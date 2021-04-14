@@ -45,7 +45,7 @@ For a complete implementation the following needs to be verified and implemented
 ## MVP Goals
 - Open .json.appmap files in the project FS in the AppMap viewer
 - Detect and reload AppMaps when files get changed on disk
-- Open source files referenced from AppMaps in split tab/window
+- Open source files referenced from AppMaps in right split [(see screenshot)](https://user-images.githubusercontent.com/42008542/114739490-ec0c4300-9d16-11eb-86f7-1eb0d3a81926.png)
 - "Open the most recently modified AppMap" action
 - Show error message when JCEF not available
 - Dark theme
