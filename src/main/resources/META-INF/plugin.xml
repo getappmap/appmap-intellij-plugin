@@ -5,11 +5,11 @@
   <vendor>app.land</vendor>
   <description>Testing of IntelliJ App.Land integration</description>
 
-  <extensions defaultExtensionNs="com.intellij">
-    <!--    <fileEditorProvider implementation="appland.AppLandHTMLEditorProvider"/>-->
-  </extensions>
+  <depends>com.intellij.modules.platform</depends>
+  <depends>com.intellij.modules.lang</depends>
+  <depends>com.intellij.modules.json</depends>
 
-  <actions>
-    <action class="appland.AppLandJCEFTestAction" text="AppLand: Open JCEF page"/>
-  </actions>
+  <extensions defaultExtensionNs="com.intellij">
+    <fileEditorProvider implementation="appland.editor.AppmapHTMLEditorProvider"/>
+  </extensions>
 </idea-plugin>
