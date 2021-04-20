@@ -44,7 +44,7 @@ For a complete implementation the following needs to be verified and implemented
 - Dark theme
 - Tested on Windows, macOS, Linux with the JDK shipped with the IDE
 - Address rendering issues on Linux
-- Version: 2021.3
+- Version: 2021.1
 - Marketplace plugin description and docs
 - Published in JetBrains plugin repo so the plugin is easy to find and install from the IDE and online marketplace
 
