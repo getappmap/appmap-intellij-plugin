@@ -19,14 +19,7 @@ After executing these commands the plugin is available at `./build/distributions
 After building the plugin you can drag & drop the file  `./build/distributions/intellij-appmap.zip` onto the main window of IntelliJ to install the plugin. A restart of your IDE is required to use the plugin.
 
 ## Usage
-The plugin adds a new action to open a sample AppMap inside of IntelliJ. This action is not visible in any menu (yet).
-
-The easiest way to invoke it is:
-1. Invoke `Search everywhere` by pressing `Shift` twice
-1. Enter `AppLand: Open JCEF page`
-1. Press `Enter` to execute the action
-
-Now a new tab should open, which displays a sample AppMap.
+A custom file editor is opened when a `.appmap.json` file is opened.
 If JCEF is unsupported on your system, then an error message will be shown instead.
 
 ## Status
