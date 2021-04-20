@@ -57,7 +57,7 @@ public class AppmapFileEditor extends UserDataHolderBase implements FileEditor {
     private final VirtualFile file;
     private final JBCefClient jcefClient = JBCefApp.getInstance().createClient();
     private final JCEFHtmlPanel contentPanel = new JCEFHtmlPanel(jcefClient, null);
-    private final JBCefJSQuery jcefBridge = JBCefJSQuery.create((JBCefBrowserBase)contentPanel);
+    private final JBCefJSQuery jcefBridge = JBCefJSQuery.create((JBCefBrowserBase) contentPanel);
 
     private final JBLoadingPanel loadingPanel = new JBLoadingPanel(new BorderLayout(), this);
     private final AtomicBoolean initial = new AtomicBoolean(true);
@@ -112,8 +112,7 @@ public class AppmapFileEditor extends UserDataHolderBase implements FileEditor {
             var filePath = AppmapPlugin.getAppMapHTMLPath();
             String htmlFileURL = filePath.toUri().toURL().toString();
             contentPanel.loadURL(htmlFileURL);
-        }
-        catch (IOException e) {
+        } catch (IOException e) {
             LOG.error(e);
         }
     }
@@ -146,8 +145,7 @@ public class AppmapFileEditor extends UserDataHolderBase implements FileEditor {
                         loadingPanel.startLoading();
                         multiPanel.select(LOADING_KEY, true);
                     }, ModalityState.defaultModalityState());
-                }
-                else {
+                } else {
                     initial.set(false);
                     ApplicationManager.getApplication().invokeLater(() -> {
                         loadingPanel.stopLoading();
@@ -213,7 +211,7 @@ public class AppmapFileEditor extends UserDataHolderBase implements FileEditor {
                         var line = location.line == null ? -1 : location.line - 1;
                         OpenFileDescriptor descriptor = new OpenFileDescriptor(project, referencedFile, line, -1);
 
-                        OpenInRightSplitAction.Companion.openInRightSplit(project, referencedFile, descriptor, false);
+                        OpenInRightSplitAction.Companion.openInRightSplit(project, referencedFile, descriptor, true);
                         return;
                     }
                 }
@@ -229,7 +227,7 @@ public class AppmapFileEditor extends UserDataHolderBase implements FileEditor {
     @NotNull
     private String createCallbackJS(JBCefJSQuery query, @NotNull String functionName) {
         return "if (!window.AppLand) window.AppLand={}; window.AppLand." + functionName + "=function(link) {" +
-               query.inject("link") + "};";
+                query.inject("link") + "};";
     }
 
     /**
@@ -240,8 +238,7 @@ public class AppmapFileEditor extends UserDataHolderBase implements FileEditor {
         String baseURL;
         try {
             baseURL = AppmapPlugin.getAppMapHTMLPath().toUri().toURL().toString();
-        }
-        catch (MalformedURLException e) {
+        } catch (MalformedURLException e) {
             baseURL = "";
         }
         return baseURL;
