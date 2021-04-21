@@ -11,6 +11,6 @@
 
   <extensions defaultExtensionNs="com.intellij">
     <fileEditorProvider implementation="appland.editor.AppMapHTMLEditorProvider"/>
-    <fileIconProvider implementation="appland.editor.AppmapIconProvider"/>
+    <fileIconProvider implementation="appland.editor.AppMapIconProvider"/>
   </extensions>
 </idea-plugin>

@@ -10,8 +10,10 @@ import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
 
-public class AppmapIconProvider implements FileIconProvider {
-    @Override public @Nullable Icon getIcon(@NotNull VirtualFile file, int flags, @Nullable Project project) {
+public class AppMapIconProvider implements FileIconProvider {
+    @Override
+    @Nullable
+    public Icon getIcon(@NotNull VirtualFile file, int flags, @Nullable Project project) {
         if (AppMapFiles.isAppMap(file)) {
             return Icons.APPMAP_FILE;
         }

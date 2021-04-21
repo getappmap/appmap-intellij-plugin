@@ -125,7 +125,7 @@ public class AppMapFileEditor extends UserDataHolderBase implements FileEditor {
                 if (isSelected.get()) {
                     // load immediately if focused
                     LOG.info("contentsChanged: refreshing immediately");
-                    ApplicationManager.getApplication().invokeLater(AppmapFileEditor.this::loadAppmapData, ModalityState.defaultModalityState());
+                    ApplicationManager.getApplication().invokeLater(AppMapFileEditor.this::loadAppmapData, ModalityState.defaultModalityState());
                 } else {
                     // delay if not focused
                     LOG.info("contentsChanged: delaying refresh");
@@ -145,7 +145,7 @@ public class AppMapFileEditor extends UserDataHolderBase implements FileEditor {
 
         isSelected.set(true);
         if (isModified.compareAndSet(true, false)) {
-            ApplicationManager.getApplication().invokeLater(AppmapFileEditor.this::loadAppmapData, ModalityState.defaultModalityState());
+            ApplicationManager.getApplication().invokeLater(AppMapFileEditor.this::loadAppmapData, ModalityState.defaultModalityState());
         }
     }
 
