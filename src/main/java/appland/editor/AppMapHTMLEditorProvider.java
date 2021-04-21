@@ -1,5 +1,6 @@
 package appland.editor;
 
+import appland.files.AppMapFiles;
 import com.intellij.openapi.fileEditor.FileEditor;
 import com.intellij.openapi.fileEditor.FileEditorPolicy;
 import com.intellij.openapi.fileEditor.FileEditorProvider;
@@ -13,15 +14,15 @@ import org.jetbrains.annotations.NotNull;
 /**
  * Provides the HTML JCEF component instead of the default JSON editor for files ending with ".appmap.json".
  */
-public class AppmapHTMLEditorProvider implements FileEditorProvider, DumbAware {
+public class AppMapHTMLEditorProvider implements FileEditorProvider, DumbAware {
     @Override
     public boolean accept(@NotNull Project project, @NotNull VirtualFile file) {
-        return JBCefApp.isSupported() && file.getName().endsWith(".appmap.json");
+        return JBCefApp.isSupported() && AppMapFiles.isAppMap(file);
     }
 
     @Override
     public @NotNull FileEditor createEditor(@NotNull Project project, @NotNull VirtualFile file) {
-        return new AppmapFileEditor(project, file);
+        return new AppMapFileEditor(project, file);
     }
 
     @Override

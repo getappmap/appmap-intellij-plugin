@@ -6,7 +6,12 @@ import org.jetbrains.annotations.NotNull;
 
 import java.nio.file.Path;
 
-public class AppmapPlugin {
+public final class AppMapPlugin {
+    private static final String PLUGIN_ID = "app.land.appmap";
+
+    private AppMapPlugin() {
+    }
+
     @NotNull
     public static Path getPluginPath() {
         var plugin = PluginManagerCore.getPlugin(PluginId.getId(PLUGIN_ID));
@@ -21,6 +26,4 @@ public class AppmapPlugin {
     public static Path getAppMapHTMLPath() {
         return getPluginPath().resolve("appmap").resolve("index.html");
     }
-
-    private static final String PLUGIN_ID = "app.land.appmap";
 }
