@@ -10,6 +10,7 @@
   <depends>com.intellij.modules.json</depends>
 
   <extensions defaultExtensionNs="com.intellij">
-    <fileEditorProvider implementation="appland.editor.AppmapHTMLEditorProvider"/>
+    <fileEditorProvider implementation="appland.editor.AppMapHTMLEditorProvider"/>
+    <fileIconProvider implementation="appland.editor.AppMapIconProvider"/>
   </extensions>
 </idea-plugin>

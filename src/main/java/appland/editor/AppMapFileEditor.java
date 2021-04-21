@@ -1,6 +1,6 @@
 package appland.editor;
 
-import appland.AppmapPlugin;
+import appland.AppMapPlugin;
 import appland.Messages;
 import appland.files.FileLocation;
 import appland.files.FileLookup;
@@ -48,7 +48,7 @@ import static com.intellij.openapi.ui.Messages.showErrorDialog;
  * <p>
  * Extending JetBrains' class isn't possible because it's internal to its module.
  */
-public class AppmapFileEditor extends UserDataHolderBase implements FileEditor {
+public class AppMapFileEditor extends UserDataHolderBase implements FileEditor {
     private static final Logger LOG = Logger.getInstance("#appland.editor");
     private static final int LOADING_KEY = 0;
     private static final int CONTENT_KEY = 1;
@@ -93,7 +93,7 @@ public class AppmapFileEditor extends UserDataHolderBase implements FileEditor {
     private final AtomicBoolean isModified = new AtomicBoolean(false);
     private final AtomicBoolean isDisposed = new AtomicBoolean(false);
 
-    public AppmapFileEditor(@NotNull Project project, @NotNull VirtualFile file) {
+    public AppMapFileEditor(@NotNull Project project, @NotNull VirtualFile file) {
         this.project = project;
         this.file = file;
         this.baseURL = getBaseURL();
@@ -125,7 +125,7 @@ public class AppmapFileEditor extends UserDataHolderBase implements FileEditor {
                 if (isSelected.get()) {
                     // load immediately if focused
                     LOG.info("contentsChanged: refreshing immediately");
-                    ApplicationManager.getApplication().invokeLater(AppmapFileEditor.this::loadAppmapData, ModalityState.defaultModalityState());
+                    ApplicationManager.getApplication().invokeLater(AppMapFileEditor.this::loadAppmapData, ModalityState.defaultModalityState());
                 } else {
                     // delay if not focused
                     LOG.info("contentsChanged: delaying refresh");
@@ -145,7 +145,7 @@ public class AppmapFileEditor extends UserDataHolderBase implements FileEditor {
 
         isSelected.set(true);
         if (isModified.compareAndSet(true, false)) {
-            ApplicationManager.getApplication().invokeLater(AppmapFileEditor.this::loadAppmapData, ModalityState.defaultModalityState());
+            ApplicationManager.getApplication().invokeLater(AppMapFileEditor.this::loadAppmapData, ModalityState.defaultModalityState());
         }
     }
 
@@ -164,7 +164,7 @@ public class AppmapFileEditor extends UserDataHolderBase implements FileEditor {
      */
     private void loadAppmapApplication() {
         try {
-            var filePath = AppmapPlugin.getAppMapHTMLPath();
+            var filePath = AppMapPlugin.getAppMapHTMLPath();
             String htmlFileURL = filePath.toUri().toURL().toString();
             contentPanel.loadURL(htmlFileURL);
         } catch (IOException e) {
@@ -252,7 +252,7 @@ public class AppmapFileEditor extends UserDataHolderBase implements FileEditor {
         setupJCEFBridge();
 
         var app = ApplicationManager.getApplication();
-        app.invokeLater(AppmapFileEditor.this::loadAppmapData, ModalityState.defaultModalityState());
+        app.invokeLater(AppMapFileEditor.this::loadAppmapData, ModalityState.defaultModalityState());
     }
 
     private void setupJCEFBridge() {
@@ -294,7 +294,7 @@ public class AppmapFileEditor extends UserDataHolderBase implements FileEditor {
     private String getBaseURL() {
         String baseURL;
         try {
-            baseURL = AppmapPlugin.getAppMapHTMLPath().toUri().toURL().toString();
+            baseURL = AppMapPlugin.getAppMapHTMLPath().toUri().toURL().toString();
         } catch (MalformedURLException e) {
             baseURL = "";
         }
