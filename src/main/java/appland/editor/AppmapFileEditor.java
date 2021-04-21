@@ -18,6 +18,8 @@ import com.intellij.openapi.util.Disposer;
 import com.intellij.openapi.util.UserDataHolderBase;
 import com.intellij.openapi.util.io.FileUtil;
 import com.intellij.openapi.vfs.VirtualFile;
+import com.intellij.openapi.vfs.VirtualFileEvent;
+import com.intellij.openapi.vfs.VirtualFileListener;
 import com.intellij.ui.components.JBLoadingPanel;
 import com.intellij.ui.jcef.*;
 import com.intellij.util.ui.UIUtil;
@@ -85,7 +87,11 @@ public class AppmapFileEditor extends UserDataHolderBase implements FileEditor {
         }
     };
 
-    private volatile boolean isDisposed = false;
+    // keeps track if the current editor is focused
+    private final AtomicBoolean isSelected = new AtomicBoolean(true);
+    // keeps track if the file was modified and not yet loaded into the AppMap application
+    private final AtomicBoolean isModified = new AtomicBoolean(false);
+    private final AtomicBoolean isDisposed = new AtomicBoolean(false);
 
     public AppmapFileEditor(@NotNull Project project, @NotNull VirtualFile file) {
         this.project = project;
@@ -96,11 +102,60 @@ public class AppmapFileEditor extends UserDataHolderBase implements FileEditor {
         Disposer.register(this, contentPanel);
         Disposer.register(this, jcefBridge);
 
+        setupVfsListener(file);
+
         loadingPanel.setLoadingText(CommonBundle.getLoadingTreeNodeText());
         setupJCEF();
 
         multiPanel.select(CONTENT_KEY, true);
         loadAppmapApplication();
+    }
+
+    private void setupVfsListener(@NotNull VirtualFile file) {
+        file.getFileSystem().addVirtualFileListener(new VirtualFileListener() {
+            /** This method is called on the EDT */
+            @Override
+            public void contentsChanged(@NotNull VirtualFileEvent event) {
+                assert ApplicationManager.getApplication().isDispatchThread();
+                if (!file.equals(event.getFile())) {
+                    return;
+                }
+
+                LOG.info("AppMap file was modified, fromSave: " + event.isFromSave() + ", fromRefresh: " + event.isFromRefresh());
+                if (isSelected.get()) {
+                    // load immediately if focused
+                    LOG.info("contentsChanged: refreshing immediately");
+                    ApplicationManager.getApplication().invokeLater(AppmapFileEditor.this::loadAppmapData, ModalityState.defaultModalityState());
+                } else {
+                    // delay if not focused
+                    LOG.info("contentsChanged: delaying refresh");
+                    isModified.set(true);
+                }
+            }
+        }, this);
+    }
+
+    /**
+     * This method is called on the EDT
+     */
+    @Override
+    public void selectNotify() {
+        LOG.info("selectNotify");
+        assert ApplicationManager.getApplication().isDispatchThread();
+
+        isSelected.set(true);
+        if (isModified.compareAndSet(true, false)) {
+            ApplicationManager.getApplication().invokeLater(AppmapFileEditor.this::loadAppmapData, ModalityState.defaultModalityState());
+        }
+    }
+
+    /**
+     * This method is called on the EDT
+     */
+    @Override
+    public void deselectNotify() {
+        LOG.info("deselectNotify");
+        isSelected.set(false);
     }
 
     /**
@@ -121,6 +176,8 @@ public class AppmapFileEditor extends UserDataHolderBase implements FileEditor {
      * Load the current file's data into the AppLand JS application.
      */
     private void loadAppmapData() {
+        LOG.info("loadAppmapData");
+
         Document document = FileDocumentManager.getInstance().getDocument(file);
         if (document == null) {
             LOG.error("unable to retrieve document for file: " + file.getPath());
@@ -270,7 +327,7 @@ public class AppmapFileEditor extends UserDataHolderBase implements FileEditor {
 
     @Override
     public boolean isValid() {
-        return !isDisposed;
+        return !isDisposed.get();
     }
 
     @Override
@@ -289,7 +346,7 @@ public class AppmapFileEditor extends UserDataHolderBase implements FileEditor {
     @Override
     public void dispose() {
         LOG.debug("disposing AppMap file editor");
-        this.isDisposed = true;
+        this.isDisposed.set(true);
     }
 
     @Override
