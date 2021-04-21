@@ -26,6 +26,11 @@ const app = new Vue(
     }
 )
 
+app.$on('viewSource', (location) => {
+  console.log("calling viewSource callback for " + location)
+  window.AppLand.viewSource(location);
+});
+
 window.loadAppMap = function (jsonString) {
   app.loadAppMap(jsonString);
 };
