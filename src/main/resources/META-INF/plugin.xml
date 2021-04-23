@@ -3,7 +3,7 @@
   <name>App.Land</name>
   <version>0.1.0-SNAPSHOT</version>
   <vendor>app.land</vendor>
-  <description>Testing of IntelliJ App.Land integration</description>
+  <description>Interactive maps and architecture analysis help you write better Java, Python and Ruby code</description>
 
   <depends>com.intellij.modules.platform</depends>
   <depends>com.intellij.modules.lang</depends>
