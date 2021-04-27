@@ -13,6 +13,9 @@ import org.jetbrains.annotations.NotNull;
 /**
  * Locates the most recently modified .appmap.json file in the project and opens it.
  * This needs an index and thus can't run when DumbMode is active.
+ *
+ * If two files have the same modification timestamp, then the returned file is randomly chosen,
+ * depending on the order in the index.
  */
 public class OpenRecentAppMapAction extends AnAction {
     private static final Logger LOG = Logger.getInstance("#appmap.action");
