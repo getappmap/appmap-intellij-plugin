@@ -1,9 +1,9 @@
 <idea-plugin require-restart="true">
   <id>appland.appmap</id>
   <name>AppMap</name>
-  <version>0.1.0-SNAPSHOT</version>
   <vendor>AppLand</vendor>
   <description>Interactive maps and architecture analysis help you write better Java, Python and Ruby code</description>
+  <version>0.1.0-SNAPSHOT</version>
 
   <depends>com.intellij.modules.platform</depends>
   <depends>com.intellij.modules.lang</depends>
