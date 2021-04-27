@@ -7,7 +7,7 @@ import org.jetbrains.annotations.NotNull;
 import java.nio.file.Path;
 
 public final class AppMapPlugin {
-    private static final String PLUGIN_ID = "app.land.appmap";
+    private static final String PLUGIN_ID = "appland.appmap";
 
     private AppMapPlugin() {
     }
