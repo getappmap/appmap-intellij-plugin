@@ -15,7 +15,7 @@ import org.jetbrains.annotations.NotNull;
  * This needs an index and thus can't run when DumbMode is active.
  */
 public class OpenRecentAppMapAction extends AnAction {
-    private static final Logger LOG = Logger.getInstance("#appmap");
+    private static final Logger LOG = Logger.getInstance("#appmap.action");
 
     static VirtualFile findMostRecentlyModifiedAppMap(com.intellij.openapi.project.Project project) {
         LOG.debug("Query .appmap.json files...");
