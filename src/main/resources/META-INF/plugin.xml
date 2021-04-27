@@ -5,6 +5,8 @@
   <description>Interactive maps and architecture analysis help you write better Java, Python and Ruby code</description>
   <version>0.1.0-SNAPSHOT</version>
 
+  <resource-bundle>messages.appland</resource-bundle>
+
   <depends>com.intellij.modules.platform</depends>
   <depends>com.intellij.modules.lang</depends>
   <depends>com.intellij.modules.json</depends>
@@ -13,4 +15,8 @@
     <fileEditorProvider implementation="appland.editor.AppMapHTMLEditorProvider"/>
     <fileIconProvider implementation="appland.editor.AppMapIconProvider"/>
   </extensions>
+
+  <actions>
+    <action id="showRecentAppmap" class="appland.actions.OpenRecentAppMapAction"/>
+  </actions>
 </idea-plugin>
