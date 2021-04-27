@@ -30,3 +30,7 @@ Follow the instructions in the [AppMap documentation](https://appland.com/docs) 
 # About AppMap
 
 Visit the [AppMap documentation](https://appland.com/docs/get-started.html#what-is-appmap) to learn how AppMap works and how it accelerates development processes.
+
+# FAQ
+
+Visit the [AppMap FAQ](https://appland.com/docs/faq.html).
