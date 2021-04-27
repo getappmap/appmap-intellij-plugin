@@ -49,7 +49,7 @@ import static com.intellij.openapi.ui.Messages.showErrorDialog;
  * Extending JetBrains' class isn't possible because it's internal to its module.
  */
 public class AppMapFileEditor extends UserDataHolderBase implements FileEditor {
-    private static final Logger LOG = Logger.getInstance("#appland.editor");
+    private static final Logger LOG = Logger.getInstance("#appmap.editor");
     private static final int LOADING_KEY = 0;
     private static final int CONTENT_KEY = 1;
     private static final String READY_MESSAGE_ID = "intellij-plugin-ready";
