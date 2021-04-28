@@ -34,9 +34,7 @@ Follow the instructions in the [AppMap documentation](https://appland.com/docs) 
 
 # About AppMap
 
-Visit the [AppMap documentation](https://appland.com/docs/get-started.html#what-is-appmap) to learn how AppMap works and how it accelerates development processes.
-
-- [Blog](https://dev.to/appland)
+Visit the [AppMap documentation](https://appland.com/docs/get-started.html#what-is-appmap) and [AppLand blog](https://dev.to/appland) to learn how AppMap works and how it accelerates development processes.
 
 **Twitter**
 - [AppMap Ruby](https://twitter.com/appmapruby)
