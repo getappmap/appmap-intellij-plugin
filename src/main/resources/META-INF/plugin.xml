@@ -2,8 +2,11 @@
   <id>appland.appmap</id>
   <name>AppMap</name>
   <vendor>AppLand</vendor>
-  <description>Interactive maps and architecture analysis help you write better Java, Python and Ruby code</description>
+
+  <!-- these are updated by the gradle build -->
   <version>0.1.0-SNAPSHOT</version>
+  <!--suppress CheckTagEmptyBody, PluginXmlValidity -->
+  <description></description>
 
   <resource-bundle>messages.appland</resource-bundle>
 
