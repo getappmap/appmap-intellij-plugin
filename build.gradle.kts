@@ -1,6 +1,8 @@
 import org.commonmark.parser.Parser
 import org.commonmark.renderer.html.HtmlRenderer
 import org.gradle.api.JavaVersion.VERSION_11
+import org.jetbrains.changelog.closure
+import org.jetbrains.changelog.date
 import org.jetbrains.intellij.tasks.PrepareSandboxTask
 
 buildscript {
@@ -12,10 +14,12 @@ buildscript {
 plugins {
     idea
     id("org.jetbrains.intellij") version "0.7.3"
+    id("org.jetbrains.changelog") version "1.1.1"
 }
 
+val pluginVersion = prop("pluginVersion")
 group = "appland.appmap"
-version = prop("pluginVersion")
+version = pluginVersion
 
 repositories {
     mavenCentral()
@@ -26,6 +30,16 @@ intellij {
     downloadSources = true
     updateSinceUntilBuild = true
     instrumentCode = false
+}
+
+changelog {
+    version = pluginVersion
+    path = "${project.projectDir}/CHANGELOG.md"
+    header = closure { "[$version]" }
+    itemPrefix = "-"
+    keepUnreleasedSection = true
+    unreleasedTerm = "[Unreleased]"
+    groups = listOf("Changes")
 }
 
 configure<JavaPluginConvention> {
@@ -44,6 +58,14 @@ tasks {
         sinceBuild(prop("sinceBuild"))
         untilBuild(prop("untilBuild"))
         pluginDescription(file("${rootDir}/plugin-description.md").readText().renderMarkdown())
+
+        changeNotes(closure {
+            if (pluginVersion.endsWith("-SNAPSHOT")) {
+                changelog.getUnreleased().toHTML()
+            } else {
+                changelog.get(pluginVersion).toHTML()
+            }
+        })
     }
 
     processTestResources {
