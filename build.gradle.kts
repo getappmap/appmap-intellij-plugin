@@ -57,7 +57,7 @@ tasks {
     patchPluginXml {
         sinceBuild(prop("sinceBuild"))
         untilBuild(prop("untilBuild"))
-        pluginDescription(file("${rootDir}/plugin-description.md").readText().renderMarkdown())
+        pluginDescription(file("${rootDir}/description.md").readText().renderMarkdown())
 
         changeNotes(closure {
             if (pluginVersion.endsWith("-SNAPSHOT")) {
