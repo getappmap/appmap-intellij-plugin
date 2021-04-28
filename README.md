@@ -1,8 +1,7 @@
-# App.Land for JetBrains IDEs
-**Note: this is an experimental plugin to verify the technical feasibility**
+# AppLand for JetBrains IDEs
 
 ## System Requirements
-**IntelliJ IDEA 2021.1** is currently required to use this experimental plugin.
+**IntelliJ IDEA 2021.1** is required to use this plugin.
 
 Only installations, which use the bundled JetBrains Java runtime, support the JCEF engine for rendering.
 
@@ -13,10 +12,23 @@ Please make sure that a **Java JDK, version 11 to 15** is installed. Building th
 ./gradlew clean build
 ```
 
-After executing these commands the plugin is available at `./build/distributions/intellij-appmap.zip`. 
+After executing these commands the plugin is available at `./build/distributions/intellij-appmap-<versin>.zip`. 
+
+### Releases
+The content of `plugin-description.md` is converted into HTML as part of the build process. The HTML content is displayed as description on the JetBrains marketplace and in plugin lists in the IDEs.
+
+1. Optional: Update content of `plugin-description.md`.
+1. Update the `pluginVersion` property in `gradle.properties`.
+1. Build the plugin ZIP file
+    ```
+    ./gradlew clean build verifyPlugin
+    ```
+   The build output is: `./build/distributions/intellij-appmap-<version>.zip`.
+1. Optional: Install and test the plugin with one or more IDEs.
+1. Upload the file `./build/distributions/intellij-appmap-<version>.zip` as an update on the JetBrains Marketplace. 
 
 ## Installation
-After building the plugin you can drag & drop the file  `./build/distributions/intellij-appmap.zip` onto the main window of IntelliJ to install the plugin. A restart of your IDE is required to use the plugin.
+After building the plugin you can drag & drop the file `./build/distributions/intellij-appmap.zip` onto the main window of IntelliJ to install the plugin. A restart of your IDE is required to use the plugin.
 
 ## Usage
 A custom file editor is opened when a `.appmap.json` file is opened.
