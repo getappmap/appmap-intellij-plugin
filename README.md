@@ -19,21 +19,21 @@ The content of `plugin-description.md` is converted into HTML as part of the bui
 
 The content of `CHANGELOG.md` is converted into HTML as part of the build process and used as content for the plugin's change notes.
 
-1. Optional: Update content of `plugin-description.md`.
+1. Optional: Update content of `description.md`.
 1. Optional: Update section `[Unreleased]` in file `CHANGELOG.md`. This content will be used for the change notes.
-1. Update the `pluginVersion` property in `gradle.properties`.
+1. Update the `pluginVersion` property in `gradle.properties`, e.g. change `pluginVersion=0.1.0-SNAPSHOT` to `pluginVersion=0.1.0`.
 1. Build the plugin ZIP file
     ```bash
     ./gradlew clean build verifyPlugin
     ```
-   The build output is: `./build/distributions/intellij-appmap-<version>.zip`.
+   The build output is located at `./build/distributions/intellij-appmap-<version>.zip`.
 1. Optional: Install and test the plugin with one or more IDEs.
 1. Upload the file `./build/distributions/intellij-appmap-<version>.zip` as an update on the JetBrains Marketplace.
 1. Patch the changelog file:
     ```bash
    ./gradlew patchChangelog
     ```
-1. Update the version in `gradle.properties` to include a SNAPSHOT version.
+1. Update the version in `gradle.properties` to include a SNAPSHOT version, e.g. change `pluginVersion=0.1.0` to `pluginVersion=0.2.0-SNAPSHOT`.
 
 ## Installation
 After building the plugin you can drag & drop the file `./build/distributions/intellij-appmap.zip` onto the main window of IntelliJ to install the plugin. A restart of your IDE is required to use the plugin.
