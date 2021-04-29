@@ -38,7 +38,7 @@
     "webpack-cli": "^4.6.0"
   },
   "dependencies": {
-    "@appland/appmap": "1.12.0",
+    "@appland/appmap": "^2.3.4",
     "bootstrap": "^4.5.3",
     "bootstrap-autocomplete": "^2.3.7",
     "jquery": "^3.5.1",
