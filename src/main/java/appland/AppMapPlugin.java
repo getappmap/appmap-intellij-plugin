@@ -1,6 +1,7 @@
 package appland;
 
 import com.intellij.ide.plugins.PluginManagerCore;
+import com.intellij.openapi.extensions.PluginDescriptor;
 import com.intellij.openapi.extensions.PluginId;
 import org.jetbrains.annotations.NotNull;
 
@@ -14,9 +15,7 @@ public final class AppMapPlugin {
 
     @NotNull
     public static Path getPluginPath() {
-        var plugin = PluginManagerCore.getPlugin(PluginId.getId(PLUGIN_ID));
-        assert plugin != null;
-
+        var plugin = getDescriptor();
         var basePath = plugin.getPluginPath();
         assert basePath != null;
 
@@ -25,5 +24,12 @@ public final class AppMapPlugin {
 
     public static Path getAppMapHTMLPath() {
         return getPluginPath().resolve("appmap").resolve("index.html");
+    }
+
+    @NotNull
+    public static PluginDescriptor getDescriptor() {
+        var plugin = PluginManagerCore.getPlugin(PluginId.getId(PLUGIN_ID));
+        assert plugin != null;
+        return plugin;
     }
 }
