@@ -17,6 +17,8 @@
   <extensions defaultExtensionNs="com.intellij">
     <fileEditorProvider implementation="appland.editor.AppMapHTMLEditorProvider"/>
     <fileIconProvider implementation="appland.editor.AppMapIconProvider"/>
+
+    <errorHandler implementation="applang.GitHubErrorHandler"/>
   </extensions>
 
   <actions>
