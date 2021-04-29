@@ -1,6 +1,9 @@
-# AppLand IntelliJ Plugin Changelog
+# AppMap Plugin Changelog
 
-## [Unreleased]
-### Changes
-- First release of this plugin.
+## [0.2.0]
+### Changed
+- First public release
 
+## [0.1.0]
+### Added
+- Initial internal release
