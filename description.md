@@ -27,6 +27,10 @@ Join us on [Discord](https://discord.com/invite/N9VUap6), [GitHub](https://githu
 - Filtering by class, package, function or label
 
 
+## Documentation
+Go to [Reference documentation](https://appland.com/docs/reference/).
+
+
 ## About AppMap
 See [AppMap overview](https://appland.com/docs/get-started.html) to learn how AppMap works and how it accelerates development processes.
 
