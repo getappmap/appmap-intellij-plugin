@@ -9,8 +9,6 @@ Visit [dev.to/appland](https://dev.to/appland) for popular articles about AppMap
 ## Quickstart
 Follow the instructions in the **[AppMap quickstart](https://appland.com/docs/quickstart)** guide.
 
-Join us on [Discord](https://discord.com/invite/N9VUap6), [GitHub](https://github.com/applandinc/appmap-intellij-plugin) or contact us on [support@app.land](mailto:support@app.land).
-
 
 ## Summary of features
 - Interactive Code Analyzer that records and processes dynamic execution traces of running code
@@ -27,8 +25,11 @@ Join us on [Discord](https://discord.com/invite/N9VUap6), [GitHub](https://githu
 - Filtering by class, package, function or label
 
 
-## Documentation
-Go to [Reference documentation](https://appland.com/docs/reference/).
+## Resources
+- [Reference documentation](https://appland.com/docs/reference/)
+- [AppMap FAQ](https://appland.com/docs/faq.html)
+- Join us on [Discord](https://discord.com/invite/N9VUap6) and [GitHub](https://github.com/applandinc/appmap-intellij-plugin)
+- Support email: [support@app.land](mailto:support@app.land)
 
 
 ## About AppMap
@@ -39,7 +40,3 @@ See [AppMap overview](https://appland.com/docs/get-started.html) to learn how Ap
 - [AppMap Ruby](https://twitter.com/appmapruby)
 - [AppMap Python](https://twitter.com/appmappython)
 - [AppMap Java](https://twitter.com/appmapjava)
-
-
-## FAQ
-Visit the [AppMap FAQ](https://appland.com/docs/faq.html).
