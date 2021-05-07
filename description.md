@@ -7,7 +7,7 @@ Visit [dev.to/appland](https://dev.to/appland) for popular articles about AppMap
 
 
 ## Quickstart
-Follow the instructions in the **[AppMap quickstart](https://appland.com/docs/quickstart)** guide.
+Follow the instructions in the **[AppMap quickstart](https://appland.com/docs/quickstart/)** guide.
 
 
 ## Summary of features
