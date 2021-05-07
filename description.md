@@ -1,7 +1,7 @@
 Interactive maps and architecture analysis help you write better Java, Python and Ruby code. Additional languages are coming soon.
 
 Navigate your code more efficiently with interactive, accurate software architecture diagrams right in your IDE. 
-In [two minutes](https://www.loom.com/share/2634caf3a57842aea07b83be2bd9bc8d) you can go from installing this plugin to exploring maps of your code's architecture. 
+In two minutes you can go from installing this plugin to exploring maps of your code's architecture. 
 
 Visit [dev.to/appland](https://dev.to/appland) for popular articles about AppMap use cases and tutorials.
 
