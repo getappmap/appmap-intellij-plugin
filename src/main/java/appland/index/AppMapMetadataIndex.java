@@ -1,9 +1,7 @@
 package appland.index;
 
+import com.google.gson.JsonParseException;
 import com.intellij.json.JsonFileType;
-import com.intellij.json.psi.JsonFile;
-import com.intellij.json.psi.JsonObject;
-import com.intellij.json.psi.JsonStringLiteral;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.fileTypes.FileType;
 import com.intellij.openapi.project.DumbService;
@@ -16,6 +14,7 @@ import com.intellij.util.io.DataExternalizer;
 import com.intellij.util.io.IOUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.jetbrains.io.JsonReaderEx;
 
 import java.io.DataInput;
 import java.io.DataOutput;
@@ -93,7 +92,7 @@ public class AppMapMetadataIndex extends SingleEntryFileBasedIndexExtension<AppM
 
     @Override
     public int getVersion() {
-        return 5;
+        return 7;
     }
 
     @Override
@@ -103,45 +102,52 @@ public class AppMapMetadataIndex extends SingleEntryFileBasedIndexExtension<AppM
 
     @Override
     public @NotNull SingleEntryIndexer<AppMapMetadata> getIndexer() {
-        return new SingleEntryIndexer<>(false) {
-            @Override
-            protected @Nullable AppMapMetadata computeValue(@NotNull FileContent inputData) {
-                var inputFile = inputData.getPsiFile();
-                assert inputFile instanceof JsonFile;
+        return new StreamingAppMapIndexer();
+    }
 
-                var jsonFile = (JsonFile) inputFile;
-                var top = jsonFile.getTopLevelValue();
-                if (!(top instanceof JsonObject)) {
-                    LOG.debug("top property not an object");
-                    return null;
+    /**
+     * Uses GSON's streaming JSON reader to minimize the memory usage.
+     */
+    private static class StreamingAppMapIndexer extends SingleEntryIndexer<AppMapMetadata> {
+        public StreamingAppMapIndexer() {
+            super(false);
+        }
+
+        @Override
+        protected @Nullable AppMapMetadata computeValue(@NotNull FileContent inputData) {
+            try (var json = new JsonReaderEx(inputData.getContentAsText())) {
+                json.beginObject(); // top-level {...}
+                while (true) {
+                    var propertyName = json.nextNameOrNull();
+                    if (propertyName == null) {
+                        return null;
+                    }
+
+                    if ("metadata".equals(propertyName)) {
+                        break;
+                    }
+                    json.skipValue();
                 }
 
-                var metadata = ((JsonObject) top).findProperty("metadata");
-                if (metadata == null) {
-                    LOG.debug("metadata property not found");
-                    return null;
-                }
+                // metadata: {...}
+                json.beginObject();
+                while (true) {
+                    var propertyName = json.nextNameOrNull();
+                    if (propertyName == null) {
+                        return null;
+                    }
 
-                var metadataValue = metadata.getValue();
-                if (!(metadataValue instanceof JsonObject)) {
-                    LOG.debug("metadata property not an object");
-                    return null;
-                }
+                    if ("name".equals(propertyName)) {
+                        var name = json.nextNullableString();
+                        return name == null ? null : new AppMapMetadata(name, inputData.getFile().getPath());
+                    }
 
-                var nameProperty = ((JsonObject) metadataValue).findProperty("name");
-                if (nameProperty == null) {
-                    LOG.debug("name metadata property not found");
-                    return null;
+                    json.skipValue();
                 }
-
-                var name = nameProperty.getValue();
-                if (!(name instanceof JsonStringLiteral)) {
-                    LOG.debug("name property is not a string");
-                    return null;
-                }
-
-                return new AppMapMetadata(((JsonStringLiteral) name).getValue(), inputData.getFile().getPath());
+            } catch (JsonParseException e) {
+                LOG.debug("parsing AppMap JSON failed", e);
+                return null;
             }
-        };
+        }
     }
 }
