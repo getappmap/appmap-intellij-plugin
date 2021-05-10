@@ -60,11 +60,6 @@ public class AppMapWindowPanel extends SimpleToolWindowPanel implements DataProv
         // refresh when dumb mode changes
         project.getMessageBus().connect(this).subscribe(DumbService.DUMB_MODE, new DumbService.DumbModeListener() {
             @Override
-            public void enteredDumbMode() {
-                rebuild();
-            }
-
-            @Override
             public void exitDumbMode() {
                 rebuild();
             }
