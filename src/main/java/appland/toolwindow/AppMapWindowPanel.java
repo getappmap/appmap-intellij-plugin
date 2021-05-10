@@ -23,7 +23,9 @@ import com.intellij.ui.content.Content;
 import com.intellij.ui.tree.AsyncTreeModel;
 import com.intellij.ui.tree.StructureTreeModel;
 import com.intellij.ui.treeStructure.SimpleTree;
+import com.intellij.util.Alarm;
 import com.intellij.util.EditSourceOnDoubleClickHandler;
+import com.intellij.util.EditSourceOnEnterKeyHandler;
 import com.intellij.util.ui.tree.TreeUtil;
 import org.jetbrains.annotations.NonNls;
 import org.jetbrains.annotations.NotNull;
@@ -37,12 +39,18 @@ import static com.intellij.psi.NavigatablePsiElement.EMPTY_NAVIGATABLE_ELEMENT_A
 
 public class AppMapWindowPanel extends SimpleToolWindowPanel implements DataProvider, Disposable {
     private static final Logger LOG = Logger.getInstance("#appmap.toolwindow");
+    private static final int TREE_REFRESH_DELAY = 250;
 
     @NotNull
     private final SimpleTree tree;
     private final StructureTreeModel<AppMapTreeModel> treeModel;
     @NotNull
     private final Project project;
+    // debounce requests for AppMap tree refresh
+    private final Alarm treeRefreshAlarm = new Alarm(Alarm.ThreadToUse.SWING_THREAD, this);
+
+    private volatile boolean isToolWindowVisible;
+    private volatile boolean hasPendingTreeRefresh;
 
     public AppMapWindowPanel(@NotNull Project project, @NotNull Content parent) {
         super(true);
@@ -58,10 +66,11 @@ public class AppMapWindowPanel extends SimpleToolWindowPanel implements DataProv
         setContent(ScrollPaneFactory.createScrollPane(tree));
 
         // refresh when dumb mode changes
-        project.getMessageBus().connect(this).subscribe(DumbService.DUMB_MODE, new DumbService.DumbModeListener() {
+        var busConnection = project.getMessageBus().connect(this);
+        busConnection.subscribe(DumbService.DUMB_MODE, new DumbService.DumbModeListener() {
             @Override
             public void exitDumbMode() {
-                rebuild();
+                rebuild(false);
             }
         });
 
@@ -81,7 +90,7 @@ public class AppMapWindowPanel extends SimpleToolWindowPanel implements DataProv
                 @Override
                 public void afterVfsChange() {
                     LOG.debug("afterVfsChange, invalidating tree");
-                    rebuild();
+                    rebuild(false);
                 }
             };
         }, this);
@@ -89,6 +98,7 @@ public class AppMapWindowPanel extends SimpleToolWindowPanel implements DataProv
 
     @Override
     public void dispose() {
+        LOG.debug("disposing AppMap tool window");
     }
 
     @NotNull
@@ -108,11 +118,20 @@ public class AppMapWindowPanel extends SimpleToolWindowPanel implements DataProv
 
         TreeUtil.installActions(tree);
         new EditSourceOnDoubleClickHandler.TreeMouseListener(tree, null).installOn(tree);
+        EditSourceOnEnterKeyHandler.install(tree);
         return tree;
     }
 
-    public void rebuild() {
-        treeModel.invalidate();
+    public void rebuild(boolean force) {
+        if (force || isToolWindowVisible) {
+            hasPendingTreeRefresh = false;
+
+            treeRefreshAlarm.cancelAllRequests();
+            treeRefreshAlarm.addRequest(treeModel::invalidate, TREE_REFRESH_DELAY, false);
+        } else {
+            LOG.debug("rebuild with hidden AppMap tool window");
+            hasPendingTreeRefresh = true;
+        }
     }
 
     @Override
@@ -159,8 +178,23 @@ public class AppMapWindowPanel extends SimpleToolWindowPanel implements DataProv
         textFilter.getTextEditor().addActionListener(e -> {
             LOG.debug("applying appmap filter: " + textFilter.getText());
             appMapModel.setNameFilter(textFilter.getText());
-            rebuild();
+            rebuild(false);
         });
         return textFilter;
+    }
+
+    public void onToolWindowShown() {
+        LOG.debug("onToolWindowShown");
+        this.isToolWindowVisible = true;
+
+        if (hasPendingTreeRefresh) {
+            LOG.debug("Triggering pending refresh of AppMap tool window");
+            rebuild(true);
+        }
+    }
+
+    public void onToolWindowHidden() {
+        LOG.debug("onToolWindowHidden");
+        this.isToolWindowVisible = false;
     }
 }
