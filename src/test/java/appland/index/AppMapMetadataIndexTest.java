@@ -28,5 +28,8 @@ public class AppMapMetadataIndexTest extends AppMapBaseTest {
         assertEquals(1, AppMapMetadataIndex.findAppMaps(getProject(), "b").size());
         assertEquals(1, AppMapMetadataIndex.findAppMaps(getProject(), "c").size());
         assertEquals(0, AppMapMetadataIndex.findAppMaps(getProject(), "not-present").size());
+
+        // case-insensitive matching
+        assertEquals(1, AppMapMetadataIndex.findAppMaps(getProject(), "C").size());
     }
 }

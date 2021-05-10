@@ -59,7 +59,7 @@ public class AppMapMetadataIndex extends SingleEntryFileBasedIndexExtension<AppM
      * Retrieves all AppMaps of a project from the index.
      *
      * @param project    The current project
-     * @param nameFilter Optional filter to restrict items by name.
+     * @param nameFilter Optional filter to restrict items by name. The name is matched case-insensitive.
      * @return The list of AppMaps metadata objects.
      */
     public static @NotNull List<AppMapMetadata> findAppMaps(@NotNull Project project, @Nullable String nameFilter) {
@@ -73,19 +73,16 @@ public class AppMapMetadataIndex extends SingleEntryFileBasedIndexExtension<AppM
             return Collections.emptyList();
         }
 
+        var lowercaseNameFilter = nameFilter == null ? null : nameFilter.toLowerCase();
         var scope = ProjectScope.getEverythingScope(project);
-        var result = new ArrayList<AppMapMetadata>(keys.size());
+        var result = new ArrayList<AppMapMetadata>();
         for (var key : keys) {
-            var values = index.getValues(INDEX_ID, key, scope);
-            if (nameFilter == null) {
-                result.addAll(values);
-            } else {
-                for (var value : values) {
-                    if (value.getName().contains(nameFilter)) {
-                        result.add(value);
-                    }
+            index.processValues(INDEX_ID, key, null, (file, value) -> {
+                if (nameFilter == null || value.getName().toLowerCase().contains(lowercaseNameFilter)) {
+                    result.add(value);
                 }
-            }
+                return true;
+            }, scope);
         }
         return result;
     }
