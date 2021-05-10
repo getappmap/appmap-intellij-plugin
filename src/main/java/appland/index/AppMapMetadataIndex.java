@@ -73,7 +73,7 @@ public class AppMapMetadataIndex extends SingleEntryFileBasedIndexExtension<AppM
             return Collections.emptyList();
         }
 
-        var scope = ProjectScope.getAllScope(project);
+        var scope = ProjectScope.getEverythingScope(project);
         var result = new ArrayList<AppMapMetadata>(keys.size());
         for (var key : keys) {
             var values = index.getValues(INDEX_ID, key, scope);
