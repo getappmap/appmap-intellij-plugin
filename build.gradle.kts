@@ -2,7 +2,6 @@ import org.commonmark.parser.Parser
 import org.commonmark.renderer.html.HtmlRenderer
 import org.gradle.api.JavaVersion.VERSION_11
 import org.jetbrains.changelog.closure
-import org.jetbrains.changelog.date
 import org.jetbrains.intellij.tasks.PrepareSandboxTask
 
 buildscript {
@@ -74,6 +73,11 @@ tasks {
 
     withType(PrepareSandboxTask::class.java).all {
         copyPluginAssets("${intellij.pluginName}/appmap")
+    }
+
+    withType(Test::class.java).all {
+        systemProperty("idea.test.execution.policy", "appland.AppLandTestExecutionPolicy")
+        systemProperty("appland.testDataPath", file("src/test/data").path)
     }
 }
 
