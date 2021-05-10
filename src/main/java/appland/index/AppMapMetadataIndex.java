@@ -58,10 +58,11 @@ public class AppMapMetadataIndex extends SingleEntryFileBasedIndexExtension<AppM
     /**
      * Retrieves all AppMaps of a project from the index.
      *
-     * @param project The current project
+     * @param project    The current project
+     * @param nameFilter Optional filter to restrict items by name.
      * @return The list of AppMaps metadata objects.
      */
-    public static @NotNull List<AppMapMetadata> findAppMaps(@NotNull Project project) {
+    public static @NotNull List<AppMapMetadata> findAppMaps(@NotNull Project project, @Nullable String nameFilter) {
         if (DumbService.isDumb(project)) {
             return Collections.emptyList();
         }
@@ -75,7 +76,16 @@ public class AppMapMetadataIndex extends SingleEntryFileBasedIndexExtension<AppM
         var scope = ProjectScope.getAllScope(project);
         var result = new ArrayList<AppMapMetadata>(keys.size());
         for (var key : keys) {
-            result.addAll(index.getValues(INDEX_ID, key, scope));
+            var values = index.getValues(INDEX_ID, key, scope);
+            if (nameFilter == null) {
+                result.addAll(values);
+            } else {
+                for (var value : values) {
+                    if (value.getName().contains(nameFilter)) {
+                        result.add(value);
+                    }
+                }
+            }
         }
         return result;
     }

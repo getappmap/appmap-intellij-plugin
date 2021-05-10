@@ -20,6 +20,8 @@ import org.jetbrains.annotations.Nullable;
 class AppMapTreeModel extends AbstractTreeStructure {
     private final Object ROOT = new Object();
     private final Project project;
+    @Nullable
+    private String nameFilter;
 
     public AppMapTreeModel(@NotNull Project project) {
         this.project = project;
@@ -42,7 +44,7 @@ class AppMapTreeModel extends AbstractTreeStructure {
 
     @Override
     public Object @NotNull [] getChildElements(@NotNull Object element) {
-        return element == ROOT ? AppMapMetadataIndex.findAppMaps(project).toArray() : ArrayUtilRt.EMPTY_OBJECT_ARRAY;
+        return element == ROOT ? AppMapMetadataIndex.findAppMaps(project, nameFilter).toArray() : ArrayUtilRt.EMPTY_OBJECT_ARRAY;
     }
 
     @Override
@@ -70,6 +72,14 @@ class AppMapTreeModel extends AbstractTreeStructure {
     @Override
     public boolean hasSomethingToCommit() {
         return false;
+    }
+
+    public @Nullable String getNameFilter() {
+        return nameFilter;
+    }
+
+    public void setNameFilter(@Nullable String nameFilter) {
+        this.nameFilter = nameFilter;
     }
 
     static class SingleAppMapDescriptor extends PresentableNodeDescriptor<Object> {

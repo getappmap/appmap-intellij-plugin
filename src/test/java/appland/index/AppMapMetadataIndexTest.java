@@ -12,7 +12,7 @@ public class AppMapMetadataIndexTest extends AppMapBaseTest {
         myFixture.configureByText("b.appmap.json", createAppMapMetadataJSON("b"));
         myFixture.configureByText("c.appmap.json", createAppMapMetadataJSON("c"));
 
-        var appMaps = AppMapMetadataIndex.findAppMaps(getProject());
+        var appMaps = AppMapMetadataIndex.findAppMaps(getProject(), null);
         assertEquals(3, appMaps.size());
         appMaps.sort(Comparator.comparing(AppMapMetadata::getName));
 
@@ -21,6 +21,12 @@ public class AppMapMetadataIndexTest extends AppMapBaseTest {
         assertEquals(new AppMapMetadata("c", "/src/c.appmap.json"), appMaps.get(2));
 
         myFixture.configureByText("d.appmap.json", createAppMapMetadataJSON("d"));
-        assertEquals(4, AppMapMetadataIndex.findAppMaps(getProject()).size());
+        assertEquals(4, AppMapMetadataIndex.findAppMaps(getProject(), null).size());
+
+        // name filter
+        assertEquals(1, AppMapMetadataIndex.findAppMaps(getProject(), "a").size());
+        assertEquals(1, AppMapMetadataIndex.findAppMaps(getProject(), "b").size());
+        assertEquals(1, AppMapMetadataIndex.findAppMaps(getProject(), "c").size());
+        assertEquals(0, AppMapMetadataIndex.findAppMaps(getProject(), "not-present").size());
     }
 }

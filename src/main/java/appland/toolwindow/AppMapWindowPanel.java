@@ -19,6 +19,7 @@ import com.intellij.openapi.vfs.LocalFileSystem;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.openapi.vfs.VirtualFileManager;
 import com.intellij.ui.ScrollPaneFactory;
+import com.intellij.ui.SearchTextField;
 import com.intellij.ui.content.Content;
 import com.intellij.ui.tree.AsyncTreeModel;
 import com.intellij.ui.tree.StructureTreeModel;
@@ -44,11 +45,15 @@ public class AppMapWindowPanel extends SimpleToolWindowPanel implements DataProv
 
     public AppMapWindowPanel(@NotNull Project project, @NotNull Content parent) {
         super(true);
+        Disposer.register(parent, this);
+
+        var appMapModel = new AppMapTreeModel(project);
+
         this.project = project;
-        this.treeModel = createModel(project, this);
+        this.treeModel = createModel(appMapModel, this);
         this.tree = createTree(this, treeModel);
 
-        Disposer.register(parent, this);
+        setToolbar(createNameFilter(appMapModel, this.treeModel));
         setContent(ScrollPaneFactory.createScrollPane(tree));
 
         // refresh when dumb mode changes
@@ -86,16 +91,28 @@ public class AppMapWindowPanel extends SimpleToolWindowPanel implements DataProv
         }, this);
     }
 
+    @NotNull
+    private SearchTextField createNameFilter(@NotNull AppMapTreeModel appMapModel,
+                                             @NotNull StructureTreeModel<AppMapTreeModel> treeModel) {
+        var textFilter = new SearchTextField();
+        textFilter.getTextEditor().getEmptyText().setText(Messages.get("toolwindow.appmap.filterEmptyText"));
+        textFilter.getTextEditor().addActionListener(e -> {
+            LOG.debug("applying appmap filter: " + textFilter.getText());
+            appMapModel.setNameFilter(textFilter.getText());
+            treeModel.invalidate();
+        });
+        return textFilter;
+    }
+
     @Override
     public void dispose() {
     }
 
     @NotNull
-    private StructureTreeModel<AppMapTreeModel> createModel(@NotNull Project project, @NotNull Disposable disposable) {
-        var model = new AppMapTreeModel(project);
+    private StructureTreeModel<AppMapTreeModel> createModel(@NotNull AppMapTreeModel model, @NotNull Disposable disposable) {
         var treeModel = new StructureTreeModel<>(model, disposable);
-        // sort alphabetically
-        treeModel.setComparator(Comparator.comparing(NodeDescriptor::toString));
+        // sort alphabetically, case-insensitive
+        treeModel.setComparator(Comparator.comparing(NodeDescriptor::toString, String.CASE_INSENSITIVE_ORDER));
         return treeModel;
     }
 
