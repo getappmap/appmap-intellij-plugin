@@ -6,10 +6,7 @@ import com.intellij.ide.util.treeView.NodeDescriptor;
 import com.intellij.openapi.Disposable;
 import com.intellij.openapi.actionSystem.CommonDataKeys;
 import com.intellij.openapi.actionSystem.DataProvider;
-import com.intellij.openapi.application.ApplicationManager;
-import com.intellij.openapi.application.ModalityState;
 import com.intellij.openapi.diagnostic.Logger;
-import com.intellij.openapi.fileEditor.FileEditorManager;
 import com.intellij.openapi.project.DumbService;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.SimpleToolWindowPanel;
@@ -18,6 +15,8 @@ import com.intellij.openapi.vfs.AsyncFileListener;
 import com.intellij.openapi.vfs.LocalFileSystem;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.openapi.vfs.VirtualFileManager;
+import com.intellij.pom.Navigatable;
+import com.intellij.psi.PsiManager;
 import com.intellij.ui.ScrollPaneFactory;
 import com.intellij.ui.SearchTextField;
 import com.intellij.ui.content.Content;
@@ -33,6 +32,8 @@ import org.jetbrains.annotations.Nullable;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreePath;
 import java.util.Comparator;
+
+import static com.intellij.psi.NavigatablePsiElement.EMPTY_NAVIGATABLE_ELEMENT_ARRAY;
 
 public class AppMapWindowPanel extends SimpleToolWindowPanel implements DataProvider, Disposable {
     private static final Logger LOG = Logger.getInstance("#appmap.toolwindow");
@@ -53,7 +54,7 @@ public class AppMapWindowPanel extends SimpleToolWindowPanel implements DataProv
         this.treeModel = createModel(appMapModel, this);
         this.tree = createTree(this, treeModel);
 
-        setToolbar(createNameFilter(appMapModel, this.treeModel));
+        setToolbar(createNameFilter(appMapModel));
         setContent(ScrollPaneFactory.createScrollPane(tree));
 
         // refresh when dumb mode changes
@@ -91,19 +92,6 @@ public class AppMapWindowPanel extends SimpleToolWindowPanel implements DataProv
         }, this);
     }
 
-    @NotNull
-    private SearchTextField createNameFilter(@NotNull AppMapTreeModel appMapModel,
-                                             @NotNull StructureTreeModel<AppMapTreeModel> treeModel) {
-        var textFilter = new SearchTextField();
-        textFilter.getTextEditor().getEmptyText().setText(Messages.get("toolwindow.appmap.filterEmptyText"));
-        textFilter.getTextEditor().addActionListener(e -> {
-            LOG.debug("applying appmap filter: " + textFilter.getText());
-            appMapModel.setNameFilter(textFilter.getText());
-            treeModel.invalidate();
-        });
-        return textFilter;
-    }
-
     @Override
     public void dispose() {
     }
@@ -136,9 +124,14 @@ public class AppMapWindowPanel extends SimpleToolWindowPanel implements DataProv
     public @Nullable Object getData(@NotNull @NonNls String dataId) {
         if (CommonDataKeys.NAVIGATABLE.is(dataId)) {
             var file = getSelectedFile();
-            if (file != null) {
-                openFile(file);
+            return file == null ? null : PsiManager.getInstance(project).findFile(file);
+        } else if (CommonDataKeys.NAVIGATABLE_ARRAY.is(dataId)) {
+            var file = getSelectedFile();
+            if (file == null) {
+                return null;
             }
+            var psiFile = PsiManager.getInstance(project).findFile(file);
+            return psiFile == null ? EMPTY_NAVIGATABLE_ELEMENT_ARRAY : new Navigatable[]{psiFile};
         } else if (CommonDataKeys.VIRTUAL_FILE.is(dataId)) {
             return getSelectedFile();
         } else if (CommonDataKeys.VIRTUAL_FILE_ARRAY.is(dataId)) {
@@ -164,9 +157,15 @@ public class AppMapWindowPanel extends SimpleToolWindowPanel implements DataProv
         return LocalFileSystem.getInstance().findFileByPath(filepath);
     }
 
-    private void openFile(@NotNull VirtualFile file) {
-        ApplicationManager.getApplication().invokeLater(() -> {
-            FileEditorManager.getInstance(project).openFile(file, true, true);
-        }, ModalityState.defaultModalityState(), project.getDisposed());
+    @NotNull
+    private SearchTextField createNameFilter(@NotNull AppMapTreeModel appMapModel) {
+        var textFilter = new SearchTextField();
+        textFilter.getTextEditor().getEmptyText().setText(Messages.get("toolwindow.appmap.filterEmptyText"));
+        textFilter.getTextEditor().addActionListener(e -> {
+            LOG.debug("applying appmap filter: " + textFilter.getText());
+            appMapModel.setNameFilter(textFilter.getText());
+            rebuild();
+        });
+        return textFilter;
     }
 }
