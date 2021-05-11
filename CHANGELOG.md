@@ -1,5 +1,9 @@
 # AppMap Plugin Changelog
 
+## [0.3.0]
+### Added
+- AppMaps tool window for a quick navigation to all AppMaps in project folders
+  
 ## [0.2.2]
 ### Changed
 - Documentation update
