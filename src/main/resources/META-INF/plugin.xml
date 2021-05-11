@@ -18,6 +18,12 @@
     <fileEditorProvider implementation="appland.editor.AppMapHTMLEditorProvider"/>
     <fileIconProvider implementation="appland.editor.AppMapIconProvider"/>
 
+    <fileBasedIndex implementation="appland.index.AppMapMetadataIndex" />
+    <indexedRootsProvider implementation="appland.index.AppMapFolderIndexedRootProvider"/>
+    <toolWindow id="applandToolWindow" anchor="right" secondary="false"
+                icon="appland.Icons.TOOL_WINDOW"
+                factoryClass="appland.toolwindow.AppMapToolWindowFactory"/>
+
     <errorHandler implementation="applang.GitHubErrorHandler"/>
   </extensions>
 
