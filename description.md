@@ -26,14 +26,14 @@ Follow the instructions in the **[AppMap quickstart](https://appland.com/docs/qu
 
 
 ## Resources
-- [Reference documentation](https://appland.com/docs/reference/)
+- [Documentation](https://appland.com/docs/)
 - [AppMap FAQ](https://appland.com/docs/faq.html)
 - Join us on [Discord](https://discord.com/invite/N9VUap6) and [GitHub](https://github.com/applandinc/appmap-intellij-plugin)
 - Support email: [support@app.land](mailto:support@app.land)
 
 
 ## About AppMap
-See [AppMap overview](https://appland.com/docs/get-started.html) to learn how AppMap works and how it accelerates development processes.
+See [AppMap overview](https://appland.com/docs/appmap-overview.html) to learn how AppMap works and how it accelerates development processes.
 
 
 ## Twitter
