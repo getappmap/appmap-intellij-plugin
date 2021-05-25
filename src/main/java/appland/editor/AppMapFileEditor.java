@@ -4,6 +4,7 @@ import appland.AppMapPlugin;
 import appland.Messages;
 import appland.files.FileLocation;
 import appland.files.FileLookup;
+import appland.settings.AppMapApplicationSettingsService;
 import com.intellij.CommonBundle;
 import com.intellij.ide.actions.OpenInRightSplitAction;
 import com.intellij.ide.plugins.MultiPanel;
@@ -187,6 +188,19 @@ public class AppMapFileEditor extends UserDataHolderBase implements FileEditor {
         var text = document.getText();
         String javascript = "window.loadAppMap(\"" + StringEscapeUtils.escapeJavaScript(text) + "\")";
         contentPanel.getCefBrowser().executeJavaScript(javascript, baseURL, 0);
+
+        if (!AppMapApplicationSettingsService.getInstance().isAppmapInstructionsViewed()) {
+            AppMapApplicationSettingsService.getInstance().setAppmapInstructionsViewed(true);
+            openAppMapInstructions();
+        }
+    }
+
+    /**
+     * Notify the AppMap application to show the instructions panel.
+     */
+    private void openAppMapInstructions() {
+        LOG.info("openAppMapInstructions");
+        contentPanel.getCefBrowser().executeJavaScript("window.showAppMapInstructions()", baseURL, 0);
     }
 
     private void setupJCEF() {

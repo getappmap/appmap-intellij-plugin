@@ -17,7 +17,10 @@ const app = new Vue(
           catch (e) {
             console.error("error parsing JSON", e);
           }
-        }
+        },
+        showInstructions() {
+          this.$refs.ui.showInstructions();
+        },
       },
       mounted() {
         // this is a workaround to notify the plugin that the app is ready
@@ -32,5 +35,11 @@ app.$on('viewSource', (location) => {
 });
 
 window.loadAppMap = function (jsonString) {
+  console.log("window.loadAppMap")
   app.loadAppMap(jsonString);
+};
+
+window.showAppMapInstructions = function () {
+  console.log("window.showAppMapInstructions")
+  app.showInstructions();
 };
