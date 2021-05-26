@@ -29,5 +29,8 @@
 
   <actions>
     <action id="showRecentAppmap" class="appland.actions.OpenRecentAppMapAction"/>
+    <action id="appmapDocs" class="appland.actions.AppMapDocumentationAction">
+      <add-to-group group-id="HelpMenu" anchor="before" relative-to-action="CheckForUpdate"/>
+    </action>
   </actions>
 </idea-plugin>
