@@ -28,6 +28,7 @@ public class DefaultRemoteRecordingService implements RemoteRecordingService {
     @Override
     public boolean isRecording(@NotNull String baseURL) {
         assertIsNotEDT();
+        LOG.debug("Retrieving status of AppMap recording for base URL: " + baseURL);
 
         var request = setupRequest(HttpRequests.request(url(baseURL, URL_SUFFIX)));
         try {
@@ -42,6 +43,7 @@ public class DefaultRemoteRecordingService implements RemoteRecordingService {
     @Override
     public boolean startRecording(@NotNull String baseURL) {
         assertIsNotEDT();
+        LOG.debug("Starting AppMap recording for base URL: " + baseURL);
 
         var request = setupRequest(HttpRequests.post(url(baseURL, URL_SUFFIX), HttpRequests.JSON_CONTENT_TYPE));
         try {
@@ -56,6 +58,7 @@ public class DefaultRemoteRecordingService implements RemoteRecordingService {
     public boolean stopRecording(@NotNull String baseURL, @NotNull Path targetFilePath) {
         assertIsNotEDT();
         assert ProgressManager.getInstance().hasProgressIndicator();
+        LOG.debug("Stopping AppMap recording for base URL: " + baseURL);
 
         var request = setupRequest(HttpRequests.delete(url(baseURL, URL_SUFFIX), HttpRequests.JSON_CONTENT_TYPE));
         try {

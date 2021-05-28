@@ -1,11 +1,12 @@
 package appland.toolwindow;
 
-import appland.Messages;
+import appland.AppMapBundle;
+import appland.actions.StartAppMapRecordingAction;
+import appland.actions.StopAppMapRecordingAction;
 import appland.files.AppMapFiles;
 import com.intellij.ide.util.treeView.NodeDescriptor;
 import com.intellij.openapi.Disposable;
-import com.intellij.openapi.actionSystem.CommonDataKeys;
-import com.intellij.openapi.actionSystem.DataProvider;
+import com.intellij.openapi.actionSystem.*;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.project.DumbService;
 import com.intellij.openapi.project.Project;
@@ -31,8 +32,10 @@ import org.jetbrains.annotations.NonNls;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import javax.swing.*;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreePath;
+import java.awt.*;
 import java.util.Comparator;
 
 import static com.intellij.psi.NavigatablePsiElement.EMPTY_NAVIGATABLE_ELEMENT_ARRAY;
@@ -62,7 +65,7 @@ public class AppMapWindowPanel extends SimpleToolWindowPanel implements DataProv
         this.treeModel = createModel(appMapModel, this);
         this.tree = createTree(this, treeModel);
 
-        setToolbar(createNameFilter(appMapModel));
+        setToolbar(createToolBar(appMapModel));
         setContent(ScrollPaneFactory.createScrollPane(tree));
 
         // refresh when dumb mode changes
@@ -109,10 +112,29 @@ public class AppMapWindowPanel extends SimpleToolWindowPanel implements DataProv
         return treeModel;
     }
 
+    /**
+     * Creates a panel with the search text field and the start and stop actions.
+     */
+    @NotNull
+    private JComponent createToolBar(AppMapTreeModel appMapModel) {
+        var actions = new DefaultActionGroup();
+        actions.add(new StartAppMapRecordingAction());
+        actions.add(new StopAppMapRecordingAction());
+
+        var bar = ActionManager.getInstance().createActionToolbar("appmapToolWindow", actions, true);
+        bar.setTargetComponent(this);
+        bar.setLayoutPolicy(ActionToolbar.NOWRAP_LAYOUT_POLICY);
+
+        var panel = new JPanel(new BorderLayout());
+        panel.add(createNameFilter(appMapModel), BorderLayout.CENTER);
+        panel.add(bar.getComponent(), BorderLayout.EAST);
+        return panel;
+    }
+
     @NotNull
     private SimpleTree createTree(@NotNull Disposable disposable, StructureTreeModel<AppMapTreeModel> treeModel) {
         var tree = new SimpleTree(new AsyncTreeModel(treeModel, true, disposable));
-        tree.getEmptyText().setText(Messages.get("toolwindow.appmap.emptyText"));
+        tree.getEmptyText().setText(AppMapBundle.get("toolwindow.appmap.emptyText"));
         tree.setRootVisible(false);
         tree.setShowsRootHandles(false);
 
@@ -174,7 +196,7 @@ public class AppMapWindowPanel extends SimpleToolWindowPanel implements DataProv
     @NotNull
     private SearchTextField createNameFilter(@NotNull AppMapTreeModel appMapModel) {
         var textFilter = new SearchTextField();
-        textFilter.getTextEditor().getEmptyText().setText(Messages.get("toolwindow.appmap.filterEmptyText"));
+        textFilter.getTextEditor().getEmptyText().setText(AppMapBundle.get("toolwindow.appmap.filterEmptyText"));
         textFilter.getTextEditor().addActionListener(e -> {
             LOG.debug("applying appmap filter: " + textFilter.getText());
             appMapModel.setNameFilter(textFilter.getText());

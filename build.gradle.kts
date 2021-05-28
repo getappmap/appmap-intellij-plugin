@@ -33,7 +33,7 @@ intellij {
     version.set(prop("ideVersion"))
     downloadSources.set(true)
     updateSinceUntilBuild.set(true)
-    instrumentCode.set(false)
+    instrumentCode.set(true)
 }
 
 changelog {

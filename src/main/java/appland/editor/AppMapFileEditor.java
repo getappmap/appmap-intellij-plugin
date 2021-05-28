@@ -1,7 +1,7 @@
 package appland.editor;
 
+import appland.AppMapBundle;
 import appland.AppMapPlugin;
-import appland.Messages;
 import appland.files.FileLocation;
 import appland.files.FileLookup;
 import appland.settings.AppMapApplicationSettingsService;
@@ -327,7 +327,7 @@ public class AppMapFileEditor extends UserDataHolderBase implements FileEditor {
 
     @Override
     public @Nls(capitalization = Nls.Capitalization.Title) @NotNull String getName() {
-        return Messages.get("appmap.editor.name");
+        return AppMapBundle.get("appmap.editor.name");
     }
 
     @Override

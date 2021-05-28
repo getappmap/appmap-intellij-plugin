@@ -1,7 +1,5 @@
 package appland;
 
-import appland.AppMapPlugin;
-import appland.Messages;
 import com.intellij.ide.BrowserUtil;
 import com.intellij.ide.DataManager;
 import com.intellij.idea.IdeaLogger;
@@ -31,7 +29,7 @@ public class GitHubErrorHandler extends ErrorReportSubmitter {
 
     @Override
     public @NlsActions.ActionText @NotNull String getReportActionText() {
-        return Messages.get("errorReporter.actionText");
+        return AppMapBundle.get("errorReporter.actionText");
     }
 
     @Override
