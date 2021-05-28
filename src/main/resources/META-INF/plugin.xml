@@ -27,6 +27,9 @@
                 icon="appland.Icons.TOOL_WINDOW"
                 factoryClass="appland.toolwindow.AppMapToolWindowFactory"/>
 
+    <applicationService serviceInterface="appland.remote.RemoteRecordingService"
+                        serviceImplementation="appland.remote.DefaultRemoteRecordingService"/>
+
     <errorHandler implementation="appland.GitHubErrorHandler"/>
   </extensions>
 
