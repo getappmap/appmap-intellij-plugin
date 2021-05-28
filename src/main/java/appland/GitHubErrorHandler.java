@@ -1,4 +1,4 @@
-package applang;
+package appland;
 
 import appland.AppMapPlugin;
 import appland.Messages;

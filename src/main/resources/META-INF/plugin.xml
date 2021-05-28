@@ -27,7 +27,7 @@
                 icon="appland.Icons.TOOL_WINDOW"
                 factoryClass="appland.toolwindow.AppMapToolWindowFactory"/>
 
-    <errorHandler implementation="applang.GitHubErrorHandler"/>
+    <errorHandler implementation="appland.GitHubErrorHandler"/>
   </extensions>
 
   <actions>
