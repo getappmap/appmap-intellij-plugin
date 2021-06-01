@@ -26,13 +26,13 @@ public class StopAppMapRecordingAction extends AnAction implements DumbAware {
 
         var form = StopRemoteRecordingDialog.show(project);
         if (form != null) {
-            var targetPath = Paths.get(form.getLocation());
-            AppMapProjectSettingsService.getState(project).setRecentAppMapStorageLocation(targetPath.toString());
+            var parentDirPath = Paths.get(form.getDirectoryLocation());
+            AppMapProjectSettingsService.getState(project).setRecentAppMapStorageLocation(parentDirPath.toString());
 
             var task = new Task.Backgroundable(project, AppMapBundle.get("action.stopAppMapRemoteRecording.progressTitle"), false) {
                 @Override
                 public void run(@NotNull ProgressIndicator indicator) {
-                    RemoteRecordingService.getInstance().stopRecording(form.getURL(), targetPath);
+                    RemoteRecordingService.getInstance().stopRecording(form.getURL(), parentDirPath, form.getName());
                 }
             };
             task.queue();

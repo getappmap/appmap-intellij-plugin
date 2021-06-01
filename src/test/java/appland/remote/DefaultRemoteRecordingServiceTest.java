@@ -13,6 +13,8 @@ import org.junit.Test;
 
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 import static appland.remote.DefaultRemoteRecordingService.url;
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
@@ -74,25 +76,24 @@ public class DefaultRemoteRecordingServiceTest extends AppMapBaseTest {
 
     @Test
     public void stopRecording() throws IOException {
-        serverRule.stubFor(delete(DefaultRemoteRecordingService.URL_SUFFIX).willReturn(ok("file_content")));
-        var tempFile = myFixture.getTempDirFixture().createFile("response.txt");
+        serverRule.stubFor(delete(DefaultRemoteRecordingService.URL_SUFFIX).willReturn(ok("{\"metadata\":{\"description\":\"my description\"}}")));
 
-        var success = ProgressManager.getInstance().runProcessWithProgressSynchronously((ThrowableComputable<Boolean, IOException>) () -> {
-            return RemoteRecordingService.getInstance().stopRecording(serverRule.baseUrl(), tempFile.toNioPath());
+        var tempDir = Paths.get(myFixture.getTempDirFixture().getTempDirPath());
+        var newFile = ProgressManager.getInstance().runProcessWithProgressSynchronously((ThrowableComputable<Path, IOException>) () -> {
+            return RemoteRecordingService.getInstance().stopRecording(serverRule.baseUrl(), tempDir, "new name");
         }, "", false, getProject());
-        assertTrue("stopRecording should return true for status == 200", success);
-        assertEquals("file_content", Files.readString(tempFile.toNioPath()));
+        assertNotNull("stopRecording should return the file for status == 200", newFile);
+        assertEquals("{\"metadata\":{\"description\":\"my description\",\"name\":\"new name\"}}", Files.readString(newFile));
     }
 
     @Test
     public void stopRecordingFailing() throws IOException {
         serverRule.stubFor(delete(DefaultRemoteRecordingService.URL_SUFFIX).willReturn(status(HttpStatus.SC_NOT_FOUND)));
 
-        var tempFile = myFixture.getTempDirFixture().createFile("response.txt");
-        var success = ProgressManager.getInstance().runProcessWithProgressSynchronously((ThrowableComputable<Boolean, IOException>) () -> {
-            return RemoteRecordingService.getInstance().stopRecording(serverRule.baseUrl(), tempFile.toNioPath());
+        var tempDir = Paths.get(myFixture.getTempDirFixture().getTempDirPath());
+        var newFile = ProgressManager.getInstance().runProcessWithProgressSynchronously((ThrowableComputable<Path, IOException>) () -> {
+            return RemoteRecordingService.getInstance().stopRecording(serverRule.baseUrl(), tempDir, "new name");
         }, "", false, getProject());
-        assertFalse("stopRecording should return false for status == 409", success);
-        assertFalse("failing recordings must not create the output file", Files.exists(tempFile.toNioPath()));
+        assertNull("stopRecording should null for status == 409", newFile);
     }
 }

@@ -20,16 +20,18 @@ public class StopRemoteRecordingForm {
     private JBTextField appMapName;
     private JBLabel appMapNameLabel;
     private JBLabel appMapLocation;
-    private TextFieldWithBrowseButton saveLocationInput;
+    private TextFieldWithBrowseButton directoryLocationInput;
 
     public StopRemoteRecordingForm(@NotNull Project project, @NotNull List<String> recentURLs, @NotNull String lastLocation) {
         urlLabel.setText(AppMapBundle.get("appMapRemoteRecording.urlLabel"));
+        appMapNameLabel.setText(AppMapBundle.get("appMapRemoteRecording.appMapNameLabel"));
+        appMapLocation.setText(AppMapBundle.get("appMapRemoteRecording.locationLabel"));
         urlComboBox.setHistory(recentURLs);
 
-        saveLocationInput.addBrowseFolderListener(AppMapBundle.get("action.stopAppMapRemoteRecording.fileChooserTitle"),
+        directoryLocationInput.addBrowseFolderListener(AppMapBundle.get("action.stopAppMapRemoteRecording.fileChooserTitle"),
                 null, project, new FileChooserDescriptor(true, false, false, false, false, false));
         if (!lastLocation.isBlank()) {
-            saveLocationInput.setText(lastLocation);
+            directoryLocationInput.setText(lastLocation);
         }
     }
 
@@ -49,8 +51,8 @@ public class StopRemoteRecordingForm {
 
     @NotNull
     @SystemDependent
-    public String getLocation() {
-        return this.saveLocationInput.getText();
+    public String getDirectoryLocation() {
+        return this.directoryLocationInput.getText();
     }
 
     public JBTextField getAppMapNameInput() {
@@ -61,7 +63,7 @@ public class StopRemoteRecordingForm {
         return urlComboBox;
     }
 
-    public TextFieldWithBrowseButton getSaveLocationInput() {
-        return saveLocationInput;
+    public TextFieldWithBrowseButton getDirectoryLocationInput() {
+        return directoryLocationInput;
     }
 }

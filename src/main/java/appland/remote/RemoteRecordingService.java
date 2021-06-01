@@ -2,6 +2,7 @@ package appland.remote;
 
 import com.intellij.openapi.application.ApplicationManager;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.nio.file.Path;
 
@@ -34,7 +35,11 @@ public interface RemoteRecordingService {
     /**
      * Stops AppMap remote recording
      *
-     * @param baseURL The URL where the AppMap remote agent is installed.
+     * @param baseURL       The URL where the AppMap remote agent is installed.
+     * @param parentDirPath Path to the parent directory, where the AppMap is saved
+     * @param name          The name of the AppMap, as in "metadata.name" of the AppMap's JSON. It's also used for the filename
+     * @return The path to the new file, if the operation was successful. {@code null} is returned if the operation failed.
      */
-    boolean stopRecording(@NotNull String baseURL, @NotNull Path targetFilePath);
+    @Nullable
+    Path stopRecording(@NotNull String baseURL, @NotNull Path parentDirPath, @NotNull String name);
 }

@@ -65,17 +65,16 @@ public class StopRemoteRecordingDialog extends DialogWrapper {
             return new ValidationInfo(AppMapBundle.get("nameValidation.empty"), form.getAppMapNameInput());
         }
 
-        if (form.getLocation().isBlank()) {
-            return new ValidationInfo(AppMapBundle.get("pathValidation.empty"), form.getSaveLocationInput());
+        if (form.getDirectoryLocation().isBlank()) {
+            return new ValidationInfo(AppMapBundle.get("dirPathValidation.empty"), form.getDirectoryLocationInput());
         }
 
         try {
-            var filePath = Paths.get(form.getLocation());
-            if (Files.isDirectory(filePath)) {
-                return new ValidationInfo(AppMapBundle.get("pathValidation.notFile"), form.getSaveLocationInput());
+            if (!Files.isDirectory(Paths.get(form.getDirectoryLocation()))) {
+                return new ValidationInfo(AppMapBundle.get("dirPathValidation.notDir"), form.getDirectoryLocationInput());
             }
         } catch (Exception e) {
-            return new ValidationInfo(AppMapBundle.get("pathValidation.invalidPath"), form.getSaveLocationInput());
+            return new ValidationInfo(AppMapBundle.get("dirPathValidation.invalidPath"), form.getDirectoryLocationInput());
         }
 
         return null;

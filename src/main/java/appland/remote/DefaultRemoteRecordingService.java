@@ -1,5 +1,6 @@
 package appland.remote;
 
+import appland.files.AppMapFiles;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonSyntaxException;
@@ -11,8 +12,10 @@ import com.intellij.util.io.HttpRequests;
 import com.intellij.util.io.RequestBuilder;
 import org.apache.http.HttpStatus;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.concurrent.TimeUnit;
 
@@ -55,20 +58,40 @@ public class DefaultRemoteRecordingService implements RemoteRecordingService {
     }
 
     @Override
-    public boolean stopRecording(@NotNull String baseURL, @NotNull Path targetFilePath) {
+    public @Nullable Path stopRecording(@NotNull String baseURL, @NotNull Path parentDirPath, @NotNull String name) {
         assertIsNotEDT();
         assert ProgressManager.getInstance().hasProgressIndicator();
-        LOG.debug("Stopping AppMap recording for base URL: " + baseURL);
+
+        var appMapFile = appMapFilename(parentDirPath, name);
+        LOG.debug("Stopping AppMap recording for base URL: " + baseURL + ", saving to %s", appMapFile);
 
         var request = setupRequest(HttpRequests.delete(url(baseURL, URL_SUFFIX), HttpRequests.JSON_CONTENT_TYPE));
         try {
             // throws a HttpStatusException for response status >= 400
-            request.saveToFile(targetFilePath.toFile(), ProgressManager.getGlobalProgressIndicator());
-            return true;
+            request.saveToFile(appMapFile, ProgressManager.getGlobalProgressIndicator());
+
+            // update metadata
+            var updated = AppMapFiles.updateMetadata(appMapFile, name);
+            return updated ? appMapFile : null;
         } catch (IOException | JsonSyntaxException e) {
             LOG.debug("exception retrieving recording status", e);
-            return false;
+            return null;
         }
+    }
+
+    private Path appMapFilename(@NotNull Path dir, @NotNull String metadataName) {
+        var filename = metadataName.replaceAll("[^a-zA-Z0-9]", "_");
+        if (metadataName.isEmpty()) {
+            throw new IllegalArgumentException("AppMap filename must not be empty");
+        }
+
+        var i = 0;
+        var candidate = String.format("%s(%d).appmap.json", filename, i);
+        while (Files.exists(dir.resolve(candidate))) {
+            i++;
+            candidate = String.format("%s(%d).appmap.json", filename, i);
+        }
+        return dir.resolve(candidate);
     }
 
     static RequestBuilder setupRequest(@NotNull RequestBuilder request) {
