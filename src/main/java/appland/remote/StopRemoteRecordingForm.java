@@ -29,7 +29,7 @@ public class StopRemoteRecordingForm {
         urlComboBox.setHistory(recentURLs);
 
         directoryLocationInput.addBrowseFolderListener(AppMapBundle.get("action.stopAppMapRemoteRecording.fileChooserTitle"),
-                null, project, new FileChooserDescriptor(true, false, false, false, false, false));
+                null, project, new FileChooserDescriptor(false, true, false, false, false, false));
         if (!lastLocation.isBlank()) {
             directoryLocationInput.setText(lastLocation);
         }

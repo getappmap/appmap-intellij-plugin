@@ -15,7 +15,6 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.concurrent.TimeUnit;
 
@@ -62,11 +61,12 @@ public class DefaultRemoteRecordingService implements RemoteRecordingService {
         assertIsNotEDT();
         assert ProgressManager.getInstance().hasProgressIndicator();
 
-        var appMapFile = appMapFilename(parentDirPath, name);
-        LOG.debug("Stopping AppMap recording for base URL: " + baseURL + ", saving to %s", appMapFile);
+        var appMapFile = AppMapFiles.appMapFilename(parentDirPath, name);
+        LOG.debug("Stopping AppMap recording for base URL: " + baseURL + ", storing at %s", appMapFile);
 
         var request = setupRequest(HttpRequests.delete(url(baseURL, URL_SUFFIX), HttpRequests.JSON_CONTENT_TYPE));
         try {
+            // stream to file on disk,
             // throws a HttpStatusException for response status >= 400
             request.saveToFile(appMapFile, ProgressManager.getGlobalProgressIndicator());
 
@@ -77,21 +77,6 @@ public class DefaultRemoteRecordingService implements RemoteRecordingService {
             LOG.debug("exception retrieving recording status", e);
             return null;
         }
-    }
-
-    private Path appMapFilename(@NotNull Path dir, @NotNull String metadataName) {
-        var filename = metadataName.replaceAll("[^a-zA-Z0-9]", "_");
-        if (metadataName.isEmpty()) {
-            throw new IllegalArgumentException("AppMap filename must not be empty");
-        }
-
-        var i = 0;
-        var candidate = String.format("%s(%d).appmap.json", filename, i);
-        while (Files.exists(dir.resolve(candidate))) {
-            i++;
-            candidate = String.format("%s(%d).appmap.json", filename, i);
-        }
-        return dir.resolve(candidate);
     }
 
     static RequestBuilder setupRequest(@NotNull RequestBuilder request) {

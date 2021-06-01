@@ -10,9 +10,11 @@ import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.progress.ProgressIndicator;
 import com.intellij.openapi.progress.Task;
 import com.intellij.openapi.project.DumbAware;
+import com.intellij.openapi.vfs.LocalFileSystem;
 import org.jetbrains.annotations.NotNull;
 
 import java.nio.file.Paths;
+import java.util.Collections;
 
 public class StopAppMapRecordingAction extends AnAction implements DumbAware {
     public StopAppMapRecordingAction() {
@@ -32,7 +34,10 @@ public class StopAppMapRecordingAction extends AnAction implements DumbAware {
             var task = new Task.Backgroundable(project, AppMapBundle.get("action.stopAppMapRemoteRecording.progressTitle"), false) {
                 @Override
                 public void run(@NotNull ProgressIndicator indicator) {
-                    RemoteRecordingService.getInstance().stopRecording(form.getURL(), parentDirPath, form.getName());
+                    var newFile = RemoteRecordingService.getInstance().stopRecording(form.getURL(), parentDirPath, form.getName());
+                    if (newFile != null) {
+                        LocalFileSystem.getInstance().refreshNioFiles(Collections.singleton(newFile));
+                    }
                 }
             };
             task.queue();

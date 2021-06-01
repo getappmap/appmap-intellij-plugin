@@ -31,6 +31,9 @@
                             serviceImplementation="appland.settings.AppMapApplicationSettingsService"/>
         <projectService serviceImplementation="appland.settings.AppMapProjectSettingsService"/>
 
+        <notificationGroup id="appmap.remoteRecording"
+                           displayType="BALLOON"
+                           key="notification.remoteRecording.displayName"/>
         <errorHandler implementation="appland.GitHubErrorHandler"/>
     </extensions>
 
