@@ -1,5 +1,10 @@
 # AppMap Plugin Changelog
 
+## [0.3.1]
+### Added
+- Documentation link in the Help menu
+- Quick guide now automatically opens for first-time users
+
 ## [0.3.0]
 ### Added
 - AppMaps tool window for a quick navigation to all AppMaps in project folders
