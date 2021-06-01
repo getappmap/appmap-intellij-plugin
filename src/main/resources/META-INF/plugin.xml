@@ -15,6 +15,9 @@
   <depends>com.intellij.modules.json</depends>
 
   <extensions defaultExtensionNs="com.intellij">
+    <applicationService id="appmap.settings"
+                        serviceImplementation="appland.settings.AppMapApplicationSettingsService"/>
+
     <fileEditorProvider implementation="appland.editor.AppMapHTMLEditorProvider"/>
     <fileIconProvider implementation="appland.editor.AppMapIconProvider"/>
 
