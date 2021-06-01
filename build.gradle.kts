@@ -6,14 +6,14 @@ import org.jetbrains.intellij.tasks.PrepareSandboxTask
 
 buildscript {
     dependencies {
-        classpath("org.commonmark:commonmark:0.17.1")
+        classpath("org.commonmark:commonmark:0.17.2")
     }
 }
 
 plugins {
     idea
-    id("org.jetbrains.intellij") version "0.7.3"
-    id("org.jetbrains.changelog") version "1.1.1"
+    id("org.jetbrains.intellij") version "1.0"
+    id("org.jetbrains.changelog") version "1.1.2"
 }
 
 val pluginVersion = prop("pluginVersion")
@@ -25,10 +25,10 @@ repositories {
 }
 
 intellij {
-    version = prop("ideVersion")
-    downloadSources = true
-    updateSinceUntilBuild = true
-    instrumentCode = false
+    version.set(prop("ideVersion"))
+    downloadSources.set(true)
+    updateSinceUntilBuild.set(true)
+    instrumentCode.set(false)
 }
 
 changelog {
@@ -54,11 +54,11 @@ tasks {
     }
 
     patchPluginXml {
-        sinceBuild(prop("sinceBuild"))
-        untilBuild(prop("untilBuild"))
-        pluginDescription(file("${rootDir}/description.md").readText().renderMarkdown())
+        sinceBuild.set(prop("sinceBuild"))
+        untilBuild.set(prop("untilBuild"))
+        pluginDescription.set(file("${rootDir}/description.md").readText().renderMarkdown())
 
-        changeNotes(closure {
+        changeNotes.set(provider {
             if (pluginVersion.endsWith("-SNAPSHOT")) {
                 changelog.getUnreleased().toHTML()
             } else {
@@ -72,7 +72,7 @@ tasks {
     }
 
     withType(PrepareSandboxTask::class.java).all {
-        copyPluginAssets("${intellij.pluginName}/appmap")
+        copyPluginAssets("${intellij.pluginName.get()}/appmap")
     }
 
     withType(Test::class.java).all {
