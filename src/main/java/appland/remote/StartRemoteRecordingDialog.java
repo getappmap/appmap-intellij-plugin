@@ -10,7 +10,6 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
-import java.util.List;
 
 /**
  * Dialog to enter the data to start a new remote recording.
@@ -18,9 +17,12 @@ import java.util.List;
 public class StartRemoteRecordingDialog extends DialogWrapper {
     private final StartRemoteRecordingForm form;
 
-    protected StartRemoteRecordingDialog(@NotNull Project project, @NotNull List<String> recentURLs) {
+    protected StartRemoteRecordingDialog(@NotNull Project project) {
         super(project);
+
+        var recentURLs = AppMapProjectSettingsService.getState(project).getRecentRemoteRecordingURLs();
         form = new StartRemoteRecordingForm(recentURLs);
+
         init();
     }
 
@@ -32,9 +34,8 @@ public class StartRemoteRecordingDialog extends DialogWrapper {
      */
     @Nullable
     public static String show(@NotNull Project project) {
-        var recentURLs = AppMapProjectSettingsService.getState(project).getRecentRemoteRecordingURLs();
 
-        var dialog = new StartRemoteRecordingDialog(project, recentURLs);
+        var dialog = new StartRemoteRecordingDialog(project);
         dialog.init();
         dialog.setTitle(AppMapBundle.get("action.startAppMapRemoteRecording.dialogTitle"));
         dialog.setOKButtonText(AppMapBundle.get("action.startAppMapRemoteRecording.startButton"));

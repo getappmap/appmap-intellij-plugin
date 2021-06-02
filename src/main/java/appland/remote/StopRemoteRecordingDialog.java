@@ -12,7 +12,6 @@ import org.jetbrains.annotations.Nullable;
 import javax.swing.*;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.List;
 
 /**
  * Dialog to enter the data to stop a remote recording.
@@ -20,11 +19,14 @@ import java.util.List;
 public class StopRemoteRecordingDialog extends DialogWrapper {
     private final StopRemoteRecordingForm form;
 
-    protected StopRemoteRecordingDialog(@NotNull Project project,
-                                        @NotNull List<String> recentURLs,
-                                        @NotNull String lastLocation) {
+    protected StopRemoteRecordingDialog(@NotNull Project project) {
         super(project);
-        form = new StopRemoteRecordingForm(project, recentURLs, lastLocation);
+
+        var state = AppMapProjectSettingsService.getState(project);
+        form = new StopRemoteRecordingForm(project,
+                state.getRecentRemoteRecordingURLs(),
+                state.getRecentAppMapStorageLocation());
+
         init();
     }
 
@@ -36,15 +38,14 @@ public class StopRemoteRecordingDialog extends DialogWrapper {
      */
     @Nullable
     public static StopRemoteRecordingForm show(@NotNull Project project) {
-        var recentURLs = AppMapProjectSettingsService.getState(project).getRecentRemoteRecordingURLs();
-        var lastLocation = AppMapProjectSettingsService.getState(project).getRecentAppMapStorageLocation();
-
-        var dialog = new StopRemoteRecordingDialog(project, recentURLs, lastLocation);
+        var dialog = new StopRemoteRecordingDialog(project);
         dialog.init();
         dialog.setTitle(AppMapBundle.get("action.stopAppMapRemoteRecording.dialogTitle"));
         dialog.setOKButtonText(AppMapBundle.get("action.stopAppMapRemoteRecording.stopButton"));
-        if (recentURLs.size() > 0) {
-            dialog.form.getUrlComboBox().setText(recentURLs.get(0));
+
+        var activeURL = RemoteRecordingStatusService.getInstance(project).getActiveRecordingURL();
+        if (activeURL != null) {
+            dialog.form.getUrlComboBox().setText(activeURL);
         }
 
         if (!dialog.showAndGet()) {

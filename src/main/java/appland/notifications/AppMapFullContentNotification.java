@@ -11,7 +11,10 @@ import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
 
-public class AppMapFullContentNotification extends Notification implements NotificationFullContent {
+/**
+ * Notification, which implements {@link NotificationFullContent} to show all of its content.
+ */
+class AppMapFullContentNotification extends Notification implements NotificationFullContent {
     public AppMapFullContentNotification(@NotNull String groupId, @Nullable Icon icon, @NotNull NotificationType type) {
         super(groupId, icon, type);
     }

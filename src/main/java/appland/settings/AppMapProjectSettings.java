@@ -12,28 +12,30 @@ public class AppMapProjectSettings {
     @Nullable
     private List<String> recentRemoteRecordingURLs;
     @Nullable
+    private String activeRecordingURL;
+    @Nullable
     private String recentAppMapStorageLocation;
 
     @NotNull
-    public String getRecentAppMapStorageLocation() {
+    public synchronized String getRecentAppMapStorageLocation() {
         return recentAppMapStorageLocation == null ? "" : recentAppMapStorageLocation;
     }
 
-    public void setRecentAppMapStorageLocation(@NotNull String recentAppMapStorageLocation) {
+    public synchronized void setRecentAppMapStorageLocation(@NotNull String recentAppMapStorageLocation) {
         this.recentAppMapStorageLocation = recentAppMapStorageLocation;
     }
 
     @NotNull
-    public List<String> getRecentRemoteRecordingURLs() {
+    public synchronized List<String> getRecentRemoteRecordingURLs() {
         var urls = recentRemoteRecordingURLs;
         return urls == null || urls.isEmpty() ? Collections.emptyList() : recentRemoteRecordingURLs;
     }
 
-    public void setRecentRemoteRecordingURLs(@NotNull List<String> urls) {
+    public synchronized void setRecentRemoteRecordingURLs(@NotNull List<String> urls) {
         this.recentRemoteRecordingURLs = new CopyOnWriteArrayList<>(urls);
     }
 
-    public void addRecentRemoteRecordingURLs(@NotNull String url) {
+    public synchronized void addRecentRemoteRecordingURLs(@NotNull String url) {
         if (url.isBlank()) {
             return;
         }
@@ -45,23 +47,34 @@ public class AppMapProjectSettings {
         this.recentRemoteRecordingURLs.add(0, url);
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        AppMapProjectSettings that = (AppMapProjectSettings) o;
-        return Objects.equals(recentRemoteRecordingURLs, that.recentRemoteRecordingURLs);
+    @Nullable
+    public synchronized String getActiveRecordingURL() {
+        return activeRecordingURL;
     }
 
-    @Override
-    public int hashCode() {
-        return Objects.hash(recentRemoteRecordingURLs);
+    public synchronized void setActiveRecordingURL(@Nullable String activeRecordingURL) {
+        this.activeRecordingURL = activeRecordingURL;
     }
 
     @Override
     public String toString() {
         return "AppMapProjectSettings{" +
-                "lastRemoteRecordingURLs=" + recentRemoteRecordingURLs +
+                "recentRemoteRecordingURLs=" + recentRemoteRecordingURLs +
+                ", activeRecordingURL='" + activeRecordingURL + '\'' +
+                ", recentAppMapStorageLocation='" + recentAppMapStorageLocation + '\'' +
                 '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        AppMapProjectSettings that = (AppMapProjectSettings) o;
+        return Objects.equals(recentRemoteRecordingURLs, that.recentRemoteRecordingURLs) && Objects.equals(activeRecordingURL, that.activeRecordingURL) && Objects.equals(recentAppMapStorageLocation, that.recentAppMapStorageLocation);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(recentRemoteRecordingURLs, activeRecordingURL, recentAppMapStorageLocation);
     }
 }
