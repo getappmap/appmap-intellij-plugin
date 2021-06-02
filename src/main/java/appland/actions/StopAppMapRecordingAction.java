@@ -1,11 +1,12 @@
 package appland.actions;
 
-import appland.AppMapBundle;
 import appland.Icons;
+import appland.notifications.AppMapNotifications;
 import appland.remote.RemoteRecordingService;
 import appland.remote.RemoteRecordingStatusService;
 import appland.remote.StopRemoteRecordingDialog;
 import appland.settings.AppMapProjectSettingsService;
+import com.intellij.notification.NotificationType;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.application.ApplicationManager;
@@ -19,6 +20,8 @@ import org.jetbrains.annotations.NotNull;
 
 import java.nio.file.Files;
 import java.nio.file.Paths;
+
+import static appland.AppMapBundle.get;
 
 public class StopAppMapRecordingAction extends AnAction implements DumbAware {
     public StopAppMapRecordingAction() {
@@ -53,10 +56,12 @@ public class StopAppMapRecordingAction extends AnAction implements DumbAware {
         var parentDirPath = Paths.get(form.getDirectoryLocation());
         AppMapProjectSettingsService.getState(project).setRecentAppMapStorageLocation(parentDirPath.toString());
 
-        new Task.Backgroundable(project, AppMapBundle.get("action.stopAppMapRemoteRecording.progressTitle"), false) {
+        new Task.Backgroundable(project, get("action.stopAppMapRemoteRecording.progressTitle"), false) {
             @Override
             public void run(@NotNull ProgressIndicator indicator) {
                 var newFile = RemoteRecordingService.getInstance().stopRecording(form.getURL(), parentDirPath, form.getName());
+                RemoteRecordingStatusService.getInstance(project).recordingStopped(form.getURL());
+
                 if (newFile != null && Files.exists(newFile)) {
                     var newVfsFile = LocalFileSystem.getInstance().refreshAndFindFileByNioFile(newFile);
                     if (newVfsFile != null) {
@@ -65,9 +70,12 @@ public class StopAppMapRecordingAction extends AnAction implements DumbAware {
                             FileEditorManager.getInstance(project).openFile(newVfsFile, true, true);
                         }, ModalityState.defaultModalityState());
                     }
+                } else {
+                    AppMapNotifications.showExpandedRecordingNotification(project,
+                            get("notification.recordingStopFailed.title"),
+                            get("notification.recordingStopFailed.content", form.getURL()),
+                            NotificationType.ERROR, true, false);
                 }
-
-                RemoteRecordingStatusService.getInstance(project).recordingStopped(form.getURL());
             }
         }.queue();
     }

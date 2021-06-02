@@ -34,6 +34,7 @@
                         serviceImplementation="appland.remote.DefaultRemoteRecordingStatusService"/>
 
         <notificationGroup id="appmap.remoteRecording" displayType="BALLOON" key="notification.remoteRecording.displayName"/>
+        <statusBarWidgetFactory implementation="appland.remote.RemoteRecordingStatusBarFactory"/>
 
         <errorHandler implementation="appland.GitHubErrorHandler"/>
     </extensions>
