@@ -44,7 +44,7 @@ public class StartAppMapRecordingAction extends AnAction implements DumbAware {
             AppMapNotifications.showExpandedRecordingNotification(project,
                     get("notification.alreadyRecording.title"),
                     get("notification.alreadyRecording.content", activeRecordingURL),
-                    NotificationType.ERROR, true, true);
+                    NotificationType.ERROR, true, true, false);
             return;
         }
 
@@ -60,7 +60,7 @@ public class StartAppMapRecordingAction extends AnAction implements DumbAware {
                     AppMapNotifications.showExpandedRecordingNotification(project,
                             get("notification.alreadyRecording.title"),
                             get("notification.alreadyRecording.content", url),
-                            NotificationType.ERROR, true, true);
+                            NotificationType.ERROR, true, true, false);
                     return;
                 }
 
@@ -75,7 +75,7 @@ public class StartAppMapRecordingAction extends AnAction implements DumbAware {
                     AppMapNotifications.showExpandedRecordingNotification(project,
                             get("notification.recordingStartFailed.title"),
                             get("notification.recordingStartFailed.content", url),
-                            NotificationType.ERROR, true, false);
+                            NotificationType.ERROR, true, false, true);
                 }
             }
         }.queue();

@@ -74,7 +74,7 @@ public class StopAppMapRecordingAction extends AnAction implements DumbAware {
                     AppMapNotifications.showExpandedRecordingNotification(project,
                             get("notification.recordingStopFailed.title"),
                             get("notification.recordingStopFailed.content", form.getURL()),
-                            NotificationType.ERROR, true, false);
+                            NotificationType.ERROR, true, false, true);
                 }
             }
         }.queue();

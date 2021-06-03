@@ -1,6 +1,8 @@
 package appland.notifications;
 
+import appland.AppMapPlugin;
 import appland.actions.StopAppMapRecordingAction;
+import com.intellij.ide.BrowserUtil;
 import com.intellij.notification.Notification;
 import com.intellij.notification.NotificationAction;
 import com.intellij.notification.NotificationListener;
@@ -44,7 +46,8 @@ public final class AppMapNotifications {
                                                          @NotNull String content,
                                                          @NotNull NotificationType type,
                                                          boolean withClose,
-                                                         boolean withStopAction) {
+                                                         boolean withStopAction,
+                                                         boolean withHelpLink) {
 
         ApplicationManager.getApplication().invokeLater(() -> {
             Notification notification = new AppMapFullContentNotification(
@@ -67,6 +70,14 @@ public final class AppMapNotifications {
                             new StopAppMapRecordingAction().actionPerformed(e);
                         }, REMOTE_RECORDING_ID
                 ));
+            }
+
+            if (withHelpLink) {
+                notification = notification.addAction(new NotificationAction.Simple(lazy("notification.recordingHelpButton"),
+                        (e, n) -> {
+                            n.expire();
+                            BrowserUtil.browse(AppMapPlugin.REMOTE_RECORDING_HELP_URL);
+                        }, REMOTE_RECORDING_ID));
             }
 
             notification.notify(project);
