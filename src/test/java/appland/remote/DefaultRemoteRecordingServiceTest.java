@@ -96,4 +96,10 @@ public class DefaultRemoteRecordingServiceTest extends AppMapBaseTest {
         }, "", false, getProject());
         assertNull("stopRecording should null for status == 409", newFile);
     }
+
+    @Test
+    public void isRecordingPortOutOfRange() {
+        // must not throw an exception
+        assertFalse(RemoteRecordingService.getInstance().isRecording("http://www.example.com:80800"));
+    }
 }

@@ -2,6 +2,7 @@ package appland.files;
 
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
+import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.vfs.VirtualFile;
 import org.jetbrains.annotations.NotNull;
 
@@ -11,6 +12,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 
 public final class AppMapFiles {
+    private static final Logger LOG = Logger.getInstance("#appmap.files");
+
     private AppMapFiles() {
     }
 
@@ -41,7 +44,7 @@ public final class AppMapFiles {
             Files.write(appMapFile, gson.toJson(json).getBytes(StandardCharsets.UTF_8));
             return true;
         } catch (IOException e) {
-            e.printStackTrace();
+            LOG.debug("error while updating AppMap metadata", e);
             return false;
         }
     }
@@ -57,11 +60,11 @@ public final class AppMapFiles {
             throw new IllegalArgumentException("AppMap filename must not be empty");
         }
 
-        var i = 0;
-        var candidate = String.format("%s(%d).appmap.json", filename, i);
+        var candidate = String.format("%s.appmap.json", filename);
+        var i = 1;
         while (Files.exists(dir.resolve(candidate))) {
-            i++;
             candidate = String.format("%s(%d).appmap.json", filename, i);
+            i++;
         }
         return dir.resolve(candidate);
     }

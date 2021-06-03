@@ -3,7 +3,6 @@ package appland.remote;
 import appland.files.AppMapFiles;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.google.gson.JsonSyntaxException;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.progress.ProgressManager;
@@ -14,7 +13,6 @@ import org.apache.http.HttpStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.io.IOException;
 import java.nio.file.Path;
 import java.util.concurrent.TimeUnit;
 
@@ -36,7 +34,7 @@ public class DefaultRemoteRecordingService implements RemoteRecordingService {
         try {
             var responseData = request.readString();
             return GSON.fromJson(responseData, RecordGetResponse.class).enabled;
-        } catch (IOException | JsonSyntaxException e) {
+        } catch (Exception e) {
             LOG.debug("exception retrieving recording status", e);
             return false;
         }
@@ -50,7 +48,7 @@ public class DefaultRemoteRecordingService implements RemoteRecordingService {
         var request = setupRequest(HttpRequests.post(url(baseURL, URL_SUFFIX), HttpRequests.JSON_CONTENT_TYPE));
         try {
             return request.tryConnect() == HttpStatus.SC_OK;
-        } catch (IOException | JsonSyntaxException e) {
+        } catch (Exception e) {
             LOG.debug("exception retrieving recording status", e);
             return false;
         }
@@ -73,7 +71,7 @@ public class DefaultRemoteRecordingService implements RemoteRecordingService {
             // update metadata
             var updated = AppMapFiles.updateMetadata(appMapFile, name);
             return updated ? appMapFile : null;
-        } catch (IOException | JsonSyntaxException e) {
+        } catch (Exception e) {
             LOG.debug("exception retrieving recording status", e);
             return null;
         }
