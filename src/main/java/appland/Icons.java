@@ -14,4 +14,4 @@ public class Icons {
 
     // 13x13
     public static final Icon APPMAP_FILE_SMALL = IconLoader.getIcon("/icons/appmap_small.svg", Icons.class);
-}
+    public static final Icon TOOL_WINDOW = APPMAP_FILE_SMALL;
