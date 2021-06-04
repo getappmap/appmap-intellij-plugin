@@ -1,8 +1,8 @@
 # AppMap Plugin Changelog
 
-## [Unreleased]
+## [0.4.0]
 ### Added
-- Remote recording of AppMaps. The AppMap tool window now displays an actions to start and stop a remote recording.
+- AppMap remote recording controls. The AppMap tool window now displays an actions to start and stop a remote recording.
 
 ## [0.3.1]
 ### Added
