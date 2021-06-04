@@ -4,8 +4,10 @@ import appland.AppMapBundle;
 import appland.settings.AppMapProjectSettingsService;
 import appland.validator.UrlInputValidator;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.project.ProjectUtil;
 import com.intellij.openapi.ui.DialogWrapper;
 import com.intellij.openapi.ui.ValidationInfo;
+import com.intellij.openapi.util.text.StringUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -23,9 +25,20 @@ public class StopRemoteRecordingDialog extends DialogWrapper {
         super(project);
 
         var state = AppMapProjectSettingsService.getState(project);
+
+        // try to find a reasonable default for the storage location
+        var storageLocation = state.getRecentAppMapStorageLocation();
+        if (StringUtil.isEmpty(storageLocation)) {
+            var projectDir = ProjectUtil.guessProjectDir(project);
+            if (projectDir != null) {
+                var nioProjectDir = projectDir.getFileSystem().getNioPath(projectDir);
+                storageLocation = nioProjectDir != null ? nioProjectDir.toString() : "";
+            }
+        }
+
         form = new StopRemoteRecordingForm(project,
                 state.getRecentRemoteRecordingURLs(),
-                state.getRecentAppMapStorageLocation());
+                storageLocation);
 
         init();
     }
