@@ -46,5 +46,12 @@
         <action id="appmapDocs" class="appland.actions.AppMapDocumentationAction">
             <add-to-group group-id="HelpMenu" anchor="before" relative-to-action="CheckForUpdate"/>
         </action>
+
+        <group id="appmapToolsMenu" popup="true" icon="appland.Icons.APPMAP_TOOLS_MENU">
+            <reference ref="startAppMapRemoteRecording"/>
+            <reference ref="stopAppMapRemoteRecording"/>
+
+            <add-to-group group-id="ToolsMenu" anchor="last"/>
+        </group>
     </actions>
 </idea-plugin>
