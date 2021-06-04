@@ -2,6 +2,9 @@
   "publisher": "appland",
   "name": "appmap-intellij",
   "version": "0.0.1",
+  "scripts": {
+    "bundle": "webpack"
+  },
   "devDependencies": {
     "@babel/core": "^7.12.10",
     "@babel/preset-env": "^7.12.11",
@@ -38,7 +41,7 @@
     "webpack-cli": "^4.6.0"
   },
   "dependencies": {
-    "@appland/appmap": "^2.3.4",
+    "@appland/components": "^1.1.5",
     "bootstrap": "^4.5.3",
     "bootstrap-autocomplete": "^2.3.7",
     "jquery": "^3.5.1",
