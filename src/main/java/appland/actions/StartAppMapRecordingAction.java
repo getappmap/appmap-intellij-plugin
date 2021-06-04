@@ -43,7 +43,7 @@ public class StartAppMapRecordingAction extends AnAction implements DumbAware {
         if (activeRecordingURL != null) {
             AppMapNotifications.showExpandedRecordingNotification(project,
                     get("notification.alreadyRecording.title"),
-                    get("notification.alreadyRecording.content", activeRecordingURL),
+                    get("notification.alreadyRecording.content"),
                     NotificationType.ERROR, true, true, false);
             return;
         }
