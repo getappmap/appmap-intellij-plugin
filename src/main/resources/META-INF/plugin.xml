@@ -1,39 +1,57 @@
 <idea-plugin require-restart="true">
-  <id>appland.appmap</id>
-  <name>AppMap</name>
-  <vendor>AppLand</vendor>
+    <id>appland.appmap</id>
+    <name>AppMap</name>
+    <vendor>AppLand</vendor>
 
-  <!-- these are updated by the gradle build -->
-  <version>0.1.0-SNAPSHOT</version>
-  <!--suppress CheckTagEmptyBody, PluginXmlValidity -->
-  <description></description>
+    <!-- these are updated by the gradle build -->
+    <version>0.1.0-SNAPSHOT</version>
+    <!--suppress CheckTagEmptyBody, PluginXmlValidity -->
+    <description></description>
 
-  <resource-bundle>messages.appland</resource-bundle>
+    <resource-bundle>messages.appland</resource-bundle>
 
-  <depends>com.intellij.modules.platform</depends>
-  <depends>com.intellij.modules.lang</depends>
-  <depends>com.intellij.modules.json</depends>
+    <depends>com.intellij.modules.platform</depends>
+    <depends>com.intellij.modules.lang</depends>
+    <depends>com.intellij.modules.json</depends>
 
-  <extensions defaultExtensionNs="com.intellij">
-    <applicationService id="appmap.settings"
-                        serviceImplementation="appland.settings.AppMapApplicationSettingsService"/>
+    <extensions defaultExtensionNs="com.intellij">
+        <fileEditorProvider implementation="appland.editor.AppMapHTMLEditorProvider"/>
+        <fileIconProvider implementation="appland.editor.AppMapIconProvider"/>
 
-    <fileEditorProvider implementation="appland.editor.AppMapHTMLEditorProvider"/>
-    <fileIconProvider implementation="appland.editor.AppMapIconProvider"/>
+        <fileBasedIndex implementation="appland.index.AppMapMetadataIndex"/>
+        <indexedRootsProvider implementation="appland.index.AppMapFolderIndexedRootProvider"/>
+        <toolWindow id="applandToolWindow" anchor="right" secondary="false"
+                    icon="appland.Icons.TOOL_WINDOW"
+                    factoryClass="appland.toolwindow.AppMapToolWindowFactory"/>
 
-    <fileBasedIndex implementation="appland.index.AppMapMetadataIndex" />
-    <indexedRootsProvider implementation="appland.index.AppMapFolderIndexedRootProvider"/>
-    <toolWindow id="applandToolWindow" anchor="right" secondary="false"
-                icon="appland.Icons.TOOL_WINDOW"
-                factoryClass="appland.toolwindow.AppMapToolWindowFactory"/>
+        <applicationService serviceInterface="appland.remote.RemoteRecordingService"
+                            serviceImplementation="appland.remote.DefaultRemoteRecordingService"/>
 
-    <errorHandler implementation="applang.GitHubErrorHandler"/>
-  </extensions>
+        <applicationService id="appmap.settings"
+                            serviceImplementation="appland.settings.AppMapApplicationSettingsService"/>
+        <projectService serviceImplementation="appland.settings.AppMapProjectSettingsService"/>
+        <projectService serviceInterface="appland.remote.RemoteRecordingStatusService"
+                        serviceImplementation="appland.remote.DefaultRemoteRecordingStatusService"/>
 
-  <actions>
-    <action id="showRecentAppmap" class="appland.actions.OpenRecentAppMapAction"/>
-    <action id="appmapDocs" class="appland.actions.AppMapDocumentationAction">
-      <add-to-group group-id="HelpMenu" anchor="before" relative-to-action="CheckForUpdate"/>
-    </action>
-  </actions>
+        <notificationGroup id="appmap.remoteRecording" displayType="BALLOON" key="notification.remoteRecording.displayName"/>
+        <statusBarWidgetFactory implementation="appland.remote.RemoteRecordingStatusBarFactory"/>
+
+        <errorHandler implementation="appland.GitHubErrorHandler"/>
+    </extensions>
+
+    <actions>
+        <action id="showRecentAppmap" class="appland.actions.OpenRecentAppMapAction"/>
+        <action id="startAppMapRemoteRecording" class="appland.actions.StartAppMapRecordingAction"/>
+        <action id="stopAppMapRemoteRecording" class="appland.actions.StopAppMapRecordingAction"/>
+        <action id="appmapDocs" class="appland.actions.AppMapDocumentationAction">
+            <add-to-group group-id="HelpMenu" anchor="before" relative-to-action="CheckForUpdate"/>
+        </action>
+
+        <group id="appmapToolsMenu" popup="true" icon="appland.Icons.APPMAP_TOOLS_MENU">
+            <reference ref="startAppMapRemoteRecording"/>
+            <reference ref="stopAppMapRemoteRecording"/>
+
+            <add-to-group group-id="ToolsMenu" anchor="last"/>
+        </group>
+    </actions>
 </idea-plugin>

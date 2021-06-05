@@ -1,5 +1,6 @@
 package appland.actions;
 
+import appland.AppMapBundle;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.diagnostic.Logger;
@@ -42,8 +43,8 @@ public class OpenRecentAppMapAction extends AnAction {
 
         var mostRecent = findMostRecentlyModifiedAppMap(project);
         if (mostRecent == null) {
-            var message = appland.Messages.get("action.showRecentAppmap.notFoundErrorMessage");
-            var title = appland.Messages.get("action.showRecentAppmap.notFoundErrorTitle");
+            var message = AppMapBundle.get("action.showRecentAppmap.notFoundErrorMessage");
+            var title = AppMapBundle.get("action.showRecentAppmap.notFoundErrorTitle");
             Messages.showErrorDialog(project, message, title);
             return;
         }

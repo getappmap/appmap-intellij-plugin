@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<form xmlns="http://www.intellij.com/uidesigner/form/" version="1" bind-to-class="appland.remote.StartRemoteRecordingForm">
+  <grid id="27dc6" binding="mainPanel" layout-manager="GridLayoutManager" row-count="3" column-count="2" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+    <margin top="0" left="0" bottom="0" right="0"/>
+    <constraints>
+      <xy x="20" y="20" width="1125" height="381"/>
+    </constraints>
+    <properties>
+      <focusable value="false"/>
+    </properties>
+    <border type="none"/>
+    <children>
+      <vspacer id="92188">
+        <constraints>
+          <grid row="2" column="0" row-span="1" col-span="2" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
+        </constraints>
+      </vspacer>
+      <component id="fd719" class="com.intellij.ui.components.JBLabel" binding="infoLabel">
+        <constraints>
+          <grid row="1" column="0" row-span="1" col-span="2" vsize-policy="3" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties>
+          <componentStyle value="SMALL"/>
+          <text value="Please enter..."/>
+        </properties>
+      </component>
+      <grid id="c2a84" layout-manager="BorderLayout" hgap="5" vgap="0">
+        <constraints>
+          <grid row="0" column="0" row-span="1" col-span="2" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties/>
+        <border type="none"/>
+        <children>
+          <component id="b56ab" class="com.intellij.ui.TextFieldWithHistory" binding="urlComboBox">
+            <constraints border-constraint="Center"/>
+            <properties>
+              <editable value="true"/>
+            </properties>
+          </component>
+          <component id="24a3a" class="com.intellij.ui.components.JBLabel" binding="urlLabel">
+            <constraints border-constraint="West"/>
+            <properties>
+              <labelFor value="b56ab"/>
+              <text value="Remote URL:"/>
+            </properties>
+          </component>
+        </children>
+      </grid>
+    </children>
+  </grid>
+</form>

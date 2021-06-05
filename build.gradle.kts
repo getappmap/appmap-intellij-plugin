@@ -24,11 +24,16 @@ repositories {
     mavenCentral()
 }
 
+dependencies {
+    // http://wiremock.org, Apache 2 license
+    testImplementation("com.github.tomakehurst:wiremock-jre8:2.28.0")
+}
+
 intellij {
     version.set(prop("ideVersion"))
     downloadSources.set(true)
     updateSinceUntilBuild.set(true)
-    instrumentCode.set(false)
+    instrumentCode.set(true)
 }
 
 changelog {
