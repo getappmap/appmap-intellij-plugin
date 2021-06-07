@@ -1,5 +1,6 @@
 package appland.notifications;
 
+import appland.AppMapBundle;
 import appland.AppMapPlugin;
 import appland.actions.StopAppMapRecordingAction;
 import com.intellij.ide.BrowserUtil;
@@ -25,16 +26,17 @@ public final class AppMapNotifications {
                                                          boolean withClose) {
 
         ApplicationManager.getApplication().invokeLater(() -> {
-            var notification = new Notification(
-                    REMOTE_RECORDING_ID, null,
-                    title, null, content,
-                    type, NotificationListener.URL_OPENING_LISTENER
-            );
+            var notification = new Notification(REMOTE_RECORDING_ID, null, type);
+            if (title != null) {
+                notification.setTitle(title);
+            }
+            notification.setContent(content);
+            notification.setListener(NotificationListener.URL_OPENING_LISTENER);
 
             if (withClose) {
-                notification = notification.addAction(new NotificationAction.Simple(
+                notification = notification.addAction(NotificationAction.create(
                         lazy("notification.closeButton"),
-                        (e, n) -> n.expire(), REMOTE_RECORDING_ID));
+                        (e, n) -> n.expire()));
             }
 
             notification.notify(project);
@@ -57,27 +59,27 @@ public final class AppMapNotifications {
             );
 
             if (withClose) {
-                var closeAction = new NotificationAction.Simple(
-                        lazy("notification.closeButton"),
-                        (e, n) -> n.expire(), REMOTE_RECORDING_ID);
+                var closeAction = NotificationAction.create(lazy("notification.closeButton"),
+                        (e, n) -> n.expire());
                 notification = notification.addAction(closeAction);
             }
 
             if (withStopAction) {
-                notification = notification.addAction(new NotificationAction.Simple(lazy("notification.stopButton"),
+                notification = notification.addAction(NotificationAction.create(
+                        lazy("notification.stopButton"),
                         (e, n) -> {
                             n.expire();
                             new StopAppMapRecordingAction().actionPerformed(e);
-                        }, REMOTE_RECORDING_ID
-                ));
+                        }));
             }
 
             if (withHelpLink) {
-                notification = notification.addAction(new NotificationAction.Simple(lazy("notification.recordingHelpButton"),
+                notification = notification.addAction(NotificationAction.create(
+                        lazy("notification.recordingHelpButton"),
                         (e, n) -> {
                             n.expire();
                             BrowserUtil.browse(AppMapPlugin.REMOTE_RECORDING_HELP_URL);
-                        }, REMOTE_RECORDING_ID));
+                        }));
             }
 
             notification.notify(project);
