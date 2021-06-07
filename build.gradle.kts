@@ -3,6 +3,7 @@ import org.commonmark.renderer.html.HtmlRenderer
 import org.gradle.api.JavaVersion.VERSION_11
 import org.jetbrains.changelog.closure
 import org.jetbrains.intellij.tasks.PrepareSandboxTask
+import org.jetbrains.intellij.tasks.RunPluginVerifierTask
 
 buildscript {
     dependencies {
@@ -74,6 +75,10 @@ tasks {
 
     processTestResources {
         copyPluginAssets()
+    }
+
+    withType<RunPluginVerifierTask> {
+        ideVersions.set(prop("ideVersionVerifier").split(","))
     }
 
     withType(PrepareSandboxTask::class.java).all {
