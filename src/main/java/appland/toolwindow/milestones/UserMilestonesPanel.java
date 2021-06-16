@@ -19,31 +19,31 @@ public class UserMilestonesPanel extends JPanel {
         addPanel("Quickstart", new UserMilestoneContentPanel() {
             @Override
             protected void setupPanel() {
-                add(new StatusLabel(UserMilestoneStatus.Success, "Install AppMap extension"));
-                add(new StatusLabel(UserMilestoneStatus.Failed, "Setup AppMap agent"));
-                add(new StatusLabel(UserMilestoneStatus.Pending, "Create AppMaps"));
-                add(new StatusLabel(UserMilestoneStatus.Pending, "View your AppMaps"));
+                add(new StatusLabel(UserMilestoneStatus.Completed, "Install AppMap extension"));
+                add(new StatusLabel(UserMilestoneStatus.Error, "Setup AppMap agent"));
+                add(new StatusLabel(UserMilestoneStatus.Incomplete, "Create AppMaps"));
+                add(new StatusLabel(UserMilestoneStatus.Incomplete, "View your AppMaps"));
             }
         });
         addPanel("Using AppMaps", new UserMilestoneContentPanel() {
             @Override
             protected void setupPanel() {
-                add(new StatusLabel(UserMilestoneStatus.Pending, "First step"));
-                add(new StatusLabel(UserMilestoneStatus.Pending, "Second step"));
+                add(new StatusLabel(UserMilestoneStatus.Incomplete, "First step"));
+                add(new StatusLabel(UserMilestoneStatus.Incomplete, "Second step"));
             }
         });
         addPanel("Mastermind AppsMaps", new UserMilestoneContentPanel() {
             @Override
             protected void setupPanel() {
-                add(new StatusLabel(UserMilestoneStatus.Pending, "First step"));
-                add(new StatusLabel(UserMilestoneStatus.Pending, "Second step"));
+                add(new StatusLabel(UserMilestoneStatus.Incomplete, "First step"));
+                add(new StatusLabel(UserMilestoneStatus.Incomplete, "Second step"));
             }
         });
         addPanel("Support", new UserMilestoneContentPanel() {
             @Override
             protected void setupPanel() {
-                add(new StatusLabel(UserMilestoneStatus.Pending, "First step"));
-                add(new StatusLabel(UserMilestoneStatus.Pending, "Second step"));
+                add(new StatusLabel(UserMilestoneStatus.Incomplete, "First step"));
+                add(new StatusLabel(UserMilestoneStatus.Incomplete, "Second step"));
             }
         });
 

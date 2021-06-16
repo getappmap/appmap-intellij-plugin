@@ -1,6 +1,6 @@
 package appland.toolwindow.milestones;
 
-import com.intellij.icons.AllIcons;
+import appland.Icons;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
@@ -9,17 +9,17 @@ import javax.swing.*;
  * Status of a single milestone step.
  */
 enum UserMilestoneStatus {
-    Pending, Success, Failed;
+    Incomplete, Completed, Error;
 
     @NotNull
     public Icon getIcon() {
         switch (this) {
-            case Success:
-                return AllIcons.Actions.Checked;
-            case Failed:
-                return AllIcons.General.Error;
-            case Pending:
-                return AllIcons.General.Gear;
+            case Completed:
+                return Icons.MILESTONE_COMPLETED;
+            case Error:
+                return Icons.MILESTONE_ERROR;
+            case Incomplete:
+                return Icons.MILESTONE_INCOMPLETE;
             default:
                 throw new IllegalStateException("unknown status: " + this);
         }
