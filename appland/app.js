@@ -1,5 +1,6 @@
 import Vue from 'vue';
 import {default as plugin, VVsCodeExtension} from '@appland/components'; // eslint-disable-line import/no-named-default
+import '@appland/diagrams/dist/style.css';
 
 Vue.use(plugin);
 
