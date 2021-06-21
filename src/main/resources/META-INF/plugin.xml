@@ -1,4 +1,4 @@
-<idea-plugin require-restart="true">
+<idea-plugin>
     <id>appland.appmap</id>
     <name>AppMap</name>
     <vendor>AppLand</vendor>
