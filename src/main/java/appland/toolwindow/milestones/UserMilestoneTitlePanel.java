@@ -78,8 +78,8 @@ class UserMilestoneTitlePanel extends JPanel {
 
     @NotNull
     private static Icon createNotificationIcon(int count) {
-        var icon = new CircledIcon(24, Color.WHITE, ColorUtil.fromHex("0E639C"), count < 10 ? String.valueOf(count) : "9+");
-        icon.setFont(UIUtil.getLabelFont(UIUtil.FontSize.MINI).deriveFont(Font.BOLD));
+        var icon = new CircledIcon(18, Color.WHITE, ColorUtil.fromHex("0E639C"), count < 10 ? String.valueOf(count) : "9+");
+        icon.setFont(UIUtil.getLabelFont(UIUtil.FontSize.SMALL).deriveFont(Font.BOLD));
         return icon;
     }
 

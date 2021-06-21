@@ -54,7 +54,7 @@ public class CircledIcon implements Icon {
                 g2d.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, fontContext.getAntiAliasingHint());
                 g2d.setRenderingHint(RenderingHints.KEY_TEXT_LCD_CONTRAST, textLcdContrast);
                 g2d.setRenderingHint(RenderingHints.KEY_FRACTIONALMETRICS, fontContext.getFractionalMetricsHint());
-                g2d.drawString(text, (float) (size - bounds.width) / 2.0f, (float) (size + bounds.height) / 2.0f + 3.0f);
+                g2d.drawString(text, (float) (size - bounds.width) / 2.0f + 1.0f, (float) (size + bounds.height) / 2.0f + 0.0f);
             } finally {
                 g2d.dispose();
             }
