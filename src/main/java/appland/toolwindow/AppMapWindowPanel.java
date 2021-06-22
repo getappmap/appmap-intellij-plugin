@@ -18,6 +18,7 @@ import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.openapi.vfs.VirtualFileManager;
 import com.intellij.pom.Navigatable;
 import com.intellij.psi.PsiManager;
+import com.intellij.ui.DocumentAdapter;
 import com.intellij.ui.ScrollPaneFactory;
 import com.intellij.ui.SearchTextField;
 import com.intellij.ui.content.Content;
@@ -33,6 +34,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
+import javax.swing.event.DocumentEvent;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreePath;
 import java.awt.*;
@@ -42,7 +44,8 @@ import static com.intellij.psi.NavigatablePsiElement.EMPTY_NAVIGATABLE_ELEMENT_A
 
 public class AppMapWindowPanel extends SimpleToolWindowPanel implements DataProvider, Disposable {
     private static final Logger LOG = Logger.getInstance("#appmap.toolwindow");
-    private static final int TREE_REFRESH_DELAY = 250;
+    private static final int TREE_REFRESH_DELAY_MILLIS = 250;
+    private static final long INPUT_FILTER_DELAY_MILLIS = 250L; // + TREE_REFRESH_DELAY after typing stopped
 
     @NotNull
     private final SimpleTree tree;
@@ -51,6 +54,8 @@ public class AppMapWindowPanel extends SimpleToolWindowPanel implements DataProv
     private final Project project;
     // debounce requests for AppMap tree refresh
     private final Alarm treeRefreshAlarm = new Alarm(Alarm.ThreadToUse.SWING_THREAD, this);
+    // debounce filter requests when search text changes
+    private final Alarm filterInputAlarm = new Alarm(Alarm.ThreadToUse.SWING_THREAD, this);
 
     private volatile boolean isToolWindowVisible;
     private volatile boolean hasPendingTreeRefresh;
@@ -149,7 +154,7 @@ public class AppMapWindowPanel extends SimpleToolWindowPanel implements DataProv
             hasPendingTreeRefresh = false;
 
             treeRefreshAlarm.cancelAllRequests();
-            treeRefreshAlarm.addRequest(treeModel::invalidate, TREE_REFRESH_DELAY, false);
+            treeRefreshAlarm.addRequest(treeModel::invalidate, TREE_REFRESH_DELAY_MILLIS, false);
         } else {
             LOG.debug("rebuild with hidden AppMap tool window");
             hasPendingTreeRefresh = true;
@@ -196,11 +201,24 @@ public class AppMapWindowPanel extends SimpleToolWindowPanel implements DataProv
     @NotNull
     private SearchTextField createNameFilter(@NotNull AppMapTreeModel appMapModel) {
         var textFilter = new SearchTextField();
+        filterInputAlarm.setActivationComponent(textFilter);
+
         textFilter.getTextEditor().getEmptyText().setText(AppMapBundle.get("toolwindow.appmap.filterEmptyText"));
         textFilter.getTextEditor().addActionListener(e -> {
             LOG.debug("applying appmap filter: " + textFilter.getText());
             appMapModel.setNameFilter(textFilter.getText());
             rebuild(false);
+        });
+        textFilter.addDocumentListener(new DocumentAdapter() {
+            @Override
+            protected void textChanged(@NotNull DocumentEvent e) {
+                LOG.debug("applying delayed appmap filter: " + textFilter.getText());
+                filterInputAlarm.cancelAllRequests();
+                filterInputAlarm.addComponentRequest(() -> {
+                    appMapModel.setNameFilter(textFilter.getText());
+                    rebuild(false);
+                }, INPUT_FILTER_DELAY_MILLIS);
+            }
         });
         return textFilter;
     }
