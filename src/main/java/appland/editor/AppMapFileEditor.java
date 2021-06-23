@@ -5,6 +5,7 @@ import appland.AppMapPlugin;
 import appland.files.FileLocation;
 import appland.files.FileLookup;
 import appland.settings.AppMapApplicationSettingsService;
+import appland.upload.AppMapUploader;
 import com.intellij.CommonBundle;
 import com.intellij.ide.actions.OpenInRightSplitAction;
 import com.intellij.ide.plugins.MultiPanel;
@@ -40,6 +41,7 @@ import java.beans.PropertyChangeListener;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Function;
 
 import static com.intellij.openapi.ui.Messages.showErrorDialog;
 
@@ -60,11 +62,8 @@ public class AppMapFileEditor extends UserDataHolderBase implements FileEditor {
     private final VirtualFile file;
     private final JBCefClient jcefClient = JBCefApp.getInstance().createClient();
     private final JCEFHtmlPanel contentPanel = new JCEFHtmlPanel(jcefClient, null);
-    private final JBCefJSQuery jcefBridge = JBCefJSQuery.create((JBCefBrowserBase) contentPanel);
-
-    private final JBLoadingPanel loadingPanel = new JBLoadingPanel(new BorderLayout(), this);
-    private final AtomicBoolean initial = new AtomicBoolean(true);
-    private final AtomicBoolean navigating = new AtomicBoolean(false);
+    private final JBCefJSQuery viewSourceBridge = JBCefJSQuery.create((JBCefBrowserBase) contentPanel);
+    private final JBCefJSQuery uploadAppMapBridge = JBCefJSQuery.create((JBCefBrowserBase) contentPanel);
     private final MultiPanel multiPanel = new MultiPanel() {
         @Override
         protected JComponent create(@NotNull Integer key) {
@@ -87,7 +86,9 @@ public class AppMapFileEditor extends UserDataHolderBase implements FileEditor {
             return callback;
         }
     };
-
+    private final JBLoadingPanel loadingPanel = new JBLoadingPanel(new BorderLayout(), this);
+    private final AtomicBoolean initial = new AtomicBoolean(true);
+    private final AtomicBoolean navigating = new AtomicBoolean(false);
     // keeps track if the current editor is focused
     private final AtomicBoolean isSelected = new AtomicBoolean(true);
     // keeps track if the file was modified and not yet loaded into the AppMap application
@@ -101,7 +102,7 @@ public class AppMapFileEditor extends UserDataHolderBase implements FileEditor {
 
         Disposer.register(this, jcefClient);
         Disposer.register(this, contentPanel);
-        Disposer.register(this, jcefBridge);
+        Disposer.register(this, viewSourceBridge);
 
         setupVfsListener(file);
 
@@ -263,42 +264,49 @@ public class AppMapFileEditor extends UserDataHolderBase implements FileEditor {
     }
 
     private void onJavaScriptAppMapReady() {
-        setupJCEFBridge();
+        setupJCEFBridge(viewSourceBridge, "viewSource", this::showSource);
+        setupJCEFBridge(uploadAppMapBridge, "uploadAppmap", ignored -> uploadAppMap());
 
         var app = ApplicationManager.getApplication();
         app.invokeLater(AppMapFileEditor.this::loadAppmapData, ModalityState.defaultModalityState());
     }
 
-    private void setupJCEFBridge() {
-        // viewSource callback handler
-        jcefBridge.addHandler(relativePath -> {
-            LOG.debug("viewSource callback handler, file: " + relativePath);
-            ApplicationManager.getApplication().invokeLater(() -> {
-                var location = FileLocation.parse(relativePath);
-                if (location != null) {
-                    var referencedFile = FileLookup.findRelativeFile(project, file, FileUtil.toSystemIndependentName(location.filePath));
-                    if (referencedFile != null) {
-                        // IntelliJ's lines are 0-based, AppMap lines seem to be 0-based
-                        var line = location.line == null ? -1 : location.line - 1;
-                        OpenFileDescriptor descriptor = new OpenFileDescriptor(project, referencedFile, line, -1);
-
-                        OpenInRightSplitAction.Companion.openInRightSplit(project, referencedFile, descriptor, true);
-                        return;
-                    }
-                }
-
-                // fallback message if the could not be found
-                showErrorDialog("File " + relativePath + " could not be found.", "AppMap");
-            }, ModalityState.defaultModalityState());
-            return null;
-        });
-        contentPanel.getCefBrowser().executeJavaScript(createCallbackJS(jcefBridge, "viewSource"), baseURL, 0);
+    @Nullable
+    private JBCefJSQuery.Response uploadAppMap() {
+        LOG.debug("uploadAppmap handler");
+        ApplicationManager.getApplication().invokeLater(() -> {
+            AppMapUploader.uploadAppMap(project, file);
+        }, ModalityState.defaultModalityState());
+        return null;
     }
 
-    @NotNull
-    private String createCallbackJS(JBCefJSQuery query, @NotNull String functionName) {
-        return "if (!window.AppLand) window.AppLand={}; window.AppLand." + functionName + "=function(link) {" +
-                query.inject("link") + "};";
+    @Nullable
+    private JBCefJSQuery.Response showSource(String relativePath) {
+        LOG.debug("viewSource callback handler, file: " + relativePath);
+        ApplicationManager.getApplication().invokeLater(() -> {
+            var location = FileLocation.parse(relativePath);
+            if (location != null) {
+                var referencedFile = FileLookup.findRelativeFile(project, file, FileUtil.toSystemIndependentName(location.filePath));
+                if (referencedFile != null) {
+                    // IntelliJ's lines are 0-based, AppMap lines seem to be 0-based
+                    var line = location.line == null ? -1 : location.line - 1;
+                    OpenFileDescriptor descriptor = new OpenFileDescriptor(project, referencedFile, line, -1);
+
+                    OpenInRightSplitAction.Companion.openInRightSplit(project, referencedFile, descriptor, true);
+                    return;
+                }
+            }
+
+            // fallback message if the file could not be found
+            showErrorDialog("File " + relativePath + " could not be found.", "AppMap");
+        }, ModalityState.defaultModalityState());
+        return null;
+    }
+
+    private void setupJCEFBridge(JBCefJSQuery bridge, @NotNull String jsFunctionName, Function<String, JBCefJSQuery.Response> callback) {
+        bridge.addHandler(callback);
+        var js = "if (!window.AppLand) window.AppLand={}; window.AppLand." + jsFunctionName + "=function(link) {" + bridge.inject("link") + "};";
+        contentPanel.getCefBrowser().executeJavaScript(js, baseURL, 0);
     }
 
     /**

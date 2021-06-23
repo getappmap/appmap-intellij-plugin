@@ -8,14 +8,13 @@ Vue.use(plugin);
 const app = new Vue(
     {
       el: '#app',
-      render: (h) => h(VVsCodeExtension, {ref: 'ui'}),
+      render: (h) => h(VVsCodeExtension, {ref: 'ui', props: {appMapUploadable: true}}),
       methods: {
         async loadAppMap(jsonString) {
           try {
             const appmapData = JSON.parse(jsonString);
             this.$refs.ui.loadData(appmapData);
-          }
-          catch (e) {
+          } catch (e) {
             console.error("error parsing JSON", e);
           }
         },
@@ -31,16 +30,21 @@ const app = new Vue(
 )
 
 app.$on('viewSource', (location) => {
-  console.log("calling viewSource callback for " + location)
+  console.log("calling viewSource callback for " + location);
   window.AppLand.viewSource(location);
 });
 
+app.$on('uploadAppmap', () => {
+  console.log("calling uploadAppmap callback");
+  window.AppLand.uploadAppmap();
+});
+
 window.loadAppMap = function (jsonString) {
-  console.log("window.loadAppMap")
+  console.log("window.loadAppMap");
   app.loadAppMap(jsonString);
 };
 
 window.showAppMapInstructions = function () {
-  console.log("window.showAppMapInstructions")
+  console.log("window.showAppMapInstructions");
   app.showInstructions();
 };

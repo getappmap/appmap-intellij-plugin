@@ -15,6 +15,7 @@ public class AppMapProjectSettings {
     private String activeRecordingURL;
     @Nullable
     private String recentAppMapStorageLocation;
+    private boolean appMapUploadConfirmed;
 
     @NotNull
     public synchronized String getRecentAppMapStorageLocation() {
@@ -56,12 +57,21 @@ public class AppMapProjectSettings {
         this.activeRecordingURL = activeRecordingURL;
     }
 
+    public synchronized boolean isAppMapUploadConfirmed() {
+        return appMapUploadConfirmed;
+    }
+
+    public synchronized void setAppMapUploadConfirmed(boolean appMapUploadConfirmed) {
+        this.appMapUploadConfirmed = appMapUploadConfirmed;
+    }
+
     @Override
     public String toString() {
         return "AppMapProjectSettings{" +
                 "recentRemoteRecordingURLs=" + recentRemoteRecordingURLs +
                 ", activeRecordingURL='" + activeRecordingURL + '\'' +
                 ", recentAppMapStorageLocation='" + recentAppMapStorageLocation + '\'' +
+                ", appMapUploadConfirmed=" + appMapUploadConfirmed +
                 '}';
     }
 
@@ -70,11 +80,11 @@ public class AppMapProjectSettings {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         AppMapProjectSettings that = (AppMapProjectSettings) o;
-        return Objects.equals(recentRemoteRecordingURLs, that.recentRemoteRecordingURLs) && Objects.equals(activeRecordingURL, that.activeRecordingURL) && Objects.equals(recentAppMapStorageLocation, that.recentAppMapStorageLocation);
+        return appMapUploadConfirmed == that.appMapUploadConfirmed && Objects.equals(recentRemoteRecordingURLs, that.recentRemoteRecordingURLs) && Objects.equals(activeRecordingURL, that.activeRecordingURL) && Objects.equals(recentAppMapStorageLocation, that.recentAppMapStorageLocation);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(recentRemoteRecordingURLs, activeRecordingURL, recentAppMapStorageLocation);
+        return Objects.hash(recentRemoteRecordingURLs, activeRecordingURL, recentAppMapStorageLocation, appMapUploadConfirmed);
     }
 }
