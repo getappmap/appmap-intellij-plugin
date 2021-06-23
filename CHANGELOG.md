@@ -1,5 +1,10 @@
 # AppMap Plugin Changelog
 
+## [0.4.1]
+### Changed
+- AppLand components updated
+- IDE restart is not required when plugin is installed
+
 ## [0.4.0]
 ### Added
 - AppMap remote recording controls. The AppMap tool window now displays actions to start and stop a remote recording.
