@@ -7,7 +7,7 @@ Visit [dev.to/appland](https://dev.to/appland) for popular articles about AppMap
 
 
 ## Quickstart
-Follow the instructions in the **[AppMap quickstart](https://appland.com/docs/quickstart/)** guide.
+Follow the instructions in the **[AppMap quickstart](https://appland.com/docs/quickstart/)** guide. 2021.1 and newer IDEs are required to use this plugin.
 
 
 ## Summary of features
