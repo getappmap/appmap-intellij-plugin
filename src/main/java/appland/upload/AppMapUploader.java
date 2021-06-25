@@ -7,11 +7,14 @@ import com.google.gson.GsonBuilder;
 import com.intellij.ide.BrowserUtil;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.diagnostic.Logger;
+import com.intellij.openapi.editor.Document;
+import com.intellij.openapi.fileEditor.FileDocumentManager;
 import com.intellij.openapi.progress.ProgressIndicator;
 import com.intellij.openapi.progress.ProgressManager;
 import com.intellij.openapi.progress.Task;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.Messages;
+import com.intellij.openapi.util.Computable;
 import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.util.io.HttpRequests;
@@ -52,7 +55,8 @@ public class AppMapUploader {
     public static void uploadAppMap(@NotNull Project project, @NotNull VirtualFile file) {
         ApplicationManager.getApplication().assertIsDispatchThread();
 
-        if (!AppMapProjectSettingsService.getState(project).getConfirmAppMapUpload()) {
+        var confirmUpload = AppMapProjectSettingsService.getState(project).getConfirmAppMapUpload();
+        if (confirmUpload == null || confirmUpload) {
             var reply = Messages.showYesNoDialog(AppMapBundle.get("upload.confirmation.message"),
                     AppMapBundle.get("upload.confirmation.title"),
                     Icons.APPMAP_FILE);
@@ -60,21 +64,43 @@ public class AppMapUploader {
                 return;
             }
 
-            AppMapProjectSettingsService.getState(project).setConfirmAppMapUpload(true);
+            if (confirmUpload == null) {
+                AppMapProjectSettingsService.getState(project).setConfirmAppMapUpload(true);
+            }
         }
 
         ProgressManager.getInstance().run(new Task.Backgroundable(project, AppMapBundle.get("upload.progress.title")) {
             @Override
             public void run(@NotNull ProgressIndicator indicator) {
+                var gson = new GsonBuilder().create();
+
                 try {
+                    var document = ApplicationManager.getApplication().runReadAction((Computable<Document>) () -> {
+                        return FileDocumentManager.getInstance().getDocument(file);
+                    });
+
+                    if (document == null) {
+                        LOG.warn("unable to load content of VirtualFile, file: " + file.getPath() + ", size: " + file.getLength());
+                        ApplicationManager.getApplication().invokeLater(() -> {
+                            Messages.showErrorDialog(project,
+                                    AppMapBundle.get("upload.docUnavailable.message"),
+                                    AppMapBundle.get("upload.docUnavaialble.title"));
+                        });
+                        return;
+                    }
+
+                    var content = ApplicationManager
+                            .getApplication()
+                            .runReadAction((Computable<CharSequence>) document::getImmutableCharSequence);
+
                     var request = HttpRequests.post(uploadURL(project), "application/json")
                             .gzip(true)
                             .forceHttps(true)
                             .tuner(connection -> connection.setRequestProperty("X-Requested-With", "IntelliJUploader"));
-                    request.write(file.contentsToByteArray());
+                    request.write(content.toString());
 
                     var replyContent = request.readString(ProgressManager.getGlobalProgressIndicator());
-                    var reply = new GsonBuilder().create().fromJson(replyContent, UploadResponse.class);
+                    var reply = gson.fromJson(replyContent, UploadResponse.class);
 
                     var confirmationURL = confirmationURL(project) + "/" + reply.id + "?token=" + reply.token;
                     ApplicationManager.getApplication().invokeLater(() -> BrowserUtil.browse(confirmationURL));
