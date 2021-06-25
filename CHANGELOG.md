@@ -3,6 +3,7 @@
 ## [Unreleased]
 ### Added
 - Display a notification for AppMap JSON editors if the HTML application can't be displayed.
+- New feature to upload AppMaps to a remote server.
 
 ## [0.4.1]
 ### Changed
