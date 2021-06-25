@@ -1,5 +1,6 @@
 package appland.settings;
 
+import com.google.common.collect.Lists;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -15,7 +16,26 @@ public class AppMapProjectSettings {
     private String activeRecordingURL;
     @Nullable
     private String recentAppMapStorageLocation;
-    private boolean appMapUploadConfirmed;
+    @Nullable
+    private String cloudServerUrl;
+    @Nullable
+    private Boolean confirmAppMapUpload;
+
+    public AppMapProjectSettings() {
+    }
+
+    /**
+     * Copy constructor.
+     *
+     * @param settings The settings to copy.
+     */
+    public AppMapProjectSettings(@NotNull AppMapProjectSettings settings) {
+        this.recentRemoteRecordingURLs = settings.recentRemoteRecordingURLs == null ? null : Lists.newLinkedList(settings.recentRemoteRecordingURLs);
+        this.activeRecordingURL = settings.activeRecordingURL;
+        this.recentAppMapStorageLocation = settings.recentAppMapStorageLocation;
+        this.cloudServerUrl = settings.cloudServerUrl;
+        this.confirmAppMapUpload = settings.confirmAppMapUpload;
+    }
 
     @NotNull
     public synchronized String getRecentAppMapStorageLocation() {
@@ -57,12 +77,35 @@ public class AppMapProjectSettings {
         this.activeRecordingURL = activeRecordingURL;
     }
 
-    public synchronized boolean isAppMapUploadConfirmed() {
-        return appMapUploadConfirmed;
+    @Nullable
+    public synchronized Boolean getConfirmAppMapUpload() {
+        return confirmAppMapUpload;
     }
 
-    public synchronized void setAppMapUploadConfirmed(boolean appMapUploadConfirmed) {
-        this.appMapUploadConfirmed = appMapUploadConfirmed;
+    public synchronized void setConfirmAppMapUpload(@Nullable Boolean confirmAppMapUpload) {
+        this.confirmAppMapUpload = confirmAppMapUpload;
+    }
+
+    @Nullable
+    public synchronized String getCloudServerUrl() {
+        return cloudServerUrl;
+    }
+
+    public synchronized void setCloudServerUrl(@Nullable String cloudServerUrl) {
+        this.cloudServerUrl = cloudServerUrl;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        AppMapProjectSettings that = (AppMapProjectSettings) o;
+        return Objects.equals(recentRemoteRecordingURLs, that.recentRemoteRecordingURLs) && Objects.equals(activeRecordingURL, that.activeRecordingURL) && Objects.equals(recentAppMapStorageLocation, that.recentAppMapStorageLocation) && Objects.equals(cloudServerUrl, that.cloudServerUrl) && Objects.equals(confirmAppMapUpload, that.confirmAppMapUpload);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(recentRemoteRecordingURLs, activeRecordingURL, recentAppMapStorageLocation, cloudServerUrl, confirmAppMapUpload);
     }
 
     @Override
@@ -71,20 +114,8 @@ public class AppMapProjectSettings {
                 "recentRemoteRecordingURLs=" + recentRemoteRecordingURLs +
                 ", activeRecordingURL='" + activeRecordingURL + '\'' +
                 ", recentAppMapStorageLocation='" + recentAppMapStorageLocation + '\'' +
-                ", appMapUploadConfirmed=" + appMapUploadConfirmed +
+                ", cloudServerUrl='" + cloudServerUrl + '\'' +
+                ", confirmAppMapUpload=" + confirmAppMapUpload +
                 '}';
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        AppMapProjectSettings that = (AppMapProjectSettings) o;
-        return appMapUploadConfirmed == that.appMapUploadConfirmed && Objects.equals(recentRemoteRecordingURLs, that.recentRemoteRecordingURLs) && Objects.equals(activeRecordingURL, that.activeRecordingURL) && Objects.equals(recentAppMapStorageLocation, that.recentAppMapStorageLocation);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(recentRemoteRecordingURLs, activeRecordingURL, recentAppMapStorageLocation, appMapUploadConfirmed);
     }
 }

@@ -37,6 +37,9 @@
         <notificationGroup id="appmap.remoteRecording" displayType="BALLOON" key="notification.remoteRecording.displayName"/>
         <statusBarWidgetFactory implementation="appland.remote.RemoteRecordingStatusBarFactory"/>
 
+        <projectConfigurable groupId="tools" nonDefaultProject="true" order="first"
+                             instance="appland.settings.AppMapProjectConfigurable"/>
+
         <errorHandler implementation="appland.GitHubErrorHandler"/>
     </extensions>
 
