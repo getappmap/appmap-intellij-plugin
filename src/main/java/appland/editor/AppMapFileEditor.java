@@ -7,6 +7,7 @@ import appland.files.FileLookup;
 import appland.settings.AppMapApplicationSettingsService;
 import appland.upload.AppMapUploader;
 import com.intellij.CommonBundle;
+import com.intellij.ide.BrowserUtil;
 import com.intellij.ide.actions.OpenInRightSplitAction;
 import com.intellij.ide.plugins.MultiPanel;
 import com.intellij.openapi.application.ApplicationManager;
@@ -275,7 +276,11 @@ public class AppMapFileEditor extends UserDataHolderBase implements FileEditor {
     private JBCefJSQuery.Response uploadAppMap() {
         LOG.debug("uploadAppmap handler");
         ApplicationManager.getApplication().invokeLater(() -> {
-            AppMapUploader.uploadAppMap(project, file);
+            AppMapUploader.uploadAppMap(project, file, url -> {
+                ApplicationManager.getApplication().invokeLater(() -> {
+                    BrowserUtil.browse(url);
+                });
+            });
         }, ModalityState.defaultModalityState());
         return null;
     }

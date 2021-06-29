@@ -4,7 +4,6 @@ import appland.AppMapBundle;
 import appland.Icons;
 import appland.settings.AppMapProjectSettingsService;
 import com.google.gson.GsonBuilder;
-import com.intellij.ide.BrowserUtil;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.editor.Document;
@@ -17,6 +16,7 @@ import com.intellij.openapi.ui.Messages;
 import com.intellij.openapi.util.Computable;
 import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.openapi.vfs.VirtualFile;
+import com.intellij.util.Consumer;
 import com.intellij.util.Urls;
 import com.intellij.util.io.HttpRequests;
 import org.apache.commons.lang.StringEscapeUtils;
@@ -41,7 +41,7 @@ public class AppMapUploader {
      * @param file    The file to upload
      */
     @SuppressWarnings("DialogTitleCapitalization")
-    public static void uploadAppMap(@NotNull Project project, @NotNull VirtualFile file) {
+    public static void uploadAppMap(@NotNull Project project, @NotNull VirtualFile file, @NotNull Consumer<String> urlConsumer) {
         ApplicationManager.getApplication().assertIsDispatchThread();
 
         var confirmUpload = AppMapProjectSettingsService.getState(project).getConfirmAppMapUpload();
@@ -84,7 +84,6 @@ public class AppMapUploader {
 
                     var request = HttpRequests.post(uploadURL(project), "application/json")
                             .gzip(true)
-                            .forceHttps(true)
                             .tuner(connection -> connection.setRequestProperty("X-Requested-With", "IntelliJUploader"));
 
                     var responseBody = request.connect(req -> {
@@ -93,9 +92,7 @@ public class AppMapUploader {
                     });
 
                     var response = gson.fromJson(responseBody, UploadResponse.class);
-                    ApplicationManager.getApplication().invokeLater(() -> {
-                        BrowserUtil.browse(confirmationURL(project, response));
-                    });
+                    urlConsumer.consume(confirmationURL(project, response));
                 } catch (IOException e) {
                     LOG.warn("Uploading AppMap failed", e);
                     ApplicationManager.getApplication().invokeLater(() -> {

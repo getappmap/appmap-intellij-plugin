@@ -3,9 +3,11 @@ package appland.actions;
 import appland.Icons;
 import appland.files.AppMapFiles;
 import appland.upload.AppMapUploader;
+import com.intellij.ide.BrowserUtil;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.CommonDataKeys;
+import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.project.DumbAware;
 import com.intellij.openapi.vfs.VirtualFile;
 import org.jetbrains.annotations.NotNull;
@@ -33,7 +35,9 @@ public class UploadAppMapAction extends AnAction implements DumbAware {
             return;
         }
 
-        AppMapUploader.uploadAppMap(project, file);
+        AppMapUploader.uploadAppMap(project, file, url -> {
+            ApplicationManager.getApplication().invokeLater(() -> BrowserUtil.browse(url));
+        });
     }
 
     @Nullable
