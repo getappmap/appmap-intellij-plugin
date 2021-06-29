@@ -17,31 +17,20 @@ import com.intellij.openapi.ui.Messages;
 import com.intellij.openapi.util.Computable;
 import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.openapi.vfs.VirtualFile;
+import com.intellij.util.Urls;
 import com.intellij.util.io.HttpRequests;
 import org.apache.commons.lang.StringEscapeUtils;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
+import java.util.Map;
 
 /**
  * Manages the uploading of AppMap files to the AppLand cloud servers.
  */
 public class AppMapUploader {
     public static final String DEFAULT_SERVER_URL = "https://app.land";
-
     private static final Logger LOG = Logger.getInstance("#appmap.upload");
-
-    @NotNull
-    private static String uploadURL(@NotNull Project project) {
-        var url = StringUtil.defaultIfEmpty(AppMapProjectSettingsService.getState(project).getCloudServerUrl(), DEFAULT_SERVER_URL);
-        return StringUtil.trimEnd(url, "/") + "/api/appmaps/create_upload";
-    }
-
-    @NotNull
-    private static String confirmationURL(@NotNull Project project) {
-        var url = StringUtil.defaultIfEmpty(AppMapProjectSettingsService.getState(project).getCloudServerUrl(), DEFAULT_SERVER_URL);
-        return StringUtil.trimEnd(url, "/") + "/scenario_uploads";
-    }
 
     /**
      * Upload the file. Asks the user for confirmation if the user did not confirm yet.
@@ -72,8 +61,6 @@ public class AppMapUploader {
         ProgressManager.getInstance().run(new Task.Backgroundable(project, AppMapBundle.get("upload.progress.title")) {
             @Override
             public void run(@NotNull ProgressIndicator indicator) {
-                var gson = new GsonBuilder().create();
-
                 try {
                     var document = ApplicationManager.getApplication().runReadAction((Computable<Document>) () -> {
                         return FileDocumentManager.getInstance().getDocument(file);
@@ -93,17 +80,22 @@ public class AppMapUploader {
                             .getApplication()
                             .runReadAction((Computable<CharSequence>) document::getImmutableCharSequence);
 
+                    var gson = new GsonBuilder().create();
+
                     var request = HttpRequests.post(uploadURL(project), "application/json")
                             .gzip(true)
                             .forceHttps(true)
                             .tuner(connection -> connection.setRequestProperty("X-Requested-With", "IntelliJUploader"));
-                    request.write(content.toString());
 
-                    var replyContent = request.readString(ProgressManager.getGlobalProgressIndicator());
-                    var reply = gson.fromJson(replyContent, UploadResponse.class);
+                    var responseBody = request.connect(req -> {
+                        req.write(gson.toJson(new UploadRequest(content.toString())));
+                        return req.readString(ProgressManager.getGlobalProgressIndicator());
+                    });
 
-                    var confirmationURL = confirmationURL(project) + "/" + reply.id + "?token=" + reply.token;
-                    ApplicationManager.getApplication().invokeLater(() -> BrowserUtil.browse(confirmationURL));
+                    var response = gson.fromJson(responseBody, UploadResponse.class);
+                    ApplicationManager.getApplication().invokeLater(() -> {
+                        BrowserUtil.browse(confirmationURL(project, response));
+                    });
                 } catch (IOException e) {
                     LOG.warn("Uploading AppMap failed", e);
                     ApplicationManager.getApplication().invokeLater(() -> {
@@ -114,5 +106,28 @@ public class AppMapUploader {
                 }
             }
         });
+    }
+
+    @NotNull
+    private static String uploadURL(@NotNull Project project) {
+        var url = StringUtil.defaultIfEmpty(AppMapProjectSettingsService.getState(project).getCloudServerUrl(), DEFAULT_SERVER_URL);
+        var parsed = Urls.parse(url, false);
+        if (parsed == null) {
+            throw new IllegalArgumentException("invalid URL: " + url);
+        }
+        return parsed.resolve("/api/appmaps/create_upload").toExternalForm();
+    }
+
+    private static @NotNull String confirmationURL(@NotNull Project project, UploadResponse response) {
+        var url = StringUtil.defaultIfEmpty(AppMapProjectSettingsService.getState(project).getCloudServerUrl(), DEFAULT_SERVER_URL);
+        var parsed = Urls.parse(url, false);
+        if (parsed == null) {
+            throw new IllegalArgumentException("invalid URL: " + url);
+        }
+
+        return parsed.resolve("/scenario_uploads")
+                .resolve(String.valueOf(response.id))
+                .addParameters(Map.of("token", response.token))
+                .toExternalForm();
     }
 }
