@@ -18,7 +18,7 @@ import org.jetbrains.annotations.Nullable;
  */
 public class UploadAppMapAction extends AnAction implements DumbAware {
     public UploadAppMapAction() {
-        super(Icons.APPMAP_FILE);
+        super(Icons.UPLOAD);
     }
 
     @Override
