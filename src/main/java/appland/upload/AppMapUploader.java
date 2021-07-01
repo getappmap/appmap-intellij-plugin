@@ -76,7 +76,7 @@ public class AppMapUploader {
                         ApplicationManager.getApplication().invokeLater(() -> {
                             Messages.showErrorDialog(project,
                                     AppMapBundle.get("upload.docUnavailable.message"),
-                                    AppMapBundle.get("upload.docUnavaialble.title"));
+                                    AppMapBundle.get("upload.docUnavailable.title"));
                         });
                         return;
                     }
