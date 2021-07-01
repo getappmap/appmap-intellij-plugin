@@ -18,8 +18,7 @@ public class AppMapProjectSettings {
     private String recentAppMapStorageLocation;
     @Nullable
     private String cloudServerUrl;
-    @Nullable
-    private Boolean confirmAppMapUpload;
+    private boolean confirmAppMapUpload = true;
 
     public AppMapProjectSettings() {
     }
@@ -77,12 +76,11 @@ public class AppMapProjectSettings {
         this.activeRecordingURL = activeRecordingURL;
     }
 
-    @Nullable
-    public synchronized Boolean getConfirmAppMapUpload() {
+    public synchronized boolean getConfirmAppMapUpload() {
         return confirmAppMapUpload;
     }
 
-    public synchronized void setConfirmAppMapUpload(@Nullable Boolean confirmAppMapUpload) {
+    public synchronized void setConfirmAppMapUpload(boolean confirmAppMapUpload) {
         this.confirmAppMapUpload = confirmAppMapUpload;
     }
 
@@ -100,7 +98,7 @@ public class AppMapProjectSettings {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         AppMapProjectSettings that = (AppMapProjectSettings) o;
-        return Objects.equals(recentRemoteRecordingURLs, that.recentRemoteRecordingURLs) && Objects.equals(activeRecordingURL, that.activeRecordingURL) && Objects.equals(recentAppMapStorageLocation, that.recentAppMapStorageLocation) && Objects.equals(cloudServerUrl, that.cloudServerUrl) && Objects.equals(confirmAppMapUpload, that.confirmAppMapUpload);
+        return confirmAppMapUpload == that.confirmAppMapUpload && Objects.equals(recentRemoteRecordingURLs, that.recentRemoteRecordingURLs) && Objects.equals(activeRecordingURL, that.activeRecordingURL) && Objects.equals(recentAppMapStorageLocation, that.recentAppMapStorageLocation) && Objects.equals(cloudServerUrl, that.cloudServerUrl);
     }
 
     @Override

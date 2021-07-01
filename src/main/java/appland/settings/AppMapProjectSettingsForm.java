@@ -9,9 +9,6 @@ import org.jetbrains.annotations.NotNull;
 import javax.swing.*;
 
 class AppMapProjectSettingsForm {
-    // internal properties
-    boolean confirmUploadModified = false;
-
     // form designer
     private JPanel mainPanel;
     private JBTextField serverName;
@@ -19,8 +16,6 @@ class AppMapProjectSettingsForm {
 
     AppMapProjectSettingsForm() {
         serverName.getEmptyText().setText(AppMapUploader.DEFAULT_SERVER_URL);
-
-        confirmUpload.addItemListener(e -> confirmUploadModified = true);
     }
 
     JPanel getMainPanel() {
@@ -28,16 +23,12 @@ class AppMapProjectSettingsForm {
     }
 
     void loadSettingsFrom(@NotNull AppMapProjectSettings settings) {
-        confirmUploadModified = false;
-
         serverName.setText(settings.getCloudServerUrl());
-        confirmUpload.setSelected(settings.getConfirmAppMapUpload() == Boolean.TRUE);
+        confirmUpload.setSelected(settings.getConfirmAppMapUpload());
     }
 
     void applySettingsTo(@NotNull AppMapProjectSettings settings) {
         settings.setCloudServerUrl(StringUtil.nullize(serverName.getText()));
-        if (confirmUploadModified) {
-            settings.setConfirmAppMapUpload(confirmUpload.isSelected());
-        }
+        settings.setConfirmAppMapUpload(confirmUpload.isSelected());
     }
 }

@@ -12,6 +12,7 @@ import com.intellij.openapi.progress.ProgressIndicator;
 import com.intellij.openapi.progress.ProgressManager;
 import com.intellij.openapi.progress.Task;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.ui.DialogWrapper;
 import com.intellij.openapi.ui.Messages;
 import com.intellij.openapi.util.Computable;
 import com.intellij.openapi.util.text.StringUtil;
@@ -44,17 +45,21 @@ public class AppMapUploader {
     public static void uploadAppMap(@NotNull Project project, @NotNull VirtualFile file, @NotNull Consumer<String> urlConsumer) {
         ApplicationManager.getApplication().assertIsDispatchThread();
 
-        var confirmUpload = AppMapProjectSettingsService.getState(project).getConfirmAppMapUpload();
-        if (confirmUpload == null || confirmUpload) {
-            var reply = Messages.showYesNoDialog(AppMapBundle.get("upload.confirmation.message"),
+        if (AppMapProjectSettingsService.getState(project).getConfirmAppMapUpload()) {
+            var reply = Messages.showOkCancelDialog(project,
+                    AppMapBundle.get("upload.confirmation.message"),
                     AppMapBundle.get("upload.confirmation.title"),
-                    Icons.APPMAP_FILE);
-            if (reply == Messages.NO) {
-                return;
-            }
+                    AppMapBundle.get("upload.confirmation.ok"),
+                    AppMapBundle.get("upload.confirmation.cancel"),
+                    Icons.APPMAP_FILE, new DialogWrapper.DoNotAskOption.Adapter() {
+                        @Override
+                        public void rememberChoice(boolean isSelected, int exitCode) {
+                            AppMapProjectSettingsService.getState(project).setConfirmAppMapUpload(!isSelected);
+                        }
+                    });
 
-            if (confirmUpload == null) {
-                AppMapProjectSettingsService.getState(project).setConfirmAppMapUpload(true);
+            if (reply != Messages.OK) {
+                return;
             }
         }
 
