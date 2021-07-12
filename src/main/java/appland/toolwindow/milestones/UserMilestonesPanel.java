@@ -1,5 +1,6 @@
 package appland.toolwindow.milestones;
 
+import com.intellij.openapi.project.Project;
 import com.intellij.ui.components.panels.VerticalLayout;
 import org.jetbrains.annotations.NotNull;
 
@@ -7,20 +8,22 @@ import javax.swing.*;
 import java.util.LinkedList;
 import java.util.List;
 
+import static appland.toolwindow.milestones.MilestoneActions.installAppMapAgent;
+
 /**
  * Manages a list of collapsible user milestone panels.
  */
 public class UserMilestonesPanel extends JPanel {
     private final List<CollapsibleUserMilestonePanel> collapsiblePanels = new LinkedList<>();
 
-    public UserMilestonesPanel() {
+    public UserMilestonesPanel(@NotNull Project project) {
         super(new VerticalLayout(5));
 
         addPanel("Quickstart", new UserMilestoneContentPanel() {
             @Override
             protected void setupPanel() {
-                add(new StatusLabel(UserMilestoneStatus.Completed, "Install AppMap extension"));
-                add(new StatusLabel(UserMilestoneStatus.Error, "Setup AppMap agent"));
+                add(new StatusLabel(UserMilestoneStatus.Incomplete, "Install AppMap extension", () -> installAppMapAgent(project)));
+                add(new StatusLabel(UserMilestoneStatus.Incomplete, "Setup AppMap agent"));
                 add(new StatusLabel(UserMilestoneStatus.Incomplete, "Create AppMaps"));
                 add(new StatusLabel(UserMilestoneStatus.Incomplete, "View your AppMaps"));
             }
