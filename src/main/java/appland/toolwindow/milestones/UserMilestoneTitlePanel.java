@@ -88,14 +88,14 @@ class UserMilestoneTitlePanel extends JPanel {
     }
 
     public void setNotificationCount(int count) {
-        if (count >= 0) {
+        /*if (count >= 0) {
             notification.setIcon(createNotificationIcon(count));
             add(notification, BorderLayout.EAST);
             revalidate();
             repaint();
         } else {
             remove(notification);
-        }
+        }*/
     }
 
     private void executeLabelAction() {

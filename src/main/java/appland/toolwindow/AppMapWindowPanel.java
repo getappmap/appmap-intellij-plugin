@@ -148,7 +148,7 @@ public class AppMapWindowPanel extends SimpleToolWindowPanel implements DataProv
 
     @NotNull
     private JPanel createUserMilestonesPanel() {
-        return new UserMilestonesPanel();
+        return new UserMilestonesPanel(project);
     }
 
     public void rebuild(boolean force) {
