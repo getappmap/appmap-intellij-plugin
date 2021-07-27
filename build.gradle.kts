@@ -74,7 +74,7 @@ tasks {
     }
 
     processTestResources {
-        copyPluginAssets()
+//        copyPluginAssets()
     }
 
     withType<RunPluginVerifierTask> {
@@ -82,7 +82,7 @@ tasks {
     }
 
     withType(PrepareSandboxTask::class.java).all {
-        copyPluginAssets("${intellij.pluginName.get()}/appmap")
+        copyPluginAssets(intellij.pluginName.get())
     }
 
     withType(Test::class.java).all {
@@ -91,9 +91,14 @@ tasks {
     }
 }
 
-fun AbstractCopyTask.copyPluginAssets(targetDir: String = "appmap") {
+fun AbstractCopyTask.copyPluginAssets(rootDir: String) {
     from("${project.rootDir}/appland") {
-        into(targetDir)
+        into("$rootDir/appmap")
+        include("index.html")
+        include("dist/**")
+    }
+    from("${project.rootDir}/appland-milestones") {
+        into("$rootDir/appmap-milestones")
         include("index.html")
         include("dist/**")
     }
