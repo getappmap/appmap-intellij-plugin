@@ -1,6 +1,5 @@
 package appland.notifications;
 
-import appland.AppMapBundle;
 import appland.AppMapPlugin;
 import appland.actions.StopAppMapRecordingAction;
 import com.intellij.ide.BrowserUtil;
@@ -14,6 +13,8 @@ import com.intellij.openapi.project.Project;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import javax.swing.*;
+
 import static appland.AppMapBundle.lazy;
 
 public final class AppMapNotifications {
@@ -26,7 +27,8 @@ public final class AppMapNotifications {
                                                          boolean withClose) {
 
         ApplicationManager.getApplication().invokeLater(() -> {
-            var notification = new Notification(REMOTE_RECORDING_ID, null, type);
+            // cast to Icon to avoid an ambiguity with 2021.2
+            var notification = new Notification(REMOTE_RECORDING_ID, (Icon) null, type);
             if (title != null) {
                 notification.setTitle(title);
             }
