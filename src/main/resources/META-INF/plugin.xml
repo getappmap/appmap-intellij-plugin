@@ -26,6 +26,8 @@
         <fileEditorProvider implementation="appland.editor.AppMapHTMLEditorProvider"/>
         <fileIconProvider implementation="appland.editor.AppMapIconProvider"/>
 
+        <fileEditorProvider implementation="appland.milestones.UserMilestonesEditorProvider"/>
+
         <fileBasedIndex implementation="appland.index.AppMapMetadataIndex"/>
         <indexedRootsProvider implementation="appland.index.AppMapFolderIndexedRootProvider"/>
         <toolWindow id="applandToolWindow" anchor="right" secondary="false"
@@ -62,5 +64,8 @@
 
             <add-to-group group-id="ToolsMenu" anchor="last"/>
         </group>
+
+        <action id="openUserMilestones" class="appland.actions.OpenUserMilestonesAction"
+                text="AppLand: Open user milestones"/>
     </actions>
 </idea-plugin>

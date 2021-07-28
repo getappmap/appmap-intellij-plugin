@@ -74,7 +74,7 @@ tasks {
     }
 
     processTestResources {
-//        copyPluginAssets("")
+        copyPluginAssets("")
     }
 
     withType<RunPluginVerifierTask> {
@@ -82,7 +82,7 @@ tasks {
     }
 
     withType(PrepareSandboxTask::class.java).all {
-//        copyPluginAssets(intellij.pluginName.get())
+        copyPluginAssets(intellij.pluginName.get())
     }
 
     withType(Test::class.java).all {
@@ -92,13 +92,14 @@ tasks {
 }
 
 fun AbstractCopyTask.copyPluginAssets(rootDir: String) {
+    val rootPath = if (rootDir.isEmpty()) "" else "${rootDir.removeSuffix("/")}/"
     from("${project.rootDir}/appland") {
-        into("$rootDir/appmap")
+        into("${rootPath}appmap")
         include("index.html")
         include("dist/**")
     }
     from("${project.rootDir}/appland-user-milestones") {
-        into("$rootDir/appmap-user-milestones")
+        into("${rootPath}appland-user-milestones")
         include("index.html")
         include("dist/**")
     }
