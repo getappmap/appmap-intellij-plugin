@@ -1,14 +1,15 @@
-// webpack.config.js
+/* eslint-disable */
 const path = require('path');
-const webpack = require('webpack');
+
 module.exports = {
-    entry: {
-        entry: __dirname + '/app.js',
-    },
+    entry: './app.js',
     output: {
-        filename: '[name].bundle.js',
+        path: path.resolve(__dirname, 'dist'),
+        filename: 'milestones-app.js',
+        devtoolModuleFilenameTemplate: '[resource-path]',
         library: 'AppLandWeb',
     },
+    devtool: 'source-map',
     resolve: {
         extensions: ['.js', '.mjs'],
         alias: {

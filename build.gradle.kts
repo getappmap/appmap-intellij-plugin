@@ -56,7 +56,7 @@ tasks {
     buildSearchableOptions.get().enabled = false
 
     buildPlugin {
-        copyPluginAssets()
+        copyPluginAssets("")
     }
 
     patchPluginXml {
@@ -74,7 +74,7 @@ tasks {
     }
 
     processTestResources {
-//        copyPluginAssets()
+//        copyPluginAssets("")
     }
 
     withType<RunPluginVerifierTask> {
@@ -82,7 +82,7 @@ tasks {
     }
 
     withType(PrepareSandboxTask::class.java).all {
-        copyPluginAssets(intellij.pluginName.get())
+//        copyPluginAssets(intellij.pluginName.get())
     }
 
     withType(Test::class.java).all {
@@ -97,8 +97,8 @@ fun AbstractCopyTask.copyPluginAssets(rootDir: String) {
         include("index.html")
         include("dist/**")
     }
-    from("${project.rootDir}/appland-milestones") {
-        into("$rootDir/appmap-milestones")
+    from("${project.rootDir}/appland-user-milestones") {
+        into("$rootDir/appmap-user-milestones")
         include("index.html")
         include("dist/**")
     }

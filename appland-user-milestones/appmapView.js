@@ -1,5 +1,6 @@
 import Vue from 'vue';
 import { VVsCodeExtension } from '@appland/components'; // eslint-disable-line import/no-named-default
+import { getAppMapMetrics } from './telemetry';
 import '@appland/diagrams/dist/style.css';
 
 export default function mountApp() {
@@ -16,6 +17,10 @@ export default function mountApp() {
 
         vscode.postMessage({
           command: 'onLoadComplete',
+          metrics: {
+            ...getAppMapMetrics(ui.$store.state.appMap),
+            loadTime: (new Date() - startTime) / 1000,
+          },
         });
       },
       showInstructions() {
@@ -28,7 +33,7 @@ export default function mountApp() {
         this.$refs.ui.setState(state);
       },
       displayUpdateNotification(version) {
-        //this.$refs.ui.showVersionNotification(`v${version}`, patchNotesHtml);
+
       },
     },
     mounted() {
