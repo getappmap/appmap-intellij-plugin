@@ -11,22 +11,32 @@ const STEPS = {
 
 export default function mountApp() {
     const vscode = {
-        // fixme
         "postMessage": function (data) {
             if (data) {
-                console.warn(JSON.stringify(data));
+                console.warn("postMessage JS handler: " + JSON.stringify(data));
             }
 
-            if (data && data.command === 'ready') {
+            if (data && data.command === 'preInitialize') {
+                // this is a workaround to notify the plugin that the app is ready
+                console.log("intellij-plugin-ready")
+
                 window.postMessage({
-                    type: 'init',
+                    type:'init',
                     data: {
-                        language: 'Ruby',
+                        language: 'ruby',
                         completedSteps: []
                     }
                 });
+                return
+            }
+
+            console.warn("POSTING " + data.command)
+            if (window.AppLand){
+                window.AppLand.postMessage(JSON.stringify({
+                    type: data.command,
+                    data: data.data
+                }))
             } else {
-                console.warn("POSTING " + data.command)
                 window.postMessage({
                     type: data.command,
                     data: data.data
@@ -34,9 +44,11 @@ export default function mountApp() {
             }
         }
     };
+
     const messages = new MessagePublisher(vscode);
 
-    messages.on('init', (event) => {
+  messages
+    .on('init', (event) => {
         const app = new Vue({
             el: '#app',
             render(h) {
@@ -117,9 +129,9 @@ export default function mountApp() {
 
         vscode.postMessage({command: 'postInitialize'});
     })
-            // .on(undefined, (event) => {
-            //     throw new Error(`unhandled message type: ${event.type}`);
-            // });
+/*            .on(undefined, (event) => {
+                throw new Error(`unhandled message type: ${event}, ${event.type}`);
+            });*/
 
     vscode.postMessage({command: 'preInitialize'});
 }

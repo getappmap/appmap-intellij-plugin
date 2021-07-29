@@ -1,8 +1,9 @@
 package appland.milestones;
 
 import appland.AppMapPlugin;
-import appland.files.FileLocation;
-import com.intellij.openapi.application.ApplicationManager;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.fileEditor.FileEditor;
 import com.intellij.openapi.fileEditor.FileEditorLocation;
@@ -113,36 +114,38 @@ public class UserMilestonesEditor extends UserDataHolderBase implements FileEdit
     }
 
     private void onJavaScriptApplicationReady() {
-        setupJCEFBridge();
+        jcefBridge.addHandler(request -> {
+            LOG.warn("postMessage received message: " + request);
+            return new JBCefJSQuery.Response("Received " + request);
+        });
 
-//        var app = ApplicationManager.getApplication();
-//        app.invokeLater(AppMapFileEditor.this::loadAppmapData, ModalityState.defaultModalityState());
+        contentPanel.getCefBrowser().executeJavaScript(createCallbackJS(jcefBridge, "postMessage"), "", 0);
+
+        // send init
+        LOG.warn("Posting 'init' message");
+        var json = new JsonObject();
+        json.addProperty("type", "init");
+        json.addProperty("language", "ruby");
+        json.add("testFrameworks", new JsonArray());
+        json.addProperty("initialStep", 0);
+        json.addProperty("appmapYmlSnippet", "");
+        json.add("appMaps", new JsonArray());
+
+        var steps = new JsonArray();
+        var step1 = new JsonObject();
+        step1.addProperty("state", "complete");
+        step1.add("errors", new JsonArray());
+        steps.add(step1);
+        json.add("steps", steps);
+
+        var jsonString = new GsonBuilder().create().toJson(json);
+        contentPanel.getCefBrowser().executeJavaScript("window.postMessage(" + jsonString + ")", "", 0);
     }
 
-    private void setupJCEFBridge() {
-        // viewSource callback handler
-//        jcefBridge.addHandler(relativePath -> {
-//            LOG.debug("viewSource callback handler, file: " + relativePath);
-//            ApplicationManager.getApplication().invokeLater(() -> {
-//                var location = FileLocation.parse(relativePath);
-//                if (location != null) {
-//                    var referencedFile = FileLookup.findRelativeFile(project, file, FileUtil.toSystemIndependentName(location.filePath));
-//                    if (referencedFile != null) {
-//                        // IntelliJ's lines are 0-based, AppMap lines seem to be 0-based
-//                        var line = location.line == null ? -1 : location.line - 1;
-//                        OpenFileDescriptor descriptor = new OpenFileDescriptor(project, referencedFile, line, -1);
-//
-//                        OpenInRightSplitAction.Companion.openInRightSplit(project, referencedFile, descriptor, true);
-//                        return;
-//                    }
-//                }
-//
-//                // fallback message if the could not be found
-//                showErrorDialog("File " + relativePath + " could not be found.", "AppMap");
-//            }, ModalityState.defaultModalityState());
-//            return null;
-//        });
-//        contentPanel.getCefBrowser().executeJavaScript(createCallbackJS(jcefBridge, "viewSource"), baseURL, 0);
+    @NotNull
+    private String createCallbackJS(JBCefJSQuery query, @NotNull String functionName) {
+        return "if (!window.AppLand) window.AppLand={}; window.AppLand." + functionName + "=function(name) {" +
+                query.inject("name") + "};";
     }
 
     @Override
