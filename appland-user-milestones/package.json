@@ -3,7 +3,7 @@
     "name": "appmap-intellij-user-milestones",
     "version": "0.0.1",
     "scripts": {
-        "bundle": "webpack  --mode=production"
+        "bundle": "webpack --mode=production"
     },
     "devDependencies": {
         "@babel/core": "^7.12.10",
@@ -36,12 +36,5 @@
         "vue-template-compiler": "^2.6.14",
         "vuex": "^3.6.0"
     },
-    "packageManager": "yarn@2.4.2",
-    "resolutions": {
-        "@appland/cli": "portal:/IslandWork/source/appland/appmap-js/packages/cli",
-        "@appland/components": "portal:/IslandWork/source/appland/appmap-js/packages/components",
-        "@appland/diagrams": "portal:/IslandWork/source/appland/appmap-js/packages/diagrams",
-        "@appland/models": "portal:/IslandWork/source/appland/appmap-js/packages/models",
-        "@appland/appmap-validate": "portal:/IslandWork/source/appland/appmap-js/packages/validate"
-    }
+    "packageManager": "yarn@2.4.2"
 }

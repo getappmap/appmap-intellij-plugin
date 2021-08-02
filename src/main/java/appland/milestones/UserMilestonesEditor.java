@@ -4,20 +4,23 @@ import appland.AppMapPlugin;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import com.intellij.ide.BrowserUtil;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.fileEditor.FileEditor;
 import com.intellij.openapi.fileEditor.FileEditorLocation;
 import com.intellij.openapi.fileEditor.FileEditorState;
-import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.Disposer;
 import com.intellij.openapi.util.UserDataHolderBase;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.ui.jcef.*;
+import com.intellij.util.PlatformUtils;
 import org.cef.CefSettings;
 import org.cef.browser.CefBrowser;
+import org.cef.browser.CefFrame;
 import org.cef.handler.CefDisplayHandlerAdapter;
 import org.cef.handler.CefLoadHandler;
-import org.cef.handler.CefLoadHandlerAdapter;
+import org.cef.handler.CefRequestHandlerAdapter;
+import org.cef.network.CefRequest;
 import org.jetbrains.annotations.Nls;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -32,19 +35,15 @@ public class UserMilestonesEditor extends UserDataHolderBase implements FileEdit
     private static final String READY_MESSAGE_ID = "intellij-plugin-ready";
 
     @NotNull
-    private final Project project;
-    @NotNull
     private final VirtualFile file;
 
     private final JBCefClient jcefClient = JBCefApp.getInstance().createClient();
     private final JCEFHtmlPanel contentPanel = new JCEFHtmlPanel(jcefClient, null);
     private final JBCefJSQuery jcefBridge = JBCefJSQuery.create((JBCefBrowserBase) contentPanel);
 
-    private final AtomicBoolean initial = new AtomicBoolean(true);
     private final AtomicBoolean navigating = new AtomicBoolean(false);
 
-    public UserMilestonesEditor(@NotNull Project project, @NotNull VirtualFile file) {
-        this.project = project;
+    public UserMilestonesEditor(@NotNull VirtualFile file) {
         this.file = file;
 
         Disposer.register(this, jcefClient);
@@ -52,18 +51,21 @@ public class UserMilestonesEditor extends UserDataHolderBase implements FileEdit
         Disposer.register(this, jcefBridge);
 
         setupJCEF();
-        loadMilestonesApplication();
+        loadApplication();
     }
 
     private void setupJCEF() {
-        contentPanel.getJBCefClient().addLoadHandler(new CefLoadHandlerAdapter() {
+        // open links to https://appland.com in the external browser
+        contentPanel.getJBCefClient().addRequestHandler(new CefRequestHandlerAdapter() {
             @Override
-            public void onLoadingStateChange(CefBrowser browser, boolean isLoading, boolean canGoBack, boolean canGoForward) {
-                if (!initial.get()) {
-                    return;
+            public boolean onBeforeBrowse(CefBrowser browser, CefFrame frame, CefRequest request, boolean user_gesture, boolean is_redirect) {
+                var url = request.getURL();
+                if (url != null && url.startsWith("https://appland.com")) {
+                    navigating.set(true);
+                    BrowserUtil.browse(url);
+                    return true;
                 }
-
-                initial.set(false);
+                return false;
             }
         }, contentPanel.getCefBrowser());
 
@@ -103,7 +105,7 @@ public class UserMilestonesEditor extends UserDataHolderBase implements FileEdit
         }, contentPanel.getCefBrowser());
     }
 
-    private void loadMilestonesApplication() {
+    private void loadApplication() {
         try {
             var filePath = AppMapPlugin.getUserMilestonesHTMLPath();
             String htmlFileURL = filePath.toUri().toURL().toString();
@@ -121,25 +123,39 @@ public class UserMilestonesEditor extends UserDataHolderBase implements FileEdit
 
         contentPanel.getCefBrowser().executeJavaScript(createCallbackJS(jcefBridge, "postMessage"), "", 0);
 
-        // send init
-        LOG.warn("Posting 'init' message");
         var json = new JsonObject();
         json.addProperty("type", "init");
-        json.addProperty("language", "ruby");
-        json.add("testFrameworks", new JsonArray());
-        json.addProperty("initialStep", 0);
-        json.addProperty("appmapYmlSnippet", "");
-        json.add("appMaps", new JsonArray());
-
-        var steps = new JsonArray();
-        var step1 = new JsonObject();
-        step1.addProperty("state", "complete");
-        step1.add("errors", new JsonArray());
-        steps.add(step1);
-        json.add("steps", steps);
+        json.add("languages", createLanguagesArray());
 
         var jsonString = new GsonBuilder().create().toJson(json);
         contentPanel.getCefBrowser().executeJavaScript("window.postMessage(" + jsonString + ")", "", 0);
+    }
+
+    @NotNull
+    private JsonArray createLanguagesArray() {
+        var ruby = new JsonObject();
+        ruby.addProperty("id", "ruby");
+        ruby.addProperty("name", "Ruby");
+        ruby.addProperty("link", "https://appland.com/docs/quickstart/vscode/ruby-step-2.html");
+        ruby.addProperty("isDetected", PlatformUtils.isRubyMine());
+
+        var python = new JsonObject();
+        python.addProperty("id", "python");
+        python.addProperty("name", "Python");
+        python.addProperty("link", "https://appland.com/docs/quickstart/vscode/python-step-2.html");
+        python.addProperty("isDetected", PlatformUtils.isPyCharm());
+
+        var java = new JsonObject();
+        java.addProperty("id", "java");
+        java.addProperty("name", "Java");
+        java.addProperty("link", "https://appland.com/docs/quickstart/vscode/java-step-2.html");
+        java.addProperty("isDetected", PlatformUtils.isIntelliJ());
+
+        var languages = new JsonArray();
+        languages.add(ruby);
+        languages.add(python);
+        languages.add(java);
+        return languages;
     }
 
     @NotNull
@@ -198,7 +214,7 @@ public class UserMilestonesEditor extends UserDataHolderBase implements FileEdit
     }
 
     @Override
-    public @Nullable VirtualFile getFile() {
+    public @NotNull VirtualFile getFile() {
         return file;
     }
 }

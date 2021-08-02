@@ -1,6 +1,5 @@
 package appland.milestones;
 
-import appland.AppMapPlugin;
 import com.intellij.openapi.fileEditor.FileEditor;
 import com.intellij.openapi.fileEditor.FileEditorManager;
 import com.intellij.openapi.fileEditor.FileEditorPolicy;
@@ -9,7 +8,6 @@ import com.intellij.openapi.project.DumbAware;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.Key;
 import com.intellij.openapi.util.KeyWithDefaultValue;
-import com.intellij.openapi.vfs.LocalFileSystem;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.testFramework.LightVirtualFile;
 import com.intellij.ui.jcef.JBCefApp;
@@ -20,7 +18,7 @@ public class UserMilestonesEditorProvider implements FileEditorProvider, DumbAwa
     private static final Key<Boolean> MILESTONES_KEY = KeyWithDefaultValue.create("appland.milestonesFile", false);
 
     public static void openUserMilestones(@NotNull Project project) {
-        var dummyFile = new LightVirtualFile("User Milestones");
+        var dummyFile = new LightVirtualFile("Quickstart: Install Appmap Agent");
         MILESTONES_KEY.set(dummyFile, true);
 
         FileEditorManager.getInstance(project).openFile(dummyFile, true);
@@ -33,7 +31,7 @@ public class UserMilestonesEditorProvider implements FileEditorProvider, DumbAwa
 
     @Override
     public @NotNull FileEditor createEditor(@NotNull Project project, @NotNull VirtualFile file) {
-        return new UserMilestonesEditor(project, file);
+        return new UserMilestonesEditor(file);
     }
 
     @Override
