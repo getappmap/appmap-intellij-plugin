@@ -65,7 +65,7 @@
             <add-to-group group-id="ToolsMenu" anchor="last"/>
         </group>
 
-        <action id="openUserMilestones" class="appland.actions.OpenUserMilestonesAction"
-                text="AppLand: Open user milestones"/>
+        <action id="openUserMilestones" class="appland.actions.OpenQuickstartAction"
+                text="AppLand: Open Quickstart"/>
     </actions>
 </idea-plugin>

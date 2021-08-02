@@ -8,7 +8,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
 
-public class OpenUserMilestonesAction extends AnAction {
+public class OpenQuickstartAction extends AnAction {
     private static final Logger LOG = Logger.getInstance("#appmap.action");
 
     @Override
