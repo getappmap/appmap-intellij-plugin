@@ -16,6 +16,9 @@ public class Icons {
     public static final Icon MILESTONE_ERROR = IconLoader.getIcon("/icons/milestone_error.svg", Icons.class);
     public static final Icon MILESTONE_INCOMPLETE = IconLoader.getIcon("/icons/milestone_incomplete.svg", Icons.class);
 
+    public static final Icon LINK = IconLoader.getIcon("/icons/link.svg", Icons.class);
+    public static final Icon LINK_VISITED = IconLoader.getIcon("/icons/link-visited.svg", Icons.class);
+
     // 13x13
     public static final Icon APPMAP_FILE_SMALL = IconLoader.getIcon("/icons/appmap_small.svg", Icons.class);
     public static final Icon TOOL_WINDOW = APPMAP_FILE_SMALL;
