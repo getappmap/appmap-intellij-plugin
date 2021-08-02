@@ -5764,9 +5764,9 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "appmap-intellij-user-milestones@workspace:."
   dependencies:
-    "@appland/components": ^1.2.1
-    "@appland/diagrams": ^1.2.1
-    "@appland/models": ^1.2.0
+    "@appland/components": ^1.2.3
+    "@appland/diagrams": ^1.2.3
+    "@appland/models": ^1.2.3
     "@babel/core": ^7.12.10
     "@babel/preset-env": ^7.12.11
     "@babel/preset-typescript": ^7.12.7
@@ -5786,6 +5786,7 @@ __metadata:
     style-loader: ^2.0.0
     vscode-extension-telemetry: ^0.1.7
     vue: ^2.6.14
+    vue-loader: ^15.9.6
     vue-template-compiler: ^2.6.14
     vuex: ^3.6.0
     webpack: ^5.31.0
@@ -24016,6 +24017,27 @@ resolve@1.1.7:
     vue-template-compiler:
       optional: true
   checksum: 48c7785a24b2561618eb7524c14fa44c25f0277aa6a523b5e8d872585cfe863cc077ad5e2852bb94c98173ee936ddc465db659726f08e50b6151331301ea4372
+  languageName: node
+  linkType: hard
+
+"vue-loader@npm:^15.9.6":
+  version: 15.9.8
+  resolution: "vue-loader@npm:15.9.8"
+  dependencies:
+    "@vue/component-compiler-utils": ^3.1.0
+    hash-sum: ^1.0.2
+    loader-utils: ^1.1.0
+    vue-hot-reload-api: ^2.3.0
+    vue-style-loader: ^4.1.0
+  peerDependencies:
+    css-loader: "*"
+    webpack: ^3.0.0 || ^4.1.0 || ^5.0.0-0
+  peerDependenciesMeta:
+    cache-loader:
+      optional: true
+    vue-template-compiler:
+      optional: true
+  checksum: bbbf069081b867f8b3135e51444818bae8199239f7718ebf484a4e81ddbb17629673d5a2eabb2abf4b2b822dd0fa75b78b487ab1f085714e0728a4c475536a74
   languageName: node
   linkType: hard
 
