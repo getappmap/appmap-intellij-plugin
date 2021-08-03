@@ -22,7 +22,14 @@
         <agent implementation="appland.lang.agents.AppMapRubyAgent"/>
     </extensions>
 
+    <projectListeners>
+        <listener topic="com.intellij.ide.plugins.DynamicPluginListener"
+                  class="appland.startup.DynamicPluginListener"/>
+    </projectListeners>
+
     <extensions defaultExtensionNs="com.intellij">
+        <postStartupActivity implementation="appland.startup.AppLandStartupActivity"/>
+
         <fileEditorProvider implementation="appland.editor.AppMapHTMLEditorProvider"/>
         <fileIconProvider implementation="appland.editor.AppMapIconProvider"/>
 

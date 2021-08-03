@@ -4,6 +4,7 @@ import appland.AppMapBundle;
 import appland.actions.StartAppMapRecordingAction;
 import appland.actions.StopAppMapRecordingAction;
 import appland.files.AppMapFiles;
+import appland.milestones.UserMilestonesEditorProvider;
 import appland.toolwindow.milestones.UserMilestonesPanel;
 import com.intellij.ide.util.treeView.NodeDescriptor;
 import com.intellij.openapi.Disposable;
@@ -21,6 +22,7 @@ import com.intellij.pom.Navigatable;
 import com.intellij.psi.PsiManager;
 import com.intellij.ui.ScrollPaneFactory;
 import com.intellij.ui.SearchTextField;
+import com.intellij.ui.SimpleTextAttributes;
 import com.intellij.ui.content.Content;
 import com.intellij.ui.tree.AsyncTreeModel;
 import com.intellij.ui.tree.StructureTreeModel;
@@ -137,6 +139,10 @@ public class AppMapWindowPanel extends SimpleToolWindowPanel implements DataProv
     private SimpleTree createTree(@NotNull Disposable disposable, StructureTreeModel<AppMapTreeModel> treeModel) {
         var tree = new SimpleTree(new AsyncTreeModel(treeModel, true, disposable));
         tree.getEmptyText().setText(AppMapBundle.get("toolwindow.appmap.emptyText"));
+        tree.getEmptyText().appendSecondaryText(
+                AppMapBundle.get("toolwindow.appmap.installAgentEmptyText"),
+                SimpleTextAttributes.LINK_ATTRIBUTES,
+                e -> UserMilestonesEditorProvider.openUserMilestones(project));
         tree.setRootVisible(false);
         tree.setShowsRootHandles(false);
 

@@ -7,6 +7,7 @@ import java.util.Objects;
  */
 public class AppMapApplicationSettings {
     private volatile boolean appmapInstructionsViewed = false;
+    private volatile boolean firstStart = true;
 
     public boolean isAppmapInstructionsViewed() {
         return appmapInstructionsViewed;
@@ -16,10 +17,19 @@ public class AppMapApplicationSettings {
         this.appmapInstructionsViewed = appmapInstructionsViewed;
     }
 
+    public boolean isFirstStart() {
+        return firstStart;
+    }
+
+    public void setFirstStart(boolean firstStart) {
+        this.firstStart = firstStart;
+    }
+
     @Override
     public String toString() {
-        return "AppMapLocalApplicationState{" +
+        return "AppMapApplicationSettings{" +
                 "appmapInstructionsViewed=" + appmapInstructionsViewed +
+                ", firstStart=" + firstStart +
                 '}';
     }
 
@@ -28,11 +38,11 @@ public class AppMapApplicationSettings {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         AppMapApplicationSettings that = (AppMapApplicationSettings) o;
-        return appmapInstructionsViewed == that.appmapInstructionsViewed;
+        return appmapInstructionsViewed == that.appmapInstructionsViewed && firstStart == that.firstStart;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(appmapInstructionsViewed);
+        return Objects.hash(appmapInstructionsViewed, firstStart);
     }
 }

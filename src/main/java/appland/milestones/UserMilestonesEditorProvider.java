@@ -18,10 +18,19 @@ public class UserMilestonesEditorProvider implements FileEditorProvider, DumbAwa
     private static final Key<Boolean> MILESTONES_KEY = KeyWithDefaultValue.create("appland.milestonesFile", false);
 
     public static void openUserMilestones(@NotNull Project project) {
+        var manager = FileEditorManager.getInstance(project);
+
+        // first search in open files
+        for (var file : manager.getOpenFiles()) {
+            if (MILESTONES_KEY.isIn(file)) {
+                manager.openFile(file, true, true);
+                return;
+            }
+        }
+
         var dummyFile = new LightVirtualFile("Quickstart: Install Appmap Agent");
         MILESTONES_KEY.set(dummyFile, true);
-
-        FileEditorManager.getInstance(project).openFile(dummyFile, true);
+        manager.openFile(dummyFile, true);
     }
 
     @NotNull
