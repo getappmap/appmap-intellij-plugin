@@ -17,6 +17,7 @@
     <extensions defaultExtensionNs="com.intellij">
         <fileEditorProvider implementation="appland.editor.AppMapHTMLEditorProvider"/>
         <fileIconProvider implementation="appland.editor.AppMapIconProvider"/>
+        <editorNotificationProvider implementation="appland.editor.AppMapNotificationProvider"/>
 
         <fileBasedIndex implementation="appland.index.AppMapMetadataIndex"/>
         <indexedRootsProvider implementation="appland.index.AppMapFolderIndexedRootProvider"/>

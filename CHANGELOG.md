@@ -1,5 +1,9 @@
 # AppMap Plugin Changelog
 
+## [Unreleased]
+### Added
+- Display a notification for AppMap JSON editors if the HTML application can't be displayed.
+
 ## [0.4.1]
 ### Changed
 - AppLand components updated
