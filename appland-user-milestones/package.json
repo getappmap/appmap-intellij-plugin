@@ -18,7 +18,7 @@
         "webpack-cli": "^4.6.0"
     },
     "dependencies": {
-        "@appland/components": "^1.2.3",
+        "@appland/components": "^1.6",
         "@appland/diagrams": "^1.2.3",
         "@appland/models": "^1.2.3",
         "bent": "^7.3.12",
