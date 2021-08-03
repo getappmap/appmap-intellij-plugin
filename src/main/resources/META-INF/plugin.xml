@@ -32,6 +32,7 @@
 
         <fileEditorProvider implementation="appland.editor.AppMapHTMLEditorProvider"/>
         <fileIconProvider implementation="appland.editor.AppMapIconProvider"/>
+        <editorNotificationProvider implementation="appland.editor.AppMapNotificationProvider"/>
 
         <fileEditorProvider implementation="appland.milestones.UserMilestonesEditorProvider"/>
 
