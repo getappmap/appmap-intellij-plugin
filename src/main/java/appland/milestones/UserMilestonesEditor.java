@@ -136,19 +136,19 @@ public class UserMilestonesEditor extends UserDataHolderBase implements FileEdit
         var ruby = new JsonObject();
         ruby.addProperty("id", "ruby");
         ruby.addProperty("name", "Ruby");
-        ruby.addProperty("link", "https://appland.com/docs/quickstart/vscode/ruby-step-2.html");
+        ruby.addProperty("link", "https://appland.com/docs/quickstart/rubymine/step-2");
         ruby.addProperty("isDetected", PlatformUtils.isRubyMine());
 
         var python = new JsonObject();
         python.addProperty("id", "python");
         python.addProperty("name", "Python");
-        python.addProperty("link", "https://appland.com/docs/quickstart/vscode/python-step-2.html");
+        python.addProperty("link", "https://appland.com/docs/quickstart/pycharm/step-2");
         python.addProperty("isDetected", PlatformUtils.isPyCharm());
 
         var java = new JsonObject();
         java.addProperty("id", "java");
         java.addProperty("name", "Java");
-        java.addProperty("link", "https://appland.com/docs/quickstart/vscode/java-step-2.html");
+        java.addProperty("link", "https://appland.com/docs/quickstart/intellij/step-2");
         java.addProperty("isDetected", PlatformUtils.isIntelliJ());
 
         var languages = new JsonArray();
