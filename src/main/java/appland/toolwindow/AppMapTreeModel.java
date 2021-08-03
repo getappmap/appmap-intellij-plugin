@@ -85,7 +85,7 @@ class AppMapTreeModel extends AbstractTreeStructure {
     static class SingleAppMapDescriptor extends PresentableNodeDescriptor<Object> {
         private final AppMapMetadata data;
 
-        public SingleAppMapDescriptor(@NotNull Project project, @Nullable NodeDescriptor<?> parentDescriptor, @NotNull AppMapMetadata data) {
+        SingleAppMapDescriptor(@NotNull Project project, @Nullable NodeDescriptor<?> parentDescriptor, @NotNull AppMapMetadata data) {
             super(project, parentDescriptor);
             this.data = data;
 
