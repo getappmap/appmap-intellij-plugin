@@ -1,4 +1,5 @@
 .idea
 .gradle
+.yarn
 build
 node_modules

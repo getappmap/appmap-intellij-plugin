@@ -28,6 +28,10 @@ public final class AppMapPlugin {
         return getPluginPath().resolve("appmap").resolve("index.html");
     }
 
+    public static Path getUserMilestonesHTMLPath() {
+        return getPluginPath().resolve("appland-user-milestones").resolve("index.html");
+    }
+
     @NotNull
     public static PluginDescriptor getDescriptor() {
         var plugin = PluginManagerCore.getPlugin(PluginId.getId(PLUGIN_ID));

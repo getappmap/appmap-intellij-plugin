@@ -1,8 +1,13 @@
 # AppMap Plugin Changelog
 
-## [Unreleased]
+## [0.5.0]
 ### Added
-- Display a notification for AppMap JSON editors if the HTML application can't be displayed.
+- Install AppMap Agent view
+- Links to AppMap documentation in AppMaps
+- Warning displayed when JCEF not available in JDK
+
+### Changed
+- Improved search in the AppMaps tool window
 
 ## [0.4.1]
 ### Changed
