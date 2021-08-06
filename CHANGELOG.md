@@ -1,9 +1,17 @@
 # AppMap Plugin Changelog
 
-## [Unreleased]
+## [0.5.1]
 ### Added
 - Display a notification for AppMap JSON editors if the HTML application can't be displayed.
 - New feature to upload AppMaps to a remote server.
+
+### Changed
+- Improved search in the AppMaps tool window
+
+## [0.5.0]
+### Added
+- Install AppMap Agent view
+- Links to AppMap documentation in AppMaps
 
 ## [0.4.1]
 ### Changed
