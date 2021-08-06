@@ -1,5 +1,12 @@
 # AppMap Plugin Changelog
 
+## [0.6.0]
+### Added
+- Uploading AppMaps to AppMap Cloud
+
+### Changed
+- Updated AppMap JavaScript components
+
 ## [0.5.1]
 ### Added
 - Display a notification for AppMap JSON editors if the HTML application can't be displayed.
