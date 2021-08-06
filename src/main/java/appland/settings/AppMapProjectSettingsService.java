@@ -11,12 +11,8 @@ public final class AppMapProjectSettingsService implements PersistentStateCompon
     @NotNull
     private volatile AppMapProjectSettings state = new AppMapProjectSettings();
 
-    public static AppMapProjectSettingsService getInstance(@NotNull Project project) {
-        return project.getService(AppMapProjectSettingsService.class);
-    }
-
     public static AppMapProjectSettings getState(@NotNull Project project) {
-        return getInstance(project).getState();
+        return project.getService(AppMapProjectSettingsService.class).getState();
     }
 
     @Override

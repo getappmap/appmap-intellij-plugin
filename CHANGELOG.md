@@ -2,7 +2,8 @@
 
 ## [0.5.1]
 ### Added
-- Warning displayed when JCEF not available in JDK
+- Display a notification for AppMap JSON editors if the HTML application can't be displayed.
+- New feature to upload AppMaps to a remote server.
 
 ### Changed
 - Improved search in the AppMaps tool window
