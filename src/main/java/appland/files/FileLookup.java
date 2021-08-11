@@ -27,7 +27,7 @@ public class FileLookup {
     /**
      * @param project      Current project
      * @param base         The base file or directory. This usually is the currently opened appmap file.
-     * @param relativePath A relative path, it's has to use / as delimiter.
+     * @param relativePath A relative path, it has to use / as delimiter.
      * @return The target file, if it was found
      */
     @Nullable
@@ -50,7 +50,7 @@ public class FileLookup {
             return null;
         }
 
-        for (var candidate : FilenameIndex.getVirtualFilesByName(project, filename(relativePath), ProjectScope.getContentScope(project))) {
+        for (var candidate : FilenameIndex.getVirtualFilesByName(project, filename(relativePath), ProjectScope.getAllScope(project))) {
             var parent = candidate.getParent();
             for (String expectedParentName : parentsReversed(relativePath)) {
                 if (parent == null || !FileUtil.namesEqual(expectedParentName, parent.getName())) {
