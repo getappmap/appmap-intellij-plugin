@@ -1,5 +1,9 @@
 # AppMap Plugin Changelog
 
+## [Unreleased]
+### Added
+- Support to open source files located in dependencies, e.g. from a sources jar file.
+
 ## [0.5.1]
 ### Added
 - Warning displayed when JCEF not available in JDK
