@@ -11,6 +11,7 @@ public class Icons {
     public static final Icon START_RECORDING_ACTION = IconLoader.getIcon("/icons/record_start.svg", Icons.class);
     public static final Icon STOP_RECORDING_ACTION = IconLoader.getIcon("/icons/record_stop.svg", Icons.class);
     public static final Icon APPMAP_TOOLS_MENU = APPMAP_FILE;
+    public static final Icon UPLOAD = IconLoader.getIcon("/icons/upload.svg", Icons.class);
 
     public static final Icon MILESTONE_COMPLETED = IconLoader.getIcon("/icons/milestone_completed.svg", Icons.class);
     public static final Icon MILESTONE_ERROR = IconLoader.getIcon("/icons/milestone_error.svg", Icons.class);
