@@ -32,4 +32,15 @@ public class AppMapMetadataIndexTest extends AppMapBaseTest {
         // case-insensitive matching
         assertEquals(1, AppMapMetadataIndex.findAppMaps(getProject(), "C").size());
     }
+
+    @Test
+    public void indexWithCounts() {
+        myFixture.configureByText("a.appmap.json", createAppMapMetadataJSON("a", 5, 10, 15));
+
+        var appMaps = AppMapMetadataIndex.findAppMaps(getProject(), null);
+        assertEquals(1, appMaps.size());
+        assertEquals(5, appMaps.get(0).getRequestCount());
+        assertEquals(10, appMaps.get(0).getQueryCount());
+        assertEquals(15, appMaps.get(0).getFunctionsCount());
+    }
 }
