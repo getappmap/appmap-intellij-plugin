@@ -21,7 +21,7 @@ public class UserMilestonesPanel extends JPanel {
             @Override
             protected void setupPanel() {
                 add(new StatusLabel(UserMilestoneStatus.Incomplete, "Install AppMap Agent", () -> MilestoneActions.openQuickstart(project)));
-                //add(new StatusLabel(UserMilestoneStatus.Incomplete, "Install AppMap Agent", () -> installAppMapAgent(project)));
+                add(new StatusLabel(UserMilestoneStatus.Incomplete, "Open AppMaps", () -> MilestoneActions.openAppMaps(project)));
             }
         });
 
@@ -46,16 +46,5 @@ public class UserMilestonesPanel extends JPanel {
         var collapsiblePanel = new CollapsibleUserMilestonePanel(panel, true, title);
         collapsiblePanels.add(collapsiblePanel);
         add(collapsiblePanel);
-
-        // collapse all other panels when a panel was expanded
-        /*collapsiblePanel.addCollapsingListener((collapsedPanel, isCollapsed) -> {
-            if (!isCollapsed) {
-                for (CollapsibleUserMilestonePanel p : collapsiblePanels) {
-                    if (!collapsedPanel.equals(p)) {
-                        p.setCollapsed(true);
-                    }
-                }
-            }
-        }, null);*/
     }
 }

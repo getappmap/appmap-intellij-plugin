@@ -16,17 +16,24 @@ import org.jetbrains.annotations.NonNls;
 import org.jetbrains.annotations.NotNull;
 
 public class UserMilestonesEditorProvider implements FileEditorProvider, DumbAware {
-    private static final Key<Boolean> MILESTONES_KEY = KeyWithDefaultValue.create("appland.milestonesFile", false);
+    private static final Key<Boolean> QUICKSTART_KEY = KeyWithDefaultValue.create("appland.milestonesFile", false);
+    private static final Key<Boolean> APPMAPS_KEY = KeyWithDefaultValue.create("appland.appmapsFile", false);
 
-    public static void openUserMilestones(@NotNull Project project) {
-        var dummyFile = new LightVirtualFile(AppMapBundle.get("userMilestones.fileTitle"));
-        MILESTONES_KEY.set(dummyFile, true);
+    public static void openUserQuickstart(@NotNull Project project) {
+        var dummyFile = new LightVirtualFile(AppMapBundle.get("userMilestones.quickstartTitle"));
+        QUICKSTART_KEY.set(dummyFile, true);
+        FileEditorManager.getInstance(project).openFile(dummyFile, true);
+    }
+
+    public static void openUserAppMaps(@NotNull Project project) {
+        var dummyFile = new LightVirtualFile(AppMapBundle.get("userMilestones.appmapsTitle"));
+        APPMAPS_KEY.set(dummyFile, true);
         FileEditorManager.getInstance(project).openFile(dummyFile, true);
     }
 
     @NotNull
     public static Boolean isQuickstartFile(@NotNull VirtualFile file) {
-        return MILESTONES_KEY.getRequired(file);
+        return QUICKSTART_KEY.getRequired(file) || APPMAPS_KEY.getRequired(file);
     }
 
     @Override
@@ -36,7 +43,13 @@ public class UserMilestonesEditorProvider implements FileEditorProvider, DumbAwa
 
     @Override
     public @NotNull FileEditor createEditor(@NotNull Project project, @NotNull VirtualFile file) {
-        return new UserMilestonesEditor(file);
+        MilestonesViewType type;
+        if (QUICKSTART_KEY.getRequired(file)) {
+            type = MilestonesViewType.Quickstart;
+        } else {
+            type = MilestonesViewType.AppMapsTable;
+        }
+        return new UserMilestonesEditor(project, file, type);
     }
 
     @Override

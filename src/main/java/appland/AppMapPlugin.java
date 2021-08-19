@@ -28,8 +28,12 @@ public final class AppMapPlugin {
         return getPluginPath().resolve("appmap").resolve("index.html");
     }
 
-    public static Path getUserMilestonesHTMLPath() {
+    public static Path getQuickstartHTMLPath() {
         return getPluginPath().resolve("appland-user-milestones").resolve("index.html");
+    }
+
+    public static Path getAppMapsHTMLPath() {
+        return getPluginPath().resolve("appland-user-milestones").resolve("appmaps.html");
     }
 
     @NotNull

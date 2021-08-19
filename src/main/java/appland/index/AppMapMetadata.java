@@ -52,6 +52,14 @@ public final class AppMapMetadata {
         return queryCount;
     }
 
+    public boolean hasAnyCount() {
+        return requestCount > 0 || queryCount > 0 || functionsCount > 0;
+    }
+
+    public int getTotalCount() {
+        return requestCount + queryCount + functionsCount;
+    }
+
     public int getFunctionsCount() {
         return functionsCount;
     }
