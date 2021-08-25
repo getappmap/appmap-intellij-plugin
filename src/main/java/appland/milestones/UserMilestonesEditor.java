@@ -219,7 +219,7 @@ public class UserMilestonesEditor extends UserDataHolderBase implements FileEdit
         var appmaps = ReadAction.compute(() -> AppMapMetadataIndex.findAppMaps(project, null))
                 .stream()
                 .filter(AppMapMetadata::hasAnyCount)
-                .sorted(Comparator.comparingInt(AppMapMetadata::getTotalCount).reversed())
+                .sorted(Comparator.comparingInt(AppMapMetadata::getSortCount).reversed())
                 .collect(Collectors.toList());
 
         var json = new JsonArray();
