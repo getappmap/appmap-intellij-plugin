@@ -1,27 +1,28 @@
 package appland.toolwindow.milestones;
 
+import appland.milestones.MilestonesViewType;
 import com.intellij.openapi.project.Project;
 import com.intellij.ui.components.panels.VerticalLayout;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
-import java.util.LinkedList;
-import java.util.List;
+
+import static appland.milestones.UserMilestonesEditorProvider.open;
 
 /**
  * Manages a list of collapsible user milestone panels.
  */
 public class UserMilestonesPanel extends JPanel {
-    private final List<CollapsibleUserMilestonePanel> collapsiblePanels = new LinkedList<>();
-
     public UserMilestonesPanel(@NotNull Project project) {
         super(new VerticalLayout(5));
 
         addPanel("Quickstart", new UserMilestoneContentPanel() {
             @Override
             protected void setupPanel() {
-                add(new StatusLabel(UserMilestoneStatus.Incomplete, "Install AppMap Agent", () -> MilestoneActions.openQuickstart(project)));
-                add(new StatusLabel(UserMilestoneStatus.Incomplete, "Open AppMaps", () -> MilestoneActions.openAppMaps(project)));
+                add(new StatusLabel(UserMilestoneStatus.Incomplete, "Welcome", () -> open(project, MilestonesViewType.Welcome)));
+                add(new StatusLabel(UserMilestoneStatus.Incomplete, "Install AppMap agent", () -> open(project, MilestonesViewType.InstallAgent)));
+                add(new StatusLabel(UserMilestoneStatus.Incomplete, "Record AppMaps", () -> open(project, MilestonesViewType.RecordAppMaps)));
+                add(new StatusLabel(UserMilestoneStatus.Incomplete, "Open AppMaps", () -> open(project, MilestonesViewType.AppMapsTable)));
             }
         });
 
@@ -44,7 +45,6 @@ public class UserMilestonesPanel extends JPanel {
 
     private void addPanel(@NotNull String title, @NotNull UserMilestoneContentPanel panel) {
         var collapsiblePanel = new CollapsibleUserMilestonePanel(panel, true, title);
-        collapsiblePanels.add(collapsiblePanel);
         add(collapsiblePanel);
     }
 }

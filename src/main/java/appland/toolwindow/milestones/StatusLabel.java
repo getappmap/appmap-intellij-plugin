@@ -14,10 +14,6 @@ import javax.swing.event.HyperlinkListener;
 class StatusLabel extends JBLabel {
     private final @Nullable Runnable clickAction;
 
-    StatusLabel(@NotNull UserMilestoneStatus status, @NotNull String label) {
-        this(status, label, null);
-    }
-
     StatusLabel(@NotNull UserMilestoneStatus status, @NotNull String label, @Nullable Runnable clickAction) {
         super(clickAction == null ? label : createLink(label), status.getIcon(), LEADING);
         this.setCopyable(true);

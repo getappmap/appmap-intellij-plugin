@@ -1,5 +1,6 @@
 package appland.startup;
 
+import appland.milestones.MilestonesViewType;
 import appland.milestones.UserMilestonesEditorProvider;
 import appland.settings.AppMapApplicationSettingsService;
 import appland.toolwindow.AppMapToolWindowFactory;
@@ -24,7 +25,7 @@ public class AppLandStartupActivity implements StartupActivity {
             var window = ToolWindowManager.getInstance(project).getToolWindow(AppMapToolWindowFactory.TOOL_WINDOW_ID);
             if (window != null) {
                 window.show(() -> {
-                    UserMilestonesEditorProvider.openUserQuickstart(project);
+                    UserMilestonesEditorProvider.open(project, MilestonesViewType.InstallAgent);
                 });
             }
         });

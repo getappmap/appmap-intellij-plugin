@@ -1,5 +1,6 @@
 package appland.actions;
 
+import appland.milestones.MilestonesViewType;
 import appland.milestones.UserMilestonesEditorProvider;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
@@ -10,6 +11,6 @@ import java.util.Objects;
 public class OpenAppMapsAction extends AnAction {
     @Override
     public void actionPerformed(@NotNull AnActionEvent e) {
-        UserMilestonesEditorProvider.openUserAppMaps(Objects.requireNonNull(e.getProject()));
+        UserMilestonesEditorProvider.open(Objects.requireNonNull(e.getProject()), MilestonesViewType.AppMapsTable);
     }
 }

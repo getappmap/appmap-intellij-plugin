@@ -4,6 +4,7 @@ import appland.AppMapBundle;
 import appland.actions.StartAppMapRecordingAction;
 import appland.actions.StopAppMapRecordingAction;
 import appland.files.AppMapFiles;
+import appland.milestones.MilestonesViewType;
 import appland.milestones.UserMilestonesEditorProvider;
 import appland.toolwindow.milestones.UserMilestonesPanel;
 import com.intellij.ide.util.treeView.NodeDescriptor;
@@ -147,7 +148,7 @@ public class AppMapWindowPanel extends SimpleToolWindowPanel implements DataProv
         tree.getEmptyText().appendSecondaryText(
                 AppMapBundle.get("toolwindow.appmap.installAgentEmptyText"),
                 SimpleTextAttributes.LINK_ATTRIBUTES,
-                e -> UserMilestonesEditorProvider.openUserQuickstart(project));
+                e -> UserMilestonesEditorProvider.open(project, MilestonesViewType.InstallAgent));
         tree.setRootVisible(false);
         tree.setShowsRootHandles(false);
 

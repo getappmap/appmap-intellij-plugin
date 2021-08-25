@@ -1,9 +1,9 @@
 package appland.actions;
 
+import appland.milestones.MilestonesViewType;
 import appland.milestones.UserMilestonesEditorProvider;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
-import com.intellij.openapi.diagnostic.Logger;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
@@ -11,6 +11,6 @@ import java.util.Objects;
 public class OpenQuickstartAction extends AnAction {
     @Override
     public void actionPerformed(@NotNull AnActionEvent e) {
-        UserMilestonesEditorProvider.openUserQuickstart(Objects.requireNonNull(e.getProject()));
+        UserMilestonesEditorProvider.open(Objects.requireNonNull(e.getProject()), MilestonesViewType.Welcome);
     }
 }
