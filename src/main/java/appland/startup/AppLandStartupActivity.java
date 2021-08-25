@@ -25,7 +25,7 @@ public class AppLandStartupActivity implements StartupActivity {
             var window = ToolWindowManager.getInstance(project).getToolWindow(AppMapToolWindowFactory.TOOL_WINDOW_ID);
             if (window != null) {
                 window.show(() -> {
-                    UserMilestonesEditorProvider.open(project, MilestonesViewType.InstallAgent);
+                    UserMilestonesEditorProvider.open(project, MilestonesViewType.Welcome);
                 });
             }
         });
