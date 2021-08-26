@@ -56,12 +56,10 @@ public final class AppMapMetadata {
         return requestCount > 0 || queryCount > 0 || functionsCount > 0;
     }
 
-    public boolean hasAllCounts() {
-        return requestCount > 0 && queryCount > 0 && functionsCount > 0;
-    }
-
     public int getSortCount() {
-        return requestCount + queryCount + functionsCount + (hasAllCounts() ? 1_000_000 : 0);
+        return requestCount + (requestCount > 0 ? 1_000_000 : 0)
+                + queryCount + (queryCount > 0 ? 1_000_000 : 0)
+                + functionsCount + (functionsCount > 0 ? 1_000_000 : 0);
     }
 
     public int getFunctionsCount() {
