@@ -69,6 +69,18 @@ public class AppMapMetadataIndex extends SingleEntryFileBasedIndexExtension<AppM
      * @return The list of AppMaps metadata objects.
      */
     public static @NotNull List<AppMapMetadata> findAppMaps(@NotNull Project project, @Nullable String nameFilter) {
+        return findAppMaps(project, nameFilter, Integer.MAX_VALUE);
+    }
+
+    /**
+     * Retrieves all AppMaps of a project from the index.
+     *
+     * @param project    The current project
+     * @param nameFilter Optional filter to restrict items by name. The name is matched case-insensitive.
+     * @param maxSize    The maximum number of items to add.
+     * @return The list of AppMaps metadata objects.
+     */
+    public static @NotNull List<AppMapMetadata> findAppMaps(@NotNull Project project, @Nullable String nameFilter, int maxSize) {
         if (DumbService.isDumb(project)) {
             return Collections.emptyList();
         }
@@ -87,8 +99,12 @@ public class AppMapMetadataIndex extends SingleEntryFileBasedIndexExtension<AppM
                 if (nameFilter == null || value.getName().toLowerCase().contains(lowercaseNameFilter)) {
                     result.add(value);
                 }
-                return true;
+                return result.size() < maxSize;
             }, scope);
+
+            if (result.size() >= maxSize) {
+                break;
+            }
         }
         return result;
     }

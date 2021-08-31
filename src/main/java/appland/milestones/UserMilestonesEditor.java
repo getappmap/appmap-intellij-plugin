@@ -216,13 +216,13 @@ public class UserMilestonesEditor extends UserDataHolderBase implements FileEdit
     }
 
     private JsonArray createAppMapsArray(@NotNull Project project) {
-        var appmaps = ReadAction.compute(() -> AppMapMetadataIndex.findAppMaps(project, null))
+        var appmaps = ReadAction.compute(() -> AppMapMetadataIndex.findAppMaps(project, null, 10))
                 .stream()
                 .filter(AppMapMetadata::hasAnyCount)
                 .sorted(Comparator.comparingInt(AppMapMetadata::getSortCount).reversed())
                 .collect(Collectors.toList());
 
-        var json = new JsonArray();
+        var json = new JsonArray(appmaps.size());
         for (var appmap : appmaps) {
             var jsonAppMap = new JsonObject();
             jsonAppMap.addProperty("path", appmap.getSystemIndependentFilepath());
