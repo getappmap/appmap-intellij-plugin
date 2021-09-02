@@ -1,7 +1,6 @@
 package appland.toolwindow.milestones;
 
 import com.intellij.ide.ui.laf.darcula.DarculaUIUtil;
-import com.intellij.ui.ColorUtil;
 import com.intellij.ui.components.JBLabel;
 import com.intellij.util.ui.JBUI;
 import com.intellij.util.ui.StartupUiUtil;
@@ -21,7 +20,6 @@ class UserMilestoneTitlePanel extends JPanel {
     private static final KeyStroke KEY_ENTER = KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0);
     private static final KeyStroke KEY_SPACE = KeyStroke.getKeyStroke(KeyEvent.VK_SPACE, 0);
     private final JBLabel label;
-    private final JBLabel notification = new JBLabel();
     private final Icon expandIcon = UIUtil.getTreeCollapsedIcon();
     private final Icon collapseIcon = UIUtil.getTreeExpandedIcon();
 
@@ -76,26 +74,8 @@ class UserMilestoneTitlePanel extends JPanel {
         });
     }
 
-    @NotNull
-    private static Icon createNotificationIcon(int count) {
-        var icon = new CircledIcon(18, Color.WHITE, ColorUtil.fromHex("0E639C"), count < 10 ? String.valueOf(count) : "9+");
-        icon.setFont(UIUtil.getLabelFont(UIUtil.FontSize.SMALL).deriveFont(Font.BOLD));
-        return icon;
-    }
-
     public void setCollapsed(boolean isCollapsed) {
         this.label.setIcon(isCollapsed ? collapseIcon : expandIcon);
-    }
-
-    public void setNotificationCount(int count) {
-        /*if (count >= 0) {
-            notification.setIcon(createNotificationIcon(count));
-            add(notification, BorderLayout.EAST);
-            revalidate();
-            repaint();
-        } else {
-            remove(notification);
-        }*/
     }
 
     private void executeLabelAction() {

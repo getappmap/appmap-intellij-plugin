@@ -13,12 +13,12 @@ export default {
             // window.AppLand is registered by the JCEF-based editor
             window.AppLand.postMessage(JSON.stringify({
                 type: data.command,
-                data: data.data
+                ...data
             }))
         } else {
             window.postMessage({
                 type: data.command,
-                data: data.data
+                ...data
             })
         }
     }

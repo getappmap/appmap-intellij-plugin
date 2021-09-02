@@ -1,6 +1,5 @@
 package appland.milestones;
 
-import appland.AppMapBundle;
 import com.intellij.openapi.fileEditor.FileEditor;
 import com.intellij.openapi.fileEditor.FileEditorManager;
 import com.intellij.openapi.fileEditor.FileEditorPolicy;
@@ -8,7 +7,6 @@ import com.intellij.openapi.fileEditor.FileEditorProvider;
 import com.intellij.openapi.project.DumbAware;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.Key;
-import com.intellij.openapi.util.KeyWithDefaultValue;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.testFramework.LightVirtualFile;
 import com.intellij.ui.jcef.JBCefApp;
@@ -16,17 +14,17 @@ import org.jetbrains.annotations.NonNls;
 import org.jetbrains.annotations.NotNull;
 
 public class UserMilestonesEditorProvider implements FileEditorProvider, DumbAware {
-    private static final Key<Boolean> MILESTONES_KEY = KeyWithDefaultValue.create("appland.milestonesFile", false);
+    private static final Key<MilestonesViewType> MILESTONE_TYPE_KEY = Key.create("appland.appmapsFile");
 
-    public static void openUserMilestones(@NotNull Project project) {
-        var dummyFile = new LightVirtualFile(AppMapBundle.get("userMilestones.fileTitle"));
-        MILESTONES_KEY.set(dummyFile, true);
+    public static void open(@NotNull Project project, @NotNull MilestonesViewType viewType) {
+        var dummyFile = new LightVirtualFile(viewType.getPageTitle());
+        MILESTONE_TYPE_KEY.set(dummyFile, viewType);
         FileEditorManager.getInstance(project).openFile(dummyFile, true);
     }
 
     @NotNull
     public static Boolean isQuickstartFile(@NotNull VirtualFile file) {
-        return MILESTONES_KEY.getRequired(file);
+        return MILESTONE_TYPE_KEY.isIn(file);
     }
 
     @Override
@@ -36,7 +34,7 @@ public class UserMilestonesEditorProvider implements FileEditorProvider, DumbAwa
 
     @Override
     public @NotNull FileEditor createEditor(@NotNull Project project, @NotNull VirtualFile file) {
-        return new UserMilestonesEditor(file);
+        return new UserMilestonesEditor(project, file, MILESTONE_TYPE_KEY.getRequired(file));
     }
 
     @Override

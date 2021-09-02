@@ -1,20 +1,20 @@
 package appland.index;
 
-import com.google.gson.JsonParseException;
 import com.intellij.json.JsonFileType;
-import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.fileTypes.FileType;
 import com.intellij.openapi.project.DumbService;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.search.ProjectScope;
 import com.intellij.util.Consumer;
-import com.intellij.util.indexing.*;
+import com.intellij.util.indexing.FileBasedIndex;
+import com.intellij.util.indexing.ID;
+import com.intellij.util.indexing.SingleEntryFileBasedIndexExtension;
+import com.intellij.util.indexing.SingleEntryIndexer;
 import com.intellij.util.io.DataExternalizer;
 import com.intellij.util.io.IOUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.jetbrains.io.JsonReaderEx;
 
 import java.io.DataInput;
 import java.io.DataOutput;
@@ -27,7 +27,6 @@ import java.util.List;
  * Index for appmap.json files of a project.
  */
 public class AppMapMetadataIndex extends SingleEntryFileBasedIndexExtension<AppMapMetadata> {
-    private static final Logger LOG = Logger.getInstance("#appmap.index");
     private static final ID<Integer, AppMapMetadata> INDEX_ID = ID.create("appmap.titleIndex");
     private static final FileBasedIndex.FileTypeSpecificInputFilter INPUT_FILTER = new FileBasedIndex.FileTypeSpecificInputFilter() {
         @Override
@@ -40,18 +39,25 @@ public class AppMapMetadataIndex extends SingleEntryFileBasedIndexExtension<AppM
             return file.getName().endsWith(".appmap.json");
         }
     };
+
     private static final DataExternalizer<AppMapMetadata> dataExternalizer = new DataExternalizer<>() {
         @Override
         public void save(@NotNull DataOutput out, AppMapMetadata value) throws IOException {
             IOUtil.writeUTF(out, value.getName());
             IOUtil.writeUTF(out, value.getSystemIndependentFilepath());
+            out.writeInt(value.getRequestCount());
+            out.writeInt(value.getQueryCount());
+            out.writeInt(value.getFunctionsCount());
         }
 
         @Override
         public AppMapMetadata read(@NotNull DataInput in) throws IOException {
             var name = IOUtil.readUTF(in);
             var filepath = IOUtil.readUTF(in);
-            return new AppMapMetadata(name, filepath);
+            var requestCount = in.readInt();
+            var queryCount = in.readInt();
+            var functionsCount = in.readInt();
+            return new AppMapMetadata(name, filepath, requestCount, queryCount, functionsCount);
         }
     };
 
@@ -63,6 +69,18 @@ public class AppMapMetadataIndex extends SingleEntryFileBasedIndexExtension<AppM
      * @return The list of AppMaps metadata objects.
      */
     public static @NotNull List<AppMapMetadata> findAppMaps(@NotNull Project project, @Nullable String nameFilter) {
+        return findAppMaps(project, nameFilter, Integer.MAX_VALUE);
+    }
+
+    /**
+     * Retrieves all AppMaps of a project from the index.
+     *
+     * @param project    The current project
+     * @param nameFilter Optional filter to restrict items by name. The name is matched case-insensitive.
+     * @param maxSize    The maximum number of items to add.
+     * @return The list of AppMaps metadata objects.
+     */
+    public static @NotNull List<AppMapMetadata> findAppMaps(@NotNull Project project, @Nullable String nameFilter, int maxSize) {
         if (DumbService.isDumb(project)) {
             return Collections.emptyList();
         }
@@ -81,8 +99,12 @@ public class AppMapMetadataIndex extends SingleEntryFileBasedIndexExtension<AppM
                 if (nameFilter == null || value.getName().toLowerCase().contains(lowercaseNameFilter)) {
                     result.add(value);
                 }
-                return true;
+                return result.size() < maxSize;
             }, scope);
+
+            if (result.size() >= maxSize) {
+                break;
+            }
         }
         return result;
     }
@@ -99,7 +121,7 @@ public class AppMapMetadataIndex extends SingleEntryFileBasedIndexExtension<AppM
 
     @Override
     public int getVersion() {
-        return 7;
+        return 8;
     }
 
     @Override
@@ -110,51 +132,5 @@ public class AppMapMetadataIndex extends SingleEntryFileBasedIndexExtension<AppM
     @Override
     public @NotNull SingleEntryIndexer<AppMapMetadata> getIndexer() {
         return new StreamingAppMapIndexer();
-    }
-
-    /**
-     * Uses GSON's streaming JSON reader to minimize the memory usage.
-     */
-    private static class StreamingAppMapIndexer extends SingleEntryIndexer<AppMapMetadata> {
-        public StreamingAppMapIndexer() {
-            super(false);
-        }
-
-        @Override
-        protected @Nullable AppMapMetadata computeValue(@NotNull FileContent inputData) {
-            try (var json = new JsonReaderEx(inputData.getContentAsText())) {
-                json.beginObject(); // top-level {...}
-                while (true) {
-                    var propertyName = json.nextNameOrNull();
-                    if (propertyName == null) {
-                        return null;
-                    }
-
-                    if ("metadata".equals(propertyName)) {
-                        break;
-                    }
-                    json.skipValue();
-                }
-
-                // metadata: {...}
-                json.beginObject();
-                while (true) {
-                    var propertyName = json.nextNameOrNull();
-                    if (propertyName == null) {
-                        return null;
-                    }
-
-                    if ("name".equals(propertyName)) {
-                        var name = json.nextNullableString();
-                        return name == null ? null : new AppMapMetadata(name, inputData.getFile().getPath());
-                    }
-
-                    json.skipValue();
-                }
-            } catch (JsonParseException e) {
-                LOG.debug("parsing AppMap JSON failed", e);
-                return null;
-            }
-        }
     }
 }

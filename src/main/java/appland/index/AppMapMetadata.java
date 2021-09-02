@@ -13,10 +13,20 @@ public final class AppMapMetadata {
     private final String name;
     @NotNull
     private final String filepath;
+    private final int requestCount;
+    private final int queryCount;
+    private final int functionsCount;
 
     public AppMapMetadata(@NotNull String name, @NotNull String filepath) {
+        this(name, filepath, 0, 0, 0);
+    }
+
+    public AppMapMetadata(@NotNull String name, @NotNull String filepath, int requestCount, int queryCount, int functionsCount) {
         this.name = name;
         this.filepath = filepath;
+        this.requestCount = requestCount;
+        this.queryCount = queryCount;
+        this.functionsCount = functionsCount;
     }
 
     @NotNull
@@ -34,11 +44,36 @@ public final class AppMapMetadata {
         return PathUtil.getFileName(filepath);
     }
 
+    public int getRequestCount() {
+        return requestCount;
+    }
+
+    public int getQueryCount() {
+        return queryCount;
+    }
+
+    public boolean hasAnyCount() {
+        return requestCount > 0 || queryCount > 0 || functionsCount > 0;
+    }
+
+    public int getSortCount() {
+        return requestCount + (requestCount > 0 ? 1_000_000 : 0)
+                + queryCount + (queryCount > 0 ? 1_000_000 : 0)
+                + functionsCount + (functionsCount > 0 ? 1_000_000 : 0);
+    }
+
+    public int getFunctionsCount() {
+        return functionsCount;
+    }
+
     @Override
     public String toString() {
         return "AppMapMetadata{" +
                 "name='" + name + '\'' +
                 ", filepath='" + filepath + '\'' +
+                ", requestCount=" + requestCount +
+                ", queryCount=" + queryCount +
+                ", functionsCount=" + functionsCount +
                 '}';
     }
 
@@ -47,11 +82,11 @@ public final class AppMapMetadata {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         AppMapMetadata that = (AppMapMetadata) o;
-        return Objects.equals(name, that.name) && Objects.equals(filepath, that.filepath);
+        return requestCount == that.requestCount && queryCount == that.queryCount && functionsCount == that.functionsCount && name.equals(that.name) && filepath.equals(that.filepath);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(name, filepath);
+        return Objects.hash(name, filepath, requestCount, queryCount, functionsCount);
     }
 }
