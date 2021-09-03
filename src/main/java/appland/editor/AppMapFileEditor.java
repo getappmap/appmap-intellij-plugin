@@ -193,7 +193,7 @@ public class AppMapFileEditor extends UserDataHolderBase implements FileEditor {
 
         if (!AppMapApplicationSettingsService.getInstance().isAppmapInstructionsViewed()) {
             AppMapApplicationSettingsService.getInstance().setAppmapInstructionsViewed(true);
-            openAppMapInstructions();
+            //openAppMapInstructions(); - we're not doing this until we have better instructions
         }
     }
 
