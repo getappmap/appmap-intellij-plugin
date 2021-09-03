@@ -109,7 +109,7 @@ public class AppMapMetadataIndex extends SingleEntryFileBasedIndexExtension<AppM
 
     @Override
     public int getVersion() {
-        return 7;
+        return 8;
     }
 
     @Override
