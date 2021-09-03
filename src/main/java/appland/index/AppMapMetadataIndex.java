@@ -20,6 +20,7 @@ import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
@@ -28,6 +29,7 @@ import java.util.List;
  */
 public class AppMapMetadataIndex extends SingleEntryFileBasedIndexExtension<AppMapMetadata> {
     private static final ID<Integer, AppMapMetadata> INDEX_ID = ID.create("appmap.titleIndex");
+
     private static final FileBasedIndex.FileTypeSpecificInputFilter INPUT_FILTER = new FileBasedIndex.FileTypeSpecificInputFilter() {
         @Override
         public void registerFileTypesUsedForIndexing(@NotNull Consumer<? super FileType> fileTypeSink) {
@@ -107,6 +109,14 @@ public class AppMapMetadataIndex extends SingleEntryFileBasedIndexExtension<AppM
             }
         }
         return result;
+    }
+
+    /**
+     * Enforce indexing of files of all sizes.
+     */
+    @Override
+    public @NotNull Collection<FileType> getFileTypesWithSizeLimitNotApplicable() {
+        return Collections.singletonList(JsonFileType.INSTANCE);
     }
 
     @Override
