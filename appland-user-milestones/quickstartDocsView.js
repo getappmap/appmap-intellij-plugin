@@ -34,6 +34,10 @@ export function mountQuickstartWelcome() {
         vscode.postMessage({ command: 'transition', target });
       });
 
+      app.$on('clipboard', (target) => {
+        vscode.postMessage({ command: 'clipboard', target });
+      });
+
       vscode.postMessage({ command: 'postInitialize' });
     })
     .on(undefined, (event) => {
@@ -66,6 +70,10 @@ export function mountQuickstartInstallAgent() {
 
       app.$on('transition', (target) => {
         vscode.postMessage({ command: 'transition', target });
+      });
+
+      app.$on('clipboard', (target) => {
+        vscode.postMessage({ command: 'clipboard', target });
       });
 
       vscode.postMessage({ command: 'postInitialize' });
@@ -108,6 +116,10 @@ export function mountQuickstartRecordAppmaps() {
 
       app.$on('transition', (target) => {
         vscode.postMessage({ command: 'transition', target });
+      });
+
+      app.$on('clipboard', (target) => {
+        vscode.postMessage({ command: 'clipboard', target });
       });
 
       vscode.postMessage({ command: 'postInitialize' });
@@ -154,6 +166,10 @@ export function mountQuickstartOpenAppmaps() {
 
       messages.on('appmapSnapshot', ({ appmaps }) => {
         app.appmaps = appmaps;
+      });
+
+      app.$on('clipboard', (target) => {
+        vscode.postMessage({ command: 'clipboard', target });
       });
 
       vscode.postMessage({ command: 'postInitialize' });

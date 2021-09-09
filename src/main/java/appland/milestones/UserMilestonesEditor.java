@@ -7,6 +7,7 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.intellij.ide.BrowserUtil;
+import com.intellij.ide.ClipboardSynchronizer;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.application.ReadAction;
 import com.intellij.openapi.diagnostic.Logger;
@@ -32,6 +33,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
+import java.awt.datatransfer.StringSelection;
 import java.beans.PropertyChangeListener;
 import java.io.IOException;
 import java.nio.file.Paths;
@@ -150,7 +152,7 @@ public class UserMilestonesEditor extends UserDataHolderBase implements FileEdit
                                 }
                             });
                             break;
-                        case "transition":
+                        case "transition": {
                             var target = json.getAsJsonPrimitive("target").getAsString();
                             var targetViewType = MilestonesViewType.findByTransitionTarget(target);
                             if (targetViewType != null) {
@@ -159,6 +161,15 @@ public class UserMilestonesEditor extends UserDataHolderBase implements FileEdit
                                 });
                             }
                             break;
+                        }
+                        case "clipboard": {
+                            var content = json.getAsJsonPrimitive("target").getAsString();
+                            LOG.debug("Copying text to clipboard: " + content);
+
+                            var target = new StringSelection(content);
+                            ClipboardSynchronizer.getInstance().setContent(target, target);
+                            break;
+                        }
                         default:
                             LOG.warn("Unhandled message type: " + type);
                     }
