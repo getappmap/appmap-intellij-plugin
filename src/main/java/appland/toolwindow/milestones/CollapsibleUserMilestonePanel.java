@@ -33,18 +33,6 @@ class CollapsibleUserMilestonePanel extends JPanel {
         setCollapsed(isCollapsed);
     }
 
-    public final void setNotificationCount(int count) {
-        this.title.setNotificationCount(count);
-    }
-
-    public void addCollapsingListener(@NotNull CollapsingListener listener, @Nullable Disposable parent) {
-        listeners.add(listener);
-
-        if (parent != null) {
-            Disposer.register(parent, () -> listeners.remove(listener));
-        }
-    }
-
     public boolean isCollapsed() {
         return isCollapsed;
     }

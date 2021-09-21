@@ -1,19 +1,26 @@
 package appland.milestones;
 
-import appland.AppMapPlugin;
+import appland.index.AppMapMetadata;
+import appland.index.AppMapMetadataIndex;
+import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.intellij.ide.BrowserUtil;
+import com.intellij.ide.ClipboardSynchronizer;
+import com.intellij.openapi.application.ApplicationManager;
+import com.intellij.openapi.application.ReadAction;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.fileEditor.FileEditor;
 import com.intellij.openapi.fileEditor.FileEditorLocation;
+import com.intellij.openapi.fileEditor.FileEditorManager;
 import com.intellij.openapi.fileEditor.FileEditorState;
+import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.Disposer;
 import com.intellij.openapi.util.UserDataHolderBase;
+import com.intellij.openapi.vfs.LocalFileSystem;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.ui.jcef.*;
-import com.intellij.util.PlatformUtils;
 import org.cef.CefSettings;
 import org.cef.browser.CefBrowser;
 import org.cef.browser.CefFrame;
@@ -26,25 +33,34 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
+import java.awt.datatransfer.StringSelection;
 import java.beans.PropertyChangeListener;
 import java.io.IOException;
+import java.nio.file.Paths;
+import java.util.Comparator;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.stream.Collectors;
 
 public class UserMilestonesEditor extends UserDataHolderBase implements FileEditor {
     private static final Logger LOG = Logger.getInstance("#appmap.milestones");
     private static final String READY_MESSAGE_ID = "intellij-plugin-ready";
 
+    private final Project project;
     @NotNull
     private final VirtualFile file;
+    private final MilestonesViewType type;
 
     private final JBCefClient jcefClient = JBCefApp.getInstance().createClient();
     private final JCEFHtmlPanel contentPanel = new JCEFHtmlPanel(jcefClient, null);
     private final JBCefJSQuery jcefBridge = JBCefJSQuery.create((JBCefBrowserBase) contentPanel);
 
     private final AtomicBoolean navigating = new AtomicBoolean(false);
+    private final Gson gson = new GsonBuilder().create();
 
-    public UserMilestonesEditor(@NotNull VirtualFile file) {
+    public UserMilestonesEditor(@NotNull Project project, @NotNull VirtualFile file, @NotNull MilestonesViewType type) {
+        this.project = project;
         this.file = file;
+        this.type = type;
 
         Disposer.register(this, jcefClient);
         Disposer.register(this, contentPanel);
@@ -107,9 +123,7 @@ public class UserMilestonesEditor extends UserDataHolderBase implements FileEdit
 
     private void loadApplication() {
         try {
-            var filePath = AppMapPlugin.getUserMilestonesHTMLPath();
-            String htmlFileURL = filePath.toUri().toURL().toString();
-            contentPanel.loadURL(htmlFileURL);
+            contentPanel.loadURL(type.getHTMLPath().toUri().toURL().toString());
         } catch (IOException e) {
             LOG.error(e);
         }
@@ -118,44 +132,118 @@ public class UserMilestonesEditor extends UserDataHolderBase implements FileEdit
     private void onJavaScriptApplicationReady() {
         jcefBridge.addHandler(request -> {
             LOG.warn("postMessage received message: " + request);
+
+            try {
+                var json = gson.fromJson(request, JsonObject.class);
+                var type = json.has("type") ? json.getAsJsonPrimitive("type").getAsString() : null;
+                if (type != null) {
+                    switch (type) {
+                        case "postInitialize":
+                            // ignored
+                            break;
+                        case "clickLink":
+                            // ignored, handled by JCEF listener
+                            break;
+                        case "openFile":
+                            ApplicationManager.getApplication().invokeLater(() -> {
+                                var file = LocalFileSystem.getInstance().findFileByNioFile(Paths.get(json.getAsJsonPrimitive("file").getAsString()));
+                                if (file != null) {
+                                    FileEditorManager.getInstance(project).openFile(file, true);
+                                }
+                            });
+                            break;
+                        case "transition": {
+                            var target = json.getAsJsonPrimitive("target").getAsString();
+                            var targetViewType = MilestonesViewType.findByTransitionTarget(target);
+                            if (targetViewType != null) {
+                                ApplicationManager.getApplication().invokeLater(() -> {
+                                    UserMilestonesEditorProvider.open(project, targetViewType);
+                                });
+                            }
+                            break;
+                        }
+                        case "clipboard": {
+                            var content = json.getAsJsonPrimitive("target").getAsString();
+                            LOG.debug("Copying text to clipboard: " + content);
+
+                            var target = new StringSelection(content);
+                            ClipboardSynchronizer.getInstance().setContent(target, target);
+                            break;
+                        }
+                        default:
+                            LOG.warn("Unhandled message type: " + type);
+                    }
+                }
+            } catch (Exception e) {
+                LOG.warn("error handling command: " + request, e);
+            }
+
             return new JBCefJSQuery.Response("Received " + request);
         });
 
         contentPanel.getCefBrowser().executeJavaScript(createCallbackJS(jcefBridge, "postMessage"), "", 0);
 
-        var json = new JsonObject();
-        json.addProperty("type", "init");
-        json.add("languages", createLanguagesArray());
+        JsonObject json;
+        switch (type) {
+            case Welcome:
+            case InstallAgent: // fall-through
+                json = createPlainInitJSON();
+                break;
+            case RecordAppMaps:
+                json = createRecordAppMapsInitJSON();
+                break;
+            case AppMapsTable:
+                json = createAppMapsInitJSON();
+                break;
+            default:
+                throw new IllegalStateException("Unsupported view type: " + type);
+        }
 
-        var jsonString = new GsonBuilder().create().toJson(json);
+        var jsonString = gson.toJson(json);
         contentPanel.getCefBrowser().executeJavaScript("window.postMessage(" + jsonString + ")", "", 0);
     }
 
     @NotNull
-    private JsonArray createLanguagesArray() {
-        var ruby = new JsonObject();
-        ruby.addProperty("id", "ruby");
-        ruby.addProperty("name", "Ruby");
-        ruby.addProperty("link", "https://appland.com/docs/quickstart/rubymine/step-2");
-        ruby.addProperty("isDetected", PlatformUtils.isRubyMine());
+    private JsonObject createPlainInitJSON() {
+        var json = new JsonObject();
+        json.addProperty("type", "init");
+        return json;
+    }
 
-        var python = new JsonObject();
-        python.addProperty("id", "python");
-        python.addProperty("name", "Python");
-        python.addProperty("link", "https://appland.com/docs/quickstart/pycharm/step-2");
-        python.addProperty("isDetected", PlatformUtils.isPyCharm());
+    @NotNull
+    private JsonObject createRecordAppMapsInitJSON() {
+        var json = new JsonObject();
+        json.addProperty("type", "init");
+        json.addProperty("editor", "jetbrains");
+        return json;
+    }
 
-        var java = new JsonObject();
-        java.addProperty("id", "java");
-        java.addProperty("name", "Java");
-        java.addProperty("link", "https://appland.com/docs/quickstart/intellij/step-2");
-        java.addProperty("isDetected", PlatformUtils.isIntelliJ());
+    @NotNull
+    private JsonObject createAppMapsInitJSON() {
+        var json = new JsonObject();
+        json.addProperty("type", "init");
+        json.add("appmaps", createAppMapsArray(project));
+        return json;
+    }
 
-        var languages = new JsonArray();
-        languages.add(ruby);
-        languages.add(python);
-        languages.add(java);
-        return languages;
+    private JsonArray createAppMapsArray(@NotNull Project project) {
+        var appmaps = ReadAction.compute(() -> AppMapMetadataIndex.findAppMaps(project, null, 10))
+                .stream()
+                .filter(AppMapMetadata::hasAnyCount)
+                .sorted(Comparator.comparingInt(AppMapMetadata::getSortCount).reversed())
+                .collect(Collectors.toList());
+
+        var json = new JsonArray(appmaps.size());
+        for (var appmap : appmaps) {
+            var jsonAppMap = new JsonObject();
+            jsonAppMap.addProperty("path", appmap.getSystemIndependentFilepath());
+            jsonAppMap.addProperty("name", appmap.getName());
+            jsonAppMap.addProperty("requests", appmap.getRequestCount());
+            jsonAppMap.addProperty("sqlQueries", appmap.getQueryCount());
+            jsonAppMap.addProperty("functions", appmap.getFunctionsCount());
+            json.add(jsonAppMap);
+        }
+        return json;
     }
 
     @NotNull

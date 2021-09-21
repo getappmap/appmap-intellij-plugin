@@ -1,9 +1,55 @@
-Interactive maps and architecture analysis help you write better Java, Python and Ruby code. Additional languages are coming soon.
+Interactive maps and architecture analysis help you write better Java, Python and Ruby code.
 
-Navigate your code more efficiently with interactive, accurate software architecture diagrams right in your IDE. 
-In two minutes you can go from installing this plugin to exploring maps of your code's architecture. 
+Navigate your code more efficiently with interactive, accurate software architecture diagrams right
+in your IDE. In two minutes you can go from installing this plugin to exploring maps of your code's
+architecture.
 
-Visit [dev.to/appland](https://dev.to/appland) for popular articles about AppMap use cases and tutorials.
+Visit [dev.to/appland](https://dev.to/appland) for popular articles about AppMap use cases and
+tutorials.
+
+AppMap supports **Spring**, **Django**, **Flask**, and **Rails** projects. To generate AppMaps you
+will need to install the AppMap agent for your project.
+
+&nbsp;
+
+Run this command from within the top level directory of your project:
+
+```bash
+npx @appland/appmap install-agent
+```
+
+&nbsp;
+
+---
+
+### Requirements
+
+AppMap is intended for mapping web services and web applications, and works seamlessly with these
+popular frameworks.
+
+**Spring**
+
+Required Framework version: Spring (any version)<br/>
+Required Language version: JDK 8+ 
+
+
+**Django**
+
+Required Framework version: Django v.3.2.x, 2.2.x <br/>
+Required Language version: Python 3.6+
+
+
+**Flask**
+
+Required Framework version: Flask v.2.0.x  <br/>
+Required Language version: Python 3.6+  
+
+**Rails**
+
+Required Framework version: Rails Version 5, 6 <br/>
+Required Language version: Ruby 2.6, 2.7, 3  
+
+---
 
 
 ## Quickstart
@@ -28,15 +74,11 @@ Follow the instructions in the **[AppMap quickstart](https://appland.com/docs/qu
 ## Resources
 - [Documentation](https://appland.com/docs/)
 - [AppMap FAQ](https://appland.com/docs/faq.html)
+- [Troubleshooting](https://appland.com/docs/troubleshooting.html)
+- [Support](https://appland.com/appmap/support)
 - Join us on [Discord](https://discord.com/invite/N9VUap6) and [GitHub](https://github.com/applandinc/appmap-intellij-plugin)
-- Support email: [support@app.land](mailto:support@app.land)
 
 
 ## About AppMap
 See [AppMap overview](https://appland.com/docs/appmap-overview.html) to learn how AppMap works and how it accelerates development processes.
 
-
-## Twitter
-- [AppMap Ruby](https://twitter.com/appmapruby)
-- [AppMap Python](https://twitter.com/appmappython)
-- [AppMap Java](https://twitter.com/appmapjava)

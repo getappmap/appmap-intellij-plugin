@@ -79,7 +79,9 @@
             <add-to-group group-id="ToolsMenu" anchor="last"/>
         </group>
 
-        <action id="openUserMilestones" class="appland.actions.OpenQuickstartAction"
+        <action id="openUserQuickstart" class="appland.actions.OpenQuickstartAction"
                 text="AppLand: Open Quickstart"/>
+        <action id="openUserAppMaps" class="appland.actions.OpenAppMapsAction"
+                text="AppLand: Open AppMaps"/>
     </actions>
 </idea-plugin>

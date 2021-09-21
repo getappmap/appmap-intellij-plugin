@@ -1,5 +1,16 @@
 # AppMap Plugin Changelog
 
+## [0.7.0]
+### Added
+- New onboarding flow
+
+### Changed
+- AppMap diagrams updates
+
+## [0.6.1]
+### Added
+-Support to open source files located in dependencies, e.g. from a sources jar file.
+
 ## [0.6.0]
 ### Added
 - Uploading AppMaps to AppMap Cloud

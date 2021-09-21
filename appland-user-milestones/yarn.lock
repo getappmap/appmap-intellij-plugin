@@ -2,24 +2,24 @@
 # yarn lockfile v1
 
 
-"@appland/components@^1.6":
-  version "1.6.2"
-  resolved "https://registry.yarnpkg.com/@appland/components/-/components-1.6.2.tgz#e94e177f763b27e6c5f7258088271b1da5eb3fdf"
-  integrity sha512-+FQuhU4ckUdQb8tHrKlW3m6vE478Ch3jlZFGeanpLBg9ToNjWOhKJ3CZJH1rdjGvrfLlJ5ffxhf6psKLZ6MLAg==
+"@appland/components@^1.12.0":
+  version "1.12.0"
+  resolved "https://registry.yarnpkg.com/@appland/components/-/components-1.12.0.tgz#0a811d838ec0e9460340b50e376c653755c795a1"
+  integrity sha512-bW8hroPocLQrlVEqNHSpz7Rl3EAlzCB005qmWN4FzSTF4InKdslLtRDBSXqew7GZ6v/PxCjoUcdkgndWNCvdBg==
   dependencies:
-    "@appland/diagrams" "^1.2.3"
-    "@appland/models" "^1.3.1"
+    "@appland/diagrams" "^1.3.1"
+    "@appland/models" "^1.5.0"
     highlight.js "^10.7.2"
     sql-formatter "^2.3.3"
     vue "^2.6.11"
     vuex "^3.6.0"
 
-"@appland/diagrams@^1.2.3":
-  version "1.2.3"
-  resolved "https://registry.yarnpkg.com/@appland/diagrams/-/diagrams-1.2.3.tgz#3d6dcb84c1adcbf349e29750c445f5f946d1470a"
-  integrity sha512-H4powBFEzgHsQ8Pr3kh1zhrhD6kX/owZ40Ud6Hsiw54B0aHlNmxS5cQrShf7d+PUwtuS3roab94oDrL8pJm7xw==
+"@appland/diagrams@^1.3.1", "@appland/diagrams@^1.4.0":
+  version "1.4.0"
+  resolved "https://registry.yarnpkg.com/@appland/diagrams/-/diagrams-1.4.0.tgz#8e299b4e926b7dc02504f2a531d2636db662224f"
+  integrity sha512-OWr/8JjQuqWzdMBAEc0g0pAhzyfz0Jrc4unSglGXfOUe1HhEqqA3Qw8fd9YmjKjHC5t8NvAo9NWdJNwpxUKJyA==
   dependencies:
-    "@appland/models" "^1.3.1"
+    "@appland/models" "^1.5.0"
     d3-flame-graph "^4.0.6"
     d3-hierarchy "^1.1.9"
     d3-interpolate "^1.4.0"
@@ -30,10 +30,10 @@
     deepmerge "^4.2.2"
     sql-formatter "^4.0.2"
 
-"@appland/models@^1.2.3", "@appland/models@^1.3.1":
-  version "1.3.1"
-  resolved "https://registry.yarnpkg.com/@appland/models/-/models-1.3.1.tgz#ffd725fe79a137229eeb636d78554ca9fdec386b"
-  integrity sha512-X+M4xI9CnXmteL3sfcaFvkjrwC8X3Ealhm7b+/i3gCKKAhmKBrJtpJIc7w0EON6hFUFBRdSOTApkFY7THkxJTw==
+"@appland/models@^1.5.0":
+  version "1.5.0"
+  resolved "https://registry.yarnpkg.com/@appland/models/-/models-1.5.0.tgz#4417473be867c09a69c216e77e5cbc55c7912d3a"
+  integrity sha512-e/bWFfmNUkh5nuZoIbVRmRk06bFtj6SrdiKPpZ0VoTEhgTdeO/31/ryFPVpu693zMBKVcNdRILa8WF4kNJtKbg==
   dependencies:
     cross-env "^7.0.3"
     crypto-js "^4.0.0"

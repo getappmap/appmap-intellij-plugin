@@ -8,9 +8,9 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
 
-public class OpenQuickstartAction extends AnAction {
+public class OpenAppMapsAction extends AnAction {
     @Override
     public void actionPerformed(@NotNull AnActionEvent e) {
-        UserMilestonesEditorProvider.open(Objects.requireNonNull(e.getProject()), MilestonesViewType.Welcome);
+        UserMilestonesEditorProvider.open(Objects.requireNonNull(e.getProject()), MilestonesViewType.AppMapsTable);
     }
 }
