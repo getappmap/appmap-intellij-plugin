@@ -8,7 +8,7 @@ Vue.use(plugin);
 const app = new Vue(
     {
       el: '#app',
-      render: (h) => h(VVsCodeExtension, {ref: 'ui', props: {appMapUploadable: true}}),
+      render: (h) => h(VVsCodeExtension, {ref: 'ui', props: {appMapUploadable: false}}),
       methods: {
         async loadAppMap(jsonString) {
           try {
