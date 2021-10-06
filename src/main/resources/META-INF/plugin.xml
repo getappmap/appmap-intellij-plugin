@@ -65,20 +65,22 @@
         <action id="showRecentAppmap" class="appland.actions.OpenRecentAppMapAction"/>
         <action id="startAppMapRemoteRecording" class="appland.actions.StartAppMapRecordingAction"/>
         <action id="stopAppMapRemoteRecording" class="appland.actions.StopAppMapRecordingAction"/>
+        <!--
         <action id="uploadAppMap" class="appland.actions.UploadAppMapAction"/>
+        -->
         <action id="appmapDocs" class="appland.actions.AppMapDocumentationAction">
             <add-to-group group-id="HelpMenu" anchor="before" relative-to-action="CheckForUpdate"/>
         </action>
-
+  
         <group id="appmapToolsMenu" popup="true" icon="appland.Icons.APPMAP_TOOLS_MENU">
-            <reference ref="uploadAppMap"/>
-            <separator/>
+            <!--          
+            <reference ref="uploadAppMap"/> 
+            <separator/> -->
             <reference ref="startAppMapRemoteRecording"/>
             <reference ref="stopAppMapRemoteRecording"/>
 
             <add-to-group group-id="ToolsMenu" anchor="last"/>
         </group>
-
         <action id="openUserQuickstart" class="appland.actions.OpenQuickstartAction"
                 text="AppLand: Open Quickstart"/>
         <action id="openUserAppMaps" class="appland.actions.OpenAppMapsAction"

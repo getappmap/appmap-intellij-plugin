@@ -19,7 +19,6 @@ public class UserMilestonesPanel extends JPanel {
         addPanel("Quickstart", new UserMilestoneContentPanel() {
             @Override
             protected void setupPanel() {
-                add(new StatusLabel(UserMilestoneStatus.Incomplete, "Welcome", () -> open(project, MilestonesViewType.Welcome)));
                 add(new StatusLabel(UserMilestoneStatus.Incomplete, "Install AppMap agent", () -> open(project, MilestonesViewType.InstallAgent)));
                 add(new StatusLabel(UserMilestoneStatus.Incomplete, "Record AppMaps", () -> open(project, MilestonesViewType.RecordAppMaps)));
                 add(new StatusLabel(UserMilestoneStatus.Incomplete, "Open AppMaps", () -> open(project, MilestonesViewType.AppMapsTable)));
@@ -44,7 +43,7 @@ public class UserMilestonesPanel extends JPanel {
     }
 
     private void addPanel(@NotNull String title, @NotNull UserMilestoneContentPanel panel) {
-        var collapsiblePanel = new CollapsibleUserMilestonePanel(panel, true, title);
+        var collapsiblePanel = new CollapsibleUserMilestonePanel(panel, false, title);
         add(collapsiblePanel);
     }
 }

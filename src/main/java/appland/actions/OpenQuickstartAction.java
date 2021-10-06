@@ -11,6 +11,6 @@ import java.util.Objects;
 public class OpenQuickstartAction extends AnAction {
     @Override
     public void actionPerformed(@NotNull AnActionEvent e) {
-        UserMilestonesEditorProvider.open(Objects.requireNonNull(e.getProject()), MilestonesViewType.Welcome);
+        UserMilestonesEditorProvider.open(Objects.requireNonNull(e.getProject()), MilestonesViewType.InstallAgent);
     }
 }

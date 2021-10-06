@@ -8,7 +8,6 @@ import org.jetbrains.annotations.Nullable;
 import java.nio.file.Path;
 
 public enum MilestonesViewType {
-    Welcome("CONFIGURE_APPMAP"),
     InstallAgent("INSTALL_AGENT"),
     RecordAppMaps("RECORD_APPMAPS"),
     AppMapsTable("OPEN_APPMAPS");
@@ -32,8 +31,6 @@ public enum MilestonesViewType {
 
     public Path getHTMLPath() {
         switch (this) {
-            case Welcome:
-                return AppMapPlugin.getWelcomeMapsHTMLPath();
             case InstallAgent:
                 return AppMapPlugin.getInstallAgentHTMLPath();
             case RecordAppMaps:
@@ -47,8 +44,6 @@ public enum MilestonesViewType {
 
     public String getPageTitle() {
         switch (this) {
-            case Welcome:
-                return AppMapBundle.get("userMilestones.welcomeTitle");
             case InstallAgent:
                 return AppMapBundle.get("userMilestones.installAgentTitle");
             case RecordAppMaps:

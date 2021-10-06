@@ -185,7 +185,6 @@ public class UserMilestonesEditor extends UserDataHolderBase implements FileEdit
 
         JsonObject json;
         switch (type) {
-            case Welcome:
             case InstallAgent: // fall-through
                 json = createPlainInitJSON();
                 break;

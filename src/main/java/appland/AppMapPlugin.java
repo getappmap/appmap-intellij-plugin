@@ -28,10 +28,6 @@ public final class AppMapPlugin {
         return getPluginPath().resolve("appmap").resolve("index.html");
     }
 
-    public static Path getWelcomeMapsHTMLPath() {
-        return getPluginPath().resolve("appland-user-milestones").resolve("welcome.html");
-    }
-
     public static Path getInstallAgentHTMLPath() {
         return getPluginPath().resolve("appland-user-milestones").resolve("agent.html");
     }

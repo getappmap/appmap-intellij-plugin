@@ -1,5 +1,9 @@
 # AppMap Plugin Changelog
 
+## [0.7.1]
+### Added
+- Onboarding updates
+
 ## [0.7.0]
 ### Added
 - New onboarding flow
