@@ -16,6 +16,7 @@ import com.intellij.openapi.fileEditor.FileEditorLocation;
 import com.intellij.openapi.fileEditor.FileEditorManager;
 import com.intellij.openapi.fileEditor.FileEditorState;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.project.ProjectUtil;
 import com.intellij.openapi.util.Disposer;
 import com.intellij.openapi.util.UserDataHolderBase;
 import com.intellij.openapi.vfs.LocalFileSystem;
@@ -185,8 +186,8 @@ public class UserMilestonesEditor extends UserDataHolderBase implements FileEdit
 
         JsonObject json;
         switch (type) {
-            case InstallAgent: // fall-through
-                json = createPlainInitJSON();
+            case InstallAgent:
+                json = createInstallAgentInitJSON();
                 break;
             case RecordAppMaps:
                 json = createRecordAppMapsInitJSON();
@@ -203,9 +204,12 @@ public class UserMilestonesEditor extends UserDataHolderBase implements FileEdit
     }
 
     @NotNull
-    private JsonObject createPlainInitJSON() {
+    private JsonObject createInstallAgentInitJSON() {
         var json = new JsonObject();
+        final VirtualFile projectDir = ProjectUtil.guessProjectDir(project);
+        final String projectDirName = projectDir == null ? "" : projectDir.getCanonicalPath();
         json.addProperty("type", "init");
+        json.addProperty("codeSnippet", "npx @appland/appmap install " + projectDirName);
         return json;
     }
 

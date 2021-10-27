@@ -1,6 +1,5 @@
 import Vue from 'vue';
 import {
-  VQuickstartDocsWelcome,
   VQuickstartDocsInstallAgent,
   VQuickstartDocsOpenAppmaps,
   VQuickstartDocsRecordAppmaps,
@@ -9,55 +8,25 @@ import '@appland/diagrams/dist/style.css';
 import MessagePublisher from './messagePublisher';
 import vscode from './vsCodeBridge';
 
-export function mountQuickstartWelcome() {
-  const messages = new MessagePublisher(vscode);
-
-  messages
-    .on('init', () => {
-      const app = new Vue({
-        el: '#app',
-        render(h) {
-          return h(VQuickstartDocsWelcome, {
-            ref: 'ui',
-          });
-        },
-        mounted() {
-          document.querySelectorAll('a[href]').forEach((el) => {
-            el.addEventListener('click', (e) => {
-              vscode.postMessage({ command: 'clickLink', uri: e.target.href });
-            });
-          });
-        },
-      });
-
-      app.$on('transition', (target) => {
-        vscode.postMessage({ command: 'transition', target });
-      });
-
-      app.$on('clipboard', (target) => {
-        vscode.postMessage({ command: 'clipboard', target });
-      });
-
-      vscode.postMessage({ command: 'postInitialize' });
-    })
-    .on(undefined, (event) => {
-      throw new Error(`unhandled message type: ${event.type}`);
-    });
-
-  vscode.postMessage({ command: 'preInitialize' });
-}
-
 export function mountQuickstartInstallAgent() {
   const messages = new MessagePublisher(vscode);
 
   messages
-    .on('init', () => {
+    .on('init', (event) => {
       const app = new Vue({
         el: '#app',
         render(h) {
           return h(VQuickstartDocsInstallAgent, {
             ref: 'ui',
+            props: {
+              codeSnippet: this.codeSnippet,
+            },
           });
+        },
+        data() {
+          return {
+            codeSnippet: event.codeSnippet,
+          };
         },
         mounted() {
           document.querySelectorAll('a[href]').forEach((el) => {
