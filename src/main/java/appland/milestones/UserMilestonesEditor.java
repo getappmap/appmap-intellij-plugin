@@ -206,8 +206,13 @@ public class UserMilestonesEditor extends UserDataHolderBase implements FileEdit
     @NotNull
     private JsonObject createInstallAgentInitJSON() {
         var json = new JsonObject();
-        final VirtualFile projectDir = ProjectUtil.guessProjectDir(project);
-        final String projectDirName = projectDir == null ? "" : projectDir.getCanonicalPath();
+
+        var projectDirName = "";
+        var projectDir = ProjectUtil.guessProjectDir(project);
+        if (projectDir != null) {
+            var nioProjectDir = projectDir.getFileSystem().getNioPath(projectDir);
+            if (nioProjectDir != null) projectDirName = nioProjectDir.toString();
+        }
         json.addProperty("type", "init");
         json.addProperty("codeSnippet", "npx @appland/appmap install " + projectDirName);
         return json;
