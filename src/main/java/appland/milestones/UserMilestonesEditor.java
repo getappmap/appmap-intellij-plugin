@@ -16,7 +16,6 @@ import com.intellij.openapi.fileEditor.FileEditorLocation;
 import com.intellij.openapi.fileEditor.FileEditorManager;
 import com.intellij.openapi.fileEditor.FileEditorState;
 import com.intellij.openapi.project.Project;
-import com.intellij.openapi.project.ProjectUtil;
 import com.intellij.openapi.util.Disposer;
 import com.intellij.openapi.util.UserDataHolderBase;
 import com.intellij.openapi.vfs.LocalFileSystem;
@@ -41,6 +40,8 @@ import java.nio.file.Paths;
 import java.util.Comparator;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
+
+import static appland.AppMapPlugin.getProjectDirPath;
 
 public class UserMilestonesEditor extends UserDataHolderBase implements FileEditor {
     private static final Logger LOG = Logger.getInstance("#appmap.milestones");
@@ -206,15 +207,9 @@ public class UserMilestonesEditor extends UserDataHolderBase implements FileEdit
     @NotNull
     private JsonObject createInstallAgentInitJSON() {
         var json = new JsonObject();
-
-        var projectDirName = "";
-        var projectDir = ProjectUtil.guessProjectDir(project);
-        if (projectDir != null) {
-            var nioProjectDir = projectDir.getFileSystem().getNioPath(projectDir);
-            if (nioProjectDir != null) projectDirName = nioProjectDir.toString();
-        }
+        String projectDirPath = getProjectDirPath(project);
         json.addProperty("type", "init");
-        json.addProperty("codeSnippet", "npx @appland/appmap install " + projectDirName);
+        json.addProperty("codeSnippet", "npx @appland/appmap install " + projectDirPath);
         return json;
     }
 
