@@ -1,5 +1,9 @@
 # AppMap Plugin Changelog
 
+## [0.7.2]
+### Changed
+- Project directory added to install command
+
 ## [0.7.1]
 ### Added
 - Onboarding updates

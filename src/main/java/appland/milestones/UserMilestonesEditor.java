@@ -41,6 +41,8 @@ import java.util.Comparator;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
+import static appland.AppMapPlugin.getProjectDirPath;
+
 public class UserMilestonesEditor extends UserDataHolderBase implements FileEditor {
     private static final Logger LOG = Logger.getInstance("#appmap.milestones");
     private static final String READY_MESSAGE_ID = "intellij-plugin-ready";
@@ -185,8 +187,8 @@ public class UserMilestonesEditor extends UserDataHolderBase implements FileEdit
 
         JsonObject json;
         switch (type) {
-            case InstallAgent: // fall-through
-                json = createPlainInitJSON();
+            case InstallAgent:
+                json = createInstallAgentInitJSON();
                 break;
             case RecordAppMaps:
                 json = createRecordAppMapsInitJSON();
@@ -203,9 +205,11 @@ public class UserMilestonesEditor extends UserDataHolderBase implements FileEdit
     }
 
     @NotNull
-    private JsonObject createPlainInitJSON() {
+    private JsonObject createInstallAgentInitJSON() {
         var json = new JsonObject();
+        String projectDirPath = getProjectDirPath(project);
         json.addProperty("type", "init");
+        json.addProperty("codeSnippet", "npx @appland/appmap install " + projectDirPath);
         return json;
     }
 
