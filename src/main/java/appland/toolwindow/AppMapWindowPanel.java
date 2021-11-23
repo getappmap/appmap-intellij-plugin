@@ -10,6 +10,7 @@ import appland.toolwindow.milestones.UserMilestonesPanel;
 import com.intellij.ide.util.treeView.NodeDescriptor;
 import com.intellij.openapi.Disposable;
 import com.intellij.openapi.actionSystem.*;
+import com.intellij.openapi.application.ApplicationInfo;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.project.DumbService;
 import com.intellij.openapi.project.Project;
@@ -42,6 +43,7 @@ import javax.swing.event.DocumentEvent;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreePath;
 import java.awt.*;
+import java.lang.reflect.InvocationTargetException;
 import java.util.Comparator;
 
 import static com.intellij.psi.NavigatablePsiElement.EMPTY_NAVIGATABLE_ELEMENT_ARRAY;
@@ -59,7 +61,7 @@ public class AppMapWindowPanel extends SimpleToolWindowPanel implements DataProv
     // debounce requests for AppMap tree refresh
     private final Alarm treeRefreshAlarm = new Alarm(Alarm.ThreadToUse.SWING_THREAD, this);
     // debounce filter requests when search text changes
-    private final Alarm filterInputAlarm = new Alarm(Alarm.ThreadToUse.SWING_THREAD, this);
+    private volatile Alarm filterInputAlarm;
 
     private volatile boolean isToolWindowVisible;
     private volatile boolean hasPendingTreeRefresh;
@@ -215,7 +217,7 @@ public class AppMapWindowPanel extends SimpleToolWindowPanel implements DataProv
     @NotNull
     private SearchTextField createNameFilter(@NotNull AppMapTreeModel appMapModel) {
         var textFilter = new SearchTextField();
-        filterInputAlarm.setActivationComponent(textFilter);
+        filterInputAlarm = createAlarm(textFilter);
 
         textFilter.getTextEditor().getEmptyText().setText(AppMapBundle.get("toolwindow.appmap.filterEmptyText"));
         textFilter.getTextEditor().addActionListener(e -> {
@@ -250,5 +252,24 @@ public class AppMapWindowPanel extends SimpleToolWindowPanel implements DataProv
     public void onToolWindowHidden() {
         LOG.debug("onToolWindowHidden");
         this.isToolWindowVisible = false;
+    }
+
+    @NotNull
+    private Alarm createAlarm(@NotNull SearchTextField textFilter) {
+        // 2021.3 is showing a notification (at least in EAPs) that the constructor used above is deprecated
+        // it's too visible and distracting, so we try to work around it
+        if (ApplicationInfo.getInstance().getBuild().getBaselineVersion() >= 213) {
+            try {
+                var constructor = Alarm.class.getConstructor(JComponent.class, Disposable.class);
+                return constructor.newInstance(textFilter, this);
+            } catch (NoSuchMethodException | InvocationTargetException | InstantiationException | IllegalAccessException e) {
+                // ignore, use fallback below
+            }
+        }
+
+        // fallback to deprecated method
+        var alarm = new Alarm(Alarm.ThreadToUse.SWING_THREAD, this);
+        alarm.setActivationComponent(textFilter);
+        return alarm;
     }
 }

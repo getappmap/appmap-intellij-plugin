@@ -1,5 +1,9 @@
 # AppMap Plugin Changelog
 
+## [0.7.3]
+### Changed
+- Compatibility with 2021.3
+
 ## [0.7.2]
 ### Changed
 - Project directory added to install command
