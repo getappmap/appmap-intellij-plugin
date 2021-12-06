@@ -1,5 +1,9 @@
 # AppMap Plugin Changelog
 
+## [0.7.4]
+### Changed
+- appmap-js components v1.17.0
+
 ## [0.7.3]
 ### Changed
 - Compatibility with 2021.3
