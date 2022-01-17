@@ -20,10 +20,13 @@ import com.intellij.openapi.util.ActionCallback;
 import com.intellij.openapi.util.Disposer;
 import com.intellij.openapi.util.UserDataHolderBase;
 import com.intellij.openapi.util.io.FileUtil;
+import com.intellij.openapi.util.io.FileUtilRt;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.openapi.vfs.VirtualFileEvent;
 import com.intellij.openapi.vfs.VirtualFileListener;
+import com.intellij.ui.SimpleTextAttributes;
 import com.intellij.ui.components.JBLoadingPanel;
+import com.intellij.ui.components.JBPanelWithEmptyText;
 import com.intellij.ui.jcef.*;
 import com.intellij.util.ui.UIUtil;
 import org.apache.commons.lang.StringEscapeUtils;
@@ -56,6 +59,7 @@ public class AppMapFileEditor extends UserDataHolderBase implements FileEditor {
     private static final Logger LOG = Logger.getInstance("#appmap.editor");
     private static final int LOADING_KEY = 0;
     private static final int CONTENT_KEY = 1;
+    private static final int ERROR_KEY = 2;
     private static final String READY_MESSAGE_ID = "intellij-plugin-ready";
 
     private final Project project;
@@ -71,6 +75,8 @@ public class AppMapFileEditor extends UserDataHolderBase implements FileEditor {
             switch (key) {
                 case LOADING_KEY:
                     return loadingPanel;
+                case ERROR_KEY:
+                    return errorPanel;
                 case CONTENT_KEY:
                     return contentPanel.getComponent();
                 default:
@@ -88,6 +94,7 @@ public class AppMapFileEditor extends UserDataHolderBase implements FileEditor {
         }
     };
     private final JBLoadingPanel loadingPanel = new JBLoadingPanel(new BorderLayout(), this);
+    private final JBPanelWithEmptyText errorPanel = new JBPanelWithEmptyText();
     private final AtomicBoolean initial = new AtomicBoolean(true);
     private final AtomicBoolean navigating = new AtomicBoolean(false);
     // keeps track if the current editor is focused
@@ -110,8 +117,9 @@ public class AppMapFileEditor extends UserDataHolderBase implements FileEditor {
         loadingPanel.setLoadingText(CommonBundle.getLoadingTreeNodeText());
         setupJCEF();
 
-        multiPanel.select(CONTENT_KEY, true);
-        loadAppmapApplication();
+        if (!showErrorOrMainPanel()) {
+            loadAppmapApplication();
+        }
     }
 
     private void setupVfsListener(@NotNull VirtualFile file) {
@@ -181,6 +189,10 @@ public class AppMapFileEditor extends UserDataHolderBase implements FileEditor {
     private void loadAppmapData() {
         LOG.info("loadAppmapData");
 
+        if (showErrorOrMainPanel()) {
+            return;
+        }
+
         Document document = FileDocumentManager.getInstance().getDocument(file);
         if (document == null) {
             LOG.error("unable to retrieve document for file: " + file.getPath());
@@ -222,7 +234,7 @@ public class AppMapFileEditor extends UserDataHolderBase implements FileEditor {
                     initial.set(false);
                     ApplicationManager.getApplication().invokeLater(() -> {
                         loadingPanel.stopLoading();
-                        multiPanel.select(CONTENT_KEY, true);
+                        showErrorOrMainPanel();
                     }, ModalityState.defaultModalityState());
                 }
             }
@@ -262,6 +274,26 @@ public class AppMapFileEditor extends UserDataHolderBase implements FileEditor {
                 }
             }
         }, contentPanel.getCefBrowser());
+    }
+
+    /**
+     * @return {@code true} if the error panel is displayed now
+     */
+    private boolean showErrorOrMainPanel() {
+        // display an error if the file is too large
+        if (FileUtilRt.isTooLarge(file.getLength())) {
+            int megabytes = FileUtilRt.LARGE_FOR_CONTENT_LOADING / FileUtilRt.MEGABYTE;
+            String error = AppMapBundle.get("editor.fileTooLarge.error");
+            String details = AppMapBundle.get("editor.fileTooLarge.details", String.valueOf(megabytes));
+
+            errorPanel.getEmptyText().setText(error, SimpleTextAttributes.ERROR_ATTRIBUTES);
+            errorPanel.getEmptyText().appendLine(details, SimpleTextAttributes.GRAYED_ATTRIBUTES, null);
+            multiPanel.select(ERROR_KEY, true);
+            return true;
+        }
+
+        multiPanel.select(CONTENT_KEY, true);
+        return false;
     }
 
     private void onJavaScriptAppMapReady() {
