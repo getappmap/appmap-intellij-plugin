@@ -13,7 +13,7 @@ AppMap works best for mapping web services and web applications. [Join our commu
 
 **2021.1** and newer JetBrains IDEs are required to use this plugin.
 
-Currently, AppMap supports Spring, Django, Flask and Rails projects. The most up-to-date list of frameworks and languages we support is
+Currently, AppMap supports Spring, Express.js, Django, Flask and Rails projects. The most up-to-date list of frameworks and languages we support is
 [here](https://appland.com/docs/integrations.html). 
 
 To start making AppMaps, you’ll need to install and configure the AppMap client agent for your project.

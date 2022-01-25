@@ -1,5 +1,9 @@
 # AppMap Plugin Changelog
 
+## [0.7.5]
+### Changed
+- Express.js is now a supported web framework 
+
 ## [0.7.4]
 ### Changed
 - appmap-js components v1.17.0
