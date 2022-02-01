@@ -1,5 +1,9 @@
 # AppMap Plugin Changelog
 
+## [Unreleased]
+### Added
+- Support 2022.1 EAP
+
 ## [0.7.5]
 ### Changed
 - Express.js is now a supported web framework 
