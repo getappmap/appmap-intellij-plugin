@@ -1,6 +1,6 @@
 # AppMap Plugin Changelog
 
-## [Unreleased]
+## [0.7.6]
 ### Added
 - Support 2022.1 EAP
 
