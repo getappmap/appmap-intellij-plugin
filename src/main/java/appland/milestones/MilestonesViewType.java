@@ -10,7 +10,8 @@ import java.nio.file.Path;
 public enum MilestonesViewType {
     InstallAgent("INSTALL_AGENT"),
     RecordAppMaps("RECORD_APPMAPS"),
-    AppMapsTable("OPEN_APPMAPS");
+    AppMapsTable("OPEN_APPMAPS"),
+    ProjectPicker("PROJECT_PICKER");
 
     // value used by the JS application for "transition" messages
     private final String transitionValue;
@@ -37,6 +38,8 @@ public enum MilestonesViewType {
                 return AppMapPlugin.getRecordAppMapsHTMLPath();
             case AppMapsTable:
                 return AppMapPlugin.getAppMapsTableHTMLPath();
+            case ProjectPicker:
+                return AppMapPlugin.getProjectPickerHTMLPath();
             default:
                 throw new IllegalStateException("Unsupported type: " + this);
         }
@@ -50,6 +53,8 @@ public enum MilestonesViewType {
                 return AppMapBundle.get("userMilestones.recordAppMapsTitle");
             case AppMapsTable:
                 return AppMapBundle.get("userMilestones.appMapsTableTitle");
+            case ProjectPicker:
+                return AppMapBundle.get("userMilestones.projectPickerTitle");
             default:
                 throw new IllegalStateException("Unsupported type: " + this);
         }

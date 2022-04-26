@@ -196,6 +196,9 @@ public class UserMilestonesEditor extends UserDataHolderBase implements FileEdit
             case AppMapsTable:
                 json = createAppMapsInitJSON();
                 break;
+            case ProjectPicker:
+                json = createProjectPickerInitJSON();
+                break;
             default:
                 throw new IllegalStateException("Unsupported view type: " + type);
         }
@@ -226,6 +229,13 @@ public class UserMilestonesEditor extends UserDataHolderBase implements FileEdit
         var json = new JsonObject();
         json.addProperty("type", "init");
         json.add("appmaps", createAppMapsArray(project));
+        return json;
+    }
+
+    @NotNull
+    private JsonObject createProjectPickerInitJSON() {
+        var json = new JsonObject();
+        json.addProperty("type", "init");
         return json;
     }
 
