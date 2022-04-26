@@ -13,7 +13,7 @@ buildscript {
 
 plugins {
     idea
-    id("org.jetbrains.intellij") version "1.3.1"
+    id("org.jetbrains.intellij") version "1.5.3"
     id("org.jetbrains.changelog") version "1.1.2"
 }
 
@@ -27,7 +27,7 @@ repositories {
 
 dependencies {
     // http://wiremock.org, Apache 2 license
-    testImplementation("com.github.tomakehurst:wiremock-jre8:2.28.0")
+    testImplementation("com.github.tomakehurst:wiremock-jre8:2.33.1")
 }
 
 intellij {

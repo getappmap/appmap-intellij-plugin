@@ -1,13 +1,13 @@
 /*!
- * Vue.js v2.6.14
- * (c) 2014-2021 Evan You
- * Released under the MIT License.
+ * @appland/sql-parser - v1.5.1
+ * @copyright 2015-2022 Code School (http://codeschool.com)
+ * @author Nick Wronski <nick@javascript.com>
  */
 
 /*!
- * sqlite-parser - v1.0.1
- * @copyright 2015-2017 Code School (http://codeschool.com)
- * @author Nick Wronski <nick@javascript.com>
+ * Vue.js v2.6.14
+ * (c) 2014-2021 Evan You
+ * Released under the MIT License.
  */
 
 /*!

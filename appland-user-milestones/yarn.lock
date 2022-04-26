@@ -2,19 +2,19 @@
 # yarn lockfile v1
 
 
-"@appland/components@^1.12.0":
-  version "1.12.0"
-  resolved "https://registry.yarnpkg.com/@appland/components/-/components-1.12.0.tgz#0a811d838ec0e9460340b50e376c653755c795a1"
-  integrity sha512-bW8hroPocLQrlVEqNHSpz7Rl3EAlzCB005qmWN4FzSTF4InKdslLtRDBSXqew7GZ6v/PxCjoUcdkgndWNCvdBg==
+"@appland/components@^1.17.0":
+  version "1.24.1"
+  resolved "https://registry.yarnpkg.com/@appland/components/-/components-1.24.1.tgz#425a224d4eae5ff5888e38d9436eddbbb7e8f128"
+  integrity sha512-4s+ug5p5iW0wXKgqxEiS0+d089h2zoY8erEeeOzdJEskOEGhVorJJEKQm07YQ6OA3pITuhm2QDIjBWHX3/MbGw==
   dependencies:
-    "@appland/diagrams" "^1.3.1"
-    "@appland/models" "^1.5.0"
+    "@appland/diagrams" "^1.5.1"
+    "@appland/models" "^1.9.0"
     highlight.js "^10.7.2"
-    sql-formatter "^2.3.3"
+    sql-formatter "^4.0.2"
     vue "^2.6.11"
     vuex "^3.6.0"
 
-"@appland/diagrams@^1.3.1", "@appland/diagrams@^1.4.0":
+"@appland/diagrams@^1.4.0":
   version "1.4.0"
   resolved "https://registry.yarnpkg.com/@appland/diagrams/-/diagrams-1.4.0.tgz#8e299b4e926b7dc02504f2a531d2636db662224f"
   integrity sha512-OWr/8JjQuqWzdMBAEc0g0pAhzyfz0Jrc4unSglGXfOUe1HhEqqA3Qw8fd9YmjKjHC5t8NvAo9NWdJNwpxUKJyA==
@@ -30,6 +30,19 @@
     deepmerge "^4.2.2"
     sql-formatter "^4.0.2"
 
+"@appland/diagrams@^1.5.1":
+  version "1.5.2"
+  resolved "https://registry.yarnpkg.com/@appland/diagrams/-/diagrams-1.5.2.tgz#2bb675f279c6f8827da660d8795a675a639f39a7"
+  integrity sha512-WxRxABdqgPzpuO9VpjhpGzdNnYaa6t9mCf8w/96JXVknA61YWg2i5YK79UwBRKAGcXQnOcXoa9nEoYDmYAoWgQ==
+  dependencies:
+    "@appland/models" "^1.9.0"
+    d3-interpolate "^1.4.0"
+    d3-selection "^1.4.2"
+    d3-shape "^1.3.7"
+    d3-zoom "^1.8.3"
+    dagre "^0.8.5"
+    deepmerge "^4.2.2"
+
 "@appland/models@^1.5.0":
   version "1.5.0"
   resolved "https://registry.yarnpkg.com/@appland/models/-/models-1.5.0.tgz#4417473be867c09a69c216e77e5cbc55c7912d3a"
@@ -38,6 +51,19 @@
     cross-env "^7.0.3"
     crypto-js "^4.0.0"
     sqlite-parser "^1.0.1"
+
+"@appland/models@^1.9.0":
+  version "1.15.0"
+  resolved "https://registry.yarnpkg.com/@appland/models/-/models-1.15.0.tgz#6fdbd1c6dd88d029b2a3433e318078e415e962a4"
+  integrity sha512-03/9icyyj7CttFdkcdR5UTEUwqBLjy2C4LBu5NouQTmNtdq56f7O6iSt3Rjrves2Xs/5/6ueZ+ZxNV75pW/RbQ==
+  dependencies:
+    "@appland/sql-parser" "^1.5.0"
+    crypto-js "^4.0.0"
+
+"@appland/sql-parser@^1.5.0":
+  version "1.5.1"
+  resolved "https://registry.yarnpkg.com/@appland/sql-parser/-/sql-parser-1.5.1.tgz#331d644364899858ba7aa6e884e2492596990626"
+  integrity sha512-R2FBHUOdzdBPUCCiL6WvXT9Fu+Xaj89exa1g+wMlatIe5z6vqitzLkY5a9zGDL3IByTiwbR0jiYuvFMfhp1Q+Q==
 
 "@babel/code-frame@^7.14.5":
   version "7.14.5"
@@ -2109,7 +2135,7 @@ lodash.debounce@^4.0.8:
   resolved "https://registry.yarnpkg.com/lodash.debounce/-/lodash.debounce-4.0.8.tgz#82d79bff30a67c4005ffd5e2515300ad9ca4d7af"
   integrity sha1-gteb/zCmfEAF/9XiUVMArZyk168=
 
-lodash@^4.17.15, lodash@^4.17.20:
+lodash@^4.17.15:
   version "4.17.21"
   resolved "https://registry.yarnpkg.com/lodash/-/lodash-4.17.21.tgz#679591c564c3bffaae8454cf0b3df370c3d6911c"
   integrity sha512-v2kDEe57lecTulaDIuNTPy3Ry4gLGJ6Z1O3vE1krgXZNrsQ+LFTGHVxVjcXPs17LhbZVGedAJv8XZ1tvj5FvSg==
@@ -2577,13 +2603,6 @@ source-map@~0.7.2:
   version "0.7.3"
   resolved "https://registry.yarnpkg.com/source-map/-/source-map-0.7.3.tgz#5302f8169031735226544092e64981f751750383"
   integrity sha512-CkCj6giN3S+n9qrYiBTX5gystlENnRW5jZeNLHpe6aue+SrHcG5VYwujhW9s4dY31mEGsxBDrHR6oI69fTXsaQ==
-
-sql-formatter@^2.3.3:
-  version "2.3.4"
-  resolved "https://registry.yarnpkg.com/sql-formatter/-/sql-formatter-2.3.4.tgz#85ff9a946d8157e3917c0b1db514ca8184a1b6f1"
-  integrity sha512-CajWtvzYoBJbD5PQeVe3E7AOHAIYvRQEPOKgF9kfKNeY8jtjBiiA6pDzkMuAID8jJMluoPvyKveLigSaA5tKQQ==
-  dependencies:
-    lodash "^4.17.20"
 
 sql-formatter@^4.0.2:
   version "4.0.2"
