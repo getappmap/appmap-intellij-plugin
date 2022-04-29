@@ -5,20 +5,13 @@ import com.google.gson.annotations.SerializedName;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public final class Languages {
-    private static final Object lock = new Object();
-    private static List<Language> languages = null;
-    private static Map<String, Language> extensionMapping = null;
-
-    static {
-        setup();
-    }
+    private static final List<Language> languages = loadLanguages();
+    private static final Map<String, Language> extensionMapping = loadLanguageMapping(languages);
 
     public static List<Language> getLanguages() {
         return languages;
@@ -28,21 +21,30 @@ public final class Languages {
         return extensionMapping.get(extension);
     }
 
-    private static void setup() {
-        var gson = new GsonBuilder().create();
-        var resource = Languages.class.getResourceAsStream("/projectPicker/languages.json");
-        var languageArray = gson.fromJson(new InputStreamReader(resource), Language[].class);
-        languages = Arrays.asList(languageArray);
-
+    private static @NotNull Map<String, Language> loadLanguageMapping(@NotNull List<Language> languages) {
         var mapping = new HashMap<String, Language>();
-        for (Language language : languages) {
+        for (var language : languages) {
             for (String extension : language.extensions) {
                 mapping.put(extension, language);
             }
         }
-        extensionMapping = mapping;
+        return mapping;
     }
 
+    private static @NotNull List<Language> loadLanguages() {
+        try (var resource = Languages.class.getResourceAsStream("/projectPicker/languages.json")) {
+            assert resource != null;
+
+            var gson = new GsonBuilder().create();
+            return Arrays.asList(gson.fromJson(new InputStreamReader(resource), Language[].class));
+        } catch (IOException e) {
+            return Collections.emptyList();
+        }
+    }
+
+    /**
+     * Definition of a single language in the JSON data copied over from the vscode plugin, see language.json.
+     */
     public static final class Language {
         @SerializedName("id")
         public String id;
