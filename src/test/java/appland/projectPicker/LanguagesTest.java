@@ -9,6 +9,8 @@ public class LanguagesTest extends AppMapBaseTest {
         var languages = Languages.getLanguages();
         assertNotEmpty(languages);
 
-        assertEquals("java", Languages.getLanguage(".java").id);
+        var java = Languages.getLanguage("java");
+        assertNotNull(java);
+        assertEquals("java", java.id);
     }
 }

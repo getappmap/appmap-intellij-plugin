@@ -3,6 +3,7 @@ package appland.projectPicker;
 import com.google.gson.GsonBuilder;
 import com.google.gson.annotations.SerializedName;
 import com.intellij.openapi.util.text.StringUtil;
+import lombok.Value;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -46,36 +47,13 @@ public final class Languages {
     /**
      * Definition of a single language in the JSON data copied over from the vscode plugin, see language.json.
      */
-    public static final class Language {
+    @Value
+    public static class Language {
         @SerializedName("id")
         public String id;
         @SerializedName("name")
         public String name;
         @SerializedName("extensions")
         public String[] extensions;
-
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
-            Language language = (Language) o;
-            return Objects.equals(id, language.id) && Objects.equals(name, language.name) && Arrays.equals(extensions, language.extensions);
-        }
-
-        @Override
-        public int hashCode() {
-            int result = Objects.hash(id, name);
-            result = 31 * result + Arrays.hashCode(extensions);
-            return result;
-        }
-
-        @Override
-        public String toString() {
-            return "Language{" +
-                    "id='" + id + '\'' +
-                    ", name='" + name + '\'' +
-                    ", extensions=" + Arrays.toString(extensions) +
-                    '}';
-        }
     }
 }
