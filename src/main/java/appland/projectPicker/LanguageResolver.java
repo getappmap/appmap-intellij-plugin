@@ -8,6 +8,9 @@ import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Comparator;
+
+// fixme(jansorg): take care of vcs-ignored files
 public class LanguageResolver {
     /**
      * Recursively walk the given rootDirectory for known source code files and returns the best-guess SUPPORTED
@@ -16,14 +19,18 @@ public class LanguageResolver {
      * If the most used language is not supported, returns {@code null}.
      */
     @Nullable String getLanguage(@NotNull VirtualFile rootDirectory) {
-        return null;
+        var detectedLanguages = getLanguageDistribution(rootDirectory);
+        var bestLanguage = detectedLanguages.object2DoubleEntrySet()
+                .stream()
+                .max(Comparator.comparingDouble(Object2DoubleMap.Entry::getDoubleValue));
+        return bestLanguage.map(lang -> lang.getKey().id).orElse(null);
     }
 
     /**
      * Recursively scans the directory for the contained languages.
      *
      * @param directory The directory to scan
-     * @return Map of language to rating
+     * @return Map of language to rating, normalized to a range of [0.0, 1.0]
      */
     private @NotNull Object2DoubleMap<Languages.Language> getLanguageDistribution(@NotNull VirtualFile directory) {
         var languageCounts = new Object2IntOpenHashMap<Languages.Language>();
@@ -42,9 +49,7 @@ public class LanguageResolver {
 
         var totalFiles = languageCounts.values().intStream().sum();
         var normalizedMap = new Object2DoubleOpenHashMap<Languages.Language>();
-        languageCounts.forEach((language, count) -> {
-            normalizedMap.put(language, (double) count / totalFiles);
-        });
+        languageCounts.forEach((language, count) -> normalizedMap.put(language, (double) count / totalFiles));
         return normalizedMap;
     }
 
