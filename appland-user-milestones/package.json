@@ -18,8 +18,8 @@
         "webpack-cli": "^4.6.0"
     },
     "dependencies": {
-        "@appland/components": "^1.17.0",
-        "@appland/diagrams": "^1.4.0",
+        "@appland/components": "^2.0.3",
+        "@appland/diagrams": "^1.5.2",
         "bent": "^7.3.12",
         "bootstrap": "^4.5.3",
         "bootstrap-autocomplete": "^2.3.7",
