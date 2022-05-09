@@ -1,5 +1,9 @@
 # AppMap Plugin Changelog
 
+## [0.7.7]
+### Changed
+- Updated web components to the latest versions
+
 ## [0.7.6]
 ### Added
 - Support 2022.1 EAP
