@@ -95,6 +95,10 @@ tasks {
         systemProperty("idea.test.execution.policy", "appland.AppLandTestExecutionPolicy")
         systemProperty("appland.testDataPath", file("src/test/data").path)
     }
+
+    withType<Zip> {
+        duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    }
 }
 
 fun AbstractCopyTask.copyPluginAssets(rootDir: String) {
@@ -110,6 +114,11 @@ fun AbstractCopyTask.copyPluginAssets(rootDir: String) {
         include("agent.html")
         include("record.html")
         include("appmaps.html")
+        include("dist/**")
+    }
+    from("${project.rootDir}/appland-project-picker") {
+        into("${rootPath}appland-project-picker")
+        include("index.html")
         include("dist/**")
     }
 }
