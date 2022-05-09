@@ -43,7 +43,7 @@ public final class AppMapPlugin {
     }
 
     public static Path getProjectPickerHTMLPath() {
-        return getPluginPath().resolve("appland-user-milestones").resolve("record.html");
+        return getPluginPath().resolve("appland-project-picker").resolve("dist").resolve("index.html");
     }
 
     @NotNull

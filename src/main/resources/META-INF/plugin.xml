@@ -35,6 +35,7 @@
         <editorNotificationProvider implementation="appland.editor.AppMapNotificationProvider"/>
 
         <fileEditorProvider implementation="appland.milestones.UserMilestonesEditorProvider"/>
+        <fileEditorProvider implementation="appland.projectPicker.ProjectPickerEditorProvider"/>
 
         <fileBasedIndex implementation="appland.index.AppMapMetadataIndex"/>
         <indexedRootsProvider implementation="appland.index.AppMapFolderIndexedRootProvider"/>

@@ -1,6 +1,7 @@
 package appland.toolwindow.milestones;
 
 import appland.milestones.MilestonesViewType;
+import appland.projectPicker.ProjectPickerEditorProvider;
 import com.intellij.openapi.project.Project;
 import com.intellij.ui.components.panels.VerticalLayout;
 import org.jetbrains.annotations.NotNull;
@@ -22,7 +23,8 @@ public class UserMilestonesPanel extends JPanel {
                 add(new StatusLabel(UserMilestoneStatus.Incomplete, "Install AppMap agent", () -> open(project, MilestonesViewType.InstallAgent)));
                 add(new StatusLabel(UserMilestoneStatus.Incomplete, "Record AppMaps", () -> open(project, MilestonesViewType.RecordAppMaps)));
                 add(new StatusLabel(UserMilestoneStatus.Incomplete, "Open AppMaps", () -> open(project, MilestonesViewType.AppMapsTable)));
-                add(new StatusLabel(UserMilestoneStatus.Incomplete, "Beta: Getting started with AppMap", () -> open(project, MilestonesViewType.ProjectPicker)));
+
+                add(new StatusLabel(UserMilestoneStatus.Incomplete, "Beta: Getting started with AppMap", () -> ProjectPickerEditorProvider.open(project)));
             }
         });
 
