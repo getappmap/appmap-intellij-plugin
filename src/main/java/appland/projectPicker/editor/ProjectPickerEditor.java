@@ -1,4 +1,4 @@
-package appland.projectPicker;
+package appland.projectPicker.editor;
 
 import appland.AppMapPlugin;
 import com.google.gson.Gson;
@@ -148,8 +148,7 @@ public class ProjectPickerEditor extends UserDataHolderBase implements FileEdito
         });
 
         JsonObject json = createAppMapsInitJSON();
-        var jsonString = gson.toJson(json);
-        contentPanel.getCefBrowser().executeJavaScript("window.postMessage(" + jsonString + ")", "", 0);
+        contentPanel.getCefBrowser().executeJavaScript("window.postMessage(" + gson.toJson(json) + ")", "", 0);
     }
 
     @NotNull
@@ -172,7 +171,7 @@ public class ProjectPickerEditor extends UserDataHolderBase implements FileEdito
 
     @Override
     public @Nls(capitalization = Nls.Capitalization.Title) @NotNull String getName() {
-        return "User Milestones";
+        return "Project Picker";
     }
 
     @Override

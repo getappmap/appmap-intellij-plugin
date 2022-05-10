@@ -1,5 +1,5 @@
 <template>
-    <ProjectPicker :rows="rows"/>
+    <ProjectPicker :projects="projects"/>
 </template>
 
 <script>
@@ -10,22 +10,13 @@ export default {
     components: {
         ProjectPicker,
     },
+    mounted() {
+        // this is a workaround to notify the plugin that the app is ready
+        console.log("intellij-plugin-ready");
+    },
     data() {
         return {
-            rows: [
-                {
-                    "id": 0,
-                    "name": "Spring Test Project",
-                    "testFramework": "JUnit",
-                    "webFramework": "Spring Boot",
-                },
-                {
-                    "id": 1,
-                    "name": "Spring Pet Clinic",
-                    "testFramework": "NGUnit",
-                    "webFramework": "Tomcat",
-                }
-            ]
+            projects: []
         }
     }
 }

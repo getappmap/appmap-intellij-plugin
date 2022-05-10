@@ -1,7 +1,7 @@
 package appland.toolwindow.milestones;
 
 import appland.milestones.MilestonesViewType;
-import appland.projectPicker.ProjectPickerEditorProvider;
+import appland.projectPicker.editor.ProjectPickerEditorProvider;
 import com.intellij.openapi.project.Project;
 import com.intellij.ui.components.panels.VerticalLayout;
 import org.jetbrains.annotations.NotNull;

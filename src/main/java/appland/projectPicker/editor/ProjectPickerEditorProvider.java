@@ -1,4 +1,4 @@
-package appland.projectPicker;
+package appland.projectPicker.editor;
 
 import com.intellij.openapi.fileEditor.FileEditor;
 import com.intellij.openapi.fileEditor.FileEditorManager;

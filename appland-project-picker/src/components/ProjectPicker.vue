@@ -6,7 +6,7 @@
         <main>
             <article>
                 <h2>Select a suitable project</h2>
-                <div v-if="rows && rows.length > 0">
+                <div v-if="projects && projects.length > 0">
                     <p class="body-text">To make sure that your projects are suitable for mapping, we make a couple of
                         quick
                         requirement checks on your workspace to help you find a project to start AppMapping.
@@ -14,18 +14,18 @@
                     <table>
                         <thead>
                         <tr>
-                            <th scope="col">Project name ({{ rows.length }})</th>
+                            <th scope="col">Project name ({{ projects.length }})</th>
                             <th scope="col">Language</th>
                             <th scope="col">Test framework</th>
                             <th scope="col">Web framework</th>
                         </tr>
                         </thead>
                         <tbody>
-                        <tr v-for="row in rows" :key="row.id">
-                            <td>{{ row.name }}</td>
-                            <td>{{ row.language }}</td>
-                            <td>{{ row.testFramework }}</td>
-                            <td>{{ row.webFramework }}</td>
+                        <tr v-for="project in projects" :key="project.id" :class="classOfScore(project.score)">
+                            <td>{{ project.name }}</td>
+                            <FeatureColumn :feature="project.features.lang"/>
+                            <FeatureColumn :feature="project.features.test"/>
+                            <FeatureColumn :feature="project.features.web"/>
                         </tr>
                         </tbody>
                     </table>
@@ -73,14 +73,29 @@
 </template>
 
 <script>
+import FeatureColumn from './FeatureColumn'
+
 export default {
     name: 'ProjectPicker',
-    props: ['rows']
+    props: ['projects'],
+    components: {FeatureColumn},
+    expose: ['classOfScore'],
+    methods: {
+        classOfScore: function (score) {
+            if (score < 2) return 'bad';
+            if (score < 3) return 'ok';
+            return 'good';
+        },
+    }
 }
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
+.my-class-name {
+    color: red;
+}
+
 :root {
     --appmap-border: #7F6BE6;
 }
