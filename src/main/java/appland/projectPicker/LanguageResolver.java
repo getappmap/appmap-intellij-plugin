@@ -18,7 +18,7 @@ public class LanguageResolver {
      * Ignores files and directories that are Git ignored.
      * If the most used language is not supported, returns {@code null}.
      */
-    @Nullable String getLanguage(@NotNull VirtualFile rootDirectory) {
+    public @Nullable String getLanguage(@NotNull VirtualFile rootDirectory) {
         var detectedLanguages = getLanguageDistribution(rootDirectory);
         var bestLanguage = detectedLanguages.object2DoubleEntrySet()
                 .stream()

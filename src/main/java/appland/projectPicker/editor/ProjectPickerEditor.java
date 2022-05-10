@@ -3,10 +3,6 @@ package appland.projectPicker.editor;
 import appland.AppMapPlugin;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
-import com.intellij.ide.BrowserUtil;
-import com.intellij.ide.ClipboardSynchronizer;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.fileEditor.FileEditor;
 import com.intellij.openapi.fileEditor.FileEditorLocation;
@@ -15,20 +11,17 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.Disposer;
 import com.intellij.openapi.util.UserDataHolderBase;
 import com.intellij.openapi.vfs.VirtualFile;
+import com.intellij.testFramework.LightVirtualFile;
 import com.intellij.ui.jcef.*;
 import org.cef.CefSettings;
 import org.cef.browser.CefBrowser;
-import org.cef.browser.CefFrame;
 import org.cef.handler.CefDisplayHandlerAdapter;
 import org.cef.handler.CefLoadHandler;
-import org.cef.handler.CefRequestHandlerAdapter;
-import org.cef.network.CefRequest;
 import org.jetbrains.annotations.Nls;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
-import java.awt.datatransfer.StringSelection;
 import java.beans.PropertyChangeListener;
 import java.io.IOException;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -39,18 +32,17 @@ public class ProjectPickerEditor extends UserDataHolderBase implements FileEdito
 
     private final Project project;
     @NotNull
-    private final VirtualFile file;
+    private final LightVirtualFile file;
 
     private final JBCefClient jcefClient = JBCefApp.getInstance().createClient();
     private final JCEFHtmlPanel contentPanel = new JCEFHtmlPanel(jcefClient, null);
     private final JBCefJSQuery jcefBridge = JBCefJSQuery.create((JBCefBrowserBase) contentPanel);
 
     private final AtomicBoolean navigating = new AtomicBoolean(false);
-    private final Gson gson = new GsonBuilder().create();
 
     public ProjectPickerEditor(@NotNull Project project, @NotNull VirtualFile file) {
         this.project = project;
-        this.file = file;
+        this.file = (LightVirtualFile) file;
 
         Disposer.register(this, jcefClient);
         Disposer.register(this, contentPanel);
@@ -61,20 +53,6 @@ public class ProjectPickerEditor extends UserDataHolderBase implements FileEdito
     }
 
     private void setupJCEF() {
-        // open links to https://appland.com in the external browser
-        contentPanel.getJBCefClient().addRequestHandler(new CefRequestHandlerAdapter() {
-            @Override
-            public boolean onBeforeBrowse(CefBrowser browser, CefFrame frame, CefRequest request, boolean user_gesture, boolean is_redirect) {
-                var url = request.getURL();
-                if (url != null && url.startsWith("https://appland.com")) {
-                    navigating.set(true);
-                    BrowserUtil.browse(url);
-                    return true;
-                }
-                return false;
-            }
-        }, contentPanel.getCefBrowser());
-
         contentPanel.setErrorPage((errorCode, errorText, failedUrl) -> {
             if (errorCode == CefLoadHandler.ErrorCode.ERR_ABORTED && navigating.getAndSet(false)) {
                 return null;
@@ -119,44 +97,16 @@ public class ProjectPickerEditor extends UserDataHolderBase implements FileEdito
         }
     }
 
+    /**
+     * This method is called after the JavaScript application notified that it's ready to receive data.
+     */
     private void onJavaScriptApplicationReady() {
-        jcefBridge.addHandler(request -> {
-            LOG.warn("postMessage received message: " + request);
-
-            try {
-                var json = gson.fromJson(request, JsonObject.class);
-                var type = json.has("type") ? json.getAsJsonPrimitive("type").getAsString() : null;
-                if (type != null) {
-                    switch (type) {
-                        case "clipboard": {
-                            var content = json.getAsJsonPrimitive("target").getAsString();
-                            LOG.debug("Copying text to clipboard: " + content);
-
-                            var target = new StringSelection(content);
-                            ClipboardSynchronizer.getInstance().setContent(target, target);
-                            break;
-                        }
-                        default:
-                            LOG.warn("Unhandled message type: " + type);
-                    }
-                }
-            } catch (Exception e) {
-                LOG.warn("error handling command: " + request, e);
-            }
-
-            return new JBCefJSQuery.Response("Received " + request);
-        });
-
-        JsonObject json = createAppMapsInitJSON();
-        contentPanel.getCefBrowser().executeJavaScript("window.postMessage(" + gson.toJson(json) + ")", "", 0);
+        var json = createAppMapsInitJSON();
+        contentPanel.getCefBrowser().executeJavaScript("window.loadAppLandProjects(" + json + ")", "", 0);
     }
 
-    @NotNull
-    private JsonObject createAppMapsInitJSON() {
-        var json = new JsonObject();
-        json.addProperty("type", "init");
-        json.add("projects", new JsonArray());
-        return json;
+    private String createAppMapsInitJSON() {
+        return file.getContent().toString();
     }
 
     @Override
