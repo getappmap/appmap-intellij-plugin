@@ -21,7 +21,9 @@
                         </tr>
                         </thead>
                         <tbody>
-                        <tr v-for="project in projects" :key="project.id" :class="classOfScore(project.score)">
+                        <tr v-for="project in projects" :key="project.id"
+                            v-bind:class="{ 'selected': currentProject === project, 'good': isGood(project), 'ok': isOk(project), 'bad': isBad(project) }"
+                            @click="selectProject(project)">
                             <td>{{ project.name }}</td>
                             <FeatureColumn :feature="project.features.lang"/>
                             <FeatureColumn :feature="project.features.test"/>
@@ -31,30 +33,32 @@
                     </table>
                 </div>
             </article>
-            <article class="explain good ok">
+            <article class="explain good ok" v-if="currentProject && (isGood(currentProject) || isOk(currentProject))">
                 <br/>
                 <h2>Install AppMap agent</h2>
                 <p class="body-text">AppMap agent records executing code. It creates JSON files as you execute test
                     cases, run sample programs, or perform interactive sessions with your app. This script will guide
                     you through the installation process. Run it in the project's environment so it can correctly detect
                     runtimes and libraries.</p>
-                <p class="explain ok note body-text">It appears this project might not be a good choice for your first
+                <p class="explain ok note body-text" v-bind:class="{ 'hidden': !isOk(currentProject) }">It appears this
+                    project might not be a good choice for your first
                     AppMap.
                     We recommend you pick another project; proceed at your own risk.</p>
-                <p class="body-text">If you do not have Node.js installed, or would prefer manual installion of the
+                <p class="body-text">If you do not have Node.js installed, or would prefer manual installation of the
                     AppMap agent visit our
-                    <a id="docref-step2" href="https://appland.com/docs/quickstart/vscode/step-2">installation
+                    <a id="docref-step2"
+                       :href="'https://appland.com/docs/quickstart/vscode/' + lang(currentProject) + '-step-2.html'">installation
                         documentation.</a></p>
                 <p class="command"><code>
-                    npx @appland/appmap install <span id="directory"></span>
+                    npx @appland/appmap install <span id="directory">{{ quote(currentProject.path) }}</span>
                 </code></p>
                 <br/>
                 <h2>Record AppMaps</h2>
                 <p>To record AppMaps from a running application or from integration tests <a id="docref-step3"
-                                                                                             href="https://appland.com/docs/quickstart/vscode/step-3">follow
+                                                                                             :href="'https://appland.com/docs/quickstart/vscode/' + lang(currentProject) + '-step-3.html'">follow
                     these instructions.</a></p>
             </article>
-            <article class="explain bad">
+            <article class="explain bad" v-if="!currentProject || isBad(currentProject)">
                 <p>For your first AppMap, we recommend a project that:</p>
                 <ul>
                     <li>is a web application or a web service</li>
@@ -78,14 +82,39 @@ import FeatureColumn from './FeatureColumn'
 export default {
     name: 'ProjectPicker',
     props: ['projects'],
+    data: function () {
+        return {
+            currentProject: undefined
+        }
+    },
     components: {FeatureColumn},
-    expose: ['classOfScore'],
+    expose: ['classOfScore', 'selectProject'],
     methods: {
-        classOfScore: function (score) {
-            if (score < 2) return 'bad';
-            if (score < 3) return 'ok';
-            return 'good';
+        isBad: function (project) {
+            return project.score < 3
         },
+        isOk: function (project) {
+            return project.score === 3
+        },
+        isGood: function (project) {
+            return project.score > 3
+        },
+        selectProject: function (project) {
+            this.currentProject = project;
+        },
+        lang: function (project) {
+            const lang = project?.features?.lang?.title;
+            return lang ? lang?.toLowerCase() : "";
+        },
+        // Quote path for the command line
+        quote: function (path) {
+            // Don't try to be too smart, shell quoting is an ugly can of worms.
+            // Just quote spaces if needed; this is pretty common on some platforms.
+            // If the user has funnier characters in paths, they should be smart
+            // enough to deal with them.
+            if (path.includes(' ')) return '"' + path + '"';
+            return path;
+        }
     }
 }
 </script>
@@ -119,6 +148,10 @@ a, a:visited, a:focus {
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
+.hidden {
+    display: none;
+}
+
 .body-text {
     max-width: 550px;
 }
