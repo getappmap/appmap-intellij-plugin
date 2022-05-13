@@ -90,20 +90,35 @@ export default {
 }
 </script>
 
-<!-- Add "scoped" attribute to limit CSS to this component only -->
-<style scoped>
-.my-class-name {
-    color: red;
-}
-
+<style>
 :root {
     --appmap-border: #7F6BE6;
+    --vscode-foreground: #c6c6c6;
+    --vscode-welcomePage-tileBackground: #252526;
+    --vscode-welcomePage-tileShadow: rgba(0, 0, 0, 0.36);
+    --vscode-list-inactiveSelectionBackground: rgba(255, 255, 255, 0.1);
+    --vscode-problemsWarningIcon-foreground: #ecc30b;
+    --vscode-problemsErrorIcon-foreground: #cd1414;
+    --vscode-list-warningForeground: #ecc30b;
+    --vscode-list-errorForeground: #cd1414;
+
+    --appland-text-font-family: 'IBM Plex Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    --vs-code-gray1: #1E1E1E;
 }
 
 body {
     color: var(--vscode-foreground);
+    background-color: var(--vs-code-gray1);
+    font-family: var(--appland-text-font-family);
 }
 
+a, a:visited, a:focus {
+    color: var(--vscode-foreground);
+}
+</style>
+
+<!-- Add "scoped" attribute to limit CSS to this component only -->
+<style scoped>
 .body-text {
     max-width: 550px;
 }
