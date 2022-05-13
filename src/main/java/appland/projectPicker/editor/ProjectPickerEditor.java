@@ -3,6 +3,7 @@ package appland.projectPicker.editor;
 import appland.AppMapPlugin;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.intellij.ide.BrowserUtil;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.fileEditor.FileEditor;
 import com.intellij.openapi.fileEditor.FileEditorLocation;
@@ -15,8 +16,11 @@ import com.intellij.testFramework.LightVirtualFile;
 import com.intellij.ui.jcef.*;
 import org.cef.CefSettings;
 import org.cef.browser.CefBrowser;
+import org.cef.browser.CefFrame;
 import org.cef.handler.CefDisplayHandlerAdapter;
 import org.cef.handler.CefLoadHandler;
+import org.cef.handler.CefRequestHandlerAdapter;
+import org.cef.network.CefRequest;
 import org.jetbrains.annotations.Nls;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -53,6 +57,20 @@ public class ProjectPickerEditor extends UserDataHolderBase implements FileEdito
     }
 
     private void setupJCEF() {
+        // open links to https://appland.com in the external browser
+        contentPanel.getJBCefClient().addRequestHandler(new CefRequestHandlerAdapter() {
+            @Override
+            public boolean onBeforeBrowse(CefBrowser browser, CefFrame frame, CefRequest request, boolean user_gesture, boolean is_redirect) {
+                var url = request.getURL();
+                if (url != null && url.startsWith("https://appland.com")) {
+                    navigating.set(true);
+                    BrowserUtil.browse(url);
+                    return true;
+                }
+                return false;
+            }
+        }, contentPanel.getCefBrowser());
+
         contentPanel.setErrorPage((errorCode, errorText, failedUrl) -> {
             if (errorCode == CefLoadHandler.ErrorCode.ERR_ABORTED && navigating.getAndSet(false)) {
                 return null;
