@@ -3,7 +3,9 @@ package appland.projectPicker.editor;
 import appland.AppMapPlugin;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonObject;
 import com.intellij.ide.BrowserUtil;
+import com.intellij.ide.ClipboardSynchronizer;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.fileEditor.FileEditor;
 import com.intellij.openapi.fileEditor.FileEditorLocation;
@@ -26,6 +28,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
+import java.awt.datatransfer.StringSelection;
 import java.beans.PropertyChangeListener;
 import java.io.IOException;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -41,6 +44,7 @@ public class ProjectPickerEditor extends UserDataHolderBase implements FileEdito
     private final JBCefClient jcefClient = JBCefApp.getInstance().createClient();
     private final JCEFHtmlPanel contentPanel = new JCEFHtmlPanel(jcefClient, null);
     private final JBCefJSQuery jcefBridge = JBCefJSQuery.create((JBCefBrowserBase) contentPanel);
+    private final Gson gson = new GsonBuilder().create();
 
     private final AtomicBoolean navigating = new AtomicBoolean(false);
 
@@ -119,8 +123,40 @@ public class ProjectPickerEditor extends UserDataHolderBase implements FileEdito
      * This method is called after the JavaScript application notified that it's ready to receive data.
      */
     private void onJavaScriptApplicationReady() {
-        var json = createAppMapsInitJSON();
-        contentPanel.getCefBrowser().executeJavaScript("window.loadAppLandProjects(" + json + ")", "", 0);
+        // init JS listener
+        jcefBridge.addHandler(request -> {
+            LOG.warn("postMessage received message: " + request);
+
+            try {
+                LOG.warn("JCEF: " + request);
+
+                var json = gson.fromJson(request, JsonObject.class);
+                var type = json.has("type") ? json.getAsJsonPrimitive("type").getAsString() : null;
+                if ("clipboard".equals(type)) {
+                    var content = json.getAsJsonPrimitive("target").getAsString();
+                    LOG.debug("Copying text to clipboard: " + content);
+
+                    var target = new StringSelection(content);
+                    ClipboardSynchronizer.getInstance().setContent(target, target);
+                }
+            } catch (Exception e) {
+                LOG.warn("error handling command: " + request, e);
+            }
+
+            return new JBCefJSQuery.Response("Received " + request);
+        });
+
+        // register callback in browser
+        contentPanel.getCefBrowser().executeJavaScript(createCallbackJS(jcefBridge, "postMessage"), "", 0);
+
+        // populate page
+        contentPanel.getCefBrowser().executeJavaScript("window.loadAppLandProjects(" + createAppMapsInitJSON() + ")", "", 0);
+    }
+
+    @NotNull
+    private String createCallbackJS(JBCefJSQuery query, @NotNull String functionName) {
+        return "if (!window.AppLand) window.AppLand={}; window.AppLand." + functionName + "=function(name) {" +
+                query.inject("name") + "};";
     }
 
     private String createAppMapsInitJSON() {

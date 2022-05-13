@@ -49,9 +49,10 @@
                     <a id="docref-step2"
                        :href="'https://appland.com/docs/quickstart/vscode/' + lang(currentProject) + '-step-2.html'">installation
                         documentation.</a></p>
-                <p class="command"><code>
-                    npx @appland/appmap install <span id="directory">{{ quote(currentProject.path) }}</span>
-                </code></p>
+                <p class="command">
+                    <code>{{ command(currentProject) }}</code>
+                    <button @click="copyProjectCommand(currentProject)" title="Copy to clipboard">⧉</button>
+                </p>
                 <br/>
                 <h2>Record AppMaps</h2>
                 <p>To record AppMaps from a running application or from integration tests <a id="docref-step3"
@@ -78,6 +79,12 @@
 
 <script>
 import FeatureColumn from './FeatureColumn'
+
+function findProjectCommand(project) {
+    const path = project.path;
+    const quoted = path.includes(' ') ? '"' + path + '"' : path;
+    return "npx @appland/appmap install " + quoted;
+}
 
 export default {
     name: 'ProjectPicker',
@@ -106,14 +113,14 @@ export default {
             const lang = project?.features?.lang?.title;
             return lang ? lang?.toLowerCase() : "";
         },
-        // Quote path for the command line
-        quote: function (path) {
-            // Don't try to be too smart, shell quoting is an ugly can of worms.
-            // Just quote spaces if needed; this is pretty common on some platforms.
-            // If the user has funnier characters in paths, they should be smart
-            // enough to deal with them.
-            if (path.includes(' ')) return '"' + path + '"';
-            return path;
+        command: function (project) {
+            return findProjectCommand(project);
+        },
+        copyProjectCommand: function (project) {
+            window.AppLand.postMessage(JSON.stringify({
+                "type": "clipboard",
+                "target": findProjectCommand(project)
+            }));
         }
     }
 }
