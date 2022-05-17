@@ -6,7 +6,7 @@ import one.util.streamex.StreamEx;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public class JavaLanguageAnalyzer implements LanguageAnalyzer {
+class JavaLanguageAnalyzer implements LanguageAnalyzer {
     @Override
     public @NotNull Result analyze(@NotNull VirtualFile directory) {
         for (var buildSystem : BuildSystem.values()) {

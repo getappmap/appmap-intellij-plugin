@@ -1,6 +1,7 @@
 package appland.projectPicker;
 
 import appland.AppMapBaseTest;
+import org.jetbrains.annotations.NotNull;
 import org.junit.Test;
 
 public class LanguagesTest extends AppMapBaseTest {
@@ -9,8 +10,13 @@ public class LanguagesTest extends AppMapBaseTest {
         var languages = Languages.getLanguages();
         assertNotEmpty(languages);
 
-        var java = Languages.getLanguage("java");
-        assertNotNull(java);
-        assertEquals("java", java.id);
+        assertLanguage("java", "java");
+        assertLanguage("js", "javascript");
+    }
+
+    private void assertLanguage(@NotNull String fileExtension, @NotNull String expectedLanguageId) {
+        var language = Languages.getLanguage(fileExtension);
+        assertNotNull(language);
+        assertEquals(expectedLanguageId, language.id);
     }
 }

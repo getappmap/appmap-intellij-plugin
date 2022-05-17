@@ -31,6 +31,16 @@ public class LanguageResolverTest extends AppMapBaseTest {
         assertLanguageResolver("python-java", "python");
     }
 
+    @Test
+    public void javascriptOneLevel() {
+        assertLanguageResolver("javascript-oneLevel", "javascript");
+    }
+
+    @Test
+    public void javascriptPython() {
+        assertLanguageResolver("javascript-python", "javascript");
+    }
+
     private void assertLanguageResolver(@NotNull String directory, @Nullable String expectedLanguageId) {
         var root = myFixture.copyDirectoryToProject(directory, "root");
 

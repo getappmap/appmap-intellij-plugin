@@ -1,13 +1,19 @@
 package appland.projectPicker;
 
 import appland.AppMapBaseTest;
+import org.jetbrains.annotations.NotNull;
 import org.junit.Test;
 
 public class LanguageAnalyzersTest extends AppMapBaseTest {
     @Test
     public void analyzers() {
-        var java = Languages.getLanguage("java");
-        assertNotNull(java);
-        assertNotNull(LanguageAnalyzers.create(java));
+        assertAnalyzer("java");
+        assertAnalyzer("js");
+    }
+
+    private void assertAnalyzer(@NotNull String fileExtension) {
+        var language = Languages.getLanguage(fileExtension);
+        assertNotNull(language);
+        assertNotNull(LanguageAnalyzers.create(language));
     }
 }

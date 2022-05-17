@@ -1,11 +1,10 @@
 package appland.projectPicker;
 
-import appland.AppMapBaseTest;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.junit.Test;
 
-public class JavaLanguageAnalyzerTest extends AppMapBaseTest {
+public class JavaLanguageAnalyzerTest extends ProjectPickerBaseTest {
     @Override
     protected String getBasePath() {
         return "projectPicker/sample-projects";
@@ -23,7 +22,7 @@ public class JavaLanguageAnalyzerTest extends AppMapBaseTest {
     public void mavenSpring() {
         var result = loadDirectory("java-maven-spring");
         assertJavaSettings(result.getFeatures(), "pom.xml", "com.appland:appmap-maven-plugin");
-        assertFramework(result.getFeatures().web, "Spring");
+        assertFramework(result.getFeatures().web, "Spring", Score.Good);
         assertNull(result.getFeatures().test);
     }
 
@@ -31,8 +30,8 @@ public class JavaLanguageAnalyzerTest extends AppMapBaseTest {
     public void mavenSpringJUnit() {
         var result = loadDirectory("java-maven-spring-junit");
         assertJavaSettings(result.getFeatures(), "pom.xml", "com.appland:appmap-maven-plugin");
-        assertFramework(result.getFeatures().web, "Spring");
-        assertFramework(result.getFeatures().test, "JUnit");
+        assertFramework(result.getFeatures().web, "Spring", Score.Good);
+        assertFramework(result.getFeatures().test, "JUnit", Score.Good);
     }
 
     @NotNull
@@ -45,19 +44,12 @@ public class JavaLanguageAnalyzerTest extends AppMapBaseTest {
         return result;
     }
 
-    private void assertJavaSettings(Features features, String buildSystemFileName, String buildPlugin) {
+    private void assertJavaSettings(@NotNull Features features, @Nullable String depFile, @Nullable String pluginValue) {
         assertEquals("Java", features.lang.title);
-        assertEquals(buildSystemFileName, features.lang.depFile);
-        assertEquals(buildPlugin, features.lang.plugin);
+        assertEquals(depFile, features.lang.depFile);
+        assertEquals(pluginValue, features.lang.plugin);
         assertEquals("plugin", features.lang.pluginType);
         assertEquals(Score.Good, features.lang.score);
         assertFalse(features.lang.text.isEmpty());
-    }
-
-    private void assertFramework(@Nullable Feature result, String Spring) {
-        assertNotNull(result);
-        assertEquals(Spring, result.title);
-        assertEquals(Score.Good, result.score);
-        assertFalse(result.title.isEmpty());
     }
 }

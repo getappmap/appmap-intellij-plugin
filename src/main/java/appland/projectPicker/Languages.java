@@ -1,6 +1,5 @@
 package appland.projectPicker;
 
-import com.google.gson.GsonBuilder;
 import com.google.gson.annotations.SerializedName;
 import com.intellij.openapi.util.text.StringUtil;
 import lombok.Value;
@@ -37,8 +36,7 @@ public final class Languages {
         try (var resource = Languages.class.getResourceAsStream("/projectPicker/languages.json")) {
             assert resource != null;
 
-            var gson = new GsonBuilder().create();
-            return Arrays.asList(gson.fromJson(new InputStreamReader(resource), Language[].class));
+            return Arrays.asList(GsonUtils.gson.fromJson(new InputStreamReader(resource), Language[].class));
         } catch (IOException e) {
             return Collections.emptyList();
         }
