@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.Objects;
 
 /**
- * Wrapper class for a line offset inside of a file.
+ * Wrapper class for a line offset inside a file.
  */
 public final class FileLocation {
     /**

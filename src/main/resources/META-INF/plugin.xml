@@ -59,6 +59,11 @@
                              instance="appland.settings.AppMapProjectConfigurable"/>
 
         <errorHandler implementation="appland.GitHubErrorHandler"/>
+
+        <!-- scanner problems view -->
+        <projectService serviceImplementation="appland.problemsView.ScannerProblemsManager"/>
+        <problemsViewPanelProvider implementation="appland.problemsView.ScannerViewPanelProvider"/>
+        <vfs.asyncListener implementation="appland.problemsView.listener.ScannerFilesAsyncListener"/>
     </extensions>
 
     <actions>
@@ -71,7 +76,7 @@
         <action id="appmapDocs" class="appland.actions.AppMapDocumentationAction">
             <add-to-group group-id="HelpMenu" anchor="before" relative-to-action="CheckForUpdate"/>
         </action>
-  
+
         <group id="appmapToolsMenu" popup="true" icon="appland.Icons.APPMAP_TOOLS_MENU">
             <!--          
             <reference ref="uploadAppMap"/> 
