@@ -1,5 +1,8 @@
 # AppMap Plugin Changelog
 
+## [0.7.9]
+- Update community links within the extension description
+
 ## [0.7.8]
 ### Changed
 - Updated web components to the latest versions

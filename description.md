@@ -41,7 +41,7 @@ Summary of Features:
 - [Our doc site](https://appland.com/docs/appmap-overview.html)
 - [Our GitHub](https://github.com/applandinc)
 - [Our blog](https://appland.com/blog/)
-- [1:1 support with our dev team on Discord](https://discord.com/invite/N9VUap6)
+- [1:1 support with our dev team on Slack](https://appland.com/slack)
 - Email support: [support@app.land](mailto:support@app.land)
 
 ## Twitter
