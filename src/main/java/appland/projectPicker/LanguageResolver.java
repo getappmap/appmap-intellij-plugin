@@ -6,9 +6,9 @@ import it.unimi.dsi.fastutil.objects.Object2DoubleMap;
 import it.unimi.dsi.fastutil.objects.Object2DoubleOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.Comparator;
+import java.util.Map;
 
 // fixme(jansorg): take care of vcs-ignored files
 public class LanguageResolver {
@@ -18,12 +18,12 @@ public class LanguageResolver {
      * Ignores files and directories that are Git ignored.
      * If the most used language is not supported, returns {@code null}.
      */
-    public @Nullable String getLanguage(@NotNull VirtualFile rootDirectory) {
+    public Languages.Language getLanguage(@NotNull VirtualFile rootDirectory) {
         var detectedLanguages = getLanguageDistribution(rootDirectory);
         var bestLanguage = detectedLanguages.object2DoubleEntrySet()
                 .stream()
                 .max(Comparator.comparingDouble(Object2DoubleMap.Entry::getDoubleValue));
-        return bestLanguage.map(lang -> lang.getKey().id).orElse(null);
+        return bestLanguage.map(Map.Entry::getKey).orElse(null);
     }
 
     /**

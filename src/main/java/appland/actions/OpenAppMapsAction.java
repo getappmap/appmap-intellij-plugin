@@ -1,7 +1,7 @@
 package appland.actions;
 
-import appland.milestones.MilestonesViewType;
-import appland.milestones.UserMilestonesEditorProvider;
+import appland.installGuide.InstallGuideViewType;
+import appland.installGuide.InstallGuideEditorProvider;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import org.jetbrains.annotations.NotNull;
@@ -11,6 +11,6 @@ import java.util.Objects;
 public class OpenAppMapsAction extends AnAction {
     @Override
     public void actionPerformed(@NotNull AnActionEvent e) {
-        UserMilestonesEditorProvider.open(Objects.requireNonNull(e.getProject()), MilestonesViewType.AppMapsTable);
+        InstallGuideEditorProvider.open(Objects.requireNonNull(e.getProject()), InstallGuideViewType.InstallGuide);
     }
 }

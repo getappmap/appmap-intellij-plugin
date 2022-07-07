@@ -36,7 +36,7 @@ public final class Languages {
         try (var resource = Languages.class.getResourceAsStream("/projectPicker/languages.json")) {
             assert resource != null;
 
-            return Arrays.asList(GsonUtils.gson.fromJson(new InputStreamReader(resource), Language[].class));
+            return Arrays.asList(GsonUtils.GSON.fromJson(new InputStreamReader(resource), Language[].class));
         } catch (IOException e) {
             return Collections.emptyList();
         }

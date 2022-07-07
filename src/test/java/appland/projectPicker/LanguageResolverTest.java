@@ -46,6 +46,6 @@ public class LanguageResolverTest extends AppMapBaseTest {
 
         var resolver = new LanguageResolver();
         var language = resolver.getLanguage(root);
-        assertEquals(expectedLanguageId, language);
+        assertEquals(expectedLanguageId, language.id);
     }
 }

@@ -8,7 +8,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
 
-public class OpenQuickstartAction extends AnAction {
+public class OpenInstallGuideAction extends AnAction {
     @Override
     public void actionPerformed(@NotNull AnActionEvent e) {
         InstallGuideEditorProvider.open(Objects.requireNonNull(e.getProject()), InstallGuideViewType.InstallGuide);

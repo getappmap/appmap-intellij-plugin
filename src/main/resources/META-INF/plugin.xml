@@ -34,8 +34,7 @@
         <fileIconProvider implementation="appland.editor.AppMapIconProvider"/>
         <editorNotificationProvider implementation="appland.editor.AppMapNotificationProvider"/>
 
-        <fileEditorProvider implementation="appland.milestones.UserMilestonesEditorProvider"/>
-        <fileEditorProvider implementation="appland.projectPicker.editor.ProjectPickerEditorProvider"/>
+        <fileEditorProvider implementation="appland.installGuide.InstallGuideEditorProvider"/>
 
         <fileBasedIndex implementation="appland.index.AppMapMetadataIndex"/>
         <indexedRootsProvider implementation="appland.index.AppMapFolderIndexedRootProvider"/>
@@ -86,5 +85,7 @@
                 text="AppLand: Open Quickstart"/>
         <action id="openUserAppMaps" class="appland.actions.OpenAppMapsAction"
                 text="AppLand: Open AppMaps"/>
+        <action id="openInstallGuide" class="appland.actions.OpenInstallGuideAction"
+                text="AppLand: Install Guide (Beta)"/>
     </actions>
 </idea-plugin>

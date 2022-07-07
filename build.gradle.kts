@@ -108,16 +108,8 @@ fun AbstractCopyTask.copyPluginAssets(rootDir: String) {
         include("index.html")
         include("dist/**")
     }
-    from("${project.rootDir}/appland-user-milestones") {
-        into("${rootPath}appland-user-milestones")
-        include("welcome.html")
-        include("agent.html")
-        include("record.html")
-        include("appmaps.html")
-        include("dist/**")
-    }
-    from("${project.rootDir}/appland-project-picker") {
-        into("${rootPath}appland-project-picker")
+    from("${project.rootDir}/appland-install-guide") {
+        into("${rootPath}appland-install-guide")
         include("index.html")
         include("dist/**")
     }

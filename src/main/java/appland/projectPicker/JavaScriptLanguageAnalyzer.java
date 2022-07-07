@@ -31,7 +31,7 @@ class JavaScriptLanguageAnalyzer implements LanguageAnalyzer {
             return null;
         }
 
-        var json = GsonUtils.gson.fromJson(document.getText(), JsonObject.class);
+        var json = GsonUtils.GSON.fromJson(document.getText(), JsonObject.class);
 
         FeatureEx web = null;
         if (GsonUtils.hasProperty(json, "dependencies", "express")) {
