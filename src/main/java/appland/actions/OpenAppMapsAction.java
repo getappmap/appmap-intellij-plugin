@@ -10,6 +10,11 @@ import java.util.Objects;
 
 public class OpenAppMapsAction extends AnAction {
     @Override
+    public void update(@NotNull AnActionEvent e) {
+        e.getPresentation().setEnabled(UserMilestonesEditorProvider.isSupported());
+    }
+
+    @Override
     public void actionPerformed(@NotNull AnActionEvent e) {
         UserMilestonesEditorProvider.open(Objects.requireNonNull(e.getProject()), MilestonesViewType.AppMapsTable);
     }
