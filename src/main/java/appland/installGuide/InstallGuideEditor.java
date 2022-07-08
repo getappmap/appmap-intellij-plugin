@@ -1,7 +1,8 @@
 package appland.installGuide;
 
 import appland.AppMapPlugin;
-import appland.installGuide.languageAnalyzer.InstallGuide;
+import appland.installGuide.languageAnalyzer.GsonUtils;
+import appland.installGuide.projectData.ProjectDataService;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
@@ -195,11 +196,13 @@ public class InstallGuideEditor extends UserDataHolderBase implements FileEditor
 
     @NotNull
     private JsonObject createInstallGuideInitJSON() {
+        var projects = ProjectDataService.getInstance(project).getAppMapProjects();
+
         var json = new JsonObject();
         json.addProperty("type", "init");
-        json.add("projects", InstallGuide.scanProjectAsyncTree(project));
-        json.add("disabled", new JsonArray());
-        json.addProperty("page", "project-picker");
+        json.add("projects", GsonUtils.GSON.toJsonTree(projects));
+        json.add("disabled", new JsonArray()); // fixme
+        json.addProperty("page", "project-picker"); // fixme
         return json;
     }
 

@@ -4,7 +4,15 @@ import lombok.AllArgsConstructor;
 
 @AllArgsConstructor
 public enum Score {
-    Good(2), Okay(1), Bad(0);
+    Bad(0), Okay(1), Good(2);
 
-    final int value;
+    private final int scoreValue;
+
+    public int getScoreValue() {
+        return scoreValue;
+    }
+
+    public int getOverallScoreValue() {
+        return scoreValue + 1;
+    }
 }

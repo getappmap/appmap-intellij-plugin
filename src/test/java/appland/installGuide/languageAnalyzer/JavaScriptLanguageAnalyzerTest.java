@@ -34,7 +34,7 @@ public class JavaScriptLanguageAnalyzerTest extends InstallGuideBaseTest {
     }
 
     @NotNull
-    private Result loadDirectory(@NotNull String sourceFilePath) {
+    private ProjectAnalysis loadDirectory(@NotNull String sourceFilePath) {
         var root = myFixture.copyDirectoryToProject(sourceFilePath, "root");
         var result = LanguageAnalyzers.JAVASCRIPT_LANGUAGE_ANALYZER.analyze(root);
         assertNotNull(result);

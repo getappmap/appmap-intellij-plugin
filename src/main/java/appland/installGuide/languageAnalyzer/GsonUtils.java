@@ -8,7 +8,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public class GsonUtils {
-    static final Gson GSON = new GsonBuilder().create();
+    public static final Gson GSON = new GsonBuilder().create();
 
     static @Nullable JsonPrimitive getPath(@NotNull JsonObject json, @NotNull String... path) {
         if (path.length == 0) {

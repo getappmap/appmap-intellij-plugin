@@ -8,7 +8,7 @@ import org.jetbrains.annotations.Nullable;
 
 class JavaLanguageAnalyzer implements LanguageAnalyzer {
     @Override
-    public @NotNull Result analyze(@NotNull VirtualFile directory) {
+    public @NotNull ProjectAnalysis analyze(@NotNull VirtualFile directory) {
         for (var buildSystem : BuildSystem.values()) {
             var file = directory.findChild(buildSystem.filename);
             if (file != null) {
@@ -20,11 +20,11 @@ class JavaLanguageAnalyzer implements LanguageAnalyzer {
                 features.web = detectWebFramework(wordScanner);
                 features.test = detectTestFramework(wordScanner);
 
-                return new Result(features, directory.getName(), directory.getPath());
+                return new ProjectAnalysis(directory.getName(), directory.getPath(), features, null);
             }
         }
 
-        return new Result(new Features(createLanguageFallback(), null, null), directory.getName(), directory.getPath());
+        return new ProjectAnalysis(directory.getName(), directory.getPath(), new Features(createLanguageFallback(), null, null), null);
     }
 
     private @Nullable Feature detectWebFramework(@NotNull FileWordScanner wordScanner) {

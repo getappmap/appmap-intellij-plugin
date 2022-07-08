@@ -10,7 +10,7 @@ import org.jetbrains.annotations.Nullable;
 
 class JavaScriptLanguageAnalyzer implements LanguageAnalyzer {
     @Override
-    public @NotNull Result analyze(@NotNull VirtualFile directory) {
+    public @NotNull ProjectAnalysis analyze(@NotNull VirtualFile directory) {
         var packageJson = directory.findChild("package.json");
 
         Features features = null;
@@ -22,7 +22,7 @@ class JavaScriptLanguageAnalyzer implements LanguageAnalyzer {
             features = new Features(createLanguageFallback(), null, null);
         }
 
-        return new Result(features, directory.getName(), directory.getPath());
+        return new ProjectAnalysis(directory.getName(), directory.getPath(), features, null);
     }
 
     private @Nullable Features findPackageJsonFeatures(@NotNull VirtualFile file) {

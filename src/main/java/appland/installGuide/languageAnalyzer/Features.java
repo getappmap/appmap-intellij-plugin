@@ -2,9 +2,11 @@ package appland.installGuide.languageAnalyzer;
 
 import com.google.gson.annotations.SerializedName;
 import lombok.AllArgsConstructor;
+import lombok.Data;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+@Data
 @AllArgsConstructor
 public class Features {
     @SerializedName("language")
@@ -17,8 +19,8 @@ public class Features {
     @Nullable Feature test;
 
     int getTotalScore() {
-        return lang.score.value
-                + (web == null ? 0 : web.score.value)
-                + (test == null ? 0 : test.score.value);
+        return lang.score.getScoreValue()
+                + (web == null ? 0 : web.score.getScoreValue())
+                + (test == null ? 0 : test.score.getScoreValue());
     }
 }

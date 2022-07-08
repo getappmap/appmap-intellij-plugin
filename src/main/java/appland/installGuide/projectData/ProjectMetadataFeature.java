@@ -1,23 +1,19 @@
-package appland.installGuide.languageAnalyzer;
+package appland.installGuide.projectData;
 
 import com.google.gson.annotations.SerializedName;
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.ToString;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 @Data
-@NoArgsConstructor
 @AllArgsConstructor
-@ToString
-public class Feature {
-    @SerializedName("title")
-    @Nullable String title;
+public class ProjectMetadataFeature {
+    @SerializedName("name")
+    @Nullable String name;
 
     @SerializedName("score")
-    @NotNull Score score;
+    int score;
 
     @SerializedName("text")
     @NotNull String text;
