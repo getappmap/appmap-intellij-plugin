@@ -1,13 +1,13 @@
-package appland.projectPicker;
+package appland.installGuide.languageAnalyzer;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.junit.Test;
 
-public class JavaLanguageAnalyzerTest extends ProjectPickerBaseTest {
+public class JavaLanguageAnalyzerTest extends InstallGuideBaseTest {
     @Override
     protected String getBasePath() {
-        return "projectPicker/sample-projects";
+        return "installGuide/sample-projects";
     }
 
     @Test

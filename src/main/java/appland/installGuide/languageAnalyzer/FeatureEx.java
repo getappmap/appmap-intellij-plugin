@@ -1,4 +1,4 @@
-package appland.projectPicker;
+package appland.installGuide.languageAnalyzer;
 
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;

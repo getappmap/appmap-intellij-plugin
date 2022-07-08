@@ -3,8 +3,6 @@ package appland;
 import com.intellij.ide.plugins.PluginManagerCore;
 import com.intellij.openapi.extensions.PluginDescriptor;
 import com.intellij.openapi.extensions.PluginId;
-import com.intellij.openapi.project.Project;
-import com.intellij.openapi.project.ProjectUtil;
 import org.jetbrains.annotations.NotNull;
 
 import java.nio.file.Path;
@@ -34,28 +32,10 @@ public final class AppMapPlugin {
         return getPluginPath().resolve("appland-install-guide").resolve("index.html");
     }
 
-    public static Path getProjectPickerHTMLPath() {
-        return getPluginPath().resolve("appland-project-picker").resolve("dist").resolve("index.html");
-    }
-
     @NotNull
     public static PluginDescriptor getDescriptor() {
         var plugin = PluginManagerCore.getPlugin(PluginId.getId(PLUGIN_ID));
         assert plugin != null;
         return plugin;
-    }
-
-    @NotNull
-    public static String getProjectDirPath(Project project) {
-        var projectDirName = "";
-        var projectDir = ProjectUtil.guessProjectDir(project);
-        if (projectDir != null) {
-            var nioProjectDir = projectDir.getFileSystem().getNioPath(projectDir);
-            if (nioProjectDir != null) {
-                projectDirName = nioProjectDir.toString();
-                if (projectDirName.indexOf(' ') > -1) projectDirName = "\"" + projectDirName + "\"";
-            }
-        }
-        return projectDirName;
     }
 }

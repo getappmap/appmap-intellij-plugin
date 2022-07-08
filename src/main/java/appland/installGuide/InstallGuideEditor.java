@@ -1,6 +1,7 @@
 package appland.installGuide;
 
-import appland.projectPicker.ProjectPicker;
+import appland.AppMapPlugin;
+import appland.installGuide.languageAnalyzer.InstallGuide;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
@@ -44,7 +45,7 @@ public class InstallGuideEditor extends UserDataHolderBase implements FileEditor
     private final Project project;
     @NotNull
     private final VirtualFile file;
-    private final InstallGuideViewType type;
+    private final InstallGuideViewPage type;
 
     private final JBCefClient jcefClient = JBCefApp.getInstance().createClient();
     private final JCEFHtmlPanel contentPanel = new JCEFHtmlPanel(jcefClient, null);
@@ -53,7 +54,7 @@ public class InstallGuideEditor extends UserDataHolderBase implements FileEditor
     private final AtomicBoolean navigating = new AtomicBoolean(false);
     private final Gson gson = new GsonBuilder().create();
 
-    public InstallGuideEditor(@NotNull Project project, @NotNull VirtualFile file, @NotNull InstallGuideViewType type) {
+    public InstallGuideEditor(@NotNull Project project, @NotNull VirtualFile file, @NotNull InstallGuideViewPage type) {
         this.project = project;
         this.file = file;
         this.type = type;
@@ -119,7 +120,7 @@ public class InstallGuideEditor extends UserDataHolderBase implements FileEditor
 
     private void loadApplication() {
         try {
-            contentPanel.loadURL(type.getHTMLPath().toUri().toURL().toString());
+            contentPanel.loadURL(AppMapPlugin.getInstallGuideHTMLPath().toUri().toURL().toString());
         } catch (IOException e) {
             LOG.error(e);
         }
@@ -150,7 +151,7 @@ public class InstallGuideEditor extends UserDataHolderBase implements FileEditor
                             break;
                         case "transition": {
                             var target = json.getAsJsonPrimitive("target").getAsString();
-                            var targetViewType = InstallGuideViewType.findByTransitionTarget(target);
+                            var targetViewType = InstallGuideViewPage.findByPageId(target);
                             if (targetViewType != null) {
                                 ApplicationManager.getApplication().invokeLater(() -> {
                                     InstallGuideEditorProvider.open(project, targetViewType);
@@ -196,7 +197,7 @@ public class InstallGuideEditor extends UserDataHolderBase implements FileEditor
     private JsonObject createInstallGuideInitJSON() {
         var json = new JsonObject();
         json.addProperty("type", "init");
-        json.add("projects", ProjectPicker.scanProjectAsyncTree(project));
+        json.add("projects", InstallGuide.scanProjectAsyncTree(project));
         json.add("disabled", new JsonArray());
         json.addProperty("page", "project-picker");
         return json;

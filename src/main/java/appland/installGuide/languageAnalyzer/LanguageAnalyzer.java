@@ -1,4 +1,4 @@
-package appland.projectPicker;
+package appland.installGuide.languageAnalyzer;
 
 import com.intellij.openapi.vfs.VirtualFile;
 import org.jetbrains.annotations.NotNull;

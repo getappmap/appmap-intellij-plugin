@@ -1,4 +1,4 @@
-package appland.projectPicker;
+package appland.installGuide.languageAnalyzer;
 
 import com.google.gson.annotations.SerializedName;
 import com.intellij.openapi.util.text.StringUtil;
@@ -33,7 +33,7 @@ public final class Languages {
     }
 
     private static @NotNull List<Language> loadLanguages() {
-        try (var resource = Languages.class.getResourceAsStream("/projectPicker/languages.json")) {
+        try (var resource = Languages.class.getResourceAsStream("/installGuide/languages.json")) {
             assert resource != null;
 
             return Arrays.asList(GsonUtils.GSON.fromJson(new InputStreamReader(resource), Language[].class));

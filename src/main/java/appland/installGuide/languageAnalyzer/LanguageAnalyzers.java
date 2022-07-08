@@ -1,4 +1,4 @@
-package appland.projectPicker;
+package appland.installGuide.languageAnalyzer;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;

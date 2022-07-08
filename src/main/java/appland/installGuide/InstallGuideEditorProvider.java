@@ -16,10 +16,10 @@ import org.jetbrains.annotations.NotNull;
 
 public class InstallGuideEditorProvider implements FileEditorProvider, DumbAware {
     // defines the install-guide view type, i.e. the install-guide page to show in a particular editor
-    private static final Key<InstallGuideViewType> INSTALL_GUIDE_TYPE_KEY = Key.create("appland.installGuideFile");
+    private static final Key<InstallGuideViewPage> INSTALL_GUIDE_TYPE_KEY = Key.create("appland.installGuideFile");
     private static final String EDITOR_ID = "appland.installGuide";
 
-    public static void open(@NotNull Project project, @NotNull InstallGuideViewType viewType) {
+    public static void open(@NotNull Project project, @NotNull InstallGuideViewPage viewType) {
         var editorManager = FileEditorManager.getInstance(project);
         // try to re-use an already open editor for "Install Guide"
         for (var editor : editorManager.getAllEditors()) {

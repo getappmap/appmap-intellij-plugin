@@ -1,4 +1,4 @@
-package appland.projectPicker;
+package appland.installGuide.languageAnalyzer;
 
 import appland.AppMapBaseTest;
 import org.jetbrains.annotations.NotNull;

@@ -1,4 +1,4 @@
-package appland.projectPicker;
+package appland.installGuide.languageAnalyzer;
 
 import com.google.gson.annotations.SerializedName;
 import lombok.AllArgsConstructor;

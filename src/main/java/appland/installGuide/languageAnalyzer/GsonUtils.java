@@ -1,4 +1,4 @@
-package appland.projectPicker;
+package appland.installGuide.languageAnalyzer;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;

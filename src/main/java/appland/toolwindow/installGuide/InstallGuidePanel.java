@@ -1,6 +1,6 @@
 package appland.toolwindow.installGuide;
 
-import appland.installGuide.InstallGuideViewType;
+import appland.installGuide.InstallGuideViewPage;
 import com.intellij.openapi.project.Project;
 import com.intellij.ui.components.panels.VerticalLayout;
 import org.jetbrains.annotations.NotNull;
@@ -19,7 +19,7 @@ public class InstallGuidePanel extends JPanel {
         addPanel("Quickstart", new InstallGuideContentPanel() {
             @Override
             protected void setupPanel() {
-                add(new StatusLabel(InstallGuideStatus.Incomplete, "Install AppMap agent", () -> open(project, InstallGuideViewType.InstallGuide)));
+                add(new StatusLabel(InstallGuideStatus.Incomplete, "Install AppMap agent", () -> open(project, InstallGuideViewPage.InstallGuide)));
                 // Record AppMaps
                 // Open AppMaps
             }

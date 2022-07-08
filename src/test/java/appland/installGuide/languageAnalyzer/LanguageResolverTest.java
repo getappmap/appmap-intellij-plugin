@@ -1,4 +1,4 @@
-package appland.projectPicker;
+package appland.installGuide.languageAnalyzer;
 
 import appland.AppMapBaseTest;
 import org.jetbrains.annotations.NotNull;
@@ -8,7 +8,7 @@ import org.junit.Test;
 public class LanguageResolverTest extends AppMapBaseTest {
     @Override
     protected String getBasePath() {
-        return "projectPicker/language-resolver";
+        return "installGuide/language-resolver";
     }
 
     @Test

@@ -1,4 +1,4 @@
-package appland.projectPicker;
+package appland.installGuide.languageAnalyzer;
 
 import com.google.gson.JsonObject;
 import com.intellij.openapi.fileEditor.FileDocumentManager;

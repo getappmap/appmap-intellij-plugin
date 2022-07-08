@@ -1,6 +1,6 @@
 package appland.startup;
 
-import appland.installGuide.InstallGuideViewType;
+import appland.installGuide.InstallGuideViewPage;
 import appland.installGuide.InstallGuideEditorProvider;
 import appland.settings.AppMapApplicationSettingsService;
 import com.intellij.openapi.application.ApplicationManager;
@@ -22,7 +22,7 @@ public class AppLandStartupActivity implements StartupActivity {
 
     static void openToolWindowAndQuickstart(@NotNull Project project) {
         StartupManager.getInstance(project).runWhenProjectIsInitialized(() -> {
-            InstallGuideEditorProvider.open(project, InstallGuideViewType.InstallGuide);
+            InstallGuideEditorProvider.open(project, InstallGuideViewPage.InstallGuide);
         });
     }
 }

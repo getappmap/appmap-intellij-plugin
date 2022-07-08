@@ -1,4 +1,4 @@
-package appland.projectPicker;
+package appland.installGuide.languageAnalyzer;
 
 import com.google.gson.JsonElement;
 import com.intellij.openapi.application.ReadAction;
@@ -14,7 +14,7 @@ import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 
-public class ProjectPicker {
+public class InstallGuide {
     public static JsonElement scanProjectAsyncTree(@NotNull Project project) {
         return ProgressManager.getInstance().runProcessWithProgressSynchronously(() -> {
             return ReadAction.compute(() -> {
