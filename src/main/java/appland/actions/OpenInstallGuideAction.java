@@ -11,6 +11,6 @@ import java.util.Objects;
 public class OpenInstallGuideAction extends AnAction {
     @Override
     public void actionPerformed(@NotNull AnActionEvent e) {
-        InstallGuideEditorProvider.open(Objects.requireNonNull(e.getProject()), InstallGuideViewPage.InstallGuide);
+        InstallGuideEditorProvider.open(Objects.requireNonNull(e.getProject()), InstallGuideViewPage.InstallAgent);
     }
 }

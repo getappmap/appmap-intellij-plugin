@@ -3,7 +3,7 @@
  */
 export default {
     "postMessage": function (data) {
-        if (data && data.command === 'preInitialize') {
+        if (data && data.command === 'ready') {
             // this is a workaround with the IntelliJ JCEF bridge to notify the plugin that the app is ready
             console.log("intellij-plugin-ready")
             return

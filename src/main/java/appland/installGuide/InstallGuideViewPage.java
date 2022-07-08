@@ -1,12 +1,16 @@
 package appland.installGuide;
 
 import appland.AppMapBundle;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+@AllArgsConstructor
 public enum InstallGuideViewPage {
-    InstallGuide("INSTALL_GUIDE");
+    InstallAgent("project-picker"),
+    RecordAppMaps("record-appmaps"),
+    OpenAppMaps("open-appmaps");
 
     // value used by the JS application as "page" values
     @Getter
@@ -21,14 +25,14 @@ public enum InstallGuideViewPage {
         return null;
     }
 
-    InstallGuideViewPage(@NotNull String pageId) {
-        this.pageId = pageId;
-    }
-
     public String getPageTitle() {
         switch (this) {
-            case InstallGuide:
-                return AppMapBundle.get("userMilestones.installGuideTitle");
+            case InstallAgent:
+                return AppMapBundle.get("installGuide.pageInstallAgent.title");
+            case RecordAppMaps:
+                return AppMapBundle.get("installGuide.pageRecordAppMaps.title");
+            case OpenAppMaps:
+                return AppMapBundle.get("installGuide.pageOpenAppMaps.title");
             default:
                 throw new IllegalStateException("Unsupported type: " + this);
         }

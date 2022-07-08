@@ -22,7 +22,7 @@ public class AppLandStartupActivity implements StartupActivity {
 
     static void openToolWindowAndQuickstart(@NotNull Project project) {
         StartupManager.getInstance(project).runWhenProjectIsInitialized(() -> {
-            InstallGuideEditorProvider.open(project, InstallGuideViewPage.InstallGuide);
+            InstallGuideEditorProvider.open(project, InstallGuideViewPage.InstallAgent);
         });
     }
 }

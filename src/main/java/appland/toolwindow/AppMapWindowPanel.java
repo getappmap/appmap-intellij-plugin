@@ -150,7 +150,7 @@ public class AppMapWindowPanel extends SimpleToolWindowPanel implements DataProv
         tree.getEmptyText().appendSecondaryText(
                 AppMapBundle.get("toolwindow.appmap.installAgentEmptyText"),
                 SimpleTextAttributes.LINK_ATTRIBUTES,
-                e -> InstallGuideEditorProvider.open(project, InstallGuideViewPage.InstallGuide));
+                e -> InstallGuideEditorProvider.open(project, InstallGuideViewPage.InstallAgent));
         tree.setRootVisible(false);
         tree.setShowsRootHandles(false);
 

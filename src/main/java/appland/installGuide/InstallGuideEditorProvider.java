@@ -1,5 +1,6 @@
 package appland.installGuide;
 
+import appland.AppMapBundle;
 import com.intellij.openapi.fileEditor.FileEditor;
 import com.intellij.openapi.fileEditor.FileEditorManager;
 import com.intellij.openapi.fileEditor.FileEditorPolicy;
@@ -16,28 +17,31 @@ import org.jetbrains.annotations.NotNull;
 
 public class InstallGuideEditorProvider implements FileEditorProvider, DumbAware {
     // defines the install-guide view type, i.e. the install-guide page to show in a particular editor
-    private static final Key<InstallGuideViewPage> INSTALL_GUIDE_TYPE_KEY = Key.create("appland.installGuideFile");
+    private static final Key<InstallGuideViewPage> INSTALL_GUIDE_PAGE_KEY = Key.create("appland.installGuideFile");
     private static final String EDITOR_ID = "appland.installGuide";
 
-    public static void open(@NotNull Project project, @NotNull InstallGuideViewPage viewType) {
+    public static void open(@NotNull Project project, @NotNull InstallGuideViewPage page) {
         var editorManager = FileEditorManager.getInstance(project);
         // try to re-use an already open editor for "Install Guide"
         for (var editor : editorManager.getAllEditors()) {
             var file = editor.getFile();
             if (file != null && isInstallGuideFile(file)) {
+                assert editor instanceof InstallGuideEditor;
+
                 FileEditorManagerEx.getInstanceEx(project).openFile(file, true, true);
+                ((InstallGuideEditor) editor).navigateTo(page);
                 return;
             }
         }
 
-        var file = new LightVirtualFile(viewType.getPageTitle());
-        INSTALL_GUIDE_TYPE_KEY.set(file, viewType);
+        var file = new LightVirtualFile(AppMapBundle.get("installGuide.editor.title"));
+        INSTALL_GUIDE_PAGE_KEY.set(file, page);
         editorManager.openFile(file, true);
     }
 
     @NotNull
     public static Boolean isInstallGuideFile(@NotNull VirtualFile file) {
-        return INSTALL_GUIDE_TYPE_KEY.isIn(file);
+        return INSTALL_GUIDE_PAGE_KEY.isIn(file);
     }
 
     @Override
@@ -47,7 +51,7 @@ public class InstallGuideEditorProvider implements FileEditorProvider, DumbAware
 
     @Override
     public @NotNull FileEditor createEditor(@NotNull Project project, @NotNull VirtualFile file) {
-        return new InstallGuideEditor(project, file, INSTALL_GUIDE_TYPE_KEY.getRequired(file));
+        return new InstallGuideEditor(project, file, INSTALL_GUIDE_PAGE_KEY.getRequired(file));
     }
 
     @Override

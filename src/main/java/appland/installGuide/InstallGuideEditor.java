@@ -1,12 +1,10 @@
 package appland.installGuide;
 
+import appland.AppMapBundle;
 import appland.AppMapPlugin;
 import appland.installGuide.languageAnalyzer.GsonUtils;
 import appland.installGuide.projectData.ProjectDataService;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
+import com.google.gson.*;
 import com.intellij.ide.BrowserUtil;
 import com.intellij.ide.ClipboardSynchronizer;
 import com.intellij.openapi.application.ApplicationManager;
@@ -44,9 +42,8 @@ public class InstallGuideEditor extends UserDataHolderBase implements FileEditor
     private static final String READY_MESSAGE_ID = "intellij-plugin-ready";
 
     private final Project project;
-    @NotNull
-    private final VirtualFile file;
-    private final InstallGuideViewPage type;
+    private final @NotNull VirtualFile file;
+    private @NotNull InstallGuideViewPage type;
 
     private final JBCefClient jcefClient = JBCefApp.getInstance().createClient();
     private final JCEFHtmlPanel contentPanel = new JCEFHtmlPanel(jcefClient, null);
@@ -66,6 +63,11 @@ public class InstallGuideEditor extends UserDataHolderBase implements FileEditor
 
         setupJCEF();
         loadApplication();
+    }
+
+    public void navigateTo(@NotNull InstallGuideViewPage page) {
+        this.type = page;
+        postMessage(createPageNavigationJSON(page));
     }
 
     private void setupJCEF() {
@@ -129,7 +131,7 @@ public class InstallGuideEditor extends UserDataHolderBase implements FileEditor
 
     private void onJavaScriptApplicationReady() {
         jcefBridge.addHandler(request -> {
-            LOG.warn("postMessage received message: " + request);
+            LOG.debug("postMessage received message: " + request);
 
             try {
                 var json = gson.fromJson(request, JsonObject.class);
@@ -139,28 +141,31 @@ public class InstallGuideEditor extends UserDataHolderBase implements FileEditor
                         case "postInitialize":
                             // ignored
                             break;
+
                         case "clickLink":
                             // ignored, handled by JCEF listener
                             break;
-                        case "openFile":
+
+                        case "open-file":
                             ApplicationManager.getApplication().invokeLater(() -> {
-                                var file = LocalFileSystem.getInstance().findFileByNioFile(Paths.get(json.getAsJsonPrimitive("file").getAsString()));
+                                var path = Paths.get(json.getAsJsonPrimitive("file").getAsString());
+                                var file = LocalFileSystem.getInstance().findFileByNioFile(path);
                                 if (file != null) {
                                     FileEditorManager.getInstance(project).openFile(file, true);
                                 }
                             });
                             break;
-                        case "transition": {
-                            var target = json.getAsJsonPrimitive("target").getAsString();
-                            var targetViewType = InstallGuideViewPage.findByPageId(target);
-                            if (targetViewType != null) {
-                                ApplicationManager.getApplication().invokeLater(() -> {
-                                    InstallGuideEditorProvider.open(project, targetViewType);
-                                });
-                            }
+
+                        case "open-page":
+                            // fixme send telemetry, as in VSCode?
                             break;
-                        }
+
+                        case "view-problems":
+                            //fixme
+                            break;
+
                         case "clipboard": {
+                            // fixme send telemetry, as in VSCode?
                             var content = json.getAsJsonPrimitive("target").getAsString();
                             LOG.debug("Copying text to clipboard: " + content);
 
@@ -168,6 +173,7 @@ public class InstallGuideEditor extends UserDataHolderBase implements FileEditor
                             ClipboardSynchronizer.getInstance().setContent(target, target);
                             break;
                         }
+
                         default:
                             LOG.warn("Unhandled message type: " + type);
                     }
@@ -181,28 +187,28 @@ public class InstallGuideEditor extends UserDataHolderBase implements FileEditor
 
         contentPanel.getCefBrowser().executeJavaScript(createCallbackJS(jcefBridge, "postMessage"), "", 0);
 
-        JsonObject json;
-        switch (type) {
-            case InstallGuide:
-                json = createInstallGuideInitJSON();
-                break;
-            default:
-                throw new IllegalStateException("Unsupported view type: " + type);
-        }
-
-        var jsonString = gson.toJson(json);
-        contentPanel.getCefBrowser().executeJavaScript("window.postMessage(" + jsonString + ")", "", 0);
+        postMessage(createInitMessageJSON());
     }
 
-    @NotNull
-    private JsonObject createInstallGuideInitJSON() {
+    private void postMessage(@NotNull JsonElement json) {
+        contentPanel.getCefBrowser().executeJavaScript("window.postMessage(" + gson.toJson(json) + ")", "", 0);
+    }
+
+    private @NotNull JsonObject createInitMessageJSON() {
         var projects = ProjectDataService.getInstance(project).getAppMapProjects();
 
         var json = new JsonObject();
         json.addProperty("type", "init");
         json.add("projects", GsonUtils.GSON.toJsonTree(projects));
         json.add("disabled", new JsonArray()); // fixme
-        json.addProperty("page", "project-picker"); // fixme
+        json.addProperty("page", type.getPageId());
+        return json;
+    }
+
+    private @NotNull JsonObject createPageNavigationJSON(@NotNull InstallGuideViewPage page) {
+        var json = new JsonObject();
+        json.addProperty("type", "page");
+        json.addProperty("page", page.getPageId());
         return json;
     }
 
@@ -224,7 +230,7 @@ public class InstallGuideEditor extends UserDataHolderBase implements FileEditor
 
     @Override
     public @Nls(capitalization = Nls.Capitalization.Title) @NotNull String getName() {
-        return "User Milestones";
+        return AppMapBundle.get("installGuide.editor.title");
     }
 
     @Override

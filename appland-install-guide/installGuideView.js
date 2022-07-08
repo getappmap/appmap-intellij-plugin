@@ -83,5 +83,5 @@ export function mountInstallGuide() {
     });
   });
 
-  vscode.postMessage({command: 'preInitialize'});
+  vscode.postMessage({ command: 'ready' });
 }

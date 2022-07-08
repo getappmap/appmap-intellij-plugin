@@ -19,9 +19,9 @@ public class InstallGuidePanel extends JPanel {
         addPanel("Quickstart", new InstallGuideContentPanel() {
             @Override
             protected void setupPanel() {
-                add(new StatusLabel(InstallGuideStatus.Incomplete, "Install AppMap agent", () -> open(project, InstallGuideViewPage.InstallGuide)));
-                // Record AppMaps
-                // Open AppMaps
+                for (var page : InstallGuideViewPage.values()) {
+                    add(new StatusLabel(getStatus(page), page.getPageTitle(), () -> open(project, page)));
+                }
             }
         });
 
@@ -42,5 +42,10 @@ public class InstallGuidePanel extends JPanel {
 
     private void addPanel(@NotNull String title, @NotNull InstallGuideContentPanel panel) {
         add(new CollapsibleInstallGuidePanel(panel, false, title));
+    }
+
+    @NotNull
+    private static InstallGuideStatus getStatus(@NotNull InstallGuideViewPage page) {
+        return InstallGuideStatus.Incomplete;
     }
 }
