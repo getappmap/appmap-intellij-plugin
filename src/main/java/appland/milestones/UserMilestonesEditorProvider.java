@@ -22,9 +22,13 @@ public class UserMilestonesEditorProvider implements FileEditorProvider, DumbAwa
         FileEditorManager.getInstance(project).openFile(dummyFile, true);
     }
 
+    public static boolean isSupported() {
+        return JBCefApp.isSupported();
+    }
+
     @NotNull
     public static Boolean isQuickstartFile(@NotNull VirtualFile file) {
-        return MILESTONE_TYPE_KEY.isIn(file);
+        return isSupported() && MILESTONE_TYPE_KEY.isIn(file);
     }
 
     @Override

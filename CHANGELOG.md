@@ -1,5 +1,9 @@
 # AppMap Plugin Changelog
 
+## [Unreleased]
+### Updated
+- Compatibility with 2022.2 EAP
+
 ## [0.7.9]
 - Update community links within the extension description
 

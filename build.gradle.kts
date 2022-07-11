@@ -13,7 +13,7 @@ buildscript {
 
 plugins {
     idea
-    id("org.jetbrains.intellij") version "1.3.1"
+    id("org.jetbrains.intellij") version "1.5.2"
     id("org.jetbrains.changelog") version "1.1.2"
 }
 
@@ -56,6 +56,8 @@ tasks {
     buildSearchableOptions.get().enabled = false
 
     buildPlugin {
+        duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+
         copyPluginAssets("")
     }
 
