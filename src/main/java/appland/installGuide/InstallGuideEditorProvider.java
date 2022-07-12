@@ -20,6 +20,10 @@ public class InstallGuideEditorProvider implements FileEditorProvider, DumbAware
     private static final Key<InstallGuideViewPage> INSTALL_GUIDE_PAGE_KEY = Key.create("appland.installGuideFile");
     private static final String EDITOR_ID = "appland.installGuide";
 
+    public static boolean isSupported() {
+        return JBCefApp.isSupported();
+    }
+
     public static void open(@NotNull Project project, @NotNull InstallGuideViewPage page) {
         var editorManager = FileEditorManager.getInstance(project);
         // try to re-use an already open editor for "Install Guide"
