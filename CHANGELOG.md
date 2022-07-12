@@ -1,8 +1,23 @@
 # AppMap Plugin Changelog
 
-## [0.7.6]
+## [0.7.10]
+### Updated
+- Compatibility with 2022.2 EAP
+
+## [0.7.9]
+- Update community links within the extension description
+
+## [0.7.8]
+### Changed
+- Updated web components to the latest versions
+
+## [0.7.7]
 ### Added
 - Support 2022.1 EAP
+
+## [0.7.6]
+### Added
+- Show an error page if the user attempts to load an AppMap that's too large.
 
 ## [0.7.5]
 ### Changed

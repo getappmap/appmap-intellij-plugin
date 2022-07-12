@@ -10,6 +10,11 @@ import java.util.Objects;
 
 public class OpenQuickstartAction extends AnAction {
     @Override
+    public void update(@NotNull AnActionEvent e) {
+        e.getPresentation().setEnabled(UserMilestonesEditorProvider.isSupported());
+    }
+
+    @Override
     public void actionPerformed(@NotNull AnActionEvent e) {
         InstallGuideEditorProvider.open(Objects.requireNonNull(e.getProject()), InstallGuideViewPage.InstallAgent);
     }
