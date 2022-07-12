@@ -1,4 +1,4 @@
-package appland.installGuide.languageAnalyzer;
+package appland.installGuide.analyzer;
 
 import com.google.gson.annotations.SerializedName;
 import lombok.Value;

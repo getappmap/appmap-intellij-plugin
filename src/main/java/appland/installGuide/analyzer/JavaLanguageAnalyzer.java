@@ -1,4 +1,4 @@
-package appland.installGuide.languageAnalyzer;
+package appland.installGuide.analyzer;
 
 import com.intellij.openapi.vfs.VirtualFile;
 import lombok.AllArgsConstructor;

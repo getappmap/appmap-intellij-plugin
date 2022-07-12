@@ -1,4 +1,4 @@
-package appland.installGuide.languageAnalyzer;
+package appland.installGuide.analyzer;
 
 import appland.AppMapBaseTest;
 import org.junit.Assert;

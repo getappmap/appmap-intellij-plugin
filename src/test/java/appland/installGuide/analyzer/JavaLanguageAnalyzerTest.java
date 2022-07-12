@@ -1,4 +1,4 @@
-package appland.installGuide.languageAnalyzer;
+package appland.installGuide.analyzer;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;

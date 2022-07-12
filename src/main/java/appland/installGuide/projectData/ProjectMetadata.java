@@ -1,6 +1,5 @@
 package appland.installGuide.projectData;
 
-import appland.installGuide.languageAnalyzer.Feature;
 import com.google.gson.annotations.SerializedName;
 import lombok.Builder;
 import lombok.Data;
@@ -37,7 +36,7 @@ public class ProjectMetadata {
     @SerializedName("numFindings")
     @Nullable Integer numFindings;
 
-    @SerializedName("Feature language")
+    @SerializedName("language")
     @Nullable ProjectMetadataFeature language;
 
     @SerializedName("testFramework")

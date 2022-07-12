@@ -1,6 +1,6 @@
 package appland.installGuide.projectData;
 
-import appland.installGuide.languageAnalyzer.*;
+import appland.installGuide.analyzer.*;
 import com.intellij.execution.configurations.GeneralCommandLine;
 import com.intellij.execution.configurations.PathEnvironmentVariableUtil;
 import com.intellij.execution.process.CapturingProcessRunner;
@@ -67,9 +67,13 @@ public class DefaultProjectDataService implements ProjectDataService {
         assert progressIndicator != null;
         var nodeVersion = findNodeVersion(progressIndicator, root);
 
+        // support fallback to non-NIO path for our tests
+        var nioPath = root.getFileSystem().getNioPath(root);
+        var path = nioPath != null ? nioPath.toString() : root.getPath();
+
         return ProjectMetadata.builder()
                 .name(root.getPresentableName())
-                .path(root.toNioPath().toString())
+                .path(path)
                 .score(analysis.getScore())
                 .hasNode(isNodeSupported(nodeVersion))
                 .agentInstalled(isAgentInstalled(root))

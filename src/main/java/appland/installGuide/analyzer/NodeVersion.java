@@ -1,8 +1,7 @@
-package appland.installGuide.languageAnalyzer;
+package appland.installGuide.analyzer;
 
 import com.google.gson.annotations.SerializedName;
 import com.intellij.openapi.diagnostic.Logger;
-import com.intellij.openapi.vfs.VirtualFile;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;

@@ -1,4 +1,4 @@
-package appland.installGuide.languageAnalyzer;
+package appland.installGuide.analyzer;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -6,6 +6,7 @@ import org.jetbrains.annotations.Nullable;
 public final class LanguageAnalyzers {
     public static final LanguageAnalyzer JAVA_LANGUAGE_ANALYZER = new JavaLanguageAnalyzer();
     public static final LanguageAnalyzer JAVASCRIPT_LANGUAGE_ANALYZER = new JavaScriptLanguageAnalyzer();
+    public static final LanguageAnalyzer RUBY_LANGUAGE_ANALYZER = new RubyLanguageAnalyzer();
 
     private LanguageAnalyzers() {
     }
@@ -16,6 +17,8 @@ public final class LanguageAnalyzers {
                 return JAVA_LANGUAGE_ANALYZER;
             case "javascript":
                 return JAVASCRIPT_LANGUAGE_ANALYZER;
+            case "ruby":
+                return RUBY_LANGUAGE_ANALYZER;
             default:
                 return null;
         }

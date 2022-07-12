@@ -2,7 +2,7 @@ package appland.installGuide;
 
 import appland.AppMapBundle;
 import appland.AppMapPlugin;
-import appland.installGuide.languageAnalyzer.GsonUtils;
+import appland.installGuide.analyzer.GsonUtils;
 import appland.installGuide.projectData.ProjectDataService;
 import com.google.gson.*;
 import com.intellij.ide.BrowserUtil;
