@@ -22,7 +22,7 @@ class JavaScriptLanguageAnalyzer implements LanguageAnalyzer {
             features = new Features(createLanguageFallback(), null, null);
         }
 
-        return new ProjectAnalysis(directory.getName(), directory.getPath(), features, null);
+        return new ProjectAnalysis(directory.getName(), directory.getPath(), features);
     }
 
     private @Nullable Features findPackageJsonFeatures(@NotNull VirtualFile file) {

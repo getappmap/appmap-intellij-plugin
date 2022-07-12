@@ -20,11 +20,11 @@ class JavaLanguageAnalyzer implements LanguageAnalyzer {
                 features.web = detectWebFramework(wordScanner);
                 features.test = detectTestFramework(wordScanner);
 
-                return new ProjectAnalysis(directory.getName(), directory.getPath(), features, null);
+                return new ProjectAnalysis(directory.getName(), directory.getPath(), features);
             }
         }
 
-        return new ProjectAnalysis(directory.getName(), directory.getPath(), new Features(createLanguageFallback(), null, null), null);
+        return new ProjectAnalysis(directory.getName(), directory.getPath(), new Features(createLanguageFallback(), null, null));
     }
 
     private @Nullable Feature detectWebFramework(@NotNull FileWordScanner wordScanner) {
