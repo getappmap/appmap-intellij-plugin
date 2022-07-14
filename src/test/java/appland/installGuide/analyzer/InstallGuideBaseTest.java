@@ -16,6 +16,18 @@ abstract class InstallGuideBaseTest extends AppMapBaseTest {
         assertEquals(Score.Bad, feature.score);
     }
 
+    protected void assertWeb(@NotNull Features features, @Nullable String title, @NotNull Score score) {
+        assertNotNull(features.web);
+        assertEquals(score, features.web.score);
+        assertEquals(title, features.web.title);
+    }
+
+    protected void assertTest(@NotNull Features features, @Nullable String title, @NotNull Score score) {
+        assertNotNull(features.test);
+        assertEquals(score, features.test.score);
+        assertEquals(title, features.test.title);
+    }
+
     protected @NotNull ProjectAnalysis loadDirectory(@NotNull String sourceFilePath) {
         var root = myFixture.copyDirectoryToProject(sourceFilePath, "root");
 
