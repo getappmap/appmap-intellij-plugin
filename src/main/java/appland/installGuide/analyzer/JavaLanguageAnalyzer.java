@@ -8,6 +8,11 @@ import org.jetbrains.annotations.Nullable;
 
 class JavaLanguageAnalyzer implements LanguageAnalyzer {
     @Override
+    public boolean isAccepting(Languages.@NotNull Language language) {
+        return "java".equals(language.id);
+    }
+
+    @Override
     public @NotNull ProjectAnalysis analyze(@NotNull VirtualFile directory) {
         for (var buildSystem : BuildSystem.values()) {
             var file = directory.findChild(buildSystem.filename);

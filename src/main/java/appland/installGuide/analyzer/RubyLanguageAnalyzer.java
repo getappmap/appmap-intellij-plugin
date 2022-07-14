@@ -7,7 +7,12 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public class RubyLanguageAnalyzer implements LanguageAnalyzer {
-    public static final String GEMFILE = "Gemfile";
+    private static final String GEMFILE = "Gemfile";
+
+    @Override
+    public boolean isAccepting(Languages.@NotNull Language language) {
+        return "ruby".equals(language.id);
+    }
 
     @Override
     public @NotNull ProjectAnalysis analyze(@NotNull VirtualFile directory) {

@@ -10,6 +10,11 @@ import org.jetbrains.annotations.Nullable;
 
 class JavaScriptLanguageAnalyzer implements LanguageAnalyzer {
     @Override
+    public boolean isAccepting(Languages.@NotNull Language language) {
+        return "javascript".equals(language.id);
+    }
+
+    @Override
     public @NotNull ProjectAnalysis analyze(@NotNull VirtualFile directory) {
         var packageJson = directory.findChild("package.json");
 

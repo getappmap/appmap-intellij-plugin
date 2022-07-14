@@ -37,7 +37,7 @@ public class JavaLanguageAnalyzerTest extends InstallGuideBaseTest {
     @NotNull
     private ProjectAnalysis loadDirectory(String sourceFilePath) {
         var root = myFixture.copyDirectoryToProject(sourceFilePath, "root");
-        var result = LanguageAnalyzers.JAVA_LANGUAGE_ANALYZER.analyze(root);
+        var result = new JavaLanguageAnalyzer().analyze(root);
         assertNotNull(result);
         assertEquals("root", result.getName());
         assertEquals("/src/root", result.getPath());

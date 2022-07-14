@@ -129,7 +129,7 @@ public class DefaultProjectDataService implements ProjectDataService {
         for (var root : findTopLevelContentRoots()) {
             var language = resolver.getLanguage(root);
             if (language != null) {
-                var analyzer = LanguageAnalyzers.create(language);
+                var analyzer = LanguageAnalyzer.create(language);
                 if (analyzer != null) {
                     projects.put(root, analyzer.analyze(root));
                 }

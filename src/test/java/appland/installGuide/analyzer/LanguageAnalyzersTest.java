@@ -14,6 +14,6 @@ public class LanguageAnalyzersTest extends AppMapBaseTest {
     private void assertAnalyzer(@NotNull String fileExtension) {
         var language = Languages.getLanguage(fileExtension);
         assertNotNull(language);
-        assertNotNull(LanguageAnalyzers.create(language));
+        assertNotNull(LanguageAnalyzer.create(language));
     }
 }

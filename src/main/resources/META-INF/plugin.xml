@@ -16,10 +16,16 @@
 
     <extensionPoints>
         <extensionPoint qualifiedName="appland.agent" interface="appland.lang.agents.AppMapAgent"/>
+        <extensionPoint qualifiedName="appland.languageAnalyzer" interface="appland.installGuide.analyzer.LanguageAnalyzer"/>
     </extensionPoints>
 
     <extensions defaultExtensionNs="appland">
         <agent implementation="appland.lang.agents.AppMapRubyAgent"/>
+
+        <languageAnalyzer implementation="appland.installGuide.analyzer.PythonLanguageAnalyzer"/>
+        <languageAnalyzer implementation="appland.installGuide.analyzer.JavaLanguageAnalyzer"/>
+        <languageAnalyzer implementation="appland.installGuide.analyzer.JavaScriptLanguageAnalyzer"/>
+        <languageAnalyzer implementation="appland.installGuide.analyzer.RubyLanguageAnalyzer"/>
     </extensions>
 
     <projectListeners>
