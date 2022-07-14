@@ -18,17 +18,17 @@ public class RubyLanguageAnalyzer implements LanguageAnalyzer {
     public @NotNull ProjectAnalysis analyze(@NotNull VirtualFile directory) {
         var gemfile = directory.findChild(GEMFILE);
         if (gemfile != null) {
-            var wordScanner = new FileWordScanner(gemfile);
+            var wordScanner = new PatternWordScanner(gemfile);
 
             var features = new Features(createRubyBase(), null, null);
             features.lang.depFile = gemfile.getName();
             features.web = detectWebFramework(wordScanner);
             features.test = detectTestFramework(wordScanner);
 
-            return new ProjectAnalysis(directory.getName(), directory.getPath(), features);
+            return new ProjectAnalysis(directory, features);
         }
 
-        return new ProjectAnalysis(directory.getName(), directory.getPath(), new Features(createRubyFallback(), null, null));
+        return new ProjectAnalysis(directory, new Features(createRubyFallback(), null, null));
     }
 
     private @NotNull FeatureEx createRubyBase() {
@@ -47,14 +47,14 @@ public class RubyLanguageAnalyzer implements LanguageAnalyzer {
         return feature;
     }
 
-    private @Nullable Feature detectWebFramework(@NotNull FileWordScanner wordScanner) {
+    private @Nullable Feature detectWebFramework(@NotNull WordScanner wordScanner) {
         return StreamEx.of(WebFramework.values())
                 .findFirst(v -> wordScanner.containsWord(v.markerWord))
                 .map(WebFramework::createFeature)
                 .orElse(null);
     }
 
-    private @Nullable Feature detectTestFramework(@NotNull FileWordScanner wordScanner) {
+    private @Nullable Feature detectTestFramework(@NotNull WordScanner wordScanner) {
         return StreamEx.of(TestFramework.values())
                 .findFirst(v -> wordScanner.containsWord(v.markerWord))
                 .map(TestFramework::createFeature)

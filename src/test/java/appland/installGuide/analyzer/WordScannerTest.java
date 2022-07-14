@@ -3,11 +3,11 @@ package appland.installGuide.analyzer;
 import appland.AppMapBaseTest;
 import org.junit.Test;
 
-public class FileWordScannerTest extends AppMapBaseTest {
+public class WordScannerTest extends AppMapBaseTest {
     @Test
     public void simple() {
         var file = myFixture.configureByText("a.txt", "a b c\nspring web framework");
-        var scanner = new FileWordScanner(file.getVirtualFile());
+        var scanner = new PatternWordScanner(file.getVirtualFile());
         assertTrue(scanner.containsWord("a"));
         assertTrue(scanner.containsWord("b"));
         assertTrue(scanner.containsWord("c"));

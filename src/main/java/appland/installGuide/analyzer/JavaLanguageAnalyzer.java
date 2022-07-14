@@ -21,25 +21,25 @@ class JavaLanguageAnalyzer implements LanguageAnalyzer {
                 features.lang.depFile = buildSystem.filename;
                 buildSystem.applyTo(features.lang);
 
-                var wordScanner = new FileWordScanner(file);
+                var wordScanner = new PatternWordScanner(file);
                 features.web = detectWebFramework(wordScanner);
                 features.test = detectTestFramework(wordScanner);
 
-                return new ProjectAnalysis(directory.getName(), directory.getPath(), features);
+                return new ProjectAnalysis(directory, features);
             }
         }
 
-        return new ProjectAnalysis(directory.getName(), directory.getPath(), new Features(createLanguageFallback(), null, null));
+        return new ProjectAnalysis(directory, new Features(createLanguageFallback(), null, null));
     }
 
-    private @Nullable Feature detectWebFramework(@NotNull FileWordScanner wordScanner) {
+    private @Nullable Feature detectWebFramework(@NotNull WordScanner wordScanner) {
         return StreamEx.of(WebFramework.values())
                 .findFirst(v -> wordScanner.containsWord(v.markerWord))
                 .map(WebFramework::createFeature)
                 .orElse(null);
     }
 
-    private @Nullable Feature detectTestFramework(@NotNull FileWordScanner wordScanner) {
+    private @Nullable Feature detectTestFramework(@NotNull WordScanner wordScanner) {
         return StreamEx.of(TestFramework.values())
                 .findFirst(v -> wordScanner.containsWord(v.markerWord))
                 .map(TestFramework::createFeature)
