@@ -10,13 +10,13 @@ import org.jetbrains.annotations.Nullable;
 @AllArgsConstructor
 public class Features {
     @SerializedName("language")
-    @NotNull FeatureEx lang;
+    public @NotNull FeatureEx lang;
 
     @SerializedName("webFramework")
-    @Nullable Feature web;
+    public @Nullable Feature web;
 
     @SerializedName("testFramework")
-    @Nullable Feature test;
+    public @Nullable Feature test;
 
     int getTotalScore() {
         return lang.score.getScoreValue()

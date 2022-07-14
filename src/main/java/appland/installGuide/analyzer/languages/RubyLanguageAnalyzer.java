@@ -1,5 +1,6 @@
-package appland.installGuide.analyzer;
+package appland.installGuide.analyzer.languages;
 
+import appland.installGuide.analyzer.*;
 import com.intellij.openapi.vfs.VirtualFile;
 import lombok.AllArgsConstructor;
 import one.util.streamex.StreamEx;

@@ -14,11 +14,11 @@ import org.jetbrains.annotations.Nullable;
 @ToString
 public class Feature {
     @SerializedName("title")
-    @Nullable String title;
+    public @Nullable String title;
 
     @SerializedName("score")
-    @NotNull Score score;
+    public @NotNull Score score;
 
     @SerializedName("text")
-    @NotNull String text;
+    public @NotNull String text;
 }

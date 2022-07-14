@@ -8,7 +8,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.function.Function;
 import java.util.regex.Pattern;
 
-class PatternWordScanner implements WordScanner {
+public class PatternWordScanner implements WordScanner {
     @Getter
     private final @NotNull VirtualFile file;
     private final Function<String, Pattern> patternProvider;

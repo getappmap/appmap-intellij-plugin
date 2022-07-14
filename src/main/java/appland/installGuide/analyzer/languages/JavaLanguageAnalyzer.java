@@ -1,12 +1,13 @@
-package appland.installGuide.analyzer;
+package appland.installGuide.analyzer.languages;
 
+import appland.installGuide.analyzer.*;
 import com.intellij.openapi.vfs.VirtualFile;
 import lombok.AllArgsConstructor;
 import one.util.streamex.StreamEx;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-class JavaLanguageAnalyzer implements LanguageAnalyzer {
+public class JavaLanguageAnalyzer implements LanguageAnalyzer {
     @Override
     public boolean isAccepting(Languages.@NotNull Language language) {
         return "java".equals(language.id);

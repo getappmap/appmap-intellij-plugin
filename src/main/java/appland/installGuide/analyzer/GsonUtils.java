@@ -10,7 +10,7 @@ import org.jetbrains.annotations.Nullable;
 public class GsonUtils {
     public static final Gson GSON = new GsonBuilder().create();
 
-    static @Nullable JsonPrimitive getPath(@NotNull JsonObject json, @NotNull String... path) {
+    public static @Nullable JsonPrimitive getPath(@NotNull JsonObject json, @NotNull String... path) {
         if (path.length == 0) {
             return null;
         }
@@ -27,7 +27,7 @@ public class GsonUtils {
         return current.getAsJsonPrimitive(path[path.length - 1]);
     }
 
-    static boolean hasProperty(@NotNull JsonObject json, @NotNull String... path) {
+    public static boolean hasProperty(@NotNull JsonObject json, @NotNull String... path) {
         return getPath(json, path) != null;
     }
 }

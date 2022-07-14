@@ -34,16 +34,6 @@ public class JavaLanguageAnalyzerTest extends InstallGuideBaseTest {
         assertFramework(result.getFeatures().test, "JUnit", Score.Good);
     }
 
-    @NotNull
-    private ProjectAnalysis loadDirectory(String sourceFilePath) {
-        var root = myFixture.copyDirectoryToProject(sourceFilePath, "root");
-        var result = new JavaLanguageAnalyzer().analyze(root);
-        assertNotNull(result);
-        assertEquals("root", result.getName());
-        assertEquals("/src/root", result.getPath());
-        return result;
-    }
-
     private void assertJavaSettings(@NotNull Features features, @Nullable String depFile, @Nullable String pluginValue) {
         assertEquals("Java", features.lang.title);
         assertEquals(depFile, features.lang.depFile);

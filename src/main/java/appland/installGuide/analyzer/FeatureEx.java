@@ -11,7 +11,7 @@ import org.jetbrains.annotations.Nullable;
 @AllArgsConstructor
 @NoArgsConstructor
 public class FeatureEx extends Feature {
-    @Nullable String depFile;
-    @Nullable String plugin;
-    @Nullable String pluginType;
+    public @Nullable String depFile;
+    public @Nullable String plugin;
+    public @Nullable String pluginType;
 }

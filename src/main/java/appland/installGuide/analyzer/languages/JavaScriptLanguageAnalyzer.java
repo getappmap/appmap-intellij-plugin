@@ -1,5 +1,6 @@
-package appland.installGuide.analyzer;
+package appland.installGuide.analyzer.languages;
 
+import appland.installGuide.analyzer.*;
 import com.google.gson.JsonObject;
 import com.intellij.openapi.fileEditor.FileDocumentManager;
 import com.intellij.openapi.util.text.StringUtil;
@@ -8,7 +9,7 @@ import com.intellij.util.text.SemVer;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-class JavaScriptLanguageAnalyzer implements LanguageAnalyzer {
+public class JavaScriptLanguageAnalyzer implements LanguageAnalyzer {
     @Override
     public boolean isAccepting(Languages.@NotNull Language language) {
         return "javascript".equals(language.id);

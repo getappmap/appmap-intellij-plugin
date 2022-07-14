@@ -33,9 +33,7 @@ public class ProjectAnalysis {
     }
 
     private static @NotNull String mapToNativePath(@NotNull VirtualFile file) {
-        if (file.isInLocalFileSystem()) {
-            return file.toNioPath().toString();
-        }
-        return FileUtilRt.toSystemDependentName(file.getName());
+        var nioPath = file.getFileSystem().getNioPath(file);
+        return nioPath != null ? nioPath.toString() : FileUtilRt.toSystemDependentName(file.getPath());
     }
 }

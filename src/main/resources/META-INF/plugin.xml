@@ -23,12 +23,12 @@
     <extensions defaultExtensionNs="appland">
         <agent implementation="appland.lang.agents.AppMapRubyAgent"/>
 
-        <languageAnalyzer implementation="appland.installGuide.analyzer.PythonLanguageAnalyzer"/>
-        <languageAnalyzer implementation="appland.installGuide.analyzer.JavaLanguageAnalyzer"/>
-        <languageAnalyzer implementation="appland.installGuide.analyzer.JavaScriptLanguageAnalyzer"/>
-        <languageAnalyzer implementation="appland.installGuide.analyzer.RubyLanguageAnalyzer"/>
+        <languageAnalyzer implementation="appland.installGuide.analyzer.languages.PythonLanguageAnalyzer"/>
+        <languageAnalyzer implementation="appland.installGuide.analyzer.languages.JavaLanguageAnalyzer"/>
+        <languageAnalyzer implementation="appland.installGuide.analyzer.languages.JavaScriptLanguageAnalyzer"/>
+        <languageAnalyzer implementation="appland.installGuide.analyzer.languages.RubyLanguageAnalyzer"/>
 
-        <languageAnalyzer order="last" implementation="appland.installGuide.analyzer.UnknownLanguageAnalyzer"/>
+        <languageAnalyzer order="last" implementation="appland.installGuide.analyzer.languages.UnknownLanguageAnalyzer"/>
     </extensions>
 
     <projectListeners>
