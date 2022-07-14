@@ -38,6 +38,6 @@ public class PatternWordScanner implements WordScanner {
 
     @NotNull
     private static Pattern createDefaultPattern(@NotNull String word) {
-        return Pattern.compile("(\\W|^)" + Pattern.quote(word) + "(\\W|$)", Pattern.CASE_INSENSITIVE);
+        return Pattern.compile("(\\W|^)" + Pattern.quote(word) + "(\\W|$)", Pattern.CASE_INSENSITIVE | Pattern.MULTILINE);
     }
 }

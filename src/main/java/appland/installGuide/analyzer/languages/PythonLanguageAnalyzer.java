@@ -4,6 +4,7 @@ import appland.installGuide.analyzer.*;
 import com.intellij.openapi.fileEditor.FileDocumentManager;
 import com.intellij.openapi.vfs.VfsUtilCore;
 import com.intellij.openapi.vfs.VirtualFile;
+import com.intellij.openapi.vfs.VirtualFileVisitor;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -71,7 +72,8 @@ public class PythonLanguageAnalyzer implements LanguageAnalyzer {
         var requirements = directory.findChild("requirements.txt");
         if (requirements != null) {
             return new PatternWordScanner(requirements, word -> {
-                return Pattern.compile("^" + Pattern.quote(word) + "(\\W|$)", Pattern.CASE_INSENSITIVE);
+                var regex = "^" + Pattern.quote(word) + "(\\W|$)";
+                return Pattern.compile(regex, Pattern.CASE_INSENSITIVE | Pattern.MULTILINE);
             });
         }
 
@@ -103,8 +105,12 @@ public class PythonLanguageAnalyzer implements LanguageAnalyzer {
         var found = new AtomicBoolean(false);
 
         VfsUtilCore.iterateChildrenRecursively(directory,
-                file -> !file.isDirectory() && file.getName().endsWith(".py"),
+                file -> file.isDirectory() || file.getName().endsWith(".py"),
                 file -> {
+                    if (file.isDirectory()) {
+                        return true;
+                    }
+
                     try {
                         var document = FileDocumentManager.getInstance().getDocument(file);
                         var content = document != null ? document.getText() : VfsUtilCore.loadText(file);
@@ -116,7 +122,7 @@ public class PythonLanguageAnalyzer implements LanguageAnalyzer {
                     }
 
                     return found.get();
-                });
+                }, VirtualFileVisitor.limit(10));
 
         return found.get();
     }
