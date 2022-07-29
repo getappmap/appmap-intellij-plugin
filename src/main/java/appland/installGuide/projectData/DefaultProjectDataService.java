@@ -1,5 +1,6 @@
 package appland.installGuide.projectData;
 
+import appland.AppMapBundle;
 import appland.installGuide.analyzer.*;
 import com.intellij.execution.configurations.GeneralCommandLine;
 import com.intellij.execution.configurations.PathEnvironmentVariableUtil;
@@ -45,27 +46,37 @@ public class DefaultProjectDataService implements ProjectDataService {
 
     private void updateMetadata() {
         var updatedProjects = ProgressManager.getInstance().runProcessWithProgressSynchronously(() -> {
-            return ReadAction.compute(() -> {
-                return scanContentRoots()
-                        .entrySet()
-                        .stream()
-                        .map(this::createMetadata)
-                        .collect(Collectors.toList());
-            });
-        }, "Scanning project", true, project);
+            // we need a read action to locate the roots,
+            // but we must not locate the node executables under a read action
+            var roots = ReadAction.compute(this::scanContentRoots);
+
+            var indicator = ProgressManager.getGlobalProgressIndicator();
+            assert indicator != null;
+
+            var nodeVersions = new HashMap<VirtualFile, NodeVersion>();
+            for (VirtualFile root : roots.keySet()) {
+                var nodeVersion = findNodeVersion(indicator, root);
+                if (nodeVersion != null) {
+                    nodeVersions.put(root, nodeVersion);
+                }
+            }
+
+            return ReadAction.compute(() -> roots
+                    .entrySet()
+                    .stream()
+                    .map(pair -> createMetadata(pair, nodeVersions.get(pair.getKey())))
+                    .collect(Collectors.toList()));
+        }, AppMapBundle.get("installGuide.scanningProject"), true, project);
 
         if (updatedProjects != null) {
             cachedProjects.set(updatedProjects);
         }
     }
 
-    private @NotNull ProjectMetadata createMetadata(@NotNull Map.Entry<VirtualFile, ProjectAnalysis> pair) {
+    private @NotNull ProjectMetadata createMetadata(@NotNull Map.Entry<VirtualFile, ProjectAnalysis> pair,
+                                                    @Nullable NodeVersion nodeVersion) {
         var root = pair.getKey();
         var analysis = pair.getValue();
-
-        var progressIndicator = ProgressIndicatorProvider.getGlobalProgressIndicator();
-        assert progressIndicator != null;
-        var nodeVersion = findNodeVersion(progressIndicator, root);
 
         // support fallback to non-NIO path for our tests
         var nioPath = root.getFileSystem().getNioPath(root);
