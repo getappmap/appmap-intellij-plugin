@@ -85,15 +85,21 @@ public class ScannerFilesAsyncListener implements AsyncFileListener {
                         var manager = getInstance(project);
 
                         for (var deletedFile : toRemove) {
-                            manager.removeFindingsFile(deletedFile);
+                            if (deletedFile != null) {
+                                manager.removeFindingsFile(deletedFile);
+                            }
                         }
 
                         for (var file : toAdd) {
-                            manager.addFindingsFile(file);
+                            if (file != null) {
+                                manager.addFindingsFile(file);
+                            }
                         }
 
                         for (var file : toRefresh) {
-                            manager.reloadFindingsFile(file);
+                            if (file != null) {
+                                manager.reloadFindingsFile(file);
+                            }
                         }
                     }
                 }
