@@ -9,11 +9,16 @@ buildscript {
     dependencies {
         classpath("org.commonmark:commonmark:0.17.2")
     }
+
+    repositories {
+        mavenCentral()
+        maven { setUrl("https://www.jetbrains.com/intellij-repository/releases") }
+    }
 }
 
 plugins {
     idea
-    id("org.jetbrains.intellij") version "1.5.2"
+    id("org.jetbrains.intellij") version "1.8.0"
     id("org.jetbrains.changelog") version "1.1.2"
 }
 
@@ -21,8 +26,11 @@ val pluginVersion = prop("pluginVersion")
 group = "appland.appmap"
 version = pluginVersion
 
+val isCI = System.getenv("CI") == "true"
+
 repositories {
     mavenCentral()
+    maven { setUrl("https://www.jetbrains.com/intellij-repository/releases") }
 }
 
 dependencies {
@@ -32,7 +40,7 @@ dependencies {
 
 intellij {
     version.set(prop("ideVersion"))
-    downloadSources.set(true)
+    downloadSources.set(!isCI)
     updateSinceUntilBuild.set(true)
     instrumentCode.set(true)
 }
