@@ -1,7 +1,6 @@
 import org.commonmark.parser.Parser
 import org.commonmark.renderer.html.HtmlRenderer
 import org.gradle.api.JavaVersion.VERSION_11
-import org.jetbrains.changelog.closure
 import org.jetbrains.intellij.tasks.PrepareSandboxTask
 import org.jetbrains.intellij.tasks.RunPluginVerifierTask
 
@@ -18,11 +17,13 @@ buildscript {
 
 plugins {
     idea
-    id("org.jetbrains.intellij") version "1.8.0"
-    id("org.jetbrains.changelog") version "1.1.2"
+    id("org.jetbrains.intellij") version "1.8.1"
+    id("org.jetbrains.changelog") version "1.3.1"
 }
 
 val pluginVersion = prop("pluginVersion")
+val lombokVersion = prop("lombokVersion")
+
 group = "appland.appmap"
 version = pluginVersion
 
@@ -35,7 +36,11 @@ repositories {
 
 dependencies {
     // http://wiremock.org, Apache 2 license
-    testImplementation("com.github.tomakehurst:wiremock-jre8:2.28.0")
+    testImplementation("com.github.tomakehurst:wiremock-jre8:2.33.1")
+
+    // Project Lombok, only for compilation
+    compileOnly("org.projectlombok:lombok:$lombokVersion")
+    annotationProcessor("org.projectlombok:lombok:$lombokVersion")
 }
 
 intellij {
@@ -46,13 +51,13 @@ intellij {
 }
 
 changelog {
-    version = pluginVersion
-    path = "${project.projectDir}/CHANGELOG.md"
-    header = closure { "[$version]" }
-    itemPrefix = "-"
-    keepUnreleasedSection = true
-    unreleasedTerm = "[Unreleased]"
-    groups = listOf("Changes")
+    version.set(pluginVersion)
+    path.set("${project.projectDir}/CHANGELOG.md")
+    header.set(provider { "[${version.get()}]" })
+    itemPrefix.set("-")
+    keepUnreleasedSection.set(true)
+    unreleasedTerm.set("[Unreleased]")
+    groups.set(listOf("Changes"))
 }
 
 configure<JavaPluginConvention> {
@@ -64,8 +69,6 @@ tasks {
     buildSearchableOptions.get().enabled = false
 
     buildPlugin {
-        duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-
         copyPluginAssets("")
     }
 
@@ -98,6 +101,10 @@ tasks {
     withType(Test::class.java).all {
         systemProperty("idea.test.execution.policy", "appland.AppLandTestExecutionPolicy")
         systemProperty("appland.testDataPath", file("src/test/data").path)
+    }
+
+    withType<Zip> {
+        duplicatesStrategy = DuplicatesStrategy.EXCLUDE
     }
 }
 
