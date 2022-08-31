@@ -1,0 +1,22 @@
+plugins:
+- '@semantic-release/commit-analyzer'
+- '@semantic-release/release-notes-generator'
+- '@semantic-release/changelog'
+#- - '@google/semantic-release-replace-plugin'
+#  - replacements:
+#      - files: [build.gradle]
+#        from: (?<=\s+defaultVersion\s*=\s*').*(?<!')
+#        to: ${nextRelease.version}
+#        countMatches: true
+#        results:
+#          - file: build.gradle
+#            hasChanged: true
+#            numMatches: 1
+#            numReplacements: 1
+- - '@semantic-release/git'
+  - assets:
+    - CHANGELOG.md
+    - build.gradle
+- - '@semantic-release/github'
+  - assets:
+    - build/distributions/intellij-appmap-*.zip

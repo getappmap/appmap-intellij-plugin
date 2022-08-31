@@ -7,13 +7,31 @@ jdk: openjdk17
 if: type != push OR branch = main OR branch =~ /^v\d+\.\d+(\.\d+)?(-\S*)?$/
 
 before_cache:
-    - rm -f  $HOME/.gradle/caches/modules-2/modules-2.lock
-    - rm -fr $HOME/.gradle/caches/*/plugin-resolution/
+- rm -f  $HOME/.gradle/caches/modules-2/modules-2.lock
+- rm -fr $HOME/.gradle/caches/*/plugin-resolution/
 
 cache:
-    directories:
-        - $HOME/.gradle/caches/
-        - $HOME/.gradle/wrapper/
+  directories:
+  - $HOME/.gradle/caches/
+  - $HOME/.gradle/wrapper/
+  - $HOME/.m2/
+
 
 before_install:
-    - chmod +x gradlew
+- chmod +x gradlew
+
+before_deploy:
+- |
+  nvm install --lts \
+    && nvm use --lts \
+    && npm i -g \
+      semantic-release \
+      @semantic-release/git \
+      @semantic-release/changelog \
+      @google/semantic-release-replace-plugin
+deploy:
+- provider: script
+  script: semantic-release
+  on:
+    branch: master
+
