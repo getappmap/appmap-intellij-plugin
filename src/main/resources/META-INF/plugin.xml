@@ -14,14 +14,6 @@
     <depends>com.intellij.modules.lang</depends>
     <depends>com.intellij.modules.json</depends>
 
-    <extensionPoints>
-        <extensionPoint qualifiedName="appland.agent" interface="appland.lang.agents.AppMapAgent"/>
-    </extensionPoints>
-
-    <extensions defaultExtensionNs="appland">
-        <agent implementation="appland.lang.agents.AppMapRubyAgent"/>
-    </extensions>
-
     <projectListeners>
         <listener topic="com.intellij.ide.plugins.DynamicPluginListener"
                   class="appland.startup.DynamicPluginListener"/>
