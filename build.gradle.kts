@@ -51,13 +51,7 @@ intellij {
 }
 
 changelog {
-    version.set(pluginVersion)
     path.set("${project.projectDir}/CHANGELOG.md")
-    header.set(provider { "[${version.get()}]" })
-    itemPrefix.set("-")
-    keepUnreleasedSection.set(true)
-    unreleasedTerm.set("[Unreleased]")
-    groups.set(listOf("Changes"))
 }
 
 configure<JavaPluginConvention> {

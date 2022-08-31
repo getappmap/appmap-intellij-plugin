@@ -1,0 +1,28 @@
+branches:
+- main
+plugins:
+- '@semantic-release/commit-analyzer'
+- - '@semantic-release/release-notes-generator'
+  - preset: conventionalcommits
+- - '@semantic-release/changelog'
+  - changelogTitle: AppMap Plugin Changelog
+- - '@google/semantic-release-replace-plugin'
+  - replacements:
+    - files: [gradle.properties]
+      from: (?<=^pluginVersion=).*
+      to: ${nextRelease.version}
+      countMatches: true
+      results:
+      - file: gradle.properties
+        hasChanged: true
+        numMatches: 1
+        numReplacements: 1
+- - '@semantic-release/git'
+  - assets:
+    - CHANGELOG.md
+    - gradle.properties
+- - '@semantic-release/exec'
+  - publishCmd: ./gradlew clean build
+- - '@semantic-release/github'
+  - assets:
+    - build/distributions/intellij-appmap-*.zip
