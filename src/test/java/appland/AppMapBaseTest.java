@@ -1,5 +1,7 @@
 package appland;
 
+import com.intellij.openapi.application.ReadAction;
+import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.testFramework.fixtures.LightPlatformCodeInsightFixture4TestCase;
 import org.jetbrains.annotations.NotNull;
 
@@ -15,6 +17,12 @@ public abstract class AppMapBaseTest extends LightPlatformCodeInsightFixture4Tes
         var events = createAppMapEvents(requestCount, queryCount);
         var classMap = createClassMap(functionCount);
         return String.format("{\n\"metadata\": { \"name\": \"%s\" },\n \"events\": %s\n,\n \"classMap\": %s\n}", name, events, classMap);
+    }
+
+    @NotNull
+    public VirtualFile createTempDir(@NotNull String name) {
+        var psiFile = myFixture.addFileToProject(name + "/file.txt", "");
+        return ReadAction.compute(() -> psiFile.getParent().getVirtualFile());
     }
 
     private String createAppMapEvents(int requestCount, int queryCount) {

@@ -14,6 +14,21 @@
     <depends>com.intellij.modules.lang</depends>
     <depends>com.intellij.modules.json</depends>
 
+    <extensionPoints>
+        <extensionPoint qualifiedName="appland.languageAnalyzer"
+                        interface="appland.installGuide.analyzer.LanguageAnalyzer"/>
+    </extensionPoints>
+
+    <extensions defaultExtensionNs="appland">
+        <languageAnalyzer implementation="appland.installGuide.analyzer.languages.PythonLanguageAnalyzer"/>
+        <languageAnalyzer implementation="appland.installGuide.analyzer.languages.JavaLanguageAnalyzer"/>
+        <languageAnalyzer implementation="appland.installGuide.analyzer.languages.JavaScriptLanguageAnalyzer"/>
+        <languageAnalyzer implementation="appland.installGuide.analyzer.languages.RubyLanguageAnalyzer"/>
+
+        <languageAnalyzer order="last"
+                          implementation="appland.installGuide.analyzer.languages.UnknownLanguageAnalyzer"/>
+    </extensions>
+
     <projectListeners>
         <listener topic="com.intellij.ide.plugins.DynamicPluginListener"
                   class="appland.startup.DynamicPluginListener"/>
@@ -63,7 +78,7 @@
         <action id="appmapDocs" class="appland.actions.AppMapDocumentationAction">
             <add-to-group group-id="HelpMenu" anchor="before" relative-to-action="CheckForUpdate"/>
         </action>
-  
+
         <group id="appmapToolsMenu" popup="true" icon="appland.Icons.APPMAP_TOOLS_MENU">
             <!--          
             <reference ref="uploadAppMap"/> 
