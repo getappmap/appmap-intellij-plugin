@@ -69,6 +69,8 @@
         <projectService serviceImplementation="appland.settings.AppMapProjectSettingsService"/>
         <projectService serviceInterface="appland.remote.RemoteRecordingStatusService"
                         serviceImplementation="appland.remote.DefaultRemoteRecordingStatusService"/>
+        <projectService serviceInterface="appland.installGuide.projectData.ProjectDataService"
+                        serviceImplementation="appland.installGuide.projectData.DefaultProjectDataService"/>
 
         <notificationGroup id="appmap.remoteRecording" displayType="BALLOON"
                            key="notification.remoteRecording.displayName"/>
