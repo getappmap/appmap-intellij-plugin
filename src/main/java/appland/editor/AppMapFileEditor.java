@@ -65,8 +65,7 @@ public class AppMapFileEditor extends UserDataHolderBase implements FileEditor {
     private final Project project;
     private final String baseURL;
     private final VirtualFile file;
-    private final JBCefClient jcefClient = JBCefApp.getInstance().createClient();
-    private final JCEFHtmlPanel contentPanel = new JCEFHtmlPanel(jcefClient, null);
+    private final JCEFHtmlPanel contentPanel = new JCEFHtmlPanel(true, null, null);
     private final JBCefJSQuery viewSourceBridge = JBCefJSQuery.create((JBCefBrowserBase) contentPanel);
     private final JBCefJSQuery uploadAppMapBridge = JBCefJSQuery.create((JBCefBrowserBase) contentPanel);
     private final MultiPanel multiPanel = new MultiPanel() {
@@ -108,9 +107,8 @@ public class AppMapFileEditor extends UserDataHolderBase implements FileEditor {
         this.file = file;
         this.baseURL = getBaseURL();
 
-        Disposer.register(this, jcefClient);
-        Disposer.register(this, contentPanel);
-        Disposer.register(this, viewSourceBridge);
+        // contentPanel and jcefBridge register with the client as Disposable parent
+        Disposer.register(this, contentPanel.getJBCefClient());
 
         setupVfsListener(file);
 
