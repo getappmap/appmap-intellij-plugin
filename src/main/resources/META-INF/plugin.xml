@@ -81,6 +81,12 @@
 
         <!-- CLI service -->
         <vfs.asyncListener implementation="appland.cli.AppmapYamlAsyncFileListener"/>
+
+        <!-- scanner problems view -->
+        <projectService serviceImplementation="appland.problemsView.FindingsManager"/>
+        <problemsViewPanelProvider implementation="appland.problemsView.FindingsPanelProvider"/>
+        <vfs.asyncListener implementation="appland.problemsView.listener.ScannerFilesAsyncListener"/>
+        <annotator implementationClass="appland.problemsView.AppMapFindingsAnnotator" language="" order="last"/>
     </extensions>
 
     <actions>
