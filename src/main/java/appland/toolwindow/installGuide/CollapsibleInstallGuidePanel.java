@@ -1,10 +1,7 @@
-package appland.toolwindow.milestones;
+package appland.toolwindow.installGuide;
 
-import com.intellij.openapi.Disposable;
-import com.intellij.openapi.util.Disposer;
 import com.intellij.util.containers.ContainerUtil;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
 import java.awt.*;
@@ -13,19 +10,19 @@ import java.util.Collection;
 /**
  * A collapsible panel with a title (always visible) and content (visible only if expanded).
  */
-class CollapsibleUserMilestonePanel extends JPanel {
+class CollapsibleInstallGuidePanel extends JPanel {
     private final Collection<CollapsingListener> listeners = ContainerUtil.createLockFreeCopyOnWriteList();
     private final JComponent content;
-    private final UserMilestoneTitlePanel title;
+    private final InstallGuideTitlePanel title;
     private boolean isCollapsed;
     private boolean isInitialized = false;
 
-    public CollapsibleUserMilestonePanel(JComponent content, boolean isCollapsed, @NotNull String title) {
+    public CollapsibleInstallGuidePanel(JComponent content, boolean isCollapsed, @NotNull String title) {
         super(new BorderLayout());
 
         this.content = content;
 
-        this.title = new UserMilestoneTitlePanel(title, isCollapsed);
+        this.title = new InstallGuideTitlePanel(title, isCollapsed);
         this.title.addLabelActionListener(() -> setCollapsed(!isCollapsed()));
         add(this.title, BorderLayout.NORTH);
 
@@ -63,6 +60,6 @@ class CollapsibleUserMilestonePanel extends JPanel {
     }
 
     interface CollapsingListener {
-        void onCollapsingChanged(@NotNull CollapsibleUserMilestonePanel panel, boolean isCollapsed);
+        void onCollapsingChanged(@NotNull CollapsibleInstallGuidePanel panel, boolean isCollapsed);
     }
 }

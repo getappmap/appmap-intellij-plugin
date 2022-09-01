@@ -29,9 +29,17 @@
                           implementation="appland.installGuide.analyzer.languages.UnknownLanguageAnalyzer"/>
     </extensions>
 
+    <applicationListeners>
+        <listener topic="com.intellij.openapi.project.ProjectManagerListener"
+                  class="appland.cli.AppLandProjectManagerListener"/>
+    </applicationListeners>
+
     <projectListeners>
         <listener topic="com.intellij.ide.plugins.DynamicPluginListener"
                   class="appland.startup.DynamicPluginListener"/>
+
+        <listener topic="appland.cli.AppLandDownloadListener"
+                  class="appland.cli.StartServicesAfterDownloadListener"/>
     </projectListeners>
 
     <extensions defaultExtensionNs="com.intellij">
@@ -46,7 +54,7 @@
         <fileIconProvider implementation="appland.editor.AppMapIconProvider"/>
         <editorNotificationProvider implementation="appland.editor.AppMapNotificationProvider"/>
 
-        <fileEditorProvider implementation="appland.milestones.UserMilestonesEditorProvider"/>
+        <fileEditorProvider implementation="appland.installGuide.InstallGuideEditorProvider"/>
 
         <fileBasedIndex implementation="appland.index.AppMapMetadataIndex"/>
         <fileBasedIndex implementation="appland.index.ClassMapTypeIndex"/>
@@ -82,6 +90,9 @@
 
         <errorHandler implementation="appland.GitHubErrorHandler"/>
 
+        <!-- Generic AppMap file handling -->
+        <vfs.asyncListener implementation="appland.files.AppMapAsyncFileListener"/>
+
         <!-- CLI service -->
         <vfs.asyncListener implementation="appland.cli.AppmapYamlAsyncFileListener"/>
 
@@ -112,9 +123,9 @@
 
             <add-to-group group-id="ToolsMenu" anchor="last"/>
         </group>
-        <action id="openUserQuickstart" class="appland.actions.OpenQuickstartAction"
-                text="AppLand: Open Quickstart"/>
-        <action id="openUserAppMaps" class="appland.actions.OpenAppMapsAction"
-                text="AppLand: Open AppMaps"/>
+        <action id="openInstallGuide" class="appland.actions.OpenInstallGuideAction"
+                text="AppLand: Install Guide (Beta)"/>
+
+        <!--<action text="AppMap: Open Install Guide DevTools" class="appland.installGuide.OpenDevToolsAction"/>-->
     </actions>
 </idea-plugin>

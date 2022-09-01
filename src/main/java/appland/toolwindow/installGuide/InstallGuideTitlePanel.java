@@ -1,4 +1,4 @@
-package appland.toolwindow.milestones;
+package appland.toolwindow.installGuide;
 
 import com.intellij.ide.ui.laf.darcula.DarculaUIUtil;
 import com.intellij.ui.components.JBLabel;
@@ -14,7 +14,7 @@ import java.awt.event.*;
 import java.util.LinkedList;
 import java.util.List;
 
-class UserMilestoneTitlePanel extends JPanel {
+class InstallGuideTitlePanel extends JPanel {
     @NonNls public static final String ENTER = "enter";
     @NonNls public static final String SPACE = "space";
     private static final KeyStroke KEY_ENTER = KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0);
@@ -25,7 +25,7 @@ class UserMilestoneTitlePanel extends JPanel {
 
     private final List<Runnable> labelActionListeners = new LinkedList<>();
 
-    UserMilestoneTitlePanel(@NotNull String title, boolean isCollapsed) {
+    InstallGuideTitlePanel(@NotNull String title, boolean isCollapsed) {
         super(new BorderLayout());
 
         label = new JBLabel(title, SwingConstants.LEADING);

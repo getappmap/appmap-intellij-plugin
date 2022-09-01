@@ -1,4 +1,4 @@
-package appland.toolwindow.milestones;
+package appland.toolwindow.installGuide;
 
 import appland.Icons;
 import com.intellij.ide.BrowserUtil;
