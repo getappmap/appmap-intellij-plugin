@@ -49,6 +49,7 @@
         <fileEditorProvider implementation="appland.milestones.UserMilestonesEditorProvider"/>
 
         <fileBasedIndex implementation="appland.index.AppMapMetadataIndex"/>
+        <fileBasedIndex implementation="appland.index.ClassMapTypeIndex"/>
         <indexedRootsProvider implementation="appland.index.AppMapFolderIndexedRootProvider"/>
         <toolWindow id="applandToolWindow" anchor="right" secondary="false"
                     icon="appland.Icons.TOOL_WINDOW"

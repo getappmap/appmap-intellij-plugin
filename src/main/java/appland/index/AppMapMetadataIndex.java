@@ -4,9 +4,7 @@ import com.intellij.json.JsonFileType;
 import com.intellij.openapi.fileTypes.FileType;
 import com.intellij.openapi.project.DumbService;
 import com.intellij.openapi.project.Project;
-import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.search.ProjectScope;
-import com.intellij.util.Consumer;
 import com.intellij.util.indexing.FileBasedIndex;
 import com.intellij.util.indexing.ID;
 import com.intellij.util.indexing.SingleEntryFileBasedIndexExtension;
@@ -29,18 +27,7 @@ import java.util.List;
  */
 public class AppMapMetadataIndex extends SingleEntryFileBasedIndexExtension<AppMapMetadata> {
     private static final ID<Integer, AppMapMetadata> INDEX_ID = ID.create("appmap.titleIndex");
-
-    private static final FileBasedIndex.FileTypeSpecificInputFilter INPUT_FILTER = new FileBasedIndex.FileTypeSpecificInputFilter() {
-        @Override
-        public void registerFileTypesUsedForIndexing(@NotNull Consumer<? super FileType> fileTypeSink) {
-            fileTypeSink.consume(JsonFileType.INSTANCE);
-        }
-
-        @Override
-        public boolean acceptInput(@NotNull VirtualFile file) {
-            return file.getName().endsWith(".appmap.json");
-        }
-    };
+    private static final FileBasedIndex.FileTypeSpecificInputFilter INPUT_FILTER = new NamedFileTypeFilter(JsonFileType.INSTANCE, name -> name.endsWith(".appmap.json"));
 
     private static final DataExternalizer<AppMapMetadata> dataExternalizer = new DataExternalizer<>() {
         @Override
@@ -131,7 +118,7 @@ public class AppMapMetadataIndex extends SingleEntryFileBasedIndexExtension<AppM
 
     @Override
     public int getVersion() {
-        return 8;
+        return 9;
     }
 
     @Override
