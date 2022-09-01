@@ -57,9 +57,7 @@ public final class AppMapMetadata {
     }
 
     public int getSortCount() {
-        return requestCount + (requestCount > 0 ? 1_000_000 : 0)
-                + queryCount + (queryCount > 0 ? 1_000_000 : 0)
-                + functionsCount + (functionsCount > 0 ? 1_000_000 : 0);
+        return requestCount * 100 + queryCount * 100 + functionsCount * 100;
     }
 
     public int getFunctionsCount() {
