@@ -17,11 +17,11 @@ public final class AppMapBundle extends AbstractBundle {
         return INSTANCE.getMessage(key);
     }
 
-    public static String get(@PropertyKey(resourceBundle = "messages.appland") String key, @NotNull String param1) {
+    public static String get(@PropertyKey(resourceBundle = "messages.appland") String key, @NotNull Object param1) {
         return INSTANCE.getMessage(key, param1);
     }
 
-    public static String get(@PropertyKey(resourceBundle = "messages.appland") String key, @NotNull String param1, @NotNull String param2) {
+    public static String get(@PropertyKey(resourceBundle = "messages.appland") String key, @NotNull Object param1, @NotNull Object param2) {
         return INSTANCE.getMessage(key, param1, param2);
     }
 
