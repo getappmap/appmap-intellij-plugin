@@ -13,6 +13,7 @@ class AppMapProjectSettingsForm {
     private JPanel mainPanel;
     private JBTextField serverName;
     private JBCheckBox confirmUpload;
+    private JBCheckBox enableFindings;
 
     AppMapProjectSettingsForm() {
         serverName.getEmptyText().setText(AppMapUploader.DEFAULT_SERVER_URL);
@@ -22,13 +23,19 @@ class AppMapProjectSettingsForm {
         return mainPanel;
     }
 
-    void loadSettingsFrom(@NotNull AppMapProjectSettings settings) {
+    void loadSettingsFrom(@NotNull AppMapProjectSettings settings,
+                          @NotNull AppMapApplicationSettings applicationSettings) {
         serverName.setText(settings.getCloudServerUrl());
         confirmUpload.setSelected(settings.getConfirmAppMapUpload());
+
+        enableFindings.setSelected(applicationSettings.isEnableFindings());
     }
 
-    void applySettingsTo(@NotNull AppMapProjectSettings settings) {
+    void applySettingsTo(@NotNull AppMapProjectSettings settings,
+                         @NotNull AppMapApplicationSettings applicationSettings) {
         settings.setCloudServerUrl(StringUtil.nullize(serverName.getText()));
         settings.setConfirmAppMapUpload(confirmUpload.isSelected());
+
+        applicationSettings.setEnableFindings(enableFindings.isSelected());
     }
 }
