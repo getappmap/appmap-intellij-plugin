@@ -39,6 +39,8 @@
         <projectService serviceImplementation="appland.AppLandLifecycleService"/>
 
         <postStartupActivity implementation="appland.startup.AppLandStartupActivity"/>
+        <postStartupActivity implementation="appland.cli.RegisterContentRootsActivity"/>
+        <postStartupActivity implementation="appland.cli.DownloadToolsStartupActivity"/>
 
         <fileEditorProvider implementation="appland.editor.AppMapHTMLEditorProvider"/>
         <fileIconProvider implementation="appland.editor.AppMapIconProvider"/>
@@ -54,6 +56,13 @@
 
         <applicationService serviceInterface="appland.remote.RemoteRecordingService"
                             serviceImplementation="appland.remote.DefaultRemoteRecordingService"/>
+
+        <applicationService serviceInterface="appland.cli.AppLandCommandLineService"
+                            serviceImplementation="appland.cli.DefaultCommandLineService"/>
+
+        <applicationService serviceInterface="appland.cli.AppLandDownloadService"
+                            serviceImplementation="appland.cli.DefaultAppLandDownloadService"
+                            testServiceImplementation="appland.cli.TestAppLandDownloadService"/>
 
         <applicationService id="appmap.settings"
                             serviceImplementation="appland.settings.AppMapApplicationSettingsService"/>

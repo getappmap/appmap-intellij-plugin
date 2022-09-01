@@ -1,6 +1,5 @@
 package appland.index;
 
-import appland.files.AppMapFiles;
 import com.intellij.openapi.module.ModuleManager;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.roots.ModuleRootManager;
@@ -8,7 +7,6 @@ import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.util.containers.SmartHashSet;
 import com.intellij.util.indexing.IndexableSetContributor;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.Collections;
 import java.util.Set;
