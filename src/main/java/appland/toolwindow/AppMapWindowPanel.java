@@ -3,23 +3,21 @@ package appland.toolwindow;
 import appland.AppMapBundle;
 import appland.actions.StartAppMapRecordingAction;
 import appland.actions.StopAppMapRecordingAction;
-import appland.files.AppMapFiles;
-import appland.milestones.MilestonesViewType;
-import appland.milestones.UserMilestonesEditorProvider;
-import appland.toolwindow.milestones.UserMilestonesPanel;
+import appland.files.AppMapFileChangeListener;
+import appland.installGuide.InstallGuideEditorProvider;
+import appland.installGuide.InstallGuideViewPage;
+import appland.toolwindow.installGuide.InstallGuidePanel;
 import com.intellij.ide.util.treeView.NodeDescriptor;
 import com.intellij.openapi.Disposable;
 import com.intellij.openapi.actionSystem.*;
-import com.intellij.openapi.application.ApplicationInfo;
+import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.project.DumbService;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.SimpleToolWindowPanel;
 import com.intellij.openapi.util.Disposer;
-import com.intellij.openapi.vfs.AsyncFileListener;
 import com.intellij.openapi.vfs.LocalFileSystem;
 import com.intellij.openapi.vfs.VirtualFile;
-import com.intellij.openapi.vfs.VirtualFileManager;
 import com.intellij.pom.Navigatable;
 import com.intellij.psi.PsiManager;
 import com.intellij.ui.DocumentAdapter;
@@ -43,7 +41,6 @@ import javax.swing.event.DocumentEvent;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreePath;
 import java.awt.*;
-import java.lang.reflect.InvocationTargetException;
 import java.util.Comparator;
 
 import static com.intellij.psi.NavigatablePsiElement.EMPTY_NAVIGATABLE_ELEMENT_ARRAY;
@@ -90,25 +87,9 @@ public class AppMapWindowPanel extends SimpleToolWindowPanel implements DataProv
         });
 
         // refresh when VirtualFiles change
-        VirtualFileManager.getInstance().addAsyncFileListener(events -> {
-            var appMapChanged = false;
-            for (var event : events) {
-                var file = event.getFile();
-                if (file != null && AppMapFiles.isAppMap(file)) {
-                    LOG.debug("appmap VirtualFile changes, rebuilding tree");
-                    appMapChanged = true;
-                    break;
-                }
-            }
-
-            return !appMapChanged ? null : new AsyncFileListener.ChangeApplier() {
-                @Override
-                public void afterVfsChange() {
-                    LOG.debug("afterVfsChange, invalidating tree");
-                    rebuild(false);
-                }
-            };
-        }, this);
+        ApplicationManager.getApplication().getMessageBus().connect(this).subscribe(AppMapFileChangeListener.TOPIC, () -> {
+            rebuild(false);
+        });
     }
 
     @Override
@@ -150,7 +131,7 @@ public class AppMapWindowPanel extends SimpleToolWindowPanel implements DataProv
         tree.getEmptyText().appendSecondaryText(
                 AppMapBundle.get("toolwindow.appmap.installAgentEmptyText"),
                 SimpleTextAttributes.LINK_ATTRIBUTES,
-                e -> UserMilestonesEditorProvider.open(project, MilestonesViewType.InstallAgent));
+                e -> InstallGuideEditorProvider.open(project, InstallGuideViewPage.InstallAgent));
         tree.setRootVisible(false);
         tree.setShowsRootHandles(false);
 
@@ -162,7 +143,7 @@ public class AppMapWindowPanel extends SimpleToolWindowPanel implements DataProv
 
     @NotNull
     private JPanel createUserMilestonesPanel() {
-        return new UserMilestonesPanel(project);
+        return new InstallGuidePanel(project);
     }
 
     public void rebuild(boolean force) {
@@ -217,7 +198,7 @@ public class AppMapWindowPanel extends SimpleToolWindowPanel implements DataProv
     @NotNull
     private SearchTextField createNameFilter(@NotNull AppMapTreeModel appMapModel) {
         var textFilter = new SearchTextField();
-        filterInputAlarm = createAlarm(textFilter);
+        filterInputAlarm = new Alarm(textFilter, this);
 
         textFilter.getTextEditor().getEmptyText().setText(AppMapBundle.get("toolwindow.appmap.filterEmptyText"));
         textFilter.getTextEditor().addActionListener(e -> {
@@ -254,22 +235,4 @@ public class AppMapWindowPanel extends SimpleToolWindowPanel implements DataProv
         this.isToolWindowVisible = false;
     }
 
-    @NotNull
-    private Alarm createAlarm(@NotNull SearchTextField textFilter) {
-        // 2021.3 is showing a notification (at least in EAPs) that the constructor used above is deprecated
-        // it's too visible and distracting, so we try to work around it
-        if (ApplicationInfo.getInstance().getBuild().getBaselineVersion() >= 213) {
-            try {
-                var constructor = Alarm.class.getConstructor(JComponent.class, Disposable.class);
-                return constructor.newInstance(textFilter, this);
-            } catch (NoSuchMethodException | InvocationTargetException | InstantiationException | IllegalAccessException e) {
-                // ignore, use fallback below
-            }
-        }
-
-        // fallback to deprecated method
-        var alarm = new Alarm(Alarm.ThreadToUse.SWING_THREAD, this);
-        alarm.setActivationComponent(textFilter);
-        return alarm;
-    }
 }

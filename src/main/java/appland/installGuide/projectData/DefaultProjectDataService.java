@@ -1,7 +1,8 @@
 package appland.installGuide.projectData;
 
 import appland.AppMapBundle;
-import appland.index.*;
+import appland.index.AppMapMetadata;
+import appland.index.AppMapMetadataIndex;
 import appland.installGuide.analyzer.*;
 import appland.problemsView.FindingsManager;
 import com.intellij.execution.configurations.GeneralCommandLine;
@@ -32,7 +33,6 @@ import java.util.stream.Collectors;
 public class DefaultProjectDataService implements ProjectDataService {
     private static final Logger LOG = Logger.getInstance(DefaultProjectDataService.class);
     private static final IntSet supportedNodeMajorVersions = IntSet.of(14, 16, 18);
-    private static final int NUMBER_OF_SAMPLE_CODE_OBJECTS = 5;
 
     private final Project project;
     private final AtomicReference<@NotNull List<@NotNull ProjectMetadata>> cachedProjects = new AtomicReference<>(List.of());
@@ -98,7 +98,10 @@ public class DefaultProjectDataService implements ProjectDataService {
         var numFindings = findingsManager.getProblemCount();
         var impactDomains = findingsManager.getFindingsImpactDomainCount();
 
-        var sampleCodeObjects = findSampleCodeObjects(project);
+        // fixme remove this sample code
+        var sampleCodeObjects = new SampleCodeObjects(
+                List.of(new SimpleCodeObject("Request 1", "/path")),
+                List.of(new SimpleCodeObject("Query 1", "/query")));
 
         return ProjectMetadata.builder()
                 .name(root.getPresentableName())
@@ -119,52 +122,6 @@ public class DefaultProjectDataService implements ProjectDataService {
                 .testFramework(mapLanguageMetadata(analysis.getFeatures().getTest()))
                 .webFramework(mapLanguageMetadata(analysis.getFeatures().getWeb()))
                 .build();
-    }
-
-    private @Nullable SampleCodeObjects findSampleCodeObjects(@NotNull Project project) {
-        var queriesToAppMaps = ClassMapTypeIndex.findItems(project, ClassMapItemType.Query);
-        var requestsToAppMaps = ClassMapTypeIndex.findItems(project, ClassMapItemType.Route);
-        if (queriesToAppMaps.isEmpty() && requestsToAppMaps.isEmpty()) {
-            return null;
-        }
-
-        var requests = getSampleCodeObjects(requestsToAppMaps);
-        var queries = getSampleCodeObjects(queriesToAppMaps);
-        return new SampleCodeObjects(requests, queries);
-    }
-
-    private List<SimpleCodeObject> getSampleCodeObjects(Map<ClassMapItem, List<VirtualFile>> itemToAppMaps) {
-        var singleFileEntries = itemToAppMaps.entrySet().stream()
-                .filter(entry -> entry.getValue().size() == 1)
-                .collect(Collectors.toList());
-
-        if (singleFileEntries.size() >= NUMBER_OF_SAMPLE_CODE_OBJECTS) {
-            return chooseClassMapItems(singleFileEntries);
-        }
-
-        var withValidFiles = itemToAppMaps.entrySet().stream()
-                .filter(entry -> !entry.getValue().isEmpty())
-                .collect(Collectors.toList());
-        return chooseClassMapItems(withValidFiles);
-    }
-
-    /**
-     * @return A selection of items from the list
-     */
-    private static @NotNull List<SimpleCodeObject> chooseClassMapItems(@NotNull Collection<Map.Entry<ClassMapItem, List<VirtualFile>>> items) {
-        if (items.isEmpty()) {
-            return Collections.emptyList();
-        }
-
-        var sorted = new ArrayList<>(items);
-        sorted.sort(Comparator.comparing(entry -> entry.getKey().getId()));
-        return sorted.subList(0, Math.min(NUMBER_OF_SAMPLE_CODE_OBJECTS, sorted.size())).stream()
-                .map(item -> {
-                    // sort to replicate VSCode's implementation
-                    var path = item.getValue().stream().map(VirtualFile::getPath).sorted().findFirst();
-                    return new SimpleCodeObject(item.getKey().getName(), path.orElse(null));
-                })
-                .collect(Collectors.toList());
     }
 
     private @Nullable ProjectMetadataFeature mapLanguageMetadata(@Nullable Feature feature) {

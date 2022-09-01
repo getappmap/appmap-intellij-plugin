@@ -1,15 +1,18 @@
-package appland.milestones;
+package appland.installGuide;
 
+import appland.AppMapBundle;
+import appland.AppMapPlugin;
+import appland.files.AppMapFileChangeListener;
 import appland.index.AppMapMetadata;
-import appland.index.AppMapMetadataIndex;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
+import appland.installGuide.projectData.ProjectDataService;
+import appland.installGuide.projectData.ProjectMetadata;
+import appland.problemsView.FindingsViewTab;
+import appland.problemsView.listener.ScannerFindingsListener;
+import appland.settings.AppMapApplicationSettingsService;
+import com.google.gson.*;
 import com.intellij.ide.BrowserUtil;
 import com.intellij.ide.ClipboardSynchronizer;
 import com.intellij.openapi.application.ApplicationManager;
-import com.intellij.openapi.application.ReadAction;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.fileEditor.FileEditor;
 import com.intellij.openapi.fileEditor.FileEditorLocation;
@@ -20,7 +23,10 @@ import com.intellij.openapi.util.Disposer;
 import com.intellij.openapi.util.UserDataHolderBase;
 import com.intellij.openapi.vfs.LocalFileSystem;
 import com.intellij.openapi.vfs.VirtualFile;
-import com.intellij.ui.jcef.*;
+import com.intellij.ui.jcef.JBCefBrowserBase;
+import com.intellij.ui.jcef.JBCefJSQuery;
+import com.intellij.ui.jcef.JCEFHtmlPanel;
+import com.intellij.util.SingleAlarm;
 import org.cef.CefSettings;
 import org.cef.browser.CefBrowser;
 import org.cef.browser.CefFrame;
@@ -37,39 +43,62 @@ import java.awt.datatransfer.StringSelection;
 import java.beans.PropertyChangeListener;
 import java.io.IOException;
 import java.nio.file.Paths;
-import java.util.Comparator;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.stream.Collectors;
 
-import static appland.AppMapPlugin.getProjectDirPath;
-
-public class UserMilestonesEditor extends UserDataHolderBase implements FileEditor {
-    private static final Logger LOG = Logger.getInstance("#appmap.milestones");
+public class InstallGuideEditor extends UserDataHolderBase implements FileEditor {
+    private static final Logger LOG = Logger.getInstance("#appmap.installGuide");
     private static final String READY_MESSAGE_ID = "intellij-plugin-ready";
 
     private final Project project;
-    @NotNull
-    private final VirtualFile file;
-    private final MilestonesViewType type;
+    private final @NotNull VirtualFile file;
+    private @NotNull InstallGuideViewPage type;
 
-    private final JBCefClient jcefClient = JBCefApp.getInstance().createClient();
-    private final JCEFHtmlPanel contentPanel = new JCEFHtmlPanel(jcefClient, null);
+    private final JCEFHtmlPanel contentPanel = new JCEFHtmlPanel(true, null, null);
     private final JBCefJSQuery jcefBridge = JBCefJSQuery.create((JBCefBrowserBase) contentPanel);
 
     private final AtomicBoolean navigating = new AtomicBoolean(false);
-    private final Gson gson = new GsonBuilder().create();
+    private final Gson gson = new GsonBuilder()
+            .registerTypeAdapter(AppMapMetadata.class, new AppMapMetadataWebAppSerializer())
+            .create();
 
-    public UserMilestonesEditor(@NotNull Project project, @NotNull VirtualFile file, @NotNull MilestonesViewType type) {
+    // to debounce the JS refresh of available AppMaps
+    private final SingleAlarm projectRefreshAlarm = new SingleAlarm(this::refreshProjects, 500, this);
+
+    public InstallGuideEditor(@NotNull Project project, @NotNull VirtualFile file, @NotNull InstallGuideViewPage type) {
         this.project = project;
         this.file = file;
         this.type = type;
 
-        Disposer.register(this, jcefClient);
-        Disposer.register(this, contentPanel);
-        Disposer.register(this, jcefBridge);
+        // contentPanel and jcefBridge register with the client as Disposable parent
+        Disposer.register(this, contentPanel.getJBCefClient());
 
+        setupListeners();
         setupJCEF();
         loadApplication();
+    }
+
+    public void navigateTo(@NotNull InstallGuideViewPage page) {
+        this.type = page;
+        postMessage(createPageNavigationJSON(page));
+    }
+
+    public void refreshProjects() {
+        postMessage(createUpdateProjectsMessage());
+    }
+
+    private void setupListeners() {
+        var busConnection = project.getMessageBus().connect(this);
+
+        // send current list of AppMaps after AppMap files changed
+        busConnection.subscribe(AppMapFileChangeListener.TOPIC, projectRefreshAlarm::cancelAndRequest);
+
+        // listen to changes of findings
+        busConnection.subscribe(ScannerFindingsListener.TOPIC, p -> {
+            if (p == project) {
+                // todo
+            }
+        });
     }
 
     private void setupJCEF() {
@@ -77,13 +106,7 @@ public class UserMilestonesEditor extends UserDataHolderBase implements FileEdit
         contentPanel.getJBCefClient().addRequestHandler(new CefRequestHandlerAdapter() {
             @Override
             public boolean onBeforeBrowse(CefBrowser browser, CefFrame frame, CefRequest request, boolean user_gesture, boolean is_redirect) {
-                var url = request.getURL();
-                if (url != null && url.startsWith("https://appland.com")) {
-                    navigating.set(true);
-                    BrowserUtil.browse(url);
-                    return true;
-                }
-                return false;
+                return user_gesture && openExternalLink(request.getURL());
             }
         }, contentPanel.getCefBrowser());
 
@@ -125,7 +148,7 @@ public class UserMilestonesEditor extends UserDataHolderBase implements FileEdit
 
     private void loadApplication() {
         try {
-            contentPanel.loadURL(type.getHTMLPath().toUri().toURL().toString());
+            contentPanel.loadURL(AppMapPlugin.getInstallGuideHTMLPath().toUri().toURL().toString());
         } catch (IOException e) {
             LOG.error(e);
         }
@@ -133,7 +156,7 @@ public class UserMilestonesEditor extends UserDataHolderBase implements FileEdit
 
     private void onJavaScriptApplicationReady() {
         jcefBridge.addHandler(request -> {
-            LOG.warn("postMessage received message: " + request);
+            LOG.debug("postMessage received message: " + request);
 
             try {
                 var json = gson.fromJson(request, JsonObject.class);
@@ -143,35 +166,47 @@ public class UserMilestonesEditor extends UserDataHolderBase implements FileEdit
                         case "postInitialize":
                             // ignored
                             break;
-                        case "clickLink":
-                            // ignored, handled by JCEF listener
+
+                        case "click-link":
+                            if (json.has("uri")) {
+                                openExternalLink(json.getAsJsonPrimitive("uri").getAsString());
+                            }
                             break;
-                        case "openFile":
+
+                        case "open-file":
                             ApplicationManager.getApplication().invokeLater(() -> {
-                                var file = LocalFileSystem.getInstance().findFileByNioFile(Paths.get(json.getAsJsonPrimitive("file").getAsString()));
+                                var path = Paths.get(json.getAsJsonPrimitive("file").getAsString());
+                                var file = LocalFileSystem.getInstance().findFileByNioFile(path);
                                 if (file != null) {
                                     FileEditorManager.getInstance(project).openFile(file, true);
                                 }
                             });
                             break;
-                        case "transition": {
-                            var target = json.getAsJsonPrimitive("target").getAsString();
-                            var targetViewType = MilestonesViewType.findByTransitionTarget(target);
-                            if (targetViewType != null) {
-                                ApplicationManager.getApplication().invokeLater(() -> {
-                                    UserMilestonesEditorProvider.open(project, targetViewType);
-                                });
-                            }
+
+                        case "openAppmap":
+                            LOG.error("TODO");
                             break;
-                        }
+
+                        case "open-page":
+                            // fixme send telemetry, as in VSCode?
+                            break;
+
+                        case "view-problems":
+                            ApplicationManager.getApplication().invokeLater(() -> {
+                                FindingsViewTab.activateFindingsTab(project);
+                            });
+                            break;
+
                         case "clipboard": {
-                            var content = json.getAsJsonPrimitive("target").getAsString();
+                            // fixme send telemetry, as in VSCode?
+                            var content = json.getAsJsonPrimitive("text").getAsString();
                             LOG.debug("Copying text to clipboard: " + content);
 
                             var target = new StringSelection(content);
                             ClipboardSynchronizer.getInstance().setContent(target, target);
                             break;
                         }
+
                         default:
                             LOG.warn("Unhandled message type: " + type);
                     }
@@ -185,68 +220,46 @@ public class UserMilestonesEditor extends UserDataHolderBase implements FileEdit
 
         contentPanel.getCefBrowser().executeJavaScript(createCallbackJS(jcefBridge, "postMessage"), "", 0);
 
-        JsonObject json;
-        switch (type) {
-            case InstallAgent:
-                json = createInstallAgentInitJSON();
-                break;
-            case RecordAppMaps:
-                json = createRecordAppMapsInitJSON();
-                break;
-            case AppMapsTable:
-                json = createAppMapsInitJSON();
-                break;
-            default:
-                throw new IllegalStateException("Unsupported view type: " + type);
-        }
+        postMessage(createInitMessageJSON());
+    }
 
-        var jsonString = gson.toJson(json);
-        contentPanel.getCefBrowser().executeJavaScript("window.postMessage(" + jsonString + ")", "", 0);
+    private void postMessage(@NotNull JsonElement json) {
+        contentPanel.getCefBrowser().executeJavaScript("window.postMessage(" + gson.toJson(json) + ")", "", 0);
+    }
+
+    private @NotNull JsonObject createInitMessageJSON() {
+        // this contains all necessary data for the components, calculated under progress
+        var projects = findProjects();
+
+        var disabledPages = new JsonArray();
+        disabledPages.add("openapi");
+
+        var json = new JsonObject();
+        json.addProperty("type", "init");
+        json.add("projects", gson.toJsonTree(projects));
+        json.add("disabled", disabledPages);
+        json.addProperty("page", type.getPageId());
+        json.addProperty("findingsEnabled", AppMapApplicationSettingsService.getInstance().isEnableFindings());
+        return json;
+    }
+
+    private @NotNull JsonObject createPageNavigationJSON(@NotNull InstallGuideViewPage page) {
+        var json = new JsonObject();
+        json.addProperty("type", "page");
+        json.addProperty("page", page.getPageId());
+        return json;
+    }
+
+    private @NotNull JsonObject createUpdateProjectsMessage() {
+        var json = new JsonObject();
+        json.addProperty("type", "projects");
+        json.add("projects", gson.toJsonTree(findProjects()));
+        return json;
     }
 
     @NotNull
-    private JsonObject createInstallAgentInitJSON() {
-        var json = new JsonObject();
-        String projectDirPath = getProjectDirPath(project);
-        json.addProperty("type", "init");
-        json.addProperty("codeSnippet", "npx @appland/appmap install " + projectDirPath);
-        return json;
-    }
-
-    @NotNull
-    private JsonObject createRecordAppMapsInitJSON() {
-        var json = new JsonObject();
-        json.addProperty("type", "init");
-        json.addProperty("editor", "jetbrains");
-        return json;
-    }
-
-    @NotNull
-    private JsonObject createAppMapsInitJSON() {
-        var json = new JsonObject();
-        json.addProperty("type", "init");
-        json.add("appmaps", createAppMapsArray(project));
-        return json;
-    }
-
-    private JsonArray createAppMapsArray(@NotNull Project project) {
-        var appmaps = ReadAction.compute(() -> AppMapMetadataIndex.findAppMaps(project, null, 10))
-                .stream()
-                .filter(AppMapMetadata::hasAnyCount)
-                .sorted(Comparator.comparingInt(AppMapMetadata::getSortCount).reversed())
-                .collect(Collectors.toList());
-
-        var json = new JsonArray(appmaps.size());
-        for (var appmap : appmaps) {
-            var jsonAppMap = new JsonObject();
-            jsonAppMap.addProperty("path", appmap.getSystemIndependentFilepath());
-            jsonAppMap.addProperty("name", appmap.getName());
-            jsonAppMap.addProperty("requests", appmap.getRequestCount());
-            jsonAppMap.addProperty("sqlQueries", appmap.getQueryCount());
-            jsonAppMap.addProperty("functions", appmap.getFunctionsCount());
-            json.add(jsonAppMap);
-        }
-        return json;
+    private List<ProjectMetadata> findProjects() {
+        return ProjectDataService.getInstance(project).getAppMapProjects();
     }
 
     @NotNull
@@ -267,7 +280,7 @@ public class UserMilestonesEditor extends UserDataHolderBase implements FileEdit
 
     @Override
     public @Nls(capitalization = Nls.Capitalization.Title) @NotNull String getName() {
-        return "User Milestones";
+        return AppMapBundle.get("installGuide.editor.title");
     }
 
     @Override
@@ -286,12 +299,10 @@ public class UserMilestonesEditor extends UserDataHolderBase implements FileEdit
 
     @Override
     public void addPropertyChangeListener(@NotNull PropertyChangeListener listener) {
-
     }
 
     @Override
     public void removePropertyChangeListener(@NotNull PropertyChangeListener listener) {
-
     }
 
     @Override
@@ -301,11 +312,24 @@ public class UserMilestonesEditor extends UserDataHolderBase implements FileEdit
 
     @Override
     public void dispose() {
-        LOG.debug("Disposing user milestones editor");
+        LOG.debug("Disposing AppLand install guide editor");
     }
 
     @Override
     public @NotNull VirtualFile getFile() {
         return file;
+    }
+
+    public void openDevTools() {
+        ApplicationManager.getApplication().invokeLater(contentPanel::openDevtools);
+    }
+
+    private boolean openExternalLink(@Nullable String url) {
+        if (url != null && (url.startsWith("http://") || url.startsWith("https://"))) {
+            navigating.set(true);
+            BrowserUtil.browse(url);
+            return true;
+        }
+        return false;
     }
 }

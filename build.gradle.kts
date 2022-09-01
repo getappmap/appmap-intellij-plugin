@@ -2,6 +2,7 @@ import org.commonmark.parser.Parser
 import org.commonmark.renderer.html.HtmlRenderer
 import org.gradle.api.JavaVersion.VERSION_11
 import org.jetbrains.intellij.tasks.PrepareSandboxTask
+import org.jetbrains.intellij.tasks.RunIdeTask
 import org.jetbrains.intellij.tasks.RunPluginVerifierTask
 
 buildscript {
@@ -92,6 +93,10 @@ tasks {
         copyPluginAssets(intellij.pluginName.get())
     }
 
+    withType(RunIdeTask::class.java).all {
+        systemProperty("appmap.sandbox", "true")
+    }
+
     withType(Test::class.java).all {
         systemProperty("idea.test.execution.policy", "appland.AppLandTestExecutionPolicy")
         systemProperty("appland.testDataPath", file("src/test/data").path)
@@ -109,12 +114,9 @@ fun AbstractCopyTask.copyPluginAssets(rootDir: String) {
         include("index.html")
         include("dist/**")
     }
-    from("${project.rootDir}/appland-user-milestones") {
-        into("${rootPath}appland-user-milestones")
-        include("welcome.html")
-        include("agent.html")
-        include("record.html")
-        include("appmaps.html")
+    from("${project.rootDir}/appland-install-guide") {
+        into("${rootPath}appland-install-guide")
+        include("index.html")
         include("dist/**")
     }
 }
