@@ -1,4 +1,4 @@
-package appland.toolwindow.milestones;
+package appland.toolwindow.installGuide;
 
 import com.intellij.ui.HyperlinkAdapter;
 import com.intellij.ui.components.JBLabel;
@@ -14,7 +14,7 @@ import javax.swing.event.HyperlinkListener;
 class StatusLabel extends JBLabel {
     private final @Nullable Runnable clickAction;
 
-    StatusLabel(@NotNull UserMilestoneStatus status, @NotNull String label, @Nullable Runnable clickAction) {
+    StatusLabel(@NotNull InstallGuideStatus status, @NotNull String label, @Nullable Runnable clickAction) {
         super(clickAction == null ? label : createLink(label), status.getIcon(), LEADING);
         this.setCopyable(true);
         this.clickAction = clickAction;
@@ -36,7 +36,7 @@ class StatusLabel extends JBLabel {
         };
     }
 
-    void setStatus(UserMilestoneStatus status) {
+    void setStatus(InstallGuideStatus status) {
         setIcon(status.getIcon());
     }
 }

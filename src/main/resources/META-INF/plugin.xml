@@ -29,9 +29,17 @@
                           implementation="appland.installGuide.analyzer.languages.UnknownLanguageAnalyzer"/>
     </extensions>
 
+    <applicationListeners>
+        <listener topic="com.intellij.openapi.project.ProjectManagerListener"
+                  class="appland.cli.AppLandProjectManagerListener"/>
+    </applicationListeners>
+
     <projectListeners>
         <listener topic="com.intellij.ide.plugins.DynamicPluginListener"
                   class="appland.startup.DynamicPluginListener"/>
+
+        <listener topic="appland.cli.AppLandDownloadListener"
+                  class="appland.cli.StartServicesAfterDownloadListener"/>
     </projectListeners>
 
     <extensions defaultExtensionNs="com.intellij">
@@ -46,7 +54,7 @@
         <fileIconProvider implementation="appland.editor.AppMapIconProvider"/>
         <editorNotificationProvider implementation="appland.editor.AppMapNotificationProvider"/>
 
-        <fileEditorProvider implementation="appland.milestones.UserMilestonesEditorProvider"/>
+        <fileEditorProvider implementation="appland.installGuide.InstallGuideEditorProvider"/>
 
         <fileBasedIndex implementation="appland.index.AppMapMetadataIndex"/>
         <indexedRootsProvider implementation="appland.index.AppMapFolderIndexedRootProvider"/>
@@ -69,6 +77,8 @@
         <projectService serviceImplementation="appland.settings.AppMapProjectSettingsService"/>
         <projectService serviceInterface="appland.remote.RemoteRecordingStatusService"
                         serviceImplementation="appland.remote.DefaultRemoteRecordingStatusService"/>
+        <projectService serviceInterface="appland.installGuide.projectData.ProjectDataService"
+                        serviceImplementation="appland.installGuide.projectData.DefaultProjectDataService"/>
 
         <notificationGroup id="appmap.remoteRecording" displayType="BALLOON"
                            key="notification.remoteRecording.displayName"/>
@@ -78,6 +88,18 @@
                              instance="appland.settings.AppMapProjectConfigurable"/>
 
         <errorHandler implementation="appland.GitHubErrorHandler"/>
+
+        <!-- Generic AppMap file handling -->
+        <vfs.asyncListener implementation="appland.files.AppMapAsyncFileListener"/>
+
+        <!-- CLI service -->
+        <vfs.asyncListener implementation="appland.cli.AppmapYamlAsyncFileListener"/>
+
+        <!-- scanner problems view -->
+        <projectService serviceImplementation="appland.problemsView.FindingsManager"/>
+        <problemsViewPanelProvider implementation="appland.problemsView.FindingsPanelProvider"/>
+        <vfs.asyncListener implementation="appland.problemsView.listener.ScannerFilesAsyncListener"/>
+        <annotator implementationClass="appland.problemsView.AppMapFindingsAnnotator" language="" order="last"/>
     </extensions>
 
     <actions>
@@ -100,9 +122,9 @@
 
             <add-to-group group-id="ToolsMenu" anchor="last"/>
         </group>
-        <action id="openUserQuickstart" class="appland.actions.OpenQuickstartAction"
-                text="AppLand: Open Quickstart"/>
-        <action id="openUserAppMaps" class="appland.actions.OpenAppMapsAction"
-                text="AppLand: Open AppMaps"/>
+        <action id="openInstallGuide" class="appland.actions.OpenInstallGuideAction"
+                text="AppLand: Install Guide (Beta)"/>
+
+        <!--<action text="AppMap: Open Install Guide DevTools" class="appland.installGuide.OpenDevToolsAction"/>-->
     </actions>
 </idea-plugin>

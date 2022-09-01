@@ -1,4 +1,4 @@
-package appland.toolwindow.milestones;
+package appland.toolwindow.installGuide;
 
 import appland.Icons;
 import org.jetbrains.annotations.NotNull;
@@ -8,7 +8,7 @@ import javax.swing.*;
 /**
  * Status of a single milestone step.
  */
-enum UserMilestoneStatus {
+enum InstallGuideStatus {
     Incomplete, Completed, Error;
 
     @NotNull

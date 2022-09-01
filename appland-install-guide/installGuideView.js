@@ -46,7 +46,12 @@ export function mountInstallGuide() {
       mounted() {
         document.querySelectorAll('a[href]').forEach((el) => {
           el.addEventListener('click', (e) => {
-            vscode.postMessage({command: 'click-link', uri: e.target.href});
+            const href = e.target.href;
+            if (href && (href.startsWith("http://") || href.startsWith("https://"))) {
+              e.preventDefault();
+              vscode.postMessage({command: 'click-link', uri: e.target.href});
+              return false;
+            }
           });
         });
         this.$refs.ui.jumpTo(startPage);
