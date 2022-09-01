@@ -30,21 +30,27 @@ public class AppMapProjectConfigurable implements Configurable {
 
     @Override
     public void reset() {
-        form.loadSettingsFrom(AppMapProjectSettingsService.getState(project));
+        var projectSettings = AppMapProjectSettingsService.getState(project);
+        var applicationSettings = AppMapApplicationSettingsService.getInstance();
+        form.loadSettingsFrom(projectSettings, applicationSettings);
     }
 
     @Override
     public boolean isModified() {
         var settings = AppMapProjectSettingsService.getState(project);
+        var applicationSettings = AppMapApplicationSettingsService.getInstance();
 
         var newSettings = new AppMapProjectSettings(settings);
-        form.applySettingsTo(newSettings);
+        var newApplicationSettings = new AppMapApplicationSettings(applicationSettings);
+        form.applySettingsTo(newSettings, newApplicationSettings);
 
-        return !settings.equals(newSettings);
+        return !settings.equals(newSettings) || !applicationSettings.equals(newApplicationSettings);
     }
 
     @Override
     public void apply() throws ConfigurationException {
-        form.applySettingsTo(AppMapProjectSettingsService.getState(project));
+        var projectSettings = AppMapProjectSettingsService.getState(project);
+        var applicationSettings = AppMapApplicationSettingsService.getInstance();
+        form.applySettingsTo(projectSettings, applicationSettings);
     }
 }
