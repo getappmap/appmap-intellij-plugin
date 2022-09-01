@@ -30,6 +30,10 @@ public final class AppMapPlugin {
         return getPluginPath().resolve("appmap").resolve("index.html");
     }
 
+    public static Path getInstallGuideHTMLPath() {
+        return getPluginPath().resolve("appland-install-guide").resolve("index.html");
+    }
+
     public static Path getInstallAgentHTMLPath() {
         return getPluginPath().resolve("appland-user-milestones").resolve("agent.html");
     }

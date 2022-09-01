@@ -35,6 +35,9 @@
     </projectListeners>
 
     <extensions defaultExtensionNs="com.intellij">
+        <applicationService serviceImplementation="appland.AppLandLifecycleService"/>
+        <projectService serviceImplementation="appland.AppLandLifecycleService"/>
+
         <postStartupActivity implementation="appland.startup.AppLandStartupActivity"/>
 
         <fileEditorProvider implementation="appland.editor.AppMapHTMLEditorProvider"/>

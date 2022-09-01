@@ -12,9 +12,6 @@ import org.jetbrains.annotations.NotNull;
  * Factory to create AppMap-mode tool windows.
  */
 public class AppMapToolWindowFactory implements ToolWindowFactory {
-    // must be the same as in plugin.xml
-    public static final String TOOL_WINDOW_ID = "applandToolWindow";
-
     @Override
     public void createToolWindowContent(@NotNull Project project, @NotNull ToolWindow toolWindow) {
         var content = ContentFactory.SERVICE.getInstance().createContent(null, null, false);
