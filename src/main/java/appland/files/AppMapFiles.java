@@ -21,7 +21,11 @@ public final class AppMapFiles {
      * @return {@code true} if the given file is an AppMap.
      */
     public static boolean isAppMap(@NotNull VirtualFile file) {
-        return file.isValid() && !file.isDirectory() && file.getName().endsWith(".appmap.json");
+        return file.isValid() && !file.isDirectory() && isAppMapFileName(file.getName());
+    }
+
+    public static boolean isAppMapFileName(@NotNull String fileName) {
+        return fileName.endsWith(".appmap.json");
     }
 
     /**
