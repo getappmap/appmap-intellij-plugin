@@ -2,9 +2,11 @@ package appland.installGuide.projectData;
 
 import com.google.gson.annotations.SerializedName;
 import lombok.Data;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 @Data
 public class SimpleCodeObject {
-    @SerializedName("name") final String name;
-    @SerializedName("path") final String path;
+    @NotNull @SerializedName("name") final String name;
+    @Nullable @SerializedName("path") final String path;
 }
