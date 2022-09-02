@@ -14,6 +14,12 @@ AppMap Plugin Changelog
 
 * Various fixes ([006aac6](https://github.com/applandinc/appmap-intellij-plugin/commit/006aac623773817f59f38dd8f166c05fb96e1453))
 
+## [0.8.0-4]
+- Indexing of classMap.json files to provide sample HTTP requests and database queries for the install guide.
+- Fixed names of install guide steps.
+- Fixed warning about CLI background process listening.
+- Bug fixes
+
 ## [0.8.0-3]
 - Refresh table of AppMaps in install guide webview after changes to `.appmap.json` files on disk.
 - Add link to page "Runtime Analysis".
