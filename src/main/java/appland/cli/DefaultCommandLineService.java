@@ -16,6 +16,7 @@ import com.intellij.openapi.util.SystemInfo;
 import com.intellij.openapi.vfs.VfsUtilCore;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.openapi.vfs.ex.temp.TempFileSystem;
+import com.intellij.util.io.BaseOutputReader;
 import com.intellij.util.system.CpuArch;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -225,19 +226,33 @@ public class DefaultCommandLineService implements AppLandCommandLineService {
         command.withWorkDirectory(workingDir.toString());
         command.withParentEnvironmentType(GeneralCommandLine.ParentEnvironmentType.SYSTEM);
 
-        var processHandler = new KillableProcessHandler(command);
-        processHandler.addProcessListener(new ProcessAdapter() {
-            @Override
-            public void processTerminated(@NotNull ProcessEvent event) {
-                LOG.warn("CLI tool terminated: " + command + ", exit code: " + event.getExitCode());
+        var processHandler = new KillableProcessHandler(command) {
+            {
+                addProcessListener(new ProcessAdapter() {
+                    @Override
+                    public void processTerminated(@NotNull ProcessEvent event) {
+                        if (LOG.isDebugEnabled()) {
+                            LOG.debug("CLI tool terminated: " + command + ", exit code: " + event.getExitCode());
+                        }
+                    }
+
+                    @Override
+                    public void onTextAvailable(@NotNull ProcessEvent event, @NotNull Key outputType) {
+                        if (LOG.isDebugEnabled()) {
+                            LOG.debug(event.getText());
+                        }
+                    }
+                });
             }
 
             @Override
-            public void onTextAvailable(@NotNull ProcessEvent event, @NotNull Key outputType) {
-                LOG.warn(event.getText());
+            protected BaseOutputReader.@NotNull Options readerOptions() {
+                return BaseOutputReader.Options.forMostlySilentProcess();
             }
-        });
+        };
+
         processHandler.startNotify();
+
         return processHandler;
     }
 
