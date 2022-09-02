@@ -53,6 +53,12 @@ AppMap Plugin Changelog
 ### Changed
 - Dropped support for 2021.1 and 2021.2
 
+## [0.8.0-4]
+- Indexing of classMap.json files to provide sample HTTP requests and database queries for the install guide.
+- Fixed names of install guide steps.
+- Fixed warning about CLI background process listening.
+- Bug fixes
+
 ## [0.8.0-3]
 - Refresh table of AppMaps in install guide webview after changes to `.appmap.json` files on disk.
 - Add link to page "Runtime Analysis".
