@@ -9,6 +9,7 @@ import com.google.common.collect.MultimapBuilder;
 import com.google.common.collect.Multiset;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonSyntaxException;
 import com.intellij.analysis.problemsView.Problem;
 import com.intellij.analysis.problemsView.ProblemsListener;
 import com.intellij.analysis.problemsView.ProblemsProvider;
@@ -260,10 +261,17 @@ public class FindingsManager implements ProblemsProvider {
 
     private @Nullable FindingsFileData loadFindingsFile(@NotNull VirtualFile file) {
         var doc = FileDocumentManager.getInstance().getDocument(file);
-        if (doc == null) {
+        if (doc == null || doc.getTextLength() == 0) {
             return null;
         }
 
-        return GSON.fromJson(doc.getText(), FindingsFileData.class);
+        try {
+            return GSON.fromJson(doc.getText(), FindingsFileData.class);
+        } catch (JsonSyntaxException e) {
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("Failed to load findings file: " + file.getPath(), e);
+            }
+            return null;
+        }
     }
 }
