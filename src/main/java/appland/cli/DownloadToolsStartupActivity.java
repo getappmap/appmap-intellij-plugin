@@ -1,6 +1,5 @@
 package appland.cli;
 
-import appland.settings.AppMapApplicationSettingsService;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.startup.StartupActivity;
@@ -19,7 +18,7 @@ public class DownloadToolsStartupActivity implements StartupActivity.Background 
 
     @Override
     public void runActivity(@NotNull Project project) {
-        if (ACTIVE.compareAndSet(false, true) && AppMapApplicationSettingsService.getInstance().isEnableFindings()) {
+        if (ACTIVE.compareAndSet(false, true)) {
             try {
                 AppLandDownloadService.getInstance().queueDownloadTasks(project);
             } catch (IOException e) {

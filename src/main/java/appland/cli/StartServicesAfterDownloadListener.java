@@ -1,13 +1,12 @@
 package appland.cli;
 
-import appland.settings.AppMapApplicationSettingsService;
 import com.intellij.openapi.application.ApplicationManager;
 import org.jetbrains.annotations.NotNull;
 
 public class StartServicesAfterDownloadListener implements AppLandDownloadListener {
     @Override
     public void downloadFinished(@NotNull CliTool type, boolean success) {
-        if (!success || !AppMapApplicationSettingsService.getInstance().isEnableFindings()) {
+        if (!success) {
             return;
         }
 
