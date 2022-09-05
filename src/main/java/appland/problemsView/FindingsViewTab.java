@@ -1,18 +1,36 @@
 package appland.problemsView;
 
 import appland.AppMapBundle;
-import com.intellij.analysis.problemsView.toolWindow.Node;
-import com.intellij.analysis.problemsView.toolWindow.ProblemsViewPanel;
-import com.intellij.analysis.problemsView.toolWindow.ProblemsViewState;
+import com.intellij.analysis.problemsView.toolWindow.*;
 import com.intellij.openapi.project.DumbService;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.vfs.VirtualFile;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Comparator;
 
-class FindingsViewTab extends ProblemsViewPanel {
+public final class FindingsViewTab extends ProblemsViewPanel {
+    private static final String TAB_ID = "appmap.scannerView";
+
+    /**
+     * Show and activate the AppMap findings tab.
+     *
+     * @see ProblemsView#toggleCurrentFileProblems(Project, VirtualFile)
+     */
+    public static void activateFindingsTab(@NotNull Project project) {
+        var window = ProblemsView.getToolWindow(project);
+        if (window == null) {
+            return;
+        }
+
+        window.activate(() -> {
+            var contentManager = window.getContentManager();
+            ProblemsViewToolWindowUtils.INSTANCE.selectContent(contentManager, TAB_ID);
+        }, true, true);
+    }
+
     public FindingsViewTab(@NotNull Project project, @NotNull ProblemsViewState state) {
-        super(project, "appmap.scannerView", state, AppMapBundle.lazy("problemsView.title"));
+        super(project, TAB_ID, state, AppMapBundle.lazy("problemsView.title"));
 
         getTreeModel().setRoot(new FindingsRootNode(this));
 

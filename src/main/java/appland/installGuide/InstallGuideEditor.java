@@ -6,6 +6,7 @@ import appland.files.AppMapFileChangeListener;
 import appland.index.AppMapMetadata;
 import appland.installGuide.projectData.ProjectDataService;
 import appland.installGuide.projectData.ProjectMetadata;
+import appland.problemsView.FindingsViewTab;
 import appland.problemsView.listener.ScannerFindingsListener;
 import appland.settings.AppMapApplicationSettingsService;
 import com.google.gson.*;
@@ -191,7 +192,9 @@ public class InstallGuideEditor extends UserDataHolderBase implements FileEditor
                             break;
 
                         case "view-problems":
-                            //fixme
+                            ApplicationManager.getApplication().invokeLater(() -> {
+                                FindingsViewTab.activateFindingsTab(project);
+                            });
                             break;
 
                         case "clipboard": {
