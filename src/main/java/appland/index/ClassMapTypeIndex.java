@@ -1,6 +1,7 @@
 package appland.index;
 
 import com.intellij.json.JsonFileType;
+import com.intellij.openapi.project.DumbService;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.search.GlobalSearchScope;
@@ -52,6 +53,10 @@ public class ClassMapTypeIndex extends FileBasedIndexExtension<ClassMapItemType,
      * @return Class map items of the given type, associated with the AppMap source files.
      */
     public static Map<ClassMapItem, List<VirtualFile>> findItems(@NotNull Project project, @NotNull ClassMapItemType type) {
+        if (DumbService.isDumb(project)) {
+            return Collections.emptyMap();
+        }
+
         var scope = GlobalSearchScope.everythingScope(project);
 
         var items = new HashMap<ClassMapItem, List<VirtualFile>>();
