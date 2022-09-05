@@ -1,6 +1,5 @@
 package appland.index;
 
-import com.google.gson.JsonParseException;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.util.indexing.FileContent;
 import com.intellij.util.indexing.SingleEntryIndexer;
@@ -64,8 +63,8 @@ class StreamingAppMapIndexer extends SingleEntryIndexer<AppMapMetadata> {
                         break;
                 }
             }
-        } catch (JsonParseException e) {
-            LOG.debug("parsing AppMap JSON failed", e);
+        } catch (Exception e) {
+            LOG.debug("parsing AppMap JSON file failed: " + inputData.getFile().getPath(), e);
             return null;
         }
 
