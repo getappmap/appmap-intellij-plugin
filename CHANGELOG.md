@@ -14,6 +14,12 @@ AppMap Plugin Changelog
 
 * Various fixes ([006aac6](https://github.com/applandinc/appmap-intellij-plugin/commit/006aac623773817f59f38dd8f166c05fb96e1453))
 
+## [0.8.0-5]
+- Support to show the problems view tab (link "Open the PROBLEMS tab" in the JS application).
+- Download CLI tools even if "enableFindings" is off. 
+- Don't break findings when JSON parsing fails.
+- Fix for `ArrayIndexOutOfBoundsException` during AppMap indexing.
+
 ## [0.8.0-4]
 - Indexing of classMap.json files to provide sample HTTP requests and database queries for the install guide.
 - Fixed names of install guide steps.
