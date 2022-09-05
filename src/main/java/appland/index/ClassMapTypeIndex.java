@@ -105,7 +105,7 @@ public class ClassMapTypeIndex extends FileBasedIndexExtension<ClassMapItemType,
 
     @Override
     public int getVersion() {
-        return 3;
+        return IndexUtil.BASE_VERSION;
     }
 
     @Override
