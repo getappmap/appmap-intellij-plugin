@@ -53,41 +53,6 @@ AppMap Plugin Changelog
 ### Changed
 - Dropped support for 2021.1 and 2021.2
 
-## [0.8.0-5]
-- Support to show the problems view tab (link "Open the PROBLEMS tab" in the JS application).
-- Download CLI tools even if "enableFindings" is off. 
-- Don't break findings when JSON parsing fails.
-- Fix for `ArrayIndexOutOfBoundsException` during AppMap indexing.
-
-## [0.8.0-4]
-- Indexing of classMap.json files to provide sample HTTP requests and database queries for the install guide.
-- Fixed names of install guide steps.
-- Fixed warning about CLI background process listening.
-- Bug fixes
-
-## [0.8.0-3]
-- Refresh table of AppMaps in install guide webview after changes to `.appmap.json` files on disk.
-- Add link to page "Runtime Analysis".
-- Fix to locate `appmap-findings.json` files in excluded parent folders, e.g. in `target/appmap/...`.
-- Updated wording of Java and JavaScript language analyzers to match VSCode.
-- Download CLI binaries to a temp location first to avoid execution of partially downloaded files at startup.
-
-## [0.8.0-2]
-- Check for `appmap.yml` before launching CLI processes.
-- Remove old versions of download CLI binaries.
-- Misc fixes
-
-## [0.8.0-1]
-- Support .gitignore and other VCS ignored files if supported by the IDE
-- Disabled OpenAPI page
-
-## [0.8.0]
-### Added
-- Support for AppLand scanner findings
-
-### Changed
-- Dropped support for 2021.1 and 2021.2
-
 ## [0.7.10]
 ### Updated
 - Compatibility with 2022.2 EAP
