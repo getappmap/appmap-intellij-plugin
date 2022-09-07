@@ -1,0 +1,11 @@
+name: sample_app_6th_ed
+packages:
+  - path: app
+  - path: lib
+language: ruby
+test_recording:
+  test_commands:
+    - env:
+        APPMAP: 'true'
+        DISABLE_SPRING: 'true'
+      command: bundle exec rails test
