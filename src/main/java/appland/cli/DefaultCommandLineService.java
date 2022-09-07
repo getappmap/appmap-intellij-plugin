@@ -1,5 +1,6 @@
 package appland.cli;
 
+import appland.config.AppMapConfigFile;
 import appland.files.AppMapVfsUtils;
 import appland.settings.AppMapApplicationSettingsService;
 import com.intellij.execution.ExecutionException;
@@ -23,6 +24,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -201,12 +203,33 @@ public class DefaultCommandLineService implements AppLandCommandLineService {
         }
 
         var workingDir = AppMapVfsUtils.asNativePath(directory);
+        var watchedDir = findWatchedAppMapDirectory(workingDir).toString();
 
-        var indexer = startProcess(workingDir, indexerPath.toString(), "index", "--watch");
+        var indexer = startProcess(workingDir, indexerPath.toString(), "index", "--watch", "--appmap-dir", watchedDir);
         var scanner = AppMapApplicationSettingsService.getInstance().isEnableFindings()
-                ? startProcess(workingDir, scannerPath.toString(), "scan", "--watch")
+                ? startProcess(workingDir, scannerPath.toString(), "scan", "--watch", "--appmap-dir", watchedDir)
                 : null;
         return new CliProcesses(indexer, scanner);
+    }
+
+    /**
+     * Locate the directory, which should be watched for new .appmap.json files.
+     * This is either the directory configured in appmap.yml or the base directory itself.
+     */
+    private static @NotNull Path findWatchedAppMapDirectory(@NotNull Path baseDirectory) {
+        var appMapConfig = AppMapConfigFile.parseConfigFile(baseDirectory.resolve("appmap.yml"));
+        if (appMapConfig == null || appMapConfig.getAppMapDir() == null) {
+            return baseDirectory;
+        }
+
+        try {
+            var configuredPath = Paths.get(appMapConfig.getAppMapDir());
+            return configuredPath.isAbsolute()
+                    ? configuredPath
+                    : baseDirectory.resolve(configuredPath);
+        } catch (Exception e) {
+            return baseDirectory;
+        }
     }
 
     private static boolean isSupported() {
