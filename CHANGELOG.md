@@ -1,3 +1,12 @@
+AppMap Plugin Changelog
+
+## [0.8.0](https://github.com/applandinc/appmap-intellij-plugin/compare/v0.7.10...v0.8.0) (2022-09-08)
+
+
+### Features
+
+* Various fixes ([006aac6](https://github.com/applandinc/appmap-intellij-plugin/commit/006aac623773817f59f38dd8f166c05fb96e1453))
+
 ## [0.7.10]
 ### Updated
 - Compatibility with 2022.2 EAP
