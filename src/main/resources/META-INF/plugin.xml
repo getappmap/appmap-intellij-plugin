@@ -58,7 +58,9 @@
 
         <fileBasedIndex implementation="appland.index.AppMapMetadataIndex"/>
         <fileBasedIndex implementation="appland.index.ClassMapTypeIndex"/>
-        <indexedRootsProvider implementation="appland.index.AppMapFolderIndexedRootProvider"/>
+        <!--suppress PluginXmlValidity -->
+        <indexableFilesContributor implementation="appland.index.AppMapIndexableFilesContributor"/>
+
         <toolWindow id="applandToolWindow" anchor="right" secondary="false"
                     icon="appland.Icons.TOOL_WINDOW"
                     factoryClass="appland.toolwindow.AppMapToolWindowFactory"/>
@@ -92,6 +94,7 @@
 
         <!-- Generic AppMap file handling -->
         <vfs.asyncListener implementation="appland.files.AppMapAsyncFileListener"/>
+        <virtualFileManagerListener implementation="appland.files.VirtualFileManagerLister"/>
 
         <!-- CLI service -->
         <vfs.asyncListener implementation="appland.cli.AppmapYamlAsyncFileListener"/>

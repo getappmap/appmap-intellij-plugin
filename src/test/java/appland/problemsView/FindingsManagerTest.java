@@ -1,6 +1,7 @@
 package appland.problemsView;
 
 import appland.AppMapBaseTest;
+import appland.index.AppMapFindingsUtil;
 import appland.problemsView.listener.ScannerFindingsListener;
 import org.junit.After;
 import org.junit.Before;
@@ -23,11 +24,11 @@ public class FindingsManagerTest extends AppMapBaseTest {
 
     @Test
     public void fileNames() {
-        assertTrue(FindingsManager.isFindingFile("/parent/child/appmap-findings.json"));
-        assertTrue(FindingsManager.isFindingFile("appmap-findings.json"));
+        assertTrue(AppMapFindingsUtil.isFindingFile("/parent/child/appmap-findings.json"));
+        assertTrue(AppMapFindingsUtil.isFindingFile("appmap-findings.json"));
 
-        assertFalse(FindingsManager.isFindingFile("/parent/child/file.json"));
-        assertFalse(FindingsManager.isFindingFile("/parent/child/appmap-findings.yaml"));
+        assertFalse(AppMapFindingsUtil.isFindingFile("/parent/child/file.json"));
+        assertFalse(AppMapFindingsUtil.isFindingFile("/parent/child/appmap-findings.yaml"));
     }
 
     @Test
@@ -41,7 +42,7 @@ public class FindingsManagerTest extends AppMapBaseTest {
         var problematicFile = root.findFileByRelativePath("app/controllers/microposts_controller.rb");
         assertNotNull(problematicFile);
 
-        manager.loadAllFindingFiles();
+        manager.reload();
 
         assertEquals(1, manager.getProblemFileCount());
         assertEquals(1, manager.getProblemCount());
@@ -75,9 +76,7 @@ public class FindingsManagerTest extends AppMapBaseTest {
 
     private CountDownLatch createAppMapFindingsCondition() {
         var latch = new CountDownLatch(1);
-        getProject().getMessageBus().connect(getTestRootDisposable()).subscribe(ScannerFindingsListener.TOPIC, project -> {
-            latch.countDown();
-        });
+        getProject().getMessageBus().connect(getTestRootDisposable()).subscribe(ScannerFindingsListener.TOPIC, latch::countDown);
         return latch;
     }
 }

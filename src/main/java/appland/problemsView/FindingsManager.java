@@ -1,5 +1,6 @@
 package appland.problemsView;
 
+import appland.index.AppMapFindingsUtil;
 import appland.problemsView.model.FindingsDomainCount;
 import appland.problemsView.model.FindingsFileData;
 import appland.problemsView.model.ScannerFinding;
@@ -17,17 +18,16 @@ import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.fileEditor.FileDocumentManager;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.roots.ProjectRootManager;
-import com.intellij.openapi.util.io.FileUtil;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.search.FilenameIndex;
 import com.intellij.psi.search.GlobalSearchScope;
-import com.intellij.util.PathUtil;
 import com.intellij.util.SlowOperations;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import javax.annotation.concurrent.GuardedBy;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.function.Consumer;
 
@@ -35,8 +35,6 @@ import java.util.function.Consumer;
  * Service managing the AppMap findings of a project.
  */
 public class FindingsManager implements ProblemsProvider {
-    private static final String FINDINGS_FILE_NAME = "appmap-findings.json";
-
     private static final Logger LOG = Logger.getInstance(FindingsManager.class);
     private static final Gson GSON = new GsonBuilder().create();
 
@@ -68,10 +66,6 @@ public class FindingsManager implements ProblemsProvider {
         var messageBus = project.getMessageBus();
         this.publisher = messageBus.syncPublisher(ProblemsListener.TOPIC);
         this.unknownFilePublisher = messageBus.syncPublisher(UnknownFileProblemListener.TOPIC);
-    }
-
-    public static boolean isFindingFile(@NotNull String path) {
-        return FileUtil.fileNameEquals(PathUtil.getFileName(path), FINDINGS_FILE_NAME);
     }
 
     @Override
@@ -159,7 +153,9 @@ public class FindingsManager implements ProblemsProvider {
         }
     }
 
-    public void loadAllFindingFiles() {
+    public void reload() {
+        clearAndNotify();
+
         SlowOperations.allowSlowOperations(() -> {
             for (var findingFile : findFindingsFiles()) {
                 addFindingsFile(findingFile);
@@ -201,11 +197,30 @@ public class FindingsManager implements ProblemsProvider {
         reset();
     }
 
-    synchronized void reset() {
-        sourceMapping.clear();
-        problems.clear();
-        sourceMappingOther.clear();
-        problemsOther.clear();
+    void reset() {
+        synchronized (lock) {
+            sourceMapping.clear();
+            problems.clear();
+            sourceMappingOther.clear();
+            problemsOther.clear();
+        }
+    }
+
+    private void clearAndNotify() {
+        synchronized (lock) {
+            var allPaths = new HashSet<String>();
+            allPaths.addAll(sourceMapping.keySet());
+            allPaths.addAll(sourceMappingOther.keySet());
+
+            for (var path : allPaths) {
+                removeFindingsFileLocked(path);
+            }
+
+            assert sourceMapping.isEmpty();
+            assert sourceMappingOther.isEmpty();
+            assert problems.isEmpty();
+            assert problemsOther.isEmpty();
+        }
     }
 
     private void removeFindingsFileLocked(@NotNull String path) {
@@ -256,7 +271,9 @@ public class FindingsManager implements ProblemsProvider {
     private @NotNull Collection<VirtualFile> findFindingsFiles() {
         // only "everything" seems to contain our appmap-findings.json files in excluded parent folders
         var scope = GlobalSearchScope.everythingScope(project);
-        return FilenameIndex.getVirtualFilesByName(project, FINDINGS_FILE_NAME, true, scope);
+        return SlowOperations.allowSlowOperations(() -> {
+            return FilenameIndex.getVirtualFilesByName(project, AppMapFindingsUtil.FINDINGS_FILE_NAME, true, scope);
+        });
     }
 
     private @Nullable FindingsFileData loadFindingsFile(@NotNull VirtualFile file) {

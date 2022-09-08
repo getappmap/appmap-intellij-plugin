@@ -1,5 +1,6 @@
 package appland.files;
 
+import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.util.messages.Topic;
 
 /**
@@ -9,7 +10,17 @@ public interface AppMapFileChangeListener {
     Topic<AppMapFileChangeListener> TOPIC = Topic.create("AppMap file change", AppMapFileChangeListener.class);
 
     /**
-     * Sent after at least one .appmap.json file was changed (e.g. created, updated, deleted, renamed).
+     * Posts an application-wide notification about changed appmaps.
      */
-    void afterAppMapFileChange();
+    static void sendNotification() {
+        ApplicationManager.getApplication().getMessageBus()
+                .syncPublisher(AppMapFileChangeListener.TOPIC)
+                .refreshAppMaps();
+    }
+
+    /**
+     * Sent after any refresh of the local file system
+     * and after changes to .appmap.json files (e.g. created, updated, deleted, renamed).
+     */
+    void refreshAppMaps();
 }

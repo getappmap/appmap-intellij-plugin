@@ -12,8 +12,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.function.Supplier;
 
+import static appland.index.AppMapFindingsUtil.isFindingFile;
 import static appland.problemsView.FindingsManager.getInstance;
-import static appland.problemsView.FindingsManager.isFindingFile;
 
 /**
  * Async file listener to update the problems view of the open projects when appmap-findings.json files
@@ -110,7 +110,9 @@ public class ScannerFilesAsyncListener implements AsyncFileListener {
 
                         // notify about changes
                         if (processed > 0) {
-                            project.getMessageBus().syncPublisher(ScannerFindingsListener.TOPIC).afterFindingsChanged(project);
+                            project.getMessageBus()
+                                    .syncPublisher(ScannerFindingsListener.TOPIC)
+                                    .afterFindingsChanged();
                         }
                     }
                 }

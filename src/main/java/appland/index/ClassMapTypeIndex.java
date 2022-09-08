@@ -22,7 +22,7 @@ import java.util.*;
  */
 public class ClassMapTypeIndex extends FileBasedIndexExtension<ClassMapItemType, List<ClassMapItem>> {
     private static final ID<ClassMapItemType, List<ClassMapItem>> INDEX_ID = ID.create("appmap.classMap");
-    private static final FileBasedIndex.FileTypeSpecificInputFilter INPUT_FILTER = new NamedFileTypeFilter(JsonFileType.INSTANCE, "classMap.json"::equals);
+    private static final FileBasedIndex.FileTypeSpecificInputFilter INPUT_FILTER = new NamedFileTypeFilter(JsonFileType.INSTANCE, ClassMapUtil.CLASS_MAP_FILE::equals);
     private static final DataExternalizer<List<ClassMapItem>> dataExternalizer = new DataExternalizer<>() {
         @Override
         public void save(@NotNull DataOutput out, @NotNull List<ClassMapItem> values) throws IOException {

@@ -1,6 +1,7 @@
 package appland.problemsView;
 
 import appland.AppMapBundle;
+import appland.index.IndexedFileListenerUtil;
 import com.intellij.analysis.problemsView.toolWindow.*;
 import com.intellij.openapi.project.DumbService;
 import com.intellij.openapi.project.Project;
@@ -34,9 +35,12 @@ public final class FindingsViewTab extends ProblemsViewPanel {
 
         getTreeModel().setRoot(new FindingsRootNode(this));
 
-        DumbService.getInstance(project).runWhenSmart(() -> {
-            FindingsManager.getInstance(project).loadAllFindingFiles();
+        IndexedFileListenerUtil.registerListeners(project, this, false, true, () -> {
+            FindingsManager.getInstance(project).reload();
         });
+
+        // initial set of files
+        DumbService.getInstance(project).runWhenSmart(() -> FindingsManager.getInstance(project).reload());
     }
 
     /**
