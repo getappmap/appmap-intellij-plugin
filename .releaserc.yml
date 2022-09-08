@@ -4,6 +4,38 @@ plugins:
 - '@semantic-release/commit-analyzer'
 - - '@semantic-release/release-notes-generator'
   - preset: conventionalcommits
+    writerOpts:
+      commitPartial: |
+        - {{#if scope}} **{{scope}}:**
+        {{~/if}} {{#if subject}}
+          {{~subject}}
+        {{~else}}
+          {{~header}}
+        {{~/if}}
+        
+        {{~!-- commit link --}}{{~#if hash}} {{#if @root.linkReferences~}}
+          ([{{shortHash}}]({{commitUrlFormat}}))
+        {{~else}}
+          {{~shortHash}}
+        {{~/if}}{{~/if}}
+        
+        {{~!-- commit references --}}
+        {{~#if references~}}
+          , closes
+          {{~#each references}} {{#if @root.linkReferences~}}
+            [
+            {{~#if this.owner}}
+              {{~this.owner}}/
+            {{~/if}}
+            {{~this.repository}}{{this.prefix}}{{this.issue}}]({{issueUrlFormat}})
+          {{~else}}
+            {{~#if this.owner}}
+              {{~this.owner}}/
+            {{~/if}}
+            {{~this.repository}}{{this.prefix}}{{this.issue}}
+          {{~/if}}{{/each}}
+        {{~/if}}
+
 - - '@semantic-release/changelog'
   - changelogTitle: AppMap Plugin Changelog
 - - '@google/semantic-release-replace-plugin'
@@ -22,7 +54,7 @@ plugins:
     - CHANGELOG.md
     - gradle.properties
 - - '@semantic-release/exec'
-  - publishCmd: ./gradlew clean build
+  - publishCmd: ./gradlew clean build verifyPlugin
 - - '@semantic-release/github'
   - assets:
     - build/distributions/intellij-appmap-*.zip
