@@ -14,6 +14,10 @@ AppMap Plugin Changelog
 
 * Various fixes ([006aac6](https://github.com/applandinc/appmap-intellij-plugin/commit/006aac623773817f59f38dd8f166c05fb96e1453))
 
+## [0.8.0-6]
+- Detect external changes to AppMap files and AppMap index data, e.g. by the install guide steps.
+- Properly handle AppMap data in excluded directories like `target/appmap`.
+
 ## [0.8.0-5]
 - Support to show the problems view tab (link "Open the PROBLEMS tab" in the JS application).
 - Download CLI tools even if "enableFindings" is off. 
