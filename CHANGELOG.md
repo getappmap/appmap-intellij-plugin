@@ -1,5 +1,12 @@
 AppMap Plugin Changelog
 
+## [0.8.1](https://github.com/applandinc/appmap-intellij-plugin/compare/v0.8.0...v0.8.1) (2022-09-09)
+
+
+### Bug Fixes
+
+-  Make sure plugin.xml gets updated ([7019c8c]())
+
 ## [0.8.0](https://github.com/applandinc/appmap-intellij-plugin/compare/v0.7.10...v0.8.0) (2022-09-08)
 
 
