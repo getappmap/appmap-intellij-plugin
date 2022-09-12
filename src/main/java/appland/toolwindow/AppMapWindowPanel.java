@@ -5,6 +5,8 @@ import appland.actions.StartAppMapRecordingAction;
 import appland.actions.StopAppMapRecordingAction;
 import appland.index.AppMapMetadata;
 import appland.index.IndexedFileListenerUtil;
+import appland.installGuide.InstallGuideEditorProvider;
+import appland.installGuide.InstallGuideViewPage;
 import appland.toolwindow.installGuide.InstallGuidePanel;
 import com.intellij.openapi.Disposable;
 import com.intellij.openapi.actionSystem.*;
@@ -105,11 +107,7 @@ public class AppMapWindowPanel extends SimpleToolWindowPanel implements DataProv
         tree.getEmptyText().appendSecondaryText(
                 AppMapBundle.get("toolwindow.appmap.installAgentEmptyText"),
                 SimpleTextAttributes.LINK_ATTRIBUTES,
-                e -> {
-                    // fixme
-                    rebuild(true);
-                    //InstallGuideEditorProvider.open(project, InstallGuideViewPage.InstallAgent);
-                });
+                e -> InstallGuideEditorProvider.open(project, InstallGuideViewPage.InstallAgent));
         tree.setRootVisible(false);
         tree.setShowsRootHandles(false);
 
