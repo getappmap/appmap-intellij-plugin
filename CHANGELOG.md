@@ -1,5 +1,12 @@
 AppMap Plugin Changelog
 
+## [0.8.1-7]
+
+- Fixed: Install AppMap Agent Link doesn't Navigate to Install page
+- Fixed: Project picker says requirements not met even though it's all green
+- Fixed: Indexer and scanner processes do not appear to be running on Windows
+- Fixed: Explore AppMaps Page does not populate "selected code objects". Code Objects are not indexed
+
 ## [0.8.1](https://github.com/applandinc/appmap-intellij-plugin/compare/v0.8.0...v0.8.1) (2022-09-09)
 
 
