@@ -18,6 +18,8 @@ public class Features {
     @SerializedName("testFramework")
     public @Nullable Feature test;
 
+    // similar to the VSCode plugin's "overallScore",
+    // https://github.com/applandinc/vscode-appland/blob/b96696df217fb50df8607fb7fe2e88955b6529a7/src/analyzers/index.ts
     int getTotalScore() {
         var languageScore = lang.score;
         var webScore = web == null ? Score.Bad : web.score;
@@ -27,7 +29,7 @@ public class Features {
         if (languageScore == Score.Bad) {
             return 1;
         }
-        if (languageScore == Score.Good && webScore == Score.Good && testScore == Score.Good) {
+        if (languageScore == Score.Okay && webScore == Score.Okay && testScore == Score.Okay) {
             return 2;
         }
 
