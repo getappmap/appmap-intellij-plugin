@@ -31,7 +31,8 @@ public enum CliTool {
     }
 
     public @NotNull String getBinaryName(@NotNull String platform, @NotNull String arch) {
-        return id + "-" + platform + "-" + arch;
+        var suffix = "win".equals(platform) ? ".exe" : "";
+        return id + "-" + platform + "-" + arch + suffix;
     }
 
     public @NotNull String getDownloadUrl(@NotNull String version, @NotNull String platform, @NotNull String arch) {
