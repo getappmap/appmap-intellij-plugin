@@ -1,6 +1,7 @@
 package appland.installGuide.analyzer;
 
 import appland.AppMapBaseTest;
+import com.intellij.openapi.util.io.FileUtilRt;
 import com.intellij.openapi.vfs.VirtualFile;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -50,7 +51,7 @@ abstract class LanguageAnalyzerBaseTest extends AppMapBaseTest {
         var result = analyzer.analyze(root);
         assertNotNull(result);
         assertEquals("root", result.getName());
-        assertEquals("/src/root", result.getPath());
+        assertEquals(FileUtilRt.toSystemDependentName("/src/root"), result.getPath());
         return result;
     }
 }
