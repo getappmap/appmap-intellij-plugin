@@ -3,6 +3,7 @@ package appland.cli;
 import appland.config.AppMapConfigFile;
 import appland.files.AppMapVfsUtils;
 import appland.settings.AppMapApplicationSettingsService;
+import com.intellij.execution.CantRunException;
 import com.intellij.execution.ExecutionException;
 import com.intellij.execution.configurations.GeneralCommandLine;
 import com.intellij.execution.process.KillableProcessHandler;
@@ -184,21 +185,19 @@ public class DefaultCommandLineService implements AppLandCommandLineService {
             return null;
         }
 
-        var indexerPath = AppLandDownloadService.getInstance().getDownloadFilePath(CliTool.AppMap);
-        if (indexerPath == null) {
-            return null;
-        }
-
-        var scannerPath = AppLandDownloadService.getInstance().getDownloadFilePath(CliTool.Scanner);
-        if (scannerPath == null) {
-            return null;
-        }
-
-        assert Files.exists(indexerPath);
-        assert Files.exists(scannerPath);
-
         // don't launch for in-memory directories in unit test mode
         if (ApplicationManager.getApplication().isUnitTestMode() && directory.getFileSystem() instanceof TempFileSystem) {
+            return null;
+        }
+
+        var indexerPath = AppLandDownloadService.getInstance().getDownloadFilePath(CliTool.AppMap);
+        if (indexerPath == null || Files.notExists(indexerPath)) {
+            return null;
+        }
+
+        var launchScanner = AppMapApplicationSettingsService.getInstance().isEnableFindings();
+        var scannerPath = AppLandDownloadService.getInstance().getDownloadFilePath(CliTool.Scanner);
+        if (launchScanner && (scannerPath == null || Files.notExists(scannerPath))) {
             return null;
         }
 
@@ -206,10 +205,22 @@ public class DefaultCommandLineService implements AppLandCommandLineService {
         var watchedDir = findWatchedAppMapDirectory(workingDir).toString();
 
         var indexer = startProcess(workingDir, indexerPath.toString(), "index", "--watch", "--appmap-dir", watchedDir);
-        var scanner = AppMapApplicationSettingsService.getInstance().isEnableFindings()
-                ? startProcess(workingDir, scannerPath.toString(), "scan", "--watch", "--appmap-dir", watchedDir)
-                : null;
-        return new CliProcesses(indexer, scanner);
+        if (!launchScanner) {
+            return new CliProcesses(indexer, null);
+        }
+
+        try {
+            var scanner = startProcess(workingDir, scannerPath.toString(), "scan", "--watch", "--appmap-dir", watchedDir);
+            return new CliProcesses(indexer, scanner);
+        } catch (ExecutionException e) {
+            LOG.debug("Error executing scanner process. Attempting to terminate indexer process.");
+            try {
+                indexer.killProcess();
+            } catch (Exception ex) {
+                LOG.debug("Error terminating scanner process", ex);
+            }
+            throw new CantRunException("Failed to execute AppMap scanner process", e);
+        }
     }
 
     /**
