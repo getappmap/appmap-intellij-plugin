@@ -1,5 +1,9 @@
 AppMap Plugin Changelog
 
+## [0.8.1-8]
+
+- Fixed: Exception when opening a project
+
 ## [0.8.1-7]
 
 - Fixed: Install AppMap Agent Link doesn't Navigate to Install page
