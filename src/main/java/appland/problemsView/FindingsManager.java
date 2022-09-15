@@ -27,6 +27,7 @@ import com.intellij.util.concurrency.AppExecutorUtil;
 import com.intellij.util.concurrency.annotations.RequiresReadLock;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.jetbrains.concurrency.CancellablePromise;
 
 import javax.annotation.concurrent.GuardedBy;
 import java.util.Collection;
@@ -69,8 +70,6 @@ public class FindingsManager implements ProblemsProvider {
         var messageBus = project.getMessageBus();
         this.publisher = messageBus.syncPublisher(ProblemsListener.TOPIC);
         this.unknownFilePublisher = messageBus.syncPublisher(UnknownFileProblemListener.TOPIC);
-
-        reload();
     }
 
     @Override
@@ -171,10 +170,8 @@ public class FindingsManager implements ProblemsProvider {
         }
     }
 
-    public void reload() {
-        clearAndNotify();
-
-        ReadAction.nonBlocking(this::doReload)
+    public @NotNull CancellablePromise<Void> reloadAsync() {
+        return ReadAction.nonBlocking(this::doReload)
                 .inSmartMode(project)
                 .expireWith(this)
                 .coalesceBy(this)
@@ -225,6 +222,8 @@ public class FindingsManager implements ProblemsProvider {
     }
 
     private void doReload() {
+        clearAndNotify();
+
         for (var findingFile : findFindingsFiles()) {
             addFindingsFile(findingFile);
         }

@@ -9,7 +9,9 @@ import org.junit.Test;
 
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 public class FindingsManagerTest extends AppMapBaseTest {
     @Before
@@ -32,7 +34,7 @@ public class FindingsManagerTest extends AppMapBaseTest {
     }
 
     @Test
-    public void findingsVSCodeSystem() {
+    public void findingsVSCodeSystem() throws ExecutionException, InterruptedException, TimeoutException {
         var manager = FindingsManager.getInstance(getProject());
         var root = myFixture.copyDirectoryToProject("vscode/workspaces/project-system", "root");
 
@@ -42,7 +44,7 @@ public class FindingsManagerTest extends AppMapBaseTest {
         var problematicFile = root.findFileByRelativePath("app/controllers/microposts_controller.rb");
         assertNotNull(problematicFile);
 
-        manager.reload();
+        manager.reloadAsync().get(30, TimeUnit.SECONDS);
 
         assertEquals(1, manager.getProblemFileCount());
         assertEquals(1, manager.getProblemCount());

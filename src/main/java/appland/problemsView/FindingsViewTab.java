@@ -3,11 +3,11 @@ package appland.problemsView;
 import appland.AppMapBundle;
 import appland.index.IndexedFileListenerUtil;
 import com.intellij.analysis.problemsView.toolWindow.*;
-import com.intellij.openapi.project.DumbService;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
 import org.jetbrains.annotations.NotNull;
 
+import javax.swing.tree.TreePath;
 import java.util.Comparator;
 
 public final class FindingsViewTab extends ProblemsViewPanel {
@@ -33,10 +33,12 @@ public final class FindingsViewTab extends ProblemsViewPanel {
     public FindingsViewTab(@NotNull Project project, @NotNull ProblemsViewState state) {
         super(project, TAB_ID, state, AppMapBundle.lazy("problemsView.title"));
 
-        getTreeModel().setRoot(new FindingsRootNode(this));
+        var rootNode = new FindingsRootNode(this);
+        getTreeModel().setRoot(rootNode);
 
+        // fixme fix the listener handling
         IndexedFileListenerUtil.registerListeners(project, this, false, true, () -> {
-            FindingsManager.getInstance(project).reload();
+            getTreeModel().structureChanged(new TreePath(rootNode));
         });
     }
 

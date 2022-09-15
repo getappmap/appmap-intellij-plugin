@@ -1,7 +1,8 @@
 package appland.startup;
 
-import appland.installGuide.InstallGuideViewPage;
 import appland.installGuide.InstallGuideEditorProvider;
+import appland.installGuide.InstallGuideViewPage;
+import appland.problemsView.FindingsManager;
 import appland.settings.AppMapApplicationSettingsService;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.project.Project;
@@ -12,7 +13,11 @@ import org.jetbrains.annotations.NotNull;
 public class AppLandStartupActivity implements StartupActivity {
     @Override
     public void runActivity(@NotNull Project project) {
-        boolean unitTestMode = ApplicationManager.getApplication().isUnitTestMode();
+        // load initial findings of the project
+        FindingsManager.getInstance(project).reloadAsync();
+
+        // show AppMap intro at first start
+        var unitTestMode = ApplicationManager.getApplication().isUnitTestMode();
         if (AppMapApplicationSettingsService.getInstance().isFirstStart() && !unitTestMode) {
             AppMapApplicationSettingsService.getInstance().setFirstStart(false);
 

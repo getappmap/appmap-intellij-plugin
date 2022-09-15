@@ -1,6 +1,7 @@
 package appland.index;
 
 import appland.files.AppMapFileChangeListener;
+import appland.problemsView.FindingsReloadedListener;
 import appland.problemsView.listener.ScannerFindingsListener;
 import com.intellij.ProjectTopics;
 import com.intellij.openapi.Disposable;
@@ -19,12 +20,14 @@ public final class IndexedFileListenerUtil {
                                          boolean appMapFileListener, boolean findingsFileListener,
                                          @NotNull Runnable action) {
 
+        var application = ApplicationManager.getApplication();
         var busConnection = project.getMessageBus().connect(parent);
+
         busConnection.subscribe(DumbService.DUMB_MODE, new DumbService.DumbModeListener() {
             @Override
             public void exitDumbMode() {
                 if (!DumbService.isDumb(project)) {
-                    ApplicationManager.getApplication().invokeLater(action);
+                    application.invokeLater(action);
                 }
             }
         });
@@ -32,20 +35,17 @@ public final class IndexedFileListenerUtil {
         busConnection.subscribe(ProjectTopics.PROJECT_ROOTS, new ModuleRootListener() {
             @Override
             public void rootsChanged(@NotNull ModuleRootEvent event) {
-                ApplicationManager.getApplication().invokeLater(action);
+                application.invokeLater(action);
             }
         });
 
         if (appMapFileListener) {
-            busConnection.subscribe(AppMapFileChangeListener.TOPIC, () -> {
-                ApplicationManager.getApplication().invokeLater(action);
-            });
+            busConnection.subscribe(AppMapFileChangeListener.TOPIC, () -> application.invokeLater(action));
         }
 
         if (findingsFileListener) {
-            busConnection.subscribe(ScannerFindingsListener.TOPIC, () -> {
-                ApplicationManager.getApplication().invokeLater(action);
-            });
+            busConnection.subscribe(ScannerFindingsListener.TOPIC, () -> application.invokeLater(action));
+            busConnection.subscribe(FindingsReloadedListener.TOPIC, () -> application.invokeLater(action));
         }
     }
 }
