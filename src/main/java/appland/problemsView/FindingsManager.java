@@ -14,14 +14,17 @@ import com.google.gson.JsonSyntaxException;
 import com.intellij.analysis.problemsView.Problem;
 import com.intellij.analysis.problemsView.ProblemsListener;
 import com.intellij.analysis.problemsView.ProblemsProvider;
+import com.intellij.openapi.application.ReadAction;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.fileEditor.FileDocumentManager;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.roots.ProjectRootManager;
+import com.intellij.openapi.vfs.VfsUtilCore;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.search.FilenameIndex;
 import com.intellij.psi.search.GlobalSearchScope;
-import com.intellij.util.SlowOperations;
+import com.intellij.util.concurrency.AppExecutorUtil;
+import com.intellij.util.concurrency.annotations.RequiresReadLock;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -66,6 +69,8 @@ public class FindingsManager implements ProblemsProvider {
         var messageBus = project.getMessageBus();
         this.publisher = messageBus.syncPublisher(ProblemsListener.TOPIC);
         this.unknownFilePublisher = messageBus.syncPublisher(UnknownFileProblemListener.TOPIC);
+
+        reload();
     }
 
     @Override
@@ -76,6 +81,19 @@ public class FindingsManager implements ProblemsProvider {
     public int getProblemFileCount() {
         synchronized (lock) {
             return problems.size();
+        }
+    }
+
+    /**
+     * @param root Root directory to limit the scope
+     * @return The number of problem files, which are located under root
+     */
+    public int getProblemFileCount(@NotNull VirtualFile root) {
+        synchronized (lock) {
+            return (int) problems.keySet()
+                    .stream()
+                    .filter(file -> VfsUtilCore.isAncestor(root, file, false))
+                    .count();
         }
     }
 
@@ -111,7 +129,7 @@ public class FindingsManager implements ProblemsProvider {
 
     /**
      * @param file The file associated with problems
-     * @return THe number of problems found in the file
+     * @return Tne number of problems found in the file
      */
     public int getProblemCount(@NotNull VirtualFile file) {
         synchronized (lock) {
@@ -156,11 +174,11 @@ public class FindingsManager implements ProblemsProvider {
     public void reload() {
         clearAndNotify();
 
-        SlowOperations.allowSlowOperations(() -> {
-            for (var findingFile : findFindingsFiles()) {
-                addFindingsFile(findingFile);
-            }
-        });
+        ReadAction.nonBlocking(this::doReload)
+                .inSmartMode(project)
+                .expireWith(this)
+                .coalesceBy(this)
+                .submit(AppExecutorUtil.getAppExecutorService());
     }
 
     public void addFindingsFile(@NotNull VirtualFile findingsFile) {
@@ -204,6 +222,14 @@ public class FindingsManager implements ProblemsProvider {
             sourceMappingOther.clear();
             problemsOther.clear();
         }
+    }
+
+    private void doReload() {
+        for (var findingFile : findFindingsFiles()) {
+            addFindingsFile(findingFile);
+        }
+
+        project.getMessageBus().syncPublisher(FindingsReloadedListener.TOPIC).afterFindingsReloaded();
     }
 
     private void clearAndNotify() {
@@ -268,12 +294,11 @@ public class FindingsManager implements ProblemsProvider {
         return false;
     }
 
+    @RequiresReadLock
     private @NotNull Collection<VirtualFile> findFindingsFiles() {
         // only "everything" seems to contain our appmap-findings.json files in excluded parent folders
         var scope = GlobalSearchScope.everythingScope(project);
-        return SlowOperations.allowSlowOperations(() -> {
-            return FilenameIndex.getVirtualFilesByName(project, AppMapFindingsUtil.FINDINGS_FILE_NAME, true, scope);
-        });
+        return FilenameIndex.getVirtualFilesByName(project, AppMapFindingsUtil.FINDINGS_FILE_NAME, true, scope);
     }
 
     private @Nullable FindingsFileData loadFindingsFile(@NotNull VirtualFile file) {

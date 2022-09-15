@@ -6,6 +6,7 @@ import appland.files.AppMapFiles;
 import appland.index.AppMapMetadataIndex;
 import appland.installGuide.InstallGuideViewPage;
 import appland.problemsView.FindingsManager;
+import appland.problemsView.FindingsReloadedListener;
 import appland.problemsView.listener.ScannerFindingsListener;
 import appland.settings.AppMapApplicationSettingsService;
 import appland.settings.AppMapProjectSettingsService;
@@ -14,6 +15,7 @@ import com.intellij.openapi.application.ModalityState;
 import com.intellij.openapi.application.ReadAction;
 import com.intellij.openapi.fileEditor.FileEditorManagerEvent;
 import com.intellij.openapi.fileEditor.FileEditorManagerListener;
+import com.intellij.openapi.project.DumbService;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.Disposer;
 import com.intellij.psi.search.FilenameIndex;
@@ -106,6 +108,9 @@ public class InstallGuidePanel extends JPanel implements Disposable {
                     project.getMessageBus().connect(parent).subscribe(ScannerFindingsListener.TOPIC, () -> {
                         updateRuntimeAnalysisLabel(project, label);
                     });
+                    project.getMessageBus().connect(parent).subscribe(FindingsReloadedListener.TOPIC, () -> {
+                        updateRuntimeAnalysisLabel(project, label);
+                    });
                     break;
             }
         }
@@ -180,9 +185,11 @@ public class InstallGuidePanel extends JPanel implements Disposable {
     private static void updateRuntimeAnalysisLabel(@NotNull Project project, @NotNull StatusLabel label) {
         var enabled = AppMapApplicationSettingsService.getInstance().isEnableFindings();
         if (enabled) {
-            label.setStatus(FindingsManager.getInstance(project).getProblemFileCount() > 0
-                    ? InstallGuideStatus.Completed
-                    : InstallGuideStatus.Incomplete);
+            DumbService.getInstance(project).runWhenSmart(() -> {
+                label.setStatus(FindingsManager.getInstance(project).getProblemFileCount() > 0
+                        ? InstallGuideStatus.Completed
+                        : InstallGuideStatus.Incomplete);
+            });
         } else {
             // fixme use lock icon
             label.setStatus(InstallGuideStatus.Error);

@@ -1,7 +1,6 @@
 package appland.installGuide.projectData;
 
 import appland.AppMapBundle;
-import appland.files.AppMapFiles;
 import appland.index.*;
 import appland.installGuide.analyzer.*;
 import appland.problemsView.FindingsManager;
@@ -105,11 +104,8 @@ public class DefaultProjectDataService implements ProjectDataService {
                 .name(root.getPresentableName())
                 .path(path)
                 .score(analysis.getScore())
+                .analysisPerformed(isAnalysisPerformed(root))
                 .hasNode(isNodeSupported(nodeVersion))
-                .agentInstalled(isAgentInstalled(root))
-                .appMapsRecorded(hasRecordedAppMaps(root))
-                .appMapOpened(isAppMapOpened(root))
-                .analysisPerformed(findingsManager.getProblemFileCount() > 0)
                 .numFindings(numFindings)
                 .findingsDomainCounts(impactDomains)
                 .numHttpRequests(countRoutes(allAppMaps))
@@ -180,16 +176,8 @@ public class DefaultProjectDataService implements ProjectDataService {
         return appMaps.stream().mapToInt(AppMapMetadata::getRequestCount).sum();
     }
 
-    private boolean isAppMapOpened(@NotNull VirtualFile root) {
-        return false;
-    }
-
-    private boolean hasRecordedAppMaps(@NotNull VirtualFile root) {
-        return false;
-    }
-
-    private boolean isAgentInstalled(@NotNull VirtualFile root) {
-        return root.findChild(AppMapFiles.APPMAP_YML) != null;
+    private boolean isAnalysisPerformed(@NotNull VirtualFile root) {
+        return FindingsManager.getInstance(project).getProblemFileCount(root) > 0;
     }
 
     private boolean isNodeSupported(@Nullable NodeVersion nodeVersion) {

@@ -38,9 +38,6 @@ public final class FindingsViewTab extends ProblemsViewPanel {
         IndexedFileListenerUtil.registerListeners(project, this, false, true, () -> {
             FindingsManager.getInstance(project).reload();
         });
-
-        // initial set of files
-        DumbService.getInstance(project).runWhenSmart(() -> FindingsManager.getInstance(project).reload());
     }
 
     /**
