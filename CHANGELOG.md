@@ -1,5 +1,12 @@
 AppMap Plugin Changelog
 
+## [0.10.0](https://github.com/applandinc/appmap-intellij-plugin/compare/v0.9.0...v0.10.0) (2022-09-15)
+
+
+### Features
+
+-  add new tab to the problems view tool window, support AppMap findings ([aa0789c]())
+
 ## [0.9.0](https://github.com/applandinc/appmap-intellij-plugin/compare/v0.8.1...v0.9.0) (2022-09-15)
 
 
