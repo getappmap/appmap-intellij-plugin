@@ -1,5 +1,12 @@
 AppMap Plugin Changelog
 
+## [0.9.0](https://github.com/applandinc/appmap-intellij-plugin/compare/v0.8.1...v0.9.0) (2022-09-15)
+
+
+### Features
+
+-  add application setting to configure findings (off by default) ([2077dbb]())-  add services to control download and launching or AppMap CLI tools ([8819710]())-  parsing of appmap.yml files to retrieve the configured appmap directory ([bfc947f]())
+
 ## [0.8.1](https://github.com/applandinc/appmap-intellij-plugin/compare/v0.8.0...v0.8.1) (2022-09-09)
 
 
