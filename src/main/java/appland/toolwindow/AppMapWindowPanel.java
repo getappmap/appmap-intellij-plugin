@@ -70,7 +70,7 @@ public class AppMapWindowPanel extends SimpleToolWindowPanel implements DataProv
 
         setToolbar(createToolBar(appMapModel));
         setContent(ScrollPaneFactory.createScrollPane(tree));
-        add(createUserMilestonesPanel(), BorderLayout.SOUTH);
+        add(createUserMilestonesPanel(appMapModel), BorderLayout.SOUTH);
 
         IndexedFileListenerUtil.registerListeners(project, this, true, false, () -> rebuild(false));
     }
@@ -118,8 +118,8 @@ public class AppMapWindowPanel extends SimpleToolWindowPanel implements DataProv
     }
 
     @NotNull
-    private JPanel createUserMilestonesPanel() {
-        return new InstallGuidePanel(project);
+    private JPanel createUserMilestonesPanel(@NotNull Disposable parent) {
+        return new InstallGuidePanel(project, parent);
     }
 
     @Override

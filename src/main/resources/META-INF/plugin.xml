@@ -97,7 +97,7 @@
         <virtualFileManagerListener implementation="appland.files.VirtualFileManagerLister"/>
 
         <!-- CLI service -->
-        <vfs.asyncListener implementation="appland.cli.AppmapYamlAsyncFileListener"/>
+        <vfs.asyncListener implementation="appland.config.AppmapYamlAsyncFileListener"/>
 
         <!-- scanner problems view -->
         <projectService serviceImplementation="appland.problemsView.FindingsManager"/>

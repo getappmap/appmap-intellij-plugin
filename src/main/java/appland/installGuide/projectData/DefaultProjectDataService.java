@@ -1,6 +1,7 @@
 package appland.installGuide.projectData;
 
 import appland.AppMapBundle;
+import appland.files.AppMapFiles;
 import appland.index.*;
 import appland.installGuide.analyzer.*;
 import appland.problemsView.FindingsManager;
@@ -188,7 +189,7 @@ public class DefaultProjectDataService implements ProjectDataService {
     }
 
     private boolean isAgentInstalled(@NotNull VirtualFile root) {
-        return root.findChild("appmap.yml") != null;
+        return root.findChild(AppMapFiles.APPMAP_YML) != null;
     }
 
     private boolean isNodeSupported(@Nullable NodeVersion nodeVersion) {

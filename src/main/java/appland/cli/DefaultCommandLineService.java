@@ -1,6 +1,7 @@
 package appland.cli;
 
 import appland.config.AppMapConfigFile;
+import appland.config.AppMapConfigFileListener;
 import appland.files.AppMapVfsUtils;
 import appland.settings.AppMapApplicationSettingsService;
 import com.intellij.execution.CantRunException;
@@ -35,6 +36,13 @@ public class DefaultCommandLineService implements AppLandCommandLineService {
 
     // must be accessed in a synchronized block
     private final Map<VirtualFile, CliProcesses> processes = new HashMap<>();
+
+    public DefaultCommandLineService() {
+        ApplicationManager.getApplication()
+                .getMessageBus()
+                .connect(this)
+                .subscribe(AppMapConfigFileListener.TOPIC, this::refreshForOpenProjects);
+    }
 
     @Override
     public synchronized boolean isRunning(@NotNull VirtualFile directory, boolean strict) {

@@ -4,6 +4,7 @@ import com.intellij.json.JsonFileType;
 import com.intellij.openapi.fileTypes.FileType;
 import com.intellij.openapi.project.DumbService;
 import com.intellij.openapi.project.Project;
+import com.intellij.psi.search.GlobalSearchScope;
 import com.intellij.psi.search.ProjectScope;
 import com.intellij.util.indexing.FileBasedIndex;
 import com.intellij.util.indexing.ID;
@@ -74,28 +75,30 @@ public class AppMapMetadataIndex extends SingleEntryFileBasedIndexExtension<AppM
             return Collections.emptyList();
         }
 
-        var index = FileBasedIndex.getInstance();
-        var keys = index.getAllKeys(INDEX_ID, project);
-        if (keys.isEmpty()) {
-            return Collections.emptyList();
+        var lowercaseNameFilter = nameFilter == null ? null : nameFilter.toLowerCase();
+        var result = new ArrayList<AppMapMetadata>();
+        processAppMaps(project, ProjectScope.getEverythingScope(project), (file, value) -> {
+            if (nameFilter == null || value.getName().toLowerCase().contains(lowercaseNameFilter)) {
+                result.add(value);
+            }
+            return result.size() < maxSize;
+        });
+        return result;
+    }
+
+    public static void processAppMaps(@NotNull Project project,
+                                      @NotNull GlobalSearchScope scope,
+                                      @NotNull FileBasedIndex.ValueProcessor<AppMapMetadata> processor) {
+        if (DumbService.isDumb(project)) {
+            return;
         }
 
-        var lowercaseNameFilter = nameFilter == null ? null : nameFilter.toLowerCase();
-        var scope = ProjectScope.getEverythingScope(project);
-        var result = new ArrayList<AppMapMetadata>();
-        for (var key : keys) {
-            index.processValues(INDEX_ID, key, null, (file, value) -> {
-                if (nameFilter == null || value.getName().toLowerCase().contains(lowercaseNameFilter)) {
-                    result.add(value);
-                }
-                return result.size() < maxSize;
-            }, scope);
-
-            if (result.size() >= maxSize) {
+        var index = FileBasedIndex.getInstance();
+        for (var key : index.getAllKeys(INDEX_ID, project)) {
+            if (!index.processValues(INDEX_ID, key, null, processor, scope)) {
                 break;
             }
         }
-        return result;
     }
 
     /**
