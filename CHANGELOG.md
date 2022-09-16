@@ -1,15 +1,18 @@
 AppMap Plugin Changelog
 
-## [0.8.1-8]
+## [0.10.0](https://github.com/applandinc/appmap-intellij-plugin/compare/v0.9.0...v0.10.0) (2022-09-15)
 
-- Fixed: Exception when opening a project
 
-## [0.8.1-7]
+### Features
 
-- Fixed: Install AppMap Agent Link doesn't Navigate to Install page
-- Fixed: Project picker says requirements not met even though it's all green
-- Fixed: Indexer and scanner processes do not appear to be running on Windows
-- Fixed: Explore AppMaps Page does not populate "selected code objects". Code Objects are not indexed
+-  add new tab to the problems view tool window, support AppMap findings ([aa0789c]())
+
+## [0.9.0](https://github.com/applandinc/appmap-intellij-plugin/compare/v0.8.1...v0.9.0) (2022-09-15)
+
+
+### Features
+
+-  add application setting to configure findings (off by default) ([2077dbb]())-  add services to control download and launching or AppMap CLI tools ([8819710]())-  parsing of appmap.yml files to retrieve the configured appmap directory ([bfc947f]())
 
 ## [0.8.1](https://github.com/applandinc/appmap-intellij-plugin/compare/v0.8.0...v0.8.1) (2022-09-09)
 
