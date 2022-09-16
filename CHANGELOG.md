@@ -1,5 +1,16 @@
 AppMap Plugin Changelog
 
+## [0.11.0](https://github.com/applandinc/appmap-intellij-plugin/compare/v0.10.0...v0.11.0) (2022-09-16)
+
+
+### Features
+
+-  indexing of classMap.json files to find sample queries and HTTP requests for the install-guide view ([6a8db2b]())-  support managing metadata for AppMap projects ([8412992]())
+
+### Bug Fixes
+
+-  don't break on IOOBE or other exceptions, which are possible with invalid JSON ([7429a55]())-  don't try to fetch class map items in dumb mode ([8abd5bc]())
+
 ## [0.10.0](https://github.com/applandinc/appmap-intellij-plugin/compare/v0.9.0...v0.10.0) (2022-09-15)
 
 
