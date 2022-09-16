@@ -6,7 +6,6 @@ import appland.files.AppMapFiles;
 import appland.index.AppMapMetadataIndex;
 import appland.installGuide.InstallGuideViewPage;
 import appland.problemsView.FindingsManager;
-import appland.problemsView.FindingsReloadedListener;
 import appland.problemsView.listener.ScannerFindingsListener;
 import appland.settings.AppMapApplicationSettingsService;
 import appland.settings.AppMapProjectSettingsService;
@@ -105,11 +104,16 @@ public class InstallGuidePanel extends JPanel implements Disposable {
                     break;
 
                 case RuntimeAnalysis:
-                    project.getMessageBus().connect(parent).subscribe(ScannerFindingsListener.TOPIC, () -> {
-                        updateRuntimeAnalysisLabel(project, label);
-                    });
-                    project.getMessageBus().connect(parent).subscribe(FindingsReloadedListener.TOPIC, () -> {
-                        updateRuntimeAnalysisLabel(project, label);
+                    project.getMessageBus().connect(parent).subscribe(ScannerFindingsListener.TOPIC, new ScannerFindingsListener() {
+                        @Override
+                        public void afterFindingsReloaded() {
+                            updateRuntimeAnalysisLabel(project, label);
+                        }
+
+                        @Override
+                        public void afterFindingsChanged() {
+                            updateRuntimeAnalysisLabel(project, label);
+                        }
                     });
                     break;
             }

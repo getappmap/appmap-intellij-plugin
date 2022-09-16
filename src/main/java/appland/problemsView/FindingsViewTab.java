@@ -7,7 +7,6 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
 import org.jetbrains.annotations.NotNull;
 
-import javax.swing.tree.TreePath;
 import java.util.Comparator;
 
 public final class FindingsViewTab extends ProblemsViewPanel {
@@ -38,7 +37,7 @@ public final class FindingsViewTab extends ProblemsViewPanel {
 
         // fixme fix the listener handling
         IndexedFileListenerUtil.registerListeners(project, this, false, true, () -> {
-            getTreeModel().structureChanged(new TreePath(rootNode));
+            rootNode.structureChanged(null);
         });
     }
 

@@ -1,6 +1,7 @@
 package appland.problemsView;
 
 import appland.index.AppMapFindingsUtil;
+import appland.problemsView.listener.ScannerFindingsListener;
 import appland.problemsView.model.FindingsDomainCount;
 import appland.problemsView.model.FindingsFileData;
 import appland.problemsView.model.ScannerFinding;
@@ -12,8 +13,8 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonSyntaxException;
 import com.intellij.analysis.problemsView.Problem;
-import com.intellij.analysis.problemsView.ProblemsListener;
 import com.intellij.analysis.problemsView.ProblemsProvider;
+import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.application.ReadAction;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.fileEditor.FileDocumentManager;
@@ -43,8 +44,7 @@ public class FindingsManager implements ProblemsProvider {
     private static final Gson GSON = new GsonBuilder().create();
 
     private final Project project;
-    private final ProblemsListener publisher;
-    private final UnknownFileProblemListener unknownFilePublisher;
+    private final ScannerFindingsListener publisher;
 
     private final Object lock = new Object();
     // findings file -> reference problem holders
@@ -66,10 +66,7 @@ public class FindingsManager implements ProblemsProvider {
 
     public FindingsManager(@NotNull Project project) {
         this.project = project;
-
-        var messageBus = project.getMessageBus();
-        this.publisher = messageBus.syncPublisher(ProblemsListener.TOPIC);
-        this.unknownFilePublisher = messageBus.syncPublisher(UnknownFileProblemListener.TOPIC);
+        this.publisher = project.getMessageBus().syncPublisher(ScannerFindingsListener.TOPIC);
     }
 
     @Override
@@ -228,7 +225,7 @@ public class FindingsManager implements ProblemsProvider {
             addFindingsFile(findingFile);
         }
 
-        project.getMessageBus().syncPublisher(FindingsReloadedListener.TOPIC).afterFindingsReloaded();
+        project.getMessageBus().syncPublisher(ScannerFindingsListener.TOPIC).afterFindingsReloaded();
     }
 
     private void clearAndNotify() {
@@ -258,13 +255,13 @@ public class FindingsManager implements ProblemsProvider {
         var unknownFileMapping = sourceMappingOther.removeAll(path);
         if (!unknownFileMapping.isEmpty()) {
             problemsOther.removeAll(unknownFileMapping);
-            unknownFilePublisher.afterUnknownFileProblemsChange();
+            publisher.afterUnknownFileProblemsChange();
         }
     }
 
     private void loadFileLocked(@NotNull VirtualFile findingsFile, @NotNull Consumer<Problem> notifier) {
         var fileData = loadFindingsFile(findingsFile);
-        if (fileData != null) {
+        if (fileData != null && fileData.findings != null) {
             for (var finding : fileData.findings) {
                 var targetFile = finding.findTargetFile(project, findingsFile);
                 if (targetFile != null) {
@@ -273,18 +270,25 @@ public class FindingsManager implements ProblemsProvider {
                     var problem = new ScannerProblem(this, targetFile, finding);
                     problems.put(targetFile, problem);
 
+                    // this takes care of problemAppeared, problemDisappeared, problemUpdated notifications
                     notifier.accept(problem);
                 } else {
                     sourceMappingOther.put(findingsFile.getPath(), finding);
                     problemsOther.add(finding);
 
-                    unknownFilePublisher.afterUnknownFileProblemsChange();
+                    publisher.afterUnknownFileProblemsChange();
                 }
             }
+
+            publisher.afterFindingsChanged();
         }
     }
 
     private boolean isNotUnderContentRoot(@NotNull VirtualFile findingsFile) {
+        if (ApplicationManager.getApplication().isUnitTestMode()) {
+            return false;
+        }
+
         var root = ProjectRootManager.getInstance(project).getFileIndex().getContentRootForFile(findingsFile, false);
         if (root == null) {
             LOG.warn("Findings file not managed by current project: " + findingsFile.getPath());

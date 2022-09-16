@@ -1,7 +1,6 @@
 package appland.index;
 
 import appland.files.AppMapFileChangeListener;
-import appland.problemsView.FindingsReloadedListener;
 import appland.problemsView.listener.ScannerFindingsListener;
 import com.intellij.ProjectTopics;
 import com.intellij.openapi.Disposable;
@@ -44,8 +43,17 @@ public final class IndexedFileListenerUtil {
         }
 
         if (findingsFileListener) {
-            busConnection.subscribe(ScannerFindingsListener.TOPIC, () -> application.invokeLater(action));
-            busConnection.subscribe(FindingsReloadedListener.TOPIC, () -> application.invokeLater(action));
+            busConnection.subscribe(ScannerFindingsListener.TOPIC, new ScannerFindingsListener() {
+                @Override
+                public void afterFindingsReloaded() {
+                    application.invokeLater(action);
+                }
+
+                @Override
+                public void afterFindingsChanged() {
+                    application.invokeLater(action);
+                }
+            });
         }
     }
 }
