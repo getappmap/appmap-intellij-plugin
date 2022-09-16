@@ -1,5 +1,16 @@
 AppMap Plugin Changelog
 
+## [0.12.0](https://github.com/applandinc/appmap-intellij-plugin/compare/v0.11.0...v0.12.0) (2022-09-16)
+
+
+### Features
+
+-  implement install guide editor ([0d12a97]())-  remove code of old user-milestones panel and editor view ([f9b6a8d]())-  remove old user-milestones web application ([43894e5]())
+
+### Bug Fixes
+
+-  icon provider logic was wrong ([bbdbe89]())-  rename install guide steps to match VSCode ([46efc5e]())
+
 ## [0.11.0](https://github.com/applandinc/appmap-intellij-plugin/compare/v0.10.0...v0.11.0) (2022-09-16)
 
 
