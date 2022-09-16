@@ -246,9 +246,12 @@ public class FindingsManager implements ProblemsProvider {
     }
 
     private void removeFindingsFileLocked(@NotNull String path) {
+        var dataChanged = false;
+
         for (var targetFile : sourceMapping.removeAll(path)) {
             for (var problem : problems.removeAll(targetFile)) {
                 publisher.problemDisappeared(problem);
+                dataChanged = true;
             }
         }
 
@@ -256,6 +259,11 @@ public class FindingsManager implements ProblemsProvider {
         if (!unknownFileMapping.isEmpty()) {
             problemsOther.removeAll(unknownFileMapping);
             publisher.afterUnknownFileProblemsChange();
+            dataChanged = true;
+        }
+
+        if (dataChanged) {
+            publisher.afterFindingsChanged();
         }
     }
 
