@@ -5,6 +5,7 @@ import appland.AppMapPlugin;
 import appland.files.FileLocation;
 import appland.files.FileLookup;
 import appland.settings.AppMapApplicationSettingsService;
+import appland.telemetry.TelemetryService;
 import appland.upload.AppMapUploader;
 import com.intellij.CommonBundle;
 import com.intellij.ide.BrowserUtil;
@@ -207,6 +208,9 @@ public class AppMapFileEditor extends UserDataHolderBase implements FileEditor {
             AppMapApplicationSettingsService.getInstance().setAppmapInstructionsViewed(true);
             //openAppMapInstructions(); - we're not doing this until we have better instructions
         }
+
+        // TODO - provide `appmap.project.language` property which specifies the language of the AppMap via metadata.language
+        TelemetryService.getInstance().sendEvent("appmap:open");
     }
 
     /**
