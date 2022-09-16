@@ -20,7 +20,9 @@ public class AppLandStartupActivity implements StartupActivity {
 
             openToolWindowAndQuickstart(project);
 
-            TelemetryService.getInstance().notifyTelemetryUsage(project);
+            var telemetry = TelemetryService.getInstance();
+            telemetry.notifyTelemetryUsage(project);
+            telemetry.sendEvent("plugin:install");
         }
     }
 
