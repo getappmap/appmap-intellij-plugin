@@ -91,7 +91,9 @@ public class InstallGuideEditor extends UserDataHolderBase implements FileEditor
         var busConnection = project.getMessageBus().connect(this);
 
         // send current list of AppMaps after AppMap files changed
-        busConnection.subscribe(AppMapFileChangeListener.TOPIC, projectRefreshAlarm::cancelAndRequest);
+        busConnection.subscribe(AppMapFileChangeListener.TOPIC, changes -> {
+            projectRefreshAlarm.cancelAndRequest();
+        });
 
         // listen to changes of findings
         busConnection.subscribe(ScannerFindingsListener.TOPIC, p -> {

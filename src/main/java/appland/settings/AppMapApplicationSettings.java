@@ -24,6 +24,10 @@ public class AppMapApplicationSettings {
     @Setter
     private volatile boolean enableFindings = false;
 
+    @Getter
+    @Setter
+    private volatile boolean enableTelemetry = true;
+
     public AppMapApplicationSettings() {
     }
 
@@ -31,5 +35,6 @@ public class AppMapApplicationSettings {
         this.appmapInstructionsViewed = settings.appmapInstructionsViewed;
         this.firstStart = settings.firstStart;
         this.enableFindings = settings.enableFindings;
+        this.enableTelemetry = settings.enableTelemetry;
     }
 }

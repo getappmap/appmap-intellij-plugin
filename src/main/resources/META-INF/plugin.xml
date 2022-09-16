@@ -43,6 +43,7 @@
     </projectListeners>
 
     <extensions defaultExtensionNs="com.intellij">
+        <applicationService serviceImplementation="appland.telemetry.TelemetryService"/>
         <applicationService serviceImplementation="appland.AppLandLifecycleService"/>
         <projectService serviceImplementation="appland.AppLandLifecycleService"/>
 
@@ -86,6 +87,9 @@
         <notificationGroup id="appmap.remoteRecording" displayType="BALLOON"
                            key="notification.remoteRecording.displayName"/>
         <statusBarWidgetFactory implementation="appland.remote.RemoteRecordingStatusBarFactory"/>
+
+        <notificationGroup id="appmap.telemetry" displayType="STICKY_BALLOON"
+                           key="telemetry.permission.title"/>
 
         <projectConfigurable groupId="tools" nonDefaultProject="true" order="first"
                              instance="appland.settings.AppMapProjectConfigurable"/>

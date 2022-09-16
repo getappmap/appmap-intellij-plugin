@@ -3,6 +3,8 @@ package appland.startup;
 import appland.installGuide.InstallGuideViewPage;
 import appland.installGuide.InstallGuideEditorProvider;
 import appland.settings.AppMapApplicationSettingsService;
+import appland.telemetry.TelemetryService;
+
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.startup.StartupActivity;
@@ -17,6 +19,8 @@ public class AppLandStartupActivity implements StartupActivity {
             AppMapApplicationSettingsService.getInstance().setFirstStart(false);
 
             openToolWindowAndQuickstart(project);
+
+            TelemetryService.getInstance().notifyTelemetryUsage(project);
         }
     }
 
