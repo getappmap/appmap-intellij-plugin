@@ -32,6 +32,8 @@
     <applicationListeners>
         <listener topic="com.intellij.openapi.project.ProjectManagerListener"
                   class="appland.cli.AppLandProjectManagerListener"/>
+        <listener topic="appland.files.AppMapFileChangeListener"
+                  class="appland.telemetry.AppMapRecordListener"/>
     </applicationListeners>
 
     <projectListeners>
