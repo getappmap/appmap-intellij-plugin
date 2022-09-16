@@ -11,7 +11,7 @@ public class DefaultProjectDataServiceTest extends AppMapBaseTest {
     }
 
     @Test
-    public void truncatedSampleObjects() {
+    public void selectedSampleObjects() {
         WriteAction.runAndWait(() -> myFixture.copyDirectoryToProject("appmap-scanner/with_findings", "root"));
 
         var projects = ProjectDataService.getInstance(getProject()).getAppMapProjects();
@@ -37,5 +37,22 @@ public class DefaultProjectDataServiceTest extends AppMapBaseTest {
         assertEquals("GET /owners/:ownerId/2", requests.get(2).name);
         assertEquals("GET /owners/:ownerId/3", requests.get(3).name);
         assertEquals("GET /owners/:ownerId/4", requests.get(4).name);
+    }
+
+    @Test
+    public void truncatedSampleObjects() {
+        WriteAction.runAndWait(() -> myFixture.copyDirectoryToProject("appmap-scanner/untruncated_findings", "root"));
+
+        var projects = ProjectDataService.getInstance(getProject()).getAppMapProjects();
+        assertEquals(1, projects.size());
+
+        var samples = projects.get(0).sampleCodeObjects;
+        assertNotNull(samples);
+
+        var queries = samples.getQueries();
+        assertEquals(1, queries.size());
+
+        // VSCode is showing this truncated query
+        assertEquals("select owner0_.id as id1_0_0_, pets1_.id as id1_1_1_, owner0_.first_name as first_na2_0_0_, owner0_.last_name as last_nam3_0_0_, owner0_.address as address4_0_0_, owner0_.city as city5_0_0_, owner0_.telephone as telephon6_0_0_, pets1_.name as name2_1_1_, pets1_.birth_date as birth_da3_1_1_, pets1_.type_id as type_id4_1_1_, pets1_.owner_id as owner_id5_1_0__, pets1_.id as id1_1_0__ from owners owner0_ left outer join pets pets1_ on owner0_.id=pets1_.owner_id where owner0_.id=? order by pets1_.name", queries.get(0).name);
     }
 }

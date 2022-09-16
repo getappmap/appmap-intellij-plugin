@@ -125,8 +125,8 @@ public class DefaultProjectDataService implements ProjectDataService {
             return null;
         }
 
-        var requests = getSampleCodeObjects(requestsToAppMaps);
-        var queries = getSampleCodeObjects(queriesToAppMaps);
+        var requests = truncateSampleCodeObjects(getSampleCodeObjects(requestsToAppMaps));
+        var queries = truncateSampleCodeObjects(getSampleCodeObjects(queriesToAppMaps));
         return new SampleCodeObjects(requests, queries);
     }
 
@@ -139,10 +139,13 @@ public class DefaultProjectDataService implements ProjectDataService {
             return chooseClassMapItems(singleFileEntries);
         }
 
-        var withValidFiles = itemToAppMaps.entrySet().stream()
+        return chooseClassMapItems(itemToAppMaps.entrySet().stream()
                 .filter(entry -> !entry.getValue().isEmpty())
-                .collect(Collectors.toList());
-        return chooseClassMapItems(withValidFiles);
+                .collect(Collectors.toList()));
+    }
+
+    private List<SimpleCodeObject> truncateSampleCodeObjects(List<SimpleCodeObject> codeObjects) {
+        return codeObjects.stream().map(SimpleCodeObject::asTruncatedObject).collect(Collectors.toList());
     }
 
     /**
