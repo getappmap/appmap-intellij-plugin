@@ -10,11 +10,12 @@ public enum ClassMapItemType {
     Folder(1, "folder"),
     Database(2, "database"),
     Package(3, "package", "/"),
+    ExternalService(4, "external_service"),
     // children types
-    Route(4, "route"),
-    Query(5, "query"),
-    Class(6, "class", "::"),
-    Function(7, "function", "#");
+    Route(5, "route"),
+    Query(6, "query"),
+    Class(7, "class", "::"),
+    Function(8, "function", "#");
 
     @Getter
     private final int id;
