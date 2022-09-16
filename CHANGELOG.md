@@ -1,5 +1,12 @@
 AppMap Plugin Changelog
 
+## [0.11.0-2]
+### Bug fixes
+- The step icons of the install guide panel are now updated when the tool window is opened for the first time and when matching data is found in the project
+- Items for "Request analysis" are now shown in the install guide
+- Long SQL queries and requests are now truncated in the install guide webview
+- Bug fixes for scanning, file watching and panel updates
+
 ## [0.11.0](https://github.com/applandinc/appmap-intellij-plugin/compare/v0.10.0...v0.11.0) (2022-09-16)
 
 
