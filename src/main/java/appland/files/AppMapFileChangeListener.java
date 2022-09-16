@@ -1,5 +1,7 @@
 package appland.files;
 
+import java.util.Set;
+
 import com.intellij.util.messages.Topic;
 
 /**
@@ -10,6 +12,7 @@ public interface AppMapFileChangeListener {
 
     /**
      * Sent after at least one .appmap.json file was changed (e.g. created, updated, deleted, renamed).
+     * @param changeTypes       The types of changes that occurred.
      */
-    void afterAppMapFileChange();
+    void afterAppMapFileChange(Set<AppMapFileEventType> changeTypes);
 }

@@ -14,6 +14,7 @@ class AppMapProjectSettingsForm {
     private JBTextField serverName;
     private JBCheckBox confirmUpload;
     private JBCheckBox enableFindings;
+    private JBCheckBox enableTelemetry;
 
     AppMapProjectSettingsForm() {
         serverName.getEmptyText().setText(AppMapUploader.DEFAULT_SERVER_URL);
@@ -29,6 +30,7 @@ class AppMapProjectSettingsForm {
         confirmUpload.setSelected(settings.getConfirmAppMapUpload());
 
         enableFindings.setSelected(applicationSettings.isEnableFindings());
+        enableTelemetry.setSelected(applicationSettings.isEnableTelemetry());
     }
 
     void applySettingsTo(@NotNull AppMapProjectSettings settings,
@@ -37,5 +39,6 @@ class AppMapProjectSettingsForm {
         settings.setConfirmAppMapUpload(confirmUpload.isSelected());
 
         applicationSettings.setEnableFindings(enableFindings.isSelected());
+        applicationSettings.setEnableTelemetry(enableTelemetry.isSelected());
     }
 }

@@ -87,7 +87,7 @@ public class AppMapWindowPanel extends SimpleToolWindowPanel implements DataProv
         });
 
         // refresh when VirtualFiles change
-        ApplicationManager.getApplication().getMessageBus().connect(this).subscribe(AppMapFileChangeListener.TOPIC, () -> {
+        ApplicationManager.getApplication().getMessageBus().connect(this).subscribe(AppMapFileChangeListener.TOPIC, changes -> {
             rebuild(false);
         });
     }
