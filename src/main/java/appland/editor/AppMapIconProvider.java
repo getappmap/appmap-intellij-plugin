@@ -15,10 +15,8 @@ public class AppMapIconProvider implements FileIconProvider {
     @Override
     @Nullable
     public Icon getIcon(@NotNull VirtualFile file, int flags, @Nullable Project project) {
-        boolean isAppLandFile = AppMapFiles.isAppMap(file)
-                | InstallGuideEditorProvider.isInstallGuideFile(file)
-                | InstallGuideEditorProvider.isInstallGuideFile(file);
-
-        return isAppLandFile ? Icons.APPMAP_FILE : null;
+        return AppMapFiles.isAppMap(file) || InstallGuideEditorProvider.isInstallGuideFile(file)
+                ? Icons.APPMAP_FILE
+                : null;
     }
 }
