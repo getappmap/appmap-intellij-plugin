@@ -117,7 +117,7 @@ public class PythonLanguageAnalyzer implements LanguageAnalyzer {
                         found.set(false);
                     }
 
-                    return found.get();
+                    return !found.get();
                 }, VirtualFileVisitor.limit(10));
 
         return found.get();
