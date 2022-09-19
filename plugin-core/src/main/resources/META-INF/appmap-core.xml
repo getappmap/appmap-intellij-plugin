@@ -1,0 +1,5 @@
+<idea-plugin>
+    <extensions defaultExtensionNs="com.intellij">
+        <executor implementation="appland.execution.AppMapJvmExecutor"/>
+    </extensions>
+</idea-plugin>

@@ -1,0 +1,6 @@
+<idea-plugin>
+    <extensions defaultExtensionNs="com.intellij">
+        <programRunner implementation="appland.execution.AppMapJavaAgentRunner"/>
+        <java.programPatcher implementation="appland.execution.AppMapJavaProgramPatcher"/>
+    </extensions>
+</idea-plugin>
