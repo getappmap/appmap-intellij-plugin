@@ -4,6 +4,7 @@ import appland.index.AppMapFindingsUtil;
 import appland.problemsView.FindingsManager;
 import com.intellij.openapi.application.ReadAction;
 import com.intellij.openapi.progress.ProgressManager;
+import com.intellij.openapi.project.Project;
 import com.intellij.openapi.project.ProjectManager;
 import com.intellij.openapi.vfs.AsyncFileListener;
 import com.intellij.openapi.vfs.LocalFileSystem;
@@ -94,53 +95,60 @@ public class ScannerFilesAsyncListener implements AsyncFileListener {
         return new ChangeApplier() {
             @Override
             public void afterVfsChange() {
-                ReadAction.nonBlocking(() -> processChangesAsync(toAdd, toRemove, toRefresh, directories))
-                        .submit(AppExecutorUtil.getAppExecutorService());
+                for (var project : ProjectManager.getInstance().getOpenProjects()) {
+                    if (project.isDefault() || project.isDisposed()) {
+                        continue;
+                    }
+
+                    // we need to run in smart mode because the findings manager uses the index to find relative files
+                    ReadAction.nonBlocking(() -> processChangesAsync(project, toAdd, toRemove, toRefresh, directories))
+                            .inSmartMode(project)
+                            .submit(AppExecutorUtil.getAppExecutorService());
+                }
             }
         };
     }
 
     @RequiresReadLock
-    private void processChangesAsync(Set<Supplier<VirtualFile>> toAdd,
+    private void processChangesAsync(@NotNull Project project,
+                                     Set<Supplier<VirtualFile>> toAdd,
                                      Set<String> toRemove,
                                      Set<VirtualFile> toRefresh,
                                      Set<String> directories) {
-        for (var project : ProjectManager.getInstance().getOpenProjects()) {
-            if (project.isDefault() || project.isDisposed()) {
-                continue;
-            }
+        if (project.isDisposed()) {
+            return;
+        }
 
-            var manager = FindingsManager.getInstance(project);
+        var manager = FindingsManager.getInstance(project);
 
-            // if there's at least one modified directory with finding files, then we do a complete reload
-            // instead of attempting to find the best diff
-            for (var path : directories) {
-                var directory = LocalFileSystem.getInstance().findFileByPath(path);
-                if (directory != null) {
-                    if (isDirectoryWithFindingFiles(directory)) {
-                        manager.reloadAsync();
-                        return;
-                    }
+        // if there's at least one modified directory with finding files, then we do a complete reload
+        // instead of attempting to find the best diff
+        for (var path : directories) {
+            var directory = LocalFileSystem.getInstance().findFileByPath(path);
+            if (directory != null) {
+                if (isDirectoryWithFindingFiles(directory)) {
+                    manager.reloadAsync();
+                    return;
                 }
             }
+        }
 
-            for (var deletedFile : toRemove) {
-                if (deletedFile != null) {
-                    manager.removeFindingsFile(deletedFile);
-                }
+        for (var deletedFile : toRemove) {
+            if (deletedFile != null) {
+                manager.removeFindingsFile(deletedFile);
             }
+        }
 
-            for (var supplier : toAdd) {
-                var file = supplier.get();
-                if (file != null) {
-                    manager.addFindingsFile(file);
-                }
+        for (var supplier : toAdd) {
+            var file = supplier.get();
+            if (file != null) {
+                manager.addFindingsFile(file);
             }
+        }
 
-            for (var file : toRefresh) {
-                if (file != null) {
-                    manager.reloadFindingsFile(file);
-                }
+        for (var file : toRefresh) {
+            if (file != null) {
+                manager.reloadFindingsFile(file);
             }
         }
     }
