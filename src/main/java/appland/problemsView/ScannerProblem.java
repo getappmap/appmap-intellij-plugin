@@ -16,6 +16,7 @@ final class ScannerProblem implements FileProblem {
     private final @NotNull VirtualFile file;
     @Getter
     private final @NotNull ScannerFinding finding;
+    // 0-based
     private final int line;
 
     public ScannerProblem(@NotNull ProblemsProvider provider,
@@ -26,7 +27,7 @@ final class ScannerProblem implements FileProblem {
         this.finding = finding;
 
         var location = finding.getProblemLocation();
-        this.line = location != null && location.line != null ? location.line : -1;
+        this.line = location != null && location.line != null ? location.line - 1 : -1;
     }
 
     @NotNull
