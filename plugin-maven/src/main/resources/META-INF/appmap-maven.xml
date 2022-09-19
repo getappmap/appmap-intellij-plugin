@@ -1,0 +1,7 @@
+<idea-plugin>
+    <depends>com.intellij.java</depends>
+
+    <extensions defaultExtensionNs="com.intellij">
+        <programRunner implementation="appland.execution.AppMapMavenAgentRunner"/>
+    </extensions>
+</idea-plugin>

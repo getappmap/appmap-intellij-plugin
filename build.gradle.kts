@@ -2,7 +2,6 @@ import org.commonmark.parser.Parser
 import org.commonmark.renderer.html.HtmlRenderer
 import org.gradle.api.JavaVersion.VERSION_11
 import org.jetbrains.intellij.tasks.PrepareSandboxTask
-import org.jetbrains.intellij.tasks.RunIdeTask
 import org.jetbrains.intellij.tasks.RunPluginVerifierTask
 
 buildscript {
@@ -30,43 +29,56 @@ version = pluginVersion
 
 val isCI = System.getenv("CI") == "true"
 
-repositories {
-    mavenCentral()
-    maven { setUrl("https://www.jetbrains.com/intellij-repository/releases") }
-}
+allprojects {
+    repositories {
+        mavenCentral()
+        maven { setUrl("https://www.jetbrains.com/intellij-repository/releases") }
+    }
 
-dependencies {
-    // http://wiremock.org, Apache 2 license
-    testImplementation("com.github.tomakehurst:wiremock-jre8:2.33.1")
+    apply {
+        plugin("idea")
+        plugin("org.jetbrains.intellij")
+    }
 
-    // Project Lombok, only for compilation
-    compileOnly("org.projectlombok:lombok:$lombokVersion")
-    annotationProcessor("org.projectlombok:lombok:$lombokVersion")
-}
+    dependencies {
+        // http://wiremock.org, Apache 2 license
+        testImplementation("com.github.tomakehurst:wiremock-jre8:2.33.1")
 
-intellij {
-    version.set(prop("ideVersion"))
-    downloadSources.set(!isCI)
-    updateSinceUntilBuild.set(true)
-    instrumentCode.set(true)
+        // Project Lombok, only for compilation
+        compileOnly("org.projectlombok:lombok:$lombokVersion")
+        annotationProcessor("org.projectlombok:lombok:$lombokVersion")
+    }
+
+    intellij {
+        version.set(prop("ideVersion"))
+        downloadSources.set(!isCI)
+        updateSinceUntilBuild.set(true)
+        instrumentCode.set(true)
+    }
+
+    configure<JavaPluginConvention> {
+        sourceCompatibility = VERSION_11
+        targetCompatibility = VERSION_11
+    }
+
+    tasks {
+        buildSearchableOptions.get().enabled = false
+
+        buildPlugin {
+            copyPluginAssets("")
+        }
+
+        processTestResources {
+            copyPluginAssets("")
+        }
+    }
 }
 
 changelog {
     path.set("${project.projectDir}/CHANGELOG.md")
 }
 
-configure<JavaPluginConvention> {
-    sourceCompatibility = VERSION_11
-    targetCompatibility = VERSION_11
-}
-
 tasks {
-    buildSearchableOptions.get().enabled = false
-
-    buildPlugin {
-        copyPluginAssets("")
-    }
-
     patchPluginXml {
         sinceBuild.set(prop("sinceBuild"))
         untilBuild.set(prop("untilBuild"))
@@ -81,29 +93,68 @@ tasks {
         })
     }
 
-    processTestResources {
-        copyPluginAssets("")
-    }
-
     withType<RunPluginVerifierTask> {
+        onlyIf { this.project == rootProject }
         ideVersions.set(prop("ideVersionVerifier").split(","))
     }
 
-    withType(PrepareSandboxTask::class.java).all {
+    withType<PrepareSandboxTask> {
         copyPluginAssets(intellij.pluginName.get())
     }
 
-    withType(RunIdeTask::class.java).all {
+    runIde {
+        onlyIf { this.project == rootProject }
         systemProperty("appmap.sandbox", "true")
     }
 
-    withType(Test::class.java).all {
+    withType<Test> {
         systemProperty("idea.test.execution.policy", "appland.AppLandTestExecutionPolicy")
         systemProperty("appland.testDataPath", file("src/test/data").path)
     }
 
     withType<Zip> {
         duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    }
+}
+
+project(":") {
+    dependencies {
+        implementation(project(":plugin-core"))
+        implementation(project(":plugin-gradle"))
+        implementation(project(":plugin-java"))
+        implementation(project(":plugin-maven"))
+    }
+}
+
+project(":plugin-java") {
+    dependencies {
+        implementation(project(":plugin-core"))
+    }
+
+    intellij {
+        plugins.set(listOf("java"))
+    }
+}
+
+project(":plugin-gradle") {
+    dependencies {
+        implementation(project(":plugin-core"))
+        implementation(project(":plugin-java"))
+    }
+
+    intellij {
+        plugins.set(listOf("java", "gradle"))
+    }
+}
+
+project(":plugin-maven") {
+    dependencies {
+        implementation(project(":plugin-core"))
+        implementation(project(":plugin-java"))
+    }
+
+    intellij {
+        plugins.set(listOf("java", "maven"))
     }
 }
 
@@ -118,6 +169,10 @@ fun AbstractCopyTask.copyPluginAssets(rootDir: String) {
         into("${rootPath}appland-install-guide")
         include("index.html")
         include("dist/**")
+    }
+    from("${project.rootDir}/appmap-agents") {
+        into("${rootPath}appmap-agents")
+        include("*.jar")
     }
 }
 
