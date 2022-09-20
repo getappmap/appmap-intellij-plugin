@@ -2,7 +2,7 @@ AppMap is a free and open source visualization tool that allows you to see how y
 You can use AppMaps to onboard to unfamiliar code, debug hard-to-fix issues, review code behavior changes before
 making a commit, and improve the quality of code reviews.
 
-AppMap works best for mapping web services and web applications. [Join our community](https://appland.com/community/)
+AppMap works best for mapping web services and web applications. [Join our community](https://appmap.io/community/)
  to help us expand support for more types of applications and frameworks!
 
 &nbsp;
@@ -14,14 +14,14 @@ AppMap works best for mapping web services and web applications. [Join our commu
 **2021.1** and newer JetBrains IDEs are required to use this plugin.
 
 Currently, AppMap supports Spring, Express.js, Django, Flask and Rails projects. The most up-to-date list of frameworks and languages we support is
-[here](https://appland.com/docs/integrations.html). 
+[here](https://appmap.io/docs/integrations.html). 
 
 To start making AppMaps, you’ll need to install and configure the AppMap client agent for your project.
 Then, you’ll make AppMaps by running your app - either by
-[running test cases](https://appland.com/docs/recording-methods.html#recording-test-cases), or by
-[recording a short interaction with your app](https://appland.com/docs/reference/remote-recording.html).
+[running test cases](https://appmap.io/docs/recording-methods.html#recording-test-cases), or by
+[recording a short interaction with your app](https://appmap.io/docs/reference/remote-recording.html).
 
-[Here's a convenient quickstart guide](https://appland.com/docs/quickstart/) that walks you through the AppMap install flow.  
+[Here's a convenient quickstart guide](https://appmap.io/docs/quickstart/) that walks you through the AppMap install flow.  
 
 ---
 
@@ -38,15 +38,15 @@ Summary of Features:
 
 ## Resources
 
-- [Our doc site](https://appland.com/docs/appmap-overview.html)
+- [Our doc site](https://appmap.io/docs/appmap-overview.html)
 - [Our GitHub](https://github.com/applandinc)
-- [Our blog](https://appland.com/blog/)
-- [1:1 support with our dev team on Slack](https://appland.com/slack)
-- Email support: [support@app.land](mailto:support@app.land)
+- [Our blog](https://appmap.io/blog/)
+- [1:1 support with our dev team on Slack](https://appmap.io/slack)
+- Email support: [support@appmap.io](mailto:support@appmap.io)
 
 ## Twitter
 
-- [@LandOfApps](https://twitter.com/landofapps)
+- [@GetAppMap](https://twitter.com/getappmap)
 
 ## YouTube
 

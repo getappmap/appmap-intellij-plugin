@@ -16,6 +16,6 @@ public class AppMapDocumentationAction extends AnAction implements DumbAware {
 
     @Override
     public void actionPerformed(@NotNull AnActionEvent e) {
-        BrowserUtil.browse("https://appland.com/docs");
+        BrowserUtil.browse("https://appmap.io/docs");
     }
 }

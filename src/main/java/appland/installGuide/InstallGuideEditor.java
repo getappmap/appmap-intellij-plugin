@@ -102,7 +102,7 @@ public class InstallGuideEditor extends UserDataHolderBase implements FileEditor
     }
 
     private void setupJCEF() {
-        // open links to https://appland.com in the external browser
+        // open links to https://appmap.io in the external browser
         contentPanel.getJBCefClient().addRequestHandler(new CefRequestHandlerAdapter() {
             @Override
             public boolean onBeforeBrowse(CefBrowser browser, CefFrame frame, CefRequest request, boolean user_gesture, boolean is_redirect) {
