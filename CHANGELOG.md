@@ -1,5 +1,7 @@
 AppMap Plugin Changelog
 
+## [0.12.0-2]
+
 ## [0.12.0](https://github.com/applandinc/appmap-intellij-plugin/compare/v0.11.0...v0.12.0) (2022-09-16)
 
 
