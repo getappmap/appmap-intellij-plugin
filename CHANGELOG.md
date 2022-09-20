@@ -1,11 +1,15 @@
 AppMap Plugin Changelog
 
-## [0.11.0-2]
-### Bug fixes
-- The step icons of the install guide panel are now updated when the tool window is opened for the first time and when matching data is found in the project
-- Items for "Request analysis" are now shown in the install guide
-- Long SQL queries and requests are now truncated in the install guide webview
-- Bug fixes for scanning, file watching and panel updates
+## [0.12.0](https://github.com/applandinc/appmap-intellij-plugin/compare/v0.11.0...v0.12.0) (2022-09-16)
+
+
+### Features
+
+-  implement install guide editor ([0d12a97]())-  remove code of old user-milestones panel and editor view ([f9b6a8d]())-  remove old user-milestones web application ([43894e5]())
+
+### Bug Fixes
+
+-  icon provider logic was wrong ([bbdbe89]())-  rename install guide steps to match VSCode ([46efc5e]())
 
 ## [0.11.0](https://github.com/applandinc/appmap-intellij-plugin/compare/v0.10.0...v0.11.0) (2022-09-16)
 
@@ -45,45 +49,6 @@ AppMap Plugin Changelog
 ### Features
 
 * Various fixes ([006aac6](https://github.com/applandinc/appmap-intellij-plugin/commit/006aac623773817f59f38dd8f166c05fb96e1453))
-
-## [0.8.0-6]
-- Detect external changes to AppMap files and AppMap index data, e.g. by the install guide steps.
-- Properly handle AppMap data in excluded directories like `target/appmap`.
-
-## [0.8.0-5]
-- Support to show the problems view tab (link "Open the PROBLEMS tab" in the JS application).
-- Download CLI tools even if "enableFindings" is off. 
-- Don't break findings when JSON parsing fails.
-- Fix for `ArrayIndexOutOfBoundsException` during AppMap indexing.
-
-## [0.8.0-4]
-- Indexing of classMap.json files to provide sample HTTP requests and database queries for the install guide.
-- Fixed names of install guide steps.
-- Fixed warning about CLI background process listening.
-- Bug fixes
-
-## [0.8.0-3]
-- Refresh table of AppMaps in install guide webview after changes to `.appmap.json` files on disk.
-- Add link to page "Runtime Analysis".
-- Fix to locate `appmap-findings.json` files in excluded parent folders, e.g. in `target/appmap/...`.
-- Updated wording of Java and JavaScript language analyzers to match VSCode.
-- Download CLI binaries to a temp location first to avoid execution of partially downloaded files at startup.
-
-## [0.8.0-2]
-- Check for `appmap.yml` before launching CLI processes.
-- Remove old versions of download CLI binaries.
-- Misc fixes
-
-## [0.8.0-1]
-- Support .gitignore and other VCS ignored files if supported by the IDE
-- Disabled OpenAPI page
-
-## [0.8.0]
-### Added
-- Support for AppLand scanner findings
-
-### Changed
-- Dropped support for 2021.1 and 2021.2
 
 ## [0.7.10]
 ### Updated
