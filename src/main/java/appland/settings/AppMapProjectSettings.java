@@ -1,14 +1,17 @@
 package appland.settings;
 
 import com.google.common.collect.Lists;
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.Objects;
 import java.util.concurrent.CopyOnWriteArrayList;
 
+@EqualsAndHashCode
+@ToString
 public class AppMapProjectSettings {
     @Nullable
     private List<String> recentRemoteRecordingURLs;
@@ -19,6 +22,7 @@ public class AppMapProjectSettings {
     @Nullable
     private String cloudServerUrl;
     private boolean confirmAppMapUpload = true;
+    private boolean openedAppMapEditor = false;
 
     public AppMapProjectSettings() {
     }
@@ -34,6 +38,7 @@ public class AppMapProjectSettings {
         this.recentAppMapStorageLocation = settings.recentAppMapStorageLocation;
         this.cloudServerUrl = settings.cloudServerUrl;
         this.confirmAppMapUpload = settings.confirmAppMapUpload;
+        this.openedAppMapEditor = settings.openedAppMapEditor;
     }
 
     @NotNull
@@ -93,27 +98,11 @@ public class AppMapProjectSettings {
         this.cloudServerUrl = cloudServerUrl;
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        AppMapProjectSettings that = (AppMapProjectSettings) o;
-        return confirmAppMapUpload == that.confirmAppMapUpload && Objects.equals(recentRemoteRecordingURLs, that.recentRemoteRecordingURLs) && Objects.equals(activeRecordingURL, that.activeRecordingURL) && Objects.equals(recentAppMapStorageLocation, that.recentAppMapStorageLocation) && Objects.equals(cloudServerUrl, that.cloudServerUrl);
+    public synchronized boolean isOpenedAppMapEditor() {
+        return openedAppMapEditor;
     }
 
-    @Override
-    public int hashCode() {
-        return Objects.hash(recentRemoteRecordingURLs, activeRecordingURL, recentAppMapStorageLocation, cloudServerUrl, confirmAppMapUpload);
-    }
-
-    @Override
-    public String toString() {
-        return "AppMapProjectSettings{" +
-                "recentRemoteRecordingURLs=" + recentRemoteRecordingURLs +
-                ", activeRecordingURL='" + activeRecordingURL + '\'' +
-                ", recentAppMapStorageLocation='" + recentAppMapStorageLocation + '\'' +
-                ", cloudServerUrl='" + cloudServerUrl + '\'' +
-                ", confirmAppMapUpload=" + confirmAppMapUpload +
-                '}';
+    public synchronized void setOpenedAppMapEditor(boolean openedAppMapEditor) {
+        this.openedAppMapEditor = openedAppMapEditor;
     }
 }
