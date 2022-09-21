@@ -1,6 +1,7 @@
 package appland.editor;
 
 import appland.files.AppMapFiles;
+import appland.settings.AppMapProjectSettingsService;
 import com.intellij.openapi.fileEditor.FileEditor;
 import com.intellij.openapi.fileEditor.FileEditorPolicy;
 import com.intellij.openapi.fileEditor.FileEditorProvider;
@@ -22,6 +23,7 @@ public class AppMapHTMLEditorProvider implements FileEditorProvider, DumbAware {
 
     @Override
     public @NotNull FileEditor createEditor(@NotNull Project project, @NotNull VirtualFile file) {
+        AppMapProjectSettingsService.getState(project).setOpenedAppMapEditor(true);
         return new AppMapFileEditor(project, file);
     }
 
