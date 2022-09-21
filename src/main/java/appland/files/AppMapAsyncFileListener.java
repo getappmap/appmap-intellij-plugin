@@ -1,13 +1,7 @@
 package appland.files;
 
-import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.vfs.AsyncFileListener;
-import com.intellij.openapi.vfs.newvfs.events.VFileContentChangeEvent;
-import com.intellij.openapi.vfs.newvfs.events.VFileCopyEvent;
-import com.intellij.openapi.vfs.newvfs.events.VFileCreateEvent;
-import com.intellij.openapi.vfs.newvfs.events.VFileDeleteEvent;
-import com.intellij.openapi.vfs.newvfs.events.VFileEvent;
-import com.intellij.openapi.vfs.newvfs.events.VFilePropertyChangeEvent;
+import com.intellij.openapi.vfs.newvfs.events.*;
 import com.intellij.util.PathUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -18,6 +12,8 @@ import java.util.stream.Collectors;
 
 /**
  * Async file listener to notify about changes to .appmap.json files.
+ * We don't react to changes from a file system refresh.
+ * {@link  VirtualFileManagerLister} is taking care of refresh events.
  */
 @SuppressWarnings("UnstableApiUsage")
 public class AppMapAsyncFileListener implements AsyncFileListener {
@@ -36,21 +32,18 @@ public class AppMapAsyncFileListener implements AsyncFileListener {
             if (event instanceof VFilePropertyChangeEvent && ((VFilePropertyChangeEvent) event).isRename()) {
                 return AppMapFileEventType.Rename;
             }
-            
+
             return AppMapFileEventType.Other;
         }).collect(Collectors.toSet());
-
-        return changeTypes.isEmpty()
-                ? null
-                : new ChangeApplier() {
-            @Override
-            public void afterVfsChange() {
-                notifyAppMapFileChange(changeTypes);
-            }
-        };
+        
+        return changeTypes.isEmpty() ? null : new AppMapChangeApplier(changeTypes);
     }
 
-    private static boolean isAppMapFileChange(VFileEvent event) {
+    private static boolean isAppMapFileChange(@NotNull VFileEvent event) {
+        if (event.isFromRefresh()) {
+            return false;
+        }
+
         // only treat renames as valid property changes
         if (event instanceof VFilePropertyChangeEvent) {
             if (!((VFilePropertyChangeEvent) event).isRename()) {
@@ -61,9 +54,16 @@ public class AppMapAsyncFileListener implements AsyncFileListener {
         return AppMapFiles.isAppMapFileName(PathUtil.getFileName(event.getPath()));
     }
 
-    private void notifyAppMapFileChange(Set<AppMapFileEventType> changeTypes) {
-        ApplicationManager.getApplication().getMessageBus()
-                .syncPublisher(AppMapFileChangeListener.TOPIC)
-                .afterAppMapFileChange(changeTypes);
+    private static class AppMapChangeApplier implements ChangeApplier {
+        private Set<AppMapFileEventType> changeTypes;
+
+        public AppMapChangeApplier(Set<Object> changeTypes) {
+            this.changeTypes = changeTypes;
+        }
+
+        @Override
+        public void afterVfsChange() {
+            AppMapFileChangeListener.sendNotification(changeTypes);
+        }
     }
 }
