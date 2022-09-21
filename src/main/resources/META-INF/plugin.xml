@@ -100,6 +100,7 @@
 
         <!-- Generic AppMap file handling -->
         <vfs.asyncListener implementation="appland.files.AppMapAsyncFileListener"/>
+        <virtualFileManagerListener implementation="appland.files.VirtualFileManagerLister"/>
 
         <!-- CLI service -->
         <vfs.asyncListener implementation="appland.config.AppmapYamlAsyncFileListener"/>
