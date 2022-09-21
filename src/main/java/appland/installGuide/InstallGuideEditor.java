@@ -2,12 +2,11 @@ package appland.installGuide;
 
 import appland.AppMapBundle;
 import appland.AppMapPlugin;
-import appland.files.AppMapFileChangeListener;
 import appland.index.AppMapMetadata;
+import appland.index.IndexedFileListenerUtil;
 import appland.installGuide.projectData.ProjectDataService;
 import appland.installGuide.projectData.ProjectMetadata;
 import appland.problemsView.FindingsViewTab;
-import appland.problemsView.listener.ScannerFindingsListener;
 import appland.settings.AppMapApplicationSettingsService;
 import appland.telemetry.TelemetryService;
 import com.google.gson.*;
@@ -89,19 +88,7 @@ public class InstallGuideEditor extends UserDataHolderBase implements FileEditor
     }
 
     private void setupListeners() {
-        var busConnection = project.getMessageBus().connect(this);
-
-        // send current list of AppMaps after AppMap files changed
-        busConnection.subscribe(AppMapFileChangeListener.TOPIC, changes -> {
-            projectRefreshAlarm.cancelAndRequest();
-        });
-
-        // listen to changes of findings
-        busConnection.subscribe(ScannerFindingsListener.TOPIC, p -> {
-            if (p == project) {
-                // todo
-            }
-        });
+        IndexedFileListenerUtil.registerListeners(project, this, true, true, projectRefreshAlarm::cancelAndRequest);
     }
 
     private void setupJCEF() {
