@@ -1,6 +1,6 @@
 AppMap Plugin Changelog
 
-## [0.12.0](https://github.com/applandinc/appmap-intellij-plugin/compare/v0.11.0...v0.12.0) (2022-09-16)
+## [0.12.0](https://github.com/getappmap/appmap-intellij-plugin/compare/v0.11.0...v0.12.0) (2022-09-16)
 
 
 ### Features
@@ -11,7 +11,7 @@ AppMap Plugin Changelog
 
 -  icon provider logic was wrong ([bbdbe89]())-  rename install guide steps to match VSCode ([46efc5e]())
 
-## [0.11.0](https://github.com/applandinc/appmap-intellij-plugin/compare/v0.10.0...v0.11.0) (2022-09-16)
+## [0.11.0](https://github.com/getappmap/appmap-intellij-plugin/compare/v0.10.0...v0.11.0) (2022-09-16)
 
 
 ### Features
@@ -22,33 +22,33 @@ AppMap Plugin Changelog
 
 -  don't break on IOOBE or other exceptions, which are possible with invalid JSON ([7429a55]())-  don't try to fetch class map items in dumb mode ([8abd5bc]())
 
-## [0.10.0](https://github.com/applandinc/appmap-intellij-plugin/compare/v0.9.0...v0.10.0) (2022-09-15)
+## [0.10.0](https://github.com/getappmap/appmap-intellij-plugin/compare/v0.9.0...v0.10.0) (2022-09-15)
 
 
 ### Features
 
 -  add new tab to the problems view tool window, support AppMap findings ([aa0789c]())
 
-## [0.9.0](https://github.com/applandinc/appmap-intellij-plugin/compare/v0.8.1...v0.9.0) (2022-09-15)
+## [0.9.0](https://github.com/getappmap/appmap-intellij-plugin/compare/v0.8.1...v0.9.0) (2022-09-15)
 
 
 ### Features
 
 -  add application setting to configure findings (off by default) ([2077dbb]())-  add services to control download and launching or AppMap CLI tools ([8819710]())-  parsing of appmap.yml files to retrieve the configured appmap directory ([bfc947f]())
 
-## [0.8.1](https://github.com/applandinc/appmap-intellij-plugin/compare/v0.8.0...v0.8.1) (2022-09-09)
+## [0.8.1](https://github.com/getappmap/appmap-intellij-plugin/compare/v0.8.0...v0.8.1) (2022-09-09)
 
 
 ### Bug Fixes
 
 -  Make sure plugin.xml gets updated ([7019c8c]())
 
-## [0.8.0](https://github.com/applandinc/appmap-intellij-plugin/compare/v0.7.10...v0.8.0) (2022-09-08)
+## [0.8.0](https://github.com/getappmap/appmap-intellij-plugin/compare/v0.7.10...v0.8.0) (2022-09-08)
 
 
 ### Features
 
-* Various fixes ([006aac6](https://github.com/applandinc/appmap-intellij-plugin/commit/006aac623773817f59f38dd8f166c05fb96e1453))
+* Various fixes ([006aac6](https://github.com/getappmap/appmap-intellij-plugin/commit/006aac623773817f59f38dd8f166c05fb96e1453))
 
 ## [0.7.10]
 ### Updated

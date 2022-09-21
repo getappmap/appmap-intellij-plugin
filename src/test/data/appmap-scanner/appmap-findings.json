@@ -39,342 +39,342 @@
   "appMapMetadata": {
     "sample_app_6th_ed/tmp/appmap/minitest/Following_followers_page.appmap.json": {
       "name": "Following followers page",
-      "source_location": "/home/db/dev/applandinc/scanner-demo/sample_app_6th_ed/test/integration/following_test.rb:20",
+      "source_location": "/home/db/dev/getappmap/scanner-demo/sample_app_6th_ed/test/integration/following_test.rb:20",
       "test_status": "succeeded"
     },
     "sample_app_6th_ed/tmp/appmap/minitest/Following_following_page.appmap.json": {
       "name": "Following following page",
-      "source_location": "/home/db/dev/applandinc/scanner-demo/sample_app_6th_ed/test/integration/following_test.rb:11",
+      "source_location": "/home/db/dev/getappmap/scanner-demo/sample_app_6th_ed/test/integration/following_test.rb:11",
       "test_status": "succeeded"
     },
     "sample_app_6th_ed/tmp/appmap/minitest/Following_should_follow_a_user_the_standard_way.appmap.json": {
       "name": "Following should follow a user the standard way",
-      "source_location": "/home/db/dev/applandinc/scanner-demo/sample_app_6th_ed/test/integration/following_test.rb:29",
+      "source_location": "/home/db/dev/getappmap/scanner-demo/sample_app_6th_ed/test/integration/following_test.rb:29",
       "test_status": "succeeded"
     },
     "sample_app_6th_ed/tmp/appmap/minitest/Following_should_follow_a_user_with_Ajax.appmap.json": {
       "name": "Following should follow a user with Ajax",
-      "source_location": "/home/db/dev/applandinc/scanner-demo/sample_app_6th_ed/test/integration/following_test.rb:35",
+      "source_location": "/home/db/dev/getappmap/scanner-demo/sample_app_6th_ed/test/integration/following_test.rb:35",
       "test_status": "succeeded"
     },
     "sample_app_6th_ed/tmp/appmap/minitest/Following_should_unfollow_a_user_the_standard_way.appmap.json": {
       "name": "Following should unfollow a user the standard way",
-      "source_location": "/home/db/dev/applandinc/scanner-demo/sample_app_6th_ed/test/integration/following_test.rb:41",
+      "source_location": "/home/db/dev/getappmap/scanner-demo/sample_app_6th_ed/test/integration/following_test.rb:41",
       "test_status": "succeeded"
     },
     "sample_app_6th_ed/tmp/appmap/minitest/Following_should_unfollow_a_user_with_Ajax.appmap.json": {
       "name": "Following should unfollow a user with Ajax",
-      "source_location": "/home/db/dev/applandinc/scanner-demo/sample_app_6th_ed/test/integration/following_test.rb:49",
+      "source_location": "/home/db/dev/getappmap/scanner-demo/sample_app_6th_ed/test/integration/following_test.rb:49",
       "test_status": "succeeded"
     },
     "sample_app_6th_ed/tmp/appmap/minitest/Micropost_content_should_be_at_most_140_characters.appmap.json": {
       "name": "Micropost content should be at most 140 characters",
-      "source_location": "/home/db/dev/applandinc/scanner-demo/sample_app_6th_ed/test/models/micropost_test.rb:24",
+      "source_location": "/home/db/dev/getappmap/scanner-demo/sample_app_6th_ed/test/models/micropost_test.rb:24",
       "test_status": "succeeded"
     },
     "sample_app_6th_ed/tmp/appmap/minitest/Micropost_content_should_be_present.appmap.json": {
       "name": "Micropost content should be present",
-      "source_location": "/home/db/dev/applandinc/scanner-demo/sample_app_6th_ed/test/models/micropost_test.rb:19",
+      "source_location": "/home/db/dev/getappmap/scanner-demo/sample_app_6th_ed/test/models/micropost_test.rb:19",
       "test_status": "succeeded"
     },
     "sample_app_6th_ed/tmp/appmap/minitest/Micropost_order_should_be_most_recent_first.appmap.json": {
       "name": "Micropost order should be most recent first",
-      "source_location": "/home/db/dev/applandinc/scanner-demo/sample_app_6th_ed/test/models/micropost_test.rb:29",
+      "source_location": "/home/db/dev/getappmap/scanner-demo/sample_app_6th_ed/test/models/micropost_test.rb:29",
       "test_status": "succeeded"
     },
     "sample_app_6th_ed/tmp/appmap/minitest/Micropost_should_be_valid.appmap.json": {
       "name": "Micropost should be valid",
-      "source_location": "/home/db/dev/applandinc/scanner-demo/sample_app_6th_ed/test/models/micropost_test.rb:10",
+      "source_location": "/home/db/dev/getappmap/scanner-demo/sample_app_6th_ed/test/models/micropost_test.rb:10",
       "test_status": "succeeded"
     },
     "sample_app_6th_ed/tmp/appmap/minitest/Micropost_user_id_should_be_present.appmap.json": {
       "name": "Micropost user id should be present",
-      "source_location": "/home/db/dev/applandinc/scanner-demo/sample_app_6th_ed/test/models/micropost_test.rb:14",
+      "source_location": "/home/db/dev/getappmap/scanner-demo/sample_app_6th_ed/test/models/micropost_test.rb:14",
       "test_status": "succeeded"
     },
     "sample_app_6th_ed/tmp/appmap/minitest/Microposts_controller_can_get_microposts_as_JSON.appmap.json": {
       "name": "Microposts_controller can get microposts as JSON",
-      "source_location": "/home/db/dev/applandinc/scanner-demo/sample_app_6th_ed/test/controllers/microposts_controller_test.rb:9",
+      "source_location": "/home/db/dev/getappmap/scanner-demo/sample_app_6th_ed/test/controllers/microposts_controller_test.rb:9",
       "test_status": "succeeded"
     },
     "sample_app_6th_ed/tmp/appmap/minitest/Microposts_controller_should_redirect_create_when_not_logged_in.appmap.json": {
       "name": "Microposts_controller should redirect create when not logged in",
-      "source_location": "/home/db/dev/applandinc/scanner-demo/sample_app_6th_ed/test/controllers/microposts_controller_test.rb:14",
+      "source_location": "/home/db/dev/getappmap/scanner-demo/sample_app_6th_ed/test/controllers/microposts_controller_test.rb:14",
       "test_status": "succeeded"
     },
     "sample_app_6th_ed/tmp/appmap/minitest/Microposts_controller_should_redirect_destroy_for_wrong_micropost.appmap.json": {
       "name": "Microposts_controller should redirect destroy for wrong micropost",
-      "source_location": "/home/db/dev/applandinc/scanner-demo/sample_app_6th_ed/test/controllers/microposts_controller_test.rb:28",
+      "source_location": "/home/db/dev/getappmap/scanner-demo/sample_app_6th_ed/test/controllers/microposts_controller_test.rb:28",
       "test_status": "succeeded"
     },
     "sample_app_6th_ed/tmp/appmap/minitest/Microposts_controller_should_redirect_destroy_when_not_logged_in.appmap.json": {
       "name": "Microposts_controller should redirect destroy when not logged in",
-      "source_location": "/home/db/dev/applandinc/scanner-demo/sample_app_6th_ed/test/controllers/microposts_controller_test.rb:21",
+      "source_location": "/home/db/dev/getappmap/scanner-demo/sample_app_6th_ed/test/controllers/microposts_controller_test.rb:21",
       "test_status": "succeeded"
     },
     "sample_app_6th_ed/tmp/appmap/minitest/Microposts_interface_micropost_interface.appmap.json": {
       "name": "Microposts_interface micropost interface",
-      "source_location": "/home/db/dev/applandinc/scanner-demo/sample_app_6th_ed/test/integration/microposts_interface_test.rb:9",
+      "source_location": "/home/db/dev/getappmap/scanner-demo/sample_app_6th_ed/test/integration/microposts_interface_test.rb:9",
       "test_status": "succeeded"
     },
     "sample_app_6th_ed/tmp/appmap/minitest/Password_resets_password_reset_attack.appmap.json": {
       "name": "Password_resets password reset attack",
-      "source_location": "/home/db/dev/applandinc/scanner-demo/sample_app_6th_ed/test/integration/password_resets_test.rb:64",
+      "source_location": "/home/db/dev/getappmap/scanner-demo/sample_app_6th_ed/test/integration/password_resets_test.rb:64",
       "test_status": "succeeded"
     },
     "sample_app_6th_ed/tmp/appmap/minitest/Password_resets_password_resets.appmap.json": {
       "name": "Password_resets password resets",
-      "source_location": "/home/db/dev/applandinc/scanner-demo/sample_app_6th_ed/test/integration/password_resets_test.rb:10",
+      "source_location": "/home/db/dev/getappmap/scanner-demo/sample_app_6th_ed/test/integration/password_resets_test.rb:10",
       "test_status": "succeeded"
     },
     "sample_app_6th_ed/tmp/appmap/minitest/Relationship_should_be_valid.appmap.json": {
       "name": "Relationship should be valid",
-      "source_location": "/home/db/dev/applandinc/scanner-demo/sample_app_6th_ed/test/models/relationship_test.rb:10",
+      "source_location": "/home/db/dev/getappmap/scanner-demo/sample_app_6th_ed/test/models/relationship_test.rb:10",
       "test_status": "succeeded"
     },
     "sample_app_6th_ed/tmp/appmap/minitest/Relationship_should_require_a_followed_id.appmap.json": {
       "name": "Relationship should require a followed id",
-      "source_location": "/home/db/dev/applandinc/scanner-demo/sample_app_6th_ed/test/models/relationship_test.rb:19",
+      "source_location": "/home/db/dev/getappmap/scanner-demo/sample_app_6th_ed/test/models/relationship_test.rb:19",
       "test_status": "succeeded"
     },
     "sample_app_6th_ed/tmp/appmap/minitest/Relationship_should_require_a_follower_id.appmap.json": {
       "name": "Relationship should require a follower id",
-      "source_location": "/home/db/dev/applandinc/scanner-demo/sample_app_6th_ed/test/models/relationship_test.rb:14",
+      "source_location": "/home/db/dev/getappmap/scanner-demo/sample_app_6th_ed/test/models/relationship_test.rb:14",
       "test_status": "succeeded"
     },
     "sample_app_6th_ed/tmp/appmap/minitest/Relationships_controller_create_should_require_logged-in_user.appmap.json": {
       "name": "Relationships_controller create should require logged-in user",
-      "source_location": "/home/db/dev/applandinc/scanner-demo/sample_app_6th_ed/test/controllers/relationships_controller_test.rb:5",
+      "source_location": "/home/db/dev/getappmap/scanner-demo/sample_app_6th_ed/test/controllers/relationships_controller_test.rb:5",
       "test_status": "succeeded"
     },
     "sample_app_6th_ed/tmp/appmap/minitest/Relationships_controller_destroy_should_require_logged-in_user.appmap.json": {
       "name": "Relationships_controller destroy should require logged-in user",
-      "source_location": "/home/db/dev/applandinc/scanner-demo/sample_app_6th_ed/test/controllers/relationships_controller_test.rb:12",
+      "source_location": "/home/db/dev/getappmap/scanner-demo/sample_app_6th_ed/test/controllers/relationships_controller_test.rb:12",
       "test_status": "succeeded"
     },
     "sample_app_6th_ed/tmp/appmap/minitest/Sessions_controller_should_get_new.appmap.json": {
       "name": "Sessions_controller should get new",
-      "source_location": "/home/db/dev/applandinc/scanner-demo/sample_app_6th_ed/test/controllers/sessions_controller_test.rb:5",
+      "source_location": "/home/db/dev/getappmap/scanner-demo/sample_app_6th_ed/test/controllers/sessions_controller_test.rb:5",
       "test_status": "succeeded"
     },
     "sample_app_6th_ed/tmp/appmap/minitest/Sessions_helper_current_user_returns_nil_when_remember_digest_is_wrong.appmap.json": {
       "name": "Sessions_helper current user returns nil when remember digest is wrong",
-      "source_location": "/home/db/dev/applandinc/scanner-demo/sample_app_6th_ed/test/helpers/sessions_helper_test.rb:15",
+      "source_location": "/home/db/dev/getappmap/scanner-demo/sample_app_6th_ed/test/helpers/sessions_helper_test.rb:15",
       "test_status": "succeeded"
     },
     "sample_app_6th_ed/tmp/appmap/minitest/Sessions_helper_current_user_returns_right_user_when_session_is_nil.appmap.json": {
       "name": "Sessions_helper current user returns right user when session is nil",
-      "source_location": "/home/db/dev/applandinc/scanner-demo/sample_app_6th_ed/test/helpers/sessions_helper_test.rb:10",
+      "source_location": "/home/db/dev/getappmap/scanner-demo/sample_app_6th_ed/test/helpers/sessions_helper_test.rb:10",
       "test_status": "succeeded"
     },
     "sample_app_6th_ed/tmp/appmap/minitest/Static_pages_controller_should_get_about.appmap.json": {
       "name": "Static_pages_controller should get about",
-      "source_location": "/home/db/dev/applandinc/scanner-demo/sample_app_6th_ed/test/controllers/static_pages_controller_test.rb:17",
+      "source_location": "/home/db/dev/getappmap/scanner-demo/sample_app_6th_ed/test/controllers/static_pages_controller_test.rb:17",
       "test_status": "succeeded"
     },
     "sample_app_6th_ed/tmp/appmap/minitest/Site_layout_layout_links.appmap.json": {
       "name": "Site_layout layout links",
-      "source_location": "/home/db/dev/applandinc/scanner-demo/sample_app_6th_ed/test/integration/site_layout_test.rb:5",
+      "source_location": "/home/db/dev/getappmap/scanner-demo/sample_app_6th_ed/test/integration/site_layout_test.rb:5",
       "test_status": "succeeded"
     },
     "sample_app_6th_ed/tmp/appmap/minitest/Static_pages_controller_should_get_contact.appmap.json": {
       "name": "Static_pages_controller should get contact",
-      "source_location": "/home/db/dev/applandinc/scanner-demo/sample_app_6th_ed/test/controllers/static_pages_controller_test.rb:23",
+      "source_location": "/home/db/dev/getappmap/scanner-demo/sample_app_6th_ed/test/controllers/static_pages_controller_test.rb:23",
       "test_status": "succeeded"
     },
     "sample_app_6th_ed/tmp/appmap/minitest/Static_pages_controller_should_get_help.appmap.json": {
       "name": "Static_pages_controller should get help",
-      "source_location": "/home/db/dev/applandinc/scanner-demo/sample_app_6th_ed/test/controllers/static_pages_controller_test.rb:11",
+      "source_location": "/home/db/dev/getappmap/scanner-demo/sample_app_6th_ed/test/controllers/static_pages_controller_test.rb:11",
       "test_status": "succeeded"
     },
     "sample_app_6th_ed/tmp/appmap/minitest/User_associated_microposts_should_be_destroyed.appmap.json": {
       "name": "User associated microposts should be destroyed",
-      "source_location": "/home/db/dev/applandinc/scanner-demo/sample_app_6th_ed/test/models/user_test.rb:72",
+      "source_location": "/home/db/dev/getappmap/scanner-demo/sample_app_6th_ed/test/models/user_test.rb:72",
       "test_status": "succeeded"
     },
     "sample_app_6th_ed/tmp/appmap/minitest/Static_pages_controller_should_get_home.appmap.json": {
       "name": "Static_pages_controller should get home",
-      "source_location": "/home/db/dev/applandinc/scanner-demo/sample_app_6th_ed/test/controllers/static_pages_controller_test.rb:5",
+      "source_location": "/home/db/dev/getappmap/scanner-demo/sample_app_6th_ed/test/controllers/static_pages_controller_test.rb:5",
       "test_status": "succeeded"
     },
     "sample_app_6th_ed/tmp/appmap/minitest/User_authenticated_should_return_false_for_a_user_with_nil_digest.appmap.json": {
       "name": "User authenticated? should return false for a user with nil digest",
-      "source_location": "/home/db/dev/applandinc/scanner-demo/sample_app_6th_ed/test/models/user_test.rb:68",
+      "source_location": "/home/db/dev/getappmap/scanner-demo/sample_app_6th_ed/test/models/user_test.rb:68",
       "test_status": "succeeded"
     },
     "sample_app_6th_ed/tmp/appmap/minitest/User_email_addresses_should_be_unique.appmap.json": {
       "name": "User email addresses should be unique",
-      "source_location": "/home/db/dev/applandinc/scanner-demo/sample_app_6th_ed/test/models/user_test.rb:52",
+      "source_location": "/home/db/dev/getappmap/scanner-demo/sample_app_6th_ed/test/models/user_test.rb:52",
       "test_status": "succeeded"
     },
     "sample_app_6th_ed/tmp/appmap/minitest/User_email_should_be_present.appmap.json": {
       "name": "User email should be present",
-      "source_location": "/home/db/dev/applandinc/scanner-demo/sample_app_6th_ed/test/models/user_test.rb:19",
+      "source_location": "/home/db/dev/getappmap/scanner-demo/sample_app_6th_ed/test/models/user_test.rb:19",
       "test_status": "succeeded"
     },
     "sample_app_6th_ed/tmp/appmap/minitest/User_email_should_not_be_too_long.appmap.json": {
       "name": "User email should not be too long",
-      "source_location": "/home/db/dev/applandinc/scanner-demo/sample_app_6th_ed/test/models/user_test.rb:29",
+      "source_location": "/home/db/dev/getappmap/scanner-demo/sample_app_6th_ed/test/models/user_test.rb:29",
       "test_status": "succeeded"
     },
     "sample_app_6th_ed/tmp/appmap/minitest/User_email_validation_should_accept_valid_addresses.appmap.json": {
       "name": "User email validation should accept valid addresses",
-      "source_location": "/home/db/dev/applandinc/scanner-demo/sample_app_6th_ed/test/models/user_test.rb:34",
+      "source_location": "/home/db/dev/getappmap/scanner-demo/sample_app_6th_ed/test/models/user_test.rb:34",
       "test_status": "succeeded"
     },
     "sample_app_6th_ed/tmp/appmap/minitest/User_email_validation_should_reject_invalid_addresses.appmap.json": {
       "name": "User email validation should reject invalid addresses",
-      "source_location": "/home/db/dev/applandinc/scanner-demo/sample_app_6th_ed/test/models/user_test.rb:43",
+      "source_location": "/home/db/dev/getappmap/scanner-demo/sample_app_6th_ed/test/models/user_test.rb:43",
       "test_status": "succeeded"
     },
     "sample_app_6th_ed/tmp/appmap/minitest/User_mailer_account_activation.appmap.json": {
       "name": "User_mailer account activation",
-      "source_location": "/home/db/dev/applandinc/scanner-demo/sample_app_6th_ed/test/mailers/user_mailer_test.rb:5",
+      "source_location": "/home/db/dev/getappmap/scanner-demo/sample_app_6th_ed/test/mailers/user_mailer_test.rb:5",
       "test_status": "succeeded"
     },
     "sample_app_6th_ed/tmp/appmap/minitest/User_feed_should_have_the_right_posts.appmap.json": {
       "name": "User feed should have the right posts",
-      "source_location": "/home/db/dev/applandinc/scanner-demo/sample_app_6th_ed/test/models/user_test.rb:91",
+      "source_location": "/home/db/dev/getappmap/scanner-demo/sample_app_6th_ed/test/models/user_test.rb:91",
       "test_status": "succeeded"
     },
     "sample_app_6th_ed/tmp/appmap/minitest/User_name_should_be_present.appmap.json": {
       "name": "User name should be present",
-      "source_location": "/home/db/dev/applandinc/scanner-demo/sample_app_6th_ed/test/models/user_test.rb:14",
+      "source_location": "/home/db/dev/getappmap/scanner-demo/sample_app_6th_ed/test/models/user_test.rb:14",
       "test_status": "succeeded"
     },
     "sample_app_6th_ed/tmp/appmap/minitest/User_mailer_password_reset.appmap.json": {
       "name": "User_mailer password reset",
-      "source_location": "/home/db/dev/applandinc/scanner-demo/sample_app_6th_ed/test/mailers/user_mailer_test.rb:17",
+      "source_location": "/home/db/dev/getappmap/scanner-demo/sample_app_6th_ed/test/mailers/user_mailer_test.rb:17",
       "test_status": "succeeded"
     },
     "sample_app_6th_ed/tmp/appmap/minitest/User_name_should_not_be_too_long.appmap.json": {
       "name": "User name should not be too long",
-      "source_location": "/home/db/dev/applandinc/scanner-demo/sample_app_6th_ed/test/models/user_test.rb:24",
+      "source_location": "/home/db/dev/getappmap/scanner-demo/sample_app_6th_ed/test/models/user_test.rb:24",
       "test_status": "succeeded"
     },
     "sample_app_6th_ed/tmp/appmap/minitest/User_password_should_be_present_nonblank.appmap.json": {
       "name": "User password should be present (nonblank)",
-      "source_location": "/home/db/dev/applandinc/scanner-demo/sample_app_6th_ed/test/models/user_test.rb:58",
+      "source_location": "/home/db/dev/getappmap/scanner-demo/sample_app_6th_ed/test/models/user_test.rb:58",
       "test_status": "succeeded"
     },
     "sample_app_6th_ed/tmp/appmap/minitest/User_password_should_have_a_minimum_length.appmap.json": {
       "name": "User password should have a minimum length",
-      "source_location": "/home/db/dev/applandinc/scanner-demo/sample_app_6th_ed/test/models/user_test.rb:63",
+      "source_location": "/home/db/dev/getappmap/scanner-demo/sample_app_6th_ed/test/models/user_test.rb:63",
       "test_status": "succeeded"
     },
     "sample_app_6th_ed/tmp/appmap/minitest/User_should_be_valid.appmap.json": {
       "name": "User should be valid",
-      "source_location": "/home/db/dev/applandinc/scanner-demo/sample_app_6th_ed/test/models/user_test.rb:10",
+      "source_location": "/home/db/dev/getappmap/scanner-demo/sample_app_6th_ed/test/models/user_test.rb:10",
       "test_status": "succeeded"
     },
     "sample_app_6th_ed/tmp/appmap/minitest/User_should_follow_and_unfollow_a_user.appmap.json": {
       "name": "User should follow and unfollow a user",
-      "source_location": "/home/db/dev/applandinc/scanner-demo/sample_app_6th_ed/test/models/user_test.rb:80",
+      "source_location": "/home/db/dev/getappmap/scanner-demo/sample_app_6th_ed/test/models/user_test.rb:80",
       "test_status": "succeeded"
     },
     "sample_app_6th_ed/tmp/appmap/minitest/Users_controller_should_get_new.appmap.json": {
       "name": "Users_controller should get new",
-      "source_location": "/home/db/dev/applandinc/scanner-demo/sample_app_6th_ed/test/controllers/users_controller_test.rb:10",
+      "source_location": "/home/db/dev/getappmap/scanner-demo/sample_app_6th_ed/test/controllers/users_controller_test.rb:10",
       "test_status": "succeeded"
     },
     "sample_app_6th_ed/tmp/appmap/minitest/Users_controller_should_redirect_destroy_when_not_logged_in.appmap.json": {
       "name": "Users_controller should redirect destroy when not logged in",
-      "source_location": "/home/db/dev/applandinc/scanner-demo/sample_app_6th_ed/test/controllers/users_controller_test.rb:48",
+      "source_location": "/home/db/dev/getappmap/scanner-demo/sample_app_6th_ed/test/controllers/users_controller_test.rb:48",
       "test_status": "succeeded"
     },
     "sample_app_6th_ed/tmp/appmap/minitest/Users_controller_should_redirect_destroy_when_logged_in_as_a_non-admin.appmap.json": {
       "name": "Users_controller should redirect destroy when logged in as a non-admin",
-      "source_location": "/home/db/dev/applandinc/scanner-demo/sample_app_6th_ed/test/controllers/users_controller_test.rb:55",
+      "source_location": "/home/db/dev/getappmap/scanner-demo/sample_app_6th_ed/test/controllers/users_controller_test.rb:55",
       "test_status": "succeeded"
     },
     "sample_app_6th_ed/tmp/appmap/minitest/Users_controller_should_redirect_edit_when_not_logged_in.appmap.json": {
       "name": "Users_controller should redirect edit when not logged in",
-      "source_location": "/home/db/dev/applandinc/scanner-demo/sample_app_6th_ed/test/controllers/users_controller_test.rb:20",
+      "source_location": "/home/db/dev/getappmap/scanner-demo/sample_app_6th_ed/test/controllers/users_controller_test.rb:20",
       "test_status": "succeeded"
     },
     "sample_app_6th_ed/tmp/appmap/minitest/Users_controller_should_redirect_edit_when_logged_in_as_wrong_user.appmap.json": {
       "name": "Users_controller should redirect edit when logged in as wrong user",
-      "source_location": "/home/db/dev/applandinc/scanner-demo/sample_app_6th_ed/test/controllers/users_controller_test.rb:33",
+      "source_location": "/home/db/dev/getappmap/scanner-demo/sample_app_6th_ed/test/controllers/users_controller_test.rb:33",
       "test_status": "succeeded"
     },
     "sample_app_6th_ed/tmp/appmap/minitest/Users_controller_should_redirect_followers_when_not_logged_in.appmap.json": {
       "name": "Users_controller should redirect followers when not logged in",
-      "source_location": "/home/db/dev/applandinc/scanner-demo/sample_app_6th_ed/test/controllers/users_controller_test.rb:68",
+      "source_location": "/home/db/dev/getappmap/scanner-demo/sample_app_6th_ed/test/controllers/users_controller_test.rb:68",
       "test_status": "succeeded"
     },
     "sample_app_6th_ed/tmp/appmap/minitest/Users_controller_should_redirect_following_when_not_logged_in.appmap.json": {
       "name": "Users_controller should redirect following when not logged in",
-      "source_location": "/home/db/dev/applandinc/scanner-demo/sample_app_6th_ed/test/controllers/users_controller_test.rb:63",
+      "source_location": "/home/db/dev/getappmap/scanner-demo/sample_app_6th_ed/test/controllers/users_controller_test.rb:63",
       "test_status": "succeeded"
     },
     "sample_app_6th_ed/tmp/appmap/minitest/Users_controller_should_redirect_index_when_not_logged_in.appmap.json": {
       "name": "Users_controller should redirect index when not logged in",
-      "source_location": "/home/db/dev/applandinc/scanner-demo/sample_app_6th_ed/test/controllers/users_controller_test.rb:15",
+      "source_location": "/home/db/dev/getappmap/scanner-demo/sample_app_6th_ed/test/controllers/users_controller_test.rb:15",
       "test_status": "succeeded"
     },
     "sample_app_6th_ed/tmp/appmap/minitest/Users_controller_should_redirect_update_when_logged_in_as_wrong_user.appmap.json": {
       "name": "Users_controller should redirect update when logged in as wrong user",
-      "source_location": "/home/db/dev/applandinc/scanner-demo/sample_app_6th_ed/test/controllers/users_controller_test.rb:40",
+      "source_location": "/home/db/dev/getappmap/scanner-demo/sample_app_6th_ed/test/controllers/users_controller_test.rb:40",
       "test_status": "succeeded"
     },
     "sample_app_6th_ed/tmp/appmap/minitest/Users_controller_should_redirect_update_when_not_logged_in.appmap.json": {
       "name": "Users_controller should redirect update when not logged in",
-      "source_location": "/home/db/dev/applandinc/scanner-demo/sample_app_6th_ed/test/controllers/users_controller_test.rb:26",
+      "source_location": "/home/db/dev/getappmap/scanner-demo/sample_app_6th_ed/test/controllers/users_controller_test.rb:26",
       "test_status": "succeeded"
     },
     "sample_app_6th_ed/tmp/appmap/minitest/Users_edit_successful_edit_with_friendly_forwarding.appmap.json": {
       "name": "Users_edit successful edit with friendly forwarding",
-      "source_location": "/home/db/dev/applandinc/scanner-demo/sample_app_6th_ed/test/integration/users_edit_test.rb:21",
+      "source_location": "/home/db/dev/getappmap/scanner-demo/sample_app_6th_ed/test/integration/users_edit_test.rb:21",
       "test_status": "succeeded"
     },
     "sample_app_6th_ed/tmp/appmap/minitest/Users_edit_unsuccessful_edit.appmap.json": {
       "name": "Users_edit unsuccessful edit",
-      "source_location": "/home/db/dev/applandinc/scanner-demo/sample_app_6th_ed/test/integration/users_edit_test.rb:9",
+      "source_location": "/home/db/dev/getappmap/scanner-demo/sample_app_6th_ed/test/integration/users_edit_test.rb:9",
       "test_status": "succeeded"
     },
     "sample_app_6th_ed/tmp/appmap/minitest/Users_index_index_as_admin_including_pagination_and_delete_links.appmap.json": {
       "name": "Users_index index as admin including pagination and delete links",
-      "source_location": "/home/db/dev/applandinc/scanner-demo/sample_app_6th_ed/test/integration/users_index_test.rb:10",
+      "source_location": "/home/db/dev/getappmap/scanner-demo/sample_app_6th_ed/test/integration/users_index_test.rb:10",
       "test_status": "succeeded"
     },
     "sample_app_6th_ed/tmp/appmap/minitest/Users_login_login_with_remembering.appmap.json": {
       "name": "Users_login login with remembering",
-      "source_location": "/home/db/dev/applandinc/scanner-demo/sample_app_6th_ed/test/integration/users_login_test.rb:43",
+      "source_location": "/home/db/dev/getappmap/scanner-demo/sample_app_6th_ed/test/integration/users_login_test.rb:43",
       "test_status": "succeeded"
     },
     "sample_app_6th_ed/tmp/appmap/minitest/Users_index_index_as_non-admin.appmap.json": {
       "name": "Users_index index as non-admin",
-      "source_location": "/home/db/dev/applandinc/scanner-demo/sample_app_6th_ed/test/integration/users_index_test.rb:27",
+      "source_location": "/home/db/dev/getappmap/scanner-demo/sample_app_6th_ed/test/integration/users_index_test.rb:27",
       "test_status": "succeeded"
     },
     "sample_app_6th_ed/tmp/appmap/minitest/Users_login_login_with_valid_email_invalid_password.appmap.json": {
       "name": "Users_login login with valid email/invalid password",
-      "source_location": "/home/db/dev/applandinc/scanner-demo/sample_app_6th_ed/test/integration/users_login_test.rb:9",
+      "source_location": "/home/db/dev/getappmap/scanner-demo/sample_app_6th_ed/test/integration/users_login_test.rb:9",
       "test_status": "succeeded"
     },
     "sample_app_6th_ed/tmp/appmap/minitest/Users_login_login_with_valid_information_followed_by_logout.appmap.json": {
       "name": "Users_login login with valid information followed by logout",
-      "source_location": "/home/db/dev/applandinc/scanner-demo/sample_app_6th_ed/test/integration/users_login_test.rb:21",
+      "source_location": "/home/db/dev/getappmap/scanner-demo/sample_app_6th_ed/test/integration/users_login_test.rb:21",
       "test_status": "succeeded"
     },
     "sample_app_6th_ed/tmp/appmap/minitest/Users_login_login_without_remembering.appmap.json": {
       "name": "Users_login login without remembering",
-      "source_location": "/home/db/dev/applandinc/scanner-demo/sample_app_6th_ed/test/integration/users_login_test.rb:48",
+      "source_location": "/home/db/dev/getappmap/scanner-demo/sample_app_6th_ed/test/integration/users_login_test.rb:48",
       "test_status": "succeeded"
     },
     "sample_app_6th_ed/tmp/appmap/minitest/Users_profile_profile_display_while_anonyomus.appmap.json": {
       "name": "Users_profile profile display while anonyomus",
-      "source_location": "/home/db/dev/applandinc/scanner-demo/sample_app_6th_ed/test/integration/users_profile_test.rb:18",
+      "source_location": "/home/db/dev/getappmap/scanner-demo/sample_app_6th_ed/test/integration/users_profile_test.rb:18",
       "test_status": "succeeded"
     },
     "sample_app_6th_ed/tmp/appmap/minitest/Users_signup_invalid_signup_information.appmap.json": {
       "name": "Users_signup invalid signup information",
-      "source_location": "/home/db/dev/applandinc/scanner-demo/sample_app_6th_ed/test/integration/users_signup_test.rb:9",
+      "source_location": "/home/db/dev/getappmap/scanner-demo/sample_app_6th_ed/test/integration/users_signup_test.rb:9",
       "test_status": "succeeded"
     },
     "sample_app_6th_ed/tmp/appmap/minitest/Users_signup_valid_signup_information_with_account_activation.appmap.json": {
       "name": "Users_signup valid signup information with account activation",
-      "source_location": "/home/db/dev/applandinc/scanner-demo/sample_app_6th_ed/test/integration/users_signup_test.rb:22",
+      "source_location": "/home/db/dev/getappmap/scanner-demo/sample_app_6th_ed/test/integration/users_signup_test.rb:22",
       "test_status": "succeeded"
     }
   },
@@ -1555,7 +1555,7 @@
       "clients": [
         {
           "name": "appmap",
-          "url": "https://github.com/applandinc/appmap-ruby",
+          "url": "https://github.com/getappmap/appmap-ruby",
           "version": "0.74.0"
         }
       ],

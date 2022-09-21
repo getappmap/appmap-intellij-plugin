@@ -39,7 +39,7 @@ Summary of Features:
 ## Resources
 
 - [Our doc site](https://appmap.io/docs/appmap-overview.html)
-- [Our GitHub](https://github.com/applandinc)
+- [Our GitHub](https://github.com/getappmap)
 - [Our blog](https://appmap.io/blog/)
 - [1:1 support with our dev team on Slack](https://appmap.io/slack)
 - Email support: [support@appmap.io](mailto:support@appmap.io)
