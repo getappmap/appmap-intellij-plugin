@@ -38,6 +38,7 @@ public class AppMapFindingsAnnotator implements Annotator {
             for (var problem : FindingsManager.getInstance(project).getScannerProblems(file)) {
                 ProgressManager.checkCanceled();
 
+                // IntelliJ's lines are 0-based
                 var line = problem.getLine();
                 if (line >= 0 && line < maxLineCount) {
                     var lineStart = document.getLineStartOffset(line);

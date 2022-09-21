@@ -32,9 +32,10 @@ public final class FileLocation {
         try {
             int line = Integer.parseInt(parts.get(1));
             return new FileLocation(parts.get(0), line);
-        }
-        catch (NumberFormatException e) {
-            LOG.warn("exception parsing offsets of " + path);
+        } catch (NumberFormatException e) {
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("exception parsing offsets of " + path);
+            }
             return null;
         }
     }
@@ -54,16 +55,16 @@ public final class FileLocation {
     @Override
     public String toString() {
         return "FileLocation{" +
-               "filePath='" + filePath + '\'' +
-               ", line=" + line +
-               '}';
+                "filePath='" + filePath + '\'' +
+                ", line=" + line +
+                '}';
     }
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        FileLocation location = (FileLocation)o;
+        FileLocation location = (FileLocation) o;
         return filePath.equals(location.filePath) && Objects.equals(line, location.line);
     }
 

@@ -20,7 +20,8 @@ public interface AppLandDownloadService {
 
     /**
      * @param type The type of CLI tool
-     * @return The location on disk, where the binary for the given tool type is stored. Only existing file paths are returned.
+     * @return The location on disk, where the binary for the given tool type is stored.
+     * It's possible that the file does not exist yet.
      */
     @Nullable Path getDownloadFilePath(@NotNull CliTool type);
 

@@ -1,6 +1,7 @@
 package appland.index;
 
 import appland.AppMapBaseTest;
+import com.intellij.openapi.util.SystemInfoRt;
 import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.openapi.vfs.VfsUtilCore;
 import org.jetbrains.annotations.NotNull;
@@ -62,7 +63,8 @@ public class StreamingClassMapIteratorTest extends AppMapBaseTest {
         iterator.parse(classMapContent);
 
         // compare as sorted lists, because the VSCode data has a different sort order
-        var sortedExpected = prepareSortedList(StringUtil.split(expectedOutputContent, "\n"));
+        var separator = SystemInfoRt.isWindows ? "\r\n" : "\n";
+        var sortedExpected = prepareSortedList(StringUtil.split(expectedOutputContent, separator));
         var sortedActual = prepareSortedList(iterator.ids);
 
         assertEquals(sortedExpected, sortedActual);

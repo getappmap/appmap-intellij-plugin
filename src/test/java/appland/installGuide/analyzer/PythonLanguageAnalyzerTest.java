@@ -35,6 +35,14 @@ public class PythonLanguageAnalyzerTest extends LanguageAnalyzerBaseTest {
     }
 
     @Test
+    public void pythonUnittestMultipleFiles() {
+        var result = loadDirectory("python-unittest-multiple-files");
+        assertLanguage(result.getFeatures(), "requirements.txt", null);
+        assertWeb(result.getFeatures(), "flask", Score.Okay);
+        assertTest(result.getFeatures(), "unittest", Score.Okay);
+    }
+
+    @Test
     public void pyprojectDjango() {
         var result = loadDirectory("python-pyproject-django");
         assertLanguage(result.getFeatures(), "pyproject.toml", null);
