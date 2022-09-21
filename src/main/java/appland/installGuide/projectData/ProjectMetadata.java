@@ -25,12 +25,7 @@ public class ProjectMetadata {
     @SerializedName("hasNode")
     boolean hasNode;
 
-    @SerializedName("agentInstalled")
-    boolean agentInstalled;
-
-    @SerializedName("appMapsRecorded")
-    boolean appMapsRecorded;
-
+    // needed for the findings page
     @SerializedName("analysisPerformed")
     boolean analysisPerformed;
 
