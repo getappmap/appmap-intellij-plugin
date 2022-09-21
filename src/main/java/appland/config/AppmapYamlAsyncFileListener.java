@@ -1,8 +1,10 @@
-package appland.cli;
+package appland.config;
 
-import com.intellij.openapi.util.io.FileUtil;
+import appland.files.AppMapFiles;
+import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.vfs.AsyncFileListener;
 import com.intellij.openapi.vfs.newvfs.events.VFileEvent;
+import com.intellij.openapi.vfs.newvfs.events.VFilePropertyChangeEvent;
 import com.intellij.util.PathUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -28,7 +30,9 @@ public class AppmapYamlAsyncFileListener implements AsyncFileListener {
         return new ChangeApplier() {
             @Override
             public void afterVfsChange() {
-                AppLandCommandLineService.getInstance().refreshForOpenProjects();
+                ApplicationManager.getApplication().getMessageBus()
+                        .syncPublisher(AppMapConfigFileListener.TOPIC)
+                        .refreshAppMapConfigs();
             }
         };
     }
@@ -38,6 +42,17 @@ public class AppmapYamlAsyncFileListener implements AsyncFileListener {
      * and to stop services when it became unavailable, e.g. after a rename, move, or removal.
      */
     private boolean isAppMapYamlEvent(@NotNull VFileEvent event) {
-        return FileUtil.fileNameEquals(PathUtil.getFileName(event.getPath()), "appmap.yml");
+        return isAppMapConfigEvent(event) || isAppMapRenameEvent(event);
+    }
+
+    private static boolean isAppMapConfigEvent(@NotNull VFileEvent event) {
+        return AppMapFiles.isAppMapConfigFileName(PathUtil.getFileName(event.getPath()));
+    }
+
+    @SuppressWarnings("UnstableApiUsage")
+    private static boolean isAppMapRenameEvent(@NotNull VFileEvent event) {
+        return event instanceof VFilePropertyChangeEvent
+                && ((VFilePropertyChangeEvent) event).isRename()
+                && AppMapFiles.isAppMapConfigFileName(PathUtil.getFileName(((VFilePropertyChangeEvent) event).getNewPath()));
     }
 }
