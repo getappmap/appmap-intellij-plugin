@@ -1,5 +1,12 @@
 AppMap Plugin Changelog
 
+## [0.13.0](https://github.com/getappmap/appmap-intellij-plugin/compare/v0.12.1...v0.13.0) (2022-09-23)
+
+
+### Features
+
+-  Add basic telemetry collection capabilities ([b49d5de]())-  Notify on AppMap open ([f694843]())-  Notify on first AppMap recording of the session ([36f3692]())-  Notify on install guide page view ([b00a15c]())-  Notify on plugin install ([2b4c45c]())
+
 ## [0.12.1](https://github.com/applandinc/appmap-intellij-plugin/compare/v0.12.0...v0.12.1) (2022-09-20)
 
 
