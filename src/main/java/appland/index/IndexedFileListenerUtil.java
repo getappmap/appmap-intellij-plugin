@@ -39,7 +39,7 @@ public final class IndexedFileListenerUtil {
         });
 
         if (appMapFileListener) {
-            busConnection.subscribe(AppMapFileChangeListener.TOPIC, () -> application.invokeLater(action));
+            busConnection.subscribe(AppMapFileChangeListener.TOPIC, changes -> application.invokeLater(action));
         }
 
         if (findingsFileListener) {

@@ -55,9 +55,9 @@ public class AppMapAsyncFileListener implements AsyncFileListener {
     }
 
     private static class AppMapChangeApplier implements ChangeApplier {
-        private Set<AppMapFileEventType> changeTypes;
+        private final Set<AppMapFileEventType> changeTypes;
 
-        public AppMapChangeApplier(Set<Object> changeTypes) {
+        public AppMapChangeApplier(Set<AppMapFileEventType> changeTypes) {
             this.changeTypes = changeTypes;
         }
 
