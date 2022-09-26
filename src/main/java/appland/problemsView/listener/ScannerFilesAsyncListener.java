@@ -125,11 +125,11 @@ public class ScannerFilesAsyncListener implements AsyncFileListener {
         // instead of attempting to find the best diff
         for (var path : directories) {
             var directory = LocalFileSystem.getInstance().findFileByPath(path);
-            if (directory != null) {
-                if (isDirectoryWithFindingFiles(directory)) {
-                    manager.reloadAsync();
-                    return;
-                }
+            // either a deleted directory, which may have contained AppMaps
+            // or a new/modified directory, which contains AppMaps
+            if (directory == null || isDirectoryWithFindingFiles(directory)) {
+                manager.reloadAsync();
+                return;
             }
         }
 
