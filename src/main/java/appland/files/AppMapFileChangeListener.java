@@ -14,10 +14,10 @@ public interface AppMapFileChangeListener {
     /**
      * Posts an application-wide notification about changed appmaps.
      */
-    static void sendNotification() {
+    static void sendNotification(Set<AppMapFileEventType> changeTypes) {
         ApplicationManager.getApplication().getMessageBus()
                 .syncPublisher(AppMapFileChangeListener.TOPIC)
-                .refreshAppMaps();
+                .refreshAppMaps(changeTypes);
     }
 
     /**

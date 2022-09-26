@@ -89,7 +89,7 @@ public class InstallGuidePanel extends JPanel implements Disposable {
                     break;
 
                 case RecordAppMaps:
-                    connection.subscribe(AppMapFileChangeListener.TOPIC, () -> updateRecordAppMapsLabel(project, label));
+                    connection.subscribe(AppMapFileChangeListener.TOPIC, changes -> updateRecordAppMapsLabel(project, label));
                     break;
 
                 case OpenAppMaps:

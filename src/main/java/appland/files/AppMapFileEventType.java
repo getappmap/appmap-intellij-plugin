@@ -5,5 +5,6 @@ public enum AppMapFileEventType {
     Delete,
     Rename,
     Modify,
-    Other
+    Refresh,
+    Other,
 }
