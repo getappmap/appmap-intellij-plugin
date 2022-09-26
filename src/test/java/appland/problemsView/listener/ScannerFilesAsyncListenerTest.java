@@ -4,12 +4,14 @@ import appland.AppMapBaseTest;
 import appland.problemsView.FindingsManager;
 import com.intellij.openapi.application.ReadAction;
 import com.intellij.openapi.application.WriteAction;
+import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiManager;
 import com.intellij.testFramework.fixtures.TempDirTestFixture;
 import com.intellij.testFramework.fixtures.impl.TempDirTestFixtureImpl;
 import org.junit.Test;
 
+import java.io.IOException;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
@@ -64,6 +66,16 @@ public class ScannerFilesAsyncListenerTest extends AppMapBaseTest {
     }
 
     @Test
+    public void findingsDirectoryDeletion() throws InterruptedException, IOException {
+        var directory = copyFindingsFixtureDirectory();
+        assertNotNull(directory);
+
+        var condition = createFindingsCondition();
+        WriteAction.runAndWait(() -> directory.delete(this));
+        assertTrue("Removing a directory with appmap-findings.json files must refresh", condition.await(10, TimeUnit.SECONDS));
+    }
+
+    @Test
     public void emptyFindingsFileDeletion() throws InterruptedException {
         var file = myFixture.configureByText("appmap-findings.json", "{}");
 
@@ -94,6 +106,13 @@ public class ScannerFilesAsyncListenerTest extends AppMapBaseTest {
         assertTrue(condition.await(10, TimeUnit.SECONDS));
 
         return ReadAction.compute(() -> PsiManager.getInstance(getProject()).findFile(file));
+    }
+
+    private VirtualFile copyFindingsFixtureDirectory() throws InterruptedException {
+        var condition = createFindingsCondition();
+        var dir = myFixture.copyDirectoryToProject("vscode/workspaces/project-system", "findings");
+        assertTrue(condition.await(10, TimeUnit.SECONDS));
+        return dir;
     }
 
     private void assertFindings(int problemFileCount, int problemCount) {
