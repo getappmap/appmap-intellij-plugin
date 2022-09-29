@@ -10,8 +10,8 @@ import java.util.List;
 @Builder
 public class SampleCodeObjects {
     @SerializedName("httpRequests")
-    List<SimpleCodeObject> httpRequests;
+    private List<SimpleCodeObject> httpRequests;
 
     @SerializedName("queries")
-    List<SimpleCodeObject> queries;
+    private List<SimpleCodeObject> queries;
 }

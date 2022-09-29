@@ -3,6 +3,7 @@ package appland.files;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
 import com.intellij.openapi.diagnostic.Logger;
+import com.intellij.openapi.util.io.FileUtil;
 import com.intellij.openapi.vfs.VirtualFile;
 import org.jetbrains.annotations.NotNull;
 
@@ -13,8 +14,13 @@ import java.nio.file.Path;
 
 public final class AppMapFiles {
     private static final Logger LOG = Logger.getInstance("#appmap.files");
+    public static final String APPMAP_YML = "appmap.yml";
 
     private AppMapFiles() {
+    }
+
+    public static boolean isAppMapConfigFileName(@NotNull String fileName) {
+        return FileUtil.fileNameEquals(fileName, AppMapFiles.APPMAP_YML);
     }
 
     /**

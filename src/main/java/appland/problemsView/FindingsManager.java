@@ -1,5 +1,7 @@
 package appland.problemsView;
 
+import appland.index.AppMapFindingsUtil;
+import appland.problemsView.listener.ScannerFindingsListener;
 import appland.problemsView.model.FindingsDomainCount;
 import appland.problemsView.model.FindingsFileData;
 import appland.problemsView.model.ScannerFinding;
@@ -9,24 +11,28 @@ import com.google.common.collect.MultimapBuilder;
 import com.google.common.collect.Multiset;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonSyntaxException;
 import com.intellij.analysis.problemsView.Problem;
-import com.intellij.analysis.problemsView.ProblemsListener;
 import com.intellij.analysis.problemsView.ProblemsProvider;
+import com.intellij.openapi.application.ApplicationManager;
+import com.intellij.openapi.application.ReadAction;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.fileEditor.FileDocumentManager;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.roots.ProjectRootManager;
-import com.intellij.openapi.util.io.FileUtil;
+import com.intellij.openapi.vfs.VfsUtilCore;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.search.FilenameIndex;
 import com.intellij.psi.search.GlobalSearchScope;
-import com.intellij.util.PathUtil;
-import com.intellij.util.SlowOperations;
+import com.intellij.util.concurrency.AppExecutorUtil;
+import com.intellij.util.concurrency.annotations.RequiresReadLock;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.jetbrains.concurrency.CancellablePromise;
 
 import javax.annotation.concurrent.GuardedBy;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.function.Consumer;
 
@@ -34,14 +40,11 @@ import java.util.function.Consumer;
  * Service managing the AppMap findings of a project.
  */
 public class FindingsManager implements ProblemsProvider {
-    private static final String FINDINGS_FILE_NAME = "appmap-findings.json";
-
     private static final Logger LOG = Logger.getInstance(FindingsManager.class);
     private static final Gson GSON = new GsonBuilder().create();
 
     private final Project project;
-    private final ProblemsListener publisher;
-    private final UnknownFileProblemListener unknownFilePublisher;
+    private final ScannerFindingsListener publisher;
 
     private final Object lock = new Object();
     // findings file -> reference problem holders
@@ -63,14 +66,7 @@ public class FindingsManager implements ProblemsProvider {
 
     public FindingsManager(@NotNull Project project) {
         this.project = project;
-
-        var messageBus = project.getMessageBus();
-        this.publisher = messageBus.syncPublisher(ProblemsListener.TOPIC);
-        this.unknownFilePublisher = messageBus.syncPublisher(UnknownFileProblemListener.TOPIC);
-    }
-
-    public static boolean isFindingFile(@NotNull String path) {
-        return FileUtil.fileNameEquals(PathUtil.getFileName(path), FINDINGS_FILE_NAME);
+        this.publisher = project.getMessageBus().syncPublisher(ScannerFindingsListener.TOPIC);
     }
 
     @Override
@@ -81,6 +77,19 @@ public class FindingsManager implements ProblemsProvider {
     public int getProblemFileCount() {
         synchronized (lock) {
             return problems.size();
+        }
+    }
+
+    /**
+     * @param root Root directory to limit the scope
+     * @return The number of problem files, which are located under root
+     */
+    public int getProblemFileCount(@NotNull VirtualFile root) {
+        synchronized (lock) {
+            return (int) problems.keySet()
+                    .stream()
+                    .filter(file -> VfsUtilCore.isAncestor(root, file, false))
+                    .count();
         }
     }
 
@@ -116,7 +125,7 @@ public class FindingsManager implements ProblemsProvider {
 
     /**
      * @param file The file associated with problems
-     * @return THe number of problems found in the file
+     * @return The number of problems found in the file
      */
     public int getProblemCount(@NotNull VirtualFile file) {
         synchronized (lock) {
@@ -158,12 +167,12 @@ public class FindingsManager implements ProblemsProvider {
         }
     }
 
-    public void loadAllFindingFiles() {
-        SlowOperations.allowSlowOperations(() -> {
-            for (var findingFile : findFindingsFiles()) {
-                addFindingsFile(findingFile);
-            }
-        });
+    public @NotNull CancellablePromise<Void> reloadAsync() {
+        return ReadAction.nonBlocking(this::doReload)
+                .inSmartMode(project)
+                .expireWith(this)
+                .coalesceBy(this)
+                .submit(AppExecutorUtil.getAppExecutorService());
     }
 
     public void addFindingsFile(@NotNull VirtualFile findingsFile) {
@@ -200,30 +209,67 @@ public class FindingsManager implements ProblemsProvider {
         reset();
     }
 
-    synchronized void reset() {
-        sourceMapping.clear();
-        problems.clear();
-        sourceMappingOther.clear();
-        problemsOther.clear();
+    void reset() {
+        synchronized (lock) {
+            sourceMapping.clear();
+            problems.clear();
+            sourceMappingOther.clear();
+            problemsOther.clear();
+        }
+    }
+
+    private void doReload() {
+        clearAndNotify();
+
+        for (var findingFile : findFindingsFiles()) {
+            addFindingsFile(findingFile);
+        }
+
+        project.getMessageBus().syncPublisher(ScannerFindingsListener.TOPIC).afterFindingsReloaded();
+    }
+
+    private void clearAndNotify() {
+        synchronized (lock) {
+            var allPaths = new HashSet<String>();
+            allPaths.addAll(sourceMapping.keySet());
+            allPaths.addAll(sourceMappingOther.keySet());
+
+            for (var path : allPaths) {
+                removeFindingsFileLocked(path);
+            }
+
+            assert sourceMapping.isEmpty();
+            assert sourceMappingOther.isEmpty();
+            assert problems.isEmpty();
+            assert problemsOther.isEmpty();
+        }
     }
 
     private void removeFindingsFileLocked(@NotNull String path) {
+        var dataChanged = false;
+
         for (var targetFile : sourceMapping.removeAll(path)) {
             for (var problem : problems.removeAll(targetFile)) {
                 publisher.problemDisappeared(problem);
+                dataChanged = true;
             }
         }
 
         var unknownFileMapping = sourceMappingOther.removeAll(path);
         if (!unknownFileMapping.isEmpty()) {
             problemsOther.removeAll(unknownFileMapping);
-            unknownFilePublisher.afterUnknownFileProblemsChange();
+            publisher.afterUnknownFileProblemsChange();
+            dataChanged = true;
+        }
+
+        if (dataChanged) {
+            publisher.afterFindingsChanged();
         }
     }
 
     private void loadFileLocked(@NotNull VirtualFile findingsFile, @NotNull Consumer<Problem> notifier) {
         var fileData = loadFindingsFile(findingsFile);
-        if (fileData != null) {
+        if (fileData != null && fileData.findings != null) {
             for (var finding : fileData.findings) {
                 var targetFile = finding.findTargetFile(project, findingsFile);
                 if (targetFile != null) {
@@ -232,18 +278,25 @@ public class FindingsManager implements ProblemsProvider {
                     var problem = new ScannerProblem(this, targetFile, finding);
                     problems.put(targetFile, problem);
 
+                    // this takes care of problemAppeared, problemDisappeared, problemUpdated notifications
                     notifier.accept(problem);
                 } else {
                     sourceMappingOther.put(findingsFile.getPath(), finding);
                     problemsOther.add(finding);
 
-                    unknownFilePublisher.afterUnknownFileProblemsChange();
+                    publisher.afterUnknownFileProblemsChange();
                 }
             }
+
+            publisher.afterFindingsChanged();
         }
     }
 
     private boolean isNotUnderContentRoot(@NotNull VirtualFile findingsFile) {
+        if (ApplicationManager.getApplication().isUnitTestMode()) {
+            return false;
+        }
+
         var root = ProjectRootManager.getInstance(project).getFileIndex().getContentRootForFile(findingsFile, false);
         if (root == null) {
             LOG.warn("Findings file not managed by current project: " + findingsFile.getPath());
@@ -252,18 +305,26 @@ public class FindingsManager implements ProblemsProvider {
         return false;
     }
 
+    @RequiresReadLock
     private @NotNull Collection<VirtualFile> findFindingsFiles() {
         // only "everything" seems to contain our appmap-findings.json files in excluded parent folders
         var scope = GlobalSearchScope.everythingScope(project);
-        return FilenameIndex.getVirtualFilesByName(project, FINDINGS_FILE_NAME, true, scope);
+        return FilenameIndex.getVirtualFilesByName(project, AppMapFindingsUtil.FINDINGS_FILE_NAME, true, scope);
     }
 
     private @Nullable FindingsFileData loadFindingsFile(@NotNull VirtualFile file) {
         var doc = FileDocumentManager.getInstance().getDocument(file);
-        if (doc == null) {
+        if (doc == null || doc.getTextLength() == 0) {
             return null;
         }
 
-        return GSON.fromJson(doc.getText(), FindingsFileData.class);
+        try {
+            return GSON.fromJson(doc.getText(), FindingsFileData.class);
+        } catch (JsonSyntaxException e) {
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("Failed to load findings file: " + file.getPath(), e);
+            }
+            return null;
+        }
     }
 }

@@ -1,0 +1,99 @@
+{
+  "name": "Pet clinic integrations test owner details",
+  "app": "spring-petclinic-intellij",
+  "language": {
+    "name": "java",
+    "version": "11.0.16.1+1",
+    "engine": "OpenJDK 64-Bit Server VM"
+  },
+  "client": {
+    "name": "appmap-java",
+    "url": "https://github.com/appland/appmap-java"
+  },
+  "recorder": {
+    "name": "toggle_record_receiver"
+  },
+  "recording": {
+    "defined_class": "org.springframework.samples.petclinic.PetClinicIntegrationTests",
+    "method_id": "testOwnerDetails"
+  },
+  "source_location": "org/springframework/samples/petclinic/PetClinicIntegrationTests.java:53",
+  "framework": {
+    "name": "junit"
+  },
+  "test_status": "succeeded",
+  "fingerprints": [
+    {
+      "appmap_digest": "83aba177ec51f815229ecc83bca8ce99d59d8d06e2a21e06158161edf4b49df9",
+      "canonicalization_algorithm": "classDependencies",
+      "digest": "06751c4b837183565397733ddabc17514dc6987913ee6b8d196b51617c0190fa",
+      "fingerprint_algorithm": "sha256"
+    },
+    {
+      "appmap_digest": "83aba177ec51f815229ecc83bca8ce99d59d8d06e2a21e06158161edf4b49df9",
+      "canonicalization_algorithm": "classes",
+      "digest": "60f3756679d014803937d77e596c1192450dcb9b3430bbad72826ccc7277bbf9",
+      "fingerprint_algorithm": "sha256"
+    },
+    {
+      "appmap_digest": "83aba177ec51f815229ecc83bca8ce99d59d8d06e2a21e06158161edf4b49df9",
+      "canonicalization_algorithm": "httpClientRequests",
+      "digest": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "fingerprint_algorithm": "sha256"
+    },
+    {
+      "appmap_digest": "83aba177ec51f815229ecc83bca8ce99d59d8d06e2a21e06158161edf4b49df9",
+      "canonicalization_algorithm": "httpServerRequests",
+      "digest": "1a5b2c96b077ef3a995cefadc0b9a237beeffe5a46bf40d7e1df8d5a6419984c",
+      "fingerprint_algorithm": "sha256"
+    },
+    {
+      "appmap_digest": "83aba177ec51f815229ecc83bca8ce99d59d8d06e2a21e06158161edf4b49df9",
+      "canonicalization_algorithm": "info",
+      "digest": "af8e50f5af1f3fd1200408c6443e7faa88ac50d27d06bf6910acc7b0f03fd3ed",
+      "fingerprint_algorithm": "sha256"
+    },
+    {
+      "appmap_digest": "83aba177ec51f815229ecc83bca8ce99d59d8d06e2a21e06158161edf4b49df9",
+      "canonicalization_algorithm": "labels",
+      "digest": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "fingerprint_algorithm": "sha256"
+    },
+    {
+      "appmap_digest": "83aba177ec51f815229ecc83bca8ce99d59d8d06e2a21e06158161edf4b49df9",
+      "canonicalization_algorithm": "packageDependencies",
+      "digest": "f5fc622e7d999238d6b11aa2bc69cd70aca33b8123e6b29787921a41846a7959",
+      "fingerprint_algorithm": "sha256"
+    },
+    {
+      "appmap_digest": "83aba177ec51f815229ecc83bca8ce99d59d8d06e2a21e06158161edf4b49df9",
+      "canonicalization_algorithm": "packages",
+      "digest": "348072e02be5f53e395cd98f287560e2647ec6ecae71f89dea8d68ecc15e994a",
+      "fingerprint_algorithm": "sha256"
+    },
+    {
+      "appmap_digest": "83aba177ec51f815229ecc83bca8ce99d59d8d06e2a21e06158161edf4b49df9",
+      "canonicalization_algorithm": "sqlNormalized",
+      "digest": "90782c5e90a90d58b56fb59fac05b701d78e3c56426aa0e60bd6b511072f8295",
+      "fingerprint_algorithm": "sha256"
+    },
+    {
+      "appmap_digest": "83aba177ec51f815229ecc83bca8ce99d59d8d06e2a21e06158161edf4b49df9",
+      "canonicalization_algorithm": "sqlTables",
+      "digest": "b2a21e653d26584397bab50461e2fc308eac6ff02b6f740bd4421afc7d0ecacf",
+      "fingerprint_algorithm": "sha256"
+    },
+    {
+      "appmap_digest": "83aba177ec51f815229ecc83bca8ce99d59d8d06e2a21e06158161edf4b49df9",
+      "canonicalization_algorithm": "trace",
+      "digest": "fca9fa2c8089e8c37f3203687dbabaa9d1e547760227a4625d698db2b2a3d610",
+      "fingerprint_algorithm": "sha256"
+    },
+    {
+      "appmap_digest": "83aba177ec51f815229ecc83bca8ce99d59d8d06e2a21e06158161edf4b49df9",
+      "canonicalization_algorithm": "update",
+      "digest": "282e5fed92f4c3039b590c4560ef35aa4c682982f1dfdaafa758b8a953309971",
+      "fingerprint_algorithm": "sha256"
+    }
+  ]
+}

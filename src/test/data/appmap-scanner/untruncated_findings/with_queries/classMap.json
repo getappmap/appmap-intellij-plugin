@@ -1,0 +1,88 @@
+[
+  {
+    "children": [
+      {
+        "children": [
+          {
+            "children": [
+              {
+                "children": [
+                  {
+                    "children": [
+                      {
+                        "name": "testOwnerDetails",
+                        "type": "function",
+                        "static": false,
+                        "location": "org/springframework/samples/petclinic/PetClinicIntegrationTests.java:53"
+                      }
+                    ],
+                    "name": "PetClinicIntegrationTests",
+                    "type": "class"
+                  },
+                  {
+                    "children": [
+                      {
+                        "children": [
+                          {
+                            "name": "showOwner",
+                            "type": "function",
+                            "static": false,
+                            "location": "org/springframework/samples/petclinic/owner/OwnerController.java:161"
+                          },
+                          {
+                            "name": "setAllowedFields",
+                            "type": "function",
+                            "static": false,
+                            "location": "org/springframework/samples/petclinic/owner/OwnerController.java:57"
+                          },
+                          {
+                            "name": "findOwner",
+                            "type": "function",
+                            "static": false,
+                            "location": "org/springframework/samples/petclinic/owner/OwnerController.java:62"
+                          }
+                        ],
+                        "name": "OwnerController",
+                        "type": "class"
+                      }
+                    ],
+                    "name": "owner",
+                    "type": "package"
+                  }
+                ],
+                "name": "petclinic",
+                "type": "package"
+              }
+            ],
+            "name": "samples",
+            "type": "package"
+          }
+        ],
+        "name": "springframework",
+        "type": "package"
+      }
+    ],
+    "name": "org",
+    "type": "package"
+  },
+  {
+    "type": "http",
+    "name": "HTTP server requests",
+    "children": [
+      {
+        "type": "route",
+        "name": "GET /owners/:ownerId"
+      }
+    ]
+  },
+  {
+    "type": "database",
+    "name": "Database",
+    "children": [
+      {
+        "type": "query",
+        "name": "select owner0_.id as id1_0_0_, pets1_.id as id1_1_1_, owner0_.first_name as first_na2_0_0_, owner0_.last_name as last_nam3_0_0_, owner0_.address as address4_0_0_, owner0_.city as city5_0_0_, owner0_.telephone as telephon6_0_0_, pets1_.name as name2_1_1_, pets1_.birth_date as birth_da3_1_1_, pets1_.type_id as type_id4_1_1_, pets1_.owner_id as owner_id5_1_0__, pets1_.id as id1_1_0__ from owners owner0_ left outer join pets pets1_ on owner0_.id=pets1_.owner_id where owner0_.id=? order by pets1_.name; select owner0_.id as id1_0_0_, pets1_.id as id1_1_1_, owner0_.first_name as first_na2_0_0_, owner0_.last_name as last_nam3_0_0_, owner0_.address as address4_0_0_, owner0_.city as city5_0_0_, owner0_.telephone as telephon6_0_0_, pets1_.name as name2_1_1_, pets1_.birth_date as birth_da3_1_1_, pets1_.type_id as type_id4_1_1_, pets1_.owner_id as owner_id5_1_0__, pets1_.id as id1_1_0__ from owners owner0_ left outer join pets pets1_ on owner0_.id=pets1_.owner_id where owner0_.id=? order by pets1_.name; select owner0_.id as id1_0_0_, pets1_.id as id1_1_1_, owner0_.first_name as first_na2_0_0_, owner0_.last_name as last_nam3_0_0_, owner0_.address as address4_0_0_, owner0_.city as city5_0_0_, owner0_.telephone as telephon6_0_0_, pets1_.name as name2_1_1_, pets1_.birth_date as birth_da3_1_1_, pets1_.type_id as type_id4_1_1_, pets1_.owner_id as owner_id5_1_0__, pets1_.id as id1_1_0__ from owners owner0_ left outer join pets pets1_ on owner0_.id=pets1_.owner_id where owner0_.id=? order by pets1_.name"
+      }
+    ]
+  }
+]

@@ -32,6 +32,8 @@
     <applicationListeners>
         <listener topic="com.intellij.openapi.project.ProjectManagerListener"
                   class="appland.cli.AppLandProjectManagerListener"/>
+        <listener topic="appland.files.AppMapFileChangeListener"
+                  class="appland.telemetry.AppMapRecordListener"/>
     </applicationListeners>
 
     <projectListeners>
@@ -43,6 +45,7 @@
     </projectListeners>
 
     <extensions defaultExtensionNs="com.intellij">
+        <applicationService serviceImplementation="appland.telemetry.TelemetryService"/>
         <applicationService serviceImplementation="appland.AppLandLifecycleService"/>
         <projectService serviceImplementation="appland.AppLandLifecycleService"/>
 
@@ -87,6 +90,9 @@
                            key="notification.remoteRecording.displayName"/>
         <statusBarWidgetFactory implementation="appland.remote.RemoteRecordingStatusBarFactory"/>
 
+        <notificationGroup id="appmap.telemetry" displayType="STICKY_BALLOON"
+                           key="telemetry.permission.title"/>
+
         <projectConfigurable groupId="tools" nonDefaultProject="true" order="first"
                              instance="appland.settings.AppMapProjectConfigurable"/>
 
@@ -94,9 +100,10 @@
 
         <!-- Generic AppMap file handling -->
         <vfs.asyncListener implementation="appland.files.AppMapAsyncFileListener"/>
+        <virtualFileManagerListener implementation="appland.files.VirtualFileManagerLister"/>
 
         <!-- CLI service -->
-        <vfs.asyncListener implementation="appland.cli.AppmapYamlAsyncFileListener"/>
+        <vfs.asyncListener implementation="appland.config.AppmapYamlAsyncFileListener"/>
 
         <!-- scanner problems view -->
         <projectService serviceImplementation="appland.problemsView.FindingsManager"/>

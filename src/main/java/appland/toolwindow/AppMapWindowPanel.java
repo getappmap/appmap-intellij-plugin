@@ -3,16 +3,14 @@ package appland.toolwindow;
 import appland.AppMapBundle;
 import appland.actions.StartAppMapRecordingAction;
 import appland.actions.StopAppMapRecordingAction;
-import appland.files.AppMapFileChangeListener;
+import appland.index.AppMapMetadata;
+import appland.index.IndexedFileListenerUtil;
 import appland.installGuide.InstallGuideEditorProvider;
 import appland.installGuide.InstallGuideViewPage;
 import appland.toolwindow.installGuide.InstallGuidePanel;
-import com.intellij.ide.util.treeView.NodeDescriptor;
 import com.intellij.openapi.Disposable;
 import com.intellij.openapi.actionSystem.*;
-import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.diagnostic.Logger;
-import com.intellij.openapi.project.DumbService;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.SimpleToolWindowPanel;
 import com.intellij.openapi.util.Disposer;
@@ -26,11 +24,11 @@ import com.intellij.ui.SearchTextField;
 import com.intellij.ui.SimpleTextAttributes;
 import com.intellij.ui.content.Content;
 import com.intellij.ui.tree.AsyncTreeModel;
-import com.intellij.ui.tree.StructureTreeModel;
 import com.intellij.ui.treeStructure.SimpleTree;
 import com.intellij.util.Alarm;
 import com.intellij.util.EditSourceOnDoubleClickHandler;
 import com.intellij.util.EditSourceOnEnterKeyHandler;
+import com.intellij.util.SingleAlarm;
 import com.intellij.util.ui.tree.TreeUtil;
 import org.jetbrains.annotations.NonNls;
 import org.jetbrains.annotations.NotNull;
@@ -38,10 +36,9 @@ import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
-import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.TreeModel;
 import javax.swing.tree.TreePath;
 import java.awt.*;
-import java.util.Comparator;
 
 import static com.intellij.psi.NavigatablePsiElement.EMPTY_NAVIGATABLE_ELEMENT_ARRAY;
 
@@ -52,11 +49,10 @@ public class AppMapWindowPanel extends SimpleToolWindowPanel implements DataProv
 
     @NotNull
     private final SimpleTree tree;
-    private final StructureTreeModel<AppMapTreeModel> treeModel;
     @NotNull
     private final Project project;
     // debounce requests for AppMap tree refresh
-    private final Alarm treeRefreshAlarm = new Alarm(Alarm.ThreadToUse.SWING_THREAD, this);
+    private final SingleAlarm treeRefreshAlarm;
     // debounce filter requests when search text changes
     private volatile Alarm filterInputAlarm;
 
@@ -67,29 +63,16 @@ public class AppMapWindowPanel extends SimpleToolWindowPanel implements DataProv
         super(true);
         Disposer.register(parent, this);
 
-        var appMapModel = new AppMapTreeModel(project);
-
+        var appMapModel = new AppMapModel(project);
         this.project = project;
-        this.treeModel = createModel(appMapModel, this);
-        this.tree = createTree(this, treeModel);
+        this.tree = createTree(this, appMapModel);
+        this.treeRefreshAlarm = new SingleAlarm(appMapModel::refresh, TREE_REFRESH_DELAY_MILLIS, this, Alarm.ThreadToUse.POOLED_THREAD);
 
         setToolbar(createToolBar(appMapModel));
         setContent(ScrollPaneFactory.createScrollPane(tree));
-        add(createUserMilestonesPanel(), BorderLayout.SOUTH);
+        add(createUserMilestonesPanel(appMapModel), BorderLayout.SOUTH);
 
-        // refresh when dumb mode changes
-        var busConnection = project.getMessageBus().connect(this);
-        busConnection.subscribe(DumbService.DUMB_MODE, new DumbService.DumbModeListener() {
-            @Override
-            public void exitDumbMode() {
-                rebuild(false);
-            }
-        });
-
-        // refresh when VirtualFiles change
-        ApplicationManager.getApplication().getMessageBus().connect(this).subscribe(AppMapFileChangeListener.TOPIC, () -> {
-            rebuild(false);
-        });
+        IndexedFileListenerUtil.registerListeners(project, this, true, false, () -> rebuild(false));
     }
 
     @Override
@@ -97,19 +80,11 @@ public class AppMapWindowPanel extends SimpleToolWindowPanel implements DataProv
         LOG.debug("disposing AppMap tool window");
     }
 
-    @NotNull
-    private StructureTreeModel<AppMapTreeModel> createModel(@NotNull AppMapTreeModel model, @NotNull Disposable disposable) {
-        var treeModel = new StructureTreeModel<>(model, disposable);
-        // sort alphabetically, case-insensitive
-        treeModel.setComparator(Comparator.comparing(NodeDescriptor::toString, String.CASE_INSENSITIVE_ORDER));
-        return treeModel;
-    }
-
     /**
      * Creates a panel with the search text field and the start and stop actions.
      */
     @NotNull
-    private JComponent createToolBar(AppMapTreeModel appMapModel) {
+    private JComponent createToolBar(AppMapModel appMapModel) {
         var actions = new DefaultActionGroup();
         actions.add(new StartAppMapRecordingAction());
         actions.add(new StopAppMapRecordingAction());
@@ -125,8 +100,9 @@ public class AppMapWindowPanel extends SimpleToolWindowPanel implements DataProv
     }
 
     @NotNull
-    private SimpleTree createTree(@NotNull Disposable disposable, StructureTreeModel<AppMapTreeModel> treeModel) {
-        var tree = new SimpleTree(new AsyncTreeModel(treeModel, true, disposable));
+    private SimpleTree createTree(@NotNull Disposable disposable, @NotNull TreeModel treeModel) {
+        var tree = new SimpleTree(new AsyncTreeModel(treeModel, disposable));
+        tree.setCellRenderer(new AppMapModel.TreeCellRenderer());
         tree.getEmptyText().setText(AppMapBundle.get("toolwindow.appmap.emptyText"));
         tree.getEmptyText().appendSecondaryText(
                 AppMapBundle.get("toolwindow.appmap.installAgentEmptyText"),
@@ -142,20 +118,8 @@ public class AppMapWindowPanel extends SimpleToolWindowPanel implements DataProv
     }
 
     @NotNull
-    private JPanel createUserMilestonesPanel() {
-        return new InstallGuidePanel(project);
-    }
-
-    public void rebuild(boolean force) {
-        if (force || isToolWindowVisible) {
-            hasPendingTreeRefresh = false;
-
-            treeRefreshAlarm.cancelAllRequests();
-            treeRefreshAlarm.addRequest(treeModel::invalidate, TREE_REFRESH_DELAY_MILLIS, false);
-        } else {
-            LOG.debug("rebuild with hidden AppMap tool window");
-            hasPendingTreeRefresh = true;
-        }
+    private JPanel createUserMilestonesPanel(@NotNull Disposable parent) {
+        return new InstallGuidePanel(project, parent);
     }
 
     @Override
@@ -163,16 +127,22 @@ public class AppMapWindowPanel extends SimpleToolWindowPanel implements DataProv
         if (CommonDataKeys.NAVIGATABLE.is(dataId)) {
             var file = getSelectedFile();
             return file == null ? null : PsiManager.getInstance(project).findFile(file);
-        } else if (CommonDataKeys.NAVIGATABLE_ARRAY.is(dataId)) {
+        }
+
+        if (CommonDataKeys.NAVIGATABLE_ARRAY.is(dataId)) {
             var file = getSelectedFile();
             if (file == null) {
                 return null;
             }
             var psiFile = PsiManager.getInstance(project).findFile(file);
             return psiFile == null ? EMPTY_NAVIGATABLE_ELEMENT_ARRAY : new Navigatable[]{psiFile};
-        } else if (CommonDataKeys.VIRTUAL_FILE.is(dataId)) {
+        }
+
+        if (CommonDataKeys.VIRTUAL_FILE.is(dataId)) {
             return getSelectedFile();
-        } else if (CommonDataKeys.VIRTUAL_FILE_ARRAY.is(dataId)) {
+        }
+
+        if (CommonDataKeys.VIRTUAL_FILE_ARRAY.is(dataId)) {
             var file = getSelectedFile();
             return file == null ? VirtualFile.EMPTY_ARRAY : new VirtualFile[]{file};
         }
@@ -185,18 +155,17 @@ public class AppMapWindowPanel extends SimpleToolWindowPanel implements DataProv
         if (path == null) {
             return null;
         }
-        DefaultMutableTreeNode node = (DefaultMutableTreeNode) path.getLastPathComponent();
-        Object userObject = node.getUserObject();
-        if (!(userObject instanceof AppMapTreeModel.SingleAppMapDescriptor)) {
+        var node = path.getLastPathComponent();
+        if (!(node instanceof AppMapMetadata)) {
             return null;
         }
-        var data = ((AppMapTreeModel.SingleAppMapDescriptor) userObject).getAppMapData();
-        var filepath = data.getSystemIndependentFilepath();
+
+        var filepath = ((AppMapMetadata) node).getSystemIndependentFilepath();
         return LocalFileSystem.getInstance().findFileByPath(filepath);
     }
 
     @NotNull
-    private SearchTextField createNameFilter(@NotNull AppMapTreeModel appMapModel) {
+    private SearchTextField createNameFilter(@NotNull AppMapModel appMapModel) {
         var textFilter = new SearchTextField();
         filterInputAlarm = new Alarm(textFilter, this);
 
@@ -235,4 +204,13 @@ public class AppMapWindowPanel extends SimpleToolWindowPanel implements DataProv
         this.isToolWindowVisible = false;
     }
 
+    private void rebuild(boolean force) {
+        if (force || isToolWindowVisible) {
+            hasPendingTreeRefresh = false;
+            treeRefreshAlarm.cancelAndRequest();
+        } else {
+            LOG.debug("rebuild with hidden AppMap tool window");
+            hasPendingTreeRefresh = true;
+        }
+    }
 }

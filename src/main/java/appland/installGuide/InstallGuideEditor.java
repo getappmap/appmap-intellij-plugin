@@ -2,13 +2,13 @@ package appland.installGuide;
 
 import appland.AppMapBundle;
 import appland.AppMapPlugin;
-import appland.files.AppMapFileChangeListener;
 import appland.index.AppMapMetadata;
+import appland.index.IndexedFileListenerUtil;
 import appland.installGuide.projectData.ProjectDataService;
 import appland.installGuide.projectData.ProjectMetadata;
 import appland.problemsView.FindingsViewTab;
-import appland.problemsView.listener.ScannerFindingsListener;
 import appland.settings.AppMapApplicationSettingsService;
+import appland.telemetry.TelemetryService;
 import com.google.gson.*;
 import com.intellij.ide.BrowserUtil;
 import com.intellij.ide.ClipboardSynchronizer;
@@ -88,17 +88,7 @@ public class InstallGuideEditor extends UserDataHolderBase implements FileEditor
     }
 
     private void setupListeners() {
-        var busConnection = project.getMessageBus().connect(this);
-
-        // send current list of AppMaps after AppMap files changed
-        busConnection.subscribe(AppMapFileChangeListener.TOPIC, projectRefreshAlarm::cancelAndRequest);
-
-        // listen to changes of findings
-        busConnection.subscribe(ScannerFindingsListener.TOPIC, p -> {
-            if (p == project) {
-                // todo
-            }
-        });
+        IndexedFileListenerUtil.registerListeners(project, this, true, true, projectRefreshAlarm::cancelAndRequest);
     }
 
     private void setupJCEF() {
@@ -188,7 +178,18 @@ public class InstallGuideEditor extends UserDataHolderBase implements FileEditor
                             break;
 
                         case "open-page":
-                            // fixme send telemetry, as in VSCode?
+                            var viewId = json.getAsJsonPrimitive("page").getAsString();
+                            var viewProject = gson.fromJson(json.get("project"), ProjectMetadata.class);
+                            var allProjects = findProjects();
+                            var anyInstallable = allProjects.stream().anyMatch(p -> p.getScore() >= 2);
+                            TelemetryService.getInstance().sendEvent(
+                                "view:open",
+                                (event) -> event
+                                    .property("appmap.view.id", viewId)
+                                    .property("appmap.project.language", viewProject.getLanguage().getName().toLowerCase())
+                                    .property("appmap.project.installable", String.valueOf(viewProject.getScore() >= 2))
+                                    .property("appmap.project.any_installable", String.valueOf(anyInstallable))
+                            );
                             break;
 
                         case "view-problems":
