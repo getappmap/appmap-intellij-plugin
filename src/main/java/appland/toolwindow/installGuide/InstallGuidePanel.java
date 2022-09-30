@@ -55,14 +55,14 @@ public class InstallGuidePanel extends JPanel implements Disposable {
         addPanel("Documentation", new InstallGuideContentPanel() {
             @Override
             protected void setupPanel() {
-                add(new UrlLabel("Quickstart", "https://appland.com/docs/quickstart"));
-                add(new UrlLabel("AppMap overview", "https://appland.com/docs/appmap-overview"));
-                add(new UrlLabel("How to use AppMap diagrams", "https://appland.com/docs/how-to-use-appmap-diagrams"));
-                add(new UrlLabel("Reference", "https://appland.com/docs/reference"));
-                add(new UrlLabel("Troubleshooting", "https://appland.com/docs/troubleshooting"));
-                add(new UrlLabel("Recording methods", "https://appland.com/docs/recording-methods"));
-                add(new UrlLabel("Community", "https://appland.com/docs/community"));
-                add(new UrlLabel("FAQ", "https://appland.com/docs/faq"));
+                add(new UrlLabel("Quickstart", "https://appmap.io/docs/quickstart"));
+                add(new UrlLabel("AppMap overview", "https://appmap.io/docs/appmap-overview"));
+                add(new UrlLabel("How to use AppMap diagrams", "https://appmap.io/docs/how-to-use-appmap-diagrams"));
+                add(new UrlLabel("Reference", "https://appmap.io/docs/reference"));
+                add(new UrlLabel("Troubleshooting", "https://appmap.io/docs/troubleshooting"));
+                add(new UrlLabel("Recording methods", "https://appmap.io/docs/recording-methods"));
+                add(new UrlLabel("Community", "https://appmap.io/docs/community"));
+                add(new UrlLabel("FAQ", "https://appmap.io/docs/faq"));
             }
         });
 

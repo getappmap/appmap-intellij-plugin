@@ -6,11 +6,11 @@ import org.jetbrains.annotations.NotNull;
 
 public enum CliTool {
     AppMap("appmap",
-            "https://github.com/applandinc/appmap-js/releases/download/%40appland%2Fappmap",
+            "https://github.com/getappmap/appmap-js/releases/download/%40appland%2Fappmap",
             "https://registry.npmjs.org/@appland%2Fappmap/latest",
             AppMapBundle.get("cli.appMap.name")),
     Scanner("scanner",
-            "https://github.com/applandinc/appmap-js/releases/download/%40appland%2Fscanner",
+            "https://github.com/getappmap/appmap-js/releases/download/%40appland%2Fscanner",
             "https://registry.npmjs.org/@appland%2Fscanner/latest",
             AppMapBundle.get("cli.scanner.name"));
 

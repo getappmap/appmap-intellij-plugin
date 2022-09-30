@@ -25,7 +25,7 @@ import java.util.HashMap;
  */
 public class GitHubErrorHandler extends ErrorReportSubmitter {
     private static final String HOST = "github.com";
-    private static final String URL_PATH = "/applandinc/appmap-intellij-plugin/issues/new";
+    private static final String URL_PATH = "/getappmap/appmap-intellij-plugin/issues/new";
 
     @Override
     public @NlsActions.ActionText @NotNull String getReportActionText() {
