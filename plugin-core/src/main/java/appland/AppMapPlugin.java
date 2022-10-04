@@ -33,7 +33,7 @@ public final class AppMapPlugin {
     }
 
     public static Path getJavaAgentPath() {
-        return getPluginPath().resolve("appmap-agents").resolve("appmap.jar");
+        return getPluginPath().resolve("appmap-agents").resolve("appmap-agent.jar");
     }
 
     @NotNull
