@@ -56,7 +56,7 @@ allprojects {
         instrumentCode.set(true)
     }
 
-    configure<JavaPluginConvention> {
+    configure<JavaPluginExtension> {
         sourceCompatibility = VERSION_11
         targetCompatibility = VERSION_11
     }
