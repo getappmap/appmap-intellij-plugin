@@ -1,5 +1,12 @@
 AppMap Plugin Changelog
 
+## [0.14.1](https://github.com/getappmap/appmap-intellij-plugin/compare/v0.14.0...v0.14.1) (2022-10-04)
+
+
+### Bug Fixes
+
+-  Update documentation URLs from appland.com -> appmap.io ([c100ec4]())
+
 ## [0.14.0](https://github.com/getappmap/appmap-intellij-plugin/compare/v0.13.0...v0.14.0) (2022-09-27)
 
 
