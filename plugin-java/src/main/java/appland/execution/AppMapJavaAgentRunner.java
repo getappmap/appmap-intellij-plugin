@@ -30,7 +30,11 @@ public class AppMapJavaAgentRunner extends DefaultJavaProgramRunner {
                       @Nullable RunnerSettings settings,
                       @NotNull RunProfile runProfile,
                       boolean beforeExecution) {
-        // invokes our AppMapJavaProgramPatcher
-        JavaProgramPatcher.runCustomPatchers(javaParameters, AppMapJvmExecutor.getInstance(), runProfile);
+        try {
+            // invokes our AppMapJavaProgramPatcher, but inside a read action.
+            JavaProgramPatcher.runCustomPatchers(javaParameters, AppMapJvmExecutor.getInstance(), runProfile);
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to update JVM command line for AppMap", e);
+        }
     }
 }

@@ -3,15 +3,10 @@ package appland.execution;
 import appland.files.AppMapFiles;
 import com.intellij.execution.configurations.RunProfile;
 import com.intellij.execution.configurations.SearchScopeProvidingRunProfile;
-import com.intellij.openapi.application.ApplicationManager;
-import com.intellij.openapi.application.ModalityState;
 import com.intellij.openapi.application.ReadAction;
-import com.intellij.openapi.application.WriteAction;
-import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.progress.util.BackgroundTaskUtil;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.roots.OrderEnumerator;
-import com.intellij.openapi.vfs.VfsUtil;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.JavaDirectoryService;
 import com.intellij.psi.PsiDirectory;
@@ -25,12 +20,14 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
 /**
@@ -47,24 +44,30 @@ public final class AppMapJavaPackageConfig {
      * @param runProfile Run profile to be executed
      * @return The path to the appmap.yml file to pass to the AppMap agent. {@code null} if no file exists and creating the new file failed.
      */
-    public static @Nullable VirtualFile findOrCreateAppMapConfig(@NotNull Project project,
-                                                                 @Nullable RunProfile runProfile,
-                                                                 @Nullable VirtualFile workingDir) throws IOException {
+    public static @Nullable Path findOrCreateAppMapConfig(@NotNull Project project,
+                                                          @Nullable RunProfile runProfile,
+                                                          @Nullable VirtualFile workingDir) throws IOException {
         var runProfileScope = runProfile instanceof SearchScopeProvidingRunProfile
                 ? ((SearchScopeProvidingRunProfile) runProfile).getSearchScope()
                 : null;
+        if (runProfileScope == null) {
+            runProfileScope = GlobalSearchScope.everythingScope(project);
+        }
+        var runProfileAndWorkingDir = workingDir == null
+                ? runProfileScope
+                : runProfileScope.uniteWith(new GlobalSearchScopesCore.DirectoryScope(project, workingDir, false));
 
         // attempt to find an existing file
         var appMapConfig = BackgroundTaskUtil.computeInBackgroundAndTryWait(
-                () -> findAppMapConfig(project, runProfileScope),
+                () -> findAppMapConfig(project, runProfileAndWorkingDir),
                 EmptyConsumer.getInstance(), TimeUnit.SECONDS.toMillis(15));
 
         if (appMapConfig != null) {
-            return appMapConfig;
+            return appMapConfig.toNioPath();
         }
 
         var newConfigContent = BackgroundTaskUtil.computeInBackgroundAndTryWait(
-                () -> generateAppMapConfig(project, runProfileScope),
+                () -> generateAppMapConfig(project, runProfileAndWorkingDir),
                 EmptyConsumer.getInstance(),
                 TimeUnit.SECONDS.toMillis(15));
 
@@ -72,28 +75,21 @@ public final class AppMapJavaPackageConfig {
             return null;
         }
 
-        // create a new config file
-        var newConfigFile = new AtomicReference<VirtualFile>();
-        ApplicationManager.getApplication().invokeAndWait(() -> {
-            WriteAction.runAndWait(() -> {
-                try {
-                    var file = workingDir.findOrCreateChildData(AppMapJavaPackageConfig.class, AppMapFiles.APPMAP_YML);
-                    VfsUtil.saveText(file, newConfigContent);
-                    newConfigFile.set(file);
-                } catch (Exception e) {
-                    Logger.getInstance(AppMapJavaPackageConfig.class).warn("Unable to create new AppMap configuration file", e);
-                }
-            });
-        }, ModalityState.defaultModalityState());
-        return newConfigFile.get();
+        // create outside a read action, because JavaProgramPatcher is always called with a ReadAction
+        // and we can't execute a WriteAction inside a read action
+        // The only known workaround is to create the new configuration as an external file,
+        // outside the VirtualFileSystem
+        var workingDirPath = workingDir.toNioPath();
+        var appMapConfigPath = workingDirPath.resolve(AppMapFiles.APPMAP_YML);
+        Files.write(appMapConfigPath, newConfigContent.getBytes(StandardCharsets.UTF_8));
+        return appMapConfigPath;
     }
 
     // executed under progress
     private static @Nullable VirtualFile findAppMapConfig(@NotNull Project project,
-                                                          @Nullable GlobalSearchScope runProfileScope) {
+                                                          @NotNull GlobalSearchScope runProfileScope) {
         return ReadAction.compute(() -> {
-            var scope = runProfileScope != null ? runProfileScope : GlobalSearchScope.everythingScope(project);
-            var files = FilenameIndex.getFilesByName(project, AppMapFiles.APPMAP_YML, scope);
+            var files = FilenameIndex.getFilesByName(project, AppMapFiles.APPMAP_YML, runProfileScope);
             return files.length == 1 ? files[0].getVirtualFile() : null;
         });
     }
