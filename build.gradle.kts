@@ -42,7 +42,6 @@ allprojects {
     }
 
     val testOutput = configurations.create("testOutput")
-    val appMapJavaAgent = configurations.create("appMapJavaAgent")
     dependencies {
         // http://wiremock.org, Apache 2 license
         testImplementation("com.github.tomakehurst:wiremock-jre8:2.33.1")
@@ -56,9 +55,6 @@ allprojects {
         if (project.name != "plugin-core") {
             testImplementation(project(":plugin-core", "testOutput"))
         }
-
-        // to copy the appmap-java jar file into the plugin zip
-        appMapJavaAgent("com.appland:appmap-agent:$appMapJvmAgentVersion")
     }
 
     intellij {
@@ -76,7 +72,73 @@ allprojects {
     tasks {
         buildSearchableOptions.get().enabled = false
 
+        buildPlugin {
+            dependsOn(":copyPluginAssets")
+            from("${rootProject.buildDir}/appmap-assets") {
+                into("")
+                include("**/*")
+            }
+        }
+
+        processTestResources {
+            dependsOn(":copyPluginAssets")
+            from("${rootProject.buildDir}/appmap-assets") {
+                into("")
+                include("**/*")
+            }
+        }
+
+        runIde {
+            onlyIf { this.project == rootProject }
+            systemProperty("appmap.sandbox", "true")
+        }
+
+        withType<PrepareSandboxTask> {
+            dependsOn(":copyPluginAssets")
+            from("${rootProject.buildDir}/appmap-assets") {
+                into(intellij.pluginName.get())
+                include("**/*")
+            }
+        }
+
+        withType<Test> {
+            systemProperty("idea.test.execution.policy", "appland.AppLandTestExecutionPolicy")
+            systemProperty("appland.testDataPath", rootProject.rootDir.resolve("src/test/data").path)
+        }
+
+        withType<RunPluginVerifierTask> {
+            onlyIf { this.project == rootProject }
+            ideVersions.set(prop("ideVersionVerifier").split(","))
+        }
+
+        withType<Zip> {
+            duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+        }
+    }
+}
+
+project(":") {
+    val appMapJavaAgent = configurations.create("appMapJavaAgent")
+    dependencies {
+        implementation(project(":plugin-core"))
+        implementation(project(":plugin-gradle"))
+        implementation(project(":plugin-java"))
+        implementation(project(":plugin-maven"))
+
+        // to copy the appmap-java jar file into the plugin zip
+        appMapJavaAgent("com.appland:appmap-agent:$appMapJvmAgentVersion")
+    }
+
+    changelog {
+        path.set("${project.projectDir}/CHANGELOG.md")
+    }
+
+    tasks {
         task<Copy>("copyPluginAssets") {
+            inputs.files("${project.rootDir}/appland")
+            inputs.files("${project.rootDir}/appland-install-guide")
+            inputs.files(appMapJavaAgent)
+
             destinationDir = project.buildDir
             from("${project.rootDir}/appland") {
                 into("appmap-assets/appmap")
@@ -97,66 +159,20 @@ allprojects {
                     }
                 }
             }
-        }
 
-        buildPlugin {
-            dependsOn("copyPluginAssets")
-            from("${project.buildDir}/appmap-assets") {
-                into("")
-                include("**/*")
+            processResources {
+                dependsOn("copyPluginAssets")
+            }
+
+            instrumentCode {
+                dependsOn("copyPluginAssets")
+            }
+
+            jar {
+                dependsOn("copyPluginAssets")
             }
         }
 
-        processTestResources {
-            dependsOn("copyPluginAssets")
-            from("${project.buildDir}/appmap-assets") {
-                into("")
-                include("**/*")
-            }
-        }
-
-        runIde {
-            onlyIf { this.project == rootProject }
-            systemProperty("appmap.sandbox", "true")
-        }
-
-        withType<RunPluginVerifierTask> {
-            onlyIf { this.project == rootProject }
-            ideVersions.set(prop("ideVersionVerifier").split(","))
-        }
-
-        withType<PrepareSandboxTask> {
-            dependsOn("copyPluginAssets")
-            from("${project.buildDir}/appmap-assets") {
-                into(intellij.pluginName.get())
-                include("**/*")
-            }
-        }
-
-        withType<Test> {
-            systemProperty("idea.test.execution.policy", "appland.AppLandTestExecutionPolicy")
-            systemProperty("appland.testDataPath", rootProject.rootDir.resolve("src/test/data").path)
-        }
-
-        withType<Zip> {
-            duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-        }
-    }
-}
-
-project(":") {
-    dependencies {
-        implementation(project(":plugin-core"))
-        implementation(project(":plugin-gradle"))
-        implementation(project(":plugin-java"))
-        implementation(project(":plugin-maven"))
-    }
-
-    changelog {
-        path.set("${project.projectDir}/CHANGELOG.md")
-    }
-
-    tasks {
         patchPluginXml {
             sinceBuild.set(prop("sinceBuild"))
             untilBuild.set(prop("untilBuild"))
