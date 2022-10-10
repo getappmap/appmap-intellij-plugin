@@ -11,6 +11,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.nio.file.Path;
+import java.util.List;
 
 public abstract class AbstractAppMapJavaProgramPatcher extends JavaProgramPatcher {
     @Override
@@ -22,7 +23,8 @@ public abstract class AbstractAppMapJavaProgramPatcher extends JavaProgramPatche
                 var config = AppMapJavaPackageConfig.findOrCreateAppMapConfig(project, configuration, workingDir);
                 var outputDirectory = findAppMapOutputDirectory(configuration, workingDir);
 
-                AppMapJvmCommandLinePatcher.patchSimpleJavaParameters(javaParameters, config, outputDirectory);
+                var jvmParams = AppMapJvmCommandLinePatcher.createJvmParams(config, outputDirectory);
+                applyJvmParameters(javaParameters, jvmParams);
             } catch (Exception e) {
                 Logger.getInstance(AppMapJavaProgramPatcher.class).error(e);
             }
@@ -33,4 +35,8 @@ public abstract class AbstractAppMapJavaProgramPatcher extends JavaProgramPatche
 
     protected abstract @Nullable Path findAppMapOutputDirectory(@NotNull RunProfile configuration,
                                                                 @Nullable VirtualFile workingDirectory);
+
+    protected void applyJvmParameters(JavaParameters javaParameters, List<String> jvmParams) {
+        javaParameters.getVMParametersList().addAll(jvmParams);
+    }
 }

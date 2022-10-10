@@ -35,7 +35,8 @@ public class AppMapExternalSystemExtension extends ExternalSystemRunConfiguratio
                     outputDirectory = workingDir.toNioPath().resolve("build").resolve("appmap");
                 }
 
-                AppMapJvmCommandLinePatcher.patchSimpleJavaParameters(javaParameters, config, outputDirectory);
+                var jvmParams = AppMapJvmCommandLinePatcher.createJvmParams(config, outputDirectory);
+                javaParameters.getVMParametersList().addAll(jvmParams);
             } catch (Exception e) {
                 Logger.getInstance(AppMapExternalSystemExtension.class).error(e);
             }
