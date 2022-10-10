@@ -13,7 +13,9 @@ import java.nio.file.Path;
  * Patching of a JVM commandline to add the AppMap agent to the execution of a Java program.
  */
 public class AppMapJvmCommandLinePatcher {
-    static void patchSimpleJavaParameters(@NotNull SimpleJavaParameters parameters, @Nullable Path appMapConfig) throws ExecutionException {
+    static void patchSimpleJavaParameters(@NotNull SimpleJavaParameters parameters,
+                                          @Nullable Path appMapConfig,
+                                          @Nullable Path appMapOutputDirectory) throws ExecutionException {
         if (appMapConfig == null) {
             throw new CantRunException("Unable to find an appmap.yml file");
         }
@@ -21,9 +23,9 @@ public class AppMapJvmCommandLinePatcher {
         var vmParams = parameters.getVMParametersList();
         //vmParams.add("-Dappmap.debug");
         vmParams.add("-Dappmap.config.file=" + appMapConfig);
+        if (appMapOutputDirectory != null) {
+            vmParams.add("-Dappmap.output.directory=" + appMapOutputDirectory);
+        }
         vmParams.add("-javaagent:" + AppMapPlugin.getJavaAgentPath());
-
-        //var classPath = parameters.getClassPath();
-        //classPath.add(AppMapPlugin.getJavaAgentPath().toString());
     }
 }

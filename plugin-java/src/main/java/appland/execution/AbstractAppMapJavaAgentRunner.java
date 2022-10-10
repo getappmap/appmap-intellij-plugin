@@ -19,13 +19,13 @@ public abstract class AbstractAppMapJavaAgentRunner extends DefaultJavaProgramRu
     public abstract @NotNull @NonNls String getRunnerId();
 
     @Override
+    public abstract boolean canRun(@NotNull String executorId, @NotNull RunProfile profile);
+
+    @Override
     public void execute(@NotNull ExecutionEnvironment environment) throws ExecutionException {
         verifyJdk(environment);
         super.execute(environment);
     }
-
-    @Override
-    public abstract boolean canRun(@NotNull String executorId, @NotNull RunProfile profile);
 
     @Override
     public void patch(@NotNull JavaParameters javaParameters,

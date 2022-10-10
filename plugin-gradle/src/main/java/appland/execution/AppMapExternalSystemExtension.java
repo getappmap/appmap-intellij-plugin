@@ -10,6 +10,8 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.plugins.gradle.service.execution.GradleRunConfiguration;
 
+import java.nio.file.Path;
+
 public class AppMapExternalSystemExtension extends ExternalSystemRunConfigurationExtension {
     @Override
     public boolean isApplicableFor(@NotNull ExternalSystemRunConfiguration configuration) {
@@ -28,7 +30,12 @@ public class AppMapExternalSystemExtension extends ExternalSystemRunConfiguratio
                 var workingDir = ProgramParameterUtils.findWorkingDir(project, javaParameters);
                 var config = AppMapJavaPackageConfig.findOrCreateAppMapConfig(project, gradleRunConfig, workingDir);
 
-                AppMapJvmCommandLinePatcher.patchSimpleJavaParameters(javaParameters, config);
+                Path outputDirectory = null;
+                if (workingDir != null) {
+                    outputDirectory = workingDir.toNioPath().resolve("build").resolve("appmap");
+                }
+
+                AppMapJvmCommandLinePatcher.patchSimpleJavaParameters(javaParameters, config, outputDirectory);
             } catch (Exception e) {
                 Logger.getInstance(AppMapExternalSystemExtension.class).error(e);
             }
