@@ -66,7 +66,7 @@ public class AppMapJvmExecutor extends Executor {
 
     @Override
     public @NlsActions.ActionDescription String getDescription() {
-        return "AppMap executor";
+        return AppMapBundle.get("appMapExecutor.description");
     }
 
     @Override
@@ -81,13 +81,15 @@ public class AppMapJvmExecutor extends Executor {
 
     @Override
     public @NotNull @Nls(capitalization = Nls.Capitalization.Title) String getStartActionText() {
-        return AppMapBundle.get("appMapExecutor.startActionConfigName");
+        return getStartActionText("");
     }
 
     @Override
     public @NotNull String getStartActionText(@NotNull String configurationName) {
-        var configName = StringUtil.isEmpty(configurationName) ? "" : " '" + shortenNameIfNeeded(configurationName) + "'";
-        return AppMapBundle.get("appMapExecutor.startActionConfigName", configName);
+        if (StringUtil.isEmpty(configurationName)) {
+            return AppMapBundle.get("appMapExecutor.startAction");
+        }
+        return AppMapBundle.get("appMapExecutor.startActionConfigName", " '" + shortenNameIfNeeded(configurationName) + "'");
     }
 
     @Override
