@@ -104,6 +104,8 @@ allprojects {
         withType<Test> {
             systemProperty("idea.test.execution.policy", "appland.AppLandTestExecutionPolicy")
             systemProperty("appland.testDataPath", rootProject.rootDir.resolve("src/test/data").path)
+            // to allow tests to access the custom Java 11 JDK
+            systemProperties["NO_FS_ROOTS_ACCESS_CHECK"] = true
         }
 
         withType<RunPluginVerifierTask> {

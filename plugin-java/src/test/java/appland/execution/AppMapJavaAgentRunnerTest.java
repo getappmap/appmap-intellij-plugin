@@ -48,7 +48,11 @@ public class AppMapJavaAgentRunnerTest extends BaseAppMapJavaTest {
         });
 
         ApplicationManager.getApplication().invokeLater(() -> {
-            ProgramRunnerUtil.executeConfiguration(env, false, true);
+            try {
+                ProgramRunnerUtil.executeConfiguration(env, false, true);
+            } catch (Exception e) {
+                addSuppressedException(e);
+            }
         });
 
         assertTrue(latch.await(30, TimeUnit.SECONDS));
