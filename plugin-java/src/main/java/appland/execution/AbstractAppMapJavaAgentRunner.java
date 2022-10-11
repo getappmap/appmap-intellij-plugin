@@ -48,7 +48,7 @@ public abstract class AbstractAppMapJavaAgentRunner extends DefaultJavaProgramRu
                 if (javaParameters != null) {
                     var jdk = javaParameters.getJdk();
                     if (jdk != null) {
-                        AppMapJvmExecutor.verifyJDK(jdk);
+                        AppMapJvmExecutor.verifyJDK(environment.getProject(), jdk);
                     }
                 }
             });

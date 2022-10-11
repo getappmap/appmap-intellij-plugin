@@ -5,6 +5,7 @@ import appland.Icons;
 import com.intellij.execution.ExecutionException;
 import com.intellij.execution.Executor;
 import com.intellij.execution.ExecutorRegistry;
+import com.intellij.openapi.project.Project;
 import com.intellij.openapi.projectRoots.Sdk;
 import com.intellij.openapi.util.IconLoader;
 import com.intellij.openapi.util.NlsActions;
@@ -37,10 +38,10 @@ public class AppMapJvmExecutor extends Executor {
      * @param jdk The JDK to verify
      * @throws ExecutionException If the JDK is unsupported
      */
-    public static void verifyJDK(@NotNull Sdk jdk) throws ExecutionException {
+    public static void verifyJDK(@NotNull Project project, @NotNull Sdk jdk) throws ExecutionException {
         var version = JavaVersion.tryParse(jdk.getVersionString());
         if (version != null && version.isAtLeast(LATEST_SUPPORTED_JAVA_VERSION + 1)) {
-            throw new ExecutionException(AppMapBundle.get("appMapExecutor.jdkNotSupported"));
+            throw new UnsupportedJdkException(project);
         }
     }
 

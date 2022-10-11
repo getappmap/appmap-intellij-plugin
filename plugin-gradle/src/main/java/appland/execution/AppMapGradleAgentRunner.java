@@ -46,7 +46,7 @@ public class AppMapGradleAgentRunner implements ProgramRunner<RunnerSettings> {
             if (gradleProjectSettings != null) {
                 var jdk = ExternalSystemJdkUtil.getJdk(environment.getProject(), gradleProjectSettings.getGradleJvm());
                 if (jdk != null) {
-                    AppMapJvmExecutor.verifyJDK(jdk);
+                    AppMapJvmExecutor.verifyJDK(environment.getProject(), jdk);
                 }
             }
         }
