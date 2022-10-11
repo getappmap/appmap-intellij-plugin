@@ -1,4 +1,4 @@
-<idea-plugin>
+<idea-plugin xmlns:xi="http://www.w3.org/2001/XInclude">
     <id>appland.appmap</id>
     <name>AppMap</name>
     <vendor>AppLand</vendor>
@@ -10,9 +10,14 @@
 
     <resource-bundle>messages.appland</resource-bundle>
 
+    <xi:include href="/META-INF/appmap-core.xml" xpointer="xpointer(/idea-plugin/*)"/>
+
     <depends>com.intellij.modules.platform</depends>
     <depends>com.intellij.modules.lang</depends>
     <depends>com.intellij.modules.json</depends>
+    <depends config-file="appmap-java.xml" optional="true">com.intellij.java</depends>
+    <depends config-file="appmap-gradle.xml" optional="true">com.intellij.gradle</depends>
+    <depends config-file="appmap-maven.xml" optional="true">org.jetbrains.idea.maven</depends>
 
     <extensionPoints>
         <extensionPoint qualifiedName="appland.languageAnalyzer"
@@ -110,6 +115,8 @@
         <problemsViewPanelProvider implementation="appland.problemsView.FindingsPanelProvider"/>
         <vfs.asyncListener implementation="appland.problemsView.listener.ScannerFilesAsyncListener"/>
         <annotator implementationClass="appland.problemsView.AppMapFindingsAnnotator" language="" order="last"/>
+
+        <externalSystem.runConfigurationEx implementation="appland.execution.AppMapExternalSystemExtension"/>
     </extensions>
 
     <actions>
