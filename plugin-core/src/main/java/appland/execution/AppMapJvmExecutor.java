@@ -57,7 +57,7 @@ public class AppMapJvmExecutor extends Executor {
 
     @Override
     public @NotNull Icon getIcon() {
-        return Icons.APPMAP_FILE;
+        return Icons.EXECUTE;
     }
 
     @Override
