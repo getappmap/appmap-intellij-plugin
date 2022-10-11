@@ -1,5 +1,16 @@
 AppMap Plugin Changelog
 
+## [0.15.0](https://github.com/getappmap/appmap-intellij-plugin/compare/v0.14.1...v0.15.0) (2022-10-11)
+
+
+### Features
+
+-  add run configurations extensions for Java and Maven ([e2ebc21]())-  Allow to use an alternative Java 11 JDK to the Java integration test. AppMap is currently only compatible with Java <= 11 ([bdea1a5]())-  download appmap-java agent from Maven repository and bundle into the plugin zip ([505e42f]())-  integration test case to run a java program with the appmap agent ([bbb4ad3]())-  prefer the output directory of the build tool ([dacdf81]())-  show a link to configure the project JDK in the notification about an incompatible JDK ([43d6568]())-  validate that the JDK is supported by AppMap before executing the run configuration ([4881ba1]())
+
+### Bug Fixes
+
+-  add icon for the AppMap executor ([ad97895]())-  don't show a JDK settings link in 2021.3, because it's not supported everywhere ([fc2701a]())-  don't show a placeholder in the "Run with AppMap" tooltip on the taskbar icon ([6538d84]())-  gradle complains about wrong task dependencies ([b7497ae]())-  Tests executed via Maven were not recording tests ([846930e]())
+
 ## [0.14.1](https://github.com/getappmap/appmap-intellij-plugin/compare/v0.14.0...v0.14.1) (2022-10-04)
 
 
