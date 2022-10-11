@@ -54,7 +54,7 @@ plugins:
     - CHANGELOG.md
     - gradle.properties
 - - '@semantic-release/exec'
-  - publishCmd: ./gradlew clean build verifyPlugin
+  - publishCmd: ./gradlew clean build
 - - '@semantic-release/github'
   - assets:
     - build/distributions/intellij-appmap-*.zip
