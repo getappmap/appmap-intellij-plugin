@@ -93,6 +93,10 @@ allprojects {
             systemProperty("appmap.sandbox", "true")
         }
 
+        verifyPlugin {
+            onlyIf { this.project == rootProject }
+        }
+
         withType<PrepareSandboxTask> {
             dependsOn(":copyPluginAssets")
             from("${rootProject.buildDir}/appmap-assets") {
