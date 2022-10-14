@@ -22,7 +22,7 @@ public class AppMapApplicationSettings {
 
     @Getter
     @Setter
-    private volatile boolean enableFindings = false;
+    private volatile boolean enableFindings = true;
 
     @Getter
     @Setter
