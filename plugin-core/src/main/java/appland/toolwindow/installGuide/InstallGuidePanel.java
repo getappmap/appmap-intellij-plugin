@@ -190,9 +190,9 @@ public class InstallGuidePanel extends JPanel implements Disposable {
         var enabled = AppMapApplicationSettingsService.getInstance().isEnableFindings();
         if (enabled) {
             DumbService.getInstance(project).runWhenSmart(() -> {
-                label.setStatus(FindingsManager.getInstance(project).getProblemFileCount() > 0
-                        ? InstallGuideStatus.Completed
-                        : InstallGuideStatus.Incomplete);
+                var manager = FindingsManager.getInstance(project);
+                var hasFindings = manager.getProblemFileCount() > 0 || manager.getOtherProblemCount() > 0;
+                label.setStatus(hasFindings ? InstallGuideStatus.Completed : InstallGuideStatus.Incomplete);
             });
         } else {
             // fixme use lock icon
