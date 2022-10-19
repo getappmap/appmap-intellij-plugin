@@ -1,5 +1,12 @@
 AppMap Plugin Changelog
 
+## [0.17.1](https://github.com/getappmap/appmap-intellij-plugin/compare/v0.17.0...v0.17.1) (2022-10-19)
+
+
+### Bug Fixes
+
+-  telemetry when a Java run configuration is executed with the AppMap executor ([dd5f7c7]())
+
 ## [0.17.0](https://github.com/getappmap/appmap-intellij-plugin/compare/v0.16.0...v0.17.0) (2022-10-19)
 
 
