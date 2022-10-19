@@ -3,5 +3,6 @@
 
     <extensions defaultExtensionNs="com.intellij">
         <programRunner implementation="appland.execution.AppMapGradleAgentRunner"/>
+        <externalSystem.runConfigurationEx implementation="appland.execution.AppMapExternalSystemExtension"/>
     </extensions>
 </idea-plugin>
