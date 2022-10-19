@@ -31,7 +31,11 @@ public class AppMapGradleAgentRunner implements ProgramRunner<RunnerSettings> {
     @Override
     public void execute(@NotNull ExecutionEnvironment environment) throws ExecutionException {
         verifyJdk(environment);
-        findDelegate().execute(environment);
+        try {
+            findDelegate().execute(environment);
+        } finally {
+            AppMapJvmExecutor.sendTelemetry(environment.getRunProfile());
+        }
     }
 
     private @NotNull ProgramRunner<RunnerSettings> findDelegate() {

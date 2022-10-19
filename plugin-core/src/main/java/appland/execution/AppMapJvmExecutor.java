@@ -2,9 +2,12 @@ package appland.execution;
 
 import appland.AppMapBundle;
 import appland.Icons;
+import appland.telemetry.TelemetryService;
 import com.intellij.execution.ExecutionException;
 import com.intellij.execution.Executor;
 import com.intellij.execution.ExecutorRegistry;
+import com.intellij.execution.configurations.RunConfiguration;
+import com.intellij.execution.configurations.RunProfile;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.projectRoots.Sdk;
 import com.intellij.openapi.util.IconLoader;
@@ -41,8 +44,20 @@ public class AppMapJvmExecutor extends Executor {
     public static void verifyJDK(@NotNull Project project, @NotNull Sdk jdk) throws ExecutionException {
         var version = JavaVersion.tryParse(jdk.getVersionString());
         if (version != null && version.isAtLeast(LATEST_SUPPORTED_JAVA_VERSION + 1)) {
+            TelemetryService.getInstance().sendEvent("run_config:incompatible_jdk",
+                    event -> event.property("appmap.jdkVersion", jdk.getVersionString()));
+
             throw new UnsupportedJdkException(project);
         }
+    }
+
+    public static void sendTelemetry(@NotNull RunProfile configuration) {
+        var typeId = configuration instanceof RunConfiguration
+                ? ((RunConfiguration) configuration).getType().getId()
+                : "unknown";
+
+        TelemetryService.getInstance().sendEvent("run_config:execute",
+                event -> event.property("appmap.run_config.type", typeId));
     }
 
     @Override

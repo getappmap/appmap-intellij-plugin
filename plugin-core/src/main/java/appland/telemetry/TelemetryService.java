@@ -41,7 +41,7 @@ public class TelemetryService {
     /**
      * Sends data to the telemetry server. The request is sent in a background thread.
      *
-     * @param name Name of the tracked event
+     * @param event Tracked event
      */
     public void sendEvent(@NotNull TelemetryEvent event) {
         if (!isEnabled()) {
