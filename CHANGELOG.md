@@ -1,5 +1,12 @@
 AppMap Plugin Changelog
 
+## [0.17.0](https://github.com/getappmap/appmap-intellij-plugin/compare/v0.16.0...v0.17.0) (2022-10-19)
+
+
+### Features
+
+-  Support 2022.3 EAP ([5d46344]())
+
 ## [0.16.0](https://github.com/getappmap/appmap-intellij-plugin/compare/v0.15.1...v0.16.0) (2022-10-14)
 
 
