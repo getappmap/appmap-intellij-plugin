@@ -1,5 +1,12 @@
 AppMap Plugin Changelog
 
+## [0.17.3](https://github.com/getappmap/appmap-intellij-plugin/compare/v0.17.2...v0.17.3) (2022-10-20)
+
+
+### Bug Fixes
+
+-  Rename `appmap:record` to `appmap:create` ([bd481d9]())
+
 ## [0.17.2](https://github.com/getappmap/appmap-intellij-plugin/compare/v0.17.1...v0.17.2) (2022-10-20)
 
 
