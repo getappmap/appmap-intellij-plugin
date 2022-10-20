@@ -1,5 +1,12 @@
 AppMap Plugin Changelog
 
+## [0.17.4](https://github.com/getappmap/appmap-intellij-plugin/compare/v0.17.3...v0.17.4) (2022-10-20)
+
+
+### Bug Fixes
+
+-  show success icon for "Runtime Analysis" even if only findings with unknown source files were found ([076856b]())
+
 ## [0.17.3](https://github.com/getappmap/appmap-intellij-plugin/compare/v0.17.2...v0.17.3) (2022-10-20)
 
 
