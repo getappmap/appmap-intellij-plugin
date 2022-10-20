@@ -20,6 +20,6 @@ public class AppMapRecordListener implements AppMapFileChangeListener {
             return;
         }
 
-        TelemetryService.getInstance().sendEvent("appmap:record");
+        TelemetryService.getInstance().sendEvent("appmap:create");
     }
 }
