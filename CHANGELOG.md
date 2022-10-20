@@ -1,5 +1,12 @@
 AppMap Plugin Changelog
 
+## [0.17.2](https://github.com/getappmap/appmap-intellij-plugin/compare/v0.17.1...v0.17.2) (2022-10-20)
+
+
+### Bug Fixes
+
+-  Add appland.appmap prefix to telemetry events ([2c80586]())
+
 ## [0.17.1](https://github.com/getappmap/appmap-intellij-plugin/compare/v0.17.0...v0.17.1) (2022-10-19)
 
 
