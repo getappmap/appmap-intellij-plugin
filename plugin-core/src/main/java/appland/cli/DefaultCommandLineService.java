@@ -7,6 +7,7 @@ import appland.settings.AppMapApplicationSettingsService;
 import com.intellij.execution.CantRunException;
 import com.intellij.execution.ExecutionException;
 import com.intellij.execution.configurations.GeneralCommandLine;
+import com.intellij.execution.configurations.PtyCommandLine;
 import com.intellij.execution.process.KillableProcessHandler;
 import com.intellij.execution.process.ProcessAdapter;
 import com.intellij.execution.process.ProcessEvent;
@@ -132,6 +133,24 @@ public class DefaultCommandLineService implements AppLandCommandLineService {
         }
 
         processes.clear();
+    }
+
+    @Override
+    public @Nullable GeneralCommandLine createInstallCommand(@NotNull Path installLocation, @NotNull String language) {
+        var indexerPath = AppLandDownloadService.getInstance().getDownloadFilePath(CliTool.AppMap);
+        if (indexerPath == null || Files.notExists(indexerPath)) {
+            LOG.debug("CLI executable not found: " + indexerPath);
+            return null;
+        }
+
+        var cmd = new PtyCommandLine();
+        cmd.withExePath(indexerPath.toString());
+        cmd.withParameters("install", "-d", installLocation.toString());
+        cmd.withConsoleMode(false);
+        cmd.withParentEnvironmentType(GeneralCommandLine.ParentEnvironmentType.CONSOLE);
+
+        LOG.debug("AppMap command line " + cmd.getCommandLineString());
+        return cmd;
     }
 
     private void stopLocked(@NotNull CliProcesses value) {

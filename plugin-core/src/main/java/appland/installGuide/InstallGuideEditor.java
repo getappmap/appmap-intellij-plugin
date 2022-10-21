@@ -2,6 +2,7 @@ package appland.installGuide;
 
 import appland.AppMapBundle;
 import appland.AppMapPlugin;
+import appland.cli.AppLandCommandLineService;
 import appland.index.AppMapMetadata;
 import appland.index.IndexedFileListenerUtil;
 import appland.installGuide.projectData.ProjectDataService;
@@ -10,8 +11,26 @@ import appland.problemsView.FindingsViewTab;
 import appland.settings.AppMapApplicationSettingsService;
 import appland.telemetry.TelemetryService;
 import com.google.gson.*;
+import com.intellij.execution.DefaultExecutionResult;
+import com.intellij.execution.ExecutionException;
+import com.intellij.execution.ExecutionResult;
+import com.intellij.execution.Executor;
+import com.intellij.execution.configurations.CommandLineState;
+import com.intellij.execution.configurations.GeneralCommandLine;
+import com.intellij.execution.configurations.RunProfileState;
+import com.intellij.execution.executors.DefaultRunExecutor;
+import com.intellij.execution.process.KillableProcessHandler;
+import com.intellij.execution.process.ProcessHandler;
+import com.intellij.execution.process.ProcessTerminatedListener;
+import com.intellij.execution.runners.ExecutionEnvironment;
+import com.intellij.execution.runners.ExecutionEnvironmentBuilder;
+import com.intellij.execution.runners.ProgramRunner;
 import com.intellij.ide.BrowserUtil;
 import com.intellij.ide.ClipboardSynchronizer;
+import com.intellij.ide.actions.runAnything.execution.RunAnythingRunProfile;
+import com.intellij.openapi.actionSystem.CommonDataKeys;
+import com.intellij.openapi.actionSystem.DataContext;
+import com.intellij.openapi.actionSystem.impl.AsyncDataContext;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.fileEditor.FileEditor;
@@ -23,10 +42,13 @@ import com.intellij.openapi.util.Disposer;
 import com.intellij.openapi.util.UserDataHolderBase;
 import com.intellij.openapi.vfs.LocalFileSystem;
 import com.intellij.openapi.vfs.VirtualFile;
+import com.intellij.terminal.TerminalExecutionConsole;
 import com.intellij.ui.jcef.JBCefBrowserBase;
 import com.intellij.ui.jcef.JBCefJSQuery;
 import com.intellij.ui.jcef.JCEFHtmlPanel;
 import com.intellij.util.SingleAlarm;
+import com.intellij.util.io.BaseDataReader;
+import com.intellij.util.io.BaseOutputReader;
 import org.cef.CefSettings;
 import org.cef.browser.CefBrowser;
 import org.cef.browser.CefFrame;
@@ -183,12 +205,12 @@ public class InstallGuideEditor extends UserDataHolderBase implements FileEditor
                             var allProjects = findProjects();
                             var anyInstallable = allProjects.stream().anyMatch(p -> p.getScore() >= 2);
                             TelemetryService.getInstance().sendEvent(
-                                "view:open",
-                                (event) -> event
-                                    .property("appmap.view.id", viewId)
-                                    .property("appmap.project.language", viewProject.getLanguage().getName().toLowerCase())
-                                    .property("appmap.project.installable", String.valueOf(viewProject.getScore() >= 2))
-                                    .property("appmap.project.any_installable", String.valueOf(anyInstallable))
+                                    "view:open",
+                                    (event) -> event
+                                            .property("appmap.view.id", viewId)
+                                            .property("appmap.project.language", viewProject.getLanguage().getName().toLowerCase())
+                                            .property("appmap.project.installable", String.valueOf(viewProject.getScore() >= 2))
+                                            .property("appmap.project.any_installable", String.valueOf(anyInstallable))
                             );
                             break;
 
@@ -208,6 +230,13 @@ public class InstallGuideEditor extends UserDataHolderBase implements FileEditor
                             break;
                         }
 
+                        case "perform-install": {
+                            var path = json.getAsJsonPrimitive("path").getAsString();
+                            var language = json.getAsJsonPrimitive("language").getAsString();
+                            executeInstallCommand(path, language);
+                            break;
+                        }
+
                         default:
                             LOG.warn("Unhandled message type: " + type);
                     }
@@ -222,6 +251,40 @@ public class InstallGuideEditor extends UserDataHolderBase implements FileEditor
         contentPanel.getCefBrowser().executeJavaScript(createCallbackJS(jcefBridge, "postMessage"), "", 0);
 
         postMessage(createInitMessageJSON());
+    }
+
+    private void executeInstallCommand(String path, String language) {
+        var commandLine = AppLandCommandLineService.getInstance().createInstallCommand(Paths.get(path), language);
+        if (commandLine == null) {
+            return;
+        }
+
+        // follows com.intellij.ide.actions.runAnything.activity.RunAnythingCommandProvider.runCommand,
+        // but uses our own PtyCommandLine instead
+        ApplicationManager.getApplication().invokeLater(() -> {
+            var runAnythingRunProfile = new RunAnythingRunProfile(commandLine, commandLine.getCommandLineString()) {
+                @Override
+                public @NotNull RunProfileState getState(@NotNull Executor executor, @NotNull ExecutionEnvironment environment) {
+                    return new AppMapRunProfileState(commandLine, environment);
+                }
+            };
+
+            var dataContext = (AsyncDataContext) dataId -> {
+                if (CommonDataKeys.PROJECT.is(dataId)) {
+                    return project;
+                }
+                return null;
+            };
+
+            try {
+                var executor = DefaultRunExecutor.getRunExecutorInstance();
+                ExecutionEnvironmentBuilder.create(project, executor, runAnythingRunProfile)
+                        .dataContext(dataContext)
+                        .buildAndExecute();
+            } catch (ExecutionException e) {
+                LOG.warn("Failed to execute command: " + commandLine.getCommandLineString(), e);
+            }
+        });
     }
 
     private void postMessage(@NotNull JsonElement json) {
@@ -332,5 +395,51 @@ public class InstallGuideEditor extends UserDataHolderBase implements FileEditor
             return true;
         }
         return false;
+    }
+
+    /**
+     * RunProfileState, which is suitable for a terminal console with a PTY.
+     * The default RunAnythingRunProfileState is not suitable, but we're following it for best practices.
+     */
+    private static class AppMapRunProfileState extends CommandLineState {
+        private final GeneralCommandLine commandLine;
+
+        protected AppMapRunProfileState(@NotNull GeneralCommandLine commandLine, @NotNull ExecutionEnvironment environment) {
+            super(environment);
+            this.commandLine = commandLine;
+        }
+
+        @Override
+        public @NotNull ExecutionResult execute(@NotNull Executor executor, @NotNull ProgramRunner<?> runner) throws ExecutionException {
+            var processHandler = startProcess();
+            ProcessTerminatedListener.attach(processHandler);
+
+            var console = new TerminalExecutionConsole(getEnvironment().getProject(), processHandler);
+            console.attachToProcess(processHandler);
+            return new DefaultExecutionResult(console, processHandler, createActions(console, processHandler, executor));
+        }
+
+        @NotNull
+        @Override
+        protected ProcessHandler startProcess() throws ExecutionException {
+            // not a com.intellij.execution.process.KillableColoredProcessHandler,
+            // because the console is handling colors
+            return new KillableProcessHandler(commandLine) {
+                @Override
+                protected BaseOutputReader.@NotNull Options readerOptions() {
+                    return new BaseOutputReader.Options() {
+                        @Override
+                        public boolean splitToLines() {
+                            return false;
+                        }
+
+                        @Override
+                        public BaseDataReader.SleepingPolicy policy() {
+                            return BaseDataReader.SleepingPolicy.BLOCKING;
+                        }
+                    };
+                }
+            };
+        }
     }
 }
