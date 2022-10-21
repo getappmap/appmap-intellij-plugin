@@ -2,22 +2,36 @@
 # yarn lockfile v1
 
 
-"@appland/components@^2.11.2":
-  version "2.11.2"
-  resolved "https://registry.yarnpkg.com/@appland/components/-/components-2.11.2.tgz#5ae5b2d1d3797857a6336538e27c4e0aad802aa3"
-  integrity sha512-m303ucdcvgTw0N+TPbFlanNiiKGV7zY/rxjRk2UPUiLzUovhuHMEGN5B73muLAf1YkVZ/n470qF5REZAO2Hckg==
+"@appland/components@^2.18.2":
+  version "2.18.2"
+  resolved "https://registry.yarnpkg.com/@appland/components/-/components-2.18.2.tgz#c5e9ecd497dfff48b9a06fbfea01c75ea72fad1e"
+  integrity sha512-3nbFGmXFvY6KJE6Xi81kplZjWzcBDl68zWT9w3Hy/08qRXOmhfvDRXKMP8bQCiNbOgScxy803fSebettsb2Z3w==
   dependencies:
     "@appland/diagrams" "^1.5.1"
     "@appland/models" "^1.9.0"
+    buffer "^6.0.3"
     highlight.js "^10.7.2"
     sql-formatter "^4.0.2"
     vue "^2.6.11"
     vuex "^3.6.0"
 
-"@appland/diagrams@^1.5.1", "@appland/diagrams@^1.5.2":
+"@appland/diagrams@^1.5.1":
   version "1.5.2"
   resolved "https://registry.yarnpkg.com/@appland/diagrams/-/diagrams-1.5.2.tgz#2bb675f279c6f8827da660d8795a675a639f39a7"
   integrity sha512-WxRxABdqgPzpuO9VpjhpGzdNnYaa6t9mCf8w/96JXVknA61YWg2i5YK79UwBRKAGcXQnOcXoa9nEoYDmYAoWgQ==
+  dependencies:
+    "@appland/models" "^1.9.0"
+    d3-interpolate "^1.4.0"
+    d3-selection "^1.4.2"
+    d3-shape "^1.3.7"
+    d3-zoom "^1.8.3"
+    dagre "^0.8.5"
+    deepmerge "^4.2.2"
+
+"@appland/diagrams@^1.5.3":
+  version "1.5.3"
+  resolved "https://registry.yarnpkg.com/@appland/diagrams/-/diagrams-1.5.3.tgz#3eaf512375d5bbc2ab73459432f9b14a8df69eaa"
+  integrity sha512-qzfWTX86O6S9L1wjfFkzSRtb55w8rB+kufos07OFo//JRPCicQm79P/IeAzZR7u/hlVEBQYYIU741k4brVbr1Q==
   dependencies:
     "@appland/models" "^1.9.0"
     d3-interpolate "^1.4.0"
@@ -1234,6 +1248,11 @@ babel-plugin-polyfill-regenerator@^0.2.2:
   dependencies:
     "@babel/helper-define-polyfill-provider" "^0.2.2"
 
+base64-js@^1.3.1:
+  version "1.5.1"
+  resolved "https://registry.yarnpkg.com/base64-js/-/base64-js-1.5.1.tgz#1b1b440160a5bf7ad40b650f095963481903930a"
+  integrity sha512-AKpaYlHn8t4SVbOHCy+b5+KKgvR4vrsD8vbvrbiQJps7fKDTkjkDry6ji0rUJjC0kzbNePLwzxq8iypo41qeWA==
+
 bent@^7.3.12:
   version "7.3.12"
   resolved "https://registry.yarnpkg.com/bent/-/bent-7.3.12.tgz#e0a2775d4425e7674c64b78b242af4f49da6b035"
@@ -1278,6 +1297,14 @@ buffer-from@^1.0.0:
   version "1.1.2"
   resolved "https://registry.yarnpkg.com/buffer-from/-/buffer-from-1.1.2.tgz#2b146a6fd72e80b4f55d255f35ed59a3a9a41bd5"
   integrity sha512-E+XQCRwSbaaiChtv6k6Dwgc+bx+Bs6vuKJHHl5kox/BaKbhiXzqQOwK4cO22yElGp2OCmjwVhT3HmxgyPGnJfQ==
+
+buffer@^6.0.3:
+  version "6.0.3"
+  resolved "https://registry.yarnpkg.com/buffer/-/buffer-6.0.3.tgz#2ace578459cc8fbe2a70aaa8f52ee63b6a74c6c6"
+  integrity sha512-FTiCpNxtwiZZHEZbcbTIcZjERVICn9yq/pDFkTl95/AxzD1naBctN7YO68riM/gLSDY7sdrMby8hofADYuuqOA==
+  dependencies:
+    base64-js "^1.3.1"
+    ieee754 "^1.2.1"
 
 bytesish@^0.4.1:
   version "0.4.4"
@@ -1882,6 +1909,11 @@ icss-utils@^5.0.0, icss-utils@^5.1.0:
   version "5.1.0"
   resolved "https://registry.yarnpkg.com/icss-utils/-/icss-utils-5.1.0.tgz#c6be6858abd013d768e98366ae47e25d5887b1ae"
   integrity sha512-soFhflCVWLfRNOPU3iv5Z9VUdT44xFRbzjLsEzSr5AQmgqPMTHdU3PMT1Cf1ssx8fLNJDA1juftYl+PUcv3MqA==
+
+ieee754@^1.2.1:
+  version "1.2.1"
+  resolved "https://registry.yarnpkg.com/ieee754/-/ieee754-1.2.1.tgz#8eb7a10a63fff25d15a57b001586d177d1b0d352"
+  integrity sha512-dcyqhDvX1C46lXZcVqCpK+FtMRQVdIMN6/Df5js2zouUsqG7I6sFxitIC+7KYK29KdXOLHdu9zL4sFnoVQnqaA==
 
 import-local@^3.0.2:
   version "3.0.2"

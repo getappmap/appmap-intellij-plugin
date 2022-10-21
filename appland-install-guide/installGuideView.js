@@ -21,6 +21,7 @@ export function mountInstallGuide() {
                         disabledPages: new Set(disabled),
                         editor: 'jetbrains',
                         findingsEnabled,
+                        featureFlags: new Set(['disable-record-pending'])
                     },
                 });
             },
@@ -78,6 +79,10 @@ export function mountInstallGuide() {
 
         app.$on('openAppmap', (file) => {
             vscode.postMessage({command: 'open-file', file});
+        });
+
+        app.$on('perform-install', (path, language) => {
+          vscode.postMessage({ command: 'perform-install', path, language });
         });
 
         app.$on('open-instruction', (pageId) => {
