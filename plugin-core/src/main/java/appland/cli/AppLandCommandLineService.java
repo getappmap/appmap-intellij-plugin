@@ -1,11 +1,14 @@
 package appland.cli;
 
 import com.intellij.execution.ExecutionException;
+import com.intellij.execution.configurations.GeneralCommandLine;
 import com.intellij.openapi.Disposable;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.vfs.VirtualFile;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
+import java.nio.file.Path;
 import java.util.List;
 
 public interface AppLandCommandLineService extends Disposable {
@@ -50,4 +53,13 @@ public interface AppLandCommandLineService extends Disposable {
      * Stop all processes.
      */
     void stopAll();
+
+    /**
+     * Creates the command line to install AppMap in the given directory.
+     *
+     * @param path     Project path
+     * @param language Detected Language
+     * @return The command line or {@code null} if the CLI is unavailable
+     */
+    @Nullable GeneralCommandLine createInstallCommand(@NotNull Path path, @NotNull String language);
 }
