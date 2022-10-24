@@ -1,5 +1,12 @@
 AppMap Plugin Changelog
 
+## [0.18.0](https://github.com/getappmap/appmap-intellij-plugin/compare/v0.17.4...v0.18.0) (2022-10-24)
+
+
+### Features
+
+-  support execution of AppMap commands in the terminal ([d3b7973]())
+
 ## [0.17.4](https://github.com/getappmap/appmap-intellij-plugin/compare/v0.17.3...v0.17.4) (2022-10-20)
 
 
