@@ -16,7 +16,7 @@ public class ScannerProblemTest extends AppMapBaseTest {
         assertNotNull(problemLocation);
         assertEquals(Integer.valueOf(100), problemLocation.line);
 
-        var scannerProblem = new ScannerProblem(FindingsManager.getInstance(getProject()), new LightVirtualFile(), scannerFinding);
+        var scannerProblem = new ScannerProblem(FindingsManager.getInstance(getProject()), new LightVirtualFile(), scannerFinding, new LightVirtualFile());
         assertEquals("IntelliJ's line is 0-based", 99, scannerProblem.getLine());
     }
 }

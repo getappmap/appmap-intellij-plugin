@@ -1,5 +1,6 @@
 package appland.installGuide.analyzer;
 
+import appland.utils.GsonUtils;
 import com.google.gson.annotations.SerializedName;
 import com.intellij.openapi.util.text.StringUtil;
 import lombok.Value;

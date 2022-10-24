@@ -1,5 +1,6 @@
 package appland.index;
 
+import appland.files.AppMapFiles;
 import com.intellij.json.JsonFileType;
 import com.intellij.openapi.project.DumbService;
 import com.intellij.openapi.project.Project;
@@ -63,7 +64,7 @@ public class ClassMapTypeIndex extends FileBasedIndexExtension<ClassMapItemType,
         FileBasedIndex.getInstance().processValues(INDEX_ID, type, null, (file, classMapItems) -> {
             for (var item : classMapItems) {
                 var appMapFiles = items.computeIfAbsent(item, classMapItem -> new LinkedList<>());
-                var appMapFile = ClassMapUtil.findAppMapSourceFile(file);
+                var appMapFile = AppMapFiles.findAppMapSourceFile(file);
                 if (appMapFile != null) {
                     appMapFiles.add(appMapFile);
                 }

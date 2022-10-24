@@ -1,7 +1,7 @@
 package appland.cli;
 
 import appland.AppMapBundle;
-import appland.installGuide.analyzer.GsonUtils;
+import appland.utils.GsonUtils;
 import com.google.gson.JsonObject;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.application.PathManager;
