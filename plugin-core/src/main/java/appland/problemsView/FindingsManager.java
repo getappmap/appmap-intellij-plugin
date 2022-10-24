@@ -5,12 +5,11 @@ import appland.problemsView.listener.ScannerFindingsListener;
 import appland.problemsView.model.FindingsDomainCount;
 import appland.problemsView.model.FindingsFileData;
 import appland.problemsView.model.ScannerFinding;
+import appland.utils.GsonUtils;
 import com.google.common.collect.HashMultiset;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.MultimapBuilder;
 import com.google.common.collect.Multiset;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import com.google.gson.JsonSyntaxException;
 import com.intellij.analysis.problemsView.Problem;
 import com.intellij.analysis.problemsView.ProblemsProvider;
@@ -41,7 +40,6 @@ import java.util.function.Consumer;
  */
 public class FindingsManager implements ProblemsProvider {
     private static final Logger LOG = Logger.getInstance(FindingsManager.class);
-    private static final Gson GSON = new GsonBuilder().create();
 
     private final Project project;
     private final ScannerFindingsListener publisher;
@@ -271,12 +269,12 @@ public class FindingsManager implements ProblemsProvider {
         var fileData = loadFindingsFile(findingsFile);
         if (fileData != null && fileData.findings != null) {
             for (var finding : fileData.findings) {
-                var targetFile = finding.findTargetFile(project, findingsFile);
-                if (targetFile != null) {
-                    sourceMapping.put(findingsFile.getPath(), targetFile);
+                var annotatedFile = finding.findAnnotatedFile(project, findingsFile);
+                if (annotatedFile != null) {
+                    sourceMapping.put(findingsFile.getPath(), annotatedFile);
 
-                    var problem = new ScannerProblem(this, targetFile, finding);
-                    problems.put(targetFile, problem);
+                    var problem = new ScannerProblem(this, annotatedFile, finding, findingsFile);
+                    problems.put(annotatedFile, problem);
 
                     // this takes care of problemAppeared, problemDisappeared, problemUpdated notifications
                     notifier.accept(problem);
@@ -319,7 +317,7 @@ public class FindingsManager implements ProblemsProvider {
         }
 
         try {
-            return GSON.fromJson(doc.getText(), FindingsFileData.class);
+            return GsonUtils.GSON.fromJson(doc.getText(), FindingsFileData.class);
         } catch (JsonSyntaxException e) {
             if (LOG.isDebugEnabled()) {
                 LOG.debug("Failed to load findings file: " + file.getPath(), e);

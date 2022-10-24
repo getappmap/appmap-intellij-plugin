@@ -1,11 +1,12 @@
 package appland.files;
 
-import com.google.gson.GsonBuilder;
+import appland.utils.GsonUtils;
 import com.google.gson.JsonObject;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.util.io.FileUtil;
 import com.intellij.openapi.vfs.VirtualFile;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -43,15 +44,14 @@ public final class AppMapFiles {
      */
     public static boolean updateMetadata(@NotNull Path appMapFile, @NotNull String name) {
         try {
-            var gson = new GsonBuilder().create();
-            var json = gson.fromJson(Files.newBufferedReader(appMapFile, StandardCharsets.UTF_8), JsonObject.class);
+            var json = GsonUtils.GSON.fromJson(Files.newBufferedReader(appMapFile, StandardCharsets.UTF_8), JsonObject.class);
             if (!json.has("metadata")) {
                 json.add("metadata", new JsonObject());
             }
             var metadata = json.getAsJsonObject("metadata");
             metadata.addProperty("name", name);
 
-            Files.write(appMapFile, gson.toJson(json).getBytes(StandardCharsets.UTF_8));
+            Files.write(appMapFile, GsonUtils.GSON.toJson(json).getBytes(StandardCharsets.UTF_8));
             return true;
         } catch (IOException e) {
             LOG.debug("error while updating AppMap metadata", e);
@@ -77,5 +77,16 @@ public final class AppMapFiles {
             i++;
         }
         return dir.resolve(candidate);
+    }
+
+    /**
+     * @param appMapDataFile Source file located in the appmap directory created by indexer or scanner.
+     * @return The appmap.json file, which is the source of the data in the appmap directory
+     */
+    public static @Nullable VirtualFile findAppMapSourceFile(@NotNull VirtualFile appMapDataFile) {
+        var parent = appMapDataFile.getParent();
+        return parent == null
+                ? null
+                : parent.findFileByRelativePath("../" + FileUtil.getNameWithoutExtension(parent.getName()) + ".appmap.json");
     }
 }
