@@ -13,18 +13,22 @@ import javax.swing.*;
 
 final class ScannerProblem implements FileProblem {
     private final @NotNull ProblemsProvider provider;
-    private final @NotNull VirtualFile file;
+    private final @NotNull VirtualFile annotatedFile;
+    @Getter
+    private final @NotNull VirtualFile findingsFile;
     @Getter
     private final @NotNull ScannerFinding finding;
     // 0-based
     private final int line;
 
     public ScannerProblem(@NotNull ProblemsProvider provider,
-                          @NotNull VirtualFile file,
-                          @NotNull ScannerFinding finding) {
+                          @NotNull VirtualFile annotatedFile,
+                          @NotNull ScannerFinding finding,
+                          @NotNull VirtualFile findingsFile) {
         this.provider = provider;
-        this.file = file;
+        this.annotatedFile = annotatedFile;
         this.finding = finding;
+        this.findingsFile = findingsFile;
 
         var location = finding.getProblemLocation();
         this.line = location != null && location.line != null ? location.line - 1 : -1;
@@ -33,7 +37,7 @@ final class ScannerProblem implements FileProblem {
     @NotNull
     @Override
     public VirtualFile getFile() {
-        return file;
+        return annotatedFile;
     }
 
     @Override

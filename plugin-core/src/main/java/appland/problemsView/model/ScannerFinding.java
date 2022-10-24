@@ -34,6 +34,12 @@ public class ScannerFinding {
     @SerializedName("impactDomain")
     public @Nullable ImpactDomain impactDomain = null;
 
+    @SerializedName("event")
+    public @Nullable ScannerFindingEvent event = null;
+
+    @SerializedName("relatedEvents")
+    public @Nullable List<ScannerFindingEvent> relatedEvents = null;
+
     public @NotNull String getFindingTitle() {
         var rule = ruleTitle;
         var context = StringUtil.defaultIfEmpty(groupMessage, message);
@@ -65,7 +71,7 @@ public class ScannerFinding {
         return FileLocation.parse(candidate);
     }
 
-    public @Nullable VirtualFile findTargetFile(@NotNull Project project, @NotNull VirtualFile findingsFile) {
+    public @Nullable VirtualFile findAnnotatedFile(@NotNull Project project, @NotNull VirtualFile findingsFile) {
         var parentDir = findingsFile.getParent();
         var location = getProblemLocation();
         if (location != null) {

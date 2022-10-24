@@ -1,15 +1,33 @@
 package appland.problemsView;
 
+import appland.AppMapBundle;
+import appland.editor.AppMapFileEditor;
+import appland.editor.AppMapFileEditorState;
+import appland.files.AppMapFiles;
+import appland.utils.GsonUtils;
+import com.google.gson.JsonObject;
+import com.intellij.codeInsight.intention.IntentionAction;
+import com.intellij.codeInspection.util.IntentionFamilyName;
+import com.intellij.codeInspection.util.IntentionName;
 import com.intellij.lang.annotation.AnnotationHolder;
 import com.intellij.lang.annotation.Annotator;
 import com.intellij.lang.annotation.HighlightSeverity;
+import com.intellij.openapi.editor.Document;
+import com.intellij.openapi.editor.Editor;
+import com.intellij.openapi.fileEditor.FileEditorManager;
 import com.intellij.openapi.progress.ProgressManager;
+import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.TextRange;
 import com.intellij.openapi.util.text.StringUtil;
+import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiDocumentManager;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
+import com.intellij.util.IncorrectOperationException;
+import lombok.AllArgsConstructor;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.stream.Collectors;
 
 /**
  * Annotator, which adds highlighting of detected problems to editors.
@@ -34,26 +52,82 @@ public class AppMapFindingsAnnotator implements Annotator {
                 return;
             }
 
-            var maxLineCount = document.getLineCount();
-            for (var problem : FindingsManager.getInstance(project).getScannerProblems(file)) {
-                ProgressManager.checkCanceled();
+            annotateAppMapFindings(holder, project, document, file);
+        }
+    }
 
-                // IntelliJ's lines are 0-based
-                var line = problem.getLine();
-                if (line >= 0 && line < maxLineCount) {
-                    var lineStart = document.getLineStartOffset(line);
-                    var lineEnd = document.getLineEndOffset(line);
-                    var lineText = document.getText(TextRange.create(lineStart, lineEnd));
-                    var emptyLinePrefixLength = lineText.length() - StringUtil.trimLeading(lineText).length();
+    private void annotateAppMapFindings(@NotNull AnnotationHolder holder, Project project, Document document, VirtualFile file) {
+        var maxLineCount = document.getLineCount();
+        for (var problem : FindingsManager.getInstance(project).getScannerProblems(file)) {
+            ProgressManager.checkCanceled();
 
-                    lineStart += emptyLinePrefixLength;
-                    if (lineStart < lineEnd) {
-                        holder.newAnnotation(HighlightSeverity.ERROR, problem.getText())
-                                .range(TextRange.create(lineStart, lineEnd))
-                                .create();
-                    }
+            // IntelliJ's lines are 0-based
+            var line = problem.getLine();
+            if (line >= 0 && line < maxLineCount) {
+                var lineStart = document.getLineStartOffset(line);
+                var lineEnd = document.getLineEndOffset(line);
+                var lineText = document.getText(TextRange.create(lineStart, lineEnd));
+                var emptyLinePrefixLength = lineText.length() - StringUtil.trimLeading(lineText).length();
+
+                lineStart += emptyLinePrefixLength;
+                if (lineStart < lineEnd) {
+                    holder.newAnnotation(HighlightSeverity.ERROR, problem.getText())
+                            .withFix(new OpenAppMapFindingQuickFix(problem))
+                            .range(TextRange.create(lineStart, lineEnd))
+                            .create();
                 }
             }
+        }
+    }
+
+    @AllArgsConstructor
+    private static class OpenAppMapFindingQuickFix implements IntentionAction {
+        private final ScannerProblem problem;
+
+        @Override
+        public @IntentionName @NotNull String getText() {
+            return AppMapBundle.get("annotator.openQuickFix.name");
+        }
+
+        @Override
+        public @NotNull @IntentionFamilyName String getFamilyName() {
+            return AppMapBundle.get("annotator.quickFixFamily");
+        }
+
+        @Override
+        public boolean isAvailable(@NotNull Project project, Editor editor, PsiFile file) {
+            return true;
+        }
+
+        @Override
+        public void invoke(@NotNull Project project, Editor editor, PsiFile file) throws IncorrectOperationException {
+            var appMapFile = AppMapFiles.findAppMapSourceFile(problem.getFindingsFile());
+            if (appMapFile != null) {
+                var appMapEditors = FileEditorManager.getInstance(project).openFile(appMapFile, true);
+                if (appMapEditors.length == 1 && appMapEditors[0] instanceof AppMapFileEditor) {
+                    var finding = problem.getFinding();
+                    var findingEvent = finding.event;
+                    var relatedEvents = finding.relatedEvents;
+
+                    var state = new JsonObject();
+                    state.addProperty("currentView", "viewFlow");
+                    if (findingEvent != null && findingEvent.id != null) {
+                        state.addProperty("selectedObject", "event:" + findingEvent.id);
+                    }
+                    if (relatedEvents != null && !relatedEvents.isEmpty()) {
+                        var joinedEvents = relatedEvents.stream()
+                                .map(event -> "id:" + event.id)
+                                .collect(Collectors.joining(" "));
+                        state.addProperty("traceFilter", joinedEvents);
+                    }
+                    appMapEditors[0].setState(new AppMapFileEditorState(GsonUtils.GSON.toJson(state)));
+                }
+            }
+        }
+
+        @Override
+        public boolean startInWriteAction() {
+            return false;
         }
     }
 }
