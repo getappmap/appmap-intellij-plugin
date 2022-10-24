@@ -68,6 +68,7 @@ public class AppMapFileEditor extends UserDataHolderBase implements FileEditor {
     private final Project project;
     private final String baseURL;
     private final VirtualFile file;
+    private @Nullable FileEditorState state;
     private final JCEFHtmlPanel contentPanel = new JCEFHtmlPanel(true, null, null);
     private final JBCefJSQuery viewSourceBridge = JBCefJSQuery.create((JBCefBrowserBase) contentPanel);
     private final JBCefJSQuery uploadAppMapBridge = JBCefJSQuery.create((JBCefBrowserBase) contentPanel);
@@ -104,6 +105,8 @@ public class AppMapFileEditor extends UserDataHolderBase implements FileEditor {
     // keeps track if the file was modified and not yet loaded into the AppMap application
     private final AtomicBoolean isModified = new AtomicBoolean(false);
     private final AtomicBoolean isDisposed = new AtomicBoolean(false);
+    // if the onReadyHandler was already called after the editor was created
+    private final AtomicBoolean isReady = new AtomicBoolean(false);
 
     public AppMapFileEditor(@NotNull Project project, @NotNull VirtualFile file) {
         this.project = project;
@@ -188,8 +191,6 @@ public class AppMapFileEditor extends UserDataHolderBase implements FileEditor {
      * Load the current file's data into the AppLand JS application.
      */
     private void loadAppmapData() {
-        LOG.info("loadAppmapData");
-
         if (showErrorOrMainPanel()) {
             return;
         }
@@ -211,6 +212,19 @@ public class AppMapFileEditor extends UserDataHolderBase implements FileEditor {
 
         // TODO - provide `appmap.project.language` property which specifies the language of the AppMap via metadata.language
         TelemetryService.getInstance().sendEvent("appmap:open");
+
+        var state = getState(FileEditorStateLevel.FULL);
+        if (state instanceof AppMapFileEditorState) {
+            applyEditorState(((AppMapFileEditorState) state).jsonState);
+        }
+    }
+
+    /**
+     * Load the current file's data into the AppLand JS application.
+     */
+    private void applyEditorState(@NotNull String jsonString) {
+        var javascript = "window.setAppMapState(\"" + StringEscapeUtils.escapeJavaScript(jsonString) + "\")";
+        contentPanel.getCefBrowser().executeJavaScript(javascript, baseURL, 0);
     }
 
     /**
@@ -305,7 +319,10 @@ public class AppMapFileEditor extends UserDataHolderBase implements FileEditor {
         setupJCEFBridge(uploadAppMapBridge, "uploadAppmap", ignored -> uploadAppMap());
 
         var app = ApplicationManager.getApplication();
-        app.invokeLater(AppMapFileEditor.this::loadAppmapData, ModalityState.defaultModalityState());
+        app.invokeLater(() -> {
+            loadAppmapData();
+            isReady.set(true);
+        }, ModalityState.defaultModalityState());
     }
 
     @Nullable
@@ -380,7 +397,18 @@ public class AppMapFileEditor extends UserDataHolderBase implements FileEditor {
     }
 
     @Override
+    public @NotNull FileEditorState getState(@NotNull FileEditorStateLevel level) {
+        var current = this.state;
+        return current == null ? FileEditorState.INSTANCE : current;
+    }
+
+    @Override
     public void setState(@NotNull FileEditorState state) {
+        this.state = state;
+
+        if (isReady.get() && state instanceof AppMapFileEditorState) {
+            applyEditorState(((AppMapFileEditorState) state).jsonState);
+        }
     }
 
     @Override
