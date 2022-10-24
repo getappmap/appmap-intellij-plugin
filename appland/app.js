@@ -18,6 +18,13 @@ const app = new Vue(
             console.error("error parsing JSON", e);
           }
         },
+        async setState(jsonString) {
+          try {
+            this.$refs.ui.setState(jsonString);
+          } catch (e) {
+            console.error("error setting state: " + jsonString, e);
+          }
+        },
         showInstructions() {
           this.$refs.ui.showInstructions();
         },
@@ -42,6 +49,11 @@ app.$on('uploadAppmap', () => {
 window.loadAppMap = function (jsonString) {
   console.log("window.loadAppMap");
   app.loadAppMap(jsonString);
+};
+
+window.setAppMapState = function (json) {
+  console.debug("window.setAppMapState");
+  app.setState(json);
 };
 
 window.showAppMapInstructions = function () {
