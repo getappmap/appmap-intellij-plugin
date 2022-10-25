@@ -12,8 +12,6 @@ import java.util.stream.Collectors;
 
 /**
  * Async file listener to notify about changes to .appmap.json files.
- * We don't react to changes from a file system refresh.
- * {@link  VirtualFileManagerLister} is taking care of refresh events.
  */
 @SuppressWarnings("UnstableApiUsage")
 public class AppMapAsyncFileListener implements AsyncFileListener {
@@ -40,10 +38,6 @@ public class AppMapAsyncFileListener implements AsyncFileListener {
     }
 
     private static boolean isAppMapFileChange(@NotNull VFileEvent event) {
-        if (event.isFromRefresh()) {
-            return false;
-        }
-
         // only treat renames as valid property changes
         if (event instanceof VFilePropertyChangeEvent) {
             if (!((VFilePropertyChangeEvent) event).isRename()) {
