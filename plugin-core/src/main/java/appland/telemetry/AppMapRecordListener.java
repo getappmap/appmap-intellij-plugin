@@ -12,7 +12,7 @@ public class AppMapRecordListener implements AppMapFileChangeListener {
 
     @Override
     public void refreshAppMaps(@NotNull Set<AppMapFileEventType> changeTypes) {
-        if (!changeTypes.contains(AppMapFileEventType.Create) || !changeTypes.contains(AppMapFileEventType.Modify)) {
+        if (!changeTypes.contains(AppMapFileEventType.Create) && !changeTypes.contains(AppMapFileEventType.Modify)) {
             return;
         }
 
