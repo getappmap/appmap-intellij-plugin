@@ -1,5 +1,12 @@
 AppMap Plugin Changelog
 
+## [0.19.0](https://github.com/getappmap/appmap-intellij-plugin/compare/v0.18.0...v0.19.0) (2022-10-26)
+
+
+### Features
+
+-  provide quick fix "Open in AppMap" for AppMap annotations in a text editor ([2c65f89]())
+
 ## [0.18.0](https://github.com/getappmap/appmap-intellij-plugin/compare/v0.17.4...v0.18.0) (2022-10-24)
 
 
