@@ -100,9 +100,15 @@
 
         <!-- run configurations -->
         <executor implementation="appland.execution.AppMapJvmExecutor"/>
+
+        <!-- OAuth authentication -->
+        <httpRequestHandler implementation="appland.oauth.AppMapOAuthRequestHandler"/>
+        <applicationService serviceImplementation="appland.oauth.AppMapOAuthService"/>
     </extensions>
 
     <actions>
+        <action class="appland.oauth.AppMapOAuthAction"/>
+
         <action id="showRecentAppmap" class="appland.actions.OpenRecentAppMapAction"/>
         <action id="startAppMapRemoteRecording" class="appland.actions.StartAppMapRecordingAction"/>
         <action id="stopAppMapRemoteRecording" class="appland.actions.StopAppMapRecordingAction"/>
