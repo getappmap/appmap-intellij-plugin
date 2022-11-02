@@ -1,6 +1,5 @@
 package appland.cli;
 
-import com.intellij.openapi.application.ApplicationManager;
 import org.jetbrains.annotations.NotNull;
 
 public class StartServicesAfterDownloadListener implements AppLandDownloadListener {
@@ -12,9 +11,7 @@ public class StartServicesAfterDownloadListener implements AppLandDownloadListen
 
         var service = AppLandDownloadService.getInstance();
         if (service.isDownloaded(CliTool.AppMap) && service.isDownloaded(CliTool.Scanner)) {
-            ApplicationManager.getApplication().executeOnPooledThread(() -> {
-                AppLandCommandLineService.getInstance().refreshForOpenProjects();
-            });
+            AppLandCommandLineService.getInstance().refreshForOpenProjectsInBackground();
         }
     }
 }

@@ -5,6 +5,7 @@ import com.intellij.execution.configurations.GeneralCommandLine;
 import com.intellij.openapi.Disposable;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.vfs.VirtualFile;
+import com.intellij.util.concurrency.annotations.RequiresBackgroundThread;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -42,7 +43,13 @@ public interface AppLandCommandLineService extends Disposable {
      * Refreshes the processes for the currently open projects.
      * It stops processes, which are not required anymore and launches services for yet unhandled content roots.
      */
+    @RequiresBackgroundThread
     void refreshForOpenProjects();
+
+    /**
+     * Helper to launch {@link #refreshForOpenProjects} in a background thread.
+     */
+    void refreshForOpenProjectsInBackground();
 
     /**
      * @return List of directories, which are handled by active CLI processes.

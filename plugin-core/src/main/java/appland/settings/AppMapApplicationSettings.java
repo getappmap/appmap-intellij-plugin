@@ -25,6 +25,7 @@ public class AppMapApplicationSettings {
     private volatile boolean firstStart = true;
 
     @Getter
+    @Setter
     private volatile boolean enableFindings = true;
 
     @Getter
@@ -32,6 +33,7 @@ public class AppMapApplicationSettings {
     private volatile boolean enableTelemetry = true;
 
     @Getter
+    @Setter
     private volatile @Nullable String apiKey = null;
 
     public AppMapApplicationSettings() {
@@ -45,7 +47,7 @@ public class AppMapApplicationSettings {
         this.apiKey = settings.apiKey;
     }
 
-    public void setEnableFindings(boolean enableFindings) {
+    public void setEnableFindingsNotifying(boolean enableFindings) {
         var changed = !Objects.equals(enableFindings, this.enableFindings);
         this.enableFindings = enableFindings;
 
@@ -54,7 +56,7 @@ public class AppMapApplicationSettings {
         }
     }
 
-    public void setApiKey(@Nullable String apiKey) {
+    public void setApiKeyNotifying(@Nullable String apiKey) {
         var changed = !Objects.equals(apiKey, this.apiKey);
         this.apiKey = apiKey;
 

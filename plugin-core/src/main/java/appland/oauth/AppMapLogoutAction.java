@@ -13,6 +13,6 @@ public class AppMapLogoutAction extends AnAction {
     }
 
     public static void logout() {
-        AppMapApplicationSettingsService.getInstance().setApiKey(null);
+        AppMapApplicationSettingsService.getInstance().setApiKeyNotifying(null);
     }
 }
