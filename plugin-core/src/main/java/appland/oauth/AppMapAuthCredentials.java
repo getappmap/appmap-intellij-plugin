@@ -1,12 +1,15 @@
 package appland.oauth;
 
 import com.intellij.collaboration.auth.credentials.Credentials;
-import lombok.Value;
+import lombok.AccessLevel;
+import lombok.Data;
+import lombok.Getter;
 import org.jetbrains.annotations.NotNull;
 
-@Value
+@Data
 public class AppMapAuthCredentials implements Credentials {
-    String token;
+    @Getter(AccessLevel.NONE)
+    private final String token;
 
     @NotNull
     @Override

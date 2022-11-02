@@ -1,28 +1,27 @@
 package appland.oauth;
 
+import appland.settings.AppMapApplicationSettingsService;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.application.ApplicationManager;
-import com.intellij.openapi.ui.Messages;
+import com.intellij.openapi.diagnostic.Logger;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.concurrent.ExecutionException;
-
 @SuppressWarnings("ComponentNotRegistered")
-public class AppMapOAuthAction extends AnAction {
-    public AppMapOAuthAction() {
-        super("AppMap OAuth");
-    }
-
+public class AppMapLoginAction extends AnAction {
     @Override
     public void actionPerformed(@NotNull AnActionEvent e) {
+        authenticate();
+    }
+
+    public static void authenticate() {
         var response = AppMapOAuthService.getInstance().authorize();
         ApplicationManager.getApplication().executeOnPooledThread(() -> {
             try {
                 var responseData = response.get();
-                ApplicationManager.getApplication().invokeLater(() -> Messages.showInfoMessage("Result:" + responseData, "OAuth"));
-            } catch (InterruptedException | ExecutionException ex) {
-                System.out.println(ex.getMessage());
+                AppMapApplicationSettingsService.getInstance().setApiKey(responseData.getAccessToken());
+            } catch (Exception ex) {
+                Logger.getInstance(AppMapLoginAction.class).warn("Error authenticating with AppMap server", ex);
             }
         });
     }
