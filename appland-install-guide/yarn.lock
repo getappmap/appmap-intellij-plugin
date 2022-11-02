@@ -3,9 +3,9 @@
 
 
 "@appland/components@^2.18.2":
-  version "2.18.2"
-  resolved "https://registry.yarnpkg.com/@appland/components/-/components-2.18.2.tgz#c5e9ecd497dfff48b9a06fbfea01c75ea72fad1e"
-  integrity sha512-3nbFGmXFvY6KJE6Xi81kplZjWzcBDl68zWT9w3Hy/08qRXOmhfvDRXKMP8bQCiNbOgScxy803fSebettsb2Z3w==
+  version "2.18.3"
+  resolved "https://registry.yarnpkg.com/@appland/components/-/components-2.18.3.tgz#bd19ca5f690527d28a048ac41546322dd339feda"
+  integrity sha512-1PEtGByd6KbLOlbwhyg4UB701rR7AX/EVw4w8/o0eHKCGxhMaKOuV8XYCMOL6TEr/tq8pgiUhpozhj5nVoyxCg==
   dependencies:
     "@appland/diagrams" "^1.5.1"
     "@appland/models" "^1.9.0"
