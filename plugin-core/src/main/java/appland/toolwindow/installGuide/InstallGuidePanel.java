@@ -7,8 +7,8 @@ import appland.index.AppMapMetadataIndex;
 import appland.installGuide.InstallGuideViewPage;
 import appland.problemsView.FindingsManager;
 import appland.problemsView.listener.ScannerFindingsListener;
-import appland.settings.AppMapApplicationSettingsService;
 import appland.settings.AppMapProjectSettingsService;
+import appland.settings.AppMapSettingsListener;
 import com.intellij.openapi.Disposable;
 import com.intellij.openapi.application.ModalityState;
 import com.intellij.openapi.application.ReadAction;
@@ -41,7 +41,6 @@ public class InstallGuidePanel extends JPanel implements Disposable {
         Disposer.register(parent, this);
 
         var statusLabels = Arrays.stream(InstallGuideViewPage.values())
-                .filter(page -> page.isEnabled(project))
                 .map(page -> new StatusLabel(page, () -> open(project, page)))
                 .collect(Collectors.toList());
 
@@ -82,6 +81,24 @@ public class InstallGuidePanel extends JPanel implements Disposable {
                                                @NotNull List<StatusLabel> labels) {
         var connection = project.getMessageBus().connect(parent);
 
+        // general settings change handling
+        connection.subscribe(AppMapSettingsListener.TOPIC, new AppMapSettingsListener() {
+            @Override
+            public void apiKeyChanged() {
+                refreshItems();
+            }
+
+            @Override
+            public void enableFindingsChanged() {
+                refreshItems();
+            }
+
+            private void refreshItems() {
+                labels.forEach(StatusLabel::refreshVisibility);
+            }
+        });
+
+        // per-page handling
         for (var label : labels) {
             switch (label.getPage()) {
                 case InstallAgent:
@@ -187,17 +204,11 @@ public class InstallGuidePanel extends JPanel implements Disposable {
      * if findings are enabled, completed if at least one appmap-findings.json file was found
      */
     private static void updateRuntimeAnalysisLabel(@NotNull Project project, @NotNull StatusLabel label) {
-        var enabled = AppMapApplicationSettingsService.getInstance().isEnableFindings();
-        if (enabled) {
-            DumbService.getInstance(project).runWhenSmart(() -> {
-                var manager = FindingsManager.getInstance(project);
-                var hasFindings = manager.getProblemFileCount() > 0 || manager.getOtherProblemCount() > 0;
-                label.setStatus(hasFindings ? InstallGuideStatus.Completed : InstallGuideStatus.Incomplete);
-            });
-        } else {
-            // fixme use lock icon
-            label.setStatus(InstallGuideStatus.Error);
-        }
+        DumbService.getInstance(project).runWhenSmart(() -> {
+            var manager = FindingsManager.getInstance(project);
+            var hasFindings = manager.getProblemFileCount() > 0 || manager.getOtherProblemCount() > 0;
+            label.setStatus(hasFindings ? InstallGuideStatus.Completed : InstallGuideStatus.Incomplete);
+        });
     }
 
     /**

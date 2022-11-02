@@ -198,9 +198,14 @@ public class DefaultCommandLineService implements AppLandCommandLineService {
             }
         }
 
+        var scannerProcessRequired = AppMapApplicationSettingsService.getInstance().isEnableFindings();
+
         // remove processes of roots, which no longer have a matching content root in a project
-        for (var activeRoot : List.copyOf(processes.keySet())) {
-            if (!topLevelRoots.contains(activeRoot)) {
+        // or which don't match the settings anymore. We need to launch the scanner when "enableFindings" changes
+        for (var entry : processes.entrySet()) {
+            var activeRoot = entry.getKey();
+            var scannerProcessMismatch = scannerProcessRequired == (entry.getValue().scanner == null);
+            if (!topLevelRoots.contains(activeRoot) || scannerProcessMismatch) {
                 try {
                     stop(activeRoot);
                 } catch (Exception e) {

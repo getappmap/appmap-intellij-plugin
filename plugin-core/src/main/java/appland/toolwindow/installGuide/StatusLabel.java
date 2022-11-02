@@ -23,6 +23,7 @@ class StatusLabel extends JBLabel {
         this.page = page;
         this.clickAction = clickAction;
         this.setCopyable(true);
+        this.setVisible(page.isEnabled());
     }
 
     @Override
@@ -39,6 +40,10 @@ class StatusLabel extends JBLabel {
 
     void setStatus(@NotNull InstallGuideStatus status) {
         setIcon(status.getIcon());
+    }
+
+    void refreshVisibility() {
+        setVisible(page.isEnabled());
     }
 
     private static String createLink(@NotNull String label) {

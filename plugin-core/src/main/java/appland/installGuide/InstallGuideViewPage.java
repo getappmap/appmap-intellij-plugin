@@ -2,7 +2,6 @@ package appland.installGuide;
 
 import appland.AppMapBundle;
 import appland.settings.AppMapApplicationSettingsService;
-import com.intellij.openapi.project.Project;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.jetbrains.annotations.NotNull;
@@ -18,7 +17,7 @@ public enum InstallGuideViewPage {
     @Getter
     private final String pageId;
 
-    public boolean isEnabled(@NotNull Project project) {
+    public boolean isEnabled() {
         if (this == RuntimeAnalysis) {
             return AppMapApplicationSettingsService.getInstance().isEnableFindings();
         }
