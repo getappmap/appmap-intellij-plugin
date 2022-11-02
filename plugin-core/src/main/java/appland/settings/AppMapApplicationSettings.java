@@ -1,10 +1,14 @@
 package appland.settings;
 
+import com.intellij.openapi.application.ApplicationManager;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+
+import java.util.Objects;
 
 /**
  * Persistent application state of the AppMap plugin.
@@ -21,12 +25,14 @@ public class AppMapApplicationSettings {
     private volatile boolean firstStart = true;
 
     @Getter
-    @Setter
     private volatile boolean enableFindings = true;
 
     @Getter
     @Setter
     private volatile boolean enableTelemetry = true;
+
+    @Getter
+    private volatile @Nullable String apiKey = null;
 
     public AppMapApplicationSettings() {
     }
@@ -36,5 +42,29 @@ public class AppMapApplicationSettings {
         this.firstStart = settings.firstStart;
         this.enableFindings = settings.enableFindings;
         this.enableTelemetry = settings.enableTelemetry;
+        this.apiKey = settings.apiKey;
+    }
+
+    public void setEnableFindings(boolean enableFindings) {
+        var changed = !Objects.equals(enableFindings, this.enableFindings);
+        this.enableFindings = enableFindings;
+
+        if (changed) {
+            settingsPublisher().enableFindingsChanged();
+        }
+    }
+
+    public void setApiKey(@Nullable String apiKey) {
+        var changed = !Objects.equals(apiKey, this.apiKey);
+        this.apiKey = apiKey;
+
+        if (changed) {
+            settingsPublisher().apiKeyChanged();
+        }
+    }
+
+    @NotNull
+    private static AppMapSettingsListener settingsPublisher() {
+        return ApplicationManager.getApplication().getMessageBus().syncPublisher(AppMapSettingsListener.TOPIC);
     }
 }
