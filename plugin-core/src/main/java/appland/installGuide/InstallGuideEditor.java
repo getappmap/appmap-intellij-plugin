@@ -7,8 +7,10 @@ import appland.index.AppMapMetadata;
 import appland.index.IndexedFileListenerUtil;
 import appland.installGuide.projectData.ProjectDataService;
 import appland.installGuide.projectData.ProjectMetadata;
+import appland.oauth.AppMapLoginAction;
 import appland.problemsView.FindingsViewTab;
 import appland.settings.AppMapApplicationSettingsService;
+import appland.settings.AppMapSettingsListener;
 import appland.telemetry.TelemetryService;
 import com.google.gson.*;
 import com.intellij.execution.DefaultExecutionResult;
@@ -29,7 +31,6 @@ import com.intellij.ide.BrowserUtil;
 import com.intellij.ide.ClipboardSynchronizer;
 import com.intellij.ide.actions.runAnything.execution.RunAnythingRunProfile;
 import com.intellij.openapi.actionSystem.CommonDataKeys;
-import com.intellij.openapi.actionSystem.DataContext;
 import com.intellij.openapi.actionSystem.impl.AsyncDataContext;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.diagnostic.Logger;
@@ -87,6 +88,9 @@ public class InstallGuideEditor extends UserDataHolderBase implements FileEditor
     // to debounce the JS refresh of available AppMaps
     private final SingleAlarm projectRefreshAlarm = new SingleAlarm(this::refreshProjects, 500, this);
 
+    // to debounce the JS refresh when settings change
+    private final SingleAlarm settingsRefreshAlarm = new SingleAlarm(this::refreshSettings, 500, this);
+
     public InstallGuideEditor(@NotNull Project project, @NotNull VirtualFile file, @NotNull InstallGuideViewPage type) {
         this.project = project;
         this.file = file;
@@ -109,8 +113,24 @@ public class InstallGuideEditor extends UserDataHolderBase implements FileEditor
         postMessage(createUpdateProjectsMessage());
     }
 
+    public void refreshSettings() {
+        postMessage(createUpdateSettingsMessage());
+    }
+
     private void setupListeners() {
         IndexedFileListenerUtil.registerListeners(project, this, true, true, projectRefreshAlarm::cancelAndRequest);
+
+        ApplicationManager.getApplication().getMessageBus().connect(this).subscribe(AppMapSettingsListener.TOPIC, new AppMapSettingsListener() {
+            @Override
+            public void apiKeyChanged() {
+                settingsRefreshAlarm.cancelAndRequest();
+            }
+
+            @Override
+            public void enableFindingsChanged() {
+                settingsRefreshAlarm.cancelAndRequest();
+            }
+        });
     }
 
     private void setupJCEF() {
@@ -237,6 +257,11 @@ public class InstallGuideEditor extends UserDataHolderBase implements FileEditor
                             break;
                         }
 
+                        case "perform-auth": {
+                            AppMapLoginAction.authenticate();
+                            break;
+                        }
+
                         default:
                             LOG.warn("Unhandled message type: " + type);
                     }
@@ -298,12 +323,22 @@ public class InstallGuideEditor extends UserDataHolderBase implements FileEditor
         var disabledPages = new JsonArray();
         disabledPages.add("openapi");
 
-        var json = new JsonObject();
-        json.addProperty("type", "init");
+        var json = createBasePropertiesMessage("init");
         json.add("projects", gson.toJsonTree(projects));
-        json.add("disabled", disabledPages);
+        json.add("disabledPages", disabledPages);
+        return json;
+    }
+
+    private @NotNull JsonObject createBasePropertiesMessage(@NotNull String messageType) {
+        var settings = AppMapApplicationSettingsService.getInstance();
+        var isAuthenticated = settings.getApiKey() != null;
+
+        var json = new JsonObject();
+        json.addProperty("type", messageType);
         json.addProperty("page", type.getPageId());
-        json.addProperty("findingsEnabled", AppMapApplicationSettingsService.getInstance().isEnableFindings());
+        json.addProperty("userAuthenticated", isAuthenticated);
+        json.addProperty("analysisEnabled", settings.isEnableFindings() && isAuthenticated);
+        json.addProperty("findingsEnabled", settings.isEnableFindings());
         return json;
     }
 
@@ -319,6 +354,12 @@ public class InstallGuideEditor extends UserDataHolderBase implements FileEditor
         json.addProperty("type", "projects");
         json.add("projects", gson.toJsonTree(findProjects()));
         return json;
+    }
+
+    private @NotNull JsonObject createUpdateSettingsMessage() {
+        // we're reusing the init properties to avoid duplicate code,
+        // the "settings" handler of installGuideView.js is only applying supported properties
+        return createBasePropertiesMessage("settings");
     }
 
     @NotNull

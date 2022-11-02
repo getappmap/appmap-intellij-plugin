@@ -107,7 +107,8 @@
     </extensions>
 
     <actions>
-        <action class="appland.oauth.AppMapOAuthAction"/>
+        <action id="appMapLogin" class="appland.oauth.AppMapLoginAction"/>
+        <action id="appMapLogout" class="appland.oauth.AppMapLogoutAction"/>
 
         <action id="showRecentAppmap" class="appland.actions.OpenRecentAppMapAction"/>
         <action id="startAppMapRemoteRecording" class="appland.actions.StartAppMapRecordingAction"/>
@@ -125,6 +126,9 @@
             <separator/> -->
             <reference ref="startAppMapRemoteRecording"/>
             <reference ref="stopAppMapRemoteRecording"/>
+            <separator/>
+            <reference ref="appMapLogin"/>
+            <reference ref="appMapLogout"/>
 
             <add-to-group group-id="ToolsMenu" anchor="last"/>
         </group>
