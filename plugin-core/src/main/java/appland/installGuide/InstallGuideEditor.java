@@ -337,7 +337,7 @@ public class InstallGuideEditor extends UserDataHolderBase implements FileEditor
         json.addProperty("type", messageType);
         json.addProperty("page", type.getPageId());
         json.addProperty("userAuthenticated", isAuthenticated);
-        json.addProperty("analysisEnabled", settings.isEnableFindings() && isAuthenticated);
+        json.addProperty("analysisEnabled", settings.isAnalysisEnabled());
         json.addProperty("findingsEnabled", settings.isEnableFindings());
         return json;
     }

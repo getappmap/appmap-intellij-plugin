@@ -21,7 +21,7 @@ public class FindingsPanelProvider implements ProblemsViewPanelProvider {
     @Nullable
     @Override
     public ProblemsViewTab create() {
-        return AppMapApplicationSettingsService.getInstance().isEnableFindings()
+        return AppMapApplicationSettingsService.getInstance().isAnalysisEnabled()
                 ? new FindingsViewTab(project, ProblemsViewState.getInstance(project))
                 : null;
     }

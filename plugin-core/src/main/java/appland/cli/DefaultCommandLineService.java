@@ -198,7 +198,7 @@ public class DefaultCommandLineService implements AppLandCommandLineService {
             }
         }
 
-        var scannerProcessRequired = AppMapApplicationSettingsService.getInstance().isEnableFindings();
+        var scannerProcessRequired = AppMapApplicationSettingsService.getInstance().isAnalysisEnabled();
 
         // remove processes of roots, which no longer have a matching content root in a project
         // or which don't match the settings anymore. We need to launch the scanner when "enableFindings" changes
@@ -239,7 +239,7 @@ public class DefaultCommandLineService implements AppLandCommandLineService {
             return null;
         }
 
-        var launchScanner = AppMapApplicationSettingsService.getInstance().isEnableFindings();
+        var launchScanner = AppMapApplicationSettingsService.getInstance().isAnalysisEnabled();
         var scannerPath = AppLandDownloadService.getInstance().getDownloadFilePath(CliTool.Scanner);
         if (launchScanner && (scannerPath == null || Files.notExists(scannerPath))) {
             return null;
