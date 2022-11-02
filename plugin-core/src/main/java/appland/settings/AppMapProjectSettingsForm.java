@@ -34,11 +34,18 @@ class AppMapProjectSettingsForm {
     }
 
     void applySettingsTo(@NotNull AppMapProjectSettings settings,
-                         @NotNull AppMapApplicationSettings applicationSettings) {
+                         @NotNull AppMapApplicationSettings applicationSettings,
+                         boolean notify) {
+        // project
         settings.setCloudServerUrl(StringUtil.nullize(serverName.getText()));
         settings.setConfirmAppMapUpload(confirmUpload.isSelected());
 
-        applicationSettings.setEnableFindings(enableFindings.isSelected());
+        // application
         applicationSettings.setEnableTelemetry(enableTelemetry.isSelected());
+        if (notify) {
+            applicationSettings.setEnableFindingsNotifying(enableFindings.isSelected());
+        } else {
+            applicationSettings.setEnableFindings(enableFindings.isSelected());
+        }
     }
 }

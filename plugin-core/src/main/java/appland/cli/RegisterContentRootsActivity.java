@@ -64,9 +64,7 @@ public class RegisterContentRootsActivity implements StartupActivity {
             @Override
             public void rootsChanged(@NotNull ModuleRootEvent event) {
                 LOG.debug("rootsChanged: " + event);
-                ApplicationManager.getApplication().executeOnPooledThread(() -> {
-                    AppLandCommandLineService.getInstance().refreshForOpenProjects();
-                });
+                AppLandCommandLineService.getInstance().refreshForOpenProjectsInBackground();
             }
         });
     }

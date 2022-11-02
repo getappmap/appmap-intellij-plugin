@@ -4,6 +4,7 @@ import appland.config.AppMapConfigFile;
 import appland.config.AppMapConfigFileListener;
 import appland.files.AppMapVfsUtils;
 import appland.settings.AppMapApplicationSettingsService;
+import appland.settings.AppMapSettingsListener;
 import com.intellij.execution.CantRunException;
 import com.intellij.execution.ExecutionException;
 import com.intellij.execution.configurations.GeneralCommandLine;
@@ -39,10 +40,14 @@ public class DefaultCommandLineService implements AppLandCommandLineService {
     private final Map<VirtualFile, CliProcesses> processes = new HashMap<>();
 
     public DefaultCommandLineService() {
-        ApplicationManager.getApplication()
-                .getMessageBus()
-                .connect(this)
-                .subscribe(AppMapConfigFileListener.TOPIC, this::refreshForOpenProjects);
+        var connection = ApplicationManager.getApplication().getMessageBus().connect(this);
+        connection.subscribe(AppMapConfigFileListener.TOPIC, this::refreshForOpenProjectsInBackground);
+        connection.subscribe(AppMapSettingsListener.TOPIC, new AppMapSettingsListener() {
+            @Override
+            public void enableFindingsChanged() {
+                refreshForOpenProjectsInBackground();
+            }
+        });
     }
 
     @Override
@@ -109,12 +114,19 @@ public class DefaultCommandLineService implements AppLandCommandLineService {
 
     @Override
     public synchronized void refreshForOpenProjects() {
+        assert !ApplicationManager.getApplication().isDispatchThread();
+
         try {
             doRefreshForOpenProjectsLocked();
         } finally {
             var messageBus = ApplicationManager.getApplication().getMessageBus();
             messageBus.syncPublisher(AppLandCommandLineListener.TOPIC).afterRefreshForProjects();
         }
+    }
+
+    @Override
+    public void refreshForOpenProjectsInBackground() {
+        ApplicationManager.getApplication().executeOnPooledThread(this::refreshForOpenProjects);
     }
 
     @Override

@@ -19,7 +19,7 @@ public class AppMapLoginAction extends AnAction {
         ApplicationManager.getApplication().executeOnPooledThread(() -> {
             try {
                 var responseData = response.get();
-                AppMapApplicationSettingsService.getInstance().setApiKey(responseData.getAccessToken());
+                AppMapApplicationSettingsService.getInstance().setApiKeyNotifying(responseData.getAccessToken());
             } catch (Exception ex) {
                 Logger.getInstance(AppMapLoginAction.class).warn("Error authenticating with AppMap server", ex);
             }

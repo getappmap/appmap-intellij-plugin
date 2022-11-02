@@ -10,11 +10,11 @@ import org.jetbrains.annotations.NotNull;
 public class AppLandProjectManagerListener implements ProjectManagerListener {
     @Override
     public void projectOpened(@NotNull Project project) {
-        AppLandCommandLineService.getInstance().refreshForOpenProjects();
+        AppLandCommandLineService.getInstance().refreshForOpenProjectsInBackground();
     }
 
     @Override
     public void projectClosed(@NotNull Project project) {
-        AppLandCommandLineService.getInstance().refreshForOpenProjects();
+        AppLandCommandLineService.getInstance().refreshForOpenProjectsInBackground();
     }
 }

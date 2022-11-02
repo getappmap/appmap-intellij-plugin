@@ -42,7 +42,7 @@ public class AppMapProjectConfigurable implements Configurable {
 
         var newSettings = new AppMapProjectSettings(settings);
         var newApplicationSettings = new AppMapApplicationSettings(applicationSettings);
-        form.applySettingsTo(newSettings, newApplicationSettings);
+        form.applySettingsTo(newSettings, newApplicationSettings, false);
 
         return !settings.equals(newSettings) || !applicationSettings.equals(newApplicationSettings);
     }
@@ -51,6 +51,6 @@ public class AppMapProjectConfigurable implements Configurable {
     public void apply() throws ConfigurationException {
         var projectSettings = AppMapProjectSettingsService.getState(project);
         var applicationSettings = AppMapApplicationSettingsService.getInstance();
-        form.applySettingsTo(projectSettings, applicationSettings);
+        form.applySettingsTo(projectSettings, applicationSettings, true);
     }
 }
