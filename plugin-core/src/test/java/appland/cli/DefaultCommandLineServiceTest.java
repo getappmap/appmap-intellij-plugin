@@ -4,6 +4,7 @@ import appland.AppMapBaseTest;
 import appland.settings.AppMapApplicationSettings;
 import appland.settings.AppMapApplicationSettingsService;
 import com.intellij.execution.ExecutionException;
+import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.application.WriteAction;
 import com.intellij.openapi.roots.ModuleRootModificationUtil;
 import com.intellij.openapi.vfs.VirtualFile;
@@ -13,7 +14,6 @@ import com.intellij.testFramework.fixtures.impl.TempDirTestFixtureImpl;
 import org.jetbrains.annotations.NotNull;
 import org.junit.After;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -37,13 +37,14 @@ public class DefaultCommandLineServiceTest extends AppMapBaseTest {
 
         RegisterContentRootsActivity.listenForContentRootChanges(getProject(), getTestRootDisposable());
         AppMapApplicationSettingsService.getInstance().setEnableFindings(true);
+        AppMapApplicationSettingsService.getInstance().setApiKey("api-key");
     }
 
     @After
     public void shutdownProcesses() {
         AppLandCommandLineService.getInstance().stopAll();
-        // reset to default
-        AppMapApplicationSettingsService.getInstance().setEnableFindings(new AppMapApplicationSettings().isEnableFindings());
+        // reset to default settings
+        ApplicationManager.getApplication().getService(AppMapApplicationSettingsService.class).loadState(new AppMapApplicationSettings());
     }
 
     @Test

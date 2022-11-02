@@ -65,6 +65,10 @@ public class AppMapApplicationSettings {
         }
     }
 
+    public boolean isAnalysisEnabled() {
+        return apiKey != null && enableFindings;
+    }
+
     @NotNull
     private static AppMapSettingsListener settingsPublisher() {
         return ApplicationManager.getApplication().getMessageBus().syncPublisher(AppMapSettingsListener.TOPIC);

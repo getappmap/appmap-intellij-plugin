@@ -19,7 +19,7 @@ public enum InstallGuideViewPage {
 
     public boolean isEnabled() {
         if (this == RuntimeAnalysis) {
-            return AppMapApplicationSettingsService.getInstance().isEnableFindings();
+            return AppMapApplicationSettingsService.getInstance().isAnalysisEnabled();
         }
         return true;
     }
