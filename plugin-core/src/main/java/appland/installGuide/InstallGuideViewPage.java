@@ -17,13 +17,6 @@ public enum InstallGuideViewPage {
     @Getter
     private final String pageId;
 
-    public boolean isEnabled() {
-        if (this == RuntimeAnalysis) {
-            return AppMapApplicationSettingsService.getInstance().isAnalysisEnabled();
-        }
-        return true;
-    }
-
     public @NotNull String getPageTitle() {
         switch (this) {
             case InstallAgent:
