@@ -7,6 +7,7 @@ import appland.index.AppMapMetadataIndex;
 import appland.installGuide.InstallGuideViewPage;
 import appland.problemsView.FindingsManager;
 import appland.problemsView.listener.ScannerFindingsListener;
+import appland.settings.AppMapApplicationSettingsService;
 import appland.settings.AppMapProjectSettingsService;
 import appland.settings.AppMapSettingsListener;
 import com.intellij.openapi.Disposable;
@@ -94,7 +95,7 @@ public class InstallGuidePanel extends JPanel implements Disposable {
             }
 
             private void refreshItems() {
-                labels.forEach(StatusLabel::refreshVisibility);
+                refreshInitialStatus(project, labels);
             }
         });
 
@@ -165,7 +166,6 @@ public class InstallGuidePanel extends JPanel implements Disposable {
     public void dispose() {
     }
 
-
     /**
      * Presence of at least one appmap.yml file.
      */
@@ -204,6 +204,11 @@ public class InstallGuidePanel extends JPanel implements Disposable {
      * if findings are enabled, completed if at least one appmap-findings.json file was found
      */
     private static void updateRuntimeAnalysisLabel(@NotNull Project project, @NotNull StatusLabel label) {
+        if (!AppMapApplicationSettingsService.getInstance().isAnalysisEnabled()) {
+            label.setStatus(InstallGuideStatus.Unavailable);
+            return;
+        }
+
         DumbService.getInstance(project).runWhenSmart(() -> {
             var manager = FindingsManager.getInstance(project);
             var hasFindings = manager.getProblemFileCount() > 0 || manager.getOtherProblemCount() > 0;
