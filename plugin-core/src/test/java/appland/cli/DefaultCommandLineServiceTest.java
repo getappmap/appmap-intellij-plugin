@@ -7,6 +7,7 @@ import com.intellij.execution.ExecutionException;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.application.WriteAction;
 import com.intellij.openapi.roots.ModuleRootModificationUtil;
+import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.testFramework.VfsTestUtil;
 import com.intellij.testFramework.fixtures.TempDirTestFixture;
@@ -190,6 +191,12 @@ public class DefaultCommandLineServiceTest extends AppMapBaseTest {
      * Asserts that the detected AppLand content roots match the parameters
      */
     private void assertActiveRoots(@NotNull VirtualFile... roots) {
-        assertEquals(Set.of(roots), Set.copyOf(AppLandCommandLineService.getInstance().getActiveRoots()));
+        var expectedRoots = Set.of(roots);
+        var expectedString = StringUtil.join(expectedRoots, VirtualFile::toString, ", ");
+
+        var activeRoots = Set.copyOf(AppLandCommandLineService.getInstance().getActiveRoots());
+        var activeRootsString = StringUtil.join(activeRoots, VirtualFile::toString, ", ");
+
+        assertEquals("Roots don't match. Expected: " + expectedString + ", actual: " + activeRootsString, expectedRoots, activeRoots);
     }
 }
