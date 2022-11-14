@@ -1,10 +1,8 @@
 package appland.oauth;
 
+import appland.telemetry.TelemetryService;
 import com.intellij.collaboration.auth.OAuthCallbackHandlerBase;
 import com.intellij.collaboration.auth.services.OAuthService;
-import io.netty.channel.ChannelHandlerContext;
-import io.netty.handler.codec.http.FullHttpRequest;
-import io.netty.handler.codec.http.QueryStringDecoder;
 import org.jetbrains.annotations.NotNull;
 
 public class AppMapOAuthRequestHandler extends OAuthCallbackHandlerBase {
@@ -18,6 +16,8 @@ public class AppMapOAuthRequestHandler extends OAuthCallbackHandlerBase {
     @Override
     protected AcceptCodeHandleResult handleAcceptCode(boolean isAccepted) {
         if (!isAccepted) {
+            // we're unable to send appland.appmap/debug/exception because we don't have context about the error.
+            TelemetryService.getInstance().sendEvent("authentication:failed");
             return new AcceptCodeHandleResult.Page("<html><body>The authentication failed.</body></html>");
         }
 
