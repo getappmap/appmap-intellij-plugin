@@ -44,20 +44,28 @@ public class AppLandStartupActivity implements StartupActivity {
 
                     @Override
                     public void apiKeyChanged() {
-                        sendTelemetryOnChange();
+                        sendRuntimeAnalysisTelemetry();
+                        sendAuthenticationTelemetry();
                     }
 
                     @Override
                     public void enableFindingsChanged() {
-                        sendTelemetryOnChange();
+                        sendRuntimeAnalysisTelemetry();
                     }
 
-                    private void sendTelemetryOnChange() {
+                    private void sendRuntimeAnalysisTelemetry() {
                         var newEnabledState = AppMapApplicationSettingsService.getInstance().isAnalysisEnabled();
                         if (lastEnabledState.getAndSet(newEnabledState) != newEnabledState) {
                             var eventName = newEnabledState ? "analysis:enable" : "analysis:disable";
                             TelemetryService.getInstance().sendEvent(eventName);
                         }
+                    }
+
+                    private void sendAuthenticationTelemetry() {
+                        var eventName = AppMapApplicationSettingsService.getInstance().getApiKey() != null
+                                ? "authentication:success"
+                                : "authentication:sign_out";
+                        TelemetryService.getInstance().sendEvent(eventName);
                     }
                 });
     }
