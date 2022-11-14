@@ -259,6 +259,7 @@ public class InstallGuideEditor extends UserDataHolderBase implements FileEditor
 
                         case "perform-auth": {
                             AppMapLoginAction.authenticate();
+                            TelemetryService.getInstance().sendEvent("analysis:cta_interaction");
                             break;
                         }
 
