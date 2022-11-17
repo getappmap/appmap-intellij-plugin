@@ -13,7 +13,7 @@ import java.util.Map;
 import java.util.UUID;
 
 public class AppMapAuthRequest implements OAuthRequest<AppMapAuthCredentials> {
-    private static final Url SERVER_URL = Urls.newFromEncoded("https://app.land/authn_provider/localhost");
+    private static final Url SERVER_URL = Urls.newFromEncoded("https://app.land/authn_provider");
 
     @Getter
     private final String nonce = UUID.randomUUID().toString();
