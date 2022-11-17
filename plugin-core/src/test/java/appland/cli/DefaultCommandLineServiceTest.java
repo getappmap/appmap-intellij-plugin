@@ -15,6 +15,7 @@ import com.intellij.testFramework.fixtures.impl.TempDirTestFixtureImpl;
 import org.jetbrains.annotations.NotNull;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -141,6 +142,7 @@ public class DefaultCommandLineServiceTest extends AppMapBaseTest {
     }
 
     @Test
+    @Ignore("unstable test")
     public void appmapYamlTrigger() throws InterruptedException, IOException {
         var newRootA = myFixture.addFileToProject("parentA/file.txt", "").getParent().getVirtualFile();
 
