@@ -121,6 +121,14 @@ public class InstallGuidePanel extends JPanel implements Disposable {
                     });
                     break;
 
+                case GenerateOpenAPI:
+                    connection.subscribe(AppMapSettingsListener.TOPIC, new AppMapSettingsListener() {
+                        @Override
+                        public void createOpenApiChanged() {
+                            updateGenerateOpenApiLabel(project, label);
+                        }
+                    });
+
                 case RuntimeAnalysis:
                     project.getMessageBus().connect(parent).subscribe(ScannerFindingsListener.TOPIC, new ScannerFindingsListener() {
                         @Override
@@ -150,6 +158,10 @@ public class InstallGuidePanel extends JPanel implements Disposable {
 
             case OpenAppMaps:
                 updateOpenAppMapsLabel(project, label);
+                break;
+
+            case GenerateOpenAPI:
+                updateGenerateOpenApiLabel(project, label);
                 break;
 
             case RuntimeAnalysis:
@@ -196,6 +208,12 @@ public class InstallGuidePanel extends JPanel implements Disposable {
      */
     private static void updateOpenAppMapsLabel(@NotNull Project project, @NotNull StatusLabel label) {
         label.setStatus(AppMapProjectSettingsService.getState(project).isOpenedAppMapEditor()
+                ? InstallGuideStatus.Completed
+                : InstallGuideStatus.Incomplete);
+    }
+
+    private static void updateGenerateOpenApiLabel(@NotNull Project project, @NotNull StatusLabel label) {
+        label.setStatus(AppMapProjectSettingsService.getState(project).isCreatedOpenAPI()
                 ? InstallGuideStatus.Completed
                 : InstallGuideStatus.Incomplete);
     }

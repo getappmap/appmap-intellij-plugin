@@ -69,4 +69,12 @@ public interface AppLandCommandLineService extends Disposable {
      * @return The command line or {@code null} if the CLI is unavailable
      */
     @Nullable GeneralCommandLine createInstallCommand(@NotNull Path path, @NotNull String language);
+
+    /**
+     * Creates the command line to generate an OpenAPI file for a given workspace directory.
+     *
+     * @param projectRoot Project path
+     * @return The command line or {@code null} if the CLI is unavailable
+     */
+    @Nullable GeneralCommandLine createGenerateOpenApiCommand(@NotNull VirtualFile projectRoot);
 }

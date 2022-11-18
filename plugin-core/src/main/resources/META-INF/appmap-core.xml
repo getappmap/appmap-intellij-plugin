@@ -113,6 +113,8 @@
         <action id="showRecentAppmap" class="appland.actions.OpenRecentAppMapAction"/>
         <action id="startAppMapRemoteRecording" class="appland.actions.StartAppMapRecordingAction"/>
         <action id="stopAppMapRemoteRecording" class="appland.actions.StopAppMapRecordingAction"/>
+
+        <action id="appmap.generateOpenAPI" class="appland.actions.GenerateOpenApiAction"/>
         <!--
         <action id="uploadAppMap" class="appland.actions.UploadAppMapAction"/>
         -->
@@ -126,6 +128,8 @@
             <separator/> -->
             <reference ref="startAppMapRemoteRecording"/>
             <reference ref="stopAppMapRemoteRecording"/>
+            <separator/>
+            <reference ref="appmap.generateOpenAPI"/>
             <separator/>
             <reference ref="appMapLogin"/>
             <reference ref="appMapLogout"/>

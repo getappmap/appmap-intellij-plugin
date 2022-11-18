@@ -2,6 +2,7 @@ package appland.installGuide;
 
 import appland.AppMapBundle;
 import appland.AppMapPlugin;
+import appland.actions.GenerateOpenApiAction;
 import appland.cli.AppLandCommandLineService;
 import appland.index.AppMapMetadata;
 import appland.index.IndexedFileListenerUtil;
@@ -33,6 +34,7 @@ import com.intellij.ide.actions.runAnything.execution.RunAnythingRunProfile;
 import com.intellij.openapi.actionSystem.CommonDataKeys;
 import com.intellij.openapi.actionSystem.impl.AsyncDataContext;
 import com.intellij.openapi.application.ApplicationManager;
+import com.intellij.openapi.application.ModalityState;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.fileEditor.FileEditor;
 import com.intellij.openapi.fileEditor.FileEditorLocation;
@@ -41,6 +43,7 @@ import com.intellij.openapi.fileEditor.FileEditorState;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.Disposer;
 import com.intellij.openapi.util.UserDataHolderBase;
+import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.openapi.vfs.LocalFileSystem;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.terminal.TerminalExecutionConsole;
@@ -268,6 +271,22 @@ public class InstallGuideEditor extends UserDataHolderBase implements FileEditor
                             break;
                         }
 
+                        case "generate-openapi": {
+                            var projectPath = json.has("projectPath") ? json.getAsJsonPrimitive("projectPath").getAsString() : null;
+                            var appMapRoot = StringUtil.isNotEmpty(projectPath)
+                                    ? LocalFileSystem.getInstance().findFileByNioFile(Paths.get(projectPath))
+                                    : null;
+
+                            ApplicationManager.getApplication().invokeLater(() -> {
+                                if (appMapRoot != null) {
+                                    GenerateOpenApiAction.createOpenApiFile(project, appMapRoot, true);
+                                } else {
+                                    GenerateOpenApiAction.createOpenApiFileInteractive(project, true);
+                                }
+                            }, ModalityState.defaultModalityState());
+                            break;
+                        }
+
                         default:
                             LOG.warn("Unhandled message type: " + type);
                     }
@@ -326,12 +345,9 @@ public class InstallGuideEditor extends UserDataHolderBase implements FileEditor
         // this contains all necessary data for the components, calculated under progress
         var projects = findProjects();
 
-        var disabledPages = new JsonArray();
-        disabledPages.add("openapi");
-
         var json = createBasePropertiesMessage("init");
         json.add("projects", gson.toJsonTree(projects));
-        json.add("disabledPages", disabledPages);
+        json.add("disabledPages", new JsonArray());
         return json;
     }
 
