@@ -1,5 +1,16 @@
 AppMap Plugin Changelog
 
+## [0.20.0](https://github.com/getappmap/appmap-intellij-plugin/compare/v0.19.0...v0.20.0) (2022-11-18)
+
+
+### Features
+
+-  handle changes to the enableFindings settings without a restart ([1eaf822]())-  send analysis:enable and analysis:disable events ([2b8db9f]())-  send authentication:failed ([f74d381]())-  send authentication:success and authentication:sign_out ([c05aa1e]())-  send telemetry event analysis:cta_interaction ([516ec48]())-  support authentication against AppLand server ([dcddf42]())
+
+### Bug Fixes
+
+-  keep "Runtime Analysis" visible even when findings are not yet available ([dba3656]())-  labels of new auth actions ([6747b8a]())-  move refresh of CLI processes into background, fix notification when settings change ([199ed86]())-  only enable findings and scanner if both "isUserAuthenticated" and "isFindingsEnabled" are true ([31dd8ed]())
+
 ## [0.19.0](https://github.com/getappmap/appmap-intellij-plugin/compare/v0.18.0...v0.19.0) (2022-10-26)
 
 
