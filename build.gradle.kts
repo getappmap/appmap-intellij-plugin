@@ -43,6 +43,9 @@ allprojects {
 
     val testOutput = configurations.create("testOutput")
     dependencies {
+        // for compatibility with IntelliJ Ultimate, IU-2021.3.3 doesn't include this for unknown reasons
+        compileOnly("com.google.code.findbugs:jsr305:3.0.2")
+
         // http://wiremock.org, Apache 2 license
         testImplementation("com.github.tomakehurst:wiremock-jre8:2.33.1")
 

@@ -165,6 +165,30 @@ public class DefaultCommandLineService implements AppLandCommandLineService {
         return cmd;
     }
 
+    @Override
+    public @Nullable GeneralCommandLine createGenerateOpenApiCommand(@NotNull VirtualFile projectRoot) {
+        var toolPath = AppLandDownloadService.getInstance().getDownloadFilePath(CliTool.AppMap);
+        if (toolPath == null || Files.notExists(toolPath)) {
+            LOG.debug("CLI executable not found: " + toolPath);
+            return null;
+        }
+
+        var localPath = projectRoot.getFileSystem().getNioPath(projectRoot);
+        if (localPath == null) {
+            LOG.debug("Project root is not on the local filesystem", projectRoot);
+            return null;
+        }
+
+        var cmd = new PtyCommandLine();
+        cmd.withExePath(toolPath.toString());
+        cmd.withParameters("openapi", "--appmap-dir", localPath.toString());
+        cmd.withConsoleMode(false);
+        cmd.withParentEnvironmentType(GeneralCommandLine.ParentEnvironmentType.CONSOLE);
+
+        LOG.debug("AppMap OpenAPI command line " + cmd.getCommandLineString());
+        return cmd;
+    }
+
     private void stopLocked(@NotNull CliProcesses value) {
         try {
             shutdownInBackground(value.indexer);

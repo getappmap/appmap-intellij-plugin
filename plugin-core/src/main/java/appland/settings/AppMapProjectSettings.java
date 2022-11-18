@@ -23,6 +23,7 @@ public class AppMapProjectSettings {
     private String cloudServerUrl;
     private boolean confirmAppMapUpload = true;
     private boolean openedAppMapEditor = false;
+    private boolean createdOpenAPI = false;
 
     public AppMapProjectSettings() {
     }
@@ -39,6 +40,7 @@ public class AppMapProjectSettings {
         this.cloudServerUrl = settings.cloudServerUrl;
         this.confirmAppMapUpload = settings.confirmAppMapUpload;
         this.openedAppMapEditor = settings.openedAppMapEditor;
+        this.createdOpenAPI = settings.createdOpenAPI;
     }
 
     @NotNull
@@ -104,5 +106,13 @@ public class AppMapProjectSettings {
 
     public synchronized void setOpenedAppMapEditor(boolean openedAppMapEditor) {
         this.openedAppMapEditor = openedAppMapEditor;
+    }
+
+    public synchronized boolean isCreatedOpenAPI() {
+        return createdOpenAPI;
+    }
+
+    public synchronized void setCreatedOpenAPI(boolean createdOpenAPI) {
+        this.createdOpenAPI = createdOpenAPI;
     }
 }
