@@ -1,5 +1,12 @@
 AppMap Plugin Changelog
 
+## [0.20.1](https://github.com/getappmap/appmap-intellij-plugin/compare/v0.20.0...v0.20.1) (2022-11-21)
+
+
+### Bug Fixes
+
+-  Use `/authn_provider` for authentication ([bbfea52]())
+
 ## [0.20.0](https://github.com/getappmap/appmap-intellij-plugin/compare/v0.19.0...v0.20.0) (2022-11-18)
 
 
