@@ -27,7 +27,7 @@ class AppMapProjectSettingsForm {
     void loadSettingsFrom(@NotNull AppMapProjectSettings settings,
                           @NotNull AppMapApplicationSettings applicationSettings) {
         serverName.setText(settings.getCloudServerUrl());
-        confirmUpload.setSelected(settings.getConfirmAppMapUpload());
+        confirmUpload.setSelected(settings.isConfirmAppMapUpload());
 
         enableFindings.setSelected(applicationSettings.isEnableFindings());
         enableTelemetry.setSelected(applicationSettings.isEnableTelemetry());

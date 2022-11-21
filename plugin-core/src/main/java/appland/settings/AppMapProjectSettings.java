@@ -1,8 +1,8 @@
 package appland.settings;
 
 import com.google.common.collect.Lists;
-import lombok.EqualsAndHashCode;
-import lombok.ToString;
+import com.intellij.openapi.application.ApplicationManager;
+import lombok.*;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -12,19 +12,18 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 @EqualsAndHashCode
 @ToString
+@Getter(onMethod_ = {@Synchronized})
+@Setter(onMethod_ = {@Synchronized})
 public class AppMapProjectSettings {
-    @Nullable
-    private List<String> recentRemoteRecordingURLs;
-    @Nullable
-    private String activeRecordingURL;
-    @Nullable
-    private String recentAppMapStorageLocation;
-    @Nullable
-    private String cloudServerUrl;
+    private @Nullable List<String> recentRemoteRecordingURLs;
+    private @Nullable String activeRecordingURL;
+    private @Nullable String recentAppMapStorageLocation;
+    private @Nullable String cloudServerUrl;
     private boolean confirmAppMapUpload = true;
     private boolean openedAppMapEditor = false;
     private boolean createdOpenAPI = false;
 
+    @SuppressWarnings("unused")
     public AppMapProjectSettings() {
     }
 
@@ -74,45 +73,20 @@ public class AppMapProjectSettings {
         this.recentRemoteRecordingURLs.add(0, url);
     }
 
-    @Nullable
-    public synchronized String getActiveRecordingURL() {
-        return activeRecordingURL;
+    public void setCreatedOpenAPI(boolean createdOpenAPI) {
+        boolean changed;
+        synchronized (this) {
+            changed = this.createdOpenAPI != createdOpenAPI;
+            this.createdOpenAPI = createdOpenAPI;
+        }
+
+        if (changed) {
+            settingsPublisher().createOpenApiChanged();
+        }
     }
 
-    public synchronized void setActiveRecordingURL(@Nullable String activeRecordingURL) {
-        this.activeRecordingURL = activeRecordingURL;
-    }
-
-    public synchronized boolean getConfirmAppMapUpload() {
-        return confirmAppMapUpload;
-    }
-
-    public synchronized void setConfirmAppMapUpload(boolean confirmAppMapUpload) {
-        this.confirmAppMapUpload = confirmAppMapUpload;
-    }
-
-    @Nullable
-    public synchronized String getCloudServerUrl() {
-        return cloudServerUrl;
-    }
-
-    public synchronized void setCloudServerUrl(@Nullable String cloudServerUrl) {
-        this.cloudServerUrl = cloudServerUrl;
-    }
-
-    public synchronized boolean isOpenedAppMapEditor() {
-        return openedAppMapEditor;
-    }
-
-    public synchronized void setOpenedAppMapEditor(boolean openedAppMapEditor) {
-        this.openedAppMapEditor = openedAppMapEditor;
-    }
-
-    public synchronized boolean isCreatedOpenAPI() {
-        return createdOpenAPI;
-    }
-
-    public synchronized void setCreatedOpenAPI(boolean createdOpenAPI) {
-        this.createdOpenAPI = createdOpenAPI;
+    @NotNull
+    private AppMapSettingsListener settingsPublisher() {
+        return ApplicationManager.getApplication().getMessageBus().syncPublisher(AppMapSettingsListener.TOPIC);
     }
 }

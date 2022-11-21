@@ -26,7 +26,7 @@ public class AppMapUploaderTest extends AppMapBaseTest {
         var appmapFile = myFixture.configureByText("sample.appmap.json", "{\"version\": \"1.5.1\"}");
 
         var projectSettings = AppMapProjectSettingsService.getState(getProject());
-        var oldConfirmUpload = projectSettings.getConfirmAppMapUpload();
+        var oldConfirmUpload = projectSettings.isConfirmAppMapUpload();
         try {
             projectSettings.setCloudServerUrl(serverRule.baseUrl());
             projectSettings.setConfirmAppMapUpload(false);
