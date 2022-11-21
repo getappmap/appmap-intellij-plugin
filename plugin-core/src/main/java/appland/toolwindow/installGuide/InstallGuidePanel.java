@@ -128,6 +128,7 @@ public class InstallGuidePanel extends JPanel implements Disposable {
                             updateGenerateOpenApiLabel(project, label);
                         }
                     });
+                    break;
 
                 case RuntimeAnalysis:
                     project.getMessageBus().connect(parent).subscribe(ScannerFindingsListener.TOPIC, new ScannerFindingsListener() {
