@@ -1,5 +1,12 @@
 AppMap Plugin Changelog
 
+## [0.20.2](https://github.com/getappmap/appmap-intellij-plugin/compare/v0.20.1...v0.20.2) (2022-11-21)
+
+
+### Bug Fixes
+
+-  ConcurrentModificationException opening a project ([813a7e9]())-  NPE when the project language could not be found ([7240aaa]())
+
 ## [0.20.1](https://github.com/getappmap/appmap-intellij-plugin/compare/v0.20.0...v0.20.1) (2022-11-21)
 
 
