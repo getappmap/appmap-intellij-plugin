@@ -22,7 +22,7 @@ public class AppMapAuthRequest implements OAuthRequest<AppMapAuthCredentials> {
     @Override
     public Url getAuthUrlWithParameters() {
         var callbackUrl = getAuthorizationCodeUrl().addParameters(Map.of("nonce", nonce)).toExternalForm();
-        return SERVER_URL.addParameters(Map.of("redirect_url", callbackUrl));
+        return SERVER_URL.addParameters(Map.of("redirect_url", callbackUrl, "source", "JetBrains"));
     }
 
     @NotNull
