@@ -108,7 +108,7 @@ public class GenerateOpenApiAction extends AnAction implements DumbAware {
 
             @Override
             public void onFinished() {
-                AppMapProjectSettingsService.getState(project).setCreatedOpenAPI(project, true);
+                AppMapProjectSettingsService.getState(project).setCreatedOpenAPI(true);
             }
 
             @Override

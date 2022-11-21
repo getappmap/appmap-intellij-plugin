@@ -45,7 +45,7 @@ public class AppMapUploader {
     public static void uploadAppMap(@NotNull Project project, @NotNull VirtualFile file, @NotNull Consumer<String> urlConsumer) {
         ApplicationManager.getApplication().assertIsDispatchThread();
 
-        if (AppMapProjectSettingsService.getState(project).getConfirmAppMapUpload()) {
+        if (AppMapProjectSettingsService.getState(project).isConfirmAppMapUpload()) {
             var reply = Messages.showOkCancelDialog(project,
                     AppMapBundle.get("upload.confirmation.message"),
                     AppMapBundle.get("upload.confirmation.title"),
