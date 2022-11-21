@@ -26,6 +26,7 @@ import com.intellij.util.system.CpuArch;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import javax.annotation.concurrent.GuardedBy;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -36,7 +37,7 @@ import java.util.Map;
 public class DefaultCommandLineService implements AppLandCommandLineService {
     private static final Logger LOG = Logger.getInstance(DefaultCommandLineService.class);
 
-    // must be accessed in a synchronized block
+    @GuardedBy("this")
     private final Map<VirtualFile, CliProcesses> processes = new HashMap<>();
 
     public DefaultCommandLineService() {
@@ -201,8 +202,9 @@ public class DefaultCommandLineService implements AppLandCommandLineService {
         var scannerProcessRequired = AppMapApplicationSettingsService.getInstance().isAnalysisEnabled();
 
         // remove processes of roots, which no longer have a matching content root in a project
-        // or which don't match the settings anymore. We need to launch the scanner when "enableFindings" changes
-        for (var entry : processes.entrySet()) {
+        // or which don't match the settings anymore. We need to launch the scanner when "enableFindings" changes.
+        // We're iterating on a copy, because stop() is called inside the loop and modifies "processes"
+        for (var entry : List.copyOf(processes.entrySet())) {
             var activeRoot = entry.getKey();
             var scannerProcessMismatch = scannerProcessRequired == (entry.getValue().scanner == null);
             if (!topLevelRoots.contains(activeRoot) || scannerProcessMismatch) {
