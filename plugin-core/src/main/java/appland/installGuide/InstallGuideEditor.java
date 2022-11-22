@@ -274,9 +274,9 @@ public class InstallGuideEditor extends UserDataHolderBase implements FileEditor
 
                             ApplicationManager.getApplication().invokeLater(() -> {
                                 if (appMapRoot != null) {
-                                    GenerateOpenApiAction.createOpenApiFile(project, appMapRoot, true);
+                                    GenerateOpenApiAction.createOpenApiFile(project, appMapRoot, false);
                                 } else {
-                                    GenerateOpenApiAction.createOpenApiFileInteractive(project, true);
+                                    GenerateOpenApiAction.createOpenApiFileInteractive(project, false);
                                 }
                             }, ModalityState.defaultModalityState());
                             break;
