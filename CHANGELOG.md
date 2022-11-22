@@ -1,5 +1,12 @@
 AppMap Plugin Changelog
 
+## [0.20.3](https://github.com/getappmap/appmap-intellij-plugin/compare/v0.20.2...v0.20.3) (2022-11-22)
+
+
+### Bug Fixes
+
+-  Emit appmap:create events ([144f7f6]())-  Specify the authentication source as 'JetBrains' ([8db8f4a]())-  Upgrade AppMap agent to v1.15.2 ([3117a31]())
+
 ## [0.20.2](https://github.com/getappmap/appmap-intellij-plugin/compare/v0.20.1...v0.20.2) (2022-11-21)
 
 
