@@ -132,11 +132,11 @@ public class GenerateOpenApiAction extends AnAction implements DumbAware {
                             }
                         });
                     } else {
-                        // fixme show message for timeout or cancelled
-                        LOG.debug("Operation was cancelled or timed out");
+                        sendErrorTelemetry();
                     }
                 } catch (ExecutionException e) {
-                    throw new RuntimeException(e);
+                    LOG.debug("Error executing command: " + commandLine.getCommandLineString(), e);
+                    sendErrorTelemetry();
                 }
             }
         }.queue();
@@ -158,5 +158,9 @@ public class GenerateOpenApiAction extends AnAction implements DumbAware {
                 return data.property("appmap.project.language", languageId);
             });
         });
+    }
+
+    private static void sendErrorTelemetry() {
+        TelemetryService.getInstance().sendEvent("open_api:failure");
     }
 }
