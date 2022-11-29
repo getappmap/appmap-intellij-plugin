@@ -1,5 +1,16 @@
 AppMap Plugin Changelog
 
+## [0.21.0](https://github.com/getappmap/appmap-intellij-plugin/compare/v0.20.3...v0.21.0) (2022-11-29)
+
+
+### Features
+
+-  Implement "Generate OpenAPI" ([bd64a95]())-  send telemetry after successfully generating an OpenAPI file ([8ac3dbe]())
+
+### Bug Fixes
+
+-  avoid exception "Too many non-blocking read actions" ([f988ecf]())-  don't open a split editor ([f7ae26f]())-  properly enable the "Generate OpenAPI" step when the panel is shown the first time ([5ff6aff]())-  send telemetry message open_api:failure ([7815b2c]())
+
 ## [0.20.3](https://github.com/getappmap/appmap-intellij-plugin/compare/v0.20.2...v0.20.3) (2022-11-22)
 
 
