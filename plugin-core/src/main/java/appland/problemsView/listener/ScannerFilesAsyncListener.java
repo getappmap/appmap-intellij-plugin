@@ -19,6 +19,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Supplier;
 
@@ -28,6 +29,8 @@ import java.util.function.Supplier;
  */
 @SuppressWarnings("UnstableApiUsage")
 public class ScannerFilesAsyncListener implements AsyncFileListener {
+    private static final @NotNull ExecutorService executor = AppExecutorUtil.createBoundedApplicationPoolExecutor("AppMap file changes", 2);
+
     @Override
     public @Nullable ChangeApplier prepareChange(@NotNull List<? extends @NotNull VFileEvent> events) {
         var toAdd = new HashSet<Supplier<VirtualFile>>();
@@ -103,7 +106,7 @@ public class ScannerFilesAsyncListener implements AsyncFileListener {
                     // we need to run in smart mode because the findings manager uses the index to find relative files
                     ReadAction.nonBlocking(() -> processChangesAsync(project, toAdd, toRemove, toRefresh, directories))
                             .inSmartMode(project)
-                            .submit(AppExecutorUtil.getAppExecutorService());
+                            .submit(executor);
                 }
             }
         };
