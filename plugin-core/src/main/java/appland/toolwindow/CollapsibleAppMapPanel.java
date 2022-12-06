@@ -1,4 +1,4 @@
-package appland.toolwindow.installGuide;
+package appland.toolwindow;
 
 import com.intellij.util.containers.ContainerUtil;
 import org.jetbrains.annotations.NotNull;
@@ -10,14 +10,14 @@ import java.util.Collection;
 /**
  * A collapsible panel with a title (always visible) and content (visible only if expanded).
  */
-class CollapsibleInstallGuidePanel extends JPanel {
+public class CollapsibleAppMapPanel extends JPanel {
     private final Collection<CollapsingListener> listeners = ContainerUtil.createLockFreeCopyOnWriteList();
     private final JComponent content;
     private final InstallGuideTitlePanel title;
     private boolean isCollapsed;
     private boolean isInitialized = false;
 
-    public CollapsibleInstallGuidePanel(JComponent content, boolean isCollapsed, @NotNull String title) {
+    public CollapsibleAppMapPanel(@NotNull String title, boolean isCollapsed, @NotNull JComponent content) {
         super(new BorderLayout());
 
         this.content = content;
@@ -60,6 +60,6 @@ class CollapsibleInstallGuidePanel extends JPanel {
     }
 
     interface CollapsingListener {
-        void onCollapsingChanged(@NotNull CollapsibleInstallGuidePanel panel, boolean isCollapsed);
+        void onCollapsingChanged(@NotNull CollapsibleAppMapPanel panel, boolean isCollapsed);
     }
 }
