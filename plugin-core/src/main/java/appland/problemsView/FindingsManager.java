@@ -4,6 +4,7 @@ import appland.index.AppMapFindingsUtil;
 import appland.problemsView.listener.ScannerFindingsListener;
 import appland.problemsView.model.FindingsDomainCount;
 import appland.problemsView.model.FindingsFileData;
+import appland.problemsView.model.ImpactDomain;
 import appland.problemsView.model.ScannerFinding;
 import appland.utils.GsonUtils;
 import com.google.common.collect.HashMultiset;
@@ -30,9 +31,7 @@ import org.jetbrains.annotations.Nullable;
 import org.jetbrains.concurrency.CancellablePromise;
 
 import javax.annotation.concurrent.GuardedBy;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
+import java.util.*;
 import java.util.function.Consumer;
 
 /**
@@ -151,6 +150,30 @@ public class FindingsManager implements ProblemsProvider {
             }
         }
         return domainMapping;
+    }
+
+    /**
+     * @return Counts of impact domain of all findings of this project.
+     */
+    public @NotNull Map<ImpactDomain, List<ScannerProblemWithFile>> getProblemsByImpactDomain() {
+        var groups = new EnumMap<ImpactDomain, List<ScannerProblemWithFile>>(ImpactDomain.class);
+
+        synchronized (lock) {
+            for (var entry : problems.entries()) {
+                var finding = entry.getValue();
+                var domain = finding.getFinding().impactDomain;
+                if (domain != null) {
+                    var sourceFile = entry.getKey();
+                    if (groups.containsKey(domain)) {
+                        groups.get(domain).add(new ScannerProblemWithFile(finding, sourceFile));
+                    } else {
+                        groups.put(domain, new ArrayList<>(List.of(new ScannerProblemWithFile(finding, sourceFile))));
+                    }
+                }
+            }
+        }
+
+        return groups;
     }
 
     public int getOtherProblemCount() {

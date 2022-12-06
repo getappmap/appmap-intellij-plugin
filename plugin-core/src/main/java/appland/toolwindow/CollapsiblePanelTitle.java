@@ -14,7 +14,7 @@ import java.awt.event.*;
 import java.util.LinkedList;
 import java.util.List;
 
-public class InstallGuideTitlePanel extends JPanel {
+class CollapsiblePanelTitle extends JPanel {
     @NonNls public static final String ENTER = "enter";
     @NonNls public static final String SPACE = "space";
     private static final KeyStroke KEY_ENTER = KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0);
@@ -25,7 +25,7 @@ public class InstallGuideTitlePanel extends JPanel {
 
     private final List<Runnable> labelActionListeners = new LinkedList<>();
 
-    InstallGuideTitlePanel(@NotNull String title, boolean isCollapsed) {
+    CollapsiblePanelTitle(@NotNull String title, boolean isCollapsed) {
         super(new BorderLayout());
 
         label = new JBLabel(title, SwingConstants.LEADING);
@@ -33,6 +33,8 @@ public class InstallGuideTitlePanel extends JPanel {
         label.setFont(StartupUiUtil.getLabelFont().deriveFont(Font.BOLD));
         label.setIcon(isCollapsed ? collapseIcon : expandIcon);
         add(label, BorderLayout.CENTER);
+        setMinimumSize(getPreferredSize());
+        setMaximumSize(getPreferredSize());
 
         setFocusable(true);
         setBorder(JBUI.Borders.empty(3));

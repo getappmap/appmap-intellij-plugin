@@ -11,7 +11,7 @@ import appland.settings.AppMapApplicationSettingsService;
 import appland.settings.AppMapProjectSettingsService;
 import appland.settings.AppMapSettingsListener;
 import appland.toolwindow.AppMapContentPanel;
-import appland.toolwindow.CollapsibleAppMapPanel;
+import appland.toolwindow.CollapsiblePanel;
 import com.intellij.openapi.Disposable;
 import com.intellij.openapi.application.ModalityState;
 import com.intellij.openapi.application.ReadAction;
@@ -47,7 +47,7 @@ public class InstallGuidePanel extends JPanel implements Disposable {
                 .map(page -> new StatusLabel(page, () -> open(project, page)))
                 .collect(Collectors.toList());
 
-        add(new CollapsibleAppMapPanel("Quickstart", false, new AppMapContentPanel() {
+        add(new CollapsiblePanel("Quickstart", false, new AppMapContentPanel() {
             @Override
             protected void setupPanel() {
                 statusLabels.forEach(this::add);

@@ -9,6 +9,7 @@ import appland.installGuide.InstallGuideEditorProvider;
 import appland.installGuide.InstallGuideViewPage;
 import appland.toolwindow.installGuide.InstallGuidePanel;
 import appland.toolwindow.installGuide.UrlLabel;
+import appland.toolwindow.runtimeAnalysis.RuntimeAnalysisPanel;
 import com.intellij.openapi.Disposable;
 import com.intellij.openapi.actionSystem.*;
 import com.intellij.openapi.diagnostic.Logger;
@@ -213,10 +214,16 @@ public class AppMapWindowPanel extends SimpleToolWindowPanel implements DataProv
     }
 
     private @NotNull JPanel createSouthPanel(@NotNull Disposable parent) {
-        var panel = new JBPanel<>(new VerticalLayout(5));
+        var panel = new JBPanel<>(new VerticalLayout(5)).withMaximumHeight(400);
+        panel.add(createRuntimeAnalysisPanel(parent));
         panel.add(createUserMilestonesPanel(parent));
         panel.add(createDocumentationLinksPanel());
         return panel;
+    }
+
+    @NotNull
+    private JPanel createRuntimeAnalysisPanel(@NotNull Disposable parent) {
+        return new CollapsiblePanel("Runtime Analysis", false, new RuntimeAnalysisPanel(project, parent));
     }
 
     @NotNull
@@ -226,7 +233,7 @@ public class AppMapWindowPanel extends SimpleToolWindowPanel implements DataProv
 
     @NotNull
     private JPanel createDocumentationLinksPanel() {
-        return new CollapsibleAppMapPanel("Documentation", false, new AppMapContentPanel() {
+        return new CollapsiblePanel("Documentation", false, new AppMapContentPanel() {
             @Override
             protected void setupPanel() {
                 add(new UrlLabel("Quickstart", "https://appmap.io/docs/quickstart"));

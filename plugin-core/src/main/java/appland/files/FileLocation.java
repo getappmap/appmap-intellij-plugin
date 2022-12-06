@@ -2,16 +2,17 @@ package appland.files;
 
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.util.text.StringUtil;
+import lombok.Value;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
-import java.util.Objects;
 
 /**
  * Wrapper class for a line offset inside a file.
  */
-public final class FileLocation {
+@Value
+public class FileLocation {
     /**
      * Parses a relative path with optional line number into a location.
      *
@@ -42,34 +43,10 @@ public final class FileLocation {
 
     private static final Logger LOG = Logger.getInstance("#appmap.file");
 
-    @NotNull
-    public final String filePath;
-    @Nullable
-    public final Integer line;
+    public @NotNull String filePath;
+    public @Nullable Integer line;
 
-    FileLocation(@NotNull String filePath, @Nullable Integer line) {
-        this.filePath = filePath;
-        this.line = line;
-    }
-
-    @Override
-    public String toString() {
-        return "FileLocation{" +
-                "filePath='" + filePath + '\'' +
-                ", line=" + line +
-                '}';
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        FileLocation location = (FileLocation) o;
-        return filePath.equals(location.filePath) && Objects.equals(line, location.line);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(filePath, line);
+    public int getZeroBasedLine(int fallback) {
+        return line == null ? fallback : line - 1;
     }
 }
