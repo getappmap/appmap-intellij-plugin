@@ -11,8 +11,8 @@ import javax.swing.*;
 import javax.swing.event.HyperlinkEvent;
 import javax.swing.event.HyperlinkListener;
 
-class UrlLabel extends JBLabel {
-    UrlLabel(@NotNull String label, @NotNull String url) {
+public class UrlLabel extends JBLabel {
+    public UrlLabel(@NotNull String label, @NotNull String url) {
         super(createLink(label, url));
 
         // to enable link support

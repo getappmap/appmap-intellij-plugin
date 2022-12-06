@@ -10,6 +10,8 @@ import appland.problemsView.listener.ScannerFindingsListener;
 import appland.settings.AppMapApplicationSettingsService;
 import appland.settings.AppMapProjectSettingsService;
 import appland.settings.AppMapSettingsListener;
+import appland.toolwindow.AppMapContentPanel;
+import appland.toolwindow.CollapsibleAppMapPanel;
 import com.intellij.openapi.Disposable;
 import com.intellij.openapi.application.ModalityState;
 import com.intellij.openapi.application.ReadAction;
@@ -45,26 +47,12 @@ public class InstallGuidePanel extends JPanel implements Disposable {
                 .map(page -> new StatusLabel(page, () -> open(project, page)))
                 .collect(Collectors.toList());
 
-        addPanel("Quickstart", new InstallGuideContentPanel() {
+        add(new CollapsibleAppMapPanel("Quickstart", false, new AppMapContentPanel() {
             @Override
             protected void setupPanel() {
                 statusLabels.forEach(this::add);
             }
-        });
-
-        addPanel("Documentation", new InstallGuideContentPanel() {
-            @Override
-            protected void setupPanel() {
-                add(new UrlLabel("Quickstart", "https://appmap.io/docs/quickstart"));
-                add(new UrlLabel("AppMap overview", "https://appmap.io/docs/appmap-overview"));
-                add(new UrlLabel("How to use AppMap diagrams", "https://appmap.io/docs/how-to-use-appmap-diagrams"));
-                add(new UrlLabel("Reference", "https://appmap.io/docs/reference"));
-                add(new UrlLabel("Troubleshooting", "https://appmap.io/docs/troubleshooting"));
-                add(new UrlLabel("Recording methods", "https://appmap.io/docs/recording-methods"));
-                add(new UrlLabel("Community", "https://appmap.io/docs/community"));
-                add(new UrlLabel("FAQ", "https://appmap.io/docs/faq"));
-            }
-        });
+        }));
 
         refreshInitialStatus(project, statusLabels);
 
@@ -169,10 +157,6 @@ public class InstallGuidePanel extends JPanel implements Disposable {
                 updateRuntimeAnalysisLabel(project, label);
                 break;
         }
-    }
-
-    private void addPanel(@NotNull String title, @NotNull InstallGuideContentPanel panel) {
-        add(new CollapsibleInstallGuidePanel(panel, false, title));
     }
 
     @Override

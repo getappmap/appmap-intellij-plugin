@@ -1,4 +1,4 @@
-package appland.toolwindow.installGuide;
+package appland.toolwindow;
 
 import com.intellij.ide.ui.laf.darcula.DarculaUIUtil;
 import com.intellij.ui.components.JBLabel;
@@ -14,7 +14,7 @@ import java.awt.event.*;
 import java.util.LinkedList;
 import java.util.List;
 
-class InstallGuideTitlePanel extends JPanel {
+public class InstallGuideTitlePanel extends JPanel {
     @NonNls public static final String ENTER = "enter";
     @NonNls public static final String SPACE = "space";
     private static final KeyStroke KEY_ENTER = KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0);

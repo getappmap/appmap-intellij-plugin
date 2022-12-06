@@ -8,6 +8,7 @@ import appland.index.IndexedFileListenerUtil;
 import appland.installGuide.InstallGuideEditorProvider;
 import appland.installGuide.InstallGuideViewPage;
 import appland.toolwindow.installGuide.InstallGuidePanel;
+import appland.toolwindow.installGuide.UrlLabel;
 import com.intellij.openapi.Disposable;
 import com.intellij.openapi.actionSystem.*;
 import com.intellij.openapi.diagnostic.Logger;
@@ -22,6 +23,8 @@ import com.intellij.ui.DocumentAdapter;
 import com.intellij.ui.ScrollPaneFactory;
 import com.intellij.ui.SearchTextField;
 import com.intellij.ui.SimpleTextAttributes;
+import com.intellij.ui.components.JBPanel;
+import com.intellij.ui.components.panels.VerticalLayout;
 import com.intellij.ui.content.Content;
 import com.intellij.ui.tree.AsyncTreeModel;
 import com.intellij.ui.treeStructure.SimpleTree;
@@ -70,7 +73,7 @@ public class AppMapWindowPanel extends SimpleToolWindowPanel implements DataProv
 
         setToolbar(createToolBar(appMapModel));
         setContent(ScrollPaneFactory.createScrollPane(tree));
-        add(createUserMilestonesPanel(appMapModel), BorderLayout.SOUTH);
+        add(createSouthPanel(appMapModel), BorderLayout.SOUTH);
 
         IndexedFileListenerUtil.registerListeners(project, this, true, false, () -> rebuild(false));
     }
@@ -115,11 +118,6 @@ public class AppMapWindowPanel extends SimpleToolWindowPanel implements DataProv
         new EditSourceOnDoubleClickHandler.TreeMouseListener(tree, null).installOn(tree);
         EditSourceOnEnterKeyHandler.install(tree);
         return tree;
-    }
-
-    @NotNull
-    private JPanel createUserMilestonesPanel(@NotNull Disposable parent) {
-        return new InstallGuidePanel(project, parent);
     }
 
     @Override
@@ -212,5 +210,34 @@ public class AppMapWindowPanel extends SimpleToolWindowPanel implements DataProv
             LOG.debug("rebuild with hidden AppMap tool window");
             hasPendingTreeRefresh = true;
         }
+    }
+
+    private @NotNull JPanel createSouthPanel(@NotNull Disposable parent) {
+        var panel = new JBPanel<>(new VerticalLayout(5));
+        panel.add(createUserMilestonesPanel(parent));
+        panel.add(createDocumentationLinksPanel());
+        return panel;
+    }
+
+    @NotNull
+    private JPanel createUserMilestonesPanel(@NotNull Disposable parent) {
+        return new InstallGuidePanel(project, parent);
+    }
+
+    @NotNull
+    private JPanel createDocumentationLinksPanel() {
+        return new CollapsibleAppMapPanel("Documentation", false, new AppMapContentPanel() {
+            @Override
+            protected void setupPanel() {
+                add(new UrlLabel("Quickstart", "https://appmap.io/docs/quickstart"));
+                add(new UrlLabel("AppMap overview", "https://appmap.io/docs/appmap-overview"));
+                add(new UrlLabel("How to use AppMap diagrams", "https://appmap.io/docs/how-to-use-appmap-diagrams"));
+                add(new UrlLabel("Reference", "https://appmap.io/docs/reference"));
+                add(new UrlLabel("Troubleshooting", "https://appmap.io/docs/troubleshooting"));
+                add(new UrlLabel("Recording methods", "https://appmap.io/docs/recording-methods"));
+                add(new UrlLabel("Community", "https://appmap.io/docs/community"));
+                add(new UrlLabel("FAQ", "https://appmap.io/docs/faq"));
+            }
+        });
     }
 }
