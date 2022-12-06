@@ -10,19 +10,19 @@ import java.util.Collection;
 /**
  * A collapsible panel with a title (always visible) and content (visible only if expanded).
  */
-public class CollapsibleAppMapPanel extends JPanel {
+public class CollapsiblePanel extends JPanel {
     private final Collection<CollapsingListener> listeners = ContainerUtil.createLockFreeCopyOnWriteList();
     private final JComponent content;
-    private final InstallGuideTitlePanel title;
+    private final CollapsiblePanelTitle title;
     private boolean isCollapsed;
     private boolean isInitialized = false;
 
-    public CollapsibleAppMapPanel(@NotNull String title, boolean isCollapsed, @NotNull JComponent content) {
+    public CollapsiblePanel(@NotNull String title, boolean isCollapsed, @NotNull JComponent content) {
         super(new BorderLayout());
 
         this.content = content;
 
-        this.title = new InstallGuideTitlePanel(title, isCollapsed);
+        this.title = new CollapsiblePanelTitle(title, isCollapsed);
         this.title.addLabelActionListener(() -> setCollapsed(!isCollapsed()));
         add(this.title, BorderLayout.NORTH);
 
@@ -60,6 +60,6 @@ public class CollapsibleAppMapPanel extends JPanel {
     }
 
     interface CollapsingListener {
-        void onCollapsingChanged(@NotNull CollapsibleAppMapPanel panel, boolean isCollapsed);
+        void onCollapsingChanged(@NotNull CollapsiblePanel panel, boolean isCollapsed);
     }
 }

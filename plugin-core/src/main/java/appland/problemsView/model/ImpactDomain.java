@@ -7,8 +7,8 @@ public enum ImpactDomain {
     Security,
     @SerializedName("Performance")
     Performance,
-    @SerializedName("Maintainability")
-    Maintainability,
     @SerializedName("Stability")
-    Stability;
+    Stability,
+    @SerializedName("Maintainability")
+    Maintainability;
 }
