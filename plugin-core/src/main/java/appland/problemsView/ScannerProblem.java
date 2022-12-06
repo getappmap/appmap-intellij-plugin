@@ -31,7 +31,7 @@ final class ScannerProblem implements FileProblem {
         this.findingsFile = findingsFile;
 
         var location = finding.getProblemLocation();
-        this.line = location != null && location.line != null ? location.line - 1 : -1;
+        this.line = location != null ? location.getZeroBasedLine(-1) : -1;
     }
 
     @NotNull

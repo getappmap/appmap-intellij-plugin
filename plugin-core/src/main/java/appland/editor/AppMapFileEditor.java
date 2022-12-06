@@ -347,7 +347,7 @@ public class AppMapFileEditor extends UserDataHolderBase implements FileEditor {
                 var referencedFile = FileLookup.findRelativeFile(project, file, FileUtil.toSystemIndependentName(location.filePath));
                 if (referencedFile != null) {
                     // IntelliJ's lines are 0-based, AppMap lines seem to be 0-based
-                    var line = location.line == null ? -1 : location.line - 1;
+                    var line = location.getZeroBasedLine(-1);
                     OpenFileDescriptor descriptor = new OpenFileDescriptor(project, referencedFile, line, -1);
 
                     OpenInRightSplitAction.Companion.openInRightSplit(project, referencedFile, descriptor, true);

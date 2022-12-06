@@ -6,15 +6,20 @@ import com.google.gson.annotations.SerializedName;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.openapi.vfs.VirtualFile;
+import lombok.EqualsAndHashCode;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Collections;
 import java.util.List;
 
+@EqualsAndHashCode
 public class ScannerFinding {
     @SerializedName("hash")
-    public @NotNull String hash = "";
+    public @Nullable String appMapHash = null;
+
+    @SerializedName("hash_v2")
+    public @Nullable String appMapHashV2 = null;
 
     @SerializedName("ruleId")
     public @NotNull String ruleId = "";
@@ -39,6 +44,10 @@ public class ScannerFinding {
 
     @SerializedName("relatedEvents")
     public @Nullable List<ScannerFindingEvent> relatedEvents = null;
+
+    public @Nullable String getAppMapHashWithFallback() {
+        return StringUtil.nullize(StringUtil.defaultIfEmpty(appMapHashV2, appMapHash));
+    }
 
     public @NotNull String getFindingTitle() {
         var rule = ruleTitle;
