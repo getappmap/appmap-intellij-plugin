@@ -45,6 +45,9 @@ public class ScannerFinding {
     @SerializedName("relatedEvents")
     public @Nullable List<ScannerFindingEvent> relatedEvents = null;
 
+    // attached after JSON parsing, not defined in appmap-findings.json
+    public transient @Nullable RuleInfo ruleInfo = null;
+
     public @Nullable String getAppMapHashWithFallback() {
         return StringUtil.nullize(StringUtil.defaultIfEmpty(appMapHashV2, appMapHash));
     }

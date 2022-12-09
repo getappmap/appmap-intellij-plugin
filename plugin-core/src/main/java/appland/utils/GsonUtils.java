@@ -1,9 +1,6 @@
 package appland.utils;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonPrimitive;
+import com.google.gson.*;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -29,5 +26,23 @@ public class GsonUtils {
 
     public static boolean hasProperty(@NotNull JsonObject json, @NotNull String... path) {
         return getPath(json, path) != null;
+    }
+
+    public static @NotNull JsonObject singlePropertyObject(@NotNull String name, @NotNull JsonElement value) {
+        var json = new JsonObject();
+        json.add(name, value);
+        return json;
+    }
+
+    public static @NotNull JsonObject singlePropertyObject(@NotNull String name, @NotNull String value) {
+        var json = new JsonObject();
+        json.addProperty(name, value);
+        return json;
+    }
+
+    public static @NotNull JsonObject singlePropertyObject(@NotNull String name, @NotNull Number value) {
+        var json = new JsonObject();
+        json.addProperty(name, value);
+        return json;
     }
 }

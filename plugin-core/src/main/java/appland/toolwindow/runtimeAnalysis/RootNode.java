@@ -6,6 +6,7 @@ import appland.problemsView.model.ImpactDomain;
 import com.intellij.ide.projectView.PresentationData;
 import com.intellij.openapi.Disposable;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.util.Disposer;
 import com.intellij.ui.tree.LeafState;
 import org.jetbrains.annotations.NotNull;
 
@@ -19,6 +20,7 @@ class RootNode extends Node implements Disposable {
     protected RootNode(@NotNull Project project, @NotNull RuntimeAnalysisModel treeModel) {
         super(project, null);
         this.treeModel = treeModel;
+        Disposer.register(treeModel, this);
 
         var busConnection = project.getMessageBus().connect(this);
         busConnection.subscribe(ScannerFindingsListener.TOPIC, new ScannerFindingsListener() {
