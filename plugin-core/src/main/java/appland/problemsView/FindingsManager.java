@@ -33,6 +33,7 @@ import org.jetbrains.concurrency.CancellablePromise;
 import javax.annotation.concurrent.GuardedBy;
 import java.util.*;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 /**
  * Service managing the AppMap findings of a project.
@@ -69,6 +70,14 @@ public class FindingsManager implements ProblemsProvider {
     @Override
     public @NotNull Project getProject() {
         return project;
+    }
+
+    public @NotNull List<ScannerFinding> getAllFindings() {
+        synchronized (lock) {
+            return problems.values().stream()
+                    .map(ScannerProblem::getFinding)
+                    .collect(Collectors.toList());
+        }
     }
 
     public int getProblemFileCount() {
@@ -225,6 +234,14 @@ public class FindingsManager implements ProblemsProvider {
         }
     }
 
+    public @NotNull List<ScannerProblem> findProblemByHash(@NotNull String hashV2) {
+        synchronized (lock) {
+            return problems.values().stream()
+                    .filter(p -> hashV2.equals(p.getFinding().getAppMapHashWithFallback()))
+                    .collect(Collectors.toList());
+        }
+    }
+
     @Override
     public void dispose() {
         reset();
@@ -340,7 +357,15 @@ public class FindingsManager implements ProblemsProvider {
         }
 
         try {
-            return GsonUtils.GSON.fromJson(doc.getText(), FindingsFileData.class);
+            var data = GsonUtils.GSON.fromJson(doc.getText(), FindingsFileData.class);
+            if (data != null && data.findings != null && !data.findings.isEmpty()) {
+                var ruleMapping = data.createRuleInfoMapping();
+                for (var finding : data.findings) {
+                    // update rule info with the ruleId of the finding
+                    finding.ruleInfo = ruleMapping.get(finding.ruleId);
+                }
+            }
+            return data;
         } catch (JsonSyntaxException e) {
             if (LOG.isDebugEnabled()) {
                 LOG.debug("Failed to load findings file: " + file.getPath(), e);

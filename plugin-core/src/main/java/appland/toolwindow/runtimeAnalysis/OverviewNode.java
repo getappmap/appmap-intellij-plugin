@@ -1,5 +1,6 @@
 package appland.toolwindow.runtimeAnalysis;
 
+import appland.webviews.findings.FindingsOverviewEditorProvider;
 import com.intellij.ide.projectView.PresentationData;
 import com.intellij.ide.util.treeView.NodeDescriptor;
 import com.intellij.openapi.project.Project;
@@ -48,6 +49,6 @@ class OverviewNode extends Node implements Navigatable {
 
     @Override
     public void navigate(boolean requestFocus) {
-        // fixme(jansorg): open the overview JS application
+        FindingsOverviewEditorProvider.openEditor(myProject);
     }
 }

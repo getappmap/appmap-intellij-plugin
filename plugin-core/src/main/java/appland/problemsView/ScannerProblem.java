@@ -11,7 +11,7 @@ import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
 
-final class ScannerProblem implements FileProblem {
+public final class ScannerProblem implements FileProblem {
     private final @NotNull ProblemsProvider provider;
     private final @NotNull VirtualFile annotatedFile;
     @Getter
@@ -34,6 +34,9 @@ final class ScannerProblem implements FileProblem {
         this.line = location != null ? location.getZeroBasedLine(-1) : -1;
     }
 
+    /**
+     * @return The annotated source file, e.g. a Java file.
+     */
     @NotNull
     @Override
     public VirtualFile getFile() {

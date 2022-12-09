@@ -46,6 +46,9 @@
 
         <fileEditorProvider implementation="appland.installGuide.InstallGuideEditorProvider"/>
 
+        <fileEditorProvider implementation="appland.webviews.findings.FindingsOverviewEditorProvider"/>
+        <fileEditorProvider implementation="appland.webviews.findingDetails.FindingDetailsEditorProvider"/>
+
         <fileBasedIndex implementation="appland.index.AppMapMetadataIndex"/>
         <fileBasedIndex implementation="appland.index.ClassMapTypeIndex"/>
         <!--suppress PluginXmlValidity -->
