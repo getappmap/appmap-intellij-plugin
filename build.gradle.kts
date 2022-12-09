@@ -159,6 +159,11 @@ project(":") {
                 include("index.html")
                 include("dist/**")
             }
+            from("${project.rootDir}/appland-findings") {
+                into("appmap-assets/appland-findings")
+                include("index.html")
+                include("dist/**")
+            }
             from(appMapJavaAgent) {
                 into("appmap-assets/appmap-agents")
                 rename {
