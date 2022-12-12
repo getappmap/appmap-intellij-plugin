@@ -2,10 +2,12 @@ package appland.problemsView.listener;
 
 import appland.index.AppMapFindingsUtil;
 import appland.problemsView.FindingsManager;
+import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.application.ReadAction;
 import com.intellij.openapi.progress.ProgressManager;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.project.ProjectManager;
+import com.intellij.openapi.util.ThrowableComputable;
 import com.intellij.openapi.vfs.AsyncFileListener;
 import com.intellij.openapi.vfs.LocalFileSystem;
 import com.intellij.openapi.vfs.VfsUtilCore;
@@ -15,6 +17,7 @@ import com.intellij.util.concurrency.AppExecutorUtil;
 import com.intellij.util.concurrency.annotations.RequiresReadLock;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.TestOnly;
 
 import java.util.HashSet;
 import java.util.List;
@@ -29,10 +32,27 @@ import java.util.function.Supplier;
  */
 @SuppressWarnings("UnstableApiUsage")
 public class ScannerFilesAsyncListener implements AsyncFileListener {
+    @TestOnly
+    private static volatile boolean TEST_ENABLED = true;
+
+    @TestOnly
+    public static <T> T disableForTests(@NotNull ThrowableComputable<T, Exception> runnable) throws Exception {
+        TEST_ENABLED = false;
+        try {
+            return runnable.compute();
+        } finally {
+            TEST_ENABLED = true;
+        }
+    }
+
     private static final @NotNull ExecutorService executor = AppExecutorUtil.createBoundedApplicationPoolExecutor("AppMap file changes", 2);
 
     @Override
     public @Nullable ChangeApplier prepareChange(@NotNull List<? extends @NotNull VFileEvent> events) {
+        if (!TEST_ENABLED && ApplicationManager.getApplication().isUnitTestMode()) {
+            return null;
+        }
+
         var toAdd = new HashSet<Supplier<VirtualFile>>();
         var toRefresh = new HashSet<VirtualFile>();
         var toRemove = new HashSet<String>();
