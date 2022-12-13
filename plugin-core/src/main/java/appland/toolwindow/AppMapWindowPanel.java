@@ -20,12 +20,7 @@ import com.intellij.openapi.vfs.LocalFileSystem;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.pom.Navigatable;
 import com.intellij.psi.PsiManager;
-import com.intellij.ui.DocumentAdapter;
-import com.intellij.ui.ScrollPaneFactory;
-import com.intellij.ui.SearchTextField;
-import com.intellij.ui.SimpleTextAttributes;
-import com.intellij.ui.components.JBPanel;
-import com.intellij.ui.components.panels.VerticalLayout;
+import com.intellij.ui.*;
 import com.intellij.ui.content.Content;
 import com.intellij.ui.tree.AsyncTreeModel;
 import com.intellij.ui.treeStructure.SimpleTree;
@@ -33,6 +28,7 @@ import com.intellij.util.Alarm;
 import com.intellij.util.EditSourceOnDoubleClickHandler;
 import com.intellij.util.EditSourceOnEnterKeyHandler;
 import com.intellij.util.SingleAlarm;
+import com.intellij.util.ui.JBDimension;
 import com.intellij.util.ui.tree.TreeUtil;
 import org.jetbrains.annotations.NonNls;
 import org.jetbrains.annotations.NotNull;
@@ -69,12 +65,11 @@ public class AppMapWindowPanel extends SimpleToolWindowPanel implements DataProv
 
         var appMapModel = new AppMapModel(project);
         this.project = project;
-        this.tree = createTree(this, appMapModel);
+        this.tree = createTree(project, this, appMapModel);
         this.treeRefreshAlarm = new SingleAlarm(appMapModel::refresh, TREE_REFRESH_DELAY_MILLIS, this, Alarm.ThreadToUse.POOLED_THREAD);
 
         setToolbar(createToolBar(appMapModel));
-        setContent(ScrollPaneFactory.createScrollPane(tree));
-        add(createSouthPanel(appMapModel), BorderLayout.SOUTH);
+        setContent(createContentPanel(project, tree, this));
 
         IndexedFileListenerUtil.registerListeners(project, this, true, false, () -> rebuild(false));
     }
@@ -87,8 +82,7 @@ public class AppMapWindowPanel extends SimpleToolWindowPanel implements DataProv
     /**
      * Creates a panel with the search text field and the start and stop actions.
      */
-    @NotNull
-    private JComponent createToolBar(AppMapModel appMapModel) {
+    private @NotNull JComponent createToolBar(@NotNull AppMapModel appMapModel) {
         var actions = new DefaultActionGroup();
         actions.add(new StartAppMapRecordingAction());
         actions.add(new StopAppMapRecordingAction());
@@ -101,24 +95,6 @@ public class AppMapWindowPanel extends SimpleToolWindowPanel implements DataProv
         panel.add(createNameFilter(appMapModel), BorderLayout.CENTER);
         panel.add(bar.getComponent(), BorderLayout.EAST);
         return panel;
-    }
-
-    @NotNull
-    private SimpleTree createTree(@NotNull Disposable disposable, @NotNull TreeModel treeModel) {
-        var tree = new SimpleTree(new AsyncTreeModel(treeModel, disposable));
-        tree.setCellRenderer(new AppMapModel.TreeCellRenderer());
-        tree.getEmptyText().setText(AppMapBundle.get("toolwindow.appmap.emptyText"));
-        tree.getEmptyText().appendSecondaryText(
-                AppMapBundle.get("toolwindow.appmap.installAgentEmptyText"),
-                SimpleTextAttributes.LINK_ATTRIBUTES,
-                e -> InstallGuideEditorProvider.open(project, InstallGuideViewPage.InstallAgent));
-        tree.setRootVisible(false);
-        tree.setShowsRootHandles(false);
-
-        TreeUtil.installActions(tree);
-        new EditSourceOnDoubleClickHandler.TreeMouseListener(tree, null).installOn(tree);
-        EditSourceOnEnterKeyHandler.install(tree);
-        return tree;
     }
 
     @Override
@@ -163,8 +139,7 @@ public class AppMapWindowPanel extends SimpleToolWindowPanel implements DataProv
         return LocalFileSystem.getInstance().findFileByPath(filepath);
     }
 
-    @NotNull
-    private SearchTextField createNameFilter(@NotNull AppMapModel appMapModel) {
+    private @NotNull SearchTextField createNameFilter(@NotNull AppMapModel appMapModel) {
         var textFilter = new SearchTextField();
         filterInputAlarm = new Alarm(textFilter, this);
 
@@ -213,26 +188,57 @@ public class AppMapWindowPanel extends SimpleToolWindowPanel implements DataProv
         }
     }
 
-    private @NotNull JPanel createSouthPanel(@NotNull Disposable parent) {
-        var panel = new JBPanel<>(new VerticalLayout(5)).withMaximumHeight(400);
-        panel.add(createRuntimeAnalysisPanel(parent));
-        panel.add(createUserMilestonesPanel(parent));
-        panel.add(createDocumentationLinksPanel());
-        return panel;
+    private static @NotNull JComponent createContentPanel(@NotNull Project project,
+                                                          @NotNull JComponent viewport,
+                                                          @NotNull Disposable parent) {
+        var firstComponent = ScrollPaneFactory.createScrollPane(viewport, true);
+        firstComponent.setMinimumSize(new JBDimension(0, 200));
+
+        var splitter = new OnePixelSplitter(true, "appmap.toolWindow", 0.7f);
+        splitter.setFirstComponent(firstComponent);
+        splitter.setSecondComponent(createSouthPanel(project, parent));
+        splitter.setHonorComponentsMinimumSize(true);
+        return splitter;
+    }
+
+    private static @NotNull SimpleTree createTree(@NotNull Project project,
+                                                  @NotNull Disposable disposable,
+                                                  @NotNull TreeModel treeModel) {
+        var tree = new SimpleTree(new AsyncTreeModel(treeModel, disposable));
+        tree.setCellRenderer(new AppMapModel.TreeCellRenderer());
+        tree.getEmptyText().setText(AppMapBundle.get("toolwindow.appmap.emptyText"));
+        tree.getEmptyText().appendSecondaryText(
+                AppMapBundle.get("toolwindow.appmap.installAgentEmptyText"),
+                SimpleTextAttributes.LINK_ATTRIBUTES,
+                e -> InstallGuideEditorProvider.open(project, InstallGuideViewPage.InstallAgent));
+        tree.setRootVisible(false);
+        tree.setShowsRootHandles(false);
+
+        TreeUtil.installActions(tree);
+        new EditSourceOnDoubleClickHandler.TreeMouseListener(tree, null).installOn(tree);
+        EditSourceOnEnterKeyHandler.install(tree);
+        return tree;
+    }
+
+    private static @NotNull JPanel createSouthPanel(@NotNull Project project, @NotNull Disposable parent) {
+        // quickstart and documentation panels don't grow
+        var subPanel = new JPanel(new BorderLayout());
+        subPanel.add(new InstallGuidePanel(project, parent), BorderLayout.NORTH);
+        subPanel.add(createDocumentationLinksPanel(), BorderLayout.SOUTH);
+
+        // the "Runtime Analysis" panel should take the available space
+        var runtimeAnalysisPanel = new RuntimeAnalysisPanel(project, parent);
+        runtimeAnalysisPanel.setMinimumSize(new JBDimension(0, 100));
+        var mainPanel = new CollapsiblePanel(AppMapBundle.get("toolwindow.appmap.runtimeAnalysis"), false, runtimeAnalysisPanel);
+
+        var main = new JPanel(new BorderLayout());
+        main.add(mainPanel, BorderLayout.CENTER);
+        main.add(subPanel, BorderLayout.SOUTH);
+        return main;
     }
 
     @NotNull
-    private JPanel createRuntimeAnalysisPanel(@NotNull Disposable parent) {
-        return new CollapsiblePanel("Runtime Analysis", false, new RuntimeAnalysisPanel(project, parent));
-    }
-
-    @NotNull
-    private JPanel createUserMilestonesPanel(@NotNull Disposable parent) {
-        return new InstallGuidePanel(project, parent);
-    }
-
-    @NotNull
-    private JPanel createDocumentationLinksPanel() {
+    private static JPanel createDocumentationLinksPanel() {
         return new CollapsiblePanel("Documentation", false, new AppMapContentPanel() {
             @Override
             protected void setupPanel() {
