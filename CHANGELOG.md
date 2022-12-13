@@ -1,5 +1,12 @@
 AppMap Plugin Changelog
 
+## [0.21.1](https://github.com/getappmap/appmap-intellij-plugin/compare/v0.21.0...v0.21.1) (2022-12-13)
+
+
+### Bug Fixes
+
+-  bundle appmap-java agent v1.15.4 ([27878f3]())
+
 ## [0.21.0](https://github.com/getappmap/appmap-intellij-plugin/compare/v0.20.3...v0.21.0) (2022-11-29)
 
 
