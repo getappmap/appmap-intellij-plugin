@@ -4,8 +4,6 @@ import appland.AppMapBundle;
 import appland.editor.AppMapFileEditor;
 import appland.editor.AppMapFileEditorState;
 import appland.files.AppMapFiles;
-import appland.utils.GsonUtils;
-import com.google.gson.JsonObject;
 import com.intellij.codeInsight.intention.IntentionAction;
 import com.intellij.codeInspection.util.IntentionFamilyName;
 import com.intellij.codeInspection.util.IntentionName;
@@ -26,8 +24,6 @@ import com.intellij.psi.PsiFile;
 import com.intellij.util.IncorrectOperationException;
 import lombok.AllArgsConstructor;
 import org.jetbrains.annotations.NotNull;
-
-import java.util.stream.Collectors;
 
 /**
  * Annotator, which adds highlighting of detected problems to editors.
@@ -106,21 +102,7 @@ public class AppMapFindingsAnnotator implements Annotator {
                 var appMapEditors = FileEditorManager.getInstance(project).openFile(appMapFile, true);
                 if (appMapEditors.length == 1 && appMapEditors[0] instanceof AppMapFileEditor) {
                     var finding = problem.getFinding();
-                    var findingEvent = finding.event;
-                    var relatedEvents = finding.relatedEvents;
-
-                    var state = new JsonObject();
-                    state.addProperty("currentView", "viewFlow");
-                    if (findingEvent != null && findingEvent.id != null) {
-                        state.addProperty("selectedObject", "event:" + findingEvent.id);
-                    }
-                    if (relatedEvents != null && !relatedEvents.isEmpty()) {
-                        var joinedEvents = relatedEvents.stream()
-                                .map(event -> "id:" + event.id)
-                                .collect(Collectors.joining(" "));
-                        state.addProperty("traceFilter", joinedEvents);
-                    }
-                    appMapEditors[0].setState(new AppMapFileEditorState(GsonUtils.GSON.toJson(state)));
+                    appMapEditors[0].setState(AppMapFileEditorState.createViewFlowState(finding.getEventId(), finding.relatedEvents));
                 }
             }
         }
