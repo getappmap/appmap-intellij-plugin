@@ -17,7 +17,7 @@ buildscript {
 
 plugins {
     idea
-    id("org.jetbrains.intellij") version "1.8.1"
+    id("org.jetbrains.intellij") version "1.10.1"
     id("org.jetbrains.changelog") version "1.3.1"
 }
 
