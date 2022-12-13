@@ -8,6 +8,7 @@ import com.intellij.ui.tree.LeafState;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -28,6 +29,10 @@ class FindingsGroupNode extends Node {
         this.title = title;
         this.findings = deduplicateFindings(findings)
                 .stream()
+                .sorted(Comparator.comparing(e -> {
+                    var sourceFile = e.getSourceFile();
+                    return sourceFile != null ? sourceFile.getPresentableName() : "";
+                }))
                 .map(finding -> new FindingLocationNode(project, this, finding))
                 .collect(Collectors.toUnmodifiableList());
     }
