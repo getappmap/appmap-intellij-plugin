@@ -167,7 +167,6 @@ public abstract class WebviewEditor extends UserDataHolderBase implements FileEd
 
     private void setupJCEF() {
         // open links to https://appmap.io in the external browser
-        contentPanel.setOpenLinksInExternalBrowser(true);
         contentPanel.getJBCefClient().addRequestHandler(new OpenExternalLinksHandler(), contentPanel.getCefBrowser());
 
         contentPanel.setErrorPage(new DefaultWebviewErrorPage(navigating));
