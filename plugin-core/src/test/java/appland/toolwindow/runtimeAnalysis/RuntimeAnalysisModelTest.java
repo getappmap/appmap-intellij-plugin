@@ -62,8 +62,8 @@ public class RuntimeAnalysisModelTest extends AppMapBaseTest {
             var findingsRuleNode = assertNode(impactChildren.get(0), "N plus 1 SQL query");
             var findingsRuleChildren = assertChildren(findingsRuleNode, 2);
 
-            assertNode(findingsRuleChildren.get(0), "PetClinicIntegrationTests.java");
-            assertNode(findingsRuleChildren.get(1), "ClinicServiceTests.java");
+            assertNode(findingsRuleChildren.get(0), "ClinicServiceTests.java");
+            assertNode(findingsRuleChildren.get(1), "PetClinicIntegrationTests.java");
         } finally {
             AppMapApplicationSettingsService.getInstance().setApiKey(null);
         }
