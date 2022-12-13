@@ -91,4 +91,8 @@ public class ScannerFinding {
         }
         return null;
     }
+
+    public @Nullable Integer getEventId() {
+        return event != null ? event.id : null;
+    }
 }

@@ -2,6 +2,8 @@ package appland.webviews.findingDetails;
 
 import appland.AppMapBundle;
 import appland.AppMapPlugin;
+import appland.editor.AppMapFileEditor;
+import appland.editor.AppMapFileEditorState;
 import appland.files.AppMapFiles;
 import appland.files.FileLocation;
 import appland.problemsView.ScannerProblem;
@@ -12,9 +14,11 @@ import com.google.gson.*;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.application.ModalityState;
 import com.intellij.openapi.application.ReadAction;
+import com.intellij.openapi.fileEditor.FileEditorManager;
 import com.intellij.openapi.fileEditor.OpenFileDescriptor;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.Messages;
+import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.openapi.vfs.LocalFileSystem;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.ui.jcef.JBCefJSQuery;
@@ -66,7 +70,7 @@ public class FindingDetailsEditor extends WebviewEditor {
                 assert message != null;
                 var path = GsonUtils.getPath(message, "uri", "path");
                 if (path != null) {
-                    openAppMap(path.getAsString());
+                    openAppMapUri(path.getAsString());
                 }
                 return new JBCefJSQuery.Response("success");
 
@@ -108,11 +112,16 @@ public class FindingDetailsEditor extends WebviewEditor {
         }
     }
 
-    private void openAppMap(@NotNull String nativeFilePath) {
-        var file = LocalFileSystem.getInstance().findFileByPath(nativeFilePath);
+    private void openAppMapUri(@NotNull String appMapUri) {
+        // split into file path and state (after the "#)
+        var parts = StringUtil.split(appMapUri, "#");
+        var file = LocalFileSystem.getInstance().findFileByPath(parts.get(0));
         if (file != null) {
             ApplicationManager.getApplication().invokeLater(() -> {
-                new OpenFileDescriptor(project, file).navigate(true);
+                var appMapEditors = FileEditorManager.getInstance(project).openFile(file, true);
+                if (appMapEditors.length == 1 && appMapEditors[0] instanceof AppMapFileEditor) {
+                    appMapEditors[0].setState(new AppMapFileEditorState(parts.get(1)));
+                }
             }, ModalityState.defaultModalityState());
         } else {
             ApplicationManager.getApplication().invokeLater(() -> {
@@ -194,11 +203,18 @@ public class FindingDetailsEditor extends WebviewEditor {
         return gson.toJsonTree(finding.getFinding().ruleInfo);
     }
 
+    // follows VSCode's "resolveAppMapUri"
     private @NotNull JsonElement createAppMapUriJson(@NotNull ScannerProblem finding) {
         var appMapFile = AppMapFiles.findAppMapSourceFile(finding.getFindingsFile());
-        return appMapFile == null
-                ? JsonNull.INSTANCE
-                : singlePropertyObject("path", appMapFile.toNioPath().toString());
+        if (appMapFile == null) {
+            return JsonNull.INSTANCE;
+        }
+
+        // adds the state of the webview as URI anchor
+        var state = AppMapFileEditorState
+                .createViewFlowState(finding.getFinding().getEventId(), finding.getFinding().relatedEvents)
+                .jsonState;
+        return singlePropertyObject("path", appMapFile.toNioPath() + "#" + state);
     }
 
     public static @NotNull String truncatePath(@NotNull String path, @NotNull Character separator) {
