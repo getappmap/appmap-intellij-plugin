@@ -228,7 +228,7 @@ public class AppMapWindowPanel extends SimpleToolWindowPanel implements DataProv
 
         // the "Runtime Analysis" panel should take the available space
         var runtimeAnalysisPanel = new RuntimeAnalysisPanel(project, parent);
-        runtimeAnalysisPanel.setMinimumSize(new JBDimension(0, 100));
+        runtimeAnalysisPanel.setMinimumSize(new JBDimension(0, 150));
         var mainPanel = new CollapsiblePanel(AppMapBundle.get("toolwindow.appmap.runtimeAnalysis"), false, runtimeAnalysisPanel);
 
         var main = new JPanel(new BorderLayout());
