@@ -29,20 +29,7 @@ export function mountWebview() {
       },
       data() {
         return initData;
-      },
-      beforeCreate() {
-      },
-      mounted() {
-        document.addEventListener('click', (e) => {
-          if (e && e.target) {
-            const href = e.target.href;
-            if (href && (href.startsWith("http://") || href.startsWith("https://" || href.startsWith("mailto:")))) {
-              e.preventDefault();
-              return false;
-            }
-          }
-        })
-      },
+      }
     });
 
     // findings overview
