@@ -33,8 +33,6 @@ class CollapsiblePanelTitle extends JPanel {
         label.setFont(StartupUiUtil.getLabelFont().deriveFont(Font.BOLD));
         label.setIcon(isCollapsed ? collapseIcon : expandIcon);
         add(label, BorderLayout.CENTER);
-        setMinimumSize(getPreferredSize());
-        setMaximumSize(getPreferredSize());
 
         setFocusable(true);
         setBorder(JBUI.Borders.empty(3));
@@ -53,6 +51,9 @@ class CollapsiblePanelTitle extends JPanel {
         });
         getInputMap().put(KEY_ENTER, ENTER);
         getInputMap().put(KEY_SPACE, SPACE);
+
+        setMinimumSize(getPreferredSize());
+        setMaximumSize(getPreferredSize());
 
         addFocusListener(new FocusListener() {
             @Override
