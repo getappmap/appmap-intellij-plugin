@@ -3,6 +3,7 @@ package appland.toolwindow.runtimeAnalysis;
 import appland.webviews.findings.FindingsOverviewEditorProvider;
 import com.intellij.ide.projectView.PresentationData;
 import com.intellij.ide.util.treeView.NodeDescriptor;
+import com.intellij.openapi.editor.colors.CodeInsightColors;
 import com.intellij.openapi.project.Project;
 import com.intellij.pom.Navigatable;
 import com.intellij.ui.tree.LeafState;
@@ -19,6 +20,7 @@ class OverviewNode extends Node implements Navigatable {
 
     @Override
     protected void update(@NotNull PresentationData presentation) {
+        presentation.setAttributesKey(CodeInsightColors.HYPERLINK_ATTRIBUTES);
         presentation.setPresentableText("Overview");
     }
 
