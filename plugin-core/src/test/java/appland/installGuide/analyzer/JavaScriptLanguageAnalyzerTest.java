@@ -10,6 +10,14 @@ public class JavaScriptLanguageAnalyzerTest extends LanguageAnalyzerBaseTest {
     }
 
     @Test
+    public void jest() {
+        var result = loadDirectory("javascript-jest", new JavaScriptLanguageAnalyzer());
+        assertJavaScriptSettings(result.getFeatures(), "package.json", "@appland/appmap-agent-js");
+        assertFramework(result.getFeatures().test, "jest", Score.Okay);
+        assertNull(result.getFeatures().web);
+    }
+
+    @Test
     public void mocha8() {
         var result = loadDirectory("javascript-mocha", new JavaScriptLanguageAnalyzer());
         assertJavaScriptSettings(result.getFeatures(), "package.json", "@appland/appmap-agent-js");
