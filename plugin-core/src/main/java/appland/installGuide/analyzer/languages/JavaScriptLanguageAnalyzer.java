@@ -48,10 +48,21 @@ public class JavaScriptLanguageAnalyzer implements LanguageAnalyzer {
             web.text = "This project uses Express. AppMap will automatically recognize web requests, SQL queries, and key framework functions during recording.";
         }
 
-        FeatureEx test = null;
+        Feature test = findTestPackage(json);
+
+        var lang = new FeatureEx("package.json", "@appland/appmap-agent-js", "package");
+        lang.title = "JavaScript";
+        lang.score = Score.Okay;
+        lang.text = "JavaScript is currently in Open Beta. Please read the docs before proceeding.";
+        return new Features(lang, web, test);
+    }
+
+    private @Nullable Feature findTestPackage(@NotNull JsonObject json) {
         var mocha = GsonUtils.getPath(json, "devDependencies", "mocha");
+        var jest = GsonUtils.getPath(json, "devDependencies", "jest");
+
         if (mocha != null && mocha.isString()) {
-            test = new FeatureEx();
+            Feature test = new Feature();
             test.title = "mocha";
 
             if (isAtLeastMocha8(mocha.getAsString())) {
@@ -61,13 +72,14 @@ public class JavaScriptLanguageAnalyzer implements LanguageAnalyzer {
                 test.score = Score.Bad;
                 test.text = "This project uses an unsupported version of Mocha. You need at least version 8 to automatically record test execution.";
             }
+            return test;
         }
 
-        var lang = new FeatureEx("package.json", "@appland/appmap-agent-js", "package");
-        lang.title = "JavaScript";
-        lang.score = Score.Okay;
-        lang.text = "JavaScript is currently in Open Beta. Please read the docs before proceeding.";
-        return new Features(lang, web, test);
+        if (jest != null && jest.isString()) {
+            return new Feature("jest", Score.Okay, "This project uses Jest. Test execution can be automatically recorded.");
+        }
+
+        return null;
     }
 
     private boolean isAtLeastMocha8(@NotNull String value) {
