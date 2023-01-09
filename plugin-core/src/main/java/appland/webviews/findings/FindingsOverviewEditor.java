@@ -89,7 +89,7 @@ public class FindingsOverviewEditor extends WebviewEditor {
             if (findings.isEmpty()) {
                 Messages.showErrorDialog("Unable to locate AppMap with ID", "Error Locating AppMap");
             } else {
-                FindingDetailsEditorProvider.openNewEditor(project, findings);
+                FindingDetailsEditorProvider.openEditor(project, findings);
             }
         });
     }

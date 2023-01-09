@@ -45,7 +45,7 @@ class FindingLocationNode extends Node {
         return new Navigatable() {
             @Override
             public void navigate(boolean requestFocus) {
-                FindingDetailsEditorProvider.openNewEditor(myProject, List.of(finding.getProblem()));
+                FindingDetailsEditorProvider.openEditor(myProject, List.of(finding.getProblem()));
             }
 
             @Override
