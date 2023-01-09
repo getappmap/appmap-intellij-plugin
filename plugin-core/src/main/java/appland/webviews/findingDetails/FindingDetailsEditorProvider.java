@@ -27,7 +27,7 @@ public class FindingDetailsEditorProvider extends WebviewEditorProvider {
         var provider = WebviewEditorProvider.findEditorProvider(TYPE_ID);
         assert provider != null;
 
-        var file = provider.createVirtualFile(AppMapBundle.get("webview.findingDetails.title"));
+        var file = provider.createVirtualFile(findEditorTitle(findings));
         KEY_FINDINGS.set(file, findings);
         FileEditorManager.getInstance(project).openFile(file, true);
     }
@@ -40,5 +40,11 @@ public class FindingDetailsEditorProvider extends WebviewEditorProvider {
     @Override
     public @Nullable Icon getEditorIcon() {
         return Icons.APPMAP_FILE;
+    }
+
+    private static String findEditorTitle(@NotNull List<ScannerProblem> findings) {
+        return findings.isEmpty()
+                ? AppMapBundle.get("webview.findingDetails.title")
+                : findings.get(0).getFinding().ruleTitle;
     }
 }
