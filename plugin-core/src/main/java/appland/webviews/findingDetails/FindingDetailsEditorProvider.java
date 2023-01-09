@@ -3,6 +3,7 @@ package appland.webviews.findingDetails;
 import appland.AppMapBundle;
 import appland.Icons;
 import appland.problemsView.ScannerProblem;
+import appland.telemetry.TelemetryService;
 import appland.webviews.WebviewEditor;
 import appland.webviews.WebviewEditorProvider;
 import com.intellij.openapi.fileEditor.FileEditor;
@@ -44,6 +45,8 @@ public class FindingDetailsEditorProvider extends WebviewEditorProvider {
         var file = provider.createVirtualFile(findEditorTitle(findings));
         KEY_FINDINGS.set(file, findings);
         FileEditorManager.getInstance(project).openFile(file, true);
+
+        queueTelemetryMessage(findings);
     }
 
     @Override
@@ -80,5 +83,24 @@ public class FindingDetailsEditorProvider extends WebviewEditorProvider {
         return findings.isEmpty()
                 ? AppMapBundle.get("webview.findingDetails.title")
                 : findings.get(0).getFinding().ruleTitle;
+    }
+
+    private static void queueTelemetryMessage(@NotNull List<ScannerProblem> findings) {
+        if (findings.isEmpty()) {
+            return;
+        }
+
+        // we're assuming that all findings shown in this webview share the same hash
+        // and have the same properties
+        var finding = findings.get(0);
+        TelemetryService.getInstance().sendEvent("analysis:view_finding", eventData -> {
+            eventData.property("appmap.finding.rule", finding.getFinding().ruleId);
+            eventData.property("appmap.finding.hash", finding.getFinding().getAppMapHashWithFallback());
+            var impactDomain = finding.getFinding().impactDomain;
+            if (impactDomain != null) {
+                eventData.property("appmap.finding.impact_domain", impactDomain.getJsonId());
+            }
+            return eventData;
+        });
     }
 }
