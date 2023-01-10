@@ -34,7 +34,7 @@ import java.util.stream.Collectors;
 
 import static appland.utils.GsonUtils.singlePropertyObject;
 
-public class FindingDetailsEditor extends WebviewEditor {
+public class FindingDetailsEditor extends WebviewEditor<Void> {
     private static final int STACK_TRACE_CHARACTER_LIMIT = 50;
 
     public FindingDetailsEditor(@NotNull Project project, @NotNull VirtualFile file) {
@@ -88,7 +88,17 @@ public class FindingDetailsEditor extends WebviewEditor {
     }
 
     @Override
-    protected void setupInitMessage(@NotNull JsonObject payload) {
+    protected @Nullable Void createInitData() {
+        return null;
+    }
+
+    @Override
+    protected void afterInit(@Nullable Void initData) {
+        // no-op, the editor provider is handling telemetry
+    }
+
+    @Override
+    protected void setupInitMessage(@Nullable Void initData, @NotNull JsonObject payload) {
         var findings = FindingDetailsEditorProvider.KEY_FINDINGS.get(file);
         assert findings != null;
 

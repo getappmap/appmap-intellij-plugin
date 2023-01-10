@@ -40,7 +40,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * Base class for editors based on a JCEF webview.
  * It implements most of the shared functionality and allows to customize link handling, message handling and more.
  */
-public abstract class WebviewEditor extends UserDataHolderBase implements FileEditor, WebviewMessageHandler {
+public abstract class WebviewEditor<T> extends UserDataHolderBase implements FileEditor, WebviewMessageHandler {
     private static final Logger LOG = Logger.getInstance(WebviewEditor.class);
 
     protected final @NotNull Project project;
@@ -65,13 +65,29 @@ public abstract class WebviewEditor extends UserDataHolderBase implements FileEd
     }
 
     /**
+     * @return The data to initialize this webview. The data is passed to {@link #setupInitMessage(Object, JsonObject)}
+     * and also to {@link #afterInit(Object)}.
+     */
+    @RequiresBackgroundThread
+    protected abstract @Nullable T createInitData();
+
+    /**
      * Initialize the init message payload.
      * This method is executed under progress in a background thread.
      *
-     * @param payload JSON object to send with the initial "init" message to the webview application.
+     * @param initData Data returned by {@link #createInitData()}.
+     * @param payload  JSON object to send with the initial "init" message to the webview application.
      */
     @RequiresBackgroundThread
-    protected abstract void setupInitMessage(@NotNull JsonObject payload);
+    protected abstract void setupInitMessage(@Nullable T initData, @NotNull JsonObject payload);
+
+    /**
+     * This method allows to post-process editor init, e.g. to send telemetry messages.
+     *
+     * @param initData Data used to init this editor
+     */
+    @RequiresBackgroundThread
+    protected abstract void afterInit(@Nullable T initData);
 
     /**
      * @return {@code java.nio.file.Path} to the HTML file to load into the webview.
@@ -200,9 +216,11 @@ public abstract class WebviewEditor extends UserDataHolderBase implements FileEd
         new Task.Backgroundable(project, AppMapBundle.get("webview.loading"), false, PerformInBackgroundOption.ALWAYS_BACKGROUND) {
             @Override
             public void run(@NotNull ProgressIndicator indicator) {
+                var initData = createInitData();
                 var initMessage = createMessageObject("init");
-                setupInitMessage(initMessage);
+                setupInitMessage(initData, initMessage);
                 postMessage(initMessage);
+                afterInit(initData);
             }
         }.queue();
     }
