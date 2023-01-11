@@ -1,5 +1,16 @@
 AppMap Plugin Changelog
 
+## [0.23.0](https://github.com/getappmap/appmap-intellij-plugin/compare/v0.22.0...v0.23.0) (2023-01-11)
+
+
+### Features
+
+-  add a splitter between the list of AppMaps and the secondary panels (Runtime Analysis, etc.) to allow resizing of the tool window content ([82466c9]())-  implement tree view of "Runtime Analysis" panel ([723213e]())-  new webviews for "Findings Overview" and "Finding details" ([14f22ec]())-  send telemetry message for finding details view ([96915e1]())-  send telemetry messages for the findings overview editor ([cfec988]())
+
+### Bug Fixes
+
+-  add borders to minimum size of titles of collapsibles panels ([823c6aa]())-  handling of external links ([eb70e3a]())-  increase minimum height of "runtime analysis" panel to show all the message when the user is unauthenticated ([29b805a]())-  open AppMap centered on finding when clicking on an AppMap link in the "Finding details" view ([8336327]())-  render "Overview" with link attributes ([0541992]())-  reuse finding details webviews if the same list of findings is displayed ([d1b21d8]())-  show a more reasonable title for finding details webviews ([ef566c4]())-  sort finding nodes by file name ([dc5c1aa]())-  spelling in empty message of the runtime analysis panel ([1c6af9a]())
+
 ## [0.22.0](https://github.com/getappmap/appmap-intellij-plugin/compare/v0.21.1...v0.22.0) (2023-01-05)
 
 
