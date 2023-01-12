@@ -14,7 +14,7 @@ ij_smart_tabs = false
 ij_visual_guides = none
 ij_wrap_on_typing = false
 
-[*.js]
+[{*.js,*.json}]
 indent_size = 2
 ij_continuation_indent_size = 4
 

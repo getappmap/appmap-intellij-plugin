@@ -1,14 +1,21 @@
-// webpack.config.js
-var webpack = require('webpack');
+/* eslint-disable */
+const path = require('path');
+
 module.exports = {
-  entry: {
-    entry: __dirname + '/app.js',
-  },
+  entry: './main.js',
   output: {
-    filename: '[name].bundle.js',
+    path: path.resolve(__dirname, 'dist'),
+    filename: 'main.js',
+    devtoolModuleFilenameTemplate: '[resource-path]',
+    library: 'AppLandWeb',
   },
+  devtool: 'source-map',
   resolve: {
-    extensions: ['.js'],
+    extensions: ['.js', '.mjs'],
+    alias: {
+      vue: path.resolve('./node_modules/vue'),
+      vuex: path.resolve('./node_modules/vuex'),
+    },
     fallback: {
       crypto: 'crypto-js',
     },
@@ -16,8 +23,28 @@ module.exports = {
   module: {
     rules: [
       {
+        test: /\.m?js$/,
+        exclude: /node_modules/,
+        use: {
+          loader: 'babel-loader',
+          options: {},
+        },
+      },
+      {
         test: /\.css$/i,
         use: ['style-loader', 'css-loader'],
+      },
+      {
+        test: /\.html$/i,
+        loader: 'html-loader',
+      },
+      {
+        test: /\.(svg|ttf)$/i,
+        use: [
+          {
+            loader: 'file-loader',
+          },
+        ],
       },
     ],
   },
