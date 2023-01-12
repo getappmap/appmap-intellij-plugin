@@ -1,4 +1,4 @@
-package appland.editor;
+package appland.webviews.appMap;
 
 import appland.problemsView.model.ScannerFindingEvent;
 import appland.utils.GsonUtils;
