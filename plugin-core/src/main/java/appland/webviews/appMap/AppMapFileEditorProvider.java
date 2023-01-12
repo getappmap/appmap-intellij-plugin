@@ -15,10 +15,10 @@ import javax.swing.*;
 /**
  * Provides the HTML JCEF component instead of the default JSON editor for files ending with ".appmap.json".
  */
-public class AppMapHTMLEditorProvider extends WebviewEditorProvider {
+public class AppMapFileEditorProvider extends WebviewEditorProvider {
     private static final String TYPE_ID = "appland.appMap";
 
-    public AppMapHTMLEditorProvider() {
+    public AppMapFileEditorProvider() {
         super(TYPE_ID);
     }
 
