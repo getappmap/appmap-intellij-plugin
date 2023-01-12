@@ -4,5 +4,5 @@ set -e
 DIR="$(CDPATH='' cd -- "$(dirname -- "$0")" && pwd -P)"
 cd "$DIR"
 
-npm install
-./node_modules/.bin/webpack
+yarn install
+yarn run bundle

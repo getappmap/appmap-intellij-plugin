@@ -207,7 +207,6 @@ public class AppMapFileEditor extends WebviewEditor<String> {
         return null;
     }
 
-    // fixme(jansorg): move lookup of file into background+readaction to avoid exception about slow operations
     @Nullable
     private JBCefJSQuery.Response showSource(String relativePath) {
         ApplicationManager.getApplication().invokeLater(() -> {
