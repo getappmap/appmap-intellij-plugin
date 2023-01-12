@@ -10,7 +10,7 @@
     "@jridgewell/gen-mapping" "^0.1.0"
     "@jridgewell/trace-mapping" "^0.3.9"
 
-"@appland/components@^1.24.1":
+"@appland/components@^1.23.0":
   version "1.24.1"
   resolved "https://registry.yarnpkg.com/@appland/components/-/components-1.24.1.tgz#425a224d4eae5ff5888e38d9436eddbbb7e8f128"
   integrity sha512-4s+ug5p5iW0wXKgqxEiS0+d089h2zoY8erEeeOzdJEskOEGhVorJJEKQm07YQ6OA3pITuhm2QDIjBWHX3/MbGw==
@@ -22,7 +22,7 @@
     vue "^2.6.11"
     vuex "^3.6.0"
 
-"@appland/diagrams@^1.5.1", "@appland/diagrams@^1.6.1":
+"@appland/diagrams@^1.5.1":
   version "1.6.1"
   resolved "https://registry.yarnpkg.com/@appland/diagrams/-/diagrams-1.6.1.tgz#c26a6783e7c1b352757c52f1c57fe2957ccf9cf2"
   integrity sha512-32Eb3qi59KoyJD4egvxhvFUDBfY5tcykXJOTTj3N5KTyUFlYFWj59fToVxg93A7jlysMSbvilxsPGXrD9Fe4kQ==
@@ -1640,16 +1640,6 @@ bluebird@^3.1.1:
   resolved "https://registry.yarnpkg.com/bluebird/-/bluebird-3.7.2.tgz#9f229c15be272454ffa973ace0dbee79a1b0c36f"
   integrity sha512-XpNj6GDQzdfW+r2Wnn7xiSAd7TM3jzkxGXBGTtWKuSXv1xUV+azxAm8jdWZN06QTQk+2N2XB9jRDkvbmQmcRtg==
 
-bootstrap-autocomplete@^2.3.7:
-  version "2.3.7"
-  resolved "https://registry.yarnpkg.com/bootstrap-autocomplete/-/bootstrap-autocomplete-2.3.7.tgz#d3d0ebfe124f8b0299a99b1ecdf885816bbf29d8"
-  integrity sha512-YD2bev4bDTLsAzkr6lSTuMZOcE7k2+c2BYbtIT+j/XpPnM5ADLlbhR4NnpSsfg6Vde5xQckG/IbdRKrLlAtXOw==
-
-bootstrap@^4.5.3:
-  version "4.6.2"
-  resolved "https://registry.yarnpkg.com/bootstrap/-/bootstrap-4.6.2.tgz#8e0cd61611728a5bf65a3a2b8d6ff6c77d5d7479"
-  integrity sha512-51Bbp/Uxr9aTuy6ca/8FbFloBUJZLHwnhTcnjIeRn2suQWsWzcuJhGjKDB5eppVte/8oCdOL3VuwxvZDUggwGQ==
-
 brace-expansion@^1.1.7:
   version "1.1.11"
   resolved "https://registry.yarnpkg.com/brace-expansion/-/brace-expansion-1.1.11.tgz#3c7fcbf529d87226f3d2f52b966ff5271eb441dd"
@@ -3168,11 +3158,6 @@ jest-worker@^27.4.5:
     merge-stream "^2.0.0"
     supports-color "^8.0.0"
 
-jquery@^3.5.1:
-  version "3.6.3"
-  resolved "https://registry.yarnpkg.com/jquery/-/jquery-3.6.3.tgz#23ed2ffed8a19e048814f13391a19afcdba160e6"
-  integrity sha512-bZ5Sy3YzKo9Fyc8wH2iIQK4JImJ6R0GWI9kL1/k7Z91ZBNgkRXE6U0JfHIizZbort8ZunhSI3jw9I6253ahKfg==
-
 js-tokens@^4.0.0:
   version "4.0.0"
   resolved "https://registry.yarnpkg.com/js-tokens/-/js-tokens-4.0.0.tgz#19203fb59991df98e3a287050d4647cdeaf32499"
@@ -3696,11 +3681,6 @@ pkg-dir@^4.1.0, pkg-dir@^4.2.0:
   integrity sha512-HRDzbaKjC+AOWVXxAU/x54COGeIv9eb+6CkDSQoNTt4XyWoIJvuPsXizxu/Fr23EiekbtZwmh1IcIG/l/a10GQ==
   dependencies:
     find-up "^4.0.0"
-
-popper.js@^1.16.1:
-  version "1.16.1"
-  resolved "https://registry.yarnpkg.com/popper.js/-/popper.js-1.16.1.tgz#2a223cb3dc7b6213d740e40372be40de43e65b1b"
-  integrity sha512-Wb4p1J4zyFTbM+u6WuO4XstYx4Ky9Cewe4DWrel7B0w6VVICvPwdOpotjzcf6eD8TsckVnIMNONQyPIUFOUbCQ==
 
 postcss-modules-extract-imports@^3.0.0:
   version "3.0.0"
@@ -4504,7 +4484,7 @@ vue-style-loader@^4.1.0, vue-style-loader@^4.1.2:
     hash-sum "^1.0.2"
     loader-utils "^1.0.2"
 
-vue-template-compiler@^2.6.14:
+vue-template-compiler@^2.6.12:
   version "2.7.14"
   resolved "https://registry.yarnpkg.com/vue-template-compiler/-/vue-template-compiler-2.7.14.tgz#4545b7dfb88090744c1577ae5ac3f964e61634b1"
   integrity sha512-zyA5Y3ArvVG0NacJDkkzJuPQDF8RFeRlzV2vLeSnhSpieO6LK2OVbdLPi5MPPs09Ii+gMO8nY4S3iKQxBxDmWQ==
@@ -4517,7 +4497,7 @@ vue-template-es2015-compiler@^1.9.0:
   resolved "https://registry.yarnpkg.com/vue-template-es2015-compiler/-/vue-template-es2015-compiler-1.9.1.tgz#1ee3bc9a16ecbf5118be334bb15f9c46f82f5825"
   integrity sha512-4gDntzrifFnCEvyoO8PqyJDmguXgVPxKiIxrBKjIowvL9l+N66196+72XVYR8BBf1Uv1Fgt3bGevJ+sEmxfZzw==
 
-vue@^2.6.11, vue@^2.6.14:
+vue@^2.6.11, vue@^2.6.12:
   version "2.7.14"
   resolved "https://registry.yarnpkg.com/vue/-/vue-2.7.14.tgz#3743dcd248fd3a34d421ae456b864a0246bafb17"
   integrity sha512-b2qkFyOM0kwqWFuQmgd4o+uHGU7T+2z3T+WQp8UBjADfEv2n4FEMffzBmCKNP0IGzOEEfYjvtcC62xaSKeQDrQ==
@@ -4525,7 +4505,7 @@ vue@^2.6.11, vue@^2.6.14:
     "@vue/compiler-sfc" "2.7.14"
     csstype "^3.1.0"
 
-vuex@^3.6.0, vuex@^3.6.2:
+vuex@^3.6.0:
   version "3.6.2"
   resolved "https://registry.yarnpkg.com/vuex/-/vuex-3.6.2.tgz#236bc086a870c3ae79946f107f16de59d5895e71"
   integrity sha512-ETW44IqCgBpVomy520DT5jf8n0zoCac+sxWnn+hMe/CzaSejb/eVw2YToiXYX+Ex/AuHHia28vWTq4goAexFbw==
