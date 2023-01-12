@@ -2,8 +2,8 @@ package appland.webviews.findingDetails;
 
 import appland.AppMapBundle;
 import appland.AppMapPlugin;
-import appland.editor.AppMapFileEditor;
-import appland.editor.AppMapFileEditorState;
+import appland.webviews.appMap.AppMapFileEditor;
+import appland.webviews.appMap.AppMapFileEditorState;
 import appland.files.AppMapFiles;
 import appland.files.FileLocation;
 import appland.problemsView.ScannerProblem;

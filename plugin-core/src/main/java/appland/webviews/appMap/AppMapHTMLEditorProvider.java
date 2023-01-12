@@ -1,4 +1,4 @@
-package appland.editor;
+package appland.webviews.appMap;
 
 import appland.files.AppMapFiles;
 import appland.settings.AppMapProjectSettingsService;

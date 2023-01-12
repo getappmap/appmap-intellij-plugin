@@ -1,4 +1,4 @@
-package appland.editor;
+package appland.webviews.appMap;
 
 import appland.Icons;
 import appland.files.AppMapFiles;

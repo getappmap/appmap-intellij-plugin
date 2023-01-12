@@ -1,8 +1,8 @@
 package appland.problemsView;
 
 import appland.AppMapBundle;
-import appland.editor.AppMapFileEditor;
-import appland.editor.AppMapFileEditorState;
+import appland.webviews.appMap.AppMapFileEditor;
+import appland.webviews.appMap.AppMapFileEditorState;
 import appland.files.AppMapFiles;
 import com.intellij.codeInsight.intention.IntentionAction;
 import com.intellij.codeInspection.util.IntentionFamilyName;
