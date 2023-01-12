@@ -40,7 +40,7 @@
         <postStartupActivity implementation="appland.cli.RegisterContentRootsActivity"/>
         <postStartupActivity implementation="appland.cli.DownloadToolsStartupActivity"/>
 
-        <fileEditorProvider implementation="appland.webviews.appMap.AppMapHTMLEditorProvider"/>
+        <fileEditorProvider implementation="appland.webviews.appMap.AppMapFileEditorProvider"/>
         <editorNotificationProvider implementation="appland.webviews.appMap.AppMapNotificationProvider"/>
 
         <fileEditorProvider implementation="appland.installGuide.InstallGuideEditorProvider"/>
