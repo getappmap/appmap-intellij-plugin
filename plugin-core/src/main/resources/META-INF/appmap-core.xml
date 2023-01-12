@@ -41,7 +41,6 @@
         <postStartupActivity implementation="appland.cli.DownloadToolsStartupActivity"/>
 
         <fileEditorProvider implementation="appland.webviews.appMap.AppMapHTMLEditorProvider"/>
-        <fileIconProvider implementation="appland.webviews.appMap.AppMapIconProvider"/>
         <editorNotificationProvider implementation="appland.webviews.appMap.AppMapNotificationProvider"/>
 
         <fileEditorProvider implementation="appland.installGuide.InstallGuideEditorProvider"/>

@@ -32,6 +32,7 @@ import org.jetbrains.annotations.Nullable;
 import javax.swing.*;
 import java.beans.PropertyChangeListener;
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.nio.file.Path;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -46,8 +47,9 @@ public abstract class WebviewEditor<T> extends UserDataHolderBase implements Fil
     protected final @NotNull Project project;
     protected final @NotNull VirtualFile file;
     protected final @NotNull Gson gson;
+    protected final @NotNull JCEFHtmlPanel contentPanel = new JCEFHtmlPanel(true, null, null);
 
-    private final @NotNull JCEFHtmlPanel contentPanel = new JCEFHtmlPanel(true, null, null);
+    private final @NotNull AtomicBoolean isWebViewReady = new AtomicBoolean(false);
     private final @NotNull AtomicBoolean navigating = new AtomicBoolean(false);
     // queries must be created before the webview is initialized
     private final @NotNull JBCefJSQuery postMessageQuery = JBCefJSQuery.create((JBCefBrowserBase) contentPanel);
@@ -181,6 +183,18 @@ public abstract class WebviewEditor<T> extends UserDataHolderBase implements Fil
         return false;
     }
 
+    protected String getBaseUrl() {
+        try {
+            return getApplicationFile().toUri().toURL().toString();
+        } catch (MalformedURLException e) {
+            return "";
+        }
+    }
+
+    protected boolean isWebViewReady() {
+        return isWebViewReady.get();
+    }
+
     private void setupJCEF() {
         // open links to https://appmap.io in the external browser
         contentPanel.getJBCefClient().addRequestHandler(new OpenExternalLinksHandler(), contentPanel.getCefBrowser());
@@ -213,6 +227,7 @@ public abstract class WebviewEditor<T> extends UserDataHolderBase implements Fil
         contentPanel.getCefBrowser().executeJavaScript(createCallbackJS(postMessageQuery, "postMessage"), "", 0);
 
         // send init message to webview to launch the JS application in a background thread
+        isWebViewReady.set(true);
         new Task.Backgroundable(project, AppMapBundle.get("webview.loading"), false, PerformInBackgroundOption.ALWAYS_BACKGROUND) {
             @Override
             public void run(@NotNull ProgressIndicator indicator) {
