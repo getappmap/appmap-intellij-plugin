@@ -142,10 +142,14 @@ public class AppMapFileEditor extends WebviewEditor<String> {
                 return uploadAppMap();
 
             case "view-source":
-                if (message == null) {
-                    return null;
+                // message is {..., location: {location:"path/file.java", externalSource="path/file.java"}}
+                if (message != null) {
+                    var location = message.getAsJsonObject("location");
+                    if (location != null) {
+                        return showSource(location.getAsJsonPrimitive("location").getAsString());
+                    }
                 }
-                return showSource(message.getAsJsonPrimitive("location").getAsString());
+                return null;
 
             default:
                 return null;

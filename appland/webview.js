@@ -37,9 +37,14 @@ export function mountWebview() {
   )
 
   messages.on('init', ({data: initData}) => {
+    // messages emitted by the webview
     app.$on('viewSource', (location) => vscode.postMessage({command: 'view-source', location}))
     app.$on('uploadAppmap', () => vscode.postMessage({command: 'uploadAppMap'}))
+    app.$on('request-resolve-location', (location) => {
+      app.$emit('response-resolve-location', {location, externalUrl: location});
+    });
 
+    // messages emitted by the Java host
     messages.on('loadAppMap', ({data}) => app.loadAppMap(data))
     messages.on('setAppMapState', (json) => app.setState(json.state))
     messages.on('showAppMapInstructions', () => app.showInstructions())
