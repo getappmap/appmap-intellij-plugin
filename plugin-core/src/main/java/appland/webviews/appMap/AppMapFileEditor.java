@@ -25,6 +25,7 @@ import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.openapi.vfs.VirtualFileEvent;
 import com.intellij.openapi.vfs.VirtualFileListener;
 import com.intellij.ui.jcef.JBCefJSQuery;
+import com.intellij.util.concurrency.annotations.RequiresBackgroundThread;
 import org.jetbrains.annotations.Nls;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -207,24 +208,34 @@ public class AppMapFileEditor extends WebviewEditor<String> {
         return null;
     }
 
-    @Nullable
-    private JBCefJSQuery.Response showSource(String relativePath) {
+    private static void showShowSourceError(@NotNull String relativePath) {
         ApplicationManager.getApplication().invokeLater(() -> {
-            var location = FileLocation.parse(relativePath);
-            if (location != null) {
-                var referencedFile = FileLookup.findRelativeFile(project, file, FileUtil.toSystemIndependentName(location.filePath));
-                if (referencedFile != null) {
-                    // IntelliJ's lines are 0-based, AppMap lines seem to be 0-based
-                    var line = location.getZeroBasedLine(-1);
-                    OpenFileDescriptor descriptor = new OpenFileDescriptor(project, referencedFile, line, -1);
+            var title = AppMapBundle.get("appmap.editor.showSourceFileMissing.title");
+            var message = AppMapBundle.get("appmap.editor.showSourceFileMissing.text", relativePath);
+            showErrorDialog(message, title);
+        }, ModalityState.defaultModalityState());
+    }
 
-                    OpenInRightSplitAction.Companion.openInRightSplit(project, referencedFile, descriptor, true);
-                    return;
-                }
-            }
+    @RequiresBackgroundThread
+    private @Nullable JBCefJSQuery.Response showSource(@NotNull String relativePath) {
+        var location = FileLocation.parse(relativePath);
+        if (location == null) {
+            showShowSourceError(relativePath);
+            return null;
+        }
 
-            // fallback message if the file could not be found
-            showErrorDialog("File " + relativePath + " could not be found.", "AppMap");
+        var referencedFile = ReadAction.compute(() -> {
+            return FileLookup.findRelativeFile(project, file, FileUtil.toSystemIndependentName(location.filePath));
+        });
+        if (referencedFile == null) {
+            showShowSourceError(relativePath);
+            return null;
+        }
+
+        ApplicationManager.getApplication().invokeLater(() -> {
+            // IntelliJ's lines are 0-based, AppMap lines seem to be 1-based
+            var descriptor = new OpenFileDescriptor(project, referencedFile, location.getZeroBasedLine(-1), -1);
+            OpenInRightSplitAction.Companion.openInRightSplit(project, referencedFile, descriptor, true);
         }, ModalityState.defaultModalityState());
         return null;
     }
