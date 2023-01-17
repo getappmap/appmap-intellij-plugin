@@ -15,6 +15,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.concurrent.TimeUnit;
 
 import static appland.remote.DefaultRemoteRecordingService.url;
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
@@ -95,6 +96,33 @@ public class DefaultRemoteRecordingServiceTest extends AppMapBaseTest {
             return RemoteRecordingService.getInstance().stopRecording(serverRule.baseUrl(), tempDir, "new name");
         }, "", false, getProject());
         assertNull("stopRecording should null for status == 409", newFile);
+    }
+
+    @Test
+    public void stopRecordingWithReadTimeout() throws IOException {
+        var service = (DefaultRemoteRecordingService) RemoteRecordingService.getInstance();
+        var tempDir = Paths.get(myFixture.getTempDirFixture().getTempDirPath());
+
+        var oldReadTimeout = service.getReadTimeout();
+        var newReadTimeout = (int) TimeUnit.SECONDS.toMillis(5);
+
+        try {
+            service.setReadTimeout(newReadTimeout);
+
+            serverRule.stubFor(delete(DefaultRemoteRecordingService.URL_SUFFIX)
+                    .willReturn(aResponse()
+                            .withFixedDelay(newReadTimeout + 1_000)
+                            .withStatus(200)
+                            .withBody("{\"metadata\":{\"description\":\"my description\"}}")));
+
+            var newFile = ProgressManager.getInstance().runProcessWithProgressSynchronously((ThrowableComputable<Path, IOException>) () -> {
+                return RemoteRecordingService.getInstance().stopRecording(serverRule.baseUrl(), tempDir, "new name");
+            }, "", false, getProject());
+            assertNull("stopRecording must not create a file after a read timeout", newFile);
+        } finally {
+            // restore default settings
+            service.setReadTimeout(oldReadTimeout);
+        }
     }
 
     @Test

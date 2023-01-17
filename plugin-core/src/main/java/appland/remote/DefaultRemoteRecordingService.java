@@ -9,6 +9,8 @@ import com.intellij.openapi.progress.ProgressManager;
 import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.util.io.HttpRequests;
 import com.intellij.util.io.RequestBuilder;
+import lombok.Getter;
+import lombok.Setter;
 import org.apache.http.HttpStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -16,12 +18,15 @@ import org.jetbrains.annotations.Nullable;
 import java.nio.file.Path;
 import java.util.concurrent.TimeUnit;
 
-@SuppressWarnings("UnstableApiUsage")
 public class DefaultRemoteRecordingService implements RemoteRecordingService {
     static final String URL_SUFFIX = "/_appmap/record";
     private static final Logger LOG = Logger.getInstance("#appmap.remote");
-    private static final int READ_TIMEOUT = (int) TimeUnit.SECONDS.toMillis(30);
-    private static final int CONNECT_TIMEOUT = (int) TimeUnit.SECONDS.toMillis(30);
+    @Getter
+    @Setter
+    private volatile int readTimeout = (int) TimeUnit.SECONDS.toMillis(30);
+    @Getter
+    @Setter
+    private volatile int connectTimeout = (int) TimeUnit.SECONDS.toMillis(30);
 
     private final Gson GSON = new GsonBuilder().create();
 
@@ -77,13 +82,12 @@ public class DefaultRemoteRecordingService implements RemoteRecordingService {
         }
     }
 
-    static RequestBuilder setupRequest(@NotNull RequestBuilder request) {
-        request.gzip(true);
-        request.productNameAsUserAgent();
-        request.throwStatusCodeException(true);
-        request.connectTimeout(CONNECT_TIMEOUT);
-        request.readTimeout(READ_TIMEOUT);
-        return request;
+    private RequestBuilder setupRequest(@NotNull RequestBuilder request) {
+        return request.gzip(true)
+                .productNameAsUserAgent()
+                .throwStatusCodeException(true)
+                .connectTimeout(connectTimeout)
+                .readTimeout(readTimeout);
     }
 
     @NotNull
