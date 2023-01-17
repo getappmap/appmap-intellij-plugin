@@ -1,5 +1,12 @@
 AppMap Plugin Changelog
 
+## [0.24.0](https://github.com/getappmap/appmap-intellij-plugin/compare/v0.23.0...v0.24.0) (2023-01-17)
+
+
+### Features
+
+-  add terms and conditions to description ([f879b5e]())
+
 ## [0.23.0](https://github.com/getappmap/appmap-intellij-plugin/compare/v0.22.0...v0.23.0) (2023-01-11)
 
 
