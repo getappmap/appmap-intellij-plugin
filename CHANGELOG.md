@@ -1,5 +1,16 @@
 AppMap Plugin Changelog
 
+## [0.25.0](https://github.com/getappmap/appmap-intellij-plugin/compare/v0.24.0...v0.25.0) (2023-01-19)
+
+
+### Features
+
+-  update @appland/components and @appland/diagrams to the latest versions ([d0e58b5]())
+
+### Bug Fixes
+
+-  don't access file name index on EDT ([8c6686f]())
+
 ## [0.24.0](https://github.com/getappmap/appmap-intellij-plugin/compare/v0.23.0...v0.24.0) (2023-01-17)
 
 
