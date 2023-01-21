@@ -60,7 +60,7 @@ public class DefaultRemoteRecordingService implements RemoteRecordingService {
         assert ProgressManager.getInstance().hasProgressIndicator();
 
         var appMapFile = AppMapFiles.appMapFilename(storageDirectoryPath, name);
-        LOG.debug("Stopping AppMap recording for base URL: " + baseURL + ", storing at %s", appMapFile);
+        LOG.debug(String.format("Stopping AppMap recording for base URL: %s, storing at %s", baseURL, appMapFile));
 
         var request = setupRequest(HttpRequests.delete(url(baseURL, URL_SUFFIX), HttpRequests.JSON_CONTENT_TYPE));
         try {
