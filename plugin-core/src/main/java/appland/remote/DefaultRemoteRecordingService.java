@@ -13,6 +13,8 @@ import org.apache.http.HttpStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.concurrent.TimeUnit;
 
@@ -73,7 +75,14 @@ public class DefaultRemoteRecordingService implements RemoteRecordingService {
             var updated = AppMapFiles.updateMetadata(appMapFile, name);
             return updated ? appMapFile : null;
         } catch (Exception e) {
-            LOG.debug("exception retrieving recording status", e);
+            LOG.debug("exception retrieving AppMap data from remote server " + appMapServerUrl, e);
+
+            try {
+                // delete the AppMap file, because it may only contain some response data
+                Files.deleteIfExists(appMapFile);
+            } catch (IOException ex) {
+                // ignore
+            }
             return null;
         }
     }
