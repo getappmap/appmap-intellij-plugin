@@ -66,8 +66,12 @@ public class StopRemoteRecordingDialog extends DialogWrapper {
         }
 
         try {
-            if (!Files.isDirectory(Paths.get(form.getDirectoryLocation()))) {
-                return new ValidationInfo(AppMapBundle.get("dirPathValidation.notDir"), form.getDirectoryLocationInput());
+            var locationPath = Paths.get(form.getDirectoryLocation());
+            // if the directory does not yet exist, then we ignore it because the save implementation will create it
+            if (Files.exists(locationPath)) {
+                if (!Files.isDirectory(locationPath)) {
+                    return new ValidationInfo(AppMapBundle.get("dirPathValidation.notDir"), form.getDirectoryLocationInput());
+                }
             }
         } catch (Exception e) {
             return new ValidationInfo(AppMapBundle.get("dirPathValidation.invalidPath"), form.getDirectoryLocationInput());
