@@ -55,16 +55,16 @@ public class DefaultRemoteRecordingService implements RemoteRecordingService {
     }
 
     @Override
-    public @Nullable Path stopRecording(@NotNull String baseURL, @NotNull Path parentDirPath, @NotNull String name) {
+    public @Nullable Path stopRecording(@NotNull String baseURL, @NotNull Path storageDirectoryPath, @NotNull String name) {
         assertIsNotEDT();
         assert ProgressManager.getInstance().hasProgressIndicator();
 
-        var appMapFile = AppMapFiles.appMapFilename(parentDirPath, name);
+        var appMapFile = AppMapFiles.appMapFilename(storageDirectoryPath, name);
         LOG.debug("Stopping AppMap recording for base URL: " + baseURL + ", storing at %s", appMapFile);
 
         var request = setupRequest(HttpRequests.delete(url(baseURL, URL_SUFFIX), HttpRequests.JSON_CONTENT_TYPE));
         try {
-            // stream to file on disk,
+            // stream to file on disk, it creates the necessary parent directories.
             // throws a HttpStatusException for response status >= 400
             request.saveToFile(appMapFile, ProgressManager.getGlobalProgressIndicator());
 

@@ -24,6 +24,8 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.nio.file.Files;
+import java.nio.file.InvalidPathException;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 
 import static appland.AppMapBundle.get;
@@ -48,22 +50,6 @@ public class StopAppMapRecordingAction extends AnAction implements DumbAware {
         }
     }
 
-    /**
-     * try to find a reasonable default for the storage location
-     */
-    private static @Nullable String findDefaultStorageLocation(@NotNull Project project,
-                                                               @NotNull AppMapProjectSettings state) {
-        var storageLocation = state.getRecentAppMapStorageLocation();
-        if (StringUtil.isEmpty(storageLocation)) {
-            var projectDir = ProjectUtil.guessProjectDir(project);
-            if (projectDir != null) {
-                var nioProjectDir = projectDir.getFileSystem().getNioPath(projectDir);
-                storageLocation = nioProjectDir != null ? nioProjectDir.toString() : "";
-            }
-        }
-        return storageLocation;
-    }
-
     @Override
     public void actionPerformed(@NotNull AnActionEvent e) {
         var project = e.getProject();
@@ -80,13 +66,21 @@ public class StopAppMapRecordingAction extends AnAction implements DumbAware {
             return;
         }
 
-        var parentDirPath = Paths.get(form.getDirectoryLocation());
-        state.setRecentAppMapStorageLocation(parentDirPath.toString());
+        var storageDirectoryPath = form.getDirectoryLocation();
+        state.setRecentAppMapStorageLocation(storageDirectoryPath);
 
         new Task.Backgroundable(project, get("action.stopAppMapRemoteRecording.progressTitle"), false) {
             @Override
             public void run(@NotNull ProgressIndicator indicator) {
-                var newFile = RemoteRecordingService.getInstance().stopRecording(form.getURL(), parentDirPath, form.getName());
+                Path nioStoragePath;
+                try {
+                    nioStoragePath = Paths.get(storageDirectoryPath);
+                } catch (InvalidPathException exception) {
+                    showStopRecordingFailedError(project, form.getURL());
+                    return;
+                }
+
+                var newFile = RemoteRecordingService.getInstance().stopRecording(form.getURL(), nioStoragePath, form.getName());
                 RemoteRecordingStatusService.getInstance(project).recordingStopped(form.getURL());
 
                 if (newFile != null && Files.exists(newFile)) {
@@ -98,12 +92,32 @@ public class StopAppMapRecordingAction extends AnAction implements DumbAware {
                         }, ModalityState.defaultModalityState());
                     }
                 } else {
-                    AppMapNotifications.showExpandedRecordingNotification(project,
-                            get("notification.recordingStopFailed.title"),
-                            get("notification.recordingStopFailed.content", form.getURL()),
-                            NotificationType.ERROR, true, false, true);
+                    showStopRecordingFailedError(project, form.getURL());
                 }
             }
         }.queue();
+    }
+
+    /**
+     * try to find a reasonable default for the storage location
+     */
+    private static @Nullable String findDefaultStorageLocation(@NotNull Project project,
+                                                               @NotNull AppMapProjectSettings state) {
+        var storageLocation = state.getRecentAppMapStorageLocation();
+        if (StringUtil.isEmpty(storageLocation)) {
+            var projectDir = ProjectUtil.guessProjectDir(project);
+            if (projectDir != null) {
+                var nioProjectDir = projectDir.getFileSystem().getNioPath(projectDir);
+                storageLocation = nioProjectDir != null ? nioProjectDir.toString() : "";
+            }
+        }
+        return storageLocation;
+    }
+
+    private static void showStopRecordingFailedError(@NotNull Project project, @NotNull String url) {
+        AppMapNotifications.showExpandedRecordingNotification(project,
+                get("notification.recordingStopFailed.title"),
+                get("notification.recordingStopFailed.content", url),
+                NotificationType.ERROR, true, false, true);
     }
 }

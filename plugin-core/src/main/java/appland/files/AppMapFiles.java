@@ -60,23 +60,23 @@ public final class AppMapFiles {
     }
 
     /**
-     * @param dir          Parent dir
-     * @param metadataName Descriptive name, used to calculate the filename
-     * @return A filename for a new appmap stored inside of dir.
+     * @param parentDirectoryPath Parent dir
+     * @param metadataName        Descriptive name, used to calculate the filename
+     * @return A filename for a new AppMap stored inside of dir.
      */
-    public static Path appMapFilename(@NotNull Path dir, @NotNull String metadataName) {
-        var filename = metadataName.replaceAll("[^a-zA-Z0-9]", "_");
+    public static @NotNull Path appMapFilename(@NotNull Path parentDirectoryPath, @NotNull String metadataName) {
         if (metadataName.isEmpty()) {
             throw new IllegalArgumentException("AppMap filename must not be empty");
         }
 
+        var filename = metadataName.replaceAll("[^a-zA-Z0-9]", "_");
         var candidate = String.format("%s.appmap.json", filename);
         var i = 1;
-        while (Files.exists(dir.resolve(candidate))) {
+        while (Files.exists(parentDirectoryPath.resolve(candidate))) {
             candidate = String.format("%s(%d).appmap.json", filename, i);
             i++;
         }
-        return dir.resolve(candidate);
+        return parentDirectoryPath.resolve(candidate);
     }
 
     /**
