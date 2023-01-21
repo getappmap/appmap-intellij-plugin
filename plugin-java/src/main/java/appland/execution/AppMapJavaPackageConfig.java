@@ -12,7 +12,6 @@ import com.intellij.psi.JavaDirectoryService;
 import com.intellij.psi.PsiDirectory;
 import com.intellij.psi.PsiManager;
 import com.intellij.psi.PsiPackage;
-import com.intellij.psi.search.FilenameIndex;
 import com.intellij.psi.search.GlobalSearchScope;
 import com.intellij.psi.search.GlobalSearchScopesCore;
 import com.intellij.util.EmptyConsumer;
@@ -89,8 +88,8 @@ public final class AppMapJavaPackageConfig {
     private static @Nullable VirtualFile findAppMapConfig(@NotNull Project project,
                                                           @NotNull GlobalSearchScope runProfileScope) {
         return ReadAction.compute(() -> {
-            var files = FilenameIndex.getFilesByName(project, AppMapFiles.APPMAP_YML, runProfileScope);
-            return files.length == 1 ? files[0].getVirtualFile() : null;
+            var files = AppMapFiles.findAppMapConfigFiles(project, runProfileScope);
+            return files.size() == 1 ? files.iterator().next() : null;
         });
     }
 

@@ -1,10 +1,18 @@
 package appland.files;
 
 import appland.utils.GsonUtils;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.google.gson.JsonObject;
 import com.intellij.openapi.diagnostic.Logger;
+import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.io.FileUtil;
+import com.intellij.openapi.util.text.StringUtil;
+import com.intellij.openapi.vfs.VfsUtil;
 import com.intellij.openapi.vfs.VirtualFile;
+import com.intellij.psi.search.FilenameIndex;
+import com.intellij.psi.search.GlobalSearchScope;
+import com.intellij.util.concurrency.annotations.RequiresReadLock;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -12,6 +20,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Collection;
 
 public final class AppMapFiles {
     private static final Logger LOG = Logger.getInstance("#appmap.files");
@@ -22,6 +31,35 @@ public final class AppMapFiles {
 
     public static boolean isAppMapConfigFileName(@NotNull String fileName) {
         return FileUtil.fileNameEquals(fileName, AppMapFiles.APPMAP_YML);
+    }
+
+    /**
+     * @return The appmap.yaml files available in the current project and search scope.
+     */
+    @RequiresReadLock
+    public static @NotNull Collection<VirtualFile> findAppMapConfigFiles(@NotNull Project project, @NotNull GlobalSearchScope scope) {
+        return FilenameIndex.getVirtualFilesByName(project, AppMapFiles.APPMAP_YML, false, scope);
+    }
+
+    /**
+     * @param appMapConfigFile appmap.yml file
+     * @return The "appmap_dir" property value, if it's configured in the file
+     */
+    public static @Nullable String readAppMapDirConfigValue(@NotNull VirtualFile appMapConfigFile) {
+        assert appMapConfigFile.isInLocalFileSystem();
+        assert !appMapConfigFile.isDirectory();
+
+        try {
+            var content = VfsUtil.loadText(appMapConfigFile);
+            var tree = new ObjectMapper(new YAMLFactory()).readTree(content);
+            var appMapDir = tree.get("appmap_dir");
+            if (appMapDir != null && appMapDir.isTextual()) {
+                return StringUtil.nullize(appMapDir.textValue());
+            }
+        } catch (Exception e) {
+            LOG.debug("error parsing appmap.yml configuration file", e);
+        }
+        return null;
     }
 
     /**
