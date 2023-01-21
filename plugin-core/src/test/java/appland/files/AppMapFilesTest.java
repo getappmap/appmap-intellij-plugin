@@ -23,7 +23,7 @@ public class AppMapFilesTest extends LightPlatformCodeInsightFixture4TestCase {
         var file = FileUtilRt.createTempFile("appmap-test", ".appmap.json").toPath();
         Files.write(file, "{}".getBytes(StandardCharsets.UTF_8));
 
-        var success = AppMapFiles.updateMetadata(file, "updated AppMap name");
+        var success = AppMapFiles.updateMetadata(file, "updated AppMap name", StandardCharsets.UTF_8);
         assertTrue(success);
         assertEquals("{\"metadata\":{\"name\":\"updated AppMap name\"}}", Files.readString(file));
     }
@@ -33,7 +33,7 @@ public class AppMapFilesTest extends LightPlatformCodeInsightFixture4TestCase {
         var file = FileUtilRt.createTempFile("appmap-test", ".appmap.json").toPath();
         Files.write(file, "{\"metadata\": {\"name\":\"old AppMap name\"}}".getBytes(StandardCharsets.UTF_8));
 
-        var success = AppMapFiles.updateMetadata(file, "updated AppMap name");
+        var success = AppMapFiles.updateMetadata(file, "updated AppMap name", StandardCharsets.UTF_8);
         assertTrue(success);
         assertEquals("{\"metadata\":{\"name\":\"updated AppMap name\"}}", Files.readString(file));
     }

@@ -17,7 +17,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
+import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collection;
@@ -78,21 +78,22 @@ public final class AppMapFiles {
      *
      * @param appMapFile The path to the file
      * @param name       The new name
+     * @param charset    Charset of the AppMap file
      * @return {@code true} if the operation was successful
      */
-    public static boolean updateMetadata(@NotNull Path appMapFile, @NotNull String name) {
+    public static boolean updateMetadata(@NotNull Path appMapFile, @NotNull String name, @NotNull Charset charset) {
         try {
-            var json = GsonUtils.GSON.fromJson(Files.newBufferedReader(appMapFile, StandardCharsets.UTF_8), JsonObject.class);
+            var json = GsonUtils.GSON.fromJson(Files.newBufferedReader(appMapFile, charset), JsonObject.class);
             if (!json.has("metadata")) {
                 json.add("metadata", new JsonObject());
             }
             var metadata = json.getAsJsonObject("metadata");
             metadata.addProperty("name", name);
 
-            Files.write(appMapFile, GsonUtils.GSON.toJson(json).getBytes(StandardCharsets.UTF_8));
+            Files.write(appMapFile, GsonUtils.GSON.toJson(json).getBytes(charset));
             return true;
         } catch (IOException e) {
-            LOG.debug("error while updating AppMap metadata", e);
+            LOG.debug("error while updating AppMap metadata of " + appMapFile, e);
             return false;
         }
     }
