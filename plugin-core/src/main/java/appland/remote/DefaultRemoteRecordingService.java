@@ -14,6 +14,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.concurrent.TimeUnit;
@@ -71,9 +72,9 @@ public class DefaultRemoteRecordingService implements RemoteRecordingService {
             // throws a HttpStatusException for response status >= 400
             request.saveToFile(appMapFile, ProgressManager.getGlobalProgressIndicator());
 
-            // update metadata
-            var updated = AppMapFiles.updateMetadata(appMapFile, name);
-            return updated ? appMapFile : null;
+            AppMapFiles.updateMetadata(appMapFile, name, StandardCharsets.UTF_8);
+
+            return appMapFile;
         } catch (Exception e) {
             LOG.debug("exception retrieving AppMap data from remote server " + appMapServerUrl, e);
 
