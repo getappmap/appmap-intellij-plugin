@@ -1,17 +1,19 @@
 package appland.actions;
 
+import appland.AppMapBundle;
 import appland.Icons;
 import appland.notifications.AppMapNotifications;
 import appland.remote.RemoteRecordingService;
 import appland.remote.RemoteRecordingStatusService;
 import appland.remote.StopRemoteRecordingDialog;
-import appland.settings.AppMapProjectSettings;
+import appland.remote.StopRemoteRecordingForm;
 import appland.settings.AppMapProjectSettingsService;
 import com.intellij.notification.NotificationType;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.application.ModalityState;
+import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.fileEditor.FileEditorManager;
 import com.intellij.openapi.progress.ProgressIndicator;
 import com.intellij.openapi.progress.Task;
@@ -27,10 +29,11 @@ import java.nio.file.Files;
 import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-
-import static appland.AppMapBundle.get;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class StopAppMapRecordingAction extends AnAction implements DumbAware {
+    private static final Logger LOG = Logger.getInstance(StopAppMapRecordingAction.class);
+
     public StopAppMapRecordingAction() {
         super(Icons.STOP_RECORDING_ACTION);
     }
@@ -55,27 +58,48 @@ public class StopAppMapRecordingAction extends AnAction implements DumbAware {
         var project = e.getProject();
         assert project != null;
 
-        var state = AppMapProjectSettingsService.getState(project);
-        var form = StopRemoteRecordingDialog.show(project,
-                findDefaultStorageLocation(project, state),
-                RemoteRecordingStatusService.getInstance(project).getActiveRecordingURL(),
-                state.getRecentRemoteRecordingURLs()
-        );
-        if (form == null) {
-            // user cancelled the form
-            return;
-        }
+        new Task.Modal(project, AppMapBundle.get("action.stopAppMapRemoteRecording.locationProgress.title"), true) {
+            private final AtomicReference<String> location = new AtomicReference<>();
 
+            @Override
+            public void run(@NotNull ProgressIndicator indicator) {
+                if (project.isDisposed()) {
+                    return;
+                }
+
+                indicator.setText(AppMapBundle.get("action.stopAppMapRemoteRecording.locationProgress.progressTitle"));
+                location.set(findDefaultStorageLocation(project));
+            }
+
+            @Override
+            public void onSuccess() {
+                if (project.isDisposed()) {
+                    return;
+                }
+
+                var form = StopRemoteRecordingDialog.show(project,
+                        location.get(),
+                        RemoteRecordingStatusService.getInstance(project).getActiveRecordingURL(),
+                        AppMapProjectSettingsService.getState(project).getRecentRemoteRecordingURLs());
+                if (form != null) {
+                    stopAndSaveRemoteRecording(project, form);
+                }
+            }
+        }.queue();
+    }
+
+    private static void stopAndSaveRemoteRecording(@NotNull Project project, @NotNull StopRemoteRecordingForm form) {
         var storageDirectoryPath = form.getDirectoryLocation();
-        state.setRecentAppMapStorageLocation(storageDirectoryPath);
+        AppMapProjectSettingsService.getState(project).setRecentAppMapStorageLocation(storageDirectoryPath);
 
-        new Task.Backgroundable(project, get("action.stopAppMapRemoteRecording.progressTitle"), false) {
+        new Task.Backgroundable(project, AppMapBundle.get("action.stopAppMapRemoteRecording.progressTitle"), false) {
             @Override
             public void run(@NotNull ProgressIndicator indicator) {
                 Path nioStoragePath;
                 try {
                     nioStoragePath = Paths.get(storageDirectoryPath);
-                } catch (InvalidPathException exception) {
+                } catch (InvalidPathException e) {
+                    LOG.debug("Invalid storage location", e);
                     showStopRecordingFailedError(project, form.getURL());
                     return;
                 }
@@ -101,8 +125,9 @@ public class StopAppMapRecordingAction extends AnAction implements DumbAware {
     /**
      * try to find a reasonable default for the storage location
      */
-    private static @Nullable String findDefaultStorageLocation(@NotNull Project project,
-                                                               @NotNull AppMapProjectSettings state) {
+    private static @Nullable String findDefaultStorageLocation(@NotNull Project project) {
+        var state = AppMapProjectSettingsService.getState(project);
+
         var storageLocation = state.getRecentAppMapStorageLocation();
         if (StringUtil.isEmpty(storageLocation)) {
             var projectDir = ProjectUtil.guessProjectDir(project);
@@ -116,8 +141,8 @@ public class StopAppMapRecordingAction extends AnAction implements DumbAware {
 
     private static void showStopRecordingFailedError(@NotNull Project project, @NotNull String url) {
         AppMapNotifications.showExpandedRecordingNotification(project,
-                get("notification.recordingStopFailed.title"),
-                get("notification.recordingStopFailed.content", url),
+                AppMapBundle.get("notification.recordingStopFailed.title"),
+                AppMapBundle.get("notification.recordingStopFailed.content", url),
                 NotificationType.ERROR, true, false, true);
     }
 }
