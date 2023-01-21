@@ -5,6 +5,7 @@ import appland.notifications.AppMapNotifications;
 import appland.remote.RemoteRecordingService;
 import appland.remote.RemoteRecordingStatusService;
 import appland.remote.StopRemoteRecordingDialog;
+import appland.settings.AppMapProjectSettings;
 import appland.settings.AppMapProjectSettingsService;
 import com.intellij.notification.NotificationType;
 import com.intellij.openapi.actionSystem.AnAction;
@@ -15,8 +16,12 @@ import com.intellij.openapi.fileEditor.FileEditorManager;
 import com.intellij.openapi.progress.ProgressIndicator;
 import com.intellij.openapi.progress.Task;
 import com.intellij.openapi.project.DumbAware;
+import com.intellij.openapi.project.Project;
+import com.intellij.openapi.project.ProjectUtil;
+import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.openapi.vfs.LocalFileSystem;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -43,18 +48,40 @@ public class StopAppMapRecordingAction extends AnAction implements DumbAware {
         }
     }
 
+    /**
+     * try to find a reasonable default for the storage location
+     */
+    private static @Nullable String findDefaultStorageLocation(@NotNull Project project,
+                                                               @NotNull AppMapProjectSettings state) {
+        var storageLocation = state.getRecentAppMapStorageLocation();
+        if (StringUtil.isEmpty(storageLocation)) {
+            var projectDir = ProjectUtil.guessProjectDir(project);
+            if (projectDir != null) {
+                var nioProjectDir = projectDir.getFileSystem().getNioPath(projectDir);
+                storageLocation = nioProjectDir != null ? nioProjectDir.toString() : "";
+            }
+        }
+        return storageLocation;
+    }
+
     @Override
     public void actionPerformed(@NotNull AnActionEvent e) {
         var project = e.getProject();
         assert project != null;
 
-        var form = StopRemoteRecordingDialog.show(project);
+        var state = AppMapProjectSettingsService.getState(project);
+        var form = StopRemoteRecordingDialog.show(project,
+                findDefaultStorageLocation(project, state),
+                RemoteRecordingStatusService.getInstance(project).getActiveRecordingURL(),
+                state.getRecentRemoteRecordingURLs()
+        );
         if (form == null) {
+            // user cancelled the form
             return;
         }
 
         var parentDirPath = Paths.get(form.getDirectoryLocation());
-        AppMapProjectSettingsService.getState(project).setRecentAppMapStorageLocation(parentDirPath.toString());
+        state.setRecentAppMapStorageLocation(parentDirPath.toString());
 
         new Task.Backgroundable(project, get("action.stopAppMapRemoteRecording.progressTitle"), false) {
             @Override

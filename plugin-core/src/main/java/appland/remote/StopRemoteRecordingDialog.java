@@ -1,19 +1,17 @@
 package appland.remote;
 
 import appland.AppMapBundle;
-import appland.settings.AppMapProjectSettingsService;
 import appland.validator.UrlInputValidator;
 import com.intellij.openapi.project.Project;
-import com.intellij.openapi.project.ProjectUtil;
 import com.intellij.openapi.ui.DialogWrapper;
 import com.intellij.openapi.ui.ValidationInfo;
-import com.intellij.openapi.util.text.StringUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.List;
 
 /**
  * Dialog to enter the data to stop a remote recording.
@@ -21,51 +19,35 @@ import java.nio.file.Paths;
 public class StopRemoteRecordingDialog extends DialogWrapper {
     private final StopRemoteRecordingForm form;
 
-    protected StopRemoteRecordingDialog(@NotNull Project project) {
+    protected StopRemoteRecordingDialog(@NotNull Project project,
+                                        @Nullable String defaultStorageLocation,
+                                        @Nullable String activeRecordingUrl,
+                                        @NotNull List<String> recentRecordingUrls) {
         super(project);
 
-        var state = AppMapProjectSettingsService.getState(project);
-
-        // try to find a reasonable default for the storage location
-        var storageLocation = state.getRecentAppMapStorageLocation();
-        if (StringUtil.isEmpty(storageLocation)) {
-            var projectDir = ProjectUtil.guessProjectDir(project);
-            if (projectDir != null) {
-                var nioProjectDir = projectDir.getFileSystem().getNioPath(projectDir);
-                storageLocation = nioProjectDir != null ? nioProjectDir.toString() : "";
-            }
-        }
-
-        form = new StopRemoteRecordingForm(project,
-                state.getRecentRemoteRecordingURLs(),
-                storageLocation);
-
+        form = new StopRemoteRecordingForm(project, defaultStorageLocation, activeRecordingUrl, recentRecordingUrls);
         init();
     }
 
     /**
      * Show the dialog and return the entered URL.
      *
-     * @param project The current project
+     * @param project                The current project
+     * @param defaultStorageLocation Default value for the "storage location" input
+     * @param activeRecordingUrl     Default for the "Remote URL" input
+     * @param recentRecordingUrls    Values for the "Remote URL" dropdown
      * @return The URL of {@code null} if the dialog was cancelled.
      */
     @Nullable
-    public static StopRemoteRecordingForm show(@NotNull Project project) {
-        var dialog = new StopRemoteRecordingDialog(project);
+    public static StopRemoteRecordingForm show(@NotNull Project project,
+                                               @Nullable String defaultStorageLocation,
+                                               @Nullable String activeRecordingUrl,
+                                               @NotNull List<String> recentRecordingUrls) {
+        var dialog = new StopRemoteRecordingDialog(project, defaultStorageLocation, activeRecordingUrl, recentRecordingUrls);
         dialog.init();
         dialog.setTitle(AppMapBundle.get("action.stopAppMapRemoteRecording.dialogTitle"));
         dialog.setOKButtonText(AppMapBundle.get("action.stopAppMapRemoteRecording.stopButton"));
-
-        var activeURL = RemoteRecordingStatusService.getInstance(project).getActiveRecordingURL();
-        if (activeURL != null) {
-            dialog.form.getUrlComboBox().setText(activeURL);
-        }
-
-        if (!dialog.showAndGet()) {
-            return null;
-        }
-
-        return dialog.form;
+        return dialog.showAndGet() ? dialog.form : null;
     }
 
     @Override
