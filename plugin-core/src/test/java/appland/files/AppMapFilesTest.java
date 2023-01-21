@@ -37,4 +37,22 @@ public class AppMapFilesTest extends LightPlatformCodeInsightFixture4TestCase {
         assertTrue(success);
         assertEquals("{\"metadata\":{\"name\":\"updated AppMap name\"}}", Files.readString(file));
     }
+
+    @Test
+    public void readAppMapDir() {
+        var configFile = myFixture.copyFileToProject("appmap-config/appmap.yml");
+        assertEquals("tmp/appmap", AppMapFiles.readAppMapDirConfigValue(configFile));
+    }
+
+    @Test
+    public void readAppMapDirEmptyValue() {
+        var configFile = myFixture.copyFileToProject("appmap-config/appmap-empty-dir.yml");
+        assertNull(AppMapFiles.readAppMapDirConfigValue(configFile));
+    }
+
+    @Test
+    public void readAppMapDirMissingValue() {
+        var configFile = myFixture.copyFileToProject("appmap-config/appmap-no-dir.yml");
+        assertNull(AppMapFiles.readAppMapDirConfigValue(configFile));
+    }
 }

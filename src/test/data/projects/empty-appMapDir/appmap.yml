@@ -1,0 +1,13 @@
+name: spring-petclinic-appMapDir
+appmap_dir: tmp-appMapAgent/appmap
+packages:
+- path: db.h2
+- path: db.hsqldb
+- path: db.mysql
+- path: db.postgres
+- path: messages
+- path: org.springframework.samples.petclinic
+- path: static.resources.css
+- path: static.resources.fonts
+- path: static.resources.images
+- path: templates
