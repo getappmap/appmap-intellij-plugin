@@ -1,4 +1,4 @@
-package appland.webviews.findingDetails;
+package appland.problemsView;
 
 import appland.utils.GsonUtils;
 import com.google.gson.*;
@@ -13,7 +13,7 @@ import java.lang.reflect.Type;
  * The JSON follows VSCode's JSON structure `of "Location".
  */
 @Value
-class ResolvedStackLocation {
+public class ResolvedStackLocation {
     // native path
     public @NotNull String absolutePath;
     // in native path format, may have a :line suffix
@@ -21,7 +21,7 @@ class ResolvedStackLocation {
     // 0-based
     public @Nullable Integer line;
 
-    static class TypeAdapter implements JsonSerializer<ResolvedStackLocation>, JsonDeserializer<ResolvedStackLocation> {
+    public static class TypeAdapter implements JsonSerializer<ResolvedStackLocation>, JsonDeserializer<ResolvedStackLocation> {
         @Override
         public ResolvedStackLocation deserialize(JsonElement jsonElement,
                                                  Type type,
