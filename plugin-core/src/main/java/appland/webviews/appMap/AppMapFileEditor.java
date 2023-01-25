@@ -2,12 +2,18 @@ package appland.webviews.appMap;
 
 import appland.AppMapBundle;
 import appland.AppMapPlugin;
+import appland.files.AppMapFiles;
 import appland.files.FileLocation;
 import appland.files.FileLookup;
+import appland.problemsView.FindingsManager;
+import appland.problemsView.FindingsUtil;
+import appland.problemsView.ResolvedStackLocation;
 import appland.settings.AppMapApplicationSettingsService;
 import appland.telemetry.TelemetryService;
 import appland.upload.AppMapUploader;
 import appland.webviews.WebviewEditor;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
 import com.intellij.ide.BrowserUtil;
 import com.intellij.ide.actions.OpenInRightSplitAction;
@@ -32,6 +38,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.nio.file.Path;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.stream.Collectors;
 
 import static com.intellij.openapi.ui.Messages.showErrorDialog;
 
@@ -41,7 +48,7 @@ import static com.intellij.openapi.ui.Messages.showErrorDialog;
  * <p>
  * Extending JetBrains' class isn't possible because it's internal to its module.
  */
-public class AppMapFileEditor extends WebviewEditor<String> {
+public class AppMapFileEditor extends WebviewEditor<JsonObject> {
     private static final Logger LOG = Logger.getInstance(AppMapFileEditor.class);
 
     private FileEditorState state;
@@ -56,8 +63,19 @@ public class AppMapFileEditor extends WebviewEditor<String> {
     }
 
     @Override
-    protected @Nullable String createInitData() {
-        return ReadAction.compute(() -> {
+    protected @Nullable Gson createCustomizedGson() {
+        return new GsonBuilder()
+                .registerTypeAdapter(FileLocation.class, new FileLocation.TypeAdapter())
+                .registerTypeAdapter(ResolvedStackLocation.class, new ResolvedStackLocation.TypeAdapter())
+                .create();
+    }
+
+    /**
+     * @return The JSON object to pass to the AppMap webview as "data" property.
+     */
+    @Override
+    protected @Nullable JsonObject createInitData() {
+        var fileContent = ReadAction.compute(() -> {
             var document = FileDocumentManager.getInstance().getDocument(file);
             if (document == null) {
                 LOG.error("unable to retrieve document for file: " + file.getPath());
@@ -66,15 +84,40 @@ public class AppMapFileEditor extends WebviewEditor<String> {
 
             return document.getText();
         });
+
+        // return early in case of error
+        if (fileContent == null) {
+            return null;
+        }
+
+        try {
+            // parse JSON outside the ReadAction
+            var appMapJson = gson.fromJson(fileContent, JsonObject.class);
+
+            // attach findings, which belong to this AppMap, as property "findings" (same as in VSCode)
+            var findingsFile = ReadAction.compute(() -> AppMapFiles.findRelatedFindingsFile(file));
+            if (findingsFile != null) {
+                var matchingFindings = FindingsManager.getInstance(project).getAllProblems()
+                        .stream()
+                        .filter(problem -> findingsFile.equals(problem.getFindingsFile()))
+                        .collect(Collectors.toList());
+                appMapJson.add("findings", FindingsUtil.createFindingsArray(gson, project, matchingFindings, "rule"));
+            }
+
+            return appMapJson;
+        } catch (Exception e) {
+            LOG.warn("invalid AppMap json", e);
+            return null;
+        }
     }
 
     @Override
-    protected void setupInitMessage(@Nullable String initData, @NotNull JsonObject payload) {
-        payload.addProperty("data", initData);
+    protected void setupInitMessage(@Nullable JsonObject initData, @NotNull JsonObject payload) {
+        payload.add("data", initData);
     }
 
     @Override
-    protected void afterInit(@Nullable String initData) {
+    protected void afterInit(@Nullable JsonObject initData) {
         if (!AppMapApplicationSettingsService.getInstance().isAppmapInstructionsViewed()) {
             AppMapApplicationSettingsService.getInstance().setAppmapInstructionsViewed(true);
             //openAppMapInstructions(); - we're not doing this until we have better instructions
@@ -200,7 +243,7 @@ public class AppMapFileEditor extends WebviewEditor<String> {
     private void reloadAppMapData() {
         ApplicationManager.getApplication().executeOnPooledThread(() -> {
             var message = createMessageObject("loadAppMap");
-            message.addProperty("data", createInitData());
+            message.add("data", createInitData());
             postMessage(message);
         });
     }

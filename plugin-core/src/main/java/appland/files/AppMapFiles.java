@@ -15,6 +15,7 @@ import com.intellij.psi.search.GlobalSearchScope;
 import com.intellij.util.concurrency.annotations.RequiresReadLock;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import com.intellij.openapi.util.text.StringUtil;
 
 import java.io.IOException;
 import java.nio.charset.Charset;
@@ -127,5 +128,17 @@ public final class AppMapFiles {
         return parent == null
                 ? null
                 : parent.findFileByRelativePath("../" + FileUtil.getNameWithoutExtension(parent.getName()) + ".appmap.json");
+    }
+
+    /**
+     * @param appMapFile An .appmap.json file
+     * @return The matching appmap-findings.json file for the given AppMap or {@code null} if unavailable.
+     */
+    @RequiresReadLock
+    public static @Nullable VirtualFile findRelatedFindingsFile(@NotNull VirtualFile appMapFile) {
+        var parent = appMapFile.getParent();
+        // name.appmap.json is mapped to name/appmap-findings.json
+        var findingsPath = String.format("%s/appmap-findings.json", StringUtil.trimEnd(appMapFile.getName(), ".appmap.json"));
+        return parent.findFileByRelativePath(findingsPath);
     }
 }

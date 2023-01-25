@@ -14,9 +14,8 @@ export function mountWebview() {
         // "ready" activates the Java host, which then sends the init message
         mounted: () => vscode.postMessage({command: 'ready'}),
         methods: {
-          async loadAppMap(jsonString) {
+          async loadAppMap(appmapData) {
             try {
-              const appmapData = JSON.parse(jsonString);
               this.$refs.ui.loadData(appmapData);
             } catch (e) {
               console.error("error parsing JSON", e);
