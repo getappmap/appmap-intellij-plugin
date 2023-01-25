@@ -27,30 +27,35 @@ public final class FindingsUtil {
      * Creates an array of findings in the JSON format expected by the "Findings details" webview and
      * the "AppMap" webview.
      *
-     * @param gson     To read and write JSON
-     * @param project  Current project
-     * @param findings Findings to transform
+     * @param gson             To read and write JSON
+     * @param project          Current project
+     * @param findings         Findings to transform
+     * @param rulePropertyName Name of the rule property of the findings items.
+     *                         The AppMap webview needs a different property name than the findings details webview.
      * @return JSON array, will be empty for an empty list of findings
      */
     public static @NotNull JsonArray createFindingsArray(@NotNull Gson gson,
                                                          @NotNull Project project,
-                                                         @NotNull List<ScannerProblem> findings) {
+                                                         @NotNull List<ScannerProblem> findings,
+                                                         @NotNull String rulePropertyName) {
         var findingsJSON = new JsonArray();
         for (var finding : findings) {
-            findingsJSON.add(createFindingItemJson(gson, project, finding));
+            findingsJSON.add(createFindingItemJson(gson, project, finding, rulePropertyName));
         }
         return findingsJSON;
     }
 
     private static @NotNull JsonObject createFindingItemJson(@NotNull Gson gson,
                                                              @NotNull Project project,
-                                                             @NotNull ScannerProblem finding) {
+                                                             @NotNull ScannerProblem finding,
+                                                             @NotNull String rulePropertyName) {
         var jsonItem = new JsonObject();
         jsonItem.add("finding", gson.toJsonTree(finding.getFinding()));
         jsonItem.add("appMapUri", createAppMapUriJson(finding));
         jsonItem.add("problemLocation", createProblemLocationJson(finding));
         jsonItem.add("stackLocations", ReadAction.compute(() -> createStackLocationsJson(gson, project, finding)));
         jsonItem.add("ruleInfo", createRuleInfoJson(gson, finding));
+        jsonItem.add(rulePropertyName, createRuleInfoJson(gson, finding));
         jsonItem.addProperty("appMapName", findAppMapName(finding));
         return jsonItem;
     }
@@ -111,9 +116,13 @@ public final class FindingsUtil {
             return JsonNull.INSTANCE;
         }
 
-        // adds the state of the webview as URI anchor
+        // Adds the state of the webview as URI anchor.
+        // The AppMap webview needs property "fragment" and doesn't work with a path containing #fragment.
         var state = AppMapFileEditorState.createViewFlowState(finding.getFinding().getEventId(), finding.getFinding().relatedEvents).jsonState;
-        return singlePropertyObject("path", appMapFile.toNioPath() + "#" + state);
+        var json = new JsonObject();
+        json.addProperty("path", appMapFile.toNioPath().toString());
+        json.addProperty("fragment", state);
+        return json;
     }
 
     private static @Nullable ResolvedStackLocation resolveStackFrame(@NotNull Project project,

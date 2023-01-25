@@ -10,7 +10,9 @@ import appland.webviews.WebviewEditor;
 import appland.webviews.appMap.AppMapFileEditor;
 import appland.webviews.appMap.AppMapFileEditorState;
 import appland.webviews.findings.FindingsOverviewEditorProvider;
-import com.google.gson.*;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonObject;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.application.ModalityState;
 import com.intellij.openapi.fileEditor.FileEditorManager;
@@ -64,7 +66,8 @@ public class FindingDetailsEditor extends WebviewEditor<Void> {
                 assert message != null;
                 var path = GsonUtils.getPath(message, "uri", "path");
                 if (path != null) {
-                    openAppMapUri(path.getAsString());
+                    var fragment = GsonUtils.getPath(message, "uri", "fragment");
+                    openAppMapUri(path.getAsString(), fragment != null ? fragment.getAsString() : "{}");
                 }
                 return new JBCefJSQuery.Response("success");
 
@@ -97,7 +100,7 @@ public class FindingDetailsEditor extends WebviewEditor<Void> {
         assert findings != null;
 
         payload.addProperty("page", "finding-details");
-        payload.add("data", singlePropertyObject("findings", FindingsUtil.createFindingsArray(gson, project, findings)));
+        payload.add("data", singlePropertyObject("findings", FindingsUtil.createFindingsArray(gson, project, findings, "ruleInfo")));
     }
 
     private void openEditorForLocation(@NotNull ResolvedStackLocation location) {
@@ -116,15 +119,13 @@ public class FindingDetailsEditor extends WebviewEditor<Void> {
         }
     }
 
-    private void openAppMapUri(@NotNull String appMapUri) {
-        // split into file path and state (after the "#)
-        var parts = StringUtil.split(appMapUri, "#");
-        var file = LocalFileSystem.getInstance().findFileByPath(parts.get(0));
+    private void openAppMapUri(@NotNull String appMapUri, @NotNull String jsonState) {
+        var file = LocalFileSystem.getInstance().findFileByPath(StringUtil.split(appMapUri, "#").get(0));
         if (file != null) {
             ApplicationManager.getApplication().invokeLater(() -> {
                 var appMapEditors = FileEditorManager.getInstance(project).openFile(file, true);
                 if (appMapEditors.length == 1 && appMapEditors[0] instanceof AppMapFileEditor) {
-                    appMapEditors[0].setState(new AppMapFileEditorState(parts.get(1)));
+                    appMapEditors[0].setState(new AppMapFileEditorState(jsonState));
                 }
             }, ModalityState.defaultModalityState());
         } else {

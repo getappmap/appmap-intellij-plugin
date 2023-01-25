@@ -80,6 +80,12 @@ public class FindingsManager implements ProblemsProvider {
         }
     }
 
+    public @NotNull List<ScannerProblem> getAllProblems() {
+        synchronized (lock) {
+            return List.copyOf(problems.values());
+        }
+    }
+
     public int getProblemFileCount() {
         synchronized (lock) {
             return problems.size();
