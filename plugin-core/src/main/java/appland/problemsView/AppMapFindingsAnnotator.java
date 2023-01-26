@@ -1,9 +1,8 @@
 package appland.problemsView;
 
 import appland.AppMapBundle;
-import appland.webviews.appMap.AppMapFileEditor;
-import appland.webviews.appMap.AppMapFileEditorState;
 import appland.files.AppMapFiles;
+import appland.files.OpenAppMapFileNavigatable;
 import com.intellij.codeInsight.intention.IntentionAction;
 import com.intellij.codeInspection.util.IntentionFamilyName;
 import com.intellij.codeInspection.util.IntentionName;
@@ -12,7 +11,6 @@ import com.intellij.lang.annotation.Annotator;
 import com.intellij.lang.annotation.HighlightSeverity;
 import com.intellij.openapi.editor.Document;
 import com.intellij.openapi.editor.Editor;
-import com.intellij.openapi.fileEditor.FileEditorManager;
 import com.intellij.openapi.progress.ProgressManager;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.TextRange;
@@ -97,12 +95,11 @@ public class AppMapFindingsAnnotator implements Annotator {
 
         @Override
         public void invoke(@NotNull Project project, Editor editor, PsiFile file) throws IncorrectOperationException {
-            var appMapFile = AppMapFiles.findAppMapSourceFile(problem.getFindingsFile());
-            if (appMapFile != null) {
-                var appMapEditors = FileEditorManager.getInstance(project).openFile(appMapFile, true);
-                if (appMapEditors.length == 1 && appMapEditors[0] instanceof AppMapFileEditor) {
-                    var finding = problem.getFinding();
-                    appMapEditors[0].setState(AppMapFileEditorState.createViewFlowState(finding.getEventId(), finding.relatedEvents));
+            var findingsFile = problem.getFindingsFile();
+            if (findingsFile != null) {
+                var appMapFile = AppMapFiles.findAppMapSourceFile(findingsFile);
+                if (appMapFile != null) {
+                    new OpenAppMapFileNavigatable(project, appMapFile, problem.getFinding()).navigate(true);
                 }
             }
         }
