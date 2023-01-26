@@ -5,8 +5,10 @@ import appland.problemsView.model.ScannerFinding;
 import com.intellij.analysis.problemsView.toolWindow.Node;
 import com.intellij.ide.projectView.PresentationData;
 import com.intellij.openapi.project.Project;
+import com.intellij.pom.Navigatable;
 import com.intellij.ui.tree.LeafState;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import static com.intellij.ui.SimpleTextAttributes.REGULAR_ATTRIBUTES;
 
@@ -32,6 +34,12 @@ class UnknownFileNode extends Node {
     @Override
     public @NotNull LeafState getLeafState() {
         return LeafState.ALWAYS;
+    }
+
+    @Nullable
+    @Override
+    public Navigatable getNavigatable() {
+        return new UnknownFileNavigatable(myProject, finding);
     }
 
     @Override

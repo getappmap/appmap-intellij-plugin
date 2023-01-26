@@ -22,6 +22,7 @@ import java.util.function.Consumer;
 public final class AppMapNotifications {
     public static final String REMOTE_RECORDING_ID = "appmap.remoteRecording";
     public static final String TELEMETRY_ID = "appmap.telemetry";
+    public static final String GENERIC_NOTIFICATIONS_ID = "appmap.generic";
 
     public static void showExpiringRecordingNotification(@NotNull Project project,
                                                          @Nullable String title,
