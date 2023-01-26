@@ -14,6 +14,11 @@ import java.util.stream.Collectors;
 import static com.intellij.ui.SimpleTextAttributes.GRAYED_ATTRIBUTES;
 import static com.intellij.ui.SimpleTextAttributes.REGULAR_ATTRIBUTES;
 
+/**
+ * Node grouping all finding nodes without a known source location.
+ *
+ * @see UnknownFileNode
+ */
 class UnknownFileGroupNode extends Node {
     UnknownFileGroupNode(@NotNull Node parent) {
         super(parent);
