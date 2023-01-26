@@ -15,23 +15,23 @@ public final class ScannerProblem implements FileProblem {
     private final @NotNull ProblemsProvider provider;
     private final @NotNull VirtualFile annotatedFile;
     @Getter
-    private final @NotNull VirtualFile findingsFile;
-    @Getter
     private final @NotNull ScannerFinding finding;
     // 0-based
     private final int line;
 
     public ScannerProblem(@NotNull ProblemsProvider provider,
                           @NotNull VirtualFile annotatedFile,
-                          @NotNull ScannerFinding finding,
-                          @NotNull VirtualFile findingsFile) {
+                          @NotNull ScannerFinding finding) {
         this.provider = provider;
         this.annotatedFile = annotatedFile;
         this.finding = finding;
-        this.findingsFile = findingsFile;
 
         var location = finding.getProblemLocation();
         this.line = location != null ? location.getZeroBasedLine(-1) : -1;
+    }
+
+    public @Nullable VirtualFile getFindingsFile() {
+        return finding.getFindingsFile();
     }
 
     /**

@@ -315,11 +315,13 @@ public class FindingsManager implements ProblemsProvider {
         var fileData = loadFindingsFile(findingsFile);
         if (fileData != null && fileData.findings != null) {
             for (var finding : fileData.findings) {
+                finding.setFindingsFile(findingsFile);
+
                 var annotatedFile = finding.findAnnotatedFile(project, findingsFile);
                 if (annotatedFile != null) {
                     sourceMapping.put(findingsFile.getPath(), annotatedFile);
 
-                    var problem = new ScannerProblem(this, annotatedFile, finding, findingsFile);
+                    var problem = new ScannerProblem(this, annotatedFile, finding);
                     problems.put(annotatedFile, problem);
 
                     // this takes care of problemAppeared, problemDisappeared, problemUpdated notifications

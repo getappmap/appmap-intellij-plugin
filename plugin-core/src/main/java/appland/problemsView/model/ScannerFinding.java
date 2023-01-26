@@ -7,6 +7,8 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.openapi.vfs.VirtualFile;
 import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.Setter;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -47,6 +49,11 @@ public class ScannerFinding {
 
     // attached after JSON parsing, not defined in appmap-findings.json
     public transient @Nullable RuleInfo ruleInfo = null;
+
+    // attached after JSON parsing, links to the source appmap-findings.file containing this finding
+    @Getter
+    @Setter
+    private transient @Nullable VirtualFile findingsFile;
 
     public @Nullable String getAppMapHashWithFallback() {
         return StringUtil.nullize(StringUtil.defaultIfEmpty(appMapHashV2, appMapHash));

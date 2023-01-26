@@ -81,6 +81,8 @@
 
         <notificationGroup id="appmap.telemetry" displayType="STICKY_BALLOON"
                            key="telemetry.permission.title"/>
+        <notificationGroup id="appmap.generic" displayType="BALLOON"
+                           key="notification.groupGeneric.title"/>
 
         <projectConfigurable groupId="tools" nonDefaultProject="true" order="first"
                              instance="appland.settings.AppMapProjectConfigurable"/>
