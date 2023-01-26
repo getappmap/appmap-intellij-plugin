@@ -12,11 +12,12 @@ public class ScannerProblemTest extends AppMapBaseTest {
     public void zeroBasedLine() {
         var scannerFinding = new ScannerFinding();
         scannerFinding.stack = List.of("parent/child/package/file.java:100");
+        scannerFinding.setFindingsFile(new LightVirtualFile());
         var problemLocation = scannerFinding.getProblemLocation();
         assertNotNull(problemLocation);
         assertEquals(Integer.valueOf(100), problemLocation.line);
 
-        var scannerProblem = new ScannerProblem(FindingsManager.getInstance(getProject()), new LightVirtualFile(), scannerFinding, new LightVirtualFile());
+        var scannerProblem = new ScannerProblem(FindingsManager.getInstance(getProject()), new LightVirtualFile(), scannerFinding);
         assertEquals("IntelliJ's line is 0-based", 99, scannerProblem.getLine());
     }
 }
