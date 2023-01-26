@@ -72,6 +72,20 @@ For a complete implementation the following needs to be verified and implemented
 - light theme
 - optionally open .appmap.json files in a text editor
 
+## Releasing
+- Find the latest official release from [GitHub Releases](https://github.com/getappmap/appmap-intellij-plugin/releases)
+- Download the plugin as a `zip` file.
+- Open IntelliJ and [install the plugin via the `zip` file](https://www.jetbrains.com/help/idea/managing-plugins.html#install_plugin_from_disk).
+- Verify everything is working as intended
+    - AppMap rendering
+    - Installation instructions
+    - Indexing and scanning
+    - OpenAPI generation
+    - Authentication
+- Navigate to the [AppMap plugin page](https://plugins.jetbrains.com/plugin/16701-appmap).
+- As an authorized user, click `Upload Update`.
+- Select the officially built plugin zip and upload to the `Stable` channel.
+
 ## Screenshot
 
 [Open screenshot](./appmap-intellij.png)
