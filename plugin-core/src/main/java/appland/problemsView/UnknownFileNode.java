@@ -12,6 +12,9 @@ import org.jetbrains.annotations.Nullable;
 
 import static com.intellij.ui.SimpleTextAttributes.REGULAR_ATTRIBUTES;
 
+/**
+ * Node representing a finding without a known source location.
+ */
 class UnknownFileNode extends Node {
     private final ScannerFinding finding;
 
