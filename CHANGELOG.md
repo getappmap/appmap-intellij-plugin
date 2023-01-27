@@ -1,5 +1,16 @@
 AppMap Plugin Changelog
 
+## [0.26.0](https://github.com/getappmap/appmap-intellij-plugin/compare/v0.25.0...v0.26.0) (2023-01-27)
+
+
+### Features
+
+-  use the configured location from appmap.yml as default for the "Stop remote recording" dialog. If unavailable, fall back to "projectRootDir/tmp/appmap/remote". ([8066fb9]())
+
+### Bug Fixes
+
+-  accept directory locations for "Stop AppMap recording", which do not exist ([7ea38e7]())-  delete (partially) recorded AppMap file if "stop remote recording" response handling failed ([d0a6587]())-  don't abort "stop remote recording" if the update of the metadata failed ([3e3bb33]())-  move lookup of the AppMap default storage location into the background to allow for a time-consuming lookup without blocking the UI ([d171d17]())-  show complete AppMap server in debug message of "Stop remote recording" ([388e02a]())-  show properly formatted debug log message for "Stop remote recording" ([a764126]())
+
 ## [0.25.0](https://github.com/getappmap/appmap-intellij-plugin/compare/v0.24.0...v0.25.0) (2023-01-19)
 
 
