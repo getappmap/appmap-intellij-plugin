@@ -143,7 +143,7 @@ public final class FindingsUtil {
 
         var nativePath = resolvedFile.toNioPath().toString();
         var truncatedPath = truncatePath(nativePath, File.separatorChar);
-        return new ResolvedStackLocation(nativePath, truncatedPath + location.getSuffix(), location.getZeroBasedLine(0));
+        return new ResolvedStackLocation(nativePath, truncatedPath, location.getZeroBasedLine(0));
     }
 
     static @NotNull String truncatePath(@NotNull String path, @NotNull Character separator) {
