@@ -94,7 +94,10 @@ public final class FindingsUtil {
                                                                  @NotNull Project project,
                                                                  @NotNull ScannerProblem finding) {
         var baseFile = finding.getFindingsFile();
-        var stackLocations = finding.getFinding().stack.stream().map(frame -> resolveStackFrame(project, frame, baseFile)).filter(Objects::nonNull).collect(Collectors.toUnmodifiableList());
+        var stackLocations = finding.getFinding().stack.stream()
+                .map(frame -> resolveStackFrame(project, frame, baseFile))
+                .filter(Objects::nonNull)
+                .collect(Collectors.toUnmodifiableList());
 
         var json = new JsonArray();
         for (var location : stackLocations) {
