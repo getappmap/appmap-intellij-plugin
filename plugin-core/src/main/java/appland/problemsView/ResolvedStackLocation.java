@@ -29,8 +29,15 @@ public class ResolvedStackLocation {
             var json = jsonElement.getAsJsonObject();
             var absolutePath = json.getAsJsonObject("uri").getAsJsonPrimitive("path").getAsString();
             var truncatedPath = json.getAsJsonPrimitive("truncatedPath").getAsString();
-            var line = json.has("range") ? json.getAsJsonObject("range").getAsJsonPrimitive("line") : null;
-            var lineValue = line != null ? line.getAsInt() : null;
+
+            Integer lineValue = null;
+            var range = json.getAsJsonArray("range");
+            if (range != null && !range.isEmpty()) {
+                var line = range.get(0).getAsJsonObject().getAsJsonPrimitive("line");
+                if (line != null) {
+                    lineValue = line.getAsInt();
+                }
+            }
             return new ResolvedStackLocation(absolutePath, truncatedPath, lineValue);
         }
 
@@ -42,7 +49,10 @@ public class ResolvedStackLocation {
             json.addProperty("truncatedPath", stackLocation.truncatedPath);
             json.add("uri", GsonUtils.singlePropertyObject("path", stackLocation.absolutePath));
             if (stackLocation.line != null) {
-                json.add("range", GsonUtils.singlePropertyObject("line", stackLocation.line));
+                var range = new JsonObject();
+                range.addProperty("line", stackLocation.line);
+                range.addProperty("character", 0);
+                json.add("range", GsonUtils.createArray(range));
             }
             return json;
         }

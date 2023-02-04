@@ -45,4 +45,12 @@ public class GsonUtils {
         json.addProperty(name, value);
         return json;
     }
+
+    public static @NotNull JsonArray createArray(@NotNull JsonObject... values) {
+        var array = new JsonArray();
+        for (var value : values) {
+            array.add(value);
+        }
+        return array;
+    }
 }
