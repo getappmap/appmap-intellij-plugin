@@ -10,6 +10,7 @@ import com.intellij.testFramework.fixtures.impl.CodeInsightTestFixtureImpl;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.junit.Assume;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.util.List;
@@ -42,6 +43,7 @@ public class RuntimeAnalysisModelTest extends AppMapBaseTest {
     }
 
     @Test
+    @Ignore("unstable test")
     public void authenticatedWithFindings() throws Exception {
         // fixme(jansorg): This test is passing locally, but consistently failing on Travis CI
         //      we're disabling this until we figure out the root cause
