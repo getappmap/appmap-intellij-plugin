@@ -1,10 +1,12 @@
 package appland.toolwindow.installGuide;
 
 import appland.Icons;
+import appland.telemetry.TelemetryService;
 import com.intellij.ide.BrowserUtil;
 import com.intellij.ide.util.PropertiesComponent;
 import com.intellij.ui.HyperlinkAdapter;
 import com.intellij.ui.components.JBLabel;
+import org.apache.commons.lang.StringUtils;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
@@ -48,6 +50,10 @@ public class UrlLabel extends JBLabel {
 
                 PropertiesComponent.getInstance().setValue(urlPropertyKey(url), true);
                 setIcon(iconFor(url));
+                TelemetryService.getInstance().sendEvent("click_docs_link_in_tree", eventData -> {
+                    eventData.property("appmap.docs_path", StringUtils.remove(url, "https://appmap.io"));
+                    return eventData;
+                });
             }
         };
     }
