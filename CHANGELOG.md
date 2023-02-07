@@ -1,5 +1,12 @@
 AppMap Plugin Changelog
 
+## [0.27.0](https://github.com/getappmap/appmap-intellij-plugin/compare/v0.26.1...v0.27.0) (2023-02-07)
+
+
+### Features
+
+-  add telemetry to docs links in tool window ([f5f3091]())-  send telemetry for appmap events ([9b849c2]())
+
 ## [0.26.1](https://github.com/getappmap/appmap-intellij-plugin/compare/v0.26.0...v0.26.1) (2023-02-03)
 
 
