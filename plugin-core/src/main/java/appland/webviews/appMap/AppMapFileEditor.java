@@ -137,11 +137,13 @@ public class AppMapFileEditor extends WebviewEditor<String> {
 
     @Override
     public @Nullable JBCefJSQuery.Response handleWebviewMessage(@NotNull String messageId, @Nullable JsonObject message) {
+        TelemetryService telemetryService = TelemetryService.getInstance();
+
         switch (messageId) {
             case "uploadAppMap":
                 return uploadAppMap();
 
-            case "view-source":
+            case "viewSource":
                 // message is {..., location: {location:"path/file.java", externalSource="path/file.java"}}
                 if (message != null) {
                     var location = message.getAsJsonObject("location");
@@ -149,6 +151,42 @@ public class AppMapFileEditor extends WebviewEditor<String> {
                         return showSource(location.getAsJsonPrimitive("location").getAsString());
                     }
                 }
+                return null;
+
+            case "sidebarSearchFocused":
+                telemetryService.sendEvent("sidebar_search_focused");
+                return null;
+
+            case "clickFilterButton":
+                telemetryService.sendEvent("click_filter_button");
+                return null;
+
+            case "clickTab":
+                if (message != null) {
+                    var tabId = message.getAsJsonPrimitive("tabId");
+                    if (tabId.isString()) {
+                        telemetryService.sendEvent("click_tab", eventData -> {
+                            eventData.property("appmap.click_tab.tabId", tabId.getAsString());
+                            return eventData;
+                        });
+                    }
+                }
+                return null;
+
+            case "selectObjectInSidebar":
+                if (message != null) {
+                    var category = message.getAsJsonPrimitive("category");
+                    if (category.isString()) {
+                        telemetryService.sendEvent("select_object_in_sidebar", eventData -> {
+                            eventData.property("appmap.select_object_in_sidebar.type", category.getAsString());
+                            return eventData;
+                        });
+                    }
+                }
+                return null;
+
+            case "resetDiagram":
+                telemetryService.sendEvent("reset_diagram");
                 return null;
 
             default:

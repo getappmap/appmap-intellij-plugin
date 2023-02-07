@@ -38,8 +38,13 @@ export function mountWebview() {
 
   messages.on('init', ({data: initData}) => {
     // messages emitted by the webview
-    app.$on('viewSource', (location) => vscode.postMessage({command: 'view-source', location}))
+    app.$on('viewSource', (location) => vscode.postMessage({command: 'viewSource', location}))
     app.$on('uploadAppmap', () => vscode.postMessage({command: 'uploadAppMap'}))
+    app.$on('sidebarSearchFocused', () => vscode.postMessage({command: 'sidebarSearchFocused'}))
+    app.$on('clickFilterButton', () => vscode.postMessage({command: 'clickFilterButton'}))
+    app.$on('clickTab', (tabId) => vscode.postMessage({command: 'clickTab', tabId}))
+    app.$on('selectObjectInSidebar', (category) => vscode.postMessage({command: 'selectObjectInSidebar', category}))
+    app.$on('resetDiagram', () => vscode.postMessage({command: 'resetDiagram'}))
     app.$on('request-resolve-location', (location) => {
       app.$emit('response-resolve-location', {location, externalUrl: location});
     });
