@@ -31,4 +31,7 @@ public class RuleInfo {
 
     @SerializedName("scope")
     public @Nullable String scope = null;
+
+    @SerializedName("url")
+    public @Nullable String url = null;
 }
