@@ -10,20 +10,20 @@
     "@jridgewell/gen-mapping" "^0.1.0"
     "@jridgewell/trace-mapping" "^0.3.9"
 
-"@appland/components@^2.22.0":
-  version "2.22.0"
-  resolved "https://registry.yarnpkg.com/@appland/components/-/components-2.22.0.tgz#1f36c2b956a046d3767739ccde98290e82b085df"
-  integrity sha512-Z1aEmSlK7J2WzL6RZDGZPRMRWpDue7+3egXXp5VQmKVxkVJEC68RGakC7btp/rWQnvT3fWgn+PjdK1d4rt527Q==
+"@appland/components@^2.28.0":
+  version "2.28.0"
+  resolved "https://registry.yarnpkg.com/@appland/components/-/components-2.28.0.tgz#a2832986566a38685c84dc5f884d92793b90cd17"
+  integrity sha512-0bXdPlycMuf3eOO2g0VkbSdtjVwG7/0D0uvHRzhwWkcyAB7xYfUJ8YDQ3DDoRy31yUuYvlwOhTH3qSJQikGgUg==
   dependencies:
-    "@appland/diagrams" "^1.6.0"
-    "@appland/models" "^1.23.0"
+    "@appland/diagrams" "^1.6.2"
+    "@appland/models" "^2.0.0"
     buffer "^6.0.3"
     highlight.js "^10.7.2"
     sql-formatter "^4.0.2"
     vue "^2.7.14"
     vuex "^3.6.0"
 
-"@appland/diagrams@^1.6.0", "@appland/diagrams@^1.6.1":
+"@appland/diagrams@^1.6.1":
   version "1.6.1"
   resolved "https://registry.yarnpkg.com/@appland/diagrams/-/diagrams-1.6.1.tgz#c26a6783e7c1b352757c52f1c57fe2957ccf9cf2"
   integrity sha512-32Eb3qi59KoyJD4egvxhvFUDBfY5tcykXJOTTj3N5KTyUFlYFWj59fToVxg93A7jlysMSbvilxsPGXrD9Fe4kQ==
@@ -36,10 +36,31 @@
     dagre "^0.8.5"
     deepmerge "^4.2.2"
 
+"@appland/diagrams@^1.6.2":
+  version "1.6.2"
+  resolved "https://registry.yarnpkg.com/@appland/diagrams/-/diagrams-1.6.2.tgz#f62707bd02c545e8adb74317e8912aa8ca1644ed"
+  integrity sha512-kfr0VoR61WN9xMASlYPLnJAyWceasKHBHBSSZ1Vqsgc8dpH6K0VMSkHpN32qJ3V7rKD42hnsGjVxz0brnHTbPg==
+  dependencies:
+    "@appland/models" "^2.0.0"
+    d3-interpolate "^1.4.0"
+    d3-selection "^1.4.2"
+    d3-shape "^1.3.7"
+    d3-zoom "^1.8.3"
+    dagre "^0.8.5"
+    deepmerge "^4.2.2"
+
 "@appland/models@^1.23.0":
   version "1.23.0"
   resolved "https://registry.yarnpkg.com/@appland/models/-/models-1.23.0.tgz#db7ec477a8bb52d118c7f1e9ef271ea10857d4aa"
   integrity sha512-ZB1mSIlK4Iqno2ubX5VdFhxT7BCP+5UZANXHLpY59Z8TE6r46p/WB77xvPrbWErO/1f/hz64U2kQJNVmpxbi/A==
+  dependencies:
+    "@appland/sql-parser" "^1.5.0"
+    crypto-js "^4.0.0"
+
+"@appland/models@^2.0.0":
+  version "2.0.0"
+  resolved "https://registry.yarnpkg.com/@appland/models/-/models-2.0.0.tgz#cbad4b5ee57257de03b0068123cfaa6f00378e45"
+  integrity sha512-PRJvwpXAAI8afNjF2ptwTYZapRdXQ3+f0LdGX7G/Api0XpA20/3GgxeHL0dDuOiL8ozhA5RHKKtUmwnSrv29MQ==
   dependencies:
     "@appland/sql-parser" "^1.5.0"
     crypto-js "^4.0.0"

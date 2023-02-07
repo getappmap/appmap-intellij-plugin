@@ -35,7 +35,7 @@
     "webpack-cli": "^4.6.0"
   },
   "dependencies": {
-    "@appland/components": "^2.22.0",
+    "@appland/components": "^2.28.0",
     "@appland/diagrams": "^1.6.1",
     "vue": "^2.6.12",
     "vue-template-compiler": "^2.6.12"
