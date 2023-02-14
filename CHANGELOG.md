@@ -1,5 +1,16 @@
 AppMap Plugin Changelog
 
+## [0.28.0](https://github.com/getappmap/appmap-intellij-plugin/compare/v0.27.0...v0.28.0) (2023-02-14)
+
+
+### Features
+
+-  open the AppMap webview if a finding node without known source location is executed in the problems view ([72174d0]())-  support findings in the AppMap webview editor ([a2052a6]())
+
+### Bug Fixes
+
+-  open stack locations of findings at the right line. property "range" is an array, not a plain object ([9330fa6]())-  pass url property to the AppMap JSON application to fix the "learn more" link of finding details ([75193d4]())
+
 ## [0.27.0](https://github.com/getappmap/appmap-intellij-plugin/compare/v0.26.1...v0.27.0) (2023-02-07)
 
 
