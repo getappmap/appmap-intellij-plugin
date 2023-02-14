@@ -20,12 +20,6 @@ before_install:
 - chmod +x gradlew
 
 install:
-    - curl -s get.sdkman.io | bash
-    - source "$HOME/.sdkman/bin/sdkman-init.sh"
-    - echo sdkman_auto_answer=true > ~/.sdkman/etc/config
-    - source "/home/travis/.sdkman/bin/sdkman-init.sh"
-    - sdk install java 11.0.2-open
-    - export APP_MAP_JDK="$(sdk home java 11.0.2-open)"
     - ./gradlew build verifyPlugin
 
 before_deploy:
