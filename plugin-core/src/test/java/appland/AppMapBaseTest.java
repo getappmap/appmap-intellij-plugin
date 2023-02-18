@@ -1,9 +1,12 @@
 package appland;
 
 import com.intellij.openapi.application.ReadAction;
+import com.intellij.openapi.roots.ModuleRootModificationUtil;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.testFramework.fixtures.LightPlatformCodeInsightFixture4TestCase;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.Collections;
 
 public abstract class AppMapBaseTest extends LightPlatformCodeInsightFixture4TestCase {
     /**
@@ -23,6 +26,21 @@ public abstract class AppMapBaseTest extends LightPlatformCodeInsightFixture4Tes
     public VirtualFile createTempDir(@NotNull String name) {
         var psiFile = myFixture.addFileToProject(name + "/file.txt", "");
         return ReadAction.compute(() -> psiFile.getParent().getVirtualFile());
+    }
+
+    protected void withExcludedFolder(@NotNull VirtualFile excludedFolder, @NotNull Runnable runnable) {
+        try {
+            ModuleRootModificationUtil.updateExcludedFolders(getModule(), excludedFolder.getParent(),
+                    Collections.emptyList(),
+                    Collections.singletonList(excludedFolder.getUrl()));
+
+            runnable.run();
+        } finally {
+            // un-exclude again to avoid follow-up tests
+            ModuleRootModificationUtil.updateExcludedFolders(getModule(), excludedFolder.getParent(),
+                    Collections.singletonList(excludedFolder.getUrl()),
+                    Collections.emptyList());
+        }
     }
 
     private String createAppMapEvents(int requestCount, int queryCount) {
