@@ -1,11 +1,14 @@
 package appland.index;
 
+import com.intellij.icons.AllIcons;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMaps;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import lombok.Getter;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
+import javax.swing.*;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -54,6 +57,30 @@ public enum ClassMapItemType {
         this.id = id;
         this.name = name;
         this.separator = separator;
+    }
+
+    public @Nullable Icon getIcon() {
+        switch (this) {
+            case Folder:
+                return AllIcons.Nodes.Folder;
+            case Package:
+                return AllIcons.Nodes.Package;
+            case ExternalService:
+                return AllIcons.Nodes.Services;
+            case HTTP: // fall-through
+            case Route:
+                return AllIcons.Nodes.WebFolder;
+            case Database:
+                return AllIcons.Nodes.DataSchema;
+            case Query:
+                return AllIcons.Nodes.DataTables;
+            case Class:
+                return AllIcons.Nodes.Class;
+            case Function:
+                return AllIcons.Nodes.Function;
+            default:
+                return null;
+        }
     }
 
     public static @NotNull ClassMapItemType findById(int id) {

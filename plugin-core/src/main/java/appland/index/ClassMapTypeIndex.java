@@ -5,7 +5,9 @@ import com.intellij.json.JsonFileType;
 import com.intellij.openapi.project.DumbService;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.text.StringUtil;
+import com.intellij.openapi.vfs.VfsUtil;
 import com.intellij.openapi.vfs.VirtualFile;
+import com.intellij.openapi.vfs.VirtualFileSet;
 import com.intellij.psi.search.GlobalSearchScope;
 import com.intellij.util.indexing.*;
 import com.intellij.util.io.DataExternalizer;
@@ -32,7 +34,10 @@ public class ClassMapTypeIndex extends FileBasedIndexExtension<ClassMapItemType,
             out.writeInt(values.size());
 
             for (var value : values) {
-                IOUtil.writeUTF(out, StringUtil.defaultIfEmpty(value.parentId, ""));
+                out.writeBoolean(value.parentId != null);
+                if (value.parentId != null) {
+                    IOUtil.writeUTF(out, value.parentId);
+                }
                 IOUtil.writeUTF(out, value.id);
                 IOUtil.writeUTF(out, value.name);
             }
@@ -44,15 +49,40 @@ public class ClassMapTypeIndex extends FileBasedIndexExtension<ClassMapItemType,
             var result = new ArrayList<ClassMapItem>(size);
 
             for (var i = 0; i < size; i++) {
-                var parentId = IOUtil.readUTF(in);
+                var hasParentId = in.readBoolean();
+                String parentId;
+                if (hasParentId) {
+                    parentId = IOUtil.readUTF(in);
+                } else {
+                    parentId = null;
+                }
+
                 var id = IOUtil.readUTF(in);
                 var name = IOUtil.readUTF(in);
-                result.add(new ClassMapItem(parentId.isEmpty() ? null : parentId, id, name));
+                result.add(new ClassMapItem(parentId, id, name));
             }
 
             return result;
         }
     };
+
+    public static VirtualFileSet findContainingAppMapFiles(@NotNull Project project, @NotNull ClassMapItemType type, @NotNull String id) {
+        var files = VfsUtil.createCompactVirtualFileSet();
+
+        processItems(project, type, (file, items) -> {
+            for (var item : items) {
+                if (id.equals(item.getId())) {
+                    var appMapFile = AppMapFiles.findAppMapSourceFile(file);
+                    if (appMapFile != null) {
+                        files.add(appMapFile);
+                    }
+                }
+            }
+            return true;
+        });
+
+        return files;
+    }
 
     /**
      * @return Class map items of the given type, associated with the AppMap source files.
@@ -141,7 +171,7 @@ public class ClassMapTypeIndex extends FileBasedIndexExtension<ClassMapItemType,
                 @Override
                 protected void onItem(@NotNull ClassMapItemType type, @Nullable String parentId, @NotNull String id, @NotNull String name, int level) {
                     var list = result.computeIfAbsent(type, ignored -> new LinkedList<>());
-                    list.add(new ClassMapItem(parentId, id, name));
+                    list.add(new ClassMapItem(StringUtil.nullize(parentId), id, name));
                 }
             }.parse(inputData.getContentAsText());
 

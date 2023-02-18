@@ -7,6 +7,7 @@ import appland.index.AppMapMetadata;
 import appland.index.IndexedFileListenerUtil;
 import appland.installGuide.InstallGuideEditorProvider;
 import appland.installGuide.InstallGuideViewPage;
+import appland.toolwindow.codeObjects.CodeObjectsPanel;
 import appland.toolwindow.installGuide.InstallGuidePanel;
 import appland.toolwindow.installGuide.UrlLabel;
 import appland.toolwindow.runtimeAnalysis.RuntimeAnalysisPanel;
@@ -221,18 +222,19 @@ public class AppMapWindowPanel extends SimpleToolWindowPanel implements DataProv
     }
 
     private static @NotNull JPanel createSouthPanel(@NotNull Project project, @NotNull Disposable parent) {
-        // quickstart and documentation panels don't grow
-        var subPanel = new JPanel(new BorderLayout());
-        subPanel.add(new InstallGuidePanel(project, parent), BorderLayout.NORTH);
-        subPanel.add(createDocumentationLinksPanel(), BorderLayout.SOUTH);
-
         // the "Runtime Analysis" panel should take the available space
         var runtimeAnalysisPanel = new RuntimeAnalysisPanel(project, parent);
         runtimeAnalysisPanel.setMinimumSize(new JBDimension(0, 150));
-        var mainPanel = new CollapsiblePanel(AppMapBundle.get("toolwindow.appmap.runtimeAnalysis"), false, runtimeAnalysisPanel);
+        var runtimeAnalysisWrapper = new CollapsiblePanel(AppMapBundle.get("toolwindow.appmap.runtimeAnalysis"), false, runtimeAnalysisPanel);
+
+        // quickstart and documentation panels don't grow
+        var subPanel = new JPanel(new BorderLayout());
+        subPanel.add(new InstallGuidePanel(project, parent), BorderLayout.NORTH);
+        subPanel.add(new CodeObjectsPanel(project, parent), BorderLayout.CENTER);
+        subPanel.add(createDocumentationLinksPanel(), BorderLayout.SOUTH);
 
         var main = new JPanel(new BorderLayout());
-        main.add(mainPanel, BorderLayout.CENTER);
+        main.add(runtimeAnalysisWrapper, BorderLayout.CENTER);
         main.add(subPanel, BorderLayout.SOUTH);
         return main;
     }
