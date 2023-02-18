@@ -3,6 +3,7 @@ package appland.index;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.util.text.StringUtil;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.jetbrains.io.JsonReaderEx;
 
 /**
@@ -19,24 +20,37 @@ abstract class StreamingClassMapIterator {
         }
 
         try (var json = new JsonReaderEx(content)) {
-            parseArray(0, json, "", ClassMapItemType.ROOT);
+            parseArray(json, 0, "", ClassMapItemType.ROOT);
         }
     }
 
-    private void parseArray(int level, @NotNull JsonReaderEx json, @NotNull String parentId, @NotNull ClassMapItemType parentType) {
+    private void parseArray(@NotNull JsonReaderEx json, int level, @NotNull String parentId, @NotNull ClassMapItemType parentType) {
         json.beginArray();
 
         while (json.hasNext()) {
             var childrenReader = json.createSubReaderAndSkipValue();
             assert childrenReader != null;
 
-            parseItem(level, parentId, parentType, childrenReader);
+            parseItem(childrenReader, level, parentId, parentType);
         }
 
         json.endArray();
     }
 
-    private void parseItem(int level, @NotNull String parentId, @NotNull ClassMapItemType parentType, JsonReaderEx json) {
+    @NotNull
+    private static String findItemSeparator(@NotNull ClassMapItemType parentType, @NotNull ClassMapItemType type, @Nullable Boolean isStatic) {
+        // special handling for functions
+        if (type == ClassMapItemType.Function) {
+            return isStatic == Boolean.TRUE ? "." : "#";
+        }
+        return parentType.getSeparator();
+    }
+
+    private String joinPath(@NotNull String delimiter, @NotNull String parent, @NotNull String child) {
+        return parent.isEmpty() ? child : parent + delimiter + child;
+    }
+
+    private void parseItem(@NotNull JsonReaderEx json, int level, @NotNull String parentId, @NotNull ClassMapItemType parentType) {
         json.beginObject();
 
         String name = null;
@@ -69,23 +83,25 @@ abstract class StreamingClassMapIterator {
                     break;
                 default:
                     json.skipValue();
-                    LOG.debug("Skipping classMap property: " + property);
+                    if (LOG.isDebugEnabled()) {
+                        LOG.debug("Skipping classMap property: " + property);
+                    }
                     break;
             }
         }
 
         if (name != null && typeName != null) {
             var type = ClassMapItemType.findByName(typeName);
-            var separator = findItemSeparator(parentType, isStatic, type);
+            var separator = findItemSeparator(parentType, type, isStatic);
 
             // Some code object entries have a path-delimited package name,
             // but we want each package name token to be its own object.
             String itemPath;
-            int childLevel = level;
+            var childLevel = level;
             if (type == ClassMapItemType.Package) {
                 itemPath = parentId;
-                for (var parentName : StringUtil.split(name, "/")) {
-                    itemPath = joinPath("/", itemPath, parentName);
+                for (var parentName : StringUtil.split(name, type.getSeparator())) {
+                    itemPath = joinPath(type.getSeparator(), itemPath, parentName);
                     onItem(childLevel, typeName + ":" + itemPath, type, name);
                     childLevel++;
                 }
@@ -97,25 +113,12 @@ abstract class StreamingClassMapIterator {
             }
 
             if (children != null) {
-                parseArray(childLevel, children, itemPath, type);
+                parseArray(children, childLevel, itemPath, type);
             }
         } else {
             LOG.debug("Incomplete item found: " + json);
         }
 
         json.endObject();
-    }
-
-    private String joinPath(@NotNull String delimiter, @NotNull String parent, @NotNull String child) {
-        return parent.isEmpty() ? child : parent + delimiter + child;
-    }
-
-    @NotNull
-    private static String findItemSeparator(@NotNull ClassMapItemType parentType, Boolean isStatic, ClassMapItemType type) {
-        // special handling for functions
-        if (type == ClassMapItemType.Function) {
-            return isStatic == Boolean.TRUE ? "." : "#";
-        }
-        return parentType.getSeparator();
     }
 }
