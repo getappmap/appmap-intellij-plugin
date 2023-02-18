@@ -58,8 +58,7 @@ public class ClassMapTypeIndex extends FileBasedIndexExtension<ClassMapItemType,
             return Collections.emptyMap();
         }
 
-        var scope = GlobalSearchScope.everythingScope(project);
-
+        var scope = GlobalSearchScope.getScopeRestrictedByFileTypes(new EverythingExceptLibrariesScope(project), JsonFileType.INSTANCE);
         var items = new HashMap<ClassMapItem, List<VirtualFile>>();
         FileBasedIndex.getInstance().processValues(INDEX_ID, type, null, (file, classMapItems) -> {
             for (var item : classMapItems) {

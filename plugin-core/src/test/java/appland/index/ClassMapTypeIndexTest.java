@@ -1,10 +1,12 @@
 package appland.index;
 
 import appland.AppMapBaseTest;
+import com.intellij.openapi.roots.ModuleRootModificationUtil;
 import com.intellij.openapi.vfs.VirtualFile;
 import org.jetbrains.annotations.NotNull;
 import org.junit.Test;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -50,6 +52,16 @@ public class ClassMapTypeIndexTest extends AppMapBaseTest {
         assertItemsFileCount("Two associated AppMap files expected",
                 2,
                 List.of(ClassMapItemType.Package, ClassMapItemType.Class, ClassMapItemType.Query, ClassMapItemType.Route));
+    }
+
+    @Test
+    public void insideExcluded() {
+        var root = myFixture.copyDirectoryToProject("classMaps/projectDuplicateIds", "root");
+        withExcludedFolder(root, () -> {
+            // root items, classMap files in excluded folders must be processed by the query
+            assertSize(1, ClassMapTypeIndex.findItems(getProject(), ClassMapItemType.Database));
+            assertSize(1, ClassMapTypeIndex.findItems(getProject(), ClassMapItemType.HTTP));
+        });
     }
 
     private void assertItemsFileCount(String message, int expected, List<ClassMapItemType> types) {
