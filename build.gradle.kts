@@ -195,6 +195,10 @@ project(":") {
             jar {
                 dependsOn("copyPluginAssets")
             }
+
+            instrumentedJar {
+                dependsOn("copyPluginAssets")
+            }
         }
 
         patchPluginXml {

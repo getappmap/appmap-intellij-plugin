@@ -24,7 +24,7 @@ abstract class StreamingClassMapIterator {
         }
     }
 
-    private void parseArray(@NotNull JsonReaderEx json, int level, @NotNull String parentId, @NotNull ClassMapItemType parentType) {
+    private void parseArray(@NotNull JsonReaderEx json, int level, @Nullable String parentId, @NotNull ClassMapItemType parentType) {
         json.beginArray();
 
         while (json.hasNext()) {
@@ -46,11 +46,11 @@ abstract class StreamingClassMapIterator {
         return parentType.getSeparator();
     }
 
-    private String joinPath(@NotNull String delimiter, @NotNull String parent, @NotNull String child) {
-        return parent.isEmpty() ? child : parent + delimiter + child;
+    private String joinPath(@NotNull String delimiter, @Nullable String parent, @NotNull String child) {
+        return parent == null || parent.isEmpty() ? child : parent + delimiter + child;
     }
 
-    private void parseItem(@NotNull JsonReaderEx json, int level, @NotNull String parentId, @NotNull ClassMapItemType parentType) {
+    private void parseItem(@NotNull JsonReaderEx json, int level, @Nullable String parentId, @NotNull ClassMapItemType parentType) {
         json.beginObject();
 
         String name = null;
@@ -102,13 +102,12 @@ abstract class StreamingClassMapIterator {
                 itemPath = parentId;
                 for (var parentName : StringUtil.split(name, type.getSeparator())) {
                     itemPath = joinPath(type.getSeparator(), itemPath, parentName);
-                    onItem(type, parentId, typeName + ":" + itemPath, name, childLevel);
+                    onItem(type, parentType.getName() + ":" + parentId, typeName + ":" + itemPath, name, childLevel);
                     childLevel++;
                 }
-
             } else {
                 itemPath = joinPath(separator, parentId, name);
-                onItem(type, parentId, typeName + ":" + itemPath, name, childLevel);
+                onItem(type, parentType.getName() + ":" + parentId, typeName + ":" + itemPath, name, childLevel);
                 childLevel++;
             }
 
