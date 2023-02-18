@@ -12,7 +12,7 @@ import org.jetbrains.io.JsonReaderEx;
 abstract class StreamingClassMapIterator {
     private static final Logger LOG = Logger.getInstance(StreamingClassMapIterator.class);
 
-    protected abstract void onItem(int level, @NotNull String id, ClassMapItemType type, @NotNull String name);
+    protected abstract void onItem(@NotNull ClassMapItemType type, @Nullable String parentId, @NotNull String id, @NotNull String name, int level);
 
     public void parse(@NotNull CharSequence content) {
         if (content.length() == 0) {
@@ -102,13 +102,13 @@ abstract class StreamingClassMapIterator {
                 itemPath = parentId;
                 for (var parentName : StringUtil.split(name, type.getSeparator())) {
                     itemPath = joinPath(type.getSeparator(), itemPath, parentName);
-                    onItem(childLevel, typeName + ":" + itemPath, type, name);
+                    onItem(type, parentId, typeName + ":" + itemPath, name, childLevel);
                     childLevel++;
                 }
 
             } else {
                 itemPath = joinPath(separator, parentId, name);
-                onItem(childLevel, typeName + ":" + itemPath, type, name);
+                onItem(type, parentId, typeName + ":" + itemPath, name, childLevel);
                 childLevel++;
             }
 

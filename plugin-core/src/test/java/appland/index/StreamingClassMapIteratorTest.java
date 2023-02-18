@@ -5,6 +5,7 @@ import com.intellij.openapi.util.SystemInfoRt;
 import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.openapi.vfs.VfsUtilCore;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -17,7 +18,7 @@ public class StreamingClassMapIteratorTest extends AppMapBaseTest {
         List<String> ids = new ArrayList<>();
 
         @Override
-        protected void onItem(int level, @NotNull String id, ClassMapItemType type, @NotNull String name) {
+        protected void onItem(@NotNull ClassMapItemType type, @Nullable String parentId, @NotNull String id, @NotNull String name, int level) {
             if (type != ClassMapItemType.Database
                     && type != ClassMapItemType.HTTP
                     && type != ClassMapItemType.Query

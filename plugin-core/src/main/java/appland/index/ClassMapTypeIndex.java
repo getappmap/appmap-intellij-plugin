@@ -4,6 +4,7 @@ import appland.files.AppMapFiles;
 import com.intellij.json.JsonFileType;
 import com.intellij.openapi.project.DumbService;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.search.GlobalSearchScope;
 import com.intellij.util.indexing.*;
@@ -12,6 +13,7 @@ import com.intellij.util.io.IOUtil;
 import com.intellij.util.io.InlineKeyDescriptor;
 import com.intellij.util.io.KeyDescriptor;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.DataInput;
 import java.io.DataOutput;
@@ -30,6 +32,7 @@ public class ClassMapTypeIndex extends FileBasedIndexExtension<ClassMapItemType,
             out.writeInt(values.size());
 
             for (var value : values) {
+                IOUtil.writeUTF(out, StringUtil.defaultIfEmpty(value.parentId, ""));
                 IOUtil.writeUTF(out, value.id);
                 IOUtil.writeUTF(out, value.name);
             }
@@ -41,9 +44,10 @@ public class ClassMapTypeIndex extends FileBasedIndexExtension<ClassMapItemType,
             var result = new ArrayList<ClassMapItem>(size);
 
             for (var i = 0; i < size; i++) {
+                var parentId = IOUtil.readUTF(in);
                 var id = IOUtil.readUTF(in);
                 var name = IOUtil.readUTF(in);
-                result.add(new ClassMapItem(id, name));
+                result.add(new ClassMapItem(parentId.isEmpty() ? null : parentId, id, name));
             }
 
             return result;
@@ -58,9 +62,8 @@ public class ClassMapTypeIndex extends FileBasedIndexExtension<ClassMapItemType,
             return Collections.emptyMap();
         }
 
-        var scope = GlobalSearchScope.getScopeRestrictedByFileTypes(new EverythingExceptLibrariesScope(project), JsonFileType.INSTANCE);
         var items = new HashMap<ClassMapItem, List<VirtualFile>>();
-        FileBasedIndex.getInstance().processValues(INDEX_ID, type, null, (file, classMapItems) -> {
+        processItems(project, type, (file, classMapItems) -> {
             for (var item : classMapItems) {
                 var appMapFiles = items.computeIfAbsent(item, classMapItem -> new LinkedList<>());
                 var appMapFile = AppMapFiles.findAppMapSourceFile(file);
@@ -69,8 +72,19 @@ public class ClassMapTypeIndex extends FileBasedIndexExtension<ClassMapItemType,
                 }
             }
             return true;
-        }, scope);
+        });
         return items;
+    }
+
+    public static void processItems(@NotNull Project project,
+                                    @NotNull ClassMapItemType type,
+                                    @NotNull FileBasedIndex.ValueProcessor<List<ClassMapItem>> processor) {
+        if (DumbService.isDumb(project)) {
+            return;
+        }
+
+        var scope = GlobalSearchScope.getScopeRestrictedByFileTypes(new EverythingExceptLibrariesScope(project), JsonFileType.INSTANCE);
+        FileBasedIndex.getInstance().processValues(INDEX_ID, type, null, processor, scope);
     }
 
     @Override
@@ -125,9 +139,9 @@ public class ClassMapTypeIndex extends FileBasedIndexExtension<ClassMapItemType,
 
             new StreamingClassMapIterator() {
                 @Override
-                protected void onItem(int level, @NotNull String id, ClassMapItemType type, @NotNull String name) {
-                    var list = result.computeIfAbsent(type, ignored -> new ArrayList<>());
-                    list.add(new ClassMapItem(id, name));
+                protected void onItem(@NotNull ClassMapItemType type, @Nullable String parentId, @NotNull String id, @NotNull String name, int level) {
+                    var list = result.computeIfAbsent(type, ignored -> new LinkedList<>());
+                    list.add(new ClassMapItem(parentId, id, name));
                 }
             }.parse(inputData.getContentAsText());
 
