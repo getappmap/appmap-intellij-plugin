@@ -4,6 +4,7 @@ import com.intellij.json.JsonFileType;
 import com.intellij.openapi.fileTypes.FileType;
 import com.intellij.openapi.project.DumbService;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.search.GlobalSearchScope;
 import com.intellij.psi.search.ProjectScope;
 import com.intellij.util.indexing.FileBasedIndex;
@@ -50,6 +51,15 @@ public class AppMapMetadataIndex extends SingleEntryFileBasedIndexExtension<AppM
             return new AppMapMetadata(name, filepath, requestCount, queryCount, functionsCount);
         }
     };
+
+    public static @Nullable AppMapMetadata findAppMap(@NotNull Project project, @NotNull VirtualFile file) {
+        if (DumbService.isDumb(project)) {
+            return null;
+        }
+
+        var fileData = FileBasedIndex.getInstance().getFileData(INDEX_ID, file, project);
+        return fileData.isEmpty() ? null : fileData.values().iterator().next();
+    }
 
     /**
      * Retrieves all AppMaps of a project from the index.
