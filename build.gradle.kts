@@ -97,6 +97,7 @@ allprojects {
         }
 
         verifyPlugin {
+            dependsOn(":copyPluginAssets")
             onlyIf { this.project == rootProject }
         }
 
@@ -113,6 +114,9 @@ allprojects {
             systemProperty("appland.testDataPath", rootProject.rootDir.resolve("src/test/data").path)
             // to allow tests to access the custom Java 11 JDK
             systemProperties["NO_FS_ROOTS_ACCESS_CHECK"] = true
+
+            // always execute tests, don't skip by Gradle's up-to-date checks in development
+            outputs.upToDateWhen { false }
 
             if (isCI) {
                 testLogging {
@@ -194,6 +198,8 @@ project(":") {
         }
 
         patchPluginXml {
+            dependsOn(":copyPluginAssets")
+
             sinceBuild.set(prop("sinceBuild"))
             untilBuild.set(prop("untilBuild"))
             pluginDescription.set(file("${rootDir}/description.md").readText().renderMarkdown())
