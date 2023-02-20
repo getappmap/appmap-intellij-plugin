@@ -39,9 +39,9 @@ class RootNode extends Node implements Disposable {
     @Override
     public List<? extends Node> getChildren() {
         return List.of(
-                new CodeObjectTopLevelNode(this, ClassMapItemType.Package, AppMapBundle.get("codeObjects.codeTopLevel.label"), Set.of(ClassMapItemType.Package, ClassMapItemType.Function)),
-                new CodeObjectTopLevelNode(this, ClassMapItemType.HTTP, AppMapBundle.get("codeObjects.requestTopLevel.label"), Set.of(ClassMapItemType.Route)),
-                new CodeObjectTopLevelNode(this, ClassMapItemType.Database, AppMapBundle.get("codeObjects.queryTopLevel.label"), Set.of(ClassMapItemType.Query)));
+                new CodeObjectTopLevelNode(this, ClassMapItemType.Package, ClassMapItemType.ROOT.getName(), AppMapBundle.get("codeObjects.codeTopLevel.label"), Set.of(ClassMapItemType.Package, ClassMapItemType.Function)),
+                new CodeObjectTopLevelNode(this, ClassMapItemType.HTTP, "", AppMapBundle.get("codeObjects.requestTopLevel.label"), Set.of(ClassMapItemType.Route)),
+                new CodeObjectTopLevelNode(this, ClassMapItemType.Database, "", AppMapBundle.get("codeObjects.queryTopLevel.label"), Set.of(ClassMapItemType.Query)));
     }
 
     @Override

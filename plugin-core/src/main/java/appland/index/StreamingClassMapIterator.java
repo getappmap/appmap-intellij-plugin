@@ -93,6 +93,9 @@ abstract class StreamingClassMapIterator {
         if (name != null && typeName != null) {
             var type = ClassMapItemType.findByName(typeName);
             var separator = findItemSeparator(parentType, type, isStatic);
+            var parentIdWithType = StringUtil.isEmpty(parentId)
+                    ? parentType.getName()
+                    : parentType.getName() + ":" + parentId;
 
             // Some code object entries have a path-delimited package name,
             // but we want each package name token to be its own object.
@@ -102,12 +105,12 @@ abstract class StreamingClassMapIterator {
                 itemPath = parentId;
                 for (var parentName : StringUtil.split(name, type.getSeparator())) {
                     itemPath = joinPath(type.getSeparator(), itemPath, parentName);
-                    onItem(type, parentType.getName() + ":" + parentId, typeName + ":" + itemPath, name, childLevel);
+                    onItem(type, parentIdWithType, typeName + ":" + itemPath, name, childLevel);
                     childLevel++;
                 }
             } else {
                 itemPath = joinPath(separator, parentId, name);
-                onItem(type, parentType.getName() + ":" + parentId, typeName + ":" + itemPath, name, childLevel);
+                onItem(type, parentIdWithType, typeName + ":" + itemPath, name, childLevel);
                 childLevel++;
             }
 
