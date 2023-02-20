@@ -20,6 +20,7 @@ import java.util.List;
 import java.util.Set;
 
 abstract class AbstractClassMapItemNode extends Node {
+    @Getter
     private final @NotNull String nodeId;
     @Getter
     private final @NotNull String displayName;
@@ -65,16 +66,17 @@ abstract class AbstractClassMapItemNode extends Node {
             }
             return a.getDisplayName().compareTo(b.getDisplayName());
         });
+
         // multiple ClassMap files may contain the same package, we only want to insert it once
-        var visitedPackageIds = new HashSet<String>();
+        var visitedNodeIds = new HashSet<String>();
 
         for (var type : supportedChildrenTypes) {
             ClassMapTypeIndex.processItems(myProject, type, (file, classMapItems) -> {
                 for (var item : classMapItems) {
                     var id = item.getId();
-                    if (!visitedPackageIds.contains(id) && isValidChildNode(item)) {
+                    if (!visitedNodeIds.contains(id) && isValidChildNode(item)) {
                         children.add(createChildNode(type, item));
-                        visitedPackageIds.add(id);
+                        visitedNodeIds.add(id);
                     }
                 }
                 return true;
@@ -97,7 +99,7 @@ abstract class AbstractClassMapItemNode extends Node {
 
     @Override
     public @NotNull LeafState getLeafState() {
-        return LeafState.ASYNC;
+        return supportedChildrenTypes.isEmpty() ? LeafState.ALWAYS : LeafState.ASYNC;
     }
 
     protected boolean isValidChildNode(@NotNull ClassMapItem item) {
@@ -111,7 +113,6 @@ abstract class AbstractClassMapItemNode extends Node {
         if (!isNavigable()) {
             return null;
         }
-
         return new ClassMapItemNavigatable(myProject, nodeType, nodeId);
     }
 }

@@ -9,15 +9,16 @@ import java.util.Set;
 class CodeObjectTopLevelNode extends AbstractClassMapItemNode {
     CodeObjectTopLevelNode(@NotNull Node parentNode,
                            @NotNull ClassMapItemType type,
+                           @NotNull String id,
                            @NotNull String label,
                            @NotNull Set<ClassMapItemType> supportedChildrenTypes) {
-        super(parentNode.getProject(), parentNode, "", label, type.getIcon(), type.getId(), type, supportedChildrenTypes);
+        super(parentNode.getProject(), parentNode, id, label, type.getIcon(), type.getId(), type, supportedChildrenTypes);
     }
 
     @Override
     protected boolean isValidChildNode(@NotNull ClassMapItem item) {
-        // we're assuming that "supportedChildrenTypes" is correctly used
-        return true;
+        var id = getNodeId();
+        return id.isEmpty() || id.equals(item.getParentId());
     }
 
     @Override
