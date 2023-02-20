@@ -11,7 +11,6 @@ import appland.settings.AppMapApplicationSettingsService;
 import appland.settings.AppMapProjectSettingsService;
 import appland.settings.AppMapSettingsListener;
 import appland.toolwindow.AppMapContentPanel;
-import appland.toolwindow.CollapsiblePanel;
 import com.intellij.openapi.Disposable;
 import com.intellij.openapi.application.ModalityState;
 import com.intellij.openapi.application.ReadAction;
@@ -22,11 +21,9 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.Disposer;
 import com.intellij.psi.search.FilenameIndex;
 import com.intellij.psi.search.GlobalSearchScope;
-import com.intellij.ui.components.panels.VerticalLayout;
 import com.intellij.util.concurrency.AppExecutorUtil;
 import org.jetbrains.annotations.NotNull;
 
-import javax.swing.*;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -38,24 +35,24 @@ import static appland.installGuide.InstallGuideEditorProvider.open;
 /**
  * Manages a list of collapsible user milestone panels.
  */
-public class InstallGuidePanel extends JPanel implements Disposable {
+public class InstallGuidePanel extends AppMapContentPanel implements Disposable {
+    private final Project project;
+
     public InstallGuidePanel(@NotNull Project project, @NotNull Disposable parent) {
-        super(new VerticalLayout(5));
+        super(false);
         Disposer.register(parent, this);
 
+        this.project = project;
+        setupPanel();
+    }
+
+    @Override
+    protected void setupPanel() {
         var statusLabels = Arrays.stream(InstallGuideViewPage.values())
                 .map(page -> new StatusLabel(page, () -> open(project, page)))
                 .collect(Collectors.toList());
-
-        add(new CollapsiblePanel("Quickstart", false, new AppMapContentPanel() {
-            @Override
-            protected void setupPanel() {
-                statusLabels.forEach(this::add);
-            }
-        }));
-
+        statusLabels.forEach(this::add);
         refreshInitialStatus(project, statusLabels);
-
         registerStatusUpdateListeners(project, this, statusLabels);
     }
 

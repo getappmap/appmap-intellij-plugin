@@ -22,6 +22,7 @@ import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.pom.Navigatable;
 import com.intellij.psi.PsiManager;
 import com.intellij.ui.*;
+import com.intellij.ui.components.panels.VerticalBox;
 import com.intellij.ui.content.Content;
 import com.intellij.ui.tree.AsyncTreeModel;
 import com.intellij.ui.treeStructure.SimpleTree;
@@ -221,27 +222,37 @@ public class AppMapWindowPanel extends SimpleToolWindowPanel implements DataProv
         return tree;
     }
 
-    private static @NotNull JPanel createSouthPanel(@NotNull Project project, @NotNull Disposable parent) {
-        // the "Runtime Analysis" panel should take the available space
+    private static @NotNull JComponent createSouthPanel(@NotNull Project project, @NotNull Disposable parent) {
+        var contentPanel = new VerticalBox();
+        contentPanel.add(createRuntimeAnalysisPanel(project, parent));
+        contentPanel.add(createInstallGuidePanel(project, parent));
+        contentPanel.add(createCodeObjectsPanel(project, parent));
+        contentPanel.add(createDocumentationLinksPanel());
+        return contentPanel;
+    }
+
+    @NotNull
+    private static JPanel createInstallGuidePanel(@NotNull Project project, @NotNull Disposable parent) {
+        return new CollapsiblePanel(AppMapBundle.get("toolwindow.appmap.quickstart"), false, new InstallGuidePanel(project, parent), false);
+    }
+
+    @NotNull
+    private static JPanel createRuntimeAnalysisPanel(@NotNull Project project, @NotNull Disposable parent) {
         var runtimeAnalysisPanel = new RuntimeAnalysisPanel(project, parent);
-        runtimeAnalysisPanel.setMinimumSize(new JBDimension(0, 150));
-        var runtimeAnalysisWrapper = new CollapsiblePanel(AppMapBundle.get("toolwindow.appmap.runtimeAnalysis"), false, runtimeAnalysisPanel);
+        runtimeAnalysisPanel.setMinimumSize(new JBDimension(0, 100));
+        return new CollapsiblePanel(AppMapBundle.get("toolwindow.appmap.runtimeAnalysis"), false, runtimeAnalysisPanel, true);
+    }
 
-        // quickstart and documentation panels don't grow
-        var subPanel = new JPanel(new BorderLayout());
-        subPanel.add(new InstallGuidePanel(project, parent), BorderLayout.NORTH);
-        subPanel.add(new CodeObjectsPanel(project, parent), BorderLayout.CENTER);
-        subPanel.add(createDocumentationLinksPanel(), BorderLayout.SOUTH);
-
-        var main = new JPanel(new BorderLayout());
-        main.add(runtimeAnalysisWrapper, BorderLayout.CENTER);
-        main.add(subPanel, BorderLayout.SOUTH);
-        return main;
+    @NotNull
+    private static JPanel createCodeObjectsPanel(@NotNull Project project, @NotNull Disposable parentDisposable) {
+        var codeObjectsPanel = new CodeObjectsPanel(project, parentDisposable);
+        codeObjectsPanel.setMinimumSize(new JBDimension(0, 100));
+        return new CollapsiblePanel(AppMapBundle.get("toolWindow.appmap.codeObjects"), false, codeObjectsPanel, true);
     }
 
     @NotNull
     private static JPanel createDocumentationLinksPanel() {
-        return new CollapsiblePanel("Documentation", false, new AppMapContentPanel() {
+        return new CollapsiblePanel(AppMapBundle.get("toolWindow.appmap.documentation"), false, new AppMapContentPanel(true) {
             @Override
             protected void setupPanel() {
                 add(new UrlLabel("Quickstart", "https://appmap.io/docs/quickstart"));
@@ -253,6 +264,6 @@ public class AppMapWindowPanel extends SimpleToolWindowPanel implements DataProv
                 add(new UrlLabel("Community", "https://appmap.io/docs/community"));
                 add(new UrlLabel("FAQ", "https://appmap.io/docs/faq"));
             }
-        });
+        }, false);
     }
 }

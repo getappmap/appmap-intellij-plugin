@@ -14,13 +14,15 @@ public class CollapsiblePanel extends JPanel {
     private final Collection<CollapsingListener> listeners = ContainerUtil.createLockFreeCopyOnWriteList();
     private final JComponent content;
     private final CollapsiblePanelTitle title;
+    private final boolean growVertically;
     private boolean isCollapsed;
     private boolean isInitialized = false;
 
-    public CollapsiblePanel(@NotNull String title, boolean isCollapsed, @NotNull JComponent content) {
+    public CollapsiblePanel(@NotNull String title, boolean isCollapsed, @NotNull JComponent content, boolean growVertically) {
         super(new BorderLayout());
 
         this.content = content;
+        this.growVertically = growVertically;
 
         this.title = new CollapsiblePanelTitle(title, isCollapsed);
         this.title.addLabelActionListener(() -> setCollapsed(!isCollapsed()));
@@ -36,11 +38,23 @@ public class CollapsiblePanel extends JPanel {
 
     protected void setCollapsed(boolean collapse) {
         try {
+            var maxSize = getMaximumSize();
+            var maxWidth = maxSize != null ? maxSize.width : Integer.MAX_VALUE;
+            var maxHeight = maxSize != null ? maxSize.height : Integer.MAX_VALUE;
+            var verticalInsets = content.getHeight() + getInsets().top + getInsets().bottom;
+
             if (!collapse) {
                 add(content, BorderLayout.CENTER);
+                maxHeight = growVertically
+                        ? Integer.MAX_VALUE
+                        : title.getHeight() + verticalInsets;
             } else if (isInitialized) {
                 remove(content);
+                maxHeight = title.getHeight() + verticalInsets;
             }
+
+            setMaximumSize(new Dimension(maxWidth, maxHeight));
+
             isCollapsed = collapse;
             title.setCollapsed(isCollapsed);
 
