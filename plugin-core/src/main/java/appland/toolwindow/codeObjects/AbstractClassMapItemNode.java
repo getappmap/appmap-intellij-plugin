@@ -28,6 +28,7 @@ abstract class AbstractClassMapItemNode extends Node {
     private final @Nullable Icon nodeIcon;
     @Getter
     private final int priority;
+    @Getter
     private final @NotNull ClassMapItemType nodeType;
 
     protected AbstractClassMapItemNode(@NotNull NodeDescriptor<?> parentNode,
