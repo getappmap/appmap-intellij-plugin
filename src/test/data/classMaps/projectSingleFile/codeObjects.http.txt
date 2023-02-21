@@ -1,0 +1,2 @@
+HTTP server requests (http)
+  PUT /scanner_jobs/{id}/status/deferred (route)
