@@ -1,6 +1,7 @@
 package appland.index;
 
 import com.intellij.openapi.diagnostic.Logger;
+import com.intellij.openapi.util.Pair;
 import com.intellij.util.indexing.FileContent;
 import com.intellij.util.indexing.SingleEntryIndexer;
 import org.jetbrains.annotations.NotNull;
@@ -20,6 +21,7 @@ class StreamingAppMapIndexer extends SingleEntryIndexer<AppMapMetadata> {
     @Override
     protected @Nullable AppMapMetadata computeValue(@NotNull FileContent inputData) {
         String name = null;
+        String sourceLocation = null;
         var request_query_functions = new int[3];
 
         var content = inputData.getContentAsText();
@@ -40,21 +42,29 @@ class StreamingAppMapIndexer extends SingleEntryIndexer<AppMapMetadata> {
                         // metadata: {...}
                         var subReader = json.createSubReaderAndSkipValue();
                         if (subReader != null) {
-                            name = readMetadata(subReader);
+                            try (subReader) {
+                                var nameAndSourceLocation = readMetadataNameAndSourceLocation(subReader);
+                                name = nameAndSourceLocation != null ? nameAndSourceLocation.first : null;
+                                sourceLocation = nameAndSourceLocation != null ? nameAndSourceLocation.second : null;
+                            }
                         }
                         break;
                     }
                     case "events": {
                         var subReader = json.createSubReaderAndSkipValue();
                         if (subReader != null) {
-                            readEvents(subReader, request_query_functions);
+                            try (subReader) {
+                                readEvents(subReader, request_query_functions);
+                            }
                         }
                         break;
                     }
                     case "classMap": {
                         var subReader = json.createSubReaderAndSkipValue();
                         if (subReader != null) {
-                            readClassMap(subReader, request_query_functions);
+                            try (subReader) {
+                                readClassMap(subReader, request_query_functions);
+                            }
                         }
                         break;
                     }
@@ -75,27 +85,31 @@ class StreamingAppMapIndexer extends SingleEntryIndexer<AppMapMetadata> {
         var requestCount = request_query_functions[0];
         var queryCount = request_query_functions[1];
         var functionsCount = request_query_functions[2];
-        return new AppMapMetadata(name, inputData.getFile().getPath(), requestCount, queryCount, functionsCount);
+        return new AppMapMetadata(name, sourceLocation, inputData.getFile().getPath(), requestCount, queryCount, functionsCount);
     }
 
-    @Nullable
-    private String readMetadata(JsonReaderEx json) {
+    private @Nullable Pair<@NotNull String, @Nullable String> readMetadataNameAndSourceLocation(@NotNull JsonReaderEx json) {
+        String name = null;
+        String sourceLocation = null;
+
         json.beginObject();
         while (true) {
             var propertyName = json.nextNameOrNull();
             if (propertyName == null) {
-                return null;
+                break;
+            } else if ("name".equals(propertyName)) {
+                name = json.nextNullableString();
+            } else if ("source_location".equals(propertyName)) {
+                sourceLocation = json.nextNullableString();
+            } else {
+                json.skipValue();
             }
-
-            if ("name".equals(propertyName)) {
-                return json.nextNullableString();
-            }
-
-            json.skipValue();
         }
+        json.endObject();
+        return name == null ? null : Pair.create(name, sourceLocation);
     }
 
-    private void readEvents(JsonReaderEx json, int[] request_query_functions) {
+    private void readEvents(@NotNull JsonReaderEx json, int[] request_query_functions) {
         json.beginArray();
 
         while (json.hasNext()) {
@@ -105,9 +119,7 @@ class StreamingAppMapIndexer extends SingleEntryIndexer<AppMapMetadata> {
                 var propertyName = object.nextNameOrNull();
                 if (propertyName == null) {
                     break;
-                }
-
-                if ("http_server_request".equals(propertyName)) {
+                } else if ("http_server_request".equals(propertyName)) {
                     request_query_functions[0]++;
                 } else if ("sql_query".equals(propertyName)) {
                     request_query_functions[1]++;
