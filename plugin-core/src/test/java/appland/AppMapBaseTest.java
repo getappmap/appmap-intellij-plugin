@@ -13,7 +13,7 @@ public abstract class AppMapBaseTest extends LightPlatformCodeInsightFixture4Tes
      * Creates a minimal version of AppMap JSON, which contains the metadata with a name.
      */
     public String createAppMapMetadataJSON(@NotNull String name) {
-        return String.format("{\"metadata\": { \"name\": \"%s\" }}", name);
+        return String.format("{\"metadata\": { \"name\": \"%s\", \"source_location\": \"/src/%s.java\" }}", name, name);
     }
 
     public String createAppMapMetadataJSON(@NotNull String name, int requestCount, int queryCount, int functionCount) {
