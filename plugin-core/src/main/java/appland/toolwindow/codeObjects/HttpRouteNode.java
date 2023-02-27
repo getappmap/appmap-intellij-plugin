@@ -8,7 +8,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Set;
 
-public class HttpRouteNode extends AbstractClassMapItemNode {
+class HttpRouteNode extends AbstractClassMapItemNode {
     @Getter
     private final String httpMethodName;
     @Getter
