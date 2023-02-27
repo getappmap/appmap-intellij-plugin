@@ -24,6 +24,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -101,6 +102,7 @@ public class ClassMapItemNavigatable implements Navigatable {
                 var files = ClassMapTypeIndex.findContainingAppMapFiles(project, type, nodeId);
                 return files.stream()
                         .map(file -> Pair.create(file, AppMapMetadataIndex.findAppMap(project, file)))
+                        .sorted(Comparator.comparing(pair -> pair.second != null ? pair.second.getName() : ""))
                         .collect(Collectors.toList());
             });
         }, AppMapBundle.get("codeObjects.navigation.locatingFiles"), false, project);

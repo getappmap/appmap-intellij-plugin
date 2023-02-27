@@ -27,7 +27,7 @@ class RootNode extends Node implements Disposable {
     }
 
     @Override
-    protected int getPriority() {
+    public int getWeight() {
         return 0;
     }
 
