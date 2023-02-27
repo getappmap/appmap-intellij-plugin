@@ -7,7 +7,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Set;
 
-public class PackageNode extends AbstractClassMapItemNode {
+class PackageNode extends AbstractClassMapItemNode {
     protected PackageNode(@NotNull NodeDescriptor parentDescriptor, @NotNull ClassMapItem item) {
         super(parentDescriptor, ClassMapItemType.Package, item, Set.of(ClassMapItemType.Package, ClassMapItemType.Class));
     }
