@@ -8,6 +8,7 @@ import org.junit.Test;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.List;
 
 public class CodeObjectsModelTest extends AppMapBaseTest {
     @Test
@@ -15,12 +16,12 @@ public class CodeObjectsModelTest extends AppMapBaseTest {
         myFixture.copyDirectoryToProject("classMaps/projectSingleFile", "root");
         var model = new CodeObjectsModel(getProject(), getTestRootDisposable());
         var rootNode = (RootNode) model.getRoot();
-        var topLevel = rootNode.getChildren();
+        var topLevel = model.getChildren(rootNode);
 
         assertSize(3, topLevel);
-        assertNodeStructure(topLevel.get(0), "Code", "classMaps/projectSingleFile/codeObjects.packages.txt");
-        assertNodeStructure(topLevel.get(1), "HTTP server requests", "classMaps/projectSingleFile/codeObjects.http.txt");
-        assertNodeStructure(topLevel.get(2), "Queries", "classMaps/projectSingleFile/codeObjects.database.txt");
+        assertNodeStructure(model, topLevel.get(0), "Code", "classMaps/projectSingleFile/codeObjects.packages.txt");
+        assertNodeStructure(model, topLevel.get(1), "HTTP server requests", "classMaps/projectSingleFile/codeObjects.http.txt");
+        assertNodeStructure(model, topLevel.get(2), "Queries", "classMaps/projectSingleFile/codeObjects.database.txt");
     }
 
     /**
@@ -31,33 +32,38 @@ public class CodeObjectsModelTest extends AppMapBaseTest {
         myFixture.copyDirectoryToProject("classMaps/projectDuplicateIds", "root");
         var model = new CodeObjectsModel(getProject(), getTestRootDisposable());
         var rootNode = (RootNode) model.getRoot();
-        var topLevel = rootNode.getChildren();
+        var topLevel = model.getChildren(rootNode);
 
         assertSize(3, topLevel);
-        assertNodeStructure(topLevel.get(0), "Code", "classMaps/projectDuplicateIds/codeObjects.packages.txt");
-        assertNodeStructure(topLevel.get(1), "HTTP server requests", "classMaps/projectDuplicateIds/codeObjects.http.txt");
-        assertNodeStructure(topLevel.get(2), "Queries", "classMaps/projectDuplicateIds/codeObjects.database.txt");
+        assertNodeStructure(model, topLevel.get(0), "Code", "classMaps/projectDuplicateIds/codeObjects.packages.txt");
+        assertNodeStructure(model, topLevel.get(1), "HTTP server requests", "classMaps/projectDuplicateIds/codeObjects.http.txt");
+        assertNodeStructure(model, topLevel.get(2), "Queries", "classMaps/projectDuplicateIds/codeObjects.database.txt");
     }
 
-    private void assertNodeStructure(Node node, @NotNull String nodeDisplayName, @NotNull String expectedOutputFileName) throws IOException {
+    private void assertNodeStructure(@NotNull CodeObjectsModel model,
+                                     @NotNull Node node,
+                                     @NotNull String nodeDisplayName,
+                                     @NotNull String expectedOutputFileName) throws IOException {
         assertEquals(nodeDisplayName, node.getDisplayName());
-        assertTreeNodes(node, expectedOutputFileName);
+        assertTreeNodes(model, node, expectedOutputFileName);
     }
 
-    private void assertTreeNodes(@NotNull Node node, @NotNull String expectedOutputFileName) throws IOException {
+    private void assertTreeNodes(@NotNull CodeObjectsModel model,
+                                 @NotNull Node node,
+                                 @NotNull String expectedOutputFileName) throws IOException {
         var output = new StringBuilder();
-        buildTreeRepresentation(node, output, 0);
+        buildTreeRepresentation(model, node, output, 0);
         var expectedOutput = Files.readString(Paths.get(getTestDataPath()).resolve(expectedOutputFileName));
         assertEquals("Tree rendering does not match expected file content: " + expectedOutputFileName, expectedOutput.trim(), output.toString().trim());
     }
 
-    private void buildTreeRepresentation(@NotNull Node node, @NotNull StringBuilder output, int indentationLevel) {
+    private void buildTreeRepresentation(@NotNull CodeObjectsModel model, @NotNull Node node, @NotNull StringBuilder output, int indentationLevel) {
         var prefix = StringUtil.repeat("  ", indentationLevel);
         var type = node instanceof AbstractClassMapItemNode ? ((AbstractClassMapItemNode) node).getNodeType().getName() : null;
         var suffix = type != null ? " (" + type + ")" : "";
         output.append(prefix).append(node.getDisplayName()).append(suffix).append("\n");
-        for (var child : node.getChildren()) {
-            buildTreeRepresentation(child, output, indentationLevel + 1);
+        for (var child : model.getChildren(node)) {
+            buildTreeRepresentation(model, child, output, indentationLevel + 1);
         }
     }
 }

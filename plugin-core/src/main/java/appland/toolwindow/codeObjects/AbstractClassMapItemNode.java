@@ -8,16 +8,12 @@ import com.intellij.ide.util.treeView.NodeDescriptor;
 import com.intellij.openapi.project.Project;
 import com.intellij.pom.Navigatable;
 import com.intellij.ui.tree.LeafState;
-import com.intellij.util.containers.SortedList;
 import lombok.Getter;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 abstract class AbstractClassMapItemNode extends Node {
     @Getter
@@ -27,7 +23,7 @@ abstract class AbstractClassMapItemNode extends Node {
     private final @NotNull Set<ClassMapItemType> supportedChildrenTypes;
     private final @Nullable Icon nodeIcon;
     @Getter
-    private final int priority;
+    private final int weight;
     @Getter
     private final @NotNull ClassMapItemType nodeType;
 
@@ -43,7 +39,7 @@ abstract class AbstractClassMapItemNode extends Node {
                                        @NotNull String nodeId,
                                        @NotNull String displayName,
                                        @Nullable Icon nodeIcon,
-                                       int priority,
+                                       int weight,
                                        @NotNull ClassMapItemType nodeType,
                                        @NotNull Set<ClassMapItemType> supportedChildrenTypes) {
         super(project, parentDescriptor);
@@ -51,7 +47,7 @@ abstract class AbstractClassMapItemNode extends Node {
         this.nodeId = nodeId;
         this.supportedChildrenTypes = supportedChildrenTypes;
         this.nodeIcon = nodeIcon;
-        this.priority = priority;
+        this.weight = weight;
         this.nodeType = nodeType;
     }
 
@@ -61,12 +57,7 @@ abstract class AbstractClassMapItemNode extends Node {
             return Collections.emptyList();
         }
 
-        var children = new SortedList<Node>((a, b) -> {
-            if (a.getPriority() != b.getPriority()) {
-                return a.getPriority() - b.getPriority();
-            }
-            return a.getDisplayName().compareTo(b.getDisplayName());
-        });
+        var children = new ArrayList<Node>();
 
         // multiple ClassMap files may contain the same package, we only want to insert it once
         var visitedNodeIds = new HashSet<String>();

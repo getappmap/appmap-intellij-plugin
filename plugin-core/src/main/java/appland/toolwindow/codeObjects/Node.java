@@ -2,6 +2,7 @@ package appland.toolwindow.codeObjects;
 
 import com.intellij.ide.util.treeView.NodeDescriptor;
 import com.intellij.ide.util.treeView.PresentableNodeDescriptor;
+import com.intellij.ide.util.treeView.WeighedItem;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.pom.Navigatable;
@@ -11,13 +12,10 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
-abstract class Node extends PresentableNodeDescriptor<Node> implements LeafState.Supplier {
+abstract class Node extends PresentableNodeDescriptor<Node> implements LeafState.Supplier, WeighedItem {
     protected Node(@NotNull Project project, @Nullable NodeDescriptor parentDescriptor) {
         super(project, parentDescriptor);
     }
-
-    // 0 is sorted to the top
-    protected abstract int getPriority();
 
     protected abstract @NotNull String getDisplayName();
 
