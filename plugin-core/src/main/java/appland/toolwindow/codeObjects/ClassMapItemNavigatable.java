@@ -2,12 +2,14 @@ package appland.toolwindow.codeObjects;
 
 import appland.AppMapBundle;
 import appland.Icons;
+import appland.files.FileLocation;
 import appland.index.AppMapMetadata;
 import appland.index.AppMapMetadataIndex;
 import appland.index.ClassMapItemType;
 import appland.index.ClassMapTypeIndex;
 import com.intellij.openapi.application.ReadAction;
 import com.intellij.openapi.fileEditor.FileEditorManager;
+import com.intellij.openapi.fileEditor.OpenFileDescriptor;
 import com.intellij.openapi.progress.ProgressManager;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.project.ProjectUtil;
@@ -36,6 +38,61 @@ public class ClassMapItemNavigatable implements Navigatable {
         this.nodeId = nodeId;
     }
 
+    private static void navigate(@NotNull Project project,
+                                 @NotNull ClassMapItemType itemType,
+                                 @NotNull Pair<VirtualFile, @Nullable AppMapMetadata> selectedValue,
+                                 boolean requestFocus) {
+        switch (itemType) {
+            case Package: // fall-through
+            case Class: // fall-through
+            case Function:
+                navigateToSourceFile(project, selectedValue, requestFocus);
+                return;
+            default:
+                navigateToAppMap(project, selectedValue, requestFocus);
+        }
+    }
+
+    @Override
+    public boolean canNavigate() {
+        return true;
+    }
+
+    @Override
+    public boolean canNavigateToSource() {
+        return true;
+    }
+
+    private static void navigateToSourceFile(@NotNull Project project,
+                                             @NotNull Pair<VirtualFile, @Nullable AppMapMetadata> selectedValue,
+                                             boolean requestFocus) {
+        // navigate to source file
+        var sourceFileWithLocation = ProgressManager.getInstance().runProcessWithProgressSynchronously(() -> {
+            return ReadAction.compute(() -> {
+                var metadata = selectedValue.second;
+                if (metadata != null && metadata.getSourceLocation() != null) {
+                    var parsedLocation = FileLocation.parse(metadata.getSourceLocation());
+                    if (parsedLocation != null) {
+                        return Pair.create(parsedLocation.resolveFilePath(project, selectedValue.first), parsedLocation);
+                    }
+                }
+                return null;
+            });
+        }, AppMapBundle.get("codeObjects.navigation.locatingSourceFile"), false, project);
+
+        if (sourceFileWithLocation != null) {
+            var sourceFile = sourceFileWithLocation.first;
+            var line = sourceFileWithLocation.second.getZeroBasedLine(0);
+            new OpenFileDescriptor(project, sourceFile, line, -1).navigate(requestFocus);
+        }
+    }
+
+    private static void navigateToAppMap(@NotNull Project project,
+                                         @NotNull Pair<VirtualFile, @Nullable AppMapMetadata> selectedValue,
+                                         boolean requestFocus) {
+        FileEditorManager.getInstance(project).openFile(selectedValue.first, requestFocus);
+    }
+
     @Override
     public void navigate(boolean requestFocus) {
         //noinspection DialogTitleCapitalization
@@ -52,31 +109,28 @@ public class ClassMapItemNavigatable implements Navigatable {
             case 0:
                 return;
             case 1:
-                FileEditorManager.getInstance(project).openFile(filesToMetadata.get(0).first, requestFocus);
+                navigate(project, type, filesToMetadata.get(0), requestFocus);
                 return;
             default:
                 JBPopupFactory.getInstance()
-                        .createListPopup(new VirtualFilePopupStep(project, filesToMetadata))
+                        .createListPopup(new VirtualFilePopupStep(project, type, filesToMetadata, requestFocus))
                         .showInFocusCenter();
         }
     }
 
-    @Override
-    public boolean canNavigate() {
-        return true;
-    }
-
-    @Override
-    public boolean canNavigateToSource() {
-        return true;
-    }
-
     private static class VirtualFilePopupStep extends BaseListPopupStep<Pair<VirtualFile, @Nullable AppMapMetadata>> {
-        private final Project project;
+        private final @NotNull Project project;
+        private final boolean requestFocus;
+        private final @NotNull ClassMapItemType itemType;
 
-        public VirtualFilePopupStep(@NotNull Project project, List<Pair<VirtualFile, AppMapMetadata>> files) {
+        public VirtualFilePopupStep(@NotNull Project project,
+                                    @NotNull ClassMapItemType type,
+                                    @NotNull List<Pair<VirtualFile, AppMapMetadata>> files,
+                                    boolean requestFocus) {
             super(AppMapBundle.get("codeObjects.chooseAppMap"), files);
             this.project = project;
+            this.itemType = type;
+            this.requestFocus = requestFocus;
         }
 
         @Override
@@ -105,7 +159,7 @@ public class ClassMapItemNavigatable implements Navigatable {
 
         @Override
         public @Nullable PopupStep<?> onChosen(@NotNull Pair<VirtualFile, @Nullable AppMapMetadata> selectedValue, boolean finalChoice) {
-            FileEditorManager.getInstance(project).openFile(selectedValue.first, true);
+            navigate(project, itemType, selectedValue, requestFocus);
             return null;
         }
     }
