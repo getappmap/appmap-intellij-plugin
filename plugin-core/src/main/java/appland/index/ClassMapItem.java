@@ -9,4 +9,5 @@ public class ClassMapItem {
     final @Nullable String parentId;
     final @NotNull String id;
     final @NotNull String name;
+    final @Nullable String location;
 }
