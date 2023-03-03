@@ -40,6 +40,10 @@ public class ClassMapTypeIndex extends FileBasedIndexExtension<ClassMapItemType,
                 }
                 IOUtil.writeUTF(out, value.id);
                 IOUtil.writeUTF(out, value.name);
+                out.writeBoolean(value.location != null);
+                if (value.location != null) {
+                    IOUtil.writeUTF(out, value.location);
+                }
             }
         }
 
@@ -59,7 +63,9 @@ public class ClassMapTypeIndex extends FileBasedIndexExtension<ClassMapItemType,
 
                 var id = IOUtil.readUTF(in);
                 var name = IOUtil.readUTF(in);
-                result.add(new ClassMapItem(parentId, id, name));
+                var hasLocation = in.readBoolean();
+                var location = hasLocation ? IOUtil.readUTF(in) : null;
+                result.add(new ClassMapItem(parentId, id, name, location));
             }
 
             return result;
@@ -169,9 +175,14 @@ public class ClassMapTypeIndex extends FileBasedIndexExtension<ClassMapItemType,
 
             new StreamingClassMapIterator() {
                 @Override
-                protected void onItem(@NotNull ClassMapItemType type, @Nullable String parentId, @NotNull String id, @NotNull String name, int level) {
+                protected void onItem(@NotNull ClassMapItemType type,
+                                      @Nullable String parentId,
+                                      @NotNull String id,
+                                      @NotNull String name,
+                                      @Nullable String location,
+                                      int level) {
                     var list = result.computeIfAbsent(type, ignored -> new LinkedList<>());
-                    list.add(new ClassMapItem(StringUtil.nullize(parentId), id, name));
+                    list.add(new ClassMapItem(StringUtil.nullize(parentId), id, name, location));
                 }
             }.parse(inputData.getContentAsText());
 

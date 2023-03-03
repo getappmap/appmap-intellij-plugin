@@ -12,7 +12,12 @@ import org.jetbrains.io.JsonReaderEx;
 abstract class StreamingClassMapIterator {
     private static final Logger LOG = Logger.getInstance(StreamingClassMapIterator.class);
 
-    protected abstract void onItem(@NotNull ClassMapItemType type, @Nullable String parentId, @NotNull String id, @NotNull String name, int level);
+    protected abstract void onItem(@NotNull ClassMapItemType type,
+                                   @Nullable String parentId,
+                                   @NotNull String id,
+                                   @NotNull String name,
+                                   @Nullable String location,
+                                   int level);
 
     public void parse(@NotNull CharSequence content) {
         if (content.length() == 0) {
@@ -55,6 +60,7 @@ abstract class StreamingClassMapIterator {
 
         String name = null;
         String typeName = null;
+        String location = null;
         Boolean isStatic = null;
         JsonReaderEx children = null;
 
@@ -73,6 +79,9 @@ abstract class StreamingClassMapIterator {
                     break;
                 case "static":
                     isStatic = json.nextBoolean();
+                    break;
+                case "location":
+                    location = json.nextString();
                     break;
                 case "children":
                     children = json.createSubReaderAndSkipValue();
@@ -105,12 +114,12 @@ abstract class StreamingClassMapIterator {
                 itemPath = parentId;
                 for (var parentName : StringUtil.split(name, type.getSeparator())) {
                     itemPath = joinPath(type.getSeparator(), itemPath, parentName);
-                    onItem(type, parentIdWithType, typeName + ":" + itemPath, name, childLevel);
+                    onItem(type, parentIdWithType, typeName + ":" + itemPath, name, location, childLevel);
                     childLevel++;
                 }
             } else {
                 itemPath = joinPath(separator, parentId, name);
-                onItem(type, parentIdWithType, typeName + ":" + itemPath, name, childLevel);
+                onItem(type, parentIdWithType, typeName + ":" + itemPath, name, location, childLevel);
                 childLevel++;
             }
 
