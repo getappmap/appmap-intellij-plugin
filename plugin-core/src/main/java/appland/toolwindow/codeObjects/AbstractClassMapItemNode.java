@@ -96,7 +96,13 @@ abstract class AbstractClassMapItemNode extends Node {
 
     @Override
     protected void update(@NotNull PresentationData presentation) {
-        presentation.setPresentableText(displayName);
+        var truncatedDisplayName = displayName.length() > 128 ? displayName.substring(0, 128) + "..." : null;
+        if (truncatedDisplayName != null) {
+            presentation.setPresentableText(truncatedDisplayName);
+            presentation.setTooltip(displayName);
+        } else {
+            presentation.setPresentableText(displayName);
+        }
         presentation.setIcon(nodeIcon);
     }
 
