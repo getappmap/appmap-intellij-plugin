@@ -20,6 +20,7 @@ abstract class AbstractClassMapItemNode extends Node {
     private final @NotNull String nodeId;
     @Getter
     private final @NotNull String displayName;
+    private final @Nullable String location;
     private final @NotNull Set<ClassMapItemType> supportedChildrenTypes;
     private final @Nullable Icon nodeIcon;
     @Getter
@@ -31,13 +32,22 @@ abstract class AbstractClassMapItemNode extends Node {
                                        @NotNull ClassMapItemType itemType,
                                        @NotNull ClassMapItem item,
                                        @NotNull Set<ClassMapItemType> supportedChildrenTypes) {
-        this(parentNode.getProject(), parentNode, item.getId(), item.getName(), itemType.getIcon(), itemType.getId(), itemType, supportedChildrenTypes);
+        this(parentNode.getProject(),
+                parentNode,
+                item.getId(),
+                item.getName(),
+                item.getLocation(),
+                itemType.getIcon(),
+                itemType.getId(),
+                itemType,
+                supportedChildrenTypes);
     }
 
     protected AbstractClassMapItemNode(@NotNull Project project,
                                        @Nullable NodeDescriptor parentDescriptor,
                                        @NotNull String nodeId,
                                        @NotNull String displayName,
+                                       @Nullable String location,
                                        @Nullable Icon nodeIcon,
                                        int weight,
                                        @NotNull ClassMapItemType nodeType,
@@ -45,6 +55,7 @@ abstract class AbstractClassMapItemNode extends Node {
         super(project, parentDescriptor);
         this.displayName = displayName;
         this.nodeId = nodeId;
+        this.location = location;
         this.supportedChildrenTypes = supportedChildrenTypes;
         this.nodeIcon = nodeIcon;
         this.weight = weight;
@@ -105,6 +116,6 @@ abstract class AbstractClassMapItemNode extends Node {
         if (!isNavigable()) {
             return null;
         }
-        return new ClassMapItemNavigatable(myProject, nodeType, nodeId);
+        return new ClassMapItemNavigatable(myProject, nodeType, nodeId, location);
     }
 }

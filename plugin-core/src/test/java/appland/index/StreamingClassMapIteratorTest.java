@@ -18,7 +18,7 @@ public class StreamingClassMapIteratorTest extends AppMapBaseTest {
         List<String> ids = new ArrayList<>();
 
         @Override
-        protected void onItem(@NotNull ClassMapItemType type, @Nullable String parentId, @NotNull String id, @NotNull String name, int level) {
+        protected void onItem(@NotNull ClassMapItemType type, @Nullable String parentId, @NotNull String id, @NotNull String name, @Nullable String location, int level) {
             if (type != ClassMapItemType.Database
                     && type != ClassMapItemType.HTTP
                     && type != ClassMapItemType.Query
