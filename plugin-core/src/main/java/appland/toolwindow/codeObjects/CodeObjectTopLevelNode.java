@@ -12,7 +12,7 @@ class CodeObjectTopLevelNode extends AbstractClassMapItemNode {
                            @NotNull String id,
                            @NotNull String label,
                            @NotNull Set<ClassMapItemType> supportedChildrenTypes) {
-        super(parentNode.getProject(), parentNode, id, label, type.getIcon(), type.getId(), type, supportedChildrenTypes);
+        super(parentNode.getProject(), parentNode, id, label, null, type.getIcon(), type.getId(), type, supportedChildrenTypes);
     }
 
     @Override
