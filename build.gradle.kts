@@ -17,7 +17,7 @@ buildscript {
 
 plugins {
     idea
-    id("org.jetbrains.intellij") version "1.13.0"
+    id("org.jetbrains.intellij") version "1.13.1"
     id("org.jetbrains.changelog") version "1.3.1"
 }
 
@@ -94,6 +94,7 @@ allprojects {
         runIde {
             onlyIf { this.project == rootProject }
             systemProperty("appmap.sandbox", "true")
+
         }
 
         verifyPlugin {
@@ -139,10 +140,10 @@ allprojects {
 project(":") {
     val appMapJavaAgent = configurations.create("appMapJavaAgent")
     dependencies {
-        implementation(project(":plugin-core"))
-        implementation(project(":plugin-gradle"))
-        implementation(project(":plugin-java"))
-        implementation(project(":plugin-maven"))
+        implementation(project(":plugin-core", "instrumentedJar"))
+        implementation(project(":plugin-gradle", "instrumentedJar"))
+        implementation(project(":plugin-java", "instrumentedJar"))
+        implementation(project(":plugin-maven", "instrumentedJar"))
 
         // to copy the appmap-java jar file into the plugin zip
         appMapJavaAgent("com.appland:appmap-agent:$appMapJvmAgentVersion")
@@ -221,7 +222,7 @@ project(":") {
 
 project(":plugin-java") {
     dependencies {
-        implementation(project(":plugin-core"))
+        implementation(project(":plugin-core", "instrumentedJar"))
     }
 
     intellij {
@@ -231,8 +232,8 @@ project(":plugin-java") {
 
 project(":plugin-gradle") {
     dependencies {
-        implementation(project(":plugin-core"))
-        implementation(project(":plugin-java"))
+        implementation(project(":plugin-core", "instrumentedJar"))
+        implementation(project(":plugin-java", "instrumentedJar"))
     }
 
     intellij {
@@ -242,8 +243,8 @@ project(":plugin-gradle") {
 
 project(":plugin-maven") {
     dependencies {
-        implementation(project(":plugin-core"))
-        implementation(project(":plugin-java"))
+        implementation(project(":plugin-core", "instrumentedJar"))
+        implementation(project(":plugin-java", "instrumentedJar"))
     }
 
     intellij {
