@@ -12,6 +12,7 @@ import appland.settings.AppMapProjectSettingsService;
 import appland.settings.AppMapSettingsListener;
 import appland.toolwindow.AppMapContentPanel;
 import com.intellij.openapi.Disposable;
+import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.application.ModalityState;
 import com.intellij.openapi.application.ReadAction;
 import com.intellij.openapi.fileEditor.FileEditorManagerEvent;
@@ -80,7 +81,9 @@ public class InstallGuidePanel extends AppMapContentPanel implements Disposable 
             }
 
             private void refreshItems() {
-                refreshInitialStatus(project, labels);
+                ApplicationManager.getApplication().invokeLater(() -> {
+                    refreshInitialStatus(project, labels);
+                }, ModalityState.defaultModalityState());
             }
         });
 
