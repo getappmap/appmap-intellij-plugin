@@ -2,8 +2,7 @@ package appland.files;
 
 import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
+import static org.junit.Assert.*;
 
 public class FileLocationTest {
     @Test
@@ -15,5 +14,10 @@ public class FileLocationTest {
 
         assertEquals(new FileLocation("dir/file.txt", null), FileLocation.parse("dir/file.txt"));
         assertEquals(new FileLocation("dir/file.txt", 42), FileLocation.parse("dir/file.txt:42"));
+    }
+
+    @Test
+    public void parseWindowsPath() {
+        assertNotNull(FileLocation.parse("C:/Users/user/dir/path:42"));
     }
 }
