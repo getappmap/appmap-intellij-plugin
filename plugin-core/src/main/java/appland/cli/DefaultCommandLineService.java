@@ -272,15 +272,24 @@ public class DefaultCommandLineService implements AppLandCommandLineService {
         }
 
         var workingDir = AppMapVfsUtils.asNativePath(directory);
-        var watchedDir = findWatchedAppMapDirectory(workingDir).toString();
+        var watchedDir = findWatchedAppMapDirectory(workingDir);
 
-        var indexer = startProcess(workingDir, indexerPath.toString(), "index", "--watch", "--appmap-dir", watchedDir);
+        // create AppMap directory if it does not exist yet
+        if (Files.notExists(watchedDir)) {
+            try {
+                Files.createDirectories(watchedDir);
+            } catch (Exception e) {
+                LOG.debug("Failed to create AppMap directory: " + watchedDir, e);
+            }
+        }
+
+        var indexer = startProcess(workingDir, indexerPath.toString(), "index", "--watch", "--appmap-dir", watchedDir.toString());
         if (!launchScanner) {
             return new CliProcesses(indexer, null);
         }
 
         try {
-            var scanner = startProcess(workingDir, scannerPath.toString(), "scan", "--watch", "--appmap-dir", watchedDir);
+            var scanner = startProcess(workingDir, scannerPath.toString(), "scan", "--watch", "--appmap-dir", watchedDir.toString());
             return new CliProcesses(indexer, scanner);
         } catch (ExecutionException e) {
             LOG.debug("Error executing scanner process. Attempting to terminate indexer process.");

@@ -8,17 +8,20 @@ import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.application.WriteAction;
 import com.intellij.openapi.roots.ModuleRootModificationUtil;
 import com.intellij.openapi.util.text.StringUtil;
+import com.intellij.openapi.vfs.LocalFileSystem;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.testFramework.VfsTestUtil;
 import com.intellij.testFramework.fixtures.TempDirTestFixture;
 import com.intellij.testFramework.fixtures.impl.TempDirTestFixtureImpl;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.IOException;
+import java.nio.file.Files;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
@@ -84,6 +87,25 @@ public class DefaultCommandLineServiceTest extends AppMapBaseTest {
         assertFalse(service.isRunning(tempDir, false));
         assertFalse(service.isRunning(nestedDir, true));
         assertFalse(service.isRunning(nestedDir, false));
+
+        service.stopAll();
+    }
+
+    @Test
+    public void directoryTreeWatchedSubdir() throws ExecutionException {
+        var tempDir = myFixture.createFile("test.txt", "").getParent();
+        createAppMapYaml(tempDir);
+
+        var service = AppLandCommandLineService.getInstance();
+        createAppMapYaml(tempDir, "tmp/appmaps");
+        addContentRootAndLaunchService(tempDir);
+        assertActiveRoots(tempDir);
+
+        assertTrue(service.isRunning(tempDir, false));
+        var tempDirNioPath = LocalFileSystem.getInstance().getNioPath(tempDir);
+        assertNotNull(tempDirNioPath);
+        var appMapDirNioPath = tempDirNioPath.resolve("tmp/appmaps");
+        assertTrue("Configured AppMap dir must be created: " + appMapDirNioPath, Files.isDirectory(appMapDirNioPath));
 
         service.stopAll();
     }
@@ -170,7 +192,12 @@ public class DefaultCommandLineServiceTest extends AppMapBaseTest {
     }
 
     private @NotNull VirtualFile createAppMapYaml(@NotNull VirtualFile directory) {
-        return VfsTestUtil.createFile(directory, "appmap.yml", "");
+        return createAppMapYaml(directory, null);
+    }
+
+    private @NotNull VirtualFile createAppMapYaml(@NotNull VirtualFile directory, @Nullable String appMapPath) {
+        var content = appMapPath != null ? "appmap_dir: " + appMapPath + "\n" : "";
+        return VfsTestUtil.createFile(directory, "appmap.yml", content);
     }
 
     private void assertEmptyRoots() {
