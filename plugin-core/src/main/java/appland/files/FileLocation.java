@@ -5,7 +5,6 @@ import com.google.gson.*;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.io.FileUtil;
-import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.util.concurrency.annotations.RequiresReadLock;
 import lombok.Value;
@@ -14,7 +13,6 @@ import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Type;
 import java.nio.file.Paths;
-import java.util.List;
 
 /**
  * Wrapper class for a line offset inside a file.
@@ -30,18 +28,14 @@ public class FileLocation {
      */
     @Nullable
     public static FileLocation parse(@NotNull String path) {
-        if (!path.contains(":")) {
+        var lineIndex = path.lastIndexOf(':');
+        if (lineIndex == -1) {
             return new FileLocation(path, null);
         }
 
-        List<String> parts = StringUtil.split(path, ":", true, true);
-        if (parts.size() != 2) {
-            return null;
-        }
-
         try {
-            int line = Integer.parseInt(parts.get(1));
-            return new FileLocation(parts.get(0), line);
+            int line = Integer.parseInt(path.substring(lineIndex + 1));
+            return new FileLocation(path.substring(0, lineIndex), line);
         } catch (NumberFormatException e) {
             if (LOG.isDebugEnabled()) {
                 LOG.debug("exception parsing offsets of " + path);
