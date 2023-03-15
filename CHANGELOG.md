@@ -1,5 +1,16 @@
 AppMap Plugin Changelog
 
+## [0.29.0](https://github.com/getappmap/appmap-intellij-plugin/compare/v0.28.0...v0.29.0) (2023-03-15)
+
+
+### Features
+
+-  new "Code objects" panel with a tree of packages, routes, and queries ([0061888]())
+
+### Bug Fixes
+
+-  bundle instrumented JAR files into the plugin to fix NPE using the remote recording actions ([ddcb211]())-  clean up code to build the tree hierarchy ([d8e3aef]())-  create watched AppMap directory before launching indexer or scanner ([5410de0]())-  improve layout of the AppMap tool window to handle space token by collapsed panels ([51ce161]())-  locate source files on Windows ([587ce9f]())-  open source location of function class map items instead of the source location of the related AppMap file ([ee3ab15]())-  show names of AppMaps if multiple files are available to navigate to a Code Objects node ([2fb6724]())-  truncate display string of class map item labels ([01345f5]())-  update AppMap status labels on EDT after AppMap API key change ([a05b07d]())
+
 ## [0.28.0](https://github.com/getappmap/appmap-intellij-plugin/compare/v0.27.0...v0.28.0) (2023-02-14)
 
 
