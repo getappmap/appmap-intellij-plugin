@@ -14,14 +14,9 @@ import java.util.List;
  */
 public class AppMapJvmCommandLinePatcher {
     @NotNull
-    static List<String> createJvmParams(@Nullable Path appMapConfig, @Nullable Path appMapOutputDirectory) throws CantRunException {
-        if (appMapConfig == null) {
-            throw new CantRunException("Unable to find an appmap.yml file");
-        }
-
+    static List<String> createJvmParams(@Nullable Path appMapOutputDirectory) throws CantRunException {
         var jvmParams = new LinkedList<String>();
         //jvmParams.add("-Dappmap.debug");
-        jvmParams.add("-Dappmap.config.file=" + appMapConfig);
         if (appMapOutputDirectory != null) {
             jvmParams.add("-Dappmap.output.directory=" + appMapOutputDirectory);
         }

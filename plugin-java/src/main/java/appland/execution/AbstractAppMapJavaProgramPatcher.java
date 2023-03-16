@@ -20,10 +20,9 @@ public abstract class AbstractAppMapJavaProgramPatcher extends JavaProgramPatche
             try {
                 var project = ((RunConfiguration) configuration).getProject();
                 var workingDir = ProgramParameterUtils.findWorkingDir(project, javaParameters);
-                var config = AppMapJavaPackageConfig.findOrCreateAppMapConfig(project, configuration, workingDir);
                 var outputDirectory = findAppMapOutputDirectory(configuration, workingDir);
 
-                var jvmParams = AppMapJvmCommandLinePatcher.createJvmParams(config, outputDirectory);
+                var jvmParams = AppMapJvmCommandLinePatcher.createJvmParams(outputDirectory);
                 applyJvmParameters(javaParameters, jvmParams);
             } catch (Exception e) {
                 Logger.getInstance(AppMapJavaProgramPatcher.class).error(e);

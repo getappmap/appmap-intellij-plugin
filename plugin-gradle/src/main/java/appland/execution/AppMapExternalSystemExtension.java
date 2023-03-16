@@ -28,14 +28,13 @@ public class AppMapExternalSystemExtension extends ExternalSystemRunConfiguratio
                 var gradleRunConfig = (GradleRunConfiguration) configuration;
                 var project = gradleRunConfig.getProject();
                 var workingDir = ProgramParameterUtils.findWorkingDir(project, javaParameters);
-                var config = AppMapJavaPackageConfig.findOrCreateAppMapConfig(project, gradleRunConfig, workingDir);
 
                 Path outputDirectory = null;
                 if (workingDir != null) {
                     outputDirectory = workingDir.toNioPath().resolve("build").resolve("appmap");
                 }
 
-                var jvmParams = AppMapJvmCommandLinePatcher.createJvmParams(config, outputDirectory);
+                var jvmParams = AppMapJvmCommandLinePatcher.createJvmParams(outputDirectory);
                 javaParameters.getVMParametersList().addAll(jvmParams);
             } catch (Exception e) {
                 Logger.getInstance(AppMapExternalSystemExtension.class).error(e);
