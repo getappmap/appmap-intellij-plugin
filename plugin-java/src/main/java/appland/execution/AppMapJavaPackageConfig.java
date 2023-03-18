@@ -107,6 +107,7 @@ public final class AppMapJavaPackageConfig {
 
         for (var packageName : ReadAction.compute(() -> findTopLevelPackages(project, runConfigurationScope))) {
             config.append("- path: ").append(packageName).append('\n');
+            config.append("  shallow: true").append('\n');
         }
 
         return config.toString();
