@@ -23,4 +23,23 @@
  * @license MIT
  */
 
+/*! https://mths.be/punycode v1.3.2 by @mathias */
+
 /*! ieee754. BSD-3-Clause License. Feross Aboukhadijeh <https://feross.org/opensource> */
+
+/**
+ * @copyright 2020 Eyas Ranjous <eyas.ranjous@gmail.com>
+ * @license MIT
+ */
+
+/**
+ * @license MIT
+ * @copyright 2020 Eyas Ranjous <eyas.ranjous@gmail.com>
+ *
+ * @class
+ */
+
+/**
+ * @license MIT
+ * @copyright 2020 Eyas Ranjous <eyas.ranjous@gmail.com>
+ */
