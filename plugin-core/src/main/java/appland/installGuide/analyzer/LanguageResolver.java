@@ -1,7 +1,6 @@
 package appland.installGuide.analyzer;
 
 import com.intellij.openapi.project.Project;
-import com.intellij.openapi.roots.ContentIteratorEx;
 import com.intellij.openapi.roots.ProjectFileIndex;
 import com.intellij.openapi.vcs.changes.ChangeListManager;
 import com.intellij.openapi.vfs.VirtualFile;
@@ -47,7 +46,6 @@ public class LanguageResolver {
      * @param directory The directory to scan
      * @return Map of language to rating, normalized to a range of [0.0, 1.0]
      */
-    @SuppressWarnings("UnstableApiUsage")
     private @NotNull Object2DoubleMap<Languages.Language> getLanguageDistribution(@NotNull VirtualFile directory) {
         if (isIgnored(directory)) {
             return Object2DoubleMaps.emptyMap();
@@ -55,23 +53,26 @@ public class LanguageResolver {
 
         var languageCounts = new Object2IntOpenHashMap<Languages.Language>();
 
-        ProjectFileIndex.getInstance(project).iterateContentUnderDirectory(directory, (ContentIteratorEx) fileOrDir -> {
-            if (isIgnored(fileOrDir)) {
-                return ContentIteratorEx.Status.SKIP_CHILDREN;
-            }
-
-            if (!fileOrDir.isDirectory()) {
-                var extension = fileOrDir.getExtension();
-                if (extension != null) {
-                    var language1 = Languages.getLanguage(extension);
-                    if (language1 != null) {
-                        languageCounts.addTo(language1, 1);
+        ProjectFileIndex.getInstance(project).iterateContentUnderDirectory(directory,
+                fileOrDir -> true,
+                fileOrDir -> {
+                    if (isIgnored(fileOrDir)) {
+                        return false;
                     }
-                }
-            }
 
-            return ContentIteratorEx.Status.CONTINUE;
-        });
+                    if (!fileOrDir.isDirectory()) {
+                        var extension = fileOrDir.getExtension();
+                        if (extension != null) {
+                            var language = Languages.getLanguage(extension);
+                            if (language != null) {
+                                languageCounts.addTo(language, 1);
+                            }
+                        }
+                    }
+
+                    return true;
+                }
+        );
 
         var totalFiles = languageCounts.values().intStream().sum();
         var normalizedMap = new Object2DoubleOpenHashMap<Languages.Language>();
