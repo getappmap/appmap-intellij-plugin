@@ -17,7 +17,7 @@ buildscript {
 
 plugins {
     idea
-    id("org.jetbrains.intellij") version "1.13.1"
+    id("org.jetbrains.intellij") version "1.13.2"
     id("org.jetbrains.changelog") version "1.3.1"
 }
 
@@ -45,6 +45,10 @@ allprojects {
     dependencies {
         // for compatibility with IntelliJ Ultimate, IU-2021.3.3 doesn't include this for unknown reasons
         compileOnly("com.google.code.findbugs:jsr305:3.0.2")
+
+        // Jackson JSON is missing from 2023.1+
+        implementation("com.fasterxml.jackson.core:jackson-core:2.14.2")
+        implementation("com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.14.2")
 
         // http://wiremock.org, Apache 2 license
         testImplementation("com.github.tomakehurst:wiremock-jre8:2.33.1")
