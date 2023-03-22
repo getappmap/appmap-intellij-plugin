@@ -1,5 +1,12 @@
 AppMap Plugin Changelog
 
+## [0.30.1](https://github.com/getappmap/appmap-intellij-plugin/compare/v0.30.0...v0.30.1) (2023-03-22)
+
+
+### Bug Fixes
+
+-  properly detect findings, which have a Windows path in the stacktrace ([3097a9d]())
+
 ## [0.30.0](https://github.com/getappmap/appmap-intellij-plugin/compare/v0.29.0...v0.30.0) (2023-03-22)
 
 
