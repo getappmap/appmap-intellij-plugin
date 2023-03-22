@@ -17,7 +17,6 @@ import com.intellij.openapi.ui.Messages;
 import com.intellij.openapi.util.Computable;
 import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.openapi.vfs.VirtualFile;
-import com.intellij.util.Consumer;
 import com.intellij.util.Urls;
 import com.intellij.util.io.HttpRequests;
 import org.apache.commons.lang.StringEscapeUtils;
@@ -25,6 +24,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 import java.util.Map;
+import java.util.function.Consumer;
 
 /**
  * Manages the uploading of AppMap files to the AppLand cloud servers.
@@ -97,7 +97,7 @@ public class AppMapUploader {
                     });
 
                     var response = gson.fromJson(responseBody, UploadResponse.class);
-                    urlConsumer.consume(confirmationURL(project, response));
+                    urlConsumer.accept(confirmationURL(project, response));
                 } catch (IOException e) {
                     LOG.warn("Uploading AppMap failed", e);
                     ApplicationManager.getApplication().invokeLater(() -> {
