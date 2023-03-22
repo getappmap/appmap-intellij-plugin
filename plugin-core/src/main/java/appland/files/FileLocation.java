@@ -12,7 +12,6 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Type;
-import java.nio.file.Paths;
 
 /**
  * Wrapper class for a line offset inside a file.
@@ -56,9 +55,7 @@ public class FileLocation {
     @RequiresReadLock
     public @Nullable VirtualFile resolveFilePath(@NotNull Project project, @NotNull VirtualFile baseFile) {
         try {
-            return Paths.get(filePath).isAbsolute()
-                    ? baseFile.getFileSystem().findFileByPath(filePath)
-                    : FileLookup.findRelativeFile(project, baseFile, FileUtil.toSystemIndependentName(filePath));
+            return FileLookup.findRelativeFile(project, baseFile, FileUtil.toSystemIndependentName(filePath));
         } catch (Exception e) {
             if (LOG.isDebugEnabled()) {
                 LOG.debug("failed to resolve location: " + this, e);

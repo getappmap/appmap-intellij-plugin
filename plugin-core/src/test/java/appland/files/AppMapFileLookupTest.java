@@ -44,4 +44,15 @@ public class AppMapFileLookupTest extends LightPlatformCodeInsightFixture4TestCa
         assertEquals(Arrays.asList("subdir", "dir"), FileLookup.parentsReversed("dir/subdir/file.txt"));
         assertEquals(Arrays.asList("subdir2", "subdir", "dir"), FileLookup.parentsReversed("dir/subdir/subdir2/file.txt"));
     }
+
+    @Test
+    public void windowsAbsolutePath() {
+        assertTrue(FileLookup.isAbsolutePath("C:\\Apps\\Ruby\\file.rb", true));
+        assertTrue(FileLookup.isAbsolutePath("C:/Apps//Ruby//file.rb", true));
+
+        assertFalse(FileLookup.isAbsolutePath("\\Apps\\Ruby\\file.rb", true));
+        assertFalse(FileLookup.isAbsolutePath("\\Apps\\Ruby\\file.rb", true));
+        assertFalse(FileLookup.isAbsolutePath("Apps/Ruby/file.rb", true));
+        assertFalse(FileLookup.isAbsolutePath("x/Ruby/file.rb", true));
+    }
 }

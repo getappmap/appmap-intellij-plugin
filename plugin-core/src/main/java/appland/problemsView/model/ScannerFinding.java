@@ -82,7 +82,7 @@ public class ScannerFinding {
             return null;
         }
 
-        var candidate = stack.stream().filter(path -> !path.startsWith("/")).findFirst().orElse(null);
+        var candidate = stack.stream().filter(path -> !FileLookup.isAbsolutePath(path)).findFirst().orElse(null);
         if (candidate == null) {
             return null;
         }
