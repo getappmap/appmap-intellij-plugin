@@ -20,7 +20,7 @@ before_install:
 - chmod +x gradlew
 
 install:
-    - ./gradlew build verifyPlugin
+    - ./gradlew build verifyPlugin runPluginVerifier
 
 before_deploy:
 - |
