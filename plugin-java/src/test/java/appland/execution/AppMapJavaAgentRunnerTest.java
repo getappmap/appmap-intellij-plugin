@@ -35,7 +35,8 @@ public class AppMapJavaAgentRunnerTest extends BaseAppMapJavaTest {
         assertNotNull(context);
 
         var runConfiguration = new ApplicationConfiguration("AppMap test", myProject);
-        runConfiguration.setMainClass(mainClass);
+        // 2023.1+ needs a ReadAction
+        ReadAction.run(() -> runConfiguration.setMainClass(mainClass));
 
         assertTrue(AppMapJvmExecutor.getInstance().isApplicable(myProject));
         assertNotNull(ProgramRunner.getRunner(AppMapJvmExecutor.EXECUTOR_ID, runConfiguration));
