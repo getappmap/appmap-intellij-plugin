@@ -232,6 +232,19 @@ public class AppMapFileEditor extends WebviewEditor<JsonObject> {
                 telemetryService.sendEvent("reset_diagram");
                 return null;
 
+            case "exportSVG":
+                if (message != null) {
+                    var svgString = message.getAsJsonPrimitive("svgString");
+                    assert svgString.isString();
+                    // choose new or existing file, write content, then open editor with the new file
+                    ApplicationManager.getApplication().invokeLater(() -> {
+                        ExportSvgUtil.exportToFile(project, "appMap.svg", file, svgString::getAsString, file -> {
+                            new OpenFileDescriptor(project, file).navigate(true);
+                        });
+                    }, ModalityState.defaultModalityState());
+                }
+                return null;
+
             default:
                 return null;
         }

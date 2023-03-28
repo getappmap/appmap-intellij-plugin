@@ -44,6 +44,7 @@ export function mountWebview() {
     app.$on('clickTab', (tabId) => vscode.postMessage({command: 'clickTab', tabId}))
     app.$on('selectObjectInSidebar', (category) => vscode.postMessage({command: 'selectObjectInSidebar', category}))
     app.$on('resetDiagram', () => vscode.postMessage({command: 'resetDiagram'}))
+    app.$on('exportSVG', (svgString) => vscode.postMessage({command: 'exportSVG', svgString}))
     app.$on('request-resolve-location', (location) => {
       app.$emit('response-resolve-location', {location, externalUrl: location});
     });
