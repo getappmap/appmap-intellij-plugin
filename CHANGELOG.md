@@ -1,5 +1,16 @@
 AppMap Plugin Changelog
 
+## [0.31.0](https://github.com/getappmap/appmap-intellij-plugin/compare/v0.30.1...v0.31.0) (2023-03-29)
+
+
+### Features
+
+-  support exporting AppMap sequence diagrams as SVG file ([8b2d537]())-  support the new AppMap sequence diagrams ([3cf7e1e]())
+
+### Bug Fixes
+
+-  support building the JS dist file with latest webpack ([ea2f9c0]())
+
 ## [0.30.1](https://github.com/getappmap/appmap-intellij-plugin/compare/v0.30.0...v0.30.1) (2023-03-22)
 
 
