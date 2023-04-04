@@ -122,6 +122,6 @@ abstract class AbstractClassMapItemNode extends Node {
         if (!isNavigable()) {
             return null;
         }
-        return new ClassMapItemNavigatable(myProject, nodeType, nodeId, location);
+        return new ClassMapItemNavigatable(myProject, nodeType, nodeId);
     }
 }
