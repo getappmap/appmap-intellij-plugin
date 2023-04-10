@@ -159,8 +159,10 @@ project(":") {
 
     tasks {
         task<Copy>("copyPluginAssets") {
-            inputs.files("${project.rootDir}/appland")
-            inputs.files("${project.rootDir}/appland-install-guide")
+            inputs.dir("${project.rootDir}/appland")
+            inputs.dir("${project.rootDir}/appland-install-guide")
+            inputs.dir("${project.rootDir}/appland-findings")
+            inputs.dir("${project.rootDir}/appland-signin")
             inputs.files(appMapJavaAgent)
 
             destinationDir = project.buildDir
@@ -176,6 +178,11 @@ project(":") {
             }
             from("${project.rootDir}/appland-findings") {
                 into("appmap-assets/appland-findings")
+                include("index.html")
+                include("dist/**")
+            }
+            from("${project.rootDir}/appland-signin") {
+                into("appmap-assets/appland-signin")
                 include("index.html")
                 include("dist/**")
             }
