@@ -14,9 +14,9 @@ import org.jetbrains.annotations.NotNull;
 public class AppMapToolWindowFactory implements ToolWindowFactory {
     @Override
     public void createToolWindowContent(@NotNull Project project, @NotNull ToolWindow toolWindow) {
-        var content = ContentFactory.SERVICE.getInstance().createContent(null, null, false);
-        var panel = new AppMapWindowPanel(project, content);
-        content.setComponent(panel);
+        var panel = new AppMapWindowPanel(project, toolWindow.getDisposable());
+
+        var content = ContentFactory.SERVICE.getInstance().createContent(panel, null, false);
         toolWindow.getContentManager().addContent(content);
 
         project.getMessageBus().connect(panel).subscribe(ToolWindowManagerListener.TOPIC, new ToolWindowManagerListener() {
