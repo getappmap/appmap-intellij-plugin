@@ -59,7 +59,7 @@ public class AppMapWindowPanel extends SimpleToolWindowPanel implements DataProv
     private volatile boolean isToolWindowVisible;
     private volatile boolean hasPendingTreeRefresh;
 
-    public AppMapWindowPanel(@NotNull Project project, @NotNull Content parent) {
+    public AppMapWindowPanel(@NotNull Project project, @NotNull Disposable parent) {
         super(true);
         Disposer.register(parent, this);
 
