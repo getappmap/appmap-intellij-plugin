@@ -10,7 +10,7 @@ export function mountWebview() {
   let app = new Vue(
       {
         el: '#app',
-        render: (h) => h(VVsCodeExtension, {ref: 'ui', props: {appMapUploadable: false}}),
+        render: (h) => h(VVsCodeExtension, {ref: 'ui', props: {appMapUploadable: false, defaultView: "viewSequence"}}),
         // "ready" activates the Java host, which then sends the init message
         mounted: () => vscode.postMessage({command: 'ready'}),
         methods: {
