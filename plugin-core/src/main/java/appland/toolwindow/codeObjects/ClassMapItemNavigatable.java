@@ -6,6 +6,7 @@ import appland.index.AppMapMetadata;
 import appland.index.AppMapMetadataIndex;
 import appland.index.ClassMapItemType;
 import appland.index.ClassMapTypeIndex;
+import appland.webviews.appMap.AppMapFileEditorState;
 import com.intellij.openapi.application.ReadAction;
 import com.intellij.openapi.fileEditor.FileEditorManager;
 import com.intellij.openapi.progress.ProgressManager;
@@ -68,7 +69,7 @@ public class ClassMapItemNavigatable implements Navigatable {
             case 0:
                 return;
             case 1:
-                FileEditorManager.getInstance(project).openFile(filesToMetadata.get(0).first, requestFocus);
+                openCodeObjectEditor(project, requestFocus, filesToMetadata.get(0));
                 return;
             default:
                 JBPopupFactory.getInstance()
@@ -77,7 +78,16 @@ public class ClassMapItemNavigatable implements Navigatable {
         }
     }
 
-    private static class VirtualFilePopupStep extends BaseListPopupStep<Pair<VirtualFile, @Nullable AppMapMetadata>> {
+    private void openCodeObjectEditor(@NotNull Project project,
+                                      boolean requestFocus,
+                                      @NotNull Pair<VirtualFile, @Nullable AppMapMetadata> selectedValue) {
+        var editors = FileEditorManager.getInstance(project).openFile(selectedValue.first, requestFocus);
+        if (editors.length == 1) {
+            editors[0].setState(AppMapFileEditorState.createCodeObjectState(nodeId));
+        }
+    }
+
+    private class VirtualFilePopupStep extends BaseListPopupStep<Pair<VirtualFile, @Nullable AppMapMetadata>> {
         private final @NotNull Project project;
         private final boolean requestFocus;
 
@@ -115,7 +125,7 @@ public class ClassMapItemNavigatable implements Navigatable {
 
         @Override
         public @Nullable PopupStep<?> onChosen(@NotNull Pair<VirtualFile, @Nullable AppMapMetadata> selectedValue, boolean finalChoice) {
-            FileEditorManager.getInstance(project).openFile(selectedValue.first, requestFocus);
+            openCodeObjectEditor(ClassMapItemNavigatable.this.project, requestFocus, selectedValue);
             return null;
         }
     }
