@@ -1,5 +1,5 @@
 import Vue from 'vue';
-import {VSignIn} from '@appland/components';
+import {VSidebarSignIn} from '@appland/components';
 import '@appland/diagrams/dist/style.css';
 import MessagePublisher from './messagePublisher';
 import vscode from './vsCodeBridge';
@@ -11,7 +11,7 @@ export function mountWebview() {
     const app = new Vue({
       el: '#app',
       render(h) {
-        return h(VSignIn, {
+        return h(VSidebarSignIn, {
           ref: 'ui',
           props: initData,
         });
@@ -21,7 +21,12 @@ export function mountWebview() {
       }
     });
 
-    app.$on('sign-in', () => vscode.postMessage({command: 'sign-in'}));
+    app.$on('sign-in', () => {
+      vscode.postMessage({command: 'sign-in'})
+    });
+    app.$on('click-sign-in-link', (linkType) => {
+      vscode.postMessage({command: 'click-sign-in-link', linkType})
+    });
   });
 
   vscode.postMessage({command: 'ready'});

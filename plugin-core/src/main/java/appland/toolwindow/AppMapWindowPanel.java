@@ -22,7 +22,6 @@ import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiManager;
 import com.intellij.ui.*;
 import com.intellij.ui.components.panels.VerticalBox;
-import com.intellij.ui.content.Content;
 import com.intellij.ui.tree.AsyncTreeModel;
 import com.intellij.ui.treeStructure.SimpleTree;
 import com.intellij.util.Alarm;
@@ -42,7 +41,7 @@ import javax.swing.tree.TreePath;
 import java.awt.*;
 import java.util.List;
 
-public class AppMapWindowPanel extends SimpleToolWindowPanel implements DataProvider, Disposable {
+public class AppMapWindowPanel extends SimpleToolWindowPanel implements DataProvider, Disposable, AppMapToolWindowContent {
     private static final Logger LOG = Logger.getInstance("#appmap.toolwindow");
     private static final int TREE_REFRESH_DELAY_MILLIS = 250;
     private static final long INPUT_FILTER_DELAY_MILLIS = 250L; // + TREE_REFRESH_DELAY after typing stopped
@@ -155,6 +154,7 @@ public class AppMapWindowPanel extends SimpleToolWindowPanel implements DataProv
         return textFilter;
     }
 
+    @Override
     public void onToolWindowShown() {
         LOG.debug("onToolWindowShown");
         this.isToolWindowVisible = true;
@@ -165,6 +165,7 @@ public class AppMapWindowPanel extends SimpleToolWindowPanel implements DataProv
         }
     }
 
+    @Override
     public void onToolWindowHidden() {
         LOG.debug("onToolWindowHidden");
         this.isToolWindowVisible = false;

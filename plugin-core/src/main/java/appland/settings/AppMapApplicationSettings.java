@@ -66,7 +66,11 @@ public class AppMapApplicationSettings {
     }
 
     public boolean isAnalysisEnabled() {
-        return apiKey != null && enableFindings;
+        return isAuthenticated() && enableFindings;
+    }
+
+    public boolean isAuthenticated() {
+        return apiKey != null;
     }
 
     @NotNull

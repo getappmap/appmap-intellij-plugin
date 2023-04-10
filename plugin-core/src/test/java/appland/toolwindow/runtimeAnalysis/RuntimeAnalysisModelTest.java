@@ -27,7 +27,7 @@ public class RuntimeAnalysisModelTest extends AppMapBaseTest {
         AppMapApplicationSettingsService.getInstance().setApiKey(null);
 
         var model = new RuntimeAnalysisModel(getProject(), getTestRootDisposable());
-        assertNull("Empty panel must be shown if the user is not signed in", model.getRoot());
+        assertNotNull("The model must not track signed-in state", model.getRoot());
     }
 
     @Test

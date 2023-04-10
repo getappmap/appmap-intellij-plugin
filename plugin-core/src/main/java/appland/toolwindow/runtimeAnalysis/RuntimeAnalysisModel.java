@@ -34,17 +34,12 @@ class RuntimeAnalysisModel extends BaseTreeModel<Node> implements InvokerSupplie
             public void enableFindingsChanged() {
                 structureChanged(null);
             }
-
-            @Override
-            public void apiKeyChanged() {
-                structureChanged(null);
-            }
         });
     }
 
     @Override
     public @Nullable RootNode getRoot() {
-        if (!AppMapApplicationSettingsService.getInstance().isAnalysisEnabled()) {
+        if (!AppMapApplicationSettingsService.getInstance().isEnableFindings()) {
             return null;
         }
 
