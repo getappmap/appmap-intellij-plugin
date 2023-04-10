@@ -37,6 +37,13 @@ public class AppMapFileEditorState implements FileEditorState {
         return new AppMapFileEditorState(GsonUtils.GSON.toJson(state));
     }
 
+    public static @NotNull AppMapFileEditorState createCodeObjectState(@NotNull String nodeId) {
+        var state = new JsonObject();
+        state.addProperty("currentView", "viewComponent");
+        state.addProperty("selectedObject", nodeId);
+        return new AppMapFileEditorState(GsonUtils.GSON.toJson(state));
+    }
+
     @Override
     public boolean canBeMergedWith(@NotNull FileEditorState otherState, @NotNull FileEditorStateLevel level) {
         return otherState instanceof AppMapFileEditorState && otherState.equals(this);
