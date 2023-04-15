@@ -19,7 +19,6 @@ import com.intellij.openapi.ui.SimpleToolWindowPanel;
 import com.intellij.openapi.util.Disposer;
 import com.intellij.openapi.vfs.LocalFileSystem;
 import com.intellij.openapi.vfs.VirtualFile;
-import com.intellij.pom.Navigatable;
 import com.intellij.psi.PsiManager;
 import com.intellij.ui.*;
 import com.intellij.ui.components.panels.VerticalBox;
@@ -41,8 +40,7 @@ import javax.swing.event.DocumentEvent;
 import javax.swing.tree.TreeModel;
 import javax.swing.tree.TreePath;
 import java.awt.*;
-
-import static com.intellij.psi.NavigatablePsiElement.EMPTY_NAVIGATABLE_ELEMENT_ARRAY;
+import java.util.List;
 
 public class AppMapWindowPanel extends SimpleToolWindowPanel implements DataProvider, Disposable {
     private static final Logger LOG = Logger.getInstance("#appmap.toolwindow");
@@ -101,27 +99,19 @@ public class AppMapWindowPanel extends SimpleToolWindowPanel implements DataProv
 
     @Override
     public @Nullable Object getData(@NotNull @NonNls String dataId) {
-        if (CommonDataKeys.NAVIGATABLE.is(dataId)) {
-            var file = getSelectedFile();
-            return file == null ? null : PsiManager.getInstance(project).findFile(file);
-        }
+        var selectedFile = getSelectedFile();
 
-        if (CommonDataKeys.NAVIGATABLE_ARRAY.is(dataId)) {
-            var file = getSelectedFile();
-            if (file == null) {
+        if (PlatformCoreDataKeys.SLOW_DATA_PROVIDERS.is(dataId)) {
+            return List.of((DataProvider) id -> {
+                if (CommonDataKeys.NAVIGATABLE.is(id) && selectedFile != null) {
+                    return PsiManager.getInstance(project).findFile(selectedFile);
+                }
                 return null;
-            }
-            var psiFile = PsiManager.getInstance(project).findFile(file);
-            return psiFile == null ? EMPTY_NAVIGATABLE_ELEMENT_ARRAY : new Navigatable[]{psiFile};
+            });
         }
 
         if (CommonDataKeys.VIRTUAL_FILE.is(dataId)) {
-            return getSelectedFile();
-        }
-
-        if (CommonDataKeys.VIRTUAL_FILE_ARRAY.is(dataId)) {
-            var file = getSelectedFile();
-            return file == null ? VirtualFile.EMPTY_ARRAY : new VirtualFile[]{file};
+            return selectedFile;
         }
 
         return super.getData(dataId);
