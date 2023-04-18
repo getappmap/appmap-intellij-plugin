@@ -150,44 +150,40 @@ public class DefaultCommandLineService implements AppLandCommandLineService {
 
     @Override
     public @Nullable GeneralCommandLine createInstallCommand(@NotNull Path installLocation, @NotNull String language) {
-        var indexerPath = AppLandDownloadService.getInstance().getDownloadFilePath(CliTool.AppMap);
-        if (indexerPath == null || Files.notExists(indexerPath)) {
-            LOG.debug("CLI executable not found: " + indexerPath);
-            return null;
-        }
-
-        var cmd = new PtyCommandLine();
-        cmd.withExePath(indexerPath.toString());
-        cmd.withParameters("install", "-d", installLocation.toString());
-        cmd.withConsoleMode(false);
-        cmd.withParentEnvironmentType(GeneralCommandLine.ParentEnvironmentType.CONSOLE);
-
-        LOG.debug("AppMap command line " + cmd.getCommandLineString());
-        return cmd;
+        return createAppMapCliCommand("install", "-d", installLocation.toString());
     }
 
     @Override
     public @Nullable GeneralCommandLine createGenerateOpenApiCommand(@NotNull VirtualFile projectRoot) {
-        var toolPath = AppLandDownloadService.getInstance().getDownloadFilePath(CliTool.AppMap);
-        if (toolPath == null || Files.notExists(toolPath)) {
-            LOG.debug("CLI executable not found: " + toolPath);
-            return null;
-        }
-
         var localPath = projectRoot.getFileSystem().getNioPath(projectRoot);
         if (localPath == null) {
             LOG.debug("Project root is not on the local filesystem", projectRoot);
             return null;
         }
 
-        var cmd = new PtyCommandLine();
-        cmd.withExePath(toolPath.toString());
-        cmd.withParameters("openapi", "--appmap-dir", localPath.toString());
-        cmd.withConsoleMode(false);
-        cmd.withParentEnvironmentType(GeneralCommandLine.ParentEnvironmentType.CONSOLE);
+        return createAppMapCliCommand("openapi", "--appmap-dir", localPath.toString());
+    }
 
-        LOG.debug("AppMap OpenAPI command line " + cmd.getCommandLineString());
-        return cmd;
+    @Override
+    public @Nullable GeneralCommandLine createPruneAppMapCommand(@NotNull VirtualFile appMapFile, @NotNull String maxSize) {
+        var localPath = appMapFile.getFileSystem().getNioPath(appMapFile);
+        if (localPath == null) {
+            LOG.debug("AppMap file is not on the local filesystem", appMapFile);
+            return null;
+        }
+
+        return createAppMapCliCommand("prune", localPath.toString(), "--size", "10mb", "--output-data", "--auto");
+    }
+
+    @Override
+    public @Nullable GeneralCommandLine createAppMapStatsCommand(@NotNull VirtualFile appMapFile) {
+        var localPath = appMapFile.getFileSystem().getNioPath(appMapFile);
+        if (localPath == null) {
+            LOG.debug("AppMap file is not on the local filesystem", appMapFile);
+            return null;
+        }
+
+        return createAppMapCliCommand("stats", "--appmap-file", localPath.toString(), "--limit", String.valueOf(Long.MAX_VALUE), "--format", "json");
     }
 
     private void stopLocked(@NotNull CliProcesses value) {
@@ -378,6 +374,23 @@ public class DefaultCommandLineService implements AppLandCommandLineService {
                 process.killProcess();
             }
         });
+    }
+
+    private static @Nullable PtyCommandLine createAppMapCliCommand(@NotNull String... parameters) {
+        var toolPath = AppLandDownloadService.getInstance().getDownloadFilePath(CliTool.AppMap);
+        if (toolPath == null || Files.notExists(toolPath)) {
+            LOG.debug("AppMap CLI executable not found: " + toolPath);
+            return null;
+        }
+
+        var cmd = new PtyCommandLine();
+        cmd.withExePath(toolPath.toString());
+        cmd.withParameters(parameters);
+        cmd.withConsoleMode(true);
+        cmd.withParentEnvironmentType(GeneralCommandLine.ParentEnvironmentType.CONSOLE);
+
+        LOG.debug("AppMap CLI command line " + cmd.getCommandLineString());
+        return cmd;
     }
 
     private static final class CliProcesses {

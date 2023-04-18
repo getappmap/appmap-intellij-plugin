@@ -228,7 +228,7 @@ public abstract class WebviewEditor<T> extends UserDataHolderBase implements Fil
 
         // send init message to webview to launch the JS application in a background thread
         isWebViewReady.set(true);
-        new Task.Backgroundable(project, AppMapBundle.get("webview.loading"), false, PerformInBackgroundOption.ALWAYS_BACKGROUND) {
+        new Task.Backgroundable(project, getLoadingProgressTitle(), false, PerformInBackgroundOption.ALWAYS_BACKGROUND) {
             @Override
             public void run(@NotNull ProgressIndicator indicator) {
                 var initData = createInitData();
@@ -238,6 +238,10 @@ public abstract class WebviewEditor<T> extends UserDataHolderBase implements Fil
                 afterInit(initData);
             }
         }.queue();
+    }
+
+    protected @NotNull String getLoadingProgressTitle() {
+        return AppMapBundle.get("webview.loading");
     }
 
     @NotNull
