@@ -1,5 +1,16 @@
 AppMap Plugin Changelog
 
+## [0.32.0](https://github.com/getappmap/appmap-intellij-plugin/compare/v0.31.0...v0.32.0) (2023-04-18)
+
+
+### Features
+
+-  show sequence diagram view by default ([6a82d68]())
+
+### Bug Fixes
+
+-  exception "PSI element is provided on EDT" with 2023.1 ([ac5188c]())-  open AppMap for all types of code objects ([eae4c69]())-  select code object after opening it in the AppMap view ([5748fba]())
+
 ## [0.31.0](https://github.com/getappmap/appmap-intellij-plugin/compare/v0.30.1...v0.31.0) (2023-03-29)
 
 
