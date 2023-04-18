@@ -11,9 +11,11 @@ import appland.problemsView.ResolvedStackLocation;
 import appland.settings.AppMapApplicationSettingsService;
 import appland.telemetry.TelemetryService;
 import appland.upload.AppMapUploader;
+import appland.utils.GsonUtils;
 import appland.webviews.WebviewEditor;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.intellij.ide.BrowserUtil;
 import com.intellij.ide.actions.OpenInRightSplitAction;
@@ -21,7 +23,6 @@ import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.application.ModalityState;
 import com.intellij.openapi.application.ReadAction;
 import com.intellij.openapi.diagnostic.Logger;
-import com.intellij.openapi.fileEditor.FileDocumentManager;
 import com.intellij.openapi.fileEditor.FileEditorState;
 import com.intellij.openapi.fileEditor.FileEditorStateLevel;
 import com.intellij.openapi.fileEditor.OpenFileDescriptor;
@@ -56,7 +57,7 @@ public class AppMapFileEditor extends WebviewEditor<JsonObject> {
     // keeps track if the file was modified and not yet loaded into the AppMap application
     private final AtomicBoolean isModified = new AtomicBoolean(false);
 
-    public AppMapFileEditor(Project project, VirtualFile file) {
+    public AppMapFileEditor(@NotNull Project project, @NotNull VirtualFile file) {
         super(project, file);
         setupVfsListener(file);
     }
@@ -69,20 +70,9 @@ public class AppMapFileEditor extends WebviewEditor<JsonObject> {
                 .create();
     }
 
-    /**
-     * @return The JSON object to pass to the AppMap webview as "data" property.
-     */
     @Override
     protected @Nullable JsonObject createInitData() {
-        var fileContent = ReadAction.compute(() -> {
-            var document = FileDocumentManager.getInstance().getDocument(file);
-            if (document == null) {
-                LOG.error("unable to retrieve document for file: " + file.getPath());
-                return null;
-            }
-
-            return document.getText();
-        });
+        var fileContent = AppMapFiles.loadAppMapFile(file);
 
         // return early in case of error
         if (fileContent == null) {
@@ -92,6 +82,15 @@ public class AppMapFileEditor extends WebviewEditor<JsonObject> {
         try {
             // parse JSON outside the ReadAction
             var appMapJson = gson.fromJson(fileContent, JsonObject.class);
+
+            // retrieve stats from CLI and attach to the parsed AppMap
+            try {
+                var appMapStats = AppMapFiles.loadAppMapStats(file);
+                var stats = GsonUtils.singlePropertyObject("functions", gson.fromJson(appMapStats, JsonArray.class));
+                appMapJson.add("stats", stats);
+            } catch (Exception e) {
+                LOG.debug("error parsing AppMap stats", e);
+            }
 
             // attach findings, which belong to this AppMap, as property "findings" (same as in VSCode)
             var findingsFile = ReadAction.compute(() -> AppMapFiles.findRelatedFindingsFile(file));
@@ -245,6 +244,11 @@ public class AppMapFileEditor extends WebviewEditor<JsonObject> {
             default:
                 return false;
         }
+    }
+
+    @Override
+    protected @NotNull String getLoadingProgressTitle() {
+        return AppMapBundle.get("appmap.editor.loadingFile");
     }
 
     /**

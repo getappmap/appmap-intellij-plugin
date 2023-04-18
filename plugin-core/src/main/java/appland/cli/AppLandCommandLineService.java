@@ -77,4 +77,21 @@ public interface AppLandCommandLineService extends Disposable {
      * @return The command line or {@code null} if the CLI is unavailable
      */
     @Nullable GeneralCommandLine createGenerateOpenApiCommand(@NotNull VirtualFile projectRoot);
+
+    /**
+     * Creates the command line to prune an AppMap file.
+     *
+     * @param appMapFile The file to prune. It won't be modified by the command, but the pruned content will be sent to STDOUT. Only files on the local file system are supported.
+     * @param maxSize The maximum size of the pruned file, must be a value understood by the CLI, e.g. "10mb"
+     * @return The command line or {@code null} if the CLI is unavailable
+     */
+    @Nullable GeneralCommandLine createPruneAppMapCommand(@NotNull VirtualFile appMapFile, @NotNull String maxSize);
+
+    /**
+     * Creates the command line to provide stats about an AppMap file.
+     *
+     * @param appMapFile The AppMap file to load
+     * @return The command line or {@code null} if the CLI is unavailable
+     */
+    @Nullable GeneralCommandLine createAppMapStatsCommand(@NotNull VirtualFile appMapFile);
 }
