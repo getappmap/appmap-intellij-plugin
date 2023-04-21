@@ -1,5 +1,12 @@
 AppMap Plugin Changelog
 
+## [0.32.1](https://github.com/getappmap/appmap-intellij-plugin/compare/v0.32.0...v0.32.1) (2023-04-21)
+
+
+### Bug Fixes
+
+-  send user id when signing in to AppMap server ([b60eed5]())
+
 ## [0.32.0](https://github.com/getappmap/appmap-intellij-plugin/compare/v0.31.0...v0.32.0) (2023-04-18)
 
 
