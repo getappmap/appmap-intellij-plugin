@@ -1,5 +1,6 @@
 package appland.oauth;
 
+import appland.telemetry.Identity;
 import com.intellij.collaboration.auth.services.OAuthCredentialsAcquirer;
 import com.intellij.collaboration.auth.services.OAuthRequest;
 import com.intellij.util.Url;
@@ -22,7 +23,10 @@ public class AppMapAuthRequest implements OAuthRequest<AppMapAuthCredentials> {
     @Override
     public Url getAuthUrlWithParameters() {
         var callbackUrl = getAuthorizationCodeUrl().addParameters(Map.of("nonce", nonce)).toExternalForm();
-        return SERVER_URL.addParameters(Map.of("redirect_url", callbackUrl, "source", "JetBrains"));
+        return SERVER_URL.addParameters(Map.of(
+                "redirect_url", callbackUrl,
+                "source", "JetBrains",
+                "azure_user_id", Identity.getMachineId()));
     }
 
     @NotNull
