@@ -30,7 +30,6 @@ import com.intellij.openapi.util.io.FileUtil;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.openapi.vfs.VirtualFileEvent;
 import com.intellij.openapi.vfs.VirtualFileListener;
-import com.intellij.ui.jcef.JBCefJSQuery;
 import com.intellij.util.concurrency.annotations.RequiresBackgroundThread;
 import org.jetbrains.annotations.Nls;
 import org.jetbrains.annotations.NotNull;
@@ -179,30 +178,28 @@ public class AppMapFileEditor extends WebviewEditor<JsonObject> {
     }
 
     @Override
-    public @Nullable JBCefJSQuery.Response handleWebviewMessage(@NotNull String messageId, @Nullable JsonObject message) {
+    public boolean handleMessage(@NotNull String messageId, @Nullable JsonObject message) throws Exception {
         TelemetryService telemetryService = TelemetryService.getInstance();
 
         switch (messageId) {
             case "uploadAppMap":
-                return uploadAppMap();
+                uploadAppMap();
+                return true;
 
             case "viewSource":
                 // message is {..., location: {location:"path/file.java", externalSource="path/file.java"}}
-                if (message != null) {
-                    var location = message.getAsJsonObject("location");
-                    if (location != null) {
-                        return showSource(location.getAsJsonPrimitive("location").getAsString());
-                    }
-                }
-                return null;
+                assert message != null;
+                assert message.has("location");
+                showSource(message.getAsJsonObject("location").getAsJsonPrimitive("location").getAsString());
+                return true;
 
             case "sidebarSearchFocused":
                 telemetryService.sendEvent("sidebar_search_focused");
-                return null;
+                return true;
 
             case "clickFilterButton":
                 telemetryService.sendEvent("click_filter_button");
-                return null;
+                return true;
 
             case "clickTab":
                 if (message != null) {
@@ -214,7 +211,7 @@ public class AppMapFileEditor extends WebviewEditor<JsonObject> {
                         });
                     }
                 }
-                return null;
+                return true;
 
             case "selectObjectInSidebar":
                 if (message != null) {
@@ -226,11 +223,11 @@ public class AppMapFileEditor extends WebviewEditor<JsonObject> {
                         });
                     }
                 }
-                return null;
+                return true;
 
             case "resetDiagram":
                 telemetryService.sendEvent("reset_diagram");
-                return null;
+                return true;
 
             case "exportSVG":
                 if (message != null) {
@@ -243,10 +240,10 @@ public class AppMapFileEditor extends WebviewEditor<JsonObject> {
                         });
                     }, ModalityState.defaultModalityState());
                 }
-                return null;
+                return true;
 
             default:
-                return null;
+                return false;
         }
     }
 
@@ -294,8 +291,7 @@ public class AppMapFileEditor extends WebviewEditor<JsonObject> {
         postMessage(message);
     }
 
-    @Nullable
-    private JBCefJSQuery.Response uploadAppMap() {
+    private void uploadAppMap() {
         ApplicationManager.getApplication().invokeLater(() -> {
             AppMapUploader.uploadAppMap(project, file, url -> {
                 ApplicationManager.getApplication().invokeLater(() -> {
@@ -303,7 +299,6 @@ public class AppMapFileEditor extends WebviewEditor<JsonObject> {
                 });
             });
         }, ModalityState.defaultModalityState());
-        return null;
     }
 
     private static void showShowSourceError(@NotNull String relativePath) {
@@ -315,11 +310,11 @@ public class AppMapFileEditor extends WebviewEditor<JsonObject> {
     }
 
     @RequiresBackgroundThread
-    private @Nullable JBCefJSQuery.Response showSource(@NotNull String relativePath) {
+    private void showSource(@NotNull String relativePath) {
         var location = FileLocation.parse(relativePath);
         if (location == null) {
             showShowSourceError(relativePath);
-            return null;
+            return;
         }
 
         var referencedFile = ReadAction.compute(() -> {
@@ -327,7 +322,7 @@ public class AppMapFileEditor extends WebviewEditor<JsonObject> {
         });
         if (referencedFile == null) {
             showShowSourceError(relativePath);
-            return null;
+            return;
         }
 
         ApplicationManager.getApplication().invokeLater(() -> {
@@ -335,6 +330,5 @@ public class AppMapFileEditor extends WebviewEditor<JsonObject> {
             var descriptor = new OpenFileDescriptor(project, referencedFile, location.getZeroBasedLine(-1), -1);
             OpenInRightSplitAction.Companion.openInRightSplit(project, referencedFile, descriptor, true);
         }, ModalityState.defaultModalityState());
-        return null;
     }
 }

@@ -17,7 +17,6 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.Messages;
 import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.openapi.vfs.VirtualFile;
-import com.intellij.ui.jcef.JBCefJSQuery;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntMaps;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
@@ -88,21 +87,21 @@ public class FindingsOverviewEditor extends WebviewEditor<List<ScannerFinding>> 
     }
 
     @Override
-    public @Nullable JBCefJSQuery.Response handleWebviewMessage(@NotNull String messageId, @Nullable JsonObject message) {
+    public boolean handleMessage(@NotNull String messageId, @Nullable JsonObject message) {
         switch (messageId) {
             case "open-problems-tab":
                 ApplicationManager.getApplication().invokeLater(() -> FindingsViewTab.activateFindingsTab(project));
-                return new JBCefJSQuery.Response("success");
+                return true;
 
             case "open-finding-info":
                 // locate finding by hash, then open it in a new AppMap webview
                 if (message != null && message.has("hash")) {
                     openFindingsByHash(message.getAsJsonPrimitive("hash").getAsString());
                 }
-                return new JBCefJSQuery.Response("processed " + messageId);
+                return true;
 
             default:
-                return null;
+                return false;
         }
     }
 
