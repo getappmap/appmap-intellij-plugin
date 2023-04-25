@@ -41,7 +41,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * Base class for editors based on a JCEF webview.
  * It implements most of the shared functionality and allows to customize link handling, message handling and more.
  */
-public abstract class WebviewEditor<T> extends UserDataHolderBase implements FileEditor, WebviewMessageHandler {
+public abstract class WebviewEditor<T> extends UserDataHolderBase implements FileEditor, SimpleWebviewMessageHandler {
     private static final Logger LOG = Logger.getInstance(WebviewEditor.class);
 
     protected final @NotNull Project project;

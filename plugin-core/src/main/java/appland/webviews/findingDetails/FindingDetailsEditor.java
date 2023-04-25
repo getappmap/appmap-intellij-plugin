@@ -22,7 +22,6 @@ import com.intellij.openapi.ui.Messages;
 import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.openapi.vfs.LocalFileSystem;
 import com.intellij.openapi.vfs.VirtualFile;
-import com.intellij.ui.jcef.JBCefJSQuery;
 import org.jetbrains.annotations.Nls;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -48,18 +47,18 @@ public class FindingDetailsEditor extends WebviewEditor<Void> {
     }
 
     @Override
-    public @Nullable JBCefJSQuery.Response handleWebviewMessage(@NotNull String messageId, @Nullable JsonObject message) {
+    public boolean handleMessage(@NotNull String messageId, @Nullable JsonObject message) throws Exception {
         switch (messageId) {
             case "open-findings-overview":
                 ApplicationManager.getApplication().invokeLater(() -> {
                     FindingsOverviewEditorProvider.openEditor(project);
                 }, ModalityState.defaultModalityState());
-                return new JBCefJSQuery.Response("success");
+                return true;
 
             case "open-in-source-code":
                 assert message != null;
                 openEditorForLocation(gson.fromJson(message.getAsJsonObject("location"), ResolvedStackLocation.class));
-                return new JBCefJSQuery.Response("success");
+                return true;
 
             case "open-map":
                 // file path to the AppMap is at uri > path
@@ -69,10 +68,10 @@ public class FindingDetailsEditor extends WebviewEditor<Void> {
                     var fragment = GsonUtils.getPath(message, "uri", "fragment");
                     openAppMapUri(path.getAsString(), fragment != null ? fragment.getAsString() : "{}");
                 }
-                return new JBCefJSQuery.Response("success");
+                return true;
 
             default:
-                return null;
+                return false;
         }
     }
 
