@@ -169,9 +169,13 @@ public class AppMapFileEditor extends WebviewEditor<JsonObject> {
 
     @Override
     public void setState(@NotNull FileEditorState state) {
+        setStateInternal(state, true);
+    }
+
+    private void setStateInternal(@NotNull FileEditorState state, boolean applyToWebview) {
         this.state = state;
 
-        if (isWebViewReady() && state instanceof AppMapFileEditorState) {
+        if (applyToWebview && isWebViewReady() && state instanceof AppMapFileEditorState) {
             applyEditorState((AppMapFileEditorState) state);
         }
     }
@@ -183,6 +187,11 @@ public class AppMapFileEditor extends WebviewEditor<JsonObject> {
         switch (messageId) {
             case "uploadAppMap":
                 uploadAppMap();
+                return true;
+
+            case "clearSelection":
+                // set empty state to the editor to restore with cleared selection
+                setStateInternal(new AppMapFileEditorState("{}"), false);
                 return true;
 
             case "viewSource":
