@@ -1,5 +1,12 @@
 AppMap Plugin Changelog
 
+## [0.33.0](https://github.com/getappmap/appmap-intellij-plugin/compare/v0.32.1...v0.33.0) (2023-04-28)
+
+
+### Features
+
+-  prune large AppMap using the AppMap CLI to support large and giant AppMaps in the editor ([57217b7]())
+
 ## [0.32.1](https://github.com/getappmap/appmap-intellij-plugin/compare/v0.32.0...v0.32.1) (2023-04-21)
 
 
