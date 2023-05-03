@@ -23,8 +23,6 @@ import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.application.ModalityState;
 import com.intellij.openapi.application.ReadAction;
 import com.intellij.openapi.diagnostic.Logger;
-import com.intellij.openapi.fileEditor.FileEditorState;
-import com.intellij.openapi.fileEditor.FileEditorStateLevel;
 import com.intellij.openapi.fileEditor.OpenFileDescriptor;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.io.FileUtil;
@@ -51,7 +49,7 @@ import static com.intellij.openapi.ui.Messages.showErrorDialog;
 public class AppMapFileEditor extends WebviewEditor<JsonObject> {
     private static final Logger LOG = Logger.getInstance(AppMapFileEditor.class);
 
-    private FileEditorState state;
+    private AppMapFileEditorState webviewState;
     // keeps track if the current editor is focused
     private final AtomicBoolean isSelected = new AtomicBoolean(true);
     // keeps track if the file was modified and not yet loaded into the AppMap application
@@ -124,9 +122,9 @@ public class AppMapFileEditor extends WebviewEditor<JsonObject> {
         // TODO - provide `appmap.project.language` property which specifies the language of the AppMap via metadata.language
         TelemetryService.getInstance().sendEvent("appmap:open");
 
-        var state = getState(FileEditorStateLevel.FULL);
-        if (state instanceof AppMapFileEditorState) {
-            applyEditorState((AppMapFileEditorState) state);
+        var state = webviewState;
+        if (state != null) {
+            applyWebViewState(state);
         }
     }
 
@@ -161,22 +159,11 @@ public class AppMapFileEditor extends WebviewEditor<JsonObject> {
         isSelected.set(false);
     }
 
-    @Override
-    public @NotNull FileEditorState getState(@NotNull FileEditorStateLevel level) {
-        var current = this.state;
-        return current == null ? FileEditorState.INSTANCE : current;
-    }
+    public void setWebViewState(@NotNull AppMapFileEditorState state) {
+        this.webviewState = state;
 
-    @Override
-    public void setState(@NotNull FileEditorState state) {
-        setStateInternal(state, true);
-    }
-
-    private void setStateInternal(@NotNull FileEditorState state, boolean applyToWebview) {
-        this.state = state;
-
-        if (applyToWebview && isWebViewReady() && state instanceof AppMapFileEditorState) {
-            applyEditorState((AppMapFileEditorState) state);
+        if (isWebViewReady()) {
+            applyWebViewState(state);
         }
     }
 
@@ -191,7 +178,7 @@ public class AppMapFileEditor extends WebviewEditor<JsonObject> {
 
             case "clearSelection":
                 // set empty state to the editor to restore with cleared selection
-                setStateInternal(new AppMapFileEditorState("{}"), false);
+                setWebViewState(AppMapFileEditorState.EMPTY);
                 return true;
 
             case "viewSource":
@@ -298,7 +285,7 @@ public class AppMapFileEditor extends WebviewEditor<JsonObject> {
     /**
      * Load the current file's data into the AppLand JS application.
      */
-    private void applyEditorState(@NotNull AppMapFileEditorState state) {
+    private void applyWebViewState(@NotNull AppMapFileEditorState state) {
         var message = createMessageObject("setAppMapState");
         message.addProperty("state", state.jsonState);
         postMessage(message);

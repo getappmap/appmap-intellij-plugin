@@ -124,7 +124,7 @@ public class FindingDetailsEditor extends WebviewEditor<Void> {
             ApplicationManager.getApplication().invokeLater(() -> {
                 var appMapEditors = FileEditorManager.getInstance(project).openFile(file, true);
                 if (appMapEditors.length == 1 && appMapEditors[0] instanceof AppMapFileEditor) {
-                    appMapEditors[0].setState(new AppMapFileEditorState(jsonState));
+                    ((AppMapFileEditor) appMapEditors[0]).setWebViewState(AppMapFileEditorState.of(jsonState));
                 }
             }, ModalityState.defaultModalityState());
         } else {

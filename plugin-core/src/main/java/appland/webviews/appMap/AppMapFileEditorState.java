@@ -3,8 +3,6 @@ package appland.webviews.appMap;
 import appland.problemsView.model.ScannerFindingEvent;
 import appland.utils.GsonUtils;
 import com.google.gson.JsonObject;
-import com.intellij.openapi.fileEditor.FileEditorState;
-import com.intellij.openapi.fileEditor.FileEditorStateLevel;
 import lombok.EqualsAndHashCode;
 import lombok.Value;
 import org.jetbrains.annotations.NotNull;
@@ -15,11 +13,17 @@ import java.util.stream.Collectors;
 
 @EqualsAndHashCode
 @Value
-public class AppMapFileEditorState implements FileEditorState {
+public class AppMapFileEditorState {
     public @NotNull String jsonState;
 
-    public AppMapFileEditorState(@NotNull String state) {
+    private AppMapFileEditorState(@NotNull String state) {
         jsonState = state;
+    }
+
+    public static final AppMapFileEditorState EMPTY = new AppMapFileEditorState("{}");
+
+    public static AppMapFileEditorState of(@NotNull String jsonState) {
+        return new AppMapFileEditorState(jsonState);
     }
 
     public static AppMapFileEditorState createViewFlowState(@Nullable Integer eventId, @Nullable List<ScannerFindingEvent> relatedEvents) {
@@ -42,10 +46,5 @@ public class AppMapFileEditorState implements FileEditorState {
         state.addProperty("currentView", "viewComponent");
         state.addProperty("selectedObject", nodeId);
         return new AppMapFileEditorState(GsonUtils.GSON.toJson(state));
-    }
-
-    @Override
-    public boolean canBeMergedWith(@NotNull FileEditorState otherState, @NotNull FileEditorStateLevel level) {
-        return otherState instanceof AppMapFileEditorState && otherState.equals(this);
     }
 }
