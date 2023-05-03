@@ -3,6 +3,7 @@ package appland.oauth;
 import appland.telemetry.Identity;
 import com.intellij.collaboration.auth.services.OAuthCredentialsAcquirer;
 import com.intellij.collaboration.auth.services.OAuthRequest;
+import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.util.Url;
 import com.intellij.util.Urls;
 import lombok.Getter;
@@ -26,7 +27,7 @@ public class AppMapAuthRequest implements OAuthRequest<AppMapAuthCredentials> {
         return SERVER_URL.addParameters(Map.of(
                 "redirect_url", callbackUrl,
                 "source", "JetBrains",
-                "azure_user_id", Identity.getMachineId()));
+                "azure_user_id", StringUtil.defaultIfEmpty(Identity.getOrCreateMachineId(), "")));
     }
 
     @NotNull
