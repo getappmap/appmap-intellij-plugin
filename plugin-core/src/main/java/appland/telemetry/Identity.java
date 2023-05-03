@@ -15,7 +15,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-class Identity {
+public class Identity {
     private static final @NotNull String MachineIdKey = "appland.machine_id";
     private static final @NotNull Set<String> IgnoredMacAddresses = Set.of("00:00:00:00:00:00", "ff:ff:ff:ff:ff:ff", "ac:de:48:00:11:22");
 
@@ -23,7 +23,7 @@ class Identity {
      * Retrieves a cached machine id from the application properties.
      * If there's no value available, then it calculates a new machine id and stores it in the properties.
      */
-    static @Nullable String getOrCreateMachineId() {
+    public static @Nullable String getOrCreateMachineId() {
         var machineId = PropertiesComponent.getInstance().getValue(MachineIdKey);
         if (StringUtil.isEmpty(machineId)) {
             machineId = issueMachineId();
