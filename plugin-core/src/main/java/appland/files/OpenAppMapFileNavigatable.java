@@ -41,7 +41,7 @@ public class OpenAppMapFileNavigatable implements Navigatable {
         var appMapEditors = FileEditorManager.getInstance(project).openFile(appMapFile, true);
         if (finding != null && appMapEditors.length == 1 && appMapEditors[0] instanceof AppMapFileEditor) {
             var editorState = AppMapFileEditorState.createViewFlowState(finding.getEventId(), finding.relatedEvents);
-            appMapEditors[0].setState(editorState);
+            ((AppMapFileEditor) appMapEditors[0]).setWebViewState(editorState);
         }
     }
 }

@@ -6,6 +6,7 @@ import appland.index.AppMapMetadata;
 import appland.index.AppMapMetadataIndex;
 import appland.index.ClassMapItemType;
 import appland.index.ClassMapTypeIndex;
+import appland.webviews.appMap.AppMapFileEditor;
 import appland.webviews.appMap.AppMapFileEditorState;
 import com.intellij.openapi.application.ReadAction;
 import com.intellij.openapi.fileEditor.FileEditorManager;
@@ -82,8 +83,8 @@ public class ClassMapItemNavigatable implements Navigatable {
                                       boolean requestFocus,
                                       @NotNull Pair<VirtualFile, @Nullable AppMapMetadata> selectedValue) {
         var editors = FileEditorManager.getInstance(project).openFile(selectedValue.first, requestFocus);
-        if (editors.length == 1) {
-            editors[0].setState(AppMapFileEditorState.createCodeObjectState(nodeId));
+        if (editors.length == 1 && editors[0] instanceof AppMapFileEditor) {
+            ((AppMapFileEditor) editors[0]).setWebViewState(AppMapFileEditorState.createCodeObjectState(nodeId));
         }
     }
 
