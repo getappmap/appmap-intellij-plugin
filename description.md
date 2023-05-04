@@ -1,20 +1,18 @@
-AppMap is a free and open source visualization tool that allows you to see how your software works as it’s running.
-You can use AppMaps to onboard to unfamiliar code, debug hard-to-fix issues, review code behavior changes before
-making a commit, and improve the quality of code reviews.
+AppMap enhances the developer experience by analyzing runtime code behavior before you commit changes and go to production.
 
-AppMap works best for mapping web services and web applications. [Join our community](https://appmap.io/community/)
- to help us expand support for more types of applications and frameworks!
+AppMap records detailed traces of how your application runs and analyzes it based on frameworks and techniques including web services, view templates, HTTP client requests, caching, authentication, and SQL.
 
-&nbsp;
+Bugs, loops, calls, dependencies, security issues, and more are found with ease in trace views and sequence diagrams.
 
----
-
-## Requirements
+## Requirements and use
 
 **2021.1** and newer JetBrains IDEs are required to use this plugin.
 
-Currently, AppMap supports Spring, Express.js, Django, Flask and Rails projects. The most up-to-date list of frameworks and languages we support is
-[here](https://appmap.io/docs/integrations.html). 
+AppMap helps you understand any codebase, map a database-backed web application or API service, and instantly generate OpenAPI documentation based on the API calls it observes at runtime. 
+
+Supported web applications and API frameworks: Ruby on Rails, Django, Flask, Express, and Spring
+
+Supported programming languages: Java, Python, Ruby, Typescript, and JavaScript
 
 To start making AppMaps, you’ll need to install and configure the AppMap client agent for your project.
 Then, you’ll make AppMaps by running your app - either by
@@ -23,33 +21,26 @@ Then, you’ll make AppMaps by running your app - either by
 
 [Here's a convenient quickstart guide](https://appmap.io/docs/quickstart/) that walks you through the AppMap install flow.  
 
----
+## Security
 
-## Summary of features
+[Open source MIT license](https://github.com/getappmap/vscode-appland/blob/master/LICENSE)
 
-Summary of Features:
-- Interactive maps of code’s behavior, so you can see what code is really doing as it runs, including: 
-    - Dependency maps that display how your app’s components are all connected, so you can quickly see how changes affect the big picture
-    - Trace diagrams that show details about how a feature works, so you can find optimization opportunities and investigate tricky bugs
-    - SQL query data, so you can see exactly what’s happening between your code and the database  
-    - Web services data, so you can see what message your app received and how it responded
-    - Labels that identify the key functions in source code, so you can easily find critical code events and ensure they’re configured and used properly
+[Terms and conditions](https://appmap.io/community/terms-and-conditions.html)
 
+Data usage: AppMap runtime recordings and diagrams are created and stored locally on your machine. AppMap does not require any permissions to your web hosted code repo in order to run. 
 
-## Resources
+Sign-in via GitHub or GitLab is required to obtain a license key to start using AppMap in your code editor.
 
-- [Our doc site](https://appmap.io/docs/appmap-overview.html)
-- [Our GitHub](https://github.com/getappmap)
-- [Our blog](https://appmap.io/blog/)
-- [1:1 support with our dev team on Slack](https://appmap.io/slack)
-- Email support: [support@appmap.io](mailto:support@appmap.io)
+There is no fee for personal use of AppMap.
 
-## Twitter
+There are methods of manually generating AppMap data files without a license key. Reach out to an AppMap team member in our community Slack or drop us a line at support@appmap.io for guidance on how to do that.
 
-- [@GetAppMap](https://twitter.com/getappmap)
+## Getting started with AppMap
 
-## YouTube
+[Documentation](https://appmap.io/docs/appmap-overview.html) for guides and videos.
 
-- [AppMap channel](https://www.youtube.com/channel/UCxVv4gVnr2Uf2PSzoELZUcg)
+[GitHub](https://github.com/getappmap) for our repository and open source project.
 
-By downloading and using AppMap you agree to the [Terms and Conditions](https://appmap.io/community/terms-and-conditions).
+[Blog](https://appmap.io/blog/) for user stories and product announcements.
+
+[Slack](https://appmap.io/slack) or email for support and community conversations: [support@appmap.io](mailto:support@appmap.io)
