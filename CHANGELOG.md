@@ -1,5 +1,12 @@
 AppMap Plugin Changelog
 
+## [0.33.1](https://github.com/getappmap/appmap-intellij-plugin/compare/v0.33.0...v0.33.1) (2023-05-04)
+
+
+### Bug Fixes
+
+-  properly handle clicks on "Clear selection" in the AppMap webview ([7023589]())
+
 ## [0.33.0](https://github.com/getappmap/appmap-intellij-plugin/compare/v0.32.1...v0.33.0) (2023-04-28)
 
 
