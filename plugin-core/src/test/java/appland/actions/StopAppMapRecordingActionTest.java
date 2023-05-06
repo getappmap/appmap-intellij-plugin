@@ -3,6 +3,7 @@ package appland.actions;
 import appland.AppMapBaseTest;
 import appland.settings.AppMapProjectSettingsService;
 import com.intellij.openapi.application.WriteAction;
+import com.intellij.util.PathUtil;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -33,13 +34,13 @@ public class StopAppMapRecordingActionTest extends AppMapBaseTest {
 
         var location = StopAppMapRecordingAction.findDefaultStorageLocation(getProject());
         assertNotNull(location);
-        assertEquals("/src/root/tmp-appMapAgent/appmap/remote", location.toString());
+        assertEquals("/src/root/tmp-appMapAgent/appmap/remote", PathUtil.toSystemIndependentName(location.toString()));
     }
 
     @Test
     public void findDefaultStorageLocationFallback() {
         var location = StopAppMapRecordingAction.findDefaultStorageLocation(getProject());
         assertNotNull(location);
-        assertEquals("/src/tmp/appmap/remote", location.toString());
+        assertEquals("/src/tmp/appmap/remote", PathUtil.toSystemIndependentName(location.toString()));
     }
 }
