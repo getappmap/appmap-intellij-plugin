@@ -1,5 +1,6 @@
 package appland.execution;
 
+import appland.cli.AppLandCommandLineService;
 import com.intellij.openapi.application.WriteAction;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.externalSystem.service.execution.ExternalSystemJdkUtil;
@@ -17,7 +18,13 @@ public abstract class BaseAppMapJavaTest extends JavaPsiTestCase {
 
     @Override
     protected void tearDown() throws Exception {
-        EdtTestUtil.runInEdtAndWait(super::tearDown);
+        try {
+            AppLandCommandLineService.getInstance().stopAll(true);
+        } catch (Exception e) {
+            addSuppressedException(e);
+        } finally {
+            EdtTestUtil.runInEdtAndWait(super::tearDown);
+        }
     }
 
     @Override
@@ -41,7 +48,7 @@ public abstract class BaseAppMapJavaTest extends JavaPsiTestCase {
             return sdk;
         }
 
-        //noinspection UnstableApiUsage
+        //noinspection UnstableApiUsage,deprecation
         return JavaAwareProjectJdkTableImpl.getInstanceEx().getInternalJdk();
     }
 }

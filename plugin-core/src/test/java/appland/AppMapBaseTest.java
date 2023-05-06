@@ -1,14 +1,27 @@
 package appland;
 
+import appland.cli.AppLandCommandLineService;
+import appland.settings.AppMapApplicationSettings;
+import appland.settings.AppMapApplicationSettingsService;
+import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.application.ReadAction;
 import com.intellij.openapi.roots.ModuleRootModificationUtil;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.testFramework.fixtures.LightPlatformCodeInsightFixture4TestCase;
 import org.jetbrains.annotations.NotNull;
+import org.junit.After;
 
 import java.util.Collections;
 
 public abstract class AppMapBaseTest extends LightPlatformCodeInsightFixture4TestCase {
+    @After
+    public void shutdownAppMapProcesses() {
+        AppLandCommandLineService.getInstance().stopAll(true);
+
+        // reset to default settings
+        ApplicationManager.getApplication().getService(AppMapApplicationSettingsService.class).loadState(new AppMapApplicationSettings());
+    }
+
     /**
      * Creates a minimal version of AppMap JSON, which contains the metadata with a name.
      */
