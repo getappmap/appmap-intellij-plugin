@@ -60,7 +60,7 @@ public class DefaultCommandLineService implements AppLandCommandLineService {
     }
 
     @Override
-    public synchronized void start(@NotNull VirtualFile directory) throws ExecutionException {
+    public synchronized void start(@NotNull VirtualFile directory, boolean waitForProcessTermination) throws ExecutionException {
         if (!isDirectoryEnabled(directory)) {
             return;
         }
@@ -76,7 +76,7 @@ public class DefaultCommandLineService implements AppLandCommandLineService {
             // stop processes serving for subdirectories of the new directory
             if (VfsUtilCore.isAncestor(directory, dirAndProcesses.getKey(), false)) {
                 it.remove();
-                stopLocked(dirAndProcesses.getValue());
+                stopLocked(dirAndProcesses.getValue(), waitForProcessTermination);
             }
         }
 
@@ -105,10 +105,10 @@ public class DefaultCommandLineService implements AppLandCommandLineService {
     }
 
     @Override
-    public synchronized void stop(@NotNull VirtualFile directory) {
+    public synchronized void stop(@NotNull VirtualFile directory, boolean waitForTermination) {
         var entry = processes.remove(directory);
         if (entry != null) {
-            stopLocked(entry);
+            stopLocked(entry, waitForTermination);
         }
     }
 
@@ -135,10 +135,10 @@ public class DefaultCommandLineService implements AppLandCommandLineService {
     }
 
     @Override
-    public synchronized void stopAll() {
+    public synchronized void stopAll(boolean waitForTermination) {
         for (var processes : processes.values()) {
             try {
-                stopLocked(processes);
+                stopLocked(processes, waitForTermination);
             } catch (Exception e) {
                 LOG.error("Error shutting down processes on disposal", e);
             }
@@ -185,16 +185,16 @@ public class DefaultCommandLineService implements AppLandCommandLineService {
         return createAppMapCliCommand("stats", "--appmap-file", localPath.toString(), "--limit", String.valueOf(Long.MAX_VALUE), "--format", "json");
     }
 
-    private void stopLocked(@NotNull CliProcesses value) {
+    private void stopLocked(@NotNull CliProcesses value, boolean waitForTermination) {
         try {
-            shutdownInBackground(value.indexer);
+            shutdownInBackground(value.indexer, waitForTermination);
         } catch (Exception e) {
             LOG.warn("Error shutting down indexer", e);
         }
 
         if (value.scanner != null) {
             try {
-                shutdownInBackground(value.scanner);
+                shutdownInBackground(value.scanner, waitForTermination);
             } catch (Exception e) {
                 LOG.warn("Error shutting down scanner", e);
             }
@@ -203,7 +203,7 @@ public class DefaultCommandLineService implements AppLandCommandLineService {
 
     @Override
     public void dispose() {
-        stopAll();
+        stopAll(false);
     }
 
     private void doRefreshForOpenProjectsLocked() {
@@ -228,7 +228,7 @@ public class DefaultCommandLineService implements AppLandCommandLineService {
             var scannerProcessMismatch = scannerProcessRequired == (entry.getValue().scanner == null);
             if (!topLevelRoots.contains(activeRoot) || scannerProcessMismatch) {
                 try {
-                    stop(activeRoot);
+                    stop(activeRoot, false);
                 } catch (Exception e) {
                     LOG.warn("Error stopping processes for root: " + activeRoot.getPath());
                 }
@@ -238,7 +238,7 @@ public class DefaultCommandLineService implements AppLandCommandLineService {
         // launch missing cli processes
         for (var root : topLevelRoots) {
             try {
-                start(root);
+                start(root, false);
             } catch (ExecutionException e) {
                 LOG.warn("Error launching cli process for root: " + root);
             }
@@ -364,15 +364,23 @@ public class DefaultCommandLineService implements AppLandCommandLineService {
         return processHandler;
     }
 
-    private static void shutdownInBackground(@NotNull KillableProcessHandler process) {
-        ApplicationManager.getApplication().executeOnPooledThread(() -> {
+    private static void shutdownInBackground(@NotNull KillableProcessHandler process, boolean waitForTermination) throws java.util.concurrent.ExecutionException, InterruptedException {
+        var future = ApplicationManager.getApplication().executeOnPooledThread(() -> {
             process.destroyProcess();
             process.waitFor(500);
 
             if (!process.isProcessTerminated()) {
                 process.killProcess();
             }
+
+            if (waitForTermination) {
+                process.waitFor();
+            }
         });
+
+        if (waitForTermination) {
+            future.get();
+        }
     }
 
     private static @Nullable GeneralCommandLine createAppMapCliCommand(@NotNull String... parameters) {

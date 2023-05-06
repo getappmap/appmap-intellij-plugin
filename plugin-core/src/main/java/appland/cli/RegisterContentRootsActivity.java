@@ -46,7 +46,7 @@ public class RegisterContentRootsActivity implements StartupActivity {
             for (var contentRoot : contentRoots) {
                 try {
                     if (!service.isRunning(contentRoot, false)) {
-                        service.start(contentRoot);
+                        service.start(contentRoot, false);
                     }
                 } catch (ExecutionException e) {
                     LOG.error("Error launch CLI tools for directory: " + contentRoot.getPath(), e);

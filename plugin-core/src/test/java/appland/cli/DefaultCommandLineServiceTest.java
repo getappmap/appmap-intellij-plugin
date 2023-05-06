@@ -47,7 +47,7 @@ public class DefaultCommandLineServiceTest extends AppMapBaseTest {
 
     @After
     public void shutdownProcesses() {
-        AppLandCommandLineService.getInstance().stopAll();
+        AppLandCommandLineService.getInstance().stopAll(true);
         // reset to default settings
         ApplicationManager.getApplication().getService(AppMapApplicationSettingsService.class).loadState(new AppMapApplicationSettings());
     }
@@ -58,6 +58,8 @@ public class DefaultCommandLineServiceTest extends AppMapBaseTest {
         var tempDir = tempFile.getParent();
 
         var nestedFile = myFixture.addFileToProject("parent/child/file.txt", "");
+        assertNotNull(nestedFile.getParent());
+
         var nestedDir = nestedFile.getParent().getVirtualFile();
         assertNotNull(nestedDir);
 
@@ -82,13 +84,11 @@ public class DefaultCommandLineServiceTest extends AppMapBaseTest {
 
         assertActiveRoots(tempDir);
 
-        service.stop(tempDir);
+        service.stop(tempDir, true);
         assertFalse(service.isRunning(tempDir, true));
         assertFalse(service.isRunning(tempDir, false));
         assertFalse(service.isRunning(nestedDir, true));
         assertFalse(service.isRunning(nestedDir, false));
-
-        service.stopAll();
     }
 
     @Test
@@ -106,8 +106,6 @@ public class DefaultCommandLineServiceTest extends AppMapBaseTest {
         assertNotNull(tempDirNioPath);
         var appMapDirNioPath = tempDirNioPath.resolve("tmp/appmaps");
         assertTrue("Configured AppMap dir must be created: " + appMapDirNioPath, Files.isDirectory(appMapDirNioPath));
-
-        service.stopAll();
     }
 
     @Test
@@ -136,7 +134,7 @@ public class DefaultCommandLineServiceTest extends AppMapBaseTest {
 
         assertActiveRoots(dirA, dirB);
 
-        service.stopAll();
+        service.stopAll(true);
         assertFalse(service.isRunning(dirA, true));
         assertFalse(service.isRunning(dirB, true));
     }
@@ -159,8 +157,6 @@ public class DefaultCommandLineServiceTest extends AppMapBaseTest {
         });
         assertTrue(condition.await(30, TimeUnit.SECONDS));
         assertActiveRoots(newRootA, newRootB);
-
-        AppLandCommandLineService.getInstance().stopAll();
     }
 
     @Test
@@ -212,7 +208,7 @@ public class DefaultCommandLineServiceTest extends AppMapBaseTest {
         });
 
         for (var contentRoot : contentRoots) {
-            AppLandCommandLineService.getInstance().start(contentRoot);
+            AppLandCommandLineService.getInstance().start(contentRoot, true);
         }
     }
 
