@@ -1,5 +1,12 @@
 AppMap Plugin Changelog
 
+## [0.34.1](https://github.com/getappmap/appmap-intellij-plugin/compare/v0.34.0...v0.34.1) (2023-05-06)
+
+
+### Bug Fixes
+
+-  compare with system independent paths to fix CI on Windows ([f84350d]())-  use GeneralCommandLine PtyCommandLine to avoid receiving ANSI escape sequences in the output of the AppMap CLI stats command ([4643e39]())-  wait for process termination to fix tests on Windows, which does not support deleting directories still being used ([81466df]())
+
 ## [0.34.0](https://github.com/getappmap/appmap-intellij-plugin/compare/v0.33.1...v0.34.0) (2023-05-04)
 
 
