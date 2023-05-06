@@ -8,7 +8,6 @@ import appland.settings.AppMapSettingsListener;
 import com.intellij.execution.CantRunException;
 import com.intellij.execution.ExecutionException;
 import com.intellij.execution.configurations.GeneralCommandLine;
-import com.intellij.execution.configurations.PtyCommandLine;
 import com.intellij.execution.process.KillableProcessHandler;
 import com.intellij.execution.process.ProcessAdapter;
 import com.intellij.execution.process.ProcessEvent;
@@ -42,7 +41,7 @@ public class DefaultCommandLineService implements AppLandCommandLineService {
 
     public DefaultCommandLineService() {
         var connection = ApplicationManager.getApplication().getMessageBus().connect(this);
-        connection.subscribe(AppMapConfigFileListener.TOPIC, this::refreshForOpenProjectsInBackground);
+        connection.subscribe(AppMapConfigFileListener.TOPIC, (AppMapConfigFileListener) this::refreshForOpenProjectsInBackground);
         connection.subscribe(AppMapSettingsListener.TOPIC, new AppMapSettingsListener() {
             @Override
             public void enableFindingsChanged() {
@@ -376,17 +375,16 @@ public class DefaultCommandLineService implements AppLandCommandLineService {
         });
     }
 
-    private static @Nullable PtyCommandLine createAppMapCliCommand(@NotNull String... parameters) {
+    private static @Nullable GeneralCommandLine createAppMapCliCommand(@NotNull String... parameters) {
         var toolPath = AppLandDownloadService.getInstance().getDownloadFilePath(CliTool.AppMap);
         if (toolPath == null || Files.notExists(toolPath)) {
             LOG.debug("AppMap CLI executable not found: " + toolPath);
             return null;
         }
 
-        var cmd = new PtyCommandLine();
+        var cmd = new GeneralCommandLine();
         cmd.withExePath(toolPath.toString());
         cmd.withParameters(parameters);
-        cmd.withConsoleMode(true);
         cmd.withParentEnvironmentType(GeneralCommandLine.ParentEnvironmentType.CONSOLE);
 
         LOG.debug("AppMap CLI command line " + cmd.getCommandLineString());
