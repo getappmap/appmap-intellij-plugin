@@ -28,16 +28,18 @@ public interface AppLandCommandLineService extends Disposable {
      * Launches the AppLand CLI tools for the given directory.
      * It'll stop any running service, which is serving a subdirectory the given path.
      *
-     * @param directory Directory, where the service should be launched.
+     * @param directory                 Directory, where the service should be launched.
+     * @param waitForProcessTermination Wait for termination of processes, which are no longer needed. This is mostly useful for test cases.
      */
-    void start(@NotNull VirtualFile directory) throws ExecutionException;
+    void start(@NotNull VirtualFile directory, boolean waitForProcessTermination) throws ExecutionException;
 
     /**
      * Stops any running service, which is being executed for the given directory.
      *
-     * @param directory Directory path
+     * @param directory          Directory path
+     * @param waitForTermination Waits until the process has been terminated. This is mostly useful for test cases.
      */
-    void stop(@NotNull VirtualFile directory);
+    void stop(@NotNull VirtualFile directory, boolean waitForTermination);
 
     /**
      * Refreshes the processes for the currently open projects.
@@ -58,8 +60,10 @@ public interface AppLandCommandLineService extends Disposable {
 
     /**
      * Stop all processes.
+     *
+     * @param waitForTermination Wait for process termination. This is mostly useful for test cases.
      */
-    void stopAll();
+    void stopAll(boolean waitForTermination);
 
     /**
      * Creates the command line to install AppMap in the given directory.
@@ -82,7 +86,7 @@ public interface AppLandCommandLineService extends Disposable {
      * Creates the command line to prune an AppMap file.
      *
      * @param appMapFile The file to prune. It won't be modified by the command, but the pruned content will be sent to STDOUT. Only files on the local file system are supported.
-     * @param maxSize The maximum size of the pruned file, must be a value understood by the CLI, e.g. "10mb"
+     * @param maxSize    The maximum size of the pruned file, must be a value understood by the CLI, e.g. "10mb"
      * @return The command line or {@code null} if the CLI is unavailable
      */
     @Nullable GeneralCommandLine createPruneAppMapCommand(@NotNull VirtualFile appMapFile, @NotNull String maxSize);
