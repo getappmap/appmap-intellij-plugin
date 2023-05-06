@@ -23,6 +23,7 @@ import org.junit.Test;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.Set;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
 public class DefaultCommandLineServiceTest extends AppMapBaseTest {
@@ -53,7 +54,7 @@ public class DefaultCommandLineServiceTest extends AppMapBaseTest {
     }
 
     @Test
-    public void directoryTree() throws ExecutionException {
+    public void directoryTree() throws Exception {
         var tempFile = myFixture.createFile("test.txt", "");
         var tempDir = tempFile.getParent();
 
@@ -92,7 +93,7 @@ public class DefaultCommandLineServiceTest extends AppMapBaseTest {
     }
 
     @Test
-    public void directoryTreeWatchedSubdir() throws ExecutionException {
+    public void directoryTreeWatchedSubdir() throws Exception {
         var tempDir = myFixture.createFile("test.txt", "").getParent();
         createAppMapYaml(tempDir);
 
@@ -109,7 +110,7 @@ public class DefaultCommandLineServiceTest extends AppMapBaseTest {
     }
 
     @Test
-    public void siblingDirectories() throws ExecutionException {
+    public void siblingDirectories() throws Exception {
         var dirA = myFixture.addFileToProject("parentA/file.txt", "").getParent().getVirtualFile();
         var dirB = myFixture.addFileToProject("parentB/file.txt", "").getParent().getVirtualFile();
 
@@ -187,13 +188,28 @@ public class DefaultCommandLineServiceTest extends AppMapBaseTest {
         assertEmptyRoots();
     }
 
-    private @NotNull VirtualFile createAppMapYaml(@NotNull VirtualFile directory) {
+    private @NotNull VirtualFile createAppMapYaml(@NotNull VirtualFile directory) throws InterruptedException {
         return createAppMapYaml(directory, null);
     }
 
-    private @NotNull VirtualFile createAppMapYaml(@NotNull VirtualFile directory, @Nullable String appMapPath) {
-        var content = appMapPath != null ? "appmap_dir: " + appMapPath + "\n" : "";
-        return VfsTestUtil.createFile(directory, "appmap.yml", content);
+    private @NotNull VirtualFile createAppMapYaml(@NotNull VirtualFile directory, @Nullable String appMapPath) throws InterruptedException {
+        var refreshLatch = new CountDownLatch(1);
+        var bus = ApplicationManager.getApplication().getMessageBus().connect(getTestRootDisposable());
+        bus.subscribe(AppLandCommandLineListener.TOPIC, new AppLandCommandLineListener() {
+            @Override
+            public void afterRefreshForProjects() {
+                refreshLatch.countDown();
+            }
+        });
+
+        try {
+            var content = appMapPath != null ? "appmap_dir: " + appMapPath + "\n" : "";
+            return VfsTestUtil.createFile(directory, "appmap.yml", content);
+        } finally {
+            // creating a new appmap.yml file triggers the start of the CLI processes,
+            // we have to wait for them to avoid launch in the background to interact with the further tests
+            assertTrue(refreshLatch.await(10, TimeUnit.SECONDS));
+        }
     }
 
     private void assertEmptyRoots() {

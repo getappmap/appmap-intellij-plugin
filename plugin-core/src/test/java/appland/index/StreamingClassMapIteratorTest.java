@@ -64,8 +64,8 @@ public class StreamingClassMapIteratorTest extends AppMapBaseTest {
         iterator.parse(classMapContent);
 
         // compare as sorted lists, because the VSCode data has a different sort order
-        var separator = SystemInfoRt.isWindows ? "\r\n" : "\n";
-        var sortedExpected = prepareSortedList(StringUtil.split(expectedOutputContent, separator));
+        // support both types of line separators because the Git data may have \n on Windows
+        var sortedExpected = prepareSortedList(List.of(expectedOutputContent.split("\r\n|\n")));
         var sortedActual = prepareSortedList(iterator.ids);
 
         assertEquals(sortedExpected, sortedActual);
