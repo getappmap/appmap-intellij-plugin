@@ -4,8 +4,6 @@ AppMap records detailed traces of how your application runs and analyzes it base
 
 Bugs, loops, calls, dependencies, security issues, and more are found with ease in trace views and sequence diagrams.
 
-https://user-images.githubusercontent.com/7118085/236264053-2276e6b2-84a3-49c9-a2db-b83ec811f960.mp4
-
 ## Requirements and use
 
 **2021.1** and newer JetBrains IDEs are required to use this plugin.
