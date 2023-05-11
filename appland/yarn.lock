@@ -10,14 +10,14 @@
     "@jridgewell/gen-mapping" "^0.1.0"
     "@jridgewell/trace-mapping" "^0.3.9"
 
-"@appland/components@^2.37.0":
-  version "2.37.0"
-  resolved "https://registry.yarnpkg.com/@appland/components/-/components-2.37.0.tgz#94bef226c3419f47c1bb5b60e5928dc955effcd0"
-  integrity sha512-XsYKWeDsWNBnWrKV2NrB/7vWWygvR4AI1bQGbvge5BJaGbHJNgTKJIx1AHN8vHvI+psY2a1YHbxdRRBlVzPbug==
+"@appland/components@^2.42.0":
+  version "2.42.0"
+  resolved "https://registry.yarnpkg.com/@appland/components/-/components-2.42.0.tgz#03e4b19a48f8f5e6ac0c166b9d3399e8dfa35572"
+  integrity sha512-jgxaiX7FxfQgSX/RxBKTshl6o5CJ07yyjuUz4GkWHJ5qSNY1B3FQtL0hNFgHeqFpE0sq8Q9GS6aDINYjv7XumQ==
   dependencies:
     "@appland/diagrams" "^1.6.2"
-    "@appland/models" "^2.4.2"
-    "@appland/sequence-diagram" "^1.5.0"
+    "@appland/models" "^2.6.0"
+    "@appland/sequence-diagram" "^1.5.2"
     buffer "^6.0.3"
     diff "^5.1.0"
     dom-to-svg "^0.12.2"
@@ -68,10 +68,10 @@
     "@appland/sql-parser" "^1.5.0"
     crypto-js "^4.0.0"
 
-"@appland/models@^2.4.2":
-  version "2.4.2"
-  resolved "https://registry.yarnpkg.com/@appland/models/-/models-2.4.2.tgz#0c4ccd0ea29a7c46cc511cb3de192bd416673601"
-  integrity sha512-Ip0BwZ4aqTP4MEY4WpkWyRfppdT5UQW7vEI/bVZEVmHeWAqBKpP6n3MzFKj6afWfr0wM5pNGLZbF8GY5lcomdg==
+"@appland/models@^2.6.0":
+  version "2.6.0"
+  resolved "https://registry.yarnpkg.com/@appland/models/-/models-2.6.0.tgz#09868070a38737fa888e5c958af8af04f6797c08"
+  integrity sha512-5h+ruDlvfIcr+vJTkuyLixQn+UP4t+3mUrZu+fq24jo3DfrUOcBYo1Rw/mxHG9CIkN413b2TR5UGg65zSs1BBA==
   dependencies:
     "@appland/sql-parser" "^1.5.0"
     crypto-js "^4.0.0"
@@ -84,10 +84,10 @@
     "@appland/models" "^2.2.0"
     js-yaml "^4.1.0"
 
-"@appland/sequence-diagram@^1.5.0":
-  version "1.5.0"
-  resolved "https://registry.yarnpkg.com/@appland/sequence-diagram/-/sequence-diagram-1.5.0.tgz#3abb7e75faa49e13b97b431d370b24b4b42adea1"
-  integrity sha512-JUX2DUdXJwwIUddszyBVkKEZrfaKW6zw3BvwEa/yAbNbfgt4hoMLYUerQb7zUxh5iBz7smIv5SWMJAwkzN42kg==
+"@appland/sequence-diagram@^1.5.2":
+  version "1.5.2"
+  resolved "https://registry.yarnpkg.com/@appland/sequence-diagram/-/sequence-diagram-1.5.2.tgz#419fa18b7ed153e5146778c00a59ae96d2c376dc"
+  integrity sha512-eL9X9BAD4bnf21yhYOfewJtpfJzgCmMu1476TdN3eOk3I7vol0fvDvAAtbShbt9YkMR9PKqWHuHapXNeWdMFkw==
   dependencies:
     "@appland/models" "^2.2.0"
     "@appland/openapi" "^1.4.3"
