@@ -1,5 +1,12 @@
 AppMap Plugin Changelog
 
+## [0.35.0](https://github.com/getappmap/appmap-intellij-plugin/compare/v0.34.1...v0.35.0) (2023-05-12)
+
+
+### Features
+
+-  expand packages in sequence diagrams ([c39ba31]())-  remove not ready to sign-in toggle ([fed31e8]())
+
 ## [0.34.1](https://github.com/getappmap/appmap-intellij-plugin/compare/v0.34.0...v0.34.1) (2023-05-06)
 
 
