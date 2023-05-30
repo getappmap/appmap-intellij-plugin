@@ -28,7 +28,7 @@ import com.intellij.util.concurrency.AppExecutorUtil;
 import com.intellij.util.concurrency.annotations.RequiresReadLock;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.jetbrains.concurrency.CancellablePromise;
+import org.jetbrains.concurrency.Promise;
 
 import javax.annotation.concurrent.GuardedBy;
 import java.util.*;
@@ -203,12 +203,25 @@ public class FindingsManager implements ProblemsProvider {
         }
     }
 
-    public @NotNull CancellablePromise<Void> reloadAsync() {
-        return ReadAction.nonBlocking(this::doReload)
+    public Promise<Collection<VirtualFile>> reloadAsync() {
+        // the non-blocking ReadAction must not have side effects, because it may be executed multiple times
+        return ReadAction.nonBlocking(this::findFindingsFiles)
                 .inSmartMode(project)
                 .expireWith(this)
-                .coalesceBy(this)
-                .submit(AppExecutorUtil.getAppExecutorService());
+                .coalesceBy(getClass(), project)
+                .submit(AppExecutorUtil.getAppExecutorService())
+                .then(findingFiles -> {
+                    assert !ApplicationManager.getApplication().isDispatchThread();
+
+                    if (!project.isDisposed()) {
+                        clearAndNotify();
+                        for (var findingFile : findingFiles) {
+                            addFindingsFile(findingFile);
+                        }
+                        project.getMessageBus().syncPublisher(ScannerFindingsListener.TOPIC).afterFindingsReloaded();
+                    }
+                    return findingFiles;
+                });
     }
 
     public void addFindingsFile(@NotNull VirtualFile findingsFile) {
@@ -260,16 +273,6 @@ public class FindingsManager implements ProblemsProvider {
             sourceMappingOther.clear();
             problemsOther.clear();
         }
-    }
-
-    private void doReload() {
-        clearAndNotify();
-
-        for (var findingFile : findFindingsFiles()) {
-            addFindingsFile(findingFile);
-        }
-
-        project.getMessageBus().syncPublisher(ScannerFindingsListener.TOPIC).afterFindingsReloaded();
     }
 
     private void clearAndNotify() {
