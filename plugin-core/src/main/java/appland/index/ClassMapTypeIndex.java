@@ -2,6 +2,7 @@ package appland.index;
 
 import appland.files.AppMapFiles;
 import com.intellij.json.JsonFileType;
+import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.project.DumbService;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.text.StringUtil;
@@ -171,22 +172,27 @@ public class ClassMapTypeIndex extends FileBasedIndexExtension<ClassMapItemType,
     private static class ClassMapItemIndexer implements DataIndexer<ClassMapItemType, List<ClassMapItem>, FileContent> {
         @Override
         public @NotNull Map<ClassMapItemType, List<ClassMapItem>> map(@NotNull FileContent inputData) {
-            var result = new EnumMap<ClassMapItemType, List<ClassMapItem>>(ClassMapItemType.class);
+            try {
+                var result = new EnumMap<ClassMapItemType, List<ClassMapItem>>(ClassMapItemType.class);
 
-            new StreamingClassMapIterator() {
-                @Override
-                protected void onItem(@NotNull ClassMapItemType type,
-                                      @Nullable String parentId,
-                                      @NotNull String id,
-                                      @NotNull String name,
-                                      @Nullable String location,
-                                      int level) {
-                    var list = result.computeIfAbsent(type, ignored -> new LinkedList<>());
-                    list.add(new ClassMapItem(StringUtil.nullize(parentId), id, name, location));
-                }
-            }.parse(inputData.getContentAsText());
+                new StreamingClassMapIterator() {
+                    @Override
+                    protected void onItem(@NotNull ClassMapItemType type,
+                                          @Nullable String parentId,
+                                          @NotNull String id,
+                                          @NotNull String name,
+                                          @Nullable String location,
+                                          int level) {
+                        var list = result.computeIfAbsent(type, ignored -> new LinkedList<>());
+                        list.add(new ClassMapItem(StringUtil.nullize(parentId), id, name, location));
+                    }
+                }.parse(inputData.getContentAsText());
 
-            return result;
+                return result;
+            } catch (Exception e) {
+                Logger.getInstance(ClassMapTypeIndex.class).warn("error indexing class map items", e);
+                return Collections.emptyMap();
+            }
         }
     }
 }

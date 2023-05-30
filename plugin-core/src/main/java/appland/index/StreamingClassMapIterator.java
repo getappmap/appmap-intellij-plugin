@@ -101,33 +101,41 @@ abstract class StreamingClassMapIterator {
 
         if (name != null && typeName != null) {
             var type = ClassMapItemType.findByName(typeName);
-            var separator = findItemSeparator(parentType, type, isStatic);
-            var parentIdWithType = StringUtil.isEmpty(parentId)
-                    ? parentType.getName()
-                    : parentType.getName() + ":" + parentId;
+            if (type != null) {
+                var separator = findItemSeparator(parentType, type, isStatic);
+                var parentIdWithType = StringUtil.isEmpty(parentId)
+                        ? parentType.getName()
+                        : parentType.getName() + ":" + parentId;
 
-            // Some code object entries have a path-delimited package name,
-            // but we want each package name token to be its own object.
-            String itemPath;
-            var childLevel = level;
-            if (type == ClassMapItemType.Package) {
-                itemPath = parentId;
-                for (var parentName : StringUtil.split(name, type.getSeparator())) {
-                    itemPath = joinPath(type.getSeparator(), itemPath, parentName);
+                // Some code object entries have a path-delimited package name,
+                // but we want each package name token to be its own object.
+                String itemPath;
+                var childLevel = level;
+                if (type == ClassMapItemType.Package) {
+                    itemPath = parentId;
+                    for (var parentName : StringUtil.split(name, type.getSeparator())) {
+                        itemPath = joinPath(type.getSeparator(), itemPath, parentName);
+                        onItem(type, parentIdWithType, typeName + ":" + itemPath, name, location, childLevel);
+                        childLevel++;
+                    }
+                } else {
+                    itemPath = joinPath(separator, parentId, name);
                     onItem(type, parentIdWithType, typeName + ":" + itemPath, name, location, childLevel);
                     childLevel++;
                 }
-            } else {
-                itemPath = joinPath(separator, parentId, name);
-                onItem(type, parentIdWithType, typeName + ":" + itemPath, name, location, childLevel);
-                childLevel++;
-            }
 
-            if (children != null) {
-                parseArray(children, childLevel, itemPath, type);
+                if (children != null) {
+                    parseArray(children, childLevel, itemPath, type);
+                    children = null;
+                }
             }
         } else {
             LOG.debug("Incomplete item found: " + json);
+        }
+
+        // happens for unknown typeName values, for example
+        if (children != null) {
+            children.close();
         }
 
         json.endObject();

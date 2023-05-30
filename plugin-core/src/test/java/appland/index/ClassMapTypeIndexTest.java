@@ -40,6 +40,16 @@ public class ClassMapTypeIndexTest extends AppMapBaseTest {
     }
 
     @Test
+    public void unexpectedClassMapType() {
+        // use fixture dir, because the index only analyzes files with name classMap.json
+        myFixture.copyDirectoryToProject("classMaps/unexpectedClassMapType", "root");
+
+        // items must still be found even if one of the items has an unknown class map type
+        assertSize(1, ClassMapTypeIndex.findItems(getProject(), ClassMapItemType.Database));
+        assertSize(1, ClassMapTypeIndex.findItems(getProject(), ClassMapItemType.HTTP));
+    }
+
+    @Test
     public void duplicateItems() {
         // use fixture dir, because the index only analyzes files with name classMap.json
         myFixture.copyDirectoryToProject("classMaps/projectDuplicateIds", "root");
