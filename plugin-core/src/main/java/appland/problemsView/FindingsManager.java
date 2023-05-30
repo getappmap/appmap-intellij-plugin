@@ -1,6 +1,7 @@
 package appland.problemsView;
 
 import appland.index.AppMapFindingsUtil;
+import appland.index.AppMapSearchScopes;
 import appland.problemsView.listener.ScannerFindingsListener;
 import appland.problemsView.model.FindingsDomainCount;
 import appland.problemsView.model.FindingsFileData;
@@ -23,7 +24,6 @@ import com.intellij.openapi.roots.ProjectRootManager;
 import com.intellij.openapi.vfs.VfsUtilCore;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.search.FilenameIndex;
-import com.intellij.psi.search.GlobalSearchScope;
 import com.intellij.util.concurrency.AppExecutorUtil;
 import com.intellij.util.concurrency.annotations.RequiresReadLock;
 import org.jetbrains.annotations.NotNull;
@@ -365,8 +365,7 @@ public class FindingsManager implements ProblemsProvider {
 
     @RequiresReadLock
     private @NotNull Collection<VirtualFile> findFindingsFiles() {
-        // only "everything" seems to contain our appmap-findings.json files in excluded parent folders
-        var scope = GlobalSearchScope.everythingScope(project);
+        var scope = AppMapSearchScopes.projectFilesWithExcluded(project);
         return FilenameIndex.getVirtualFilesByName(project, AppMapFindingsUtil.FINDINGS_FILE_NAME, true, scope);
     }
 

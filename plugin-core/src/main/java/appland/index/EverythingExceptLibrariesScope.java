@@ -10,7 +10,7 @@ import org.jetbrains.annotations.NotNull;
  * We're using everythingScope because it contains excluded files, which are needed for the AppMap index data,
  * but it's also including libraries, and more unrelated files.
  */
-class EverythingExceptLibrariesScope extends DelegatingGlobalSearchScope {
+final class EverythingExceptLibrariesScope extends DelegatingGlobalSearchScope {
     EverythingExceptLibrariesScope(@NotNull Project project) {
         super(GlobalSearchScope.everythingScope(project));
     }

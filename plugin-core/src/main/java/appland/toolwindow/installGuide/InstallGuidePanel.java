@@ -4,6 +4,7 @@ import appland.config.AppMapConfigFileListener;
 import appland.files.AppMapFileChangeListener;
 import appland.files.AppMapFiles;
 import appland.index.AppMapMetadataIndex;
+import appland.index.AppMapSearchScopes;
 import appland.installGuide.InstallGuideViewPage;
 import appland.problemsView.FindingsManager;
 import appland.problemsView.listener.ScannerFindingsListener;
@@ -21,7 +22,7 @@ import com.intellij.openapi.project.DumbService;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.Disposer;
 import com.intellij.psi.search.FilenameIndex;
-import com.intellij.psi.search.GlobalSearchScope;
+import com.intellij.util.CommonProcessors;
 import com.intellij.util.concurrency.AppExecutorUtil;
 import org.jetbrains.annotations.NotNull;
 
@@ -168,9 +169,9 @@ public class InstallGuidePanel extends AppMapContentPanel implements Disposable 
      */
     private static void updateInstallAgentLabel(@NotNull Project project, @NotNull StatusLabel label) {
         findIndexedStatus(project, label, () -> {
-            return FilenameIndex.processFilesByName(AppMapFiles.APPMAP_YML, false, file -> {
-                return false;
-            }, GlobalSearchScope.everythingScope(project), project);
+            var processor = CommonProcessors.alwaysFalse();
+            var scope = AppMapSearchScopes.projectFilesWithExcluded(project);
+            return FilenameIndex.processFilesByName(AppMapFiles.APPMAP_YML, false, processor, scope, project);
         });
     }
 
@@ -180,7 +181,7 @@ public class InstallGuidePanel extends AppMapContentPanel implements Disposable 
     private static void updateRecordAppMapsLabel(@NotNull Project project, @NotNull StatusLabel label) {
         findIndexedStatus(project, label, () -> {
             var found = new AtomicBoolean(false);
-            AppMapMetadataIndex.processAppMaps(project, GlobalSearchScope.everythingScope(project), (file, appmap) -> {
+            AppMapMetadataIndex.processAppMaps(project, AppMapSearchScopes.appMapsWithExcluded(project), (file, appmap) -> {
                 found.set(true);
                 return false;
             });

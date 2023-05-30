@@ -9,7 +9,6 @@ import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.openapi.vfs.VfsUtil;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.openapi.vfs.VirtualFileSet;
-import com.intellij.psi.search.GlobalSearchScope;
 import com.intellij.util.indexing.*;
 import com.intellij.util.io.DataExternalizer;
 import com.intellij.util.io.IOUtil;
@@ -120,7 +119,7 @@ public class ClassMapTypeIndex extends FileBasedIndexExtension<ClassMapItemType,
             return;
         }
 
-        var scope = GlobalSearchScope.getScopeRestrictedByFileTypes(new EverythingExceptLibrariesScope(project), JsonFileType.INSTANCE);
+        var scope = AppMapSearchScopes.appMapsWithExcluded(project);
         FileBasedIndex.getInstance().processValues(INDEX_ID, type, null, processor, scope);
     }
 
