@@ -91,11 +91,7 @@ public enum ClassMapItemType {
         throw new IllegalStateException("Unexpected id: " + id);
     }
 
-    public static @NotNull ClassMapItemType findByName(@NotNull String name) {
-        var itemType = nameToTypeMap.get(name);
-        if (itemType != null) {
-            return itemType;
-        }
-        throw new IllegalStateException("Unexpected name: " + name);
+    public static @Nullable ClassMapItemType findByName(@NotNull String name) {
+        return nameToTypeMap.get(name);
     }
 }
