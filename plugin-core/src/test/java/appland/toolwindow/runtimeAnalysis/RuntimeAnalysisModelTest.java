@@ -107,6 +107,6 @@ public class RuntimeAnalysisModelTest extends AppMapBaseTest {
         ScannerFilesAsyncListener.disableForTests(() -> {
             return WriteAction.computeAndWait(() -> myFixture.copyDirectoryToProject(directoryPath, "root"));
         });
-        FindingsManager.getInstance(getProject()).reloadAsync().get(30, TimeUnit.SECONDS);
+        FindingsManager.getInstance(getProject()).reloadAsync().blockingGet(30, TimeUnit.SECONDS);
     }
 }
