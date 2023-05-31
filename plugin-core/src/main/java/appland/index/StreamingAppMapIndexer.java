@@ -85,7 +85,7 @@ class StreamingAppMapIndexer extends SingleEntryIndexer<AppMapMetadata> {
         var requestCount = request_query_functions[0];
         var queryCount = request_query_functions[1];
         var functionsCount = request_query_functions[2];
-        return new AppMapMetadata(name, sourceLocation, inputData.getFile().getPath(), requestCount, queryCount, functionsCount);
+        return new AppMapMetadata(name, inputData.getFile().getPath(), requestCount, queryCount, functionsCount);
     }
 
     private @Nullable Pair<@NotNull String, @Nullable String> readMetadataNameAndSourceLocation(@NotNull JsonReaderEx json) {

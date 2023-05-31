@@ -16,9 +16,9 @@ public class AppMapMetadataIndexTest extends AppMapBaseTest {
         assertEquals(3, appMaps.size());
         appMaps.sort(Comparator.comparing(AppMapMetadata::getName));
 
-        assertEquals(new AppMapMetadata("a", "/src/a.appmap.json", "/src/a.java"), appMaps.get(0));
-        assertEquals(new AppMapMetadata("b", "/src/b.appmap.json", "/src/b.java"), appMaps.get(1));
-        assertEquals(new AppMapMetadata("c", "/src/c.appmap.json", "/src/c.java"), appMaps.get(2));
+        assertEquals(new AppMapMetadata("a", "/src/a.appmap.json"), appMaps.get(0));
+        assertEquals(new AppMapMetadata("b", "/src/b.appmap.json"), appMaps.get(1));
+        assertEquals(new AppMapMetadata("c", "/src/c.appmap.json"), appMaps.get(2));
 
         myFixture.configureByText("d.appmap.json", createAppMapMetadataJSON("d"));
         assertEquals(4, AppMapMetadataIndex.findAppMaps(getProject(), null).size());
