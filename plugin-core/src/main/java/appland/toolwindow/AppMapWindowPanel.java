@@ -246,14 +246,17 @@ public class AppMapWindowPanel extends SimpleToolWindowPanel implements DataProv
         return new CollapsiblePanel(AppMapBundle.get("toolWindow.appmap.documentation"), false, new AppMapContentPanel(true) {
             @Override
             protected void setupPanel() {
+                /* can be generated from vscode links with:
+                 * $ curl -L https://github.com/getappmap/vscode-appland/raw/master/src/tree/links.ts |
+                 *   sed -n '/label:/ {s/.*: /add(new UrlLabel(/; s/,\n/, /; N; s/\n *link: / /; s/,$/\)\);/; y/'"'"'/"/; p }'
+                 */
                 add(new UrlLabel("Quickstart", "https://appmap.io/docs/quickstart"));
                 add(new UrlLabel("AppMap overview", "https://appmap.io/docs/appmap-overview"));
                 add(new UrlLabel("How to use AppMap diagrams", "https://appmap.io/docs/how-to-use-appmap-diagrams"));
+                add(new UrlLabel("Sequence diagrams", "https://appmap.io/docs/diagrams/sequence-diagrams.html"));
                 add(new UrlLabel("Reference", "https://appmap.io/docs/reference"));
-                add(new UrlLabel("Troubleshooting", "https://appmap.io/docs/troubleshooting"));
                 add(new UrlLabel("Recording methods", "https://appmap.io/docs/recording-methods"));
                 add(new UrlLabel("Community", "https://appmap.io/docs/community"));
-                add(new UrlLabel("FAQ", "https://appmap.io/docs/faq"));
             }
         }, false);
     }
