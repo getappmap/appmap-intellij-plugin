@@ -35,10 +35,6 @@ public class AppMapMetadataIndex extends SingleEntryFileBasedIndexExtension<AppM
         public void save(@NotNull DataOutput out, @NotNull AppMapMetadata value) throws IOException {
             IOUtil.writeUTF(out, value.getName());
             IOUtil.writeUTF(out, value.getSystemIndependentFilepath());
-            out.writeBoolean(value.getSourceLocation() != null);
-            if (value.getSourceLocation() != null) {
-                IOUtil.writeUTF(out, value.getSourceLocation());
-            }
             out.writeInt(value.getRequestCount());
             out.writeInt(value.getQueryCount());
             out.writeInt(value.getFunctionsCount());
@@ -48,12 +44,10 @@ public class AppMapMetadataIndex extends SingleEntryFileBasedIndexExtension<AppM
         public @NotNull AppMapMetadata read(@NotNull DataInput in) throws IOException {
             var name = IOUtil.readUTF(in);
             var filepath = IOUtil.readUTF(in);
-            var hasSourceLocation = in.readBoolean();
-            var sourceLocation = hasSourceLocation ? IOUtil.readUTF(in) : null;
             var requestCount = in.readInt();
             var queryCount = in.readInt();
             var functionsCount = in.readInt();
-            return new AppMapMetadata(name, sourceLocation, filepath, requestCount, queryCount, functionsCount);
+            return new AppMapMetadata(name, filepath, requestCount, queryCount, functionsCount);
         }
     };
 
