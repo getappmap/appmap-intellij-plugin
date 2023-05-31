@@ -84,8 +84,10 @@ public class AppMapFileEditor extends WebviewEditor<JsonObject> {
             // retrieve stats from CLI and attach to the parsed AppMap
             try {
                 var appMapStats = AppMapFiles.loadAppMapStats(file);
-                var stats = GsonUtils.singlePropertyObject("functions", gson.fromJson(appMapStats, JsonArray.class));
-                appMapJson.add("stats", stats);
+                if (appMapStats != null) {
+                    var stats = GsonUtils.singlePropertyObject("functions", gson.fromJson(appMapStats, JsonArray.class));
+                    appMapJson.add("stats", stats);
+                }
             } catch (Exception e) {
                 LOG.debug("error parsing AppMap stats", e);
             }
