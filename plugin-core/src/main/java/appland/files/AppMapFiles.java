@@ -38,9 +38,11 @@ public final class AppMapFiles {
     // prune size parameter passed to the appmap CLI tool
     public static final String APPMAP_CLI_MAX_PRUNE_SIZE = "10mb";
     // Files larger than 200mb are considered giant and can't be pruned or opened
-    public static int SIZE_THRESHOLD_GIANT_BYTES = 200 * 1024 * 1024;
+    public static final int SIZE_THRESHOLD_GIANT_BYTES = 200 * 1024 * 1024;
     // Files larger than 10mb and smaller than 200mb are considered large and have to be pruned
-    public static int SIZE_THRESHOLD_LARGE_BYTES = 10 * 1024 * 1024;
+    public static final int SIZE_THRESHOLD_LARGE_BYTES = 10 * 1024 * 1024;
+    // Maximum time to wait for the CLI stats command to finish
+    private static final int STATS_COMMAND_TIMEOUT_MILLIS = 20_000;
 
     private AppMapFiles() {
     }
@@ -228,6 +230,13 @@ public final class AppMapFiles {
         return loadFileContent(file);
     }
 
+    /**
+     * Executes the stats command with the AppMap CLI and returns STDOUT if the command executed successfully.
+     * The maximum runtime is limited to {@link #STATS_COMMAND_TIMEOUT_MILLIS} milliseconds.
+     *
+     * @param file The file to pass to the stats command
+     * @return STDOUT of the process if it executed successfully
+     */
     @RequiresBackgroundThread
     public static @Nullable String loadAppMapStats(@NotNull VirtualFile file) {
         var command = AppLandCommandLineService.getInstance().createAppMapStatsCommand(file);
@@ -236,7 +245,7 @@ public final class AppMapFiles {
         }
 
         try {
-            var processOutput = ExecUtil.execAndGetOutput(command);
+            var processOutput = ExecUtil.execAndGetOutput(command, STATS_COMMAND_TIMEOUT_MILLIS);
             return getOutputOrLogStatus(command, processOutput);
         } catch (ExecutionException e) {
             LOG.debug("error retrieving AppMap file stats: " + file.getPath(), e);
@@ -245,7 +254,7 @@ public final class AppMapFiles {
     }
 
     private static @Nullable String getOutputOrLogStatus(@NotNull GeneralCommandLine command, @NotNull ProcessOutput processOutput) {
-        if (processOutput.getExitCode() == 0) {
+        if (processOutput.getExitCode() == 0 && !processOutput.isTimeout()) {
             return processOutput.getStdout();
         }
 
