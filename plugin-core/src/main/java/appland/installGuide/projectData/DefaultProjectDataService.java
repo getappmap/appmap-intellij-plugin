@@ -86,7 +86,7 @@ public class DefaultProjectDataService implements ProjectDataService {
         var nioPath = root.getFileSystem().getNioPath(root);
         var path = nioPath != null ? nioPath.toString() : root.getPath();
 
-        var allAppMaps = AppMapMetadataIndex.findAppMaps(project, null);
+        var allAppMaps = AppMapMetadataService.getInstance(project).findAppMaps();
         var bestAppMaps = allAppMaps
                 .stream()
                 .filter(AppMapMetadata::hasAnyCount)

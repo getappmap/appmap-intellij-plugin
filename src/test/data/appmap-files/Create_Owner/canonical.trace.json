@@ -1,0 +1,111 @@
+[
+  {
+    "kind": "http_server_request",
+    "route": "POST /owners/new",
+    "parameter_names": [
+      "firstName",
+      "lastName",
+      "address",
+      "city",
+      "telephone"
+    ],
+    "status_code": 302,
+    "children": [
+      {
+        "kind": "function",
+        "function": "org/springframework/samples/petclinic/owner/OwnerController#setAllowedFields",
+        "labels": []
+      },
+      {
+        "kind": "function",
+        "function": "org/springframework/samples/petclinic/owner/Owner#getAddress",
+        "labels": []
+      },
+      {
+        "kind": "function",
+        "function": "org/springframework/samples/petclinic/owner/Owner#setAddress",
+        "labels": []
+      },
+      {
+        "kind": "function",
+        "function": "org/springframework/samples/petclinic/owner/Owner#getCity",
+        "labels": []
+      },
+      {
+        "kind": "function",
+        "function": "org/springframework/samples/petclinic/owner/Owner#setCity",
+        "labels": []
+      },
+      {
+        "kind": "function",
+        "function": "org/springframework/samples/petclinic/model/Person#getFirstName",
+        "labels": []
+      },
+      {
+        "kind": "function",
+        "function": "org/springframework/samples/petclinic/model/Person#setFirstName",
+        "labels": []
+      },
+      {
+        "kind": "function",
+        "function": "org/springframework/samples/petclinic/model/Person#getLastName",
+        "labels": []
+      },
+      {
+        "kind": "function",
+        "function": "org/springframework/samples/petclinic/model/Person#setLastName",
+        "labels": []
+      },
+      {
+        "kind": "function",
+        "function": "org/springframework/samples/petclinic/owner/Owner#getTelephone",
+        "labels": []
+      },
+      {
+        "kind": "function",
+        "function": "org/springframework/samples/petclinic/owner/Owner#setTelephone",
+        "labels": []
+      },
+      {
+        "kind": "function",
+        "function": "org/springframework/samples/petclinic/owner/OwnerController#processCreationForm",
+        "labels": [],
+        "children": [
+          {
+            "kind": "function",
+            "function": "org/springframework/samples/petclinic/model/BaseEntity#getId",
+            "labels": []
+          },
+          {
+            "kind": "sql",
+            "sql": {
+              "normalized_query": "insert into owners (id, first_name, last_name, address, city, telephone) values (?, ?, ?, ?, ?, ?)"
+            },
+            "analyzed_query": {
+              "actions": [
+                "insert"
+              ],
+              "tables": [
+                "owners"
+              ],
+              "columns": [
+                "address",
+                "city",
+                "first_name",
+                "id",
+                "last_name",
+                "telephone"
+              ],
+              "joinCount": 0
+            }
+          },
+          {
+            "kind": "function",
+            "function": "org/springframework/samples/petclinic/model/BaseEntity#getId",
+            "labels": []
+          }
+        ]
+      }
+    ]
+  }
+]

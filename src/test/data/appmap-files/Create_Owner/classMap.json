@@ -1,0 +1,160 @@
+[
+  {
+    "children": [
+      {
+        "children": [
+          {
+            "children": [
+              {
+                "children": [
+                  {
+                    "children": [
+                      {
+                        "children": [
+                          {
+                            "name": "getCity",
+                            "type": "function",
+                            "static": false,
+                            "location": "org/springframework/samples/petclinic/owner/Owner.java:74"
+                          },
+                          {
+                            "name": "setCity",
+                            "type": "function",
+                            "static": false,
+                            "location": "org/springframework/samples/petclinic/owner/Owner.java:78"
+                          },
+                          {
+                            "name": "getAddress",
+                            "type": "function",
+                            "static": false,
+                            "location": "org/springframework/samples/petclinic/owner/Owner.java:66"
+                          },
+                          {
+                            "name": "getTelephone",
+                            "type": "function",
+                            "static": false,
+                            "location": "org/springframework/samples/petclinic/owner/Owner.java:82"
+                          },
+                          {
+                            "name": "setAddress",
+                            "type": "function",
+                            "static": false,
+                            "location": "org/springframework/samples/petclinic/owner/Owner.java:70"
+                          },
+                          {
+                            "name": "setTelephone",
+                            "type": "function",
+                            "static": false,
+                            "location": "org/springframework/samples/petclinic/owner/Owner.java:86"
+                          }
+                        ],
+                        "name": "Owner",
+                        "type": "class"
+                      },
+                      {
+                        "children": [
+                          {
+                            "name": "setAllowedFields",
+                            "type": "function",
+                            "static": false,
+                            "location": "org/springframework/samples/petclinic/owner/OwnerController.java:55"
+                          },
+                          {
+                            "name": "processCreationForm",
+                            "type": "function",
+                            "static": false,
+                            "location": "org/springframework/samples/petclinic/owner/OwnerController.java:67"
+                          }
+                        ],
+                        "name": "OwnerController",
+                        "type": "class"
+                      }
+                    ],
+                    "name": "owner",
+                    "type": "package"
+                  },
+                  {
+                    "children": [
+                      {
+                        "children": [
+                          {
+                            "name": "setFirstName",
+                            "type": "function",
+                            "static": false,
+                            "location": "org/springframework/samples/petclinic/model/Person.java:43"
+                          },
+                          {
+                            "name": "getFirstName",
+                            "type": "function",
+                            "static": false,
+                            "location": "org/springframework/samples/petclinic/model/Person.java:39"
+                          },
+                          {
+                            "name": "getLastName",
+                            "type": "function",
+                            "static": false,
+                            "location": "org/springframework/samples/petclinic/model/Person.java:47"
+                          },
+                          {
+                            "name": "setLastName",
+                            "type": "function",
+                            "static": false,
+                            "location": "org/springframework/samples/petclinic/model/Person.java:51"
+                          }
+                        ],
+                        "name": "Person",
+                        "type": "class"
+                      },
+                      {
+                        "children": [
+                          {
+                            "name": "getId",
+                            "type": "function",
+                            "static": false,
+                            "location": "org/springframework/samples/petclinic/model/BaseEntity.java:40"
+                          }
+                        ],
+                        "name": "BaseEntity",
+                        "type": "class"
+                      }
+                    ],
+                    "name": "model",
+                    "type": "package"
+                  }
+                ],
+                "name": "petclinic",
+                "type": "package"
+              }
+            ],
+            "name": "samples",
+            "type": "package"
+          }
+        ],
+        "name": "springframework",
+        "type": "package"
+      }
+    ],
+    "name": "org",
+    "type": "package"
+  },
+  {
+    "type": "http",
+    "name": "HTTP server requests",
+    "children": [
+      {
+        "type": "route",
+        "name": "POST /owners/new"
+      }
+    ]
+  },
+  {
+    "type": "database",
+    "name": "Database",
+    "children": [
+      {
+        "type": "query",
+        "name": "insert into owners (id, first_name, last_name, address, city, telephone) values (null, ?, ?, ?, ?, ?)"
+      }
+    ]
+  }
+]

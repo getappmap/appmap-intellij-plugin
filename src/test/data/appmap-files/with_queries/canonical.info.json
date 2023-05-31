@@ -1,0 +1,106 @@
+[
+  {
+    "kind": "http_server_request",
+    "route": "GET /owners/:ownerId",
+    "parameter_names": [
+      "ownerId"
+    ],
+    "status_code": 200,
+    "children": [
+      {
+        "kind": "sql",
+        "sql": {
+          "analyzed_query": {
+            "actions": [
+              "select"
+            ],
+            "tables": [
+              "owners",
+              "pets"
+            ],
+            "columns": [
+              "owner0_.address",
+              "owner0_.city",
+              "owner0_.first_name",
+              "owner0_.id",
+              "owner0_.last_name",
+              "owner0_.telephone",
+              "pets1_.birth_date",
+              "pets1_.id",
+              "pets1_.name",
+              "pets1_.owner_id",
+              "pets1_.type_id"
+            ],
+            "joinCount": 1
+          }
+        }
+      },
+      {
+        "kind": "sql",
+        "sql": {
+          "analyzed_query": {
+            "actions": [
+              "select"
+            ],
+            "tables": [
+              "types"
+            ],
+            "columns": [
+              "pettype0_.id",
+              "pettype0_.name"
+            ],
+            "joinCount": 0
+          }
+        }
+      },
+      {
+        "kind": "sql",
+        "sql": {
+          "analyzed_query": {
+            "actions": [
+              "select"
+            ],
+            "tables": [
+              "visits"
+            ],
+            "columns": [
+              "visits0_.description",
+              "visits0_.id",
+              "visits0_.pet_id",
+              "visits0_.visit_date"
+            ],
+            "joinCount": 0
+          }
+        }
+      },
+      {
+        "kind": "sql",
+        "sql": {
+          "analyzed_query": {
+            "actions": [
+              "select"
+            ],
+            "tables": [
+              "owners",
+              "pets"
+            ],
+            "columns": [
+              "owner0_.address",
+              "owner0_.city",
+              "owner0_.first_name",
+              "owner0_.id",
+              "owner0_.last_name",
+              "owner0_.telephone",
+              "pets1_.birth_date",
+              "pets1_.id",
+              "pets1_.name",
+              "pets1_.owner_id",
+              "pets1_.type_id"
+            ],
+            "joinCount": 1
+          }
+        }
+      }
+    ]
+  }
+]

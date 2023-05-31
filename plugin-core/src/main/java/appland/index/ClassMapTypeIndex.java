@@ -72,13 +72,19 @@ public class ClassMapTypeIndex extends FileBasedIndexExtension<ClassMapItemType,
         }
     };
 
+    /**
+     * @param project Current project
+     * @param type    Requested type of ClassMapItem
+     * @param id      Requested ID of a ClassMapItem
+     * @return Files containing a ClassMapItem of given type and id
+     */
     public static VirtualFileSet findContainingAppMapFiles(@NotNull Project project, @NotNull ClassMapItemType type, @NotNull String id) {
         var files = VfsUtil.createCompactVirtualFileSet();
 
         processItems(project, type, (file, items) -> {
             for (var item : items) {
                 if (id.equals(item.getId())) {
-                    var appMapFile = AppMapFiles.findAppMapSourceFile(file);
+                    var appMapFile = AppMapFiles.findAppMapFileByMetadataFile(file);
                     if (appMapFile != null) {
                         files.add(appMapFile);
                     }
@@ -88,6 +94,24 @@ public class ClassMapTypeIndex extends FileBasedIndexExtension<ClassMapItemType,
         });
 
         return files;
+    }
+
+    /**
+     * @param project                 Current project
+     * @param appMapMetadataDirectory Metadata directory of an AppMap
+     * @param type                    Requested type of ClassMapItem
+     * @return List of {@code ClassMapItem}, which have the given type
+     */
+    public static List<ClassMapItem> findItemsByAppMapDirectory(@NotNull Project project,
+                                                                @NotNull VirtualFile appMapMetadataDirectory,
+                                                                @NotNull ClassMapItemType type) {
+        var file = appMapMetadataDirectory.findChild(ClassMapUtil.CLASS_MAP_FILE);
+        if (file == null) {
+            return Collections.emptyList();
+        }
+
+        var fileData = FileBasedIndex.getInstance().getFileData(INDEX_ID, file, project);
+        return fileData.getOrDefault(type, Collections.emptyList());
     }
 
     /**
@@ -102,7 +126,7 @@ public class ClassMapTypeIndex extends FileBasedIndexExtension<ClassMapItemType,
         processItems(project, type, (file, classMapItems) -> {
             for (var item : classMapItems) {
                 var appMapFiles = items.computeIfAbsent(item, classMapItem -> new LinkedList<>());
-                var appMapFile = AppMapFiles.findAppMapSourceFile(file);
+                var appMapFile = AppMapFiles.findAppMapFileByMetadataFile(file);
                 if (appMapFile != null) {
                     appMapFiles.add(appMapFile);
                 }

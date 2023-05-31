@@ -1,0 +1,6 @@
+[
+  "org/springframework/samples/petclinic/model/BaseEntity",
+  "org/springframework/samples/petclinic/model/Person",
+  "org/springframework/samples/petclinic/owner/Owner",
+  "org/springframework/samples/petclinic/owner/OwnerController"
+]

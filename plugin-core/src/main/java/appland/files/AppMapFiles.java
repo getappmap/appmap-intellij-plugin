@@ -137,14 +137,26 @@ public final class AppMapFiles {
     }
 
     /**
-     * @param appMapDataFile Source file located in the appmap directory created by indexer or scanner.
-     * @return The appmap.json file, which is the source of the data in the appmap directory
+     * @param appMapMetadataFile Source file located in the appmap directory created by indexer or scanner.
+     * @return The .appmap.json file, which is the source of the given metadata file
      */
-    public static @Nullable VirtualFile findAppMapSourceFile(@NotNull VirtualFile appMapDataFile) {
-        var parent = appMapDataFile.getParent();
-        return parent == null
-                ? null
-                : parent.findFileByRelativePath("../" + FileUtil.getNameWithoutExtension(parent.getName()) + ".appmap.json");
+    @RequiresReadLock
+    public static @Nullable VirtualFile findAppMapFileByMetadataFile(@NotNull VirtualFile appMapMetadataFile) {
+        return findAppMapByMetadataDirectory(appMapMetadataFile.getParent());
+    }
+
+    /**
+     * @param appMapMetadataDirectory Directory containing AppMap metadata files created by the AppMap CLI tools
+     * @return The .appmap.json file, which is the source of the metadata directory.
+     */
+    @RequiresReadLock
+    public static @Nullable VirtualFile findAppMapByMetadataDirectory(@Nullable VirtualFile appMapMetadataDirectory) {
+        if (appMapMetadataDirectory == null) {
+            return null;
+        }
+
+        var appMapFilePath = "../" + FileUtil.getNameWithoutExtension(appMapMetadataDirectory.getName()) + ".appmap.json";
+        return appMapMetadataDirectory.findFileByRelativePath(appMapFilePath);
     }
 
     /**
@@ -153,10 +165,18 @@ public final class AppMapFiles {
      */
     @RequiresReadLock
     public static @Nullable VirtualFile findRelatedFindingsFile(@NotNull VirtualFile appMapFile) {
-        var parent = appMapFile.getParent();
-        // name.appmap.json is mapped to name/appmap-findings.json
-        var findingsPath = String.format("%s/appmap-findings.json", StringUtil.trimEnd(appMapFile.getName(), ".appmap.json"));
-        return parent.findFileByRelativePath(findingsPath);
+        var directory = findAppMapMetadataDirectory(appMapFile);
+        return directory != null ? directory.findChild("appmap-findings.json") : null;
+    }
+
+    /**
+     * @param appMapFile An .appmap.json file
+     * @return Directory containing the metadata JSON files created by the AppMap CLI tools.
+     */
+    @RequiresReadLock
+    public static @Nullable VirtualFile findAppMapMetadataDirectory(@NotNull VirtualFile appMapFile) {
+        var directoryName = StringUtil.trimEnd(appMapFile.getName(), ".appmap.json");
+        return appMapFile.getParent().findFileByRelativePath(directoryName);
     }
 
     /**

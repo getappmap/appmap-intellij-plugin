@@ -1,0 +1,254 @@
+[
+  {
+    "kind": "http_server_request",
+    "route": "POST /admincp/",
+    "status_code": 302,
+    "children": [
+      {
+        "kind": "sql",
+        "sql": {
+          "analyzed_query": {
+            "actions": [
+              "update"
+            ],
+            "tables": [
+              "misago_users_user"
+            ],
+            "columns": [
+              "last_login",
+              "misago_users_user.id"
+            ],
+            "joinCount": 0
+          }
+        }
+      },
+      {
+        "kind": "sql",
+        "sql": {
+          "analyzed_query": {
+            "actions": [
+              "update"
+            ],
+            "tables": [
+              "misago_users_online"
+            ],
+            "columns": [
+              "last_click",
+              "misago_users_online.user_id"
+            ],
+            "joinCount": 0
+          }
+        }
+      },
+      {
+        "kind": "sql",
+        "sql": {
+          "analyzed_query": {
+            "actions": [
+              "update"
+            ],
+            "tables": [
+              "django_session"
+            ],
+            "columns": [
+              "django_session.session_key",
+              "expire_date",
+              "session_data"
+            ],
+            "joinCount": 0
+          }
+        }
+      }
+    ]
+  },
+  {
+    "kind": "http_server_request",
+    "route": "GET /admincp/",
+    "status_code": 200,
+    "children": [
+      {
+        "kind": "sql",
+        "sql": {
+          "analyzed_query": {
+            "actions": [
+              "update"
+            ],
+            "tables": [
+              "misago_users_online"
+            ],
+            "columns": [
+              "last_click",
+              "misago_users_online.user_id"
+            ],
+            "joinCount": 0
+          }
+        }
+      },
+      {
+        "kind": "sql",
+        "sql": {
+          "analyzed_query": {
+            "actions": [
+              "update"
+            ],
+            "tables": [
+              "django_session"
+            ],
+            "columns": [
+              "django_session.session_key",
+              "expire_date",
+              "session_data"
+            ],
+            "joinCount": 0
+          }
+        }
+      }
+    ]
+  },
+  {
+    "kind": "http_server_request",
+    "route": "POST /admincp/permissions/categories/new/",
+    "status_code": 302,
+    "children": [
+      {
+        "kind": "sql",
+        "sql": {
+          "analyzed_query": {
+            "actions": [
+              "insert"
+            ],
+            "tables": [
+              "misago_categories_categoryrole"
+            ],
+            "columns": [
+              "misago_categories_categoryrole.id",
+              "name",
+              "permissions",
+              "special_role"
+            ],
+            "joinCount": 0
+          }
+        }
+      },
+      {
+        "kind": "sql",
+        "sql": {
+          "analyzed_query": {
+            "actions": [
+              "update"
+            ],
+            "tables": [
+              "misago_users_online"
+            ],
+            "columns": [
+              "last_click",
+              "misago_users_online.user_id"
+            ],
+            "joinCount": 0
+          }
+        }
+      },
+      {
+        "kind": "sql",
+        "sql": {
+          "analyzed_query": {
+            "actions": [
+              "update"
+            ],
+            "tables": [
+              "django_session"
+            ],
+            "columns": [
+              "django_session.session_key",
+              "expire_date",
+              "session_data"
+            ],
+            "joinCount": 0
+          }
+        }
+      }
+    ]
+  },
+  {
+    "kind": "http_server_request",
+    "route": "POST /admincp/permissions/categories/edit/16/",
+    "status_code": 302,
+    "children": [
+      {
+        "kind": "sql",
+        "sql": {
+          "analyzed_query": {
+            "actions": [
+              "update"
+            ],
+            "tables": [
+              "misago_cache_cacheversion"
+            ],
+            "columns": [
+              "misago_cache_cacheversion.cache",
+              "version"
+            ],
+            "joinCount": 0
+          }
+        }
+      },
+      {
+        "kind": "sql",
+        "sql": {
+          "analyzed_query": {
+            "actions": [
+              "update"
+            ],
+            "tables": [
+              "misago_categories_categoryrole"
+            ],
+            "columns": [
+              "misago_categories_categoryrole.id",
+              "name",
+              "permissions",
+              "special_role"
+            ],
+            "joinCount": 0
+          }
+        }
+      },
+      {
+        "kind": "sql",
+        "sql": {
+          "analyzed_query": {
+            "actions": [
+              "update"
+            ],
+            "tables": [
+              "misago_users_online"
+            ],
+            "columns": [
+              "last_click",
+              "misago_users_online.user_id"
+            ],
+            "joinCount": 0
+          }
+        }
+      },
+      {
+        "kind": "sql",
+        "sql": {
+          "analyzed_query": {
+            "actions": [
+              "update"
+            ],
+            "tables": [
+              "django_session"
+            ],
+            "columns": [
+              "django_session.session_key",
+              "expire_date",
+              "session_data"
+            ],
+            "joinCount": 0
+          }
+        }
+      }
+    ]
+  }
+]

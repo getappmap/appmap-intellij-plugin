@@ -64,7 +64,7 @@ public final class FindingsUtil {
      * follows VSCode's "filterFinding"
      */
     private static @Nullable String findAppMapName(@NotNull ScannerProblem finding) {
-        var appMapFile = AppMapFiles.findAppMapSourceFile(finding.getFindingsFile());
+        var appMapFile = AppMapFiles.findAppMapFileByMetadataFile(finding.getFindingsFile());
         if (appMapFile == null) {
             return null;
         }
@@ -114,7 +114,7 @@ public final class FindingsUtil {
      * follows VSCode's "resolveAppMapUri"
      */
     private static @NotNull JsonElement createAppMapUriJson(@NotNull ScannerProblem finding) {
-        var appMapFile = AppMapFiles.findAppMapSourceFile(finding.getFindingsFile());
+        var appMapFile = AppMapFiles.findAppMapFileByMetadataFile(finding.getFindingsFile());
         if (appMapFile == null) {
             return JsonNull.INSTANCE;
         }

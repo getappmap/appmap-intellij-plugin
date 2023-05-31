@@ -1,0 +1,22 @@
+[
+  {
+    "route": "GET /admincp/",
+    "parameters": "()",
+    "status": 200
+  },
+  {
+    "route": "POST /admincp/",
+    "parameters": "()",
+    "status": 302
+  },
+  {
+    "route": "POST /admincp/permissions/categories/edit/16/",
+    "parameters": "()",
+    "status": 302
+  },
+  {
+    "route": "POST /admincp/permissions/categories/new/",
+    "parameters": "()",
+    "status": 302
+  }
+]

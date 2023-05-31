@@ -5,7 +5,11 @@ import appland.settings.AppMapApplicationSettings;
 import appland.settings.AppMapApplicationSettingsService;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.application.ReadAction;
+import com.intellij.openapi.application.WriteAction;
 import com.intellij.openapi.roots.ModuleRootModificationUtil;
+import com.intellij.openapi.util.ThrowableComputable;
+import com.intellij.openapi.util.text.StringUtil;
+import com.intellij.openapi.vfs.VfsUtil;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.testFramework.LightProjectDescriptor;
 import com.intellij.testFramework.fixtures.LightPlatformCodeInsightFixture4TestCase;
@@ -28,6 +32,45 @@ public abstract class AppMapBaseTest extends LightPlatformCodeInsightFixture4Tes
 
         // reset to default settings
         ApplicationManager.getApplication().getService(AppMapApplicationSettingsService.class).loadState(new AppMapApplicationSettings());
+    }
+
+    public @NotNull VirtualFile createAppMapWithIndexes(@NotNull String appMapName) throws Throwable {
+        return createAppMapWithIndexes(appMapName, 0, 0, 0);
+    }
+
+    public @NotNull VirtualFile createAppMapWithIndexes(@NotNull String appMapName, int requestCount, int queryCount, int functionCount) throws Throwable {
+        return WriteAction.computeAndWait((ThrowableComputable<VirtualFile, Throwable>) () -> {
+            // create empty .appmap.json files because we're not indexing it
+            var appMapFile = myFixture.createFile(appMapName + ".appmap.json", "");
+
+            // create name/metadata.json with a name property
+            var appMapDir = appMapFile.getParent().createChildDirectory(this, appMapName);
+            VfsUtil.saveText(appMapDir.createChildData(this, "metadata.json"), "{\"name\": \"" + appMapName + "\"}");
+
+            if (requestCount > 0) {
+                var json = "[" + StringUtil.trimEnd(StringUtil.repeat("{},", requestCount), ",") + "]";
+                VfsUtil.saveText(appMapDir.createChildData(this, "canonical.httpServerRequests.json"), json);
+            }
+
+            if (queryCount > 0) {
+                var json = "[" + StringUtil.trimEnd(StringUtil.repeat("{},", queryCount), ",") + "]";
+                VfsUtil.saveText(appMapDir.createChildData(this, "canonical.sqlNormalized.json"), json);
+            }
+
+            if (functionCount > 0) {
+                var json = new StringBuilder("[");
+                for (var i = 0; i < functionCount; i++) {
+                    json.append("{\"name\": \"function_").append(i).append("\", \"type\": \"function\"}");
+                    if (i < functionCount - 1) {
+                        json.append(",");
+                    }
+                }
+                json.append("]");
+                VfsUtil.saveText(appMapDir.createChildData(this, "classMap.json"), json.toString());
+            }
+
+            return appMapFile;
+        });
     }
 
     /**

@@ -20,7 +20,7 @@ public final class AppMapMetadata {
     /**
      * System-independent file path.
      */
-    private final @NotNull String filepath;
+    private final @NotNull String systemIndependentFilePath;
     @Getter
     private final int requestCount;
     @Getter
@@ -28,13 +28,13 @@ public final class AppMapMetadata {
     @Getter
     private final int functionsCount;
 
-    public AppMapMetadata(@NotNull String name, @NotNull String filepath) {
-        this(name, filepath, 0, 0, 0);
+    public AppMapMetadata(@NotNull String name, @NotNull String systemIndependentFilePath) {
+        this(name, systemIndependentFilePath, 0, 0, 0);
     }
 
-    public AppMapMetadata(@NotNull String name, @NotNull String filepath, int requestCount, int queryCount, int functionsCount) {
+    public AppMapMetadata(@NotNull String name, @NotNull String systemIndependentFilePath, int requestCount, int queryCount, int functionsCount) {
         this.name = name;
-        this.filepath = filepath;
+        this.systemIndependentFilePath = systemIndependentFilePath;
         this.requestCount = requestCount;
         this.queryCount = queryCount;
         this.functionsCount = functionsCount;
@@ -42,12 +42,12 @@ public final class AppMapMetadata {
 
     @NotNull
     public String getSystemIndependentFilepath() {
-        return filepath;
+        return systemIndependentFilePath;
     }
 
     @NotNull
     public String getFilename() {
-        return PathUtil.getFileName(filepath);
+        return PathUtil.getFileName(systemIndependentFilePath);
     }
 
     public boolean hasAnyCount() {

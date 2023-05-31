@@ -3,7 +3,7 @@ package appland.toolwindow.codeObjects;
 import appland.AppMapBundle;
 import appland.Icons;
 import appland.index.AppMapMetadata;
-import appland.index.AppMapMetadataIndex;
+import appland.index.AppMapMetadataService;
 import appland.index.ClassMapItemType;
 import appland.index.ClassMapTypeIndex;
 import appland.webviews.appMap.AppMapFileEditor;
@@ -56,11 +56,12 @@ public class ClassMapItemNavigatable implements Navigatable {
 
     @SuppressWarnings("DialogTitleCapitalization")
     private void choseAndNavigateAppMap(boolean requestFocus) {
+        var metadataService = AppMapMetadataService.getInstance(project);
         var filesToMetadata = ProgressManager.getInstance().runProcessWithProgressSynchronously(() -> {
             return ReadAction.compute(() -> {
                 var files = ClassMapTypeIndex.findContainingAppMapFiles(project, type, nodeId);
                 return files.stream()
-                        .map(file -> Pair.create(file, AppMapMetadataIndex.findAppMap(project, file)))
+                        .map(file -> Pair.create(file, metadataService.getAppMapMetadata(file)))
                         .sorted(Comparator.comparing(pair -> pair.second != null ? pair.second.getName() : ""))
                         .collect(Collectors.toList());
             });

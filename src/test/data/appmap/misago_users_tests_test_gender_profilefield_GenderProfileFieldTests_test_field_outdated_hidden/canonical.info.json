@@ -1,0 +1,4725 @@
+[
+  {
+    "kind": "http_server_request",
+    "route": "POST /admincp/",
+    "parameter_names": null,
+    "status_code": 302,
+    "children": [
+      {
+        "kind": "sql",
+        "sql": {
+          "analyzed_query": {
+            "actions": [
+              "select"
+            ],
+            "tables": [
+              "misago_cache_cacheversion"
+            ],
+            "columns": [
+              "misago_cache_cacheversion.cache",
+              "misago_cache_cacheversion.version"
+            ],
+            "joinCount": 0
+          }
+        }
+      },
+      {
+        "kind": "sql",
+        "sql": {
+          "analyzed_query": {
+            "actions": [
+              "select"
+            ],
+            "tables": [
+              "django_session"
+            ],
+            "columns": [
+              "django_session.expire_date",
+              "django_session.session_data",
+              "django_session.session_key"
+            ],
+            "joinCount": 0
+          }
+        }
+      },
+      {
+        "kind": "sql",
+        "sql": {
+          "analyzed_query": {
+            "actions": [
+              "select"
+            ],
+            "tables": [
+              "misago_users_bancache",
+              "misago_users_online",
+              "misago_users_rank",
+              "misago_users_user"
+            ],
+            "columns": [
+              "misago_users_bancache.ban_id",
+              "misago_users_bancache.cache_version",
+              "misago_users_bancache.expires_on",
+              "misago_users_bancache.staff_message",
+              "misago_users_bancache.user_id",
+              "misago_users_bancache.user_message",
+              "misago_users_online.last_click",
+              "misago_users_online.user_id",
+              "misago_users_rank.css_class",
+              "misago_users_rank.description",
+              "misago_users_rank.id",
+              "misago_users_rank.is_default",
+              "misago_users_rank.is_tab",
+              "misago_users_rank.name",
+              "misago_users_rank.order",
+              "misago_users_rank.slug",
+              "misago_users_rank.title",
+              "misago_users_user.acl_key",
+              "misago_users_user.agreements",
+              "misago_users_user.avatar_crop",
+              "misago_users_user.avatar_lock_staff_message",
+              "misago_users_user.avatar_lock_user_message",
+              "misago_users_user.avatar_src",
+              "misago_users_user.avatar_tmp",
+              "misago_users_user.avatars",
+              "misago_users_user.email",
+              "misago_users_user.email_hash",
+              "misago_users_user.followers",
+              "misago_users_user.following",
+              "misago_users_user.id",
+              "misago_users_user.is_active",
+              "misago_users_user.is_active_staff_message",
+              "misago_users_user.is_avatar_locked",
+              "misago_users_user.is_deleting_account",
+              "misago_users_user.is_hiding_presence",
+              "misago_users_user.is_signature_locked",
+              "misago_users_user.is_staff",
+              "misago_users_user.is_superuser",
+              "misago_users_user.joined_from_ip",
+              "misago_users_user.joined_on",
+              "misago_users_user.last_login",
+              "misago_users_user.last_posted_on",
+              "misago_users_user.limits_private_thread_invites_to",
+              "misago_users_user.password",
+              "misago_users_user.posts",
+              "misago_users_user.profile_fields",
+              "misago_users_user.rank_id",
+              "misago_users_user.requires_activation",
+              "misago_users_user.signature",
+              "misago_users_user.signature_checksum",
+              "misago_users_user.signature_lock_staff_message",
+              "misago_users_user.signature_lock_user_message",
+              "misago_users_user.signature_parsed",
+              "misago_users_user.slug",
+              "misago_users_user.sso_id",
+              "misago_users_user.subscribe_to_replied_threads",
+              "misago_users_user.subscribe_to_started_threads",
+              "misago_users_user.sync_unread_private_threads",
+              "misago_users_user.threads",
+              "misago_users_user.title",
+              "misago_users_user.unread_private_threads",
+              "misago_users_user.username"
+            ],
+            "joinCount": 3
+          }
+        }
+      },
+      {
+        "kind": "sql",
+        "sql": {
+          "analyzed_query": {
+            "actions": [
+              "select"
+            ],
+            "tables": [
+              "misago_acl_role",
+              "misago_users_user_roles"
+            ],
+            "columns": [
+              "misago_acl_role.id",
+              "misago_acl_role.name",
+              "misago_acl_role.permissions",
+              "misago_acl_role.special_role",
+              "misago_users_user_roles.role_id",
+              "misago_users_user_roles.user_id"
+            ],
+            "joinCount": 1
+          }
+        }
+      },
+      {
+        "kind": "sql",
+        "sql": {
+          "analyzed_query": {
+            "actions": [
+              "select"
+            ],
+            "tables": [
+              "misago_acl_role",
+              "misago_users_rank_roles"
+            ],
+            "columns": [
+              "misago_acl_role.id",
+              "misago_acl_role.name",
+              "misago_acl_role.permissions",
+              "misago_acl_role.special_role",
+              "misago_users_rank_roles.rank_id",
+              "misago_users_rank_roles.role_id"
+            ],
+            "joinCount": 1
+          }
+        }
+      },
+      {
+        "kind": "sql",
+        "sql": {
+          "analyzed_query": null
+        }
+      },
+      {
+        "kind": "sql",
+        "sql": {
+          "analyzed_query": {
+            "actions": [
+              "select"
+            ],
+            "tables": [
+              "misago_categories_category"
+            ],
+            "columns": [
+              "misago_categories_category.archive_pruned_in_id",
+              "misago_categories_category.css_class",
+              "misago_categories_category.description",
+              "misago_categories_category.id",
+              "misago_categories_category.is_closed",
+              "misago_categories_category.last_post_on",
+              "misago_categories_category.last_poster_id",
+              "misago_categories_category.last_poster_name",
+              "misago_categories_category.last_poster_slug",
+              "misago_categories_category.last_thread_id",
+              "misago_categories_category.last_thread_slug",
+              "misago_categories_category.last_thread_title",
+              "misago_categories_category.level",
+              "misago_categories_category.lft",
+              "misago_categories_category.name",
+              "misago_categories_category.parent_id",
+              "misago_categories_category.posts",
+              "misago_categories_category.prune_replied_after",
+              "misago_categories_category.prune_started_after",
+              "misago_categories_category.require_edits_approval",
+              "misago_categories_category.require_replies_approval",
+              "misago_categories_category.require_threads_approval",
+              "misago_categories_category.rght",
+              "misago_categories_category.slug",
+              "misago_categories_category.special_role",
+              "misago_categories_category.threads",
+              "misago_categories_category.tree_id"
+            ],
+            "joinCount": 0
+          }
+        }
+      },
+      {
+        "kind": "sql",
+        "sql": {
+          "analyzed_query": {
+            "actions": [
+              "select"
+            ],
+            "tables": [
+              "misago_categories_category"
+            ],
+            "columns": [
+              "misago_categories_category.archive_pruned_in_id",
+              "misago_categories_category.css_class",
+              "misago_categories_category.description",
+              "misago_categories_category.id",
+              "misago_categories_category.is_closed",
+              "misago_categories_category.last_post_on",
+              "misago_categories_category.last_poster_id",
+              "misago_categories_category.last_poster_name",
+              "misago_categories_category.last_poster_slug",
+              "misago_categories_category.last_thread_id",
+              "misago_categories_category.last_thread_slug",
+              "misago_categories_category.last_thread_title",
+              "misago_categories_category.level",
+              "misago_categories_category.lft",
+              "misago_categories_category.name",
+              "misago_categories_category.parent_id",
+              "misago_categories_category.posts",
+              "misago_categories_category.prune_replied_after",
+              "misago_categories_category.prune_started_after",
+              "misago_categories_category.require_edits_approval",
+              "misago_categories_category.require_replies_approval",
+              "misago_categories_category.require_threads_approval",
+              "misago_categories_category.rght",
+              "misago_categories_category.slug",
+              "misago_categories_category.special_role",
+              "misago_categories_category.threads",
+              "misago_categories_category.tree_id"
+            ],
+            "joinCount": 0
+          }
+        }
+      },
+      {
+        "kind": "sql",
+        "sql": {
+          "analyzed_query": null
+        }
+      },
+      {
+        "kind": "sql",
+        "sql": {
+          "analyzed_query": {
+            "actions": [
+              "select"
+            ],
+            "tables": [
+              "misago_categories_category"
+            ],
+            "columns": [
+              "misago_categories_category.archive_pruned_in_id",
+              "misago_categories_category.css_class",
+              "misago_categories_category.description",
+              "misago_categories_category.id",
+              "misago_categories_category.is_closed",
+              "misago_categories_category.last_post_on",
+              "misago_categories_category.last_poster_id",
+              "misago_categories_category.last_poster_name",
+              "misago_categories_category.last_poster_slug",
+              "misago_categories_category.last_thread_id",
+              "misago_categories_category.last_thread_slug",
+              "misago_categories_category.last_thread_title",
+              "misago_categories_category.level",
+              "misago_categories_category.lft",
+              "misago_categories_category.name",
+              "misago_categories_category.parent_id",
+              "misago_categories_category.posts",
+              "misago_categories_category.prune_replied_after",
+              "misago_categories_category.prune_started_after",
+              "misago_categories_category.require_edits_approval",
+              "misago_categories_category.require_replies_approval",
+              "misago_categories_category.require_threads_approval",
+              "misago_categories_category.rght",
+              "misago_categories_category.slug",
+              "misago_categories_category.special_role",
+              "misago_categories_category.threads",
+              "misago_categories_category.tree_id"
+            ],
+            "joinCount": 0
+          }
+        }
+      },
+      {
+        "kind": "sql",
+        "sql": {
+          "analyzed_query": {
+            "actions": [
+              "select"
+            ],
+            "tables": [
+              "misago_categories_category"
+            ],
+            "columns": [
+              "misago_categories_category.archive_pruned_in_id",
+              "misago_categories_category.css_class",
+              "misago_categories_category.description",
+              "misago_categories_category.id",
+              "misago_categories_category.is_closed",
+              "misago_categories_category.last_post_on",
+              "misago_categories_category.last_poster_id",
+              "misago_categories_category.last_poster_name",
+              "misago_categories_category.last_poster_slug",
+              "misago_categories_category.last_thread_id",
+              "misago_categories_category.last_thread_slug",
+              "misago_categories_category.last_thread_title",
+              "misago_categories_category.level",
+              "misago_categories_category.lft",
+              "misago_categories_category.name",
+              "misago_categories_category.parent_id",
+              "misago_categories_category.posts",
+              "misago_categories_category.prune_replied_after",
+              "misago_categories_category.prune_started_after",
+              "misago_categories_category.require_edits_approval",
+              "misago_categories_category.require_replies_approval",
+              "misago_categories_category.require_threads_approval",
+              "misago_categories_category.rght",
+              "misago_categories_category.slug",
+              "misago_categories_category.special_role",
+              "misago_categories_category.threads",
+              "misago_categories_category.tree_id"
+            ],
+            "joinCount": 0
+          }
+        }
+      },
+      {
+        "kind": "sql",
+        "sql": {
+          "analyzed_query": {
+            "actions": [
+              "select"
+            ],
+            "tables": [
+              "misago_categories_category"
+            ],
+            "columns": [
+              "misago_categories_category.archive_pruned_in_id",
+              "misago_categories_category.css_class",
+              "misago_categories_category.description",
+              "misago_categories_category.id",
+              "misago_categories_category.is_closed",
+              "misago_categories_category.last_post_on",
+              "misago_categories_category.last_poster_id",
+              "misago_categories_category.last_poster_name",
+              "misago_categories_category.last_poster_slug",
+              "misago_categories_category.last_thread_id",
+              "misago_categories_category.last_thread_slug",
+              "misago_categories_category.last_thread_title",
+              "misago_categories_category.level",
+              "misago_categories_category.lft",
+              "misago_categories_category.name",
+              "misago_categories_category.parent_id",
+              "misago_categories_category.posts",
+              "misago_categories_category.prune_replied_after",
+              "misago_categories_category.prune_started_after",
+              "misago_categories_category.require_edits_approval",
+              "misago_categories_category.require_replies_approval",
+              "misago_categories_category.require_threads_approval",
+              "misago_categories_category.rght",
+              "misago_categories_category.slug",
+              "misago_categories_category.special_role",
+              "misago_categories_category.threads",
+              "misago_categories_category.tree_id"
+            ],
+            "joinCount": 0
+          }
+        }
+      },
+      {
+        "kind": "sql",
+        "sql": {
+          "analyzed_query": null
+        }
+      },
+      {
+        "kind": "sql",
+        "sql": {
+          "analyzed_query": {
+            "actions": [
+              "select"
+            ],
+            "tables": [
+              "misago_categories_category"
+            ],
+            "columns": [
+              "misago_categories_category.archive_pruned_in_id",
+              "misago_categories_category.css_class",
+              "misago_categories_category.description",
+              "misago_categories_category.id",
+              "misago_categories_category.is_closed",
+              "misago_categories_category.last_post_on",
+              "misago_categories_category.last_poster_id",
+              "misago_categories_category.last_poster_name",
+              "misago_categories_category.last_poster_slug",
+              "misago_categories_category.last_thread_id",
+              "misago_categories_category.last_thread_slug",
+              "misago_categories_category.last_thread_title",
+              "misago_categories_category.level",
+              "misago_categories_category.lft",
+              "misago_categories_category.name",
+              "misago_categories_category.parent_id",
+              "misago_categories_category.posts",
+              "misago_categories_category.prune_replied_after",
+              "misago_categories_category.prune_started_after",
+              "misago_categories_category.require_edits_approval",
+              "misago_categories_category.require_replies_approval",
+              "misago_categories_category.require_threads_approval",
+              "misago_categories_category.rght",
+              "misago_categories_category.slug",
+              "misago_categories_category.special_role",
+              "misago_categories_category.threads",
+              "misago_categories_category.tree_id"
+            ],
+            "joinCount": 0
+          }
+        }
+      },
+      {
+        "kind": "sql",
+        "sql": {
+          "analyzed_query": {
+            "actions": [
+              "select"
+            ],
+            "tables": [
+              "misago_categories_category"
+            ],
+            "columns": [
+              "misago_categories_category.archive_pruned_in_id",
+              "misago_categories_category.css_class",
+              "misago_categories_category.description",
+              "misago_categories_category.id",
+              "misago_categories_category.is_closed",
+              "misago_categories_category.last_post_on",
+              "misago_categories_category.last_poster_id",
+              "misago_categories_category.last_poster_name",
+              "misago_categories_category.last_poster_slug",
+              "misago_categories_category.last_thread_id",
+              "misago_categories_category.last_thread_slug",
+              "misago_categories_category.last_thread_title",
+              "misago_categories_category.level",
+              "misago_categories_category.lft",
+              "misago_categories_category.name",
+              "misago_categories_category.parent_id",
+              "misago_categories_category.posts",
+              "misago_categories_category.prune_replied_after",
+              "misago_categories_category.prune_started_after",
+              "misago_categories_category.require_edits_approval",
+              "misago_categories_category.require_replies_approval",
+              "misago_categories_category.require_threads_approval",
+              "misago_categories_category.rght",
+              "misago_categories_category.slug",
+              "misago_categories_category.special_role",
+              "misago_categories_category.threads",
+              "misago_categories_category.tree_id"
+            ],
+            "joinCount": 0
+          }
+        }
+      },
+      {
+        "kind": "sql",
+        "sql": {
+          "analyzed_query": {
+            "actions": [
+              "select"
+            ],
+            "tables": [
+              "misago_categories_category"
+            ],
+            "columns": [
+              "misago_categories_category.archive_pruned_in_id",
+              "misago_categories_category.css_class",
+              "misago_categories_category.description",
+              "misago_categories_category.id",
+              "misago_categories_category.is_closed",
+              "misago_categories_category.last_post_on",
+              "misago_categories_category.last_poster_id",
+              "misago_categories_category.last_poster_name",
+              "misago_categories_category.last_poster_slug",
+              "misago_categories_category.last_thread_id",
+              "misago_categories_category.last_thread_slug",
+              "misago_categories_category.last_thread_title",
+              "misago_categories_category.level",
+              "misago_categories_category.lft",
+              "misago_categories_category.name",
+              "misago_categories_category.parent_id",
+              "misago_categories_category.posts",
+              "misago_categories_category.prune_replied_after",
+              "misago_categories_category.prune_started_after",
+              "misago_categories_category.require_edits_approval",
+              "misago_categories_category.require_replies_approval",
+              "misago_categories_category.require_threads_approval",
+              "misago_categories_category.rght",
+              "misago_categories_category.slug",
+              "misago_categories_category.special_role",
+              "misago_categories_category.threads",
+              "misago_categories_category.tree_id"
+            ],
+            "joinCount": 0
+          }
+        }
+      },
+      {
+        "kind": "sql",
+        "sql": {
+          "analyzed_query": {
+            "actions": [
+              "select"
+            ],
+            "tables": [
+              "misago_users_user"
+            ],
+            "columns": [
+              "misago_users_user.acl_key",
+              "misago_users_user.agreements",
+              "misago_users_user.avatar_crop",
+              "misago_users_user.avatar_lock_staff_message",
+              "misago_users_user.avatar_lock_user_message",
+              "misago_users_user.avatar_src",
+              "misago_users_user.avatar_tmp",
+              "misago_users_user.avatars",
+              "misago_users_user.email",
+              "misago_users_user.email_hash",
+              "misago_users_user.followers",
+              "misago_users_user.following",
+              "misago_users_user.id",
+              "misago_users_user.is_active",
+              "misago_users_user.is_active_staff_message",
+              "misago_users_user.is_avatar_locked",
+              "misago_users_user.is_deleting_account",
+              "misago_users_user.is_hiding_presence",
+              "misago_users_user.is_signature_locked",
+              "misago_users_user.is_staff",
+              "misago_users_user.is_superuser",
+              "misago_users_user.joined_from_ip",
+              "misago_users_user.joined_on",
+              "misago_users_user.last_login",
+              "misago_users_user.last_posted_on",
+              "misago_users_user.limits_private_thread_invites_to",
+              "misago_users_user.password",
+              "misago_users_user.posts",
+              "misago_users_user.profile_fields",
+              "misago_users_user.rank_id",
+              "misago_users_user.requires_activation",
+              "misago_users_user.signature",
+              "misago_users_user.signature_checksum",
+              "misago_users_user.signature_lock_staff_message",
+              "misago_users_user.signature_lock_user_message",
+              "misago_users_user.signature_parsed",
+              "misago_users_user.slug",
+              "misago_users_user.sso_id",
+              "misago_users_user.subscribe_to_replied_threads",
+              "misago_users_user.subscribe_to_started_threads",
+              "misago_users_user.sync_unread_private_threads",
+              "misago_users_user.threads",
+              "misago_users_user.title",
+              "misago_users_user.unread_private_threads",
+              "misago_users_user.username"
+            ],
+            "joinCount": 0
+          }
+        }
+      },
+      {
+        "kind": "sql",
+        "sql": {
+          "analyzed_query": {
+            "actions": [
+              "update"
+            ],
+            "tables": [
+              "misago_users_user"
+            ],
+            "columns": [
+              "last_login",
+              "misago_users_user.id"
+            ],
+            "joinCount": 0
+          }
+        }
+      },
+      {
+        "kind": "sql",
+        "sql": {
+          "analyzed_query": {
+            "actions": [
+              "update"
+            ],
+            "tables": [
+              "misago_users_online"
+            ],
+            "columns": [
+              "last_click",
+              "misago_users_online.user_id"
+            ],
+            "joinCount": 0
+          }
+        }
+      },
+      {
+        "kind": "sql",
+        "sql": {
+          "analyzed_query": {
+            "actions": [],
+            "tables": [],
+            "columns": [],
+            "joinCount": 0
+          }
+        }
+      },
+      {
+        "kind": "sql",
+        "sql": {
+          "analyzed_query": {
+            "actions": [
+              "update"
+            ],
+            "tables": [
+              "django_session"
+            ],
+            "columns": [
+              "django_session.session_key",
+              "expire_date",
+              "session_data"
+            ],
+            "joinCount": 0
+          }
+        }
+      },
+      {
+        "kind": "sql",
+        "sql": {
+          "analyzed_query": {
+            "actions": [],
+            "tables": [],
+            "columns": [],
+            "joinCount": 0
+          }
+        }
+      }
+    ]
+  },
+  {
+    "kind": "http_server_request",
+    "route": "GET /admincp/",
+    "parameter_names": null,
+    "status_code": 200,
+    "children": [
+      {
+        "kind": "sql",
+        "sql": {
+          "analyzed_query": {
+            "actions": [
+              "select"
+            ],
+            "tables": [
+              "misago_cache_cacheversion"
+            ],
+            "columns": [
+              "misago_cache_cacheversion.cache",
+              "misago_cache_cacheversion.version"
+            ],
+            "joinCount": 0
+          }
+        }
+      },
+      {
+        "kind": "sql",
+        "sql": {
+          "analyzed_query": {
+            "actions": [
+              "select"
+            ],
+            "tables": [
+              "django_session"
+            ],
+            "columns": [
+              "django_session.expire_date",
+              "django_session.session_data",
+              "django_session.session_key"
+            ],
+            "joinCount": 0
+          }
+        }
+      },
+      {
+        "kind": "sql",
+        "sql": {
+          "analyzed_query": {
+            "actions": [
+              "select"
+            ],
+            "tables": [
+              "misago_users_bancache",
+              "misago_users_online",
+              "misago_users_rank",
+              "misago_users_user"
+            ],
+            "columns": [
+              "misago_users_bancache.ban_id",
+              "misago_users_bancache.cache_version",
+              "misago_users_bancache.expires_on",
+              "misago_users_bancache.staff_message",
+              "misago_users_bancache.user_id",
+              "misago_users_bancache.user_message",
+              "misago_users_online.last_click",
+              "misago_users_online.user_id",
+              "misago_users_rank.css_class",
+              "misago_users_rank.description",
+              "misago_users_rank.id",
+              "misago_users_rank.is_default",
+              "misago_users_rank.is_tab",
+              "misago_users_rank.name",
+              "misago_users_rank.order",
+              "misago_users_rank.slug",
+              "misago_users_rank.title",
+              "misago_users_user.acl_key",
+              "misago_users_user.agreements",
+              "misago_users_user.avatar_crop",
+              "misago_users_user.avatar_lock_staff_message",
+              "misago_users_user.avatar_lock_user_message",
+              "misago_users_user.avatar_src",
+              "misago_users_user.avatar_tmp",
+              "misago_users_user.avatars",
+              "misago_users_user.email",
+              "misago_users_user.email_hash",
+              "misago_users_user.followers",
+              "misago_users_user.following",
+              "misago_users_user.id",
+              "misago_users_user.is_active",
+              "misago_users_user.is_active_staff_message",
+              "misago_users_user.is_avatar_locked",
+              "misago_users_user.is_deleting_account",
+              "misago_users_user.is_hiding_presence",
+              "misago_users_user.is_signature_locked",
+              "misago_users_user.is_staff",
+              "misago_users_user.is_superuser",
+              "misago_users_user.joined_from_ip",
+              "misago_users_user.joined_on",
+              "misago_users_user.last_login",
+              "misago_users_user.last_posted_on",
+              "misago_users_user.limits_private_thread_invites_to",
+              "misago_users_user.password",
+              "misago_users_user.posts",
+              "misago_users_user.profile_fields",
+              "misago_users_user.rank_id",
+              "misago_users_user.requires_activation",
+              "misago_users_user.signature",
+              "misago_users_user.signature_checksum",
+              "misago_users_user.signature_lock_staff_message",
+              "misago_users_user.signature_lock_user_message",
+              "misago_users_user.signature_parsed",
+              "misago_users_user.slug",
+              "misago_users_user.sso_id",
+              "misago_users_user.subscribe_to_replied_threads",
+              "misago_users_user.subscribe_to_started_threads",
+              "misago_users_user.sync_unread_private_threads",
+              "misago_users_user.threads",
+              "misago_users_user.title",
+              "misago_users_user.unread_private_threads",
+              "misago_users_user.username"
+            ],
+            "joinCount": 3
+          }
+        }
+      },
+      {
+        "kind": "sql",
+        "sql": {
+          "analyzed_query": {
+            "actions": [
+              "select"
+            ],
+            "tables": [
+              "misago_acl_role",
+              "misago_users_user_roles"
+            ],
+            "columns": [
+              "misago_acl_role.id",
+              "misago_acl_role.name",
+              "misago_acl_role.permissions",
+              "misago_acl_role.special_role",
+              "misago_users_user_roles.role_id",
+              "misago_users_user_roles.user_id"
+            ],
+            "joinCount": 1
+          }
+        }
+      },
+      {
+        "kind": "sql",
+        "sql": {
+          "analyzed_query": {
+            "actions": [
+              "select"
+            ],
+            "tables": [
+              "misago_acl_role",
+              "misago_users_rank_roles"
+            ],
+            "columns": [
+              "misago_acl_role.id",
+              "misago_acl_role.name",
+              "misago_acl_role.permissions",
+              "misago_acl_role.special_role",
+              "misago_users_rank_roles.rank_id",
+              "misago_users_rank_roles.role_id"
+            ],
+            "joinCount": 1
+          }
+        }
+      },
+      {
+        "kind": "sql",
+        "sql": {
+          "analyzed_query": null
+        }
+      },
+      {
+        "kind": "sql",
+        "sql": {
+          "analyzed_query": {
+            "actions": [
+              "select"
+            ],
+            "tables": [
+              "misago_categories_category"
+            ],
+            "columns": [
+              "misago_categories_category.archive_pruned_in_id",
+              "misago_categories_category.css_class",
+              "misago_categories_category.description",
+              "misago_categories_category.id",
+              "misago_categories_category.is_closed",
+              "misago_categories_category.last_post_on",
+              "misago_categories_category.last_poster_id",
+              "misago_categories_category.last_poster_name",
+              "misago_categories_category.last_poster_slug",
+              "misago_categories_category.last_thread_id",
+              "misago_categories_category.last_thread_slug",
+              "misago_categories_category.last_thread_title",
+              "misago_categories_category.level",
+              "misago_categories_category.lft",
+              "misago_categories_category.name",
+              "misago_categories_category.parent_id",
+              "misago_categories_category.posts",
+              "misago_categories_category.prune_replied_after",
+              "misago_categories_category.prune_started_after",
+              "misago_categories_category.require_edits_approval",
+              "misago_categories_category.require_replies_approval",
+              "misago_categories_category.require_threads_approval",
+              "misago_categories_category.rght",
+              "misago_categories_category.slug",
+              "misago_categories_category.special_role",
+              "misago_categories_category.threads",
+              "misago_categories_category.tree_id"
+            ],
+            "joinCount": 0
+          }
+        }
+      },
+      {
+        "kind": "sql",
+        "sql": {
+          "analyzed_query": {
+            "actions": [
+              "select"
+            ],
+            "tables": [
+              "misago_categories_category"
+            ],
+            "columns": [
+              "misago_categories_category.archive_pruned_in_id",
+              "misago_categories_category.css_class",
+              "misago_categories_category.description",
+              "misago_categories_category.id",
+              "misago_categories_category.is_closed",
+              "misago_categories_category.last_post_on",
+              "misago_categories_category.last_poster_id",
+              "misago_categories_category.last_poster_name",
+              "misago_categories_category.last_poster_slug",
+              "misago_categories_category.last_thread_id",
+              "misago_categories_category.last_thread_slug",
+              "misago_categories_category.last_thread_title",
+              "misago_categories_category.level",
+              "misago_categories_category.lft",
+              "misago_categories_category.name",
+              "misago_categories_category.parent_id",
+              "misago_categories_category.posts",
+              "misago_categories_category.prune_replied_after",
+              "misago_categories_category.prune_started_after",
+              "misago_categories_category.require_edits_approval",
+              "misago_categories_category.require_replies_approval",
+              "misago_categories_category.require_threads_approval",
+              "misago_categories_category.rght",
+              "misago_categories_category.slug",
+              "misago_categories_category.special_role",
+              "misago_categories_category.threads",
+              "misago_categories_category.tree_id"
+            ],
+            "joinCount": 0
+          }
+        }
+      },
+      {
+        "kind": "sql",
+        "sql": {
+          "analyzed_query": null
+        }
+      },
+      {
+        "kind": "sql",
+        "sql": {
+          "analyzed_query": {
+            "actions": [
+              "select"
+            ],
+            "tables": [
+              "misago_categories_category"
+            ],
+            "columns": [
+              "misago_categories_category.archive_pruned_in_id",
+              "misago_categories_category.css_class",
+              "misago_categories_category.description",
+              "misago_categories_category.id",
+              "misago_categories_category.is_closed",
+              "misago_categories_category.last_post_on",
+              "misago_categories_category.last_poster_id",
+              "misago_categories_category.last_poster_name",
+              "misago_categories_category.last_poster_slug",
+              "misago_categories_category.last_thread_id",
+              "misago_categories_category.last_thread_slug",
+              "misago_categories_category.last_thread_title",
+              "misago_categories_category.level",
+              "misago_categories_category.lft",
+              "misago_categories_category.name",
+              "misago_categories_category.parent_id",
+              "misago_categories_category.posts",
+              "misago_categories_category.prune_replied_after",
+              "misago_categories_category.prune_started_after",
+              "misago_categories_category.require_edits_approval",
+              "misago_categories_category.require_replies_approval",
+              "misago_categories_category.require_threads_approval",
+              "misago_categories_category.rght",
+              "misago_categories_category.slug",
+              "misago_categories_category.special_role",
+              "misago_categories_category.threads",
+              "misago_categories_category.tree_id"
+            ],
+            "joinCount": 0
+          }
+        }
+      },
+      {
+        "kind": "sql",
+        "sql": {
+          "analyzed_query": {
+            "actions": [
+              "select"
+            ],
+            "tables": [
+              "misago_categories_category"
+            ],
+            "columns": [
+              "misago_categories_category.archive_pruned_in_id",
+              "misago_categories_category.css_class",
+              "misago_categories_category.description",
+              "misago_categories_category.id",
+              "misago_categories_category.is_closed",
+              "misago_categories_category.last_post_on",
+              "misago_categories_category.last_poster_id",
+              "misago_categories_category.last_poster_name",
+              "misago_categories_category.last_poster_slug",
+              "misago_categories_category.last_thread_id",
+              "misago_categories_category.last_thread_slug",
+              "misago_categories_category.last_thread_title",
+              "misago_categories_category.level",
+              "misago_categories_category.lft",
+              "misago_categories_category.name",
+              "misago_categories_category.parent_id",
+              "misago_categories_category.posts",
+              "misago_categories_category.prune_replied_after",
+              "misago_categories_category.prune_started_after",
+              "misago_categories_category.require_edits_approval",
+              "misago_categories_category.require_replies_approval",
+              "misago_categories_category.require_threads_approval",
+              "misago_categories_category.rght",
+              "misago_categories_category.slug",
+              "misago_categories_category.special_role",
+              "misago_categories_category.threads",
+              "misago_categories_category.tree_id"
+            ],
+            "joinCount": 0
+          }
+        }
+      },
+      {
+        "kind": "sql",
+        "sql": {
+          "analyzed_query": {
+            "actions": [
+              "select"
+            ],
+            "tables": [
+              "misago_categories_category"
+            ],
+            "columns": [
+              "misago_categories_category.archive_pruned_in_id",
+              "misago_categories_category.css_class",
+              "misago_categories_category.description",
+              "misago_categories_category.id",
+              "misago_categories_category.is_closed",
+              "misago_categories_category.last_post_on",
+              "misago_categories_category.last_poster_id",
+              "misago_categories_category.last_poster_name",
+              "misago_categories_category.last_poster_slug",
+              "misago_categories_category.last_thread_id",
+              "misago_categories_category.last_thread_slug",
+              "misago_categories_category.last_thread_title",
+              "misago_categories_category.level",
+              "misago_categories_category.lft",
+              "misago_categories_category.name",
+              "misago_categories_category.parent_id",
+              "misago_categories_category.posts",
+              "misago_categories_category.prune_replied_after",
+              "misago_categories_category.prune_started_after",
+              "misago_categories_category.require_edits_approval",
+              "misago_categories_category.require_replies_approval",
+              "misago_categories_category.require_threads_approval",
+              "misago_categories_category.rght",
+              "misago_categories_category.slug",
+              "misago_categories_category.special_role",
+              "misago_categories_category.threads",
+              "misago_categories_category.tree_id"
+            ],
+            "joinCount": 0
+          }
+        }
+      },
+      {
+        "kind": "sql",
+        "sql": {
+          "analyzed_query": null
+        }
+      },
+      {
+        "kind": "sql",
+        "sql": {
+          "analyzed_query": {
+            "actions": [
+              "select"
+            ],
+            "tables": [
+              "misago_categories_category"
+            ],
+            "columns": [
+              "misago_categories_category.archive_pruned_in_id",
+              "misago_categories_category.css_class",
+              "misago_categories_category.description",
+              "misago_categories_category.id",
+              "misago_categories_category.is_closed",
+              "misago_categories_category.last_post_on",
+              "misago_categories_category.last_poster_id",
+              "misago_categories_category.last_poster_name",
+              "misago_categories_category.last_poster_slug",
+              "misago_categories_category.last_thread_id",
+              "misago_categories_category.last_thread_slug",
+              "misago_categories_category.last_thread_title",
+              "misago_categories_category.level",
+              "misago_categories_category.lft",
+              "misago_categories_category.name",
+              "misago_categories_category.parent_id",
+              "misago_categories_category.posts",
+              "misago_categories_category.prune_replied_after",
+              "misago_categories_category.prune_started_after",
+              "misago_categories_category.require_edits_approval",
+              "misago_categories_category.require_replies_approval",
+              "misago_categories_category.require_threads_approval",
+              "misago_categories_category.rght",
+              "misago_categories_category.slug",
+              "misago_categories_category.special_role",
+              "misago_categories_category.threads",
+              "misago_categories_category.tree_id"
+            ],
+            "joinCount": 0
+          }
+        }
+      },
+      {
+        "kind": "sql",
+        "sql": {
+          "analyzed_query": {
+            "actions": [
+              "select"
+            ],
+            "tables": [
+              "misago_categories_category"
+            ],
+            "columns": [
+              "misago_categories_category.archive_pruned_in_id",
+              "misago_categories_category.css_class",
+              "misago_categories_category.description",
+              "misago_categories_category.id",
+              "misago_categories_category.is_closed",
+              "misago_categories_category.last_post_on",
+              "misago_categories_category.last_poster_id",
+              "misago_categories_category.last_poster_name",
+              "misago_categories_category.last_poster_slug",
+              "misago_categories_category.last_thread_id",
+              "misago_categories_category.last_thread_slug",
+              "misago_categories_category.last_thread_title",
+              "misago_categories_category.level",
+              "misago_categories_category.lft",
+              "misago_categories_category.name",
+              "misago_categories_category.parent_id",
+              "misago_categories_category.posts",
+              "misago_categories_category.prune_replied_after",
+              "misago_categories_category.prune_started_after",
+              "misago_categories_category.require_edits_approval",
+              "misago_categories_category.require_replies_approval",
+              "misago_categories_category.require_threads_approval",
+              "misago_categories_category.rght",
+              "misago_categories_category.slug",
+              "misago_categories_category.special_role",
+              "misago_categories_category.threads",
+              "misago_categories_category.tree_id"
+            ],
+            "joinCount": 0
+          }
+        }
+      },
+      {
+        "kind": "sql",
+        "sql": {
+          "analyzed_query": {
+            "actions": [
+              "select"
+            ],
+            "tables": [
+              "misago_categories_category"
+            ],
+            "columns": [
+              "misago_categories_category.archive_pruned_in_id",
+              "misago_categories_category.css_class",
+              "misago_categories_category.description",
+              "misago_categories_category.id",
+              "misago_categories_category.is_closed",
+              "misago_categories_category.last_post_on",
+              "misago_categories_category.last_poster_id",
+              "misago_categories_category.last_poster_name",
+              "misago_categories_category.last_poster_slug",
+              "misago_categories_category.last_thread_id",
+              "misago_categories_category.last_thread_slug",
+              "misago_categories_category.last_thread_title",
+              "misago_categories_category.level",
+              "misago_categories_category.lft",
+              "misago_categories_category.name",
+              "misago_categories_category.parent_id",
+              "misago_categories_category.posts",
+              "misago_categories_category.prune_replied_after",
+              "misago_categories_category.prune_started_after",
+              "misago_categories_category.require_edits_approval",
+              "misago_categories_category.require_replies_approval",
+              "misago_categories_category.require_threads_approval",
+              "misago_categories_category.rght",
+              "misago_categories_category.slug",
+              "misago_categories_category.special_role",
+              "misago_categories_category.threads",
+              "misago_categories_category.tree_id"
+            ],
+            "joinCount": 0
+          }
+        }
+      },
+      {
+        "kind": "sql",
+        "sql": {
+          "analyzed_query": {
+            "actions": [
+              "select"
+            ],
+            "tables": [
+              "misago_threads_attachment"
+            ],
+            "columns": [
+              "*"
+            ],
+            "joinCount": 0
+          }
+        }
+      },
+      {
+        "kind": "sql",
+        "sql": {
+          "analyzed_query": {
+            "actions": [
+              "select"
+            ],
+            "tables": [
+              "misago_threads_thread"
+            ],
+            "columns": [
+              "*"
+            ],
+            "joinCount": 0
+          }
+        }
+      },
+      {
+        "kind": "sql",
+        "sql": {
+          "analyzed_query": {
+            "actions": [
+              "select"
+            ],
+            "tables": [
+              "misago_threads_post"
+            ],
+            "columns": [
+              "*"
+            ],
+            "joinCount": 0
+          }
+        }
+      },
+      {
+        "kind": "sql",
+        "sql": {
+          "analyzed_query": {
+            "actions": [
+              "select"
+            ],
+            "tables": [
+              "misago_users_user"
+            ],
+            "columns": [
+              "*"
+            ],
+            "joinCount": 0
+          }
+        }
+      },
+      {
+        "kind": "sql",
+        "sql": {
+          "analyzed_query": null
+        }
+      },
+      {
+        "kind": "sql",
+        "sql": {
+          "analyzed_query": {
+            "actions": [
+              "select"
+            ],
+            "tables": [
+              "misago_users_datadownload"
+            ],
+            "columns": [
+              "*",
+              "misago_users_datadownload.requested_on",
+              "misago_users_datadownload.status"
+            ],
+            "joinCount": 0
+          }
+        }
+      },
+      {
+        "kind": "sql",
+        "sql": {
+          "analyzed_query": {
+            "actions": [
+              "select"
+            ],
+            "tables": [
+              "misago_users_user"
+            ],
+            "columns": [
+              "*",
+              "misago_users_user.requires_activation"
+            ],
+            "joinCount": 0
+          }
+        }
+      },
+      {
+        "kind": "sql",
+        "sql": {
+          "analyzed_query": {
+            "actions": [
+              "select"
+            ],
+            "tables": [
+              "misago_icons_icon"
+            ],
+            "columns": [
+              "misago_icons_icon.height",
+              "misago_icons_icon.id",
+              "misago_icons_icon.image",
+              "misago_icons_icon.size",
+              "misago_icons_icon.type",
+              "misago_icons_icon.width"
+            ],
+            "joinCount": 0
+          }
+        }
+      },
+      {
+        "kind": "sql",
+        "sql": {
+          "analyzed_query": {
+            "actions": [
+              "select"
+            ],
+            "tables": [
+              "misago_themes_theme"
+            ],
+            "columns": [
+              "misago_themes_theme.author",
+              "misago_themes_theme.dirname",
+              "misago_themes_theme.id",
+              "misago_themes_theme.is_active",
+              "misago_themes_theme.is_default",
+              "misago_themes_theme.level",
+              "misago_themes_theme.lft",
+              "misago_themes_theme.name",
+              "misago_themes_theme.parent_id",
+              "misago_themes_theme.rght",
+              "misago_themes_theme.tree_id",
+              "misago_themes_theme.url",
+              "misago_themes_theme.version",
+              "true"
+            ],
+            "joinCount": 0
+          }
+        }
+      },
+      {
+        "kind": "sql",
+        "sql": {
+          "analyzed_query": {
+            "actions": [
+              "select"
+            ],
+            "tables": [
+              "misago_themes_theme"
+            ],
+            "columns": [
+              "misago_themes_theme.author",
+              "misago_themes_theme.dirname",
+              "misago_themes_theme.id",
+              "misago_themes_theme.is_active",
+              "misago_themes_theme.is_default",
+              "misago_themes_theme.level",
+              "misago_themes_theme.lft",
+              "misago_themes_theme.name",
+              "misago_themes_theme.parent_id",
+              "misago_themes_theme.rght",
+              "misago_themes_theme.tree_id",
+              "misago_themes_theme.url",
+              "misago_themes_theme.version"
+            ],
+            "joinCount": 0
+          }
+        }
+      },
+      {
+        "kind": "sql",
+        "sql": {
+          "analyzed_query": {
+            "actions": [
+              "select"
+            ],
+            "tables": [
+              "misago_themes_css"
+            ],
+            "columns": [
+              "misago_themes_css.build_file",
+              "misago_themes_css.build_hash",
+              "misago_themes_css.id",
+              "misago_themes_css.modified_on",
+              "misago_themes_css.name",
+              "misago_themes_css.order",
+              "misago_themes_css.size",
+              "misago_themes_css.source_file",
+              "misago_themes_css.source_hash",
+              "misago_themes_css.source_needs_building",
+              "misago_themes_css.theme_id",
+              "misago_themes_css.url"
+            ],
+            "joinCount": 0
+          }
+        }
+      },
+      {
+        "kind": "sql",
+        "sql": {
+          "analyzed_query": {
+            "actions": [
+              "select"
+            ],
+            "tables": [
+              "misago_legal_agreement"
+            ],
+            "columns": [
+              "misago_legal_agreement.created_by_id",
+              "misago_legal_agreement.created_by_name",
+              "misago_legal_agreement.created_on",
+              "misago_legal_agreement.id",
+              "misago_legal_agreement.is_active",
+              "misago_legal_agreement.last_modified_by_id",
+              "misago_legal_agreement.last_modified_by_name",
+              "misago_legal_agreement.last_modified_on",
+              "misago_legal_agreement.link",
+              "misago_legal_agreement.text",
+              "misago_legal_agreement.title",
+              "misago_legal_agreement.type",
+              "true"
+            ],
+            "joinCount": 0
+          }
+        }
+      },
+      {
+        "kind": "sql",
+        "sql": {
+          "analyzed_query": {
+            "actions": [
+              "select"
+            ],
+            "tables": [
+              "misago_menus_menuitem"
+            ],
+            "columns": [
+              "misago_menus_menuitem.css_class",
+              "misago_menus_menuitem.id",
+              "misago_menus_menuitem.menu",
+              "misago_menus_menuitem.order",
+              "misago_menus_menuitem.rel",
+              "misago_menus_menuitem.target_blank",
+              "misago_menus_menuitem.title",
+              "misago_menus_menuitem.url"
+            ],
+            "joinCount": 0
+          }
+        }
+      },
+      {
+        "kind": "sql",
+        "sql": {
+          "analyzed_query": {
+            "actions": [
+              "select"
+            ],
+            "tables": [
+              "misago_menus_menuitem"
+            ],
+            "columns": [
+              "misago_menus_menuitem.css_class",
+              "misago_menus_menuitem.id",
+              "misago_menus_menuitem.menu",
+              "misago_menus_menuitem.order",
+              "misago_menus_menuitem.rel",
+              "misago_menus_menuitem.target_blank",
+              "misago_menus_menuitem.title",
+              "misago_menus_menuitem.url"
+            ],
+            "joinCount": 0
+          }
+        }
+      },
+      {
+        "kind": "sql",
+        "sql": {
+          "analyzed_query": {
+            "actions": [
+              "select"
+            ],
+            "tables": [
+              "misago_menus_menuitem"
+            ],
+            "columns": [
+              "misago_menus_menuitem.css_class",
+              "misago_menus_menuitem.id",
+              "misago_menus_menuitem.menu",
+              "misago_menus_menuitem.order",
+              "misago_menus_menuitem.rel",
+              "misago_menus_menuitem.target_blank",
+              "misago_menus_menuitem.title",
+              "misago_menus_menuitem.url"
+            ],
+            "joinCount": 0
+          }
+        }
+      },
+      {
+        "kind": "sql",
+        "sql": {
+          "analyzed_query": {
+            "actions": [
+              "select"
+            ],
+            "tables": [
+              "misago_menus_menuitem"
+            ],
+            "columns": [
+              "misago_menus_menuitem.css_class",
+              "misago_menus_menuitem.id",
+              "misago_menus_menuitem.menu",
+              "misago_menus_menuitem.order",
+              "misago_menus_menuitem.rel",
+              "misago_menus_menuitem.target_blank",
+              "misago_menus_menuitem.title",
+              "misago_menus_menuitem.url"
+            ],
+            "joinCount": 0
+          }
+        }
+      },
+      {
+        "kind": "sql",
+        "sql": {
+          "analyzed_query": {
+            "actions": [
+              "select"
+            ],
+            "tables": [
+              "misago_menus_menuitem"
+            ],
+            "columns": [
+              "misago_menus_menuitem.css_class",
+              "misago_menus_menuitem.id",
+              "misago_menus_menuitem.menu",
+              "misago_menus_menuitem.order",
+              "misago_menus_menuitem.rel",
+              "misago_menus_menuitem.target_blank",
+              "misago_menus_menuitem.title",
+              "misago_menus_menuitem.url"
+            ],
+            "joinCount": 0
+          }
+        }
+      },
+      {
+        "kind": "sql",
+        "sql": {
+          "analyzed_query": {
+            "actions": [
+              "select"
+            ],
+            "tables": [
+              "misago_menus_menuitem"
+            ],
+            "columns": [
+              "misago_menus_menuitem.css_class",
+              "misago_menus_menuitem.id",
+              "misago_menus_menuitem.menu",
+              "misago_menus_menuitem.order",
+              "misago_menus_menuitem.rel",
+              "misago_menus_menuitem.target_blank",
+              "misago_menus_menuitem.title",
+              "misago_menus_menuitem.url"
+            ],
+            "joinCount": 0
+          }
+        }
+      },
+      {
+        "kind": "sql",
+        "sql": {
+          "analyzed_query": {
+            "actions": [
+              "select"
+            ],
+            "tables": [
+              "misago_menus_menuitem"
+            ],
+            "columns": [
+              "misago_menus_menuitem.css_class",
+              "misago_menus_menuitem.id",
+              "misago_menus_menuitem.menu",
+              "misago_menus_menuitem.order",
+              "misago_menus_menuitem.rel",
+              "misago_menus_menuitem.target_blank",
+              "misago_menus_menuitem.title",
+              "misago_menus_menuitem.url"
+            ],
+            "joinCount": 0
+          }
+        }
+      },
+      {
+        "kind": "sql",
+        "sql": {
+          "analyzed_query": {
+            "actions": [
+              "select"
+            ],
+            "tables": [
+              "misago_menus_menuitem"
+            ],
+            "columns": [
+              "misago_menus_menuitem.css_class",
+              "misago_menus_menuitem.id",
+              "misago_menus_menuitem.menu",
+              "misago_menus_menuitem.order",
+              "misago_menus_menuitem.rel",
+              "misago_menus_menuitem.target_blank",
+              "misago_menus_menuitem.title",
+              "misago_menus_menuitem.url"
+            ],
+            "joinCount": 0
+          }
+        }
+      },
+      {
+        "kind": "sql",
+        "sql": {
+          "analyzed_query": {
+            "actions": [
+              "select"
+            ],
+            "tables": [
+              "misago_menus_menuitem"
+            ],
+            "columns": [
+              "misago_menus_menuitem.css_class",
+              "misago_menus_menuitem.id",
+              "misago_menus_menuitem.menu",
+              "misago_menus_menuitem.order",
+              "misago_menus_menuitem.rel",
+              "misago_menus_menuitem.target_blank",
+              "misago_menus_menuitem.title",
+              "misago_menus_menuitem.url"
+            ],
+            "joinCount": 0
+          }
+        }
+      },
+      {
+        "kind": "sql",
+        "sql": {
+          "analyzed_query": {
+            "actions": [
+              "select"
+            ],
+            "tables": [
+              "misago_menus_menuitem"
+            ],
+            "columns": [
+              "misago_menus_menuitem.css_class",
+              "misago_menus_menuitem.id",
+              "misago_menus_menuitem.menu",
+              "misago_menus_menuitem.order",
+              "misago_menus_menuitem.rel",
+              "misago_menus_menuitem.target_blank",
+              "misago_menus_menuitem.title",
+              "misago_menus_menuitem.url"
+            ],
+            "joinCount": 0
+          }
+        }
+      },
+      {
+        "kind": "sql",
+        "sql": {
+          "analyzed_query": {
+            "actions": [
+              "select"
+            ],
+            "tables": [
+              "misago_menus_menuitem"
+            ],
+            "columns": [
+              "misago_menus_menuitem.css_class",
+              "misago_menus_menuitem.id",
+              "misago_menus_menuitem.menu",
+              "misago_menus_menuitem.order",
+              "misago_menus_menuitem.rel",
+              "misago_menus_menuitem.target_blank",
+              "misago_menus_menuitem.title",
+              "misago_menus_menuitem.url"
+            ],
+            "joinCount": 0
+          }
+        }
+      },
+      {
+        "kind": "sql",
+        "sql": {
+          "analyzed_query": {
+            "actions": [
+              "select"
+            ],
+            "tables": [
+              "misago_menus_menuitem"
+            ],
+            "columns": [
+              "misago_menus_menuitem.css_class",
+              "misago_menus_menuitem.id",
+              "misago_menus_menuitem.menu",
+              "misago_menus_menuitem.order",
+              "misago_menus_menuitem.rel",
+              "misago_menus_menuitem.target_blank",
+              "misago_menus_menuitem.title",
+              "misago_menus_menuitem.url"
+            ],
+            "joinCount": 0
+          }
+        }
+      },
+      {
+        "kind": "sql",
+        "sql": {
+          "analyzed_query": {
+            "actions": [
+              "select"
+            ],
+            "tables": [
+              "misago_menus_menuitem"
+            ],
+            "columns": [
+              "misago_menus_menuitem.css_class",
+              "misago_menus_menuitem.id",
+              "misago_menus_menuitem.menu",
+              "misago_menus_menuitem.order",
+              "misago_menus_menuitem.rel",
+              "misago_menus_menuitem.target_blank",
+              "misago_menus_menuitem.title",
+              "misago_menus_menuitem.url"
+            ],
+            "joinCount": 0
+          }
+        }
+      },
+      {
+        "kind": "sql",
+        "sql": {
+          "analyzed_query": {
+            "actions": [
+              "select"
+            ],
+            "tables": [
+              "misago_menus_menuitem"
+            ],
+            "columns": [
+              "misago_menus_menuitem.css_class",
+              "misago_menus_menuitem.id",
+              "misago_menus_menuitem.menu",
+              "misago_menus_menuitem.order",
+              "misago_menus_menuitem.rel",
+              "misago_menus_menuitem.target_blank",
+              "misago_menus_menuitem.title",
+              "misago_menus_menuitem.url"
+            ],
+            "joinCount": 0
+          }
+        }
+      },
+      {
+        "kind": "sql",
+        "sql": {
+          "analyzed_query": {
+            "actions": [
+              "select"
+            ],
+            "tables": [
+              "misago_menus_menuitem"
+            ],
+            "columns": [
+              "misago_menus_menuitem.css_class",
+              "misago_menus_menuitem.id",
+              "misago_menus_menuitem.menu",
+              "misago_menus_menuitem.order",
+              "misago_menus_menuitem.rel",
+              "misago_menus_menuitem.target_blank",
+              "misago_menus_menuitem.title",
+              "misago_menus_menuitem.url"
+            ],
+            "joinCount": 0
+          }
+        }
+      },
+      {
+        "kind": "sql",
+        "sql": {
+          "analyzed_query": {
+            "actions": [
+              "select"
+            ],
+            "tables": [
+              "misago_menus_menuitem"
+            ],
+            "columns": [
+              "misago_menus_menuitem.css_class",
+              "misago_menus_menuitem.id",
+              "misago_menus_menuitem.menu",
+              "misago_menus_menuitem.order",
+              "misago_menus_menuitem.rel",
+              "misago_menus_menuitem.target_blank",
+              "misago_menus_menuitem.title",
+              "misago_menus_menuitem.url"
+            ],
+            "joinCount": 0
+          }
+        }
+      },
+      {
+        "kind": "sql",
+        "sql": {
+          "analyzed_query": {
+            "actions": [
+              "select"
+            ],
+            "tables": [
+              "misago_menus_menuitem"
+            ],
+            "columns": [
+              "misago_menus_menuitem.css_class",
+              "misago_menus_menuitem.id",
+              "misago_menus_menuitem.menu",
+              "misago_menus_menuitem.order",
+              "misago_menus_menuitem.rel",
+              "misago_menus_menuitem.target_blank",
+              "misago_menus_menuitem.title",
+              "misago_menus_menuitem.url"
+            ],
+            "joinCount": 0
+          }
+        }
+      },
+      {
+        "kind": "sql",
+        "sql": {
+          "analyzed_query": {
+            "actions": [
+              "select"
+            ],
+            "tables": [
+              "misago_menus_menuitem"
+            ],
+            "columns": [
+              "misago_menus_menuitem.css_class",
+              "misago_menus_menuitem.id",
+              "misago_menus_menuitem.menu",
+              "misago_menus_menuitem.order",
+              "misago_menus_menuitem.rel",
+              "misago_menus_menuitem.target_blank",
+              "misago_menus_menuitem.title",
+              "misago_menus_menuitem.url"
+            ],
+            "joinCount": 0
+          }
+        }
+      },
+      {
+        "kind": "sql",
+        "sql": {
+          "analyzed_query": {
+            "actions": [
+              "select"
+            ],
+            "tables": [
+              "misago_menus_menuitem"
+            ],
+            "columns": [
+              "misago_menus_menuitem.css_class",
+              "misago_menus_menuitem.id",
+              "misago_menus_menuitem.menu",
+              "misago_menus_menuitem.order",
+              "misago_menus_menuitem.rel",
+              "misago_menus_menuitem.target_blank",
+              "misago_menus_menuitem.title",
+              "misago_menus_menuitem.url"
+            ],
+            "joinCount": 0
+          }
+        }
+      },
+      {
+        "kind": "sql",
+        "sql": {
+          "analyzed_query": {
+            "actions": [
+              "select"
+            ],
+            "tables": [
+              "misago_menus_menuitem"
+            ],
+            "columns": [
+              "misago_menus_menuitem.css_class",
+              "misago_menus_menuitem.id",
+              "misago_menus_menuitem.menu",
+              "misago_menus_menuitem.order",
+              "misago_menus_menuitem.rel",
+              "misago_menus_menuitem.target_blank",
+              "misago_menus_menuitem.title",
+              "misago_menus_menuitem.url"
+            ],
+            "joinCount": 0
+          }
+        }
+      },
+      {
+        "kind": "sql",
+        "sql": {
+          "analyzed_query": {
+            "actions": [
+              "select"
+            ],
+            "tables": [
+              "misago_socialauth_socialauthprovider"
+            ],
+            "columns": [
+              "misago_socialauth_socialauthprovider.button_color",
+              "misago_socialauth_socialauthprovider.button_text",
+              "misago_socialauth_socialauthprovider.is_active",
+              "misago_socialauth_socialauthprovider.order",
+              "misago_socialauth_socialauthprovider.provider",
+              "misago_socialauth_socialauthprovider.settings",
+              "true"
+            ],
+            "joinCount": 0
+          }
+        }
+      },
+      {
+        "kind": "sql",
+        "sql": {
+          "analyzed_query": {
+            "actions": [
+              "update"
+            ],
+            "tables": [
+              "misago_users_online"
+            ],
+            "columns": [
+              "last_click",
+              "misago_users_online.user_id"
+            ],
+            "joinCount": 0
+          }
+        }
+      },
+      {
+        "kind": "sql",
+        "sql": {
+          "analyzed_query": {
+            "actions": [],
+            "tables": [],
+            "columns": [],
+            "joinCount": 0
+          }
+        }
+      },
+      {
+        "kind": "sql",
+        "sql": {
+          "analyzed_query": {
+            "actions": [
+              "update"
+            ],
+            "tables": [
+              "django_session"
+            ],
+            "columns": [
+              "django_session.session_key",
+              "expire_date",
+              "session_data"
+            ],
+            "joinCount": 0
+          }
+        }
+      },
+      {
+        "kind": "sql",
+        "sql": {
+          "analyzed_query": {
+            "actions": [],
+            "tables": [],
+            "columns": [],
+            "joinCount": 0
+          }
+        }
+      }
+    ]
+  },
+  {
+    "kind": "http_server_request",
+    "route": "GET /u/testsuperuser/2536/details/",
+    "parameter_names": null,
+    "status_code": 200,
+    "children": [
+      {
+        "kind": "sql",
+        "sql": {
+          "analyzed_query": {
+            "actions": [
+              "select"
+            ],
+            "tables": [
+              "misago_cache_cacheversion"
+            ],
+            "columns": [
+              "misago_cache_cacheversion.cache",
+              "misago_cache_cacheversion.version"
+            ],
+            "joinCount": 0
+          }
+        }
+      },
+      {
+        "kind": "sql",
+        "sql": {
+          "analyzed_query": {
+            "actions": [
+              "select"
+            ],
+            "tables": [
+              "django_session"
+            ],
+            "columns": [
+              "django_session.expire_date",
+              "django_session.session_data",
+              "django_session.session_key"
+            ],
+            "joinCount": 0
+          }
+        }
+      },
+      {
+        "kind": "sql",
+        "sql": {
+          "analyzed_query": {
+            "actions": [
+              "select"
+            ],
+            "tables": [
+              "misago_users_bancache",
+              "misago_users_online",
+              "misago_users_rank",
+              "misago_users_user"
+            ],
+            "columns": [
+              "misago_users_bancache.ban_id",
+              "misago_users_bancache.cache_version",
+              "misago_users_bancache.expires_on",
+              "misago_users_bancache.staff_message",
+              "misago_users_bancache.user_id",
+              "misago_users_bancache.user_message",
+              "misago_users_online.last_click",
+              "misago_users_online.user_id",
+              "misago_users_rank.css_class",
+              "misago_users_rank.description",
+              "misago_users_rank.id",
+              "misago_users_rank.is_default",
+              "misago_users_rank.is_tab",
+              "misago_users_rank.name",
+              "misago_users_rank.order",
+              "misago_users_rank.slug",
+              "misago_users_rank.title",
+              "misago_users_user.acl_key",
+              "misago_users_user.agreements",
+              "misago_users_user.avatar_crop",
+              "misago_users_user.avatar_lock_staff_message",
+              "misago_users_user.avatar_lock_user_message",
+              "misago_users_user.avatar_src",
+              "misago_users_user.avatar_tmp",
+              "misago_users_user.avatars",
+              "misago_users_user.email",
+              "misago_users_user.email_hash",
+              "misago_users_user.followers",
+              "misago_users_user.following",
+              "misago_users_user.id",
+              "misago_users_user.is_active",
+              "misago_users_user.is_active_staff_message",
+              "misago_users_user.is_avatar_locked",
+              "misago_users_user.is_deleting_account",
+              "misago_users_user.is_hiding_presence",
+              "misago_users_user.is_signature_locked",
+              "misago_users_user.is_staff",
+              "misago_users_user.is_superuser",
+              "misago_users_user.joined_from_ip",
+              "misago_users_user.joined_on",
+              "misago_users_user.last_login",
+              "misago_users_user.last_posted_on",
+              "misago_users_user.limits_private_thread_invites_to",
+              "misago_users_user.password",
+              "misago_users_user.posts",
+              "misago_users_user.profile_fields",
+              "misago_users_user.rank_id",
+              "misago_users_user.requires_activation",
+              "misago_users_user.signature",
+              "misago_users_user.signature_checksum",
+              "misago_users_user.signature_lock_staff_message",
+              "misago_users_user.signature_lock_user_message",
+              "misago_users_user.signature_parsed",
+              "misago_users_user.slug",
+              "misago_users_user.sso_id",
+              "misago_users_user.subscribe_to_replied_threads",
+              "misago_users_user.subscribe_to_started_threads",
+              "misago_users_user.sync_unread_private_threads",
+              "misago_users_user.threads",
+              "misago_users_user.title",
+              "misago_users_user.unread_private_threads",
+              "misago_users_user.username"
+            ],
+            "joinCount": 3
+          }
+        }
+      },
+      {
+        "kind": "sql",
+        "sql": {
+          "analyzed_query": {
+            "actions": [
+              "select"
+            ],
+            "tables": [
+              "misago_acl_role",
+              "misago_users_user_roles"
+            ],
+            "columns": [
+              "misago_acl_role.id",
+              "misago_acl_role.name",
+              "misago_acl_role.permissions",
+              "misago_acl_role.special_role",
+              "misago_users_user_roles.role_id",
+              "misago_users_user_roles.user_id"
+            ],
+            "joinCount": 1
+          }
+        }
+      },
+      {
+        "kind": "sql",
+        "sql": {
+          "analyzed_query": {
+            "actions": [
+              "select"
+            ],
+            "tables": [
+              "misago_acl_role",
+              "misago_users_rank_roles"
+            ],
+            "columns": [
+              "misago_acl_role.id",
+              "misago_acl_role.name",
+              "misago_acl_role.permissions",
+              "misago_acl_role.special_role",
+              "misago_users_rank_roles.rank_id",
+              "misago_users_rank_roles.role_id"
+            ],
+            "joinCount": 1
+          }
+        }
+      },
+      {
+        "kind": "sql",
+        "sql": {
+          "analyzed_query": null
+        }
+      },
+      {
+        "kind": "sql",
+        "sql": {
+          "analyzed_query": {
+            "actions": [
+              "select"
+            ],
+            "tables": [
+              "misago_categories_category"
+            ],
+            "columns": [
+              "misago_categories_category.archive_pruned_in_id",
+              "misago_categories_category.css_class",
+              "misago_categories_category.description",
+              "misago_categories_category.id",
+              "misago_categories_category.is_closed",
+              "misago_categories_category.last_post_on",
+              "misago_categories_category.last_poster_id",
+              "misago_categories_category.last_poster_name",
+              "misago_categories_category.last_poster_slug",
+              "misago_categories_category.last_thread_id",
+              "misago_categories_category.last_thread_slug",
+              "misago_categories_category.last_thread_title",
+              "misago_categories_category.level",
+              "misago_categories_category.lft",
+              "misago_categories_category.name",
+              "misago_categories_category.parent_id",
+              "misago_categories_category.posts",
+              "misago_categories_category.prune_replied_after",
+              "misago_categories_category.prune_started_after",
+              "misago_categories_category.require_edits_approval",
+              "misago_categories_category.require_replies_approval",
+              "misago_categories_category.require_threads_approval",
+              "misago_categories_category.rght",
+              "misago_categories_category.slug",
+              "misago_categories_category.special_role",
+              "misago_categories_category.threads",
+              "misago_categories_category.tree_id"
+            ],
+            "joinCount": 0
+          }
+        }
+      },
+      {
+        "kind": "sql",
+        "sql": {
+          "analyzed_query": {
+            "actions": [
+              "select"
+            ],
+            "tables": [
+              "misago_categories_category"
+            ],
+            "columns": [
+              "misago_categories_category.archive_pruned_in_id",
+              "misago_categories_category.css_class",
+              "misago_categories_category.description",
+              "misago_categories_category.id",
+              "misago_categories_category.is_closed",
+              "misago_categories_category.last_post_on",
+              "misago_categories_category.last_poster_id",
+              "misago_categories_category.last_poster_name",
+              "misago_categories_category.last_poster_slug",
+              "misago_categories_category.last_thread_id",
+              "misago_categories_category.last_thread_slug",
+              "misago_categories_category.last_thread_title",
+              "misago_categories_category.level",
+              "misago_categories_category.lft",
+              "misago_categories_category.name",
+              "misago_categories_category.parent_id",
+              "misago_categories_category.posts",
+              "misago_categories_category.prune_replied_after",
+              "misago_categories_category.prune_started_after",
+              "misago_categories_category.require_edits_approval",
+              "misago_categories_category.require_replies_approval",
+              "misago_categories_category.require_threads_approval",
+              "misago_categories_category.rght",
+              "misago_categories_category.slug",
+              "misago_categories_category.special_role",
+              "misago_categories_category.threads",
+              "misago_categories_category.tree_id"
+            ],
+            "joinCount": 0
+          }
+        }
+      },
+      {
+        "kind": "sql",
+        "sql": {
+          "analyzed_query": null
+        }
+      },
+      {
+        "kind": "sql",
+        "sql": {
+          "analyzed_query": {
+            "actions": [
+              "select"
+            ],
+            "tables": [
+              "misago_categories_category"
+            ],
+            "columns": [
+              "misago_categories_category.archive_pruned_in_id",
+              "misago_categories_category.css_class",
+              "misago_categories_category.description",
+              "misago_categories_category.id",
+              "misago_categories_category.is_closed",
+              "misago_categories_category.last_post_on",
+              "misago_categories_category.last_poster_id",
+              "misago_categories_category.last_poster_name",
+              "misago_categories_category.last_poster_slug",
+              "misago_categories_category.last_thread_id",
+              "misago_categories_category.last_thread_slug",
+              "misago_categories_category.last_thread_title",
+              "misago_categories_category.level",
+              "misago_categories_category.lft",
+              "misago_categories_category.name",
+              "misago_categories_category.parent_id",
+              "misago_categories_category.posts",
+              "misago_categories_category.prune_replied_after",
+              "misago_categories_category.prune_started_after",
+              "misago_categories_category.require_edits_approval",
+              "misago_categories_category.require_replies_approval",
+              "misago_categories_category.require_threads_approval",
+              "misago_categories_category.rght",
+              "misago_categories_category.slug",
+              "misago_categories_category.special_role",
+              "misago_categories_category.threads",
+              "misago_categories_category.tree_id"
+            ],
+            "joinCount": 0
+          }
+        }
+      },
+      {
+        "kind": "sql",
+        "sql": {
+          "analyzed_query": {
+            "actions": [
+              "select"
+            ],
+            "tables": [
+              "misago_categories_category"
+            ],
+            "columns": [
+              "misago_categories_category.archive_pruned_in_id",
+              "misago_categories_category.css_class",
+              "misago_categories_category.description",
+              "misago_categories_category.id",
+              "misago_categories_category.is_closed",
+              "misago_categories_category.last_post_on",
+              "misago_categories_category.last_poster_id",
+              "misago_categories_category.last_poster_name",
+              "misago_categories_category.last_poster_slug",
+              "misago_categories_category.last_thread_id",
+              "misago_categories_category.last_thread_slug",
+              "misago_categories_category.last_thread_title",
+              "misago_categories_category.level",
+              "misago_categories_category.lft",
+              "misago_categories_category.name",
+              "misago_categories_category.parent_id",
+              "misago_categories_category.posts",
+              "misago_categories_category.prune_replied_after",
+              "misago_categories_category.prune_started_after",
+              "misago_categories_category.require_edits_approval",
+              "misago_categories_category.require_replies_approval",
+              "misago_categories_category.require_threads_approval",
+              "misago_categories_category.rght",
+              "misago_categories_category.slug",
+              "misago_categories_category.special_role",
+              "misago_categories_category.threads",
+              "misago_categories_category.tree_id"
+            ],
+            "joinCount": 0
+          }
+        }
+      },
+      {
+        "kind": "sql",
+        "sql": {
+          "analyzed_query": {
+            "actions": [
+              "select"
+            ],
+            "tables": [
+              "misago_categories_category"
+            ],
+            "columns": [
+              "misago_categories_category.archive_pruned_in_id",
+              "misago_categories_category.css_class",
+              "misago_categories_category.description",
+              "misago_categories_category.id",
+              "misago_categories_category.is_closed",
+              "misago_categories_category.last_post_on",
+              "misago_categories_category.last_poster_id",
+              "misago_categories_category.last_poster_name",
+              "misago_categories_category.last_poster_slug",
+              "misago_categories_category.last_thread_id",
+              "misago_categories_category.last_thread_slug",
+              "misago_categories_category.last_thread_title",
+              "misago_categories_category.level",
+              "misago_categories_category.lft",
+              "misago_categories_category.name",
+              "misago_categories_category.parent_id",
+              "misago_categories_category.posts",
+              "misago_categories_category.prune_replied_after",
+              "misago_categories_category.prune_started_after",
+              "misago_categories_category.require_edits_approval",
+              "misago_categories_category.require_replies_approval",
+              "misago_categories_category.require_threads_approval",
+              "misago_categories_category.rght",
+              "misago_categories_category.slug",
+              "misago_categories_category.special_role",
+              "misago_categories_category.threads",
+              "misago_categories_category.tree_id"
+            ],
+            "joinCount": 0
+          }
+        }
+      },
+      {
+        "kind": "sql",
+        "sql": {
+          "analyzed_query": null
+        }
+      },
+      {
+        "kind": "sql",
+        "sql": {
+          "analyzed_query": {
+            "actions": [
+              "select"
+            ],
+            "tables": [
+              "misago_categories_category"
+            ],
+            "columns": [
+              "misago_categories_category.archive_pruned_in_id",
+              "misago_categories_category.css_class",
+              "misago_categories_category.description",
+              "misago_categories_category.id",
+              "misago_categories_category.is_closed",
+              "misago_categories_category.last_post_on",
+              "misago_categories_category.last_poster_id",
+              "misago_categories_category.last_poster_name",
+              "misago_categories_category.last_poster_slug",
+              "misago_categories_category.last_thread_id",
+              "misago_categories_category.last_thread_slug",
+              "misago_categories_category.last_thread_title",
+              "misago_categories_category.level",
+              "misago_categories_category.lft",
+              "misago_categories_category.name",
+              "misago_categories_category.parent_id",
+              "misago_categories_category.posts",
+              "misago_categories_category.prune_replied_after",
+              "misago_categories_category.prune_started_after",
+              "misago_categories_category.require_edits_approval",
+              "misago_categories_category.require_replies_approval",
+              "misago_categories_category.require_threads_approval",
+              "misago_categories_category.rght",
+              "misago_categories_category.slug",
+              "misago_categories_category.special_role",
+              "misago_categories_category.threads",
+              "misago_categories_category.tree_id"
+            ],
+            "joinCount": 0
+          }
+        }
+      },
+      {
+        "kind": "sql",
+        "sql": {
+          "analyzed_query": {
+            "actions": [
+              "select"
+            ],
+            "tables": [
+              "misago_categories_category"
+            ],
+            "columns": [
+              "misago_categories_category.archive_pruned_in_id",
+              "misago_categories_category.css_class",
+              "misago_categories_category.description",
+              "misago_categories_category.id",
+              "misago_categories_category.is_closed",
+              "misago_categories_category.last_post_on",
+              "misago_categories_category.last_poster_id",
+              "misago_categories_category.last_poster_name",
+              "misago_categories_category.last_poster_slug",
+              "misago_categories_category.last_thread_id",
+              "misago_categories_category.last_thread_slug",
+              "misago_categories_category.last_thread_title",
+              "misago_categories_category.level",
+              "misago_categories_category.lft",
+              "misago_categories_category.name",
+              "misago_categories_category.parent_id",
+              "misago_categories_category.posts",
+              "misago_categories_category.prune_replied_after",
+              "misago_categories_category.prune_started_after",
+              "misago_categories_category.require_edits_approval",
+              "misago_categories_category.require_replies_approval",
+              "misago_categories_category.require_threads_approval",
+              "misago_categories_category.rght",
+              "misago_categories_category.slug",
+              "misago_categories_category.special_role",
+              "misago_categories_category.threads",
+              "misago_categories_category.tree_id"
+            ],
+            "joinCount": 0
+          }
+        }
+      },
+      {
+        "kind": "sql",
+        "sql": {
+          "analyzed_query": {
+            "actions": [
+              "select"
+            ],
+            "tables": [
+              "misago_categories_category"
+            ],
+            "columns": [
+              "misago_categories_category.archive_pruned_in_id",
+              "misago_categories_category.css_class",
+              "misago_categories_category.description",
+              "misago_categories_category.id",
+              "misago_categories_category.is_closed",
+              "misago_categories_category.last_post_on",
+              "misago_categories_category.last_poster_id",
+              "misago_categories_category.last_poster_name",
+              "misago_categories_category.last_poster_slug",
+              "misago_categories_category.last_thread_id",
+              "misago_categories_category.last_thread_slug",
+              "misago_categories_category.last_thread_title",
+              "misago_categories_category.level",
+              "misago_categories_category.lft",
+              "misago_categories_category.name",
+              "misago_categories_category.parent_id",
+              "misago_categories_category.posts",
+              "misago_categories_category.prune_replied_after",
+              "misago_categories_category.prune_started_after",
+              "misago_categories_category.require_edits_approval",
+              "misago_categories_category.require_replies_approval",
+              "misago_categories_category.require_threads_approval",
+              "misago_categories_category.rght",
+              "misago_categories_category.slug",
+              "misago_categories_category.special_role",
+              "misago_categories_category.threads",
+              "misago_categories_category.tree_id"
+            ],
+            "joinCount": 0
+          }
+        }
+      },
+      {
+        "kind": "sql",
+        "sql": {
+          "analyzed_query": {
+            "actions": [
+              "select"
+            ],
+            "tables": [
+              "misago_users_bancache",
+              "misago_users_online",
+              "misago_users_rank",
+              "misago_users_user"
+            ],
+            "columns": [
+              "misago_users_bancache.ban_id",
+              "misago_users_bancache.cache_version",
+              "misago_users_bancache.expires_on",
+              "misago_users_bancache.staff_message",
+              "misago_users_bancache.user_id",
+              "misago_users_bancache.user_message",
+              "misago_users_online.last_click",
+              "misago_users_online.user_id",
+              "misago_users_rank.css_class",
+              "misago_users_rank.description",
+              "misago_users_rank.id",
+              "misago_users_rank.is_default",
+              "misago_users_rank.is_tab",
+              "misago_users_rank.name",
+              "misago_users_rank.order",
+              "misago_users_rank.slug",
+              "misago_users_rank.title",
+              "misago_users_user.acl_key",
+              "misago_users_user.agreements",
+              "misago_users_user.avatar_crop",
+              "misago_users_user.avatar_lock_staff_message",
+              "misago_users_user.avatar_lock_user_message",
+              "misago_users_user.avatar_src",
+              "misago_users_user.avatar_tmp",
+              "misago_users_user.avatars",
+              "misago_users_user.email",
+              "misago_users_user.email_hash",
+              "misago_users_user.followers",
+              "misago_users_user.following",
+              "misago_users_user.id",
+              "misago_users_user.is_active",
+              "misago_users_user.is_active_staff_message",
+              "misago_users_user.is_avatar_locked",
+              "misago_users_user.is_deleting_account",
+              "misago_users_user.is_hiding_presence",
+              "misago_users_user.is_signature_locked",
+              "misago_users_user.is_staff",
+              "misago_users_user.is_superuser",
+              "misago_users_user.joined_from_ip",
+              "misago_users_user.joined_on",
+              "misago_users_user.last_login",
+              "misago_users_user.last_posted_on",
+              "misago_users_user.limits_private_thread_invites_to",
+              "misago_users_user.password",
+              "misago_users_user.posts",
+              "misago_users_user.profile_fields",
+              "misago_users_user.rank_id",
+              "misago_users_user.requires_activation",
+              "misago_users_user.signature",
+              "misago_users_user.signature_checksum",
+              "misago_users_user.signature_lock_staff_message",
+              "misago_users_user.signature_lock_user_message",
+              "misago_users_user.signature_parsed",
+              "misago_users_user.slug",
+              "misago_users_user.sso_id",
+              "misago_users_user.subscribe_to_replied_threads",
+              "misago_users_user.subscribe_to_started_threads",
+              "misago_users_user.sync_unread_private_threads",
+              "misago_users_user.threads",
+              "misago_users_user.title",
+              "misago_users_user.unread_private_threads",
+              "misago_users_user.username"
+            ],
+            "joinCount": 3
+          }
+        }
+      },
+      {
+        "kind": "sql",
+        "sql": {
+          "analyzed_query": null
+        }
+      },
+      {
+        "kind": "sql",
+        "sql": {
+          "analyzed_query": {
+            "actions": [
+              "update"
+            ],
+            "tables": [
+              "misago_users_bancache"
+            ],
+            "columns": [
+              "ban_id",
+              "cache_version",
+              "expires_on",
+              "misago_users_bancache.user_id",
+              "staff_message",
+              "user_message"
+            ],
+            "joinCount": 0
+          }
+        }
+      },
+      {
+        "kind": "sql",
+        "sql": {
+          "analyzed_query": {
+            "actions": [
+              "insert"
+            ],
+            "tables": [
+              "misago_users_bancache"
+            ],
+            "columns": [
+              "ban_id",
+              "cache_version",
+              "expires_on",
+              "staff_message",
+              "user_id",
+              "user_message"
+            ],
+            "joinCount": 0
+          }
+        }
+      },
+      {
+        "kind": "sql",
+        "sql": {
+          "analyzed_query": null
+        }
+      },
+      {
+        "kind": "sql",
+        "sql": {
+          "analyzed_query": {
+            "actions": [
+              "select"
+            ],
+            "tables": [
+              "misago_icons_icon"
+            ],
+            "columns": [
+              "misago_icons_icon.height",
+              "misago_icons_icon.id",
+              "misago_icons_icon.image",
+              "misago_icons_icon.size",
+              "misago_icons_icon.type",
+              "misago_icons_icon.width"
+            ],
+            "joinCount": 0
+          }
+        }
+      },
+      {
+        "kind": "sql",
+        "sql": {
+          "analyzed_query": {
+            "actions": [
+              "select"
+            ],
+            "tables": [
+              "misago_themes_theme"
+            ],
+            "columns": [
+              "misago_themes_theme.author",
+              "misago_themes_theme.dirname",
+              "misago_themes_theme.id",
+              "misago_themes_theme.is_active",
+              "misago_themes_theme.is_default",
+              "misago_themes_theme.level",
+              "misago_themes_theme.lft",
+              "misago_themes_theme.name",
+              "misago_themes_theme.parent_id",
+              "misago_themes_theme.rght",
+              "misago_themes_theme.tree_id",
+              "misago_themes_theme.url",
+              "misago_themes_theme.version",
+              "true"
+            ],
+            "joinCount": 0
+          }
+        }
+      },
+      {
+        "kind": "sql",
+        "sql": {
+          "analyzed_query": {
+            "actions": [
+              "select"
+            ],
+            "tables": [
+              "misago_themes_theme"
+            ],
+            "columns": [
+              "misago_themes_theme.author",
+              "misago_themes_theme.dirname",
+              "misago_themes_theme.id",
+              "misago_themes_theme.is_active",
+              "misago_themes_theme.is_default",
+              "misago_themes_theme.level",
+              "misago_themes_theme.lft",
+              "misago_themes_theme.name",
+              "misago_themes_theme.parent_id",
+              "misago_themes_theme.rght",
+              "misago_themes_theme.tree_id",
+              "misago_themes_theme.url",
+              "misago_themes_theme.version"
+            ],
+            "joinCount": 0
+          }
+        }
+      },
+      {
+        "kind": "sql",
+        "sql": {
+          "analyzed_query": {
+            "actions": [
+              "select"
+            ],
+            "tables": [
+              "misago_themes_css"
+            ],
+            "columns": [
+              "misago_themes_css.build_file",
+              "misago_themes_css.build_hash",
+              "misago_themes_css.id",
+              "misago_themes_css.modified_on",
+              "misago_themes_css.name",
+              "misago_themes_css.order",
+              "misago_themes_css.size",
+              "misago_themes_css.source_file",
+              "misago_themes_css.source_hash",
+              "misago_themes_css.source_needs_building",
+              "misago_themes_css.theme_id",
+              "misago_themes_css.url"
+            ],
+            "joinCount": 0
+          }
+        }
+      },
+      {
+        "kind": "sql",
+        "sql": {
+          "analyzed_query": {
+            "actions": [
+              "select"
+            ],
+            "tables": [
+              "misago_legal_agreement"
+            ],
+            "columns": [
+              "misago_legal_agreement.created_by_id",
+              "misago_legal_agreement.created_by_name",
+              "misago_legal_agreement.created_on",
+              "misago_legal_agreement.id",
+              "misago_legal_agreement.is_active",
+              "misago_legal_agreement.last_modified_by_id",
+              "misago_legal_agreement.last_modified_by_name",
+              "misago_legal_agreement.last_modified_on",
+              "misago_legal_agreement.link",
+              "misago_legal_agreement.text",
+              "misago_legal_agreement.title",
+              "misago_legal_agreement.type",
+              "true"
+            ],
+            "joinCount": 0
+          }
+        }
+      },
+      {
+        "kind": "sql",
+        "sql": {
+          "analyzed_query": {
+            "actions": [
+              "select"
+            ],
+            "tables": [
+              "misago_menus_menuitem"
+            ],
+            "columns": [
+              "misago_menus_menuitem.css_class",
+              "misago_menus_menuitem.id",
+              "misago_menus_menuitem.menu",
+              "misago_menus_menuitem.order",
+              "misago_menus_menuitem.rel",
+              "misago_menus_menuitem.target_blank",
+              "misago_menus_menuitem.title",
+              "misago_menus_menuitem.url"
+            ],
+            "joinCount": 0
+          }
+        }
+      },
+      {
+        "kind": "sql",
+        "sql": {
+          "analyzed_query": {
+            "actions": [
+              "select"
+            ],
+            "tables": [
+              "misago_menus_menuitem"
+            ],
+            "columns": [
+              "misago_menus_menuitem.css_class",
+              "misago_menus_menuitem.id",
+              "misago_menus_menuitem.menu",
+              "misago_menus_menuitem.order",
+              "misago_menus_menuitem.rel",
+              "misago_menus_menuitem.target_blank",
+              "misago_menus_menuitem.title",
+              "misago_menus_menuitem.url"
+            ],
+            "joinCount": 0
+          }
+        }
+      },
+      {
+        "kind": "sql",
+        "sql": {
+          "analyzed_query": {
+            "actions": [
+              "select"
+            ],
+            "tables": [
+              "misago_menus_menuitem"
+            ],
+            "columns": [
+              "misago_menus_menuitem.css_class",
+              "misago_menus_menuitem.id",
+              "misago_menus_menuitem.menu",
+              "misago_menus_menuitem.order",
+              "misago_menus_menuitem.rel",
+              "misago_menus_menuitem.target_blank",
+              "misago_menus_menuitem.title",
+              "misago_menus_menuitem.url"
+            ],
+            "joinCount": 0
+          }
+        }
+      },
+      {
+        "kind": "sql",
+        "sql": {
+          "analyzed_query": {
+            "actions": [
+              "select"
+            ],
+            "tables": [
+              "misago_menus_menuitem"
+            ],
+            "columns": [
+              "misago_menus_menuitem.css_class",
+              "misago_menus_menuitem.id",
+              "misago_menus_menuitem.menu",
+              "misago_menus_menuitem.order",
+              "misago_menus_menuitem.rel",
+              "misago_menus_menuitem.target_blank",
+              "misago_menus_menuitem.title",
+              "misago_menus_menuitem.url"
+            ],
+            "joinCount": 0
+          }
+        }
+      },
+      {
+        "kind": "sql",
+        "sql": {
+          "analyzed_query": {
+            "actions": [
+              "select"
+            ],
+            "tables": [
+              "misago_menus_menuitem"
+            ],
+            "columns": [
+              "misago_menus_menuitem.css_class",
+              "misago_menus_menuitem.id",
+              "misago_menus_menuitem.menu",
+              "misago_menus_menuitem.order",
+              "misago_menus_menuitem.rel",
+              "misago_menus_menuitem.target_blank",
+              "misago_menus_menuitem.title",
+              "misago_menus_menuitem.url"
+            ],
+            "joinCount": 0
+          }
+        }
+      },
+      {
+        "kind": "sql",
+        "sql": {
+          "analyzed_query": {
+            "actions": [
+              "select"
+            ],
+            "tables": [
+              "misago_menus_menuitem"
+            ],
+            "columns": [
+              "misago_menus_menuitem.css_class",
+              "misago_menus_menuitem.id",
+              "misago_menus_menuitem.menu",
+              "misago_menus_menuitem.order",
+              "misago_menus_menuitem.rel",
+              "misago_menus_menuitem.target_blank",
+              "misago_menus_menuitem.title",
+              "misago_menus_menuitem.url"
+            ],
+            "joinCount": 0
+          }
+        }
+      },
+      {
+        "kind": "sql",
+        "sql": {
+          "analyzed_query": {
+            "actions": [
+              "select"
+            ],
+            "tables": [
+              "misago_menus_menuitem"
+            ],
+            "columns": [
+              "misago_menus_menuitem.css_class",
+              "misago_menus_menuitem.id",
+              "misago_menus_menuitem.menu",
+              "misago_menus_menuitem.order",
+              "misago_menus_menuitem.rel",
+              "misago_menus_menuitem.target_blank",
+              "misago_menus_menuitem.title",
+              "misago_menus_menuitem.url"
+            ],
+            "joinCount": 0
+          }
+        }
+      },
+      {
+        "kind": "sql",
+        "sql": {
+          "analyzed_query": {
+            "actions": [
+              "select"
+            ],
+            "tables": [
+              "misago_menus_menuitem"
+            ],
+            "columns": [
+              "misago_menus_menuitem.css_class",
+              "misago_menus_menuitem.id",
+              "misago_menus_menuitem.menu",
+              "misago_menus_menuitem.order",
+              "misago_menus_menuitem.rel",
+              "misago_menus_menuitem.target_blank",
+              "misago_menus_menuitem.title",
+              "misago_menus_menuitem.url"
+            ],
+            "joinCount": 0
+          }
+        }
+      },
+      {
+        "kind": "sql",
+        "sql": {
+          "analyzed_query": {
+            "actions": [
+              "select"
+            ],
+            "tables": [
+              "misago_menus_menuitem"
+            ],
+            "columns": [
+              "misago_menus_menuitem.css_class",
+              "misago_menus_menuitem.id",
+              "misago_menus_menuitem.menu",
+              "misago_menus_menuitem.order",
+              "misago_menus_menuitem.rel",
+              "misago_menus_menuitem.target_blank",
+              "misago_menus_menuitem.title",
+              "misago_menus_menuitem.url"
+            ],
+            "joinCount": 0
+          }
+        }
+      },
+      {
+        "kind": "sql",
+        "sql": {
+          "analyzed_query": {
+            "actions": [
+              "select"
+            ],
+            "tables": [
+              "misago_menus_menuitem"
+            ],
+            "columns": [
+              "misago_menus_menuitem.css_class",
+              "misago_menus_menuitem.id",
+              "misago_menus_menuitem.menu",
+              "misago_menus_menuitem.order",
+              "misago_menus_menuitem.rel",
+              "misago_menus_menuitem.target_blank",
+              "misago_menus_menuitem.title",
+              "misago_menus_menuitem.url"
+            ],
+            "joinCount": 0
+          }
+        }
+      },
+      {
+        "kind": "sql",
+        "sql": {
+          "analyzed_query": {
+            "actions": [
+              "select"
+            ],
+            "tables": [
+              "misago_menus_menuitem"
+            ],
+            "columns": [
+              "misago_menus_menuitem.css_class",
+              "misago_menus_menuitem.id",
+              "misago_menus_menuitem.menu",
+              "misago_menus_menuitem.order",
+              "misago_menus_menuitem.rel",
+              "misago_menus_menuitem.target_blank",
+              "misago_menus_menuitem.title",
+              "misago_menus_menuitem.url"
+            ],
+            "joinCount": 0
+          }
+        }
+      },
+      {
+        "kind": "sql",
+        "sql": {
+          "analyzed_query": {
+            "actions": [
+              "select"
+            ],
+            "tables": [
+              "misago_menus_menuitem"
+            ],
+            "columns": [
+              "misago_menus_menuitem.css_class",
+              "misago_menus_menuitem.id",
+              "misago_menus_menuitem.menu",
+              "misago_menus_menuitem.order",
+              "misago_menus_menuitem.rel",
+              "misago_menus_menuitem.target_blank",
+              "misago_menus_menuitem.title",
+              "misago_menus_menuitem.url"
+            ],
+            "joinCount": 0
+          }
+        }
+      },
+      {
+        "kind": "sql",
+        "sql": {
+          "analyzed_query": {
+            "actions": [
+              "select"
+            ],
+            "tables": [
+              "misago_menus_menuitem"
+            ],
+            "columns": [
+              "misago_menus_menuitem.css_class",
+              "misago_menus_menuitem.id",
+              "misago_menus_menuitem.menu",
+              "misago_menus_menuitem.order",
+              "misago_menus_menuitem.rel",
+              "misago_menus_menuitem.target_blank",
+              "misago_menus_menuitem.title",
+              "misago_menus_menuitem.url"
+            ],
+            "joinCount": 0
+          }
+        }
+      },
+      {
+        "kind": "sql",
+        "sql": {
+          "analyzed_query": {
+            "actions": [
+              "select"
+            ],
+            "tables": [
+              "misago_menus_menuitem"
+            ],
+            "columns": [
+              "misago_menus_menuitem.css_class",
+              "misago_menus_menuitem.id",
+              "misago_menus_menuitem.menu",
+              "misago_menus_menuitem.order",
+              "misago_menus_menuitem.rel",
+              "misago_menus_menuitem.target_blank",
+              "misago_menus_menuitem.title",
+              "misago_menus_menuitem.url"
+            ],
+            "joinCount": 0
+          }
+        }
+      },
+      {
+        "kind": "sql",
+        "sql": {
+          "analyzed_query": {
+            "actions": [
+              "select"
+            ],
+            "tables": [
+              "misago_menus_menuitem"
+            ],
+            "columns": [
+              "misago_menus_menuitem.css_class",
+              "misago_menus_menuitem.id",
+              "misago_menus_menuitem.menu",
+              "misago_menus_menuitem.order",
+              "misago_menus_menuitem.rel",
+              "misago_menus_menuitem.target_blank",
+              "misago_menus_menuitem.title",
+              "misago_menus_menuitem.url"
+            ],
+            "joinCount": 0
+          }
+        }
+      },
+      {
+        "kind": "sql",
+        "sql": {
+          "analyzed_query": {
+            "actions": [
+              "select"
+            ],
+            "tables": [
+              "misago_menus_menuitem"
+            ],
+            "columns": [
+              "misago_menus_menuitem.css_class",
+              "misago_menus_menuitem.id",
+              "misago_menus_menuitem.menu",
+              "misago_menus_menuitem.order",
+              "misago_menus_menuitem.rel",
+              "misago_menus_menuitem.target_blank",
+              "misago_menus_menuitem.title",
+              "misago_menus_menuitem.url"
+            ],
+            "joinCount": 0
+          }
+        }
+      },
+      {
+        "kind": "sql",
+        "sql": {
+          "analyzed_query": {
+            "actions": [
+              "select"
+            ],
+            "tables": [
+              "misago_menus_menuitem"
+            ],
+            "columns": [
+              "misago_menus_menuitem.css_class",
+              "misago_menus_menuitem.id",
+              "misago_menus_menuitem.menu",
+              "misago_menus_menuitem.order",
+              "misago_menus_menuitem.rel",
+              "misago_menus_menuitem.target_blank",
+              "misago_menus_menuitem.title",
+              "misago_menus_menuitem.url"
+            ],
+            "joinCount": 0
+          }
+        }
+      },
+      {
+        "kind": "sql",
+        "sql": {
+          "analyzed_query": {
+            "actions": [
+              "select"
+            ],
+            "tables": [
+              "misago_menus_menuitem"
+            ],
+            "columns": [
+              "misago_menus_menuitem.css_class",
+              "misago_menus_menuitem.id",
+              "misago_menus_menuitem.menu",
+              "misago_menus_menuitem.order",
+              "misago_menus_menuitem.rel",
+              "misago_menus_menuitem.target_blank",
+              "misago_menus_menuitem.title",
+              "misago_menus_menuitem.url"
+            ],
+            "joinCount": 0
+          }
+        }
+      },
+      {
+        "kind": "sql",
+        "sql": {
+          "analyzed_query": {
+            "actions": [
+              "select"
+            ],
+            "tables": [
+              "misago_menus_menuitem"
+            ],
+            "columns": [
+              "misago_menus_menuitem.css_class",
+              "misago_menus_menuitem.id",
+              "misago_menus_menuitem.menu",
+              "misago_menus_menuitem.order",
+              "misago_menus_menuitem.rel",
+              "misago_menus_menuitem.target_blank",
+              "misago_menus_menuitem.title",
+              "misago_menus_menuitem.url"
+            ],
+            "joinCount": 0
+          }
+        }
+      },
+      {
+        "kind": "sql",
+        "sql": {
+          "analyzed_query": {
+            "actions": [
+              "select"
+            ],
+            "tables": [
+              "misago_menus_menuitem"
+            ],
+            "columns": [
+              "misago_menus_menuitem.css_class",
+              "misago_menus_menuitem.id",
+              "misago_menus_menuitem.menu",
+              "misago_menus_menuitem.order",
+              "misago_menus_menuitem.rel",
+              "misago_menus_menuitem.target_blank",
+              "misago_menus_menuitem.title",
+              "misago_menus_menuitem.url"
+            ],
+            "joinCount": 0
+          }
+        }
+      },
+      {
+        "kind": "sql",
+        "sql": {
+          "analyzed_query": {
+            "actions": [
+              "select"
+            ],
+            "tables": [
+              "misago_socialauth_socialauthprovider"
+            ],
+            "columns": [
+              "misago_socialauth_socialauthprovider.button_color",
+              "misago_socialauth_socialauthprovider.button_text",
+              "misago_socialauth_socialauthprovider.is_active",
+              "misago_socialauth_socialauthprovider.order",
+              "misago_socialauth_socialauthprovider.provider",
+              "misago_socialauth_socialauthprovider.settings",
+              "true"
+            ],
+            "joinCount": 0
+          }
+        }
+      },
+      {
+        "kind": "sql",
+        "sql": {
+          "analyzed_query": {
+            "actions": [
+              "select"
+            ],
+            "tables": [
+              "misago_menus_menuitem"
+            ],
+            "columns": [
+              "misago_menus_menuitem.css_class",
+              "misago_menus_menuitem.id",
+              "misago_menus_menuitem.menu",
+              "misago_menus_menuitem.order",
+              "misago_menus_menuitem.rel",
+              "misago_menus_menuitem.target_blank",
+              "misago_menus_menuitem.title",
+              "misago_menus_menuitem.url"
+            ],
+            "joinCount": 0
+          }
+        }
+      },
+      {
+        "kind": "sql",
+        "sql": {
+          "analyzed_query": {
+            "actions": [
+              "select"
+            ],
+            "tables": [
+              "misago_menus_menuitem"
+            ],
+            "columns": [
+              "misago_menus_menuitem.css_class",
+              "misago_menus_menuitem.id",
+              "misago_menus_menuitem.menu",
+              "misago_menus_menuitem.order",
+              "misago_menus_menuitem.rel",
+              "misago_menus_menuitem.target_blank",
+              "misago_menus_menuitem.title",
+              "misago_menus_menuitem.url"
+            ],
+            "joinCount": 0
+          }
+        }
+      },
+      {
+        "kind": "sql",
+        "sql": {
+          "analyzed_query": {
+            "actions": [
+              "update"
+            ],
+            "tables": [
+              "misago_users_online"
+            ],
+            "columns": [
+              "last_click",
+              "misago_users_online.user_id"
+            ],
+            "joinCount": 0
+          }
+        }
+      }
+    ]
+  },
+  {
+    "kind": "http_server_request",
+    "route": "GET /u/testsuperuser/2536/details/",
+    "parameter_names": null,
+    "status_code": 200,
+    "children": [
+      {
+        "kind": "sql",
+        "sql": {
+          "analyzed_query": {
+            "actions": [
+              "select"
+            ],
+            "tables": [
+              "misago_cache_cacheversion"
+            ],
+            "columns": [
+              "misago_cache_cacheversion.cache",
+              "misago_cache_cacheversion.version"
+            ],
+            "joinCount": 0
+          }
+        }
+      },
+      {
+        "kind": "sql",
+        "sql": {
+          "analyzed_query": {
+            "actions": [
+              "select"
+            ],
+            "tables": [
+              "django_session"
+            ],
+            "columns": [
+              "django_session.expire_date",
+              "django_session.session_data",
+              "django_session.session_key"
+            ],
+            "joinCount": 0
+          }
+        }
+      },
+      {
+        "kind": "sql",
+        "sql": {
+          "analyzed_query": {
+            "actions": [
+              "select"
+            ],
+            "tables": [
+              "misago_users_bancache",
+              "misago_users_online",
+              "misago_users_rank",
+              "misago_users_user"
+            ],
+            "columns": [
+              "misago_users_bancache.ban_id",
+              "misago_users_bancache.cache_version",
+              "misago_users_bancache.expires_on",
+              "misago_users_bancache.staff_message",
+              "misago_users_bancache.user_id",
+              "misago_users_bancache.user_message",
+              "misago_users_online.last_click",
+              "misago_users_online.user_id",
+              "misago_users_rank.css_class",
+              "misago_users_rank.description",
+              "misago_users_rank.id",
+              "misago_users_rank.is_default",
+              "misago_users_rank.is_tab",
+              "misago_users_rank.name",
+              "misago_users_rank.order",
+              "misago_users_rank.slug",
+              "misago_users_rank.title",
+              "misago_users_user.acl_key",
+              "misago_users_user.agreements",
+              "misago_users_user.avatar_crop",
+              "misago_users_user.avatar_lock_staff_message",
+              "misago_users_user.avatar_lock_user_message",
+              "misago_users_user.avatar_src",
+              "misago_users_user.avatar_tmp",
+              "misago_users_user.avatars",
+              "misago_users_user.email",
+              "misago_users_user.email_hash",
+              "misago_users_user.followers",
+              "misago_users_user.following",
+              "misago_users_user.id",
+              "misago_users_user.is_active",
+              "misago_users_user.is_active_staff_message",
+              "misago_users_user.is_avatar_locked",
+              "misago_users_user.is_deleting_account",
+              "misago_users_user.is_hiding_presence",
+              "misago_users_user.is_signature_locked",
+              "misago_users_user.is_staff",
+              "misago_users_user.is_superuser",
+              "misago_users_user.joined_from_ip",
+              "misago_users_user.joined_on",
+              "misago_users_user.last_login",
+              "misago_users_user.last_posted_on",
+              "misago_users_user.limits_private_thread_invites_to",
+              "misago_users_user.password",
+              "misago_users_user.posts",
+              "misago_users_user.profile_fields",
+              "misago_users_user.rank_id",
+              "misago_users_user.requires_activation",
+              "misago_users_user.signature",
+              "misago_users_user.signature_checksum",
+              "misago_users_user.signature_lock_staff_message",
+              "misago_users_user.signature_lock_user_message",
+              "misago_users_user.signature_parsed",
+              "misago_users_user.slug",
+              "misago_users_user.sso_id",
+              "misago_users_user.subscribe_to_replied_threads",
+              "misago_users_user.subscribe_to_started_threads",
+              "misago_users_user.sync_unread_private_threads",
+              "misago_users_user.threads",
+              "misago_users_user.title",
+              "misago_users_user.unread_private_threads",
+              "misago_users_user.username"
+            ],
+            "joinCount": 3
+          }
+        }
+      },
+      {
+        "kind": "sql",
+        "sql": {
+          "analyzed_query": {
+            "actions": [
+              "select"
+            ],
+            "tables": [
+              "misago_acl_role",
+              "misago_users_user_roles"
+            ],
+            "columns": [
+              "misago_acl_role.id",
+              "misago_acl_role.name",
+              "misago_acl_role.permissions",
+              "misago_acl_role.special_role",
+              "misago_users_user_roles.role_id",
+              "misago_users_user_roles.user_id"
+            ],
+            "joinCount": 1
+          }
+        }
+      },
+      {
+        "kind": "sql",
+        "sql": {
+          "analyzed_query": {
+            "actions": [
+              "select"
+            ],
+            "tables": [
+              "misago_acl_role",
+              "misago_users_rank_roles"
+            ],
+            "columns": [
+              "misago_acl_role.id",
+              "misago_acl_role.name",
+              "misago_acl_role.permissions",
+              "misago_acl_role.special_role",
+              "misago_users_rank_roles.rank_id",
+              "misago_users_rank_roles.role_id"
+            ],
+            "joinCount": 1
+          }
+        }
+      },
+      {
+        "kind": "sql",
+        "sql": {
+          "analyzed_query": null
+        }
+      },
+      {
+        "kind": "sql",
+        "sql": {
+          "analyzed_query": {
+            "actions": [
+              "select"
+            ],
+            "tables": [
+              "misago_categories_category"
+            ],
+            "columns": [
+              "misago_categories_category.archive_pruned_in_id",
+              "misago_categories_category.css_class",
+              "misago_categories_category.description",
+              "misago_categories_category.id",
+              "misago_categories_category.is_closed",
+              "misago_categories_category.last_post_on",
+              "misago_categories_category.last_poster_id",
+              "misago_categories_category.last_poster_name",
+              "misago_categories_category.last_poster_slug",
+              "misago_categories_category.last_thread_id",
+              "misago_categories_category.last_thread_slug",
+              "misago_categories_category.last_thread_title",
+              "misago_categories_category.level",
+              "misago_categories_category.lft",
+              "misago_categories_category.name",
+              "misago_categories_category.parent_id",
+              "misago_categories_category.posts",
+              "misago_categories_category.prune_replied_after",
+              "misago_categories_category.prune_started_after",
+              "misago_categories_category.require_edits_approval",
+              "misago_categories_category.require_replies_approval",
+              "misago_categories_category.require_threads_approval",
+              "misago_categories_category.rght",
+              "misago_categories_category.slug",
+              "misago_categories_category.special_role",
+              "misago_categories_category.threads",
+              "misago_categories_category.tree_id"
+            ],
+            "joinCount": 0
+          }
+        }
+      },
+      {
+        "kind": "sql",
+        "sql": {
+          "analyzed_query": {
+            "actions": [
+              "select"
+            ],
+            "tables": [
+              "misago_categories_category"
+            ],
+            "columns": [
+              "misago_categories_category.archive_pruned_in_id",
+              "misago_categories_category.css_class",
+              "misago_categories_category.description",
+              "misago_categories_category.id",
+              "misago_categories_category.is_closed",
+              "misago_categories_category.last_post_on",
+              "misago_categories_category.last_poster_id",
+              "misago_categories_category.last_poster_name",
+              "misago_categories_category.last_poster_slug",
+              "misago_categories_category.last_thread_id",
+              "misago_categories_category.last_thread_slug",
+              "misago_categories_category.last_thread_title",
+              "misago_categories_category.level",
+              "misago_categories_category.lft",
+              "misago_categories_category.name",
+              "misago_categories_category.parent_id",
+              "misago_categories_category.posts",
+              "misago_categories_category.prune_replied_after",
+              "misago_categories_category.prune_started_after",
+              "misago_categories_category.require_edits_approval",
+              "misago_categories_category.require_replies_approval",
+              "misago_categories_category.require_threads_approval",
+              "misago_categories_category.rght",
+              "misago_categories_category.slug",
+              "misago_categories_category.special_role",
+              "misago_categories_category.threads",
+              "misago_categories_category.tree_id"
+            ],
+            "joinCount": 0
+          }
+        }
+      },
+      {
+        "kind": "sql",
+        "sql": {
+          "analyzed_query": null
+        }
+      },
+      {
+        "kind": "sql",
+        "sql": {
+          "analyzed_query": {
+            "actions": [
+              "select"
+            ],
+            "tables": [
+              "misago_categories_category"
+            ],
+            "columns": [
+              "misago_categories_category.archive_pruned_in_id",
+              "misago_categories_category.css_class",
+              "misago_categories_category.description",
+              "misago_categories_category.id",
+              "misago_categories_category.is_closed",
+              "misago_categories_category.last_post_on",
+              "misago_categories_category.last_poster_id",
+              "misago_categories_category.last_poster_name",
+              "misago_categories_category.last_poster_slug",
+              "misago_categories_category.last_thread_id",
+              "misago_categories_category.last_thread_slug",
+              "misago_categories_category.last_thread_title",
+              "misago_categories_category.level",
+              "misago_categories_category.lft",
+              "misago_categories_category.name",
+              "misago_categories_category.parent_id",
+              "misago_categories_category.posts",
+              "misago_categories_category.prune_replied_after",
+              "misago_categories_category.prune_started_after",
+              "misago_categories_category.require_edits_approval",
+              "misago_categories_category.require_replies_approval",
+              "misago_categories_category.require_threads_approval",
+              "misago_categories_category.rght",
+              "misago_categories_category.slug",
+              "misago_categories_category.special_role",
+              "misago_categories_category.threads",
+              "misago_categories_category.tree_id"
+            ],
+            "joinCount": 0
+          }
+        }
+      },
+      {
+        "kind": "sql",
+        "sql": {
+          "analyzed_query": {
+            "actions": [
+              "select"
+            ],
+            "tables": [
+              "misago_categories_category"
+            ],
+            "columns": [
+              "misago_categories_category.archive_pruned_in_id",
+              "misago_categories_category.css_class",
+              "misago_categories_category.description",
+              "misago_categories_category.id",
+              "misago_categories_category.is_closed",
+              "misago_categories_category.last_post_on",
+              "misago_categories_category.last_poster_id",
+              "misago_categories_category.last_poster_name",
+              "misago_categories_category.last_poster_slug",
+              "misago_categories_category.last_thread_id",
+              "misago_categories_category.last_thread_slug",
+              "misago_categories_category.last_thread_title",
+              "misago_categories_category.level",
+              "misago_categories_category.lft",
+              "misago_categories_category.name",
+              "misago_categories_category.parent_id",
+              "misago_categories_category.posts",
+              "misago_categories_category.prune_replied_after",
+              "misago_categories_category.prune_started_after",
+              "misago_categories_category.require_edits_approval",
+              "misago_categories_category.require_replies_approval",
+              "misago_categories_category.require_threads_approval",
+              "misago_categories_category.rght",
+              "misago_categories_category.slug",
+              "misago_categories_category.special_role",
+              "misago_categories_category.threads",
+              "misago_categories_category.tree_id"
+            ],
+            "joinCount": 0
+          }
+        }
+      },
+      {
+        "kind": "sql",
+        "sql": {
+          "analyzed_query": {
+            "actions": [
+              "select"
+            ],
+            "tables": [
+              "misago_categories_category"
+            ],
+            "columns": [
+              "misago_categories_category.archive_pruned_in_id",
+              "misago_categories_category.css_class",
+              "misago_categories_category.description",
+              "misago_categories_category.id",
+              "misago_categories_category.is_closed",
+              "misago_categories_category.last_post_on",
+              "misago_categories_category.last_poster_id",
+              "misago_categories_category.last_poster_name",
+              "misago_categories_category.last_poster_slug",
+              "misago_categories_category.last_thread_id",
+              "misago_categories_category.last_thread_slug",
+              "misago_categories_category.last_thread_title",
+              "misago_categories_category.level",
+              "misago_categories_category.lft",
+              "misago_categories_category.name",
+              "misago_categories_category.parent_id",
+              "misago_categories_category.posts",
+              "misago_categories_category.prune_replied_after",
+              "misago_categories_category.prune_started_after",
+              "misago_categories_category.require_edits_approval",
+              "misago_categories_category.require_replies_approval",
+              "misago_categories_category.require_threads_approval",
+              "misago_categories_category.rght",
+              "misago_categories_category.slug",
+              "misago_categories_category.special_role",
+              "misago_categories_category.threads",
+              "misago_categories_category.tree_id"
+            ],
+            "joinCount": 0
+          }
+        }
+      },
+      {
+        "kind": "sql",
+        "sql": {
+          "analyzed_query": null
+        }
+      },
+      {
+        "kind": "sql",
+        "sql": {
+          "analyzed_query": {
+            "actions": [
+              "select"
+            ],
+            "tables": [
+              "misago_categories_category"
+            ],
+            "columns": [
+              "misago_categories_category.archive_pruned_in_id",
+              "misago_categories_category.css_class",
+              "misago_categories_category.description",
+              "misago_categories_category.id",
+              "misago_categories_category.is_closed",
+              "misago_categories_category.last_post_on",
+              "misago_categories_category.last_poster_id",
+              "misago_categories_category.last_poster_name",
+              "misago_categories_category.last_poster_slug",
+              "misago_categories_category.last_thread_id",
+              "misago_categories_category.last_thread_slug",
+              "misago_categories_category.last_thread_title",
+              "misago_categories_category.level",
+              "misago_categories_category.lft",
+              "misago_categories_category.name",
+              "misago_categories_category.parent_id",
+              "misago_categories_category.posts",
+              "misago_categories_category.prune_replied_after",
+              "misago_categories_category.prune_started_after",
+              "misago_categories_category.require_edits_approval",
+              "misago_categories_category.require_replies_approval",
+              "misago_categories_category.require_threads_approval",
+              "misago_categories_category.rght",
+              "misago_categories_category.slug",
+              "misago_categories_category.special_role",
+              "misago_categories_category.threads",
+              "misago_categories_category.tree_id"
+            ],
+            "joinCount": 0
+          }
+        }
+      },
+      {
+        "kind": "sql",
+        "sql": {
+          "analyzed_query": {
+            "actions": [
+              "select"
+            ],
+            "tables": [
+              "misago_categories_category"
+            ],
+            "columns": [
+              "misago_categories_category.archive_pruned_in_id",
+              "misago_categories_category.css_class",
+              "misago_categories_category.description",
+              "misago_categories_category.id",
+              "misago_categories_category.is_closed",
+              "misago_categories_category.last_post_on",
+              "misago_categories_category.last_poster_id",
+              "misago_categories_category.last_poster_name",
+              "misago_categories_category.last_poster_slug",
+              "misago_categories_category.last_thread_id",
+              "misago_categories_category.last_thread_slug",
+              "misago_categories_category.last_thread_title",
+              "misago_categories_category.level",
+              "misago_categories_category.lft",
+              "misago_categories_category.name",
+              "misago_categories_category.parent_id",
+              "misago_categories_category.posts",
+              "misago_categories_category.prune_replied_after",
+              "misago_categories_category.prune_started_after",
+              "misago_categories_category.require_edits_approval",
+              "misago_categories_category.require_replies_approval",
+              "misago_categories_category.require_threads_approval",
+              "misago_categories_category.rght",
+              "misago_categories_category.slug",
+              "misago_categories_category.special_role",
+              "misago_categories_category.threads",
+              "misago_categories_category.tree_id"
+            ],
+            "joinCount": 0
+          }
+        }
+      },
+      {
+        "kind": "sql",
+        "sql": {
+          "analyzed_query": {
+            "actions": [
+              "select"
+            ],
+            "tables": [
+              "misago_categories_category"
+            ],
+            "columns": [
+              "misago_categories_category.archive_pruned_in_id",
+              "misago_categories_category.css_class",
+              "misago_categories_category.description",
+              "misago_categories_category.id",
+              "misago_categories_category.is_closed",
+              "misago_categories_category.last_post_on",
+              "misago_categories_category.last_poster_id",
+              "misago_categories_category.last_poster_name",
+              "misago_categories_category.last_poster_slug",
+              "misago_categories_category.last_thread_id",
+              "misago_categories_category.last_thread_slug",
+              "misago_categories_category.last_thread_title",
+              "misago_categories_category.level",
+              "misago_categories_category.lft",
+              "misago_categories_category.name",
+              "misago_categories_category.parent_id",
+              "misago_categories_category.posts",
+              "misago_categories_category.prune_replied_after",
+              "misago_categories_category.prune_started_after",
+              "misago_categories_category.require_edits_approval",
+              "misago_categories_category.require_replies_approval",
+              "misago_categories_category.require_threads_approval",
+              "misago_categories_category.rght",
+              "misago_categories_category.slug",
+              "misago_categories_category.special_role",
+              "misago_categories_category.threads",
+              "misago_categories_category.tree_id"
+            ],
+            "joinCount": 0
+          }
+        }
+      },
+      {
+        "kind": "sql",
+        "sql": {
+          "analyzed_query": {
+            "actions": [
+              "select"
+            ],
+            "tables": [
+              "misago_users_bancache",
+              "misago_users_online",
+              "misago_users_rank",
+              "misago_users_user"
+            ],
+            "columns": [
+              "misago_users_bancache.ban_id",
+              "misago_users_bancache.cache_version",
+              "misago_users_bancache.expires_on",
+              "misago_users_bancache.staff_message",
+              "misago_users_bancache.user_id",
+              "misago_users_bancache.user_message",
+              "misago_users_online.last_click",
+              "misago_users_online.user_id",
+              "misago_users_rank.css_class",
+              "misago_users_rank.description",
+              "misago_users_rank.id",
+              "misago_users_rank.is_default",
+              "misago_users_rank.is_tab",
+              "misago_users_rank.name",
+              "misago_users_rank.order",
+              "misago_users_rank.slug",
+              "misago_users_rank.title",
+              "misago_users_user.acl_key",
+              "misago_users_user.agreements",
+              "misago_users_user.avatar_crop",
+              "misago_users_user.avatar_lock_staff_message",
+              "misago_users_user.avatar_lock_user_message",
+              "misago_users_user.avatar_src",
+              "misago_users_user.avatar_tmp",
+              "misago_users_user.avatars",
+              "misago_users_user.email",
+              "misago_users_user.email_hash",
+              "misago_users_user.followers",
+              "misago_users_user.following",
+              "misago_users_user.id",
+              "misago_users_user.is_active",
+              "misago_users_user.is_active_staff_message",
+              "misago_users_user.is_avatar_locked",
+              "misago_users_user.is_deleting_account",
+              "misago_users_user.is_hiding_presence",
+              "misago_users_user.is_signature_locked",
+              "misago_users_user.is_staff",
+              "misago_users_user.is_superuser",
+              "misago_users_user.joined_from_ip",
+              "misago_users_user.joined_on",
+              "misago_users_user.last_login",
+              "misago_users_user.last_posted_on",
+              "misago_users_user.limits_private_thread_invites_to",
+              "misago_users_user.password",
+              "misago_users_user.posts",
+              "misago_users_user.profile_fields",
+              "misago_users_user.rank_id",
+              "misago_users_user.requires_activation",
+              "misago_users_user.signature",
+              "misago_users_user.signature_checksum",
+              "misago_users_user.signature_lock_staff_message",
+              "misago_users_user.signature_lock_user_message",
+              "misago_users_user.signature_parsed",
+              "misago_users_user.slug",
+              "misago_users_user.sso_id",
+              "misago_users_user.subscribe_to_replied_threads",
+              "misago_users_user.subscribe_to_started_threads",
+              "misago_users_user.sync_unread_private_threads",
+              "misago_users_user.threads",
+              "misago_users_user.title",
+              "misago_users_user.unread_private_threads",
+              "misago_users_user.username"
+            ],
+            "joinCount": 3
+          }
+        }
+      },
+      {
+        "kind": "sql",
+        "sql": {
+          "analyzed_query": null
+        }
+      },
+      {
+        "kind": "sql",
+        "sql": {
+          "analyzed_query": {
+            "actions": [
+              "select"
+            ],
+            "tables": [
+              "misago_icons_icon"
+            ],
+            "columns": [
+              "misago_icons_icon.height",
+              "misago_icons_icon.id",
+              "misago_icons_icon.image",
+              "misago_icons_icon.size",
+              "misago_icons_icon.type",
+              "misago_icons_icon.width"
+            ],
+            "joinCount": 0
+          }
+        }
+      },
+      {
+        "kind": "sql",
+        "sql": {
+          "analyzed_query": {
+            "actions": [
+              "select"
+            ],
+            "tables": [
+              "misago_themes_theme"
+            ],
+            "columns": [
+              "misago_themes_theme.author",
+              "misago_themes_theme.dirname",
+              "misago_themes_theme.id",
+              "misago_themes_theme.is_active",
+              "misago_themes_theme.is_default",
+              "misago_themes_theme.level",
+              "misago_themes_theme.lft",
+              "misago_themes_theme.name",
+              "misago_themes_theme.parent_id",
+              "misago_themes_theme.rght",
+              "misago_themes_theme.tree_id",
+              "misago_themes_theme.url",
+              "misago_themes_theme.version",
+              "true"
+            ],
+            "joinCount": 0
+          }
+        }
+      },
+      {
+        "kind": "sql",
+        "sql": {
+          "analyzed_query": {
+            "actions": [
+              "select"
+            ],
+            "tables": [
+              "misago_themes_theme"
+            ],
+            "columns": [
+              "misago_themes_theme.author",
+              "misago_themes_theme.dirname",
+              "misago_themes_theme.id",
+              "misago_themes_theme.is_active",
+              "misago_themes_theme.is_default",
+              "misago_themes_theme.level",
+              "misago_themes_theme.lft",
+              "misago_themes_theme.name",
+              "misago_themes_theme.parent_id",
+              "misago_themes_theme.rght",
+              "misago_themes_theme.tree_id",
+              "misago_themes_theme.url",
+              "misago_themes_theme.version"
+            ],
+            "joinCount": 0
+          }
+        }
+      },
+      {
+        "kind": "sql",
+        "sql": {
+          "analyzed_query": {
+            "actions": [
+              "select"
+            ],
+            "tables": [
+              "misago_themes_css"
+            ],
+            "columns": [
+              "misago_themes_css.build_file",
+              "misago_themes_css.build_hash",
+              "misago_themes_css.id",
+              "misago_themes_css.modified_on",
+              "misago_themes_css.name",
+              "misago_themes_css.order",
+              "misago_themes_css.size",
+              "misago_themes_css.source_file",
+              "misago_themes_css.source_hash",
+              "misago_themes_css.source_needs_building",
+              "misago_themes_css.theme_id",
+              "misago_themes_css.url"
+            ],
+            "joinCount": 0
+          }
+        }
+      },
+      {
+        "kind": "sql",
+        "sql": {
+          "analyzed_query": {
+            "actions": [
+              "select"
+            ],
+            "tables": [
+              "misago_legal_agreement"
+            ],
+            "columns": [
+              "misago_legal_agreement.created_by_id",
+              "misago_legal_agreement.created_by_name",
+              "misago_legal_agreement.created_on",
+              "misago_legal_agreement.id",
+              "misago_legal_agreement.is_active",
+              "misago_legal_agreement.last_modified_by_id",
+              "misago_legal_agreement.last_modified_by_name",
+              "misago_legal_agreement.last_modified_on",
+              "misago_legal_agreement.link",
+              "misago_legal_agreement.text",
+              "misago_legal_agreement.title",
+              "misago_legal_agreement.type",
+              "true"
+            ],
+            "joinCount": 0
+          }
+        }
+      },
+      {
+        "kind": "sql",
+        "sql": {
+          "analyzed_query": {
+            "actions": [
+              "select"
+            ],
+            "tables": [
+              "misago_menus_menuitem"
+            ],
+            "columns": [
+              "misago_menus_menuitem.css_class",
+              "misago_menus_menuitem.id",
+              "misago_menus_menuitem.menu",
+              "misago_menus_menuitem.order",
+              "misago_menus_menuitem.rel",
+              "misago_menus_menuitem.target_blank",
+              "misago_menus_menuitem.title",
+              "misago_menus_menuitem.url"
+            ],
+            "joinCount": 0
+          }
+        }
+      },
+      {
+        "kind": "sql",
+        "sql": {
+          "analyzed_query": {
+            "actions": [
+              "select"
+            ],
+            "tables": [
+              "misago_menus_menuitem"
+            ],
+            "columns": [
+              "misago_menus_menuitem.css_class",
+              "misago_menus_menuitem.id",
+              "misago_menus_menuitem.menu",
+              "misago_menus_menuitem.order",
+              "misago_menus_menuitem.rel",
+              "misago_menus_menuitem.target_blank",
+              "misago_menus_menuitem.title",
+              "misago_menus_menuitem.url"
+            ],
+            "joinCount": 0
+          }
+        }
+      },
+      {
+        "kind": "sql",
+        "sql": {
+          "analyzed_query": {
+            "actions": [
+              "select"
+            ],
+            "tables": [
+              "misago_menus_menuitem"
+            ],
+            "columns": [
+              "misago_menus_menuitem.css_class",
+              "misago_menus_menuitem.id",
+              "misago_menus_menuitem.menu",
+              "misago_menus_menuitem.order",
+              "misago_menus_menuitem.rel",
+              "misago_menus_menuitem.target_blank",
+              "misago_menus_menuitem.title",
+              "misago_menus_menuitem.url"
+            ],
+            "joinCount": 0
+          }
+        }
+      },
+      {
+        "kind": "sql",
+        "sql": {
+          "analyzed_query": {
+            "actions": [
+              "select"
+            ],
+            "tables": [
+              "misago_menus_menuitem"
+            ],
+            "columns": [
+              "misago_menus_menuitem.css_class",
+              "misago_menus_menuitem.id",
+              "misago_menus_menuitem.menu",
+              "misago_menus_menuitem.order",
+              "misago_menus_menuitem.rel",
+              "misago_menus_menuitem.target_blank",
+              "misago_menus_menuitem.title",
+              "misago_menus_menuitem.url"
+            ],
+            "joinCount": 0
+          }
+        }
+      },
+      {
+        "kind": "sql",
+        "sql": {
+          "analyzed_query": {
+            "actions": [
+              "select"
+            ],
+            "tables": [
+              "misago_menus_menuitem"
+            ],
+            "columns": [
+              "misago_menus_menuitem.css_class",
+              "misago_menus_menuitem.id",
+              "misago_menus_menuitem.menu",
+              "misago_menus_menuitem.order",
+              "misago_menus_menuitem.rel",
+              "misago_menus_menuitem.target_blank",
+              "misago_menus_menuitem.title",
+              "misago_menus_menuitem.url"
+            ],
+            "joinCount": 0
+          }
+        }
+      },
+      {
+        "kind": "sql",
+        "sql": {
+          "analyzed_query": {
+            "actions": [
+              "select"
+            ],
+            "tables": [
+              "misago_menus_menuitem"
+            ],
+            "columns": [
+              "misago_menus_menuitem.css_class",
+              "misago_menus_menuitem.id",
+              "misago_menus_menuitem.menu",
+              "misago_menus_menuitem.order",
+              "misago_menus_menuitem.rel",
+              "misago_menus_menuitem.target_blank",
+              "misago_menus_menuitem.title",
+              "misago_menus_menuitem.url"
+            ],
+            "joinCount": 0
+          }
+        }
+      },
+      {
+        "kind": "sql",
+        "sql": {
+          "analyzed_query": {
+            "actions": [
+              "select"
+            ],
+            "tables": [
+              "misago_menus_menuitem"
+            ],
+            "columns": [
+              "misago_menus_menuitem.css_class",
+              "misago_menus_menuitem.id",
+              "misago_menus_menuitem.menu",
+              "misago_menus_menuitem.order",
+              "misago_menus_menuitem.rel",
+              "misago_menus_menuitem.target_blank",
+              "misago_menus_menuitem.title",
+              "misago_menus_menuitem.url"
+            ],
+            "joinCount": 0
+          }
+        }
+      },
+      {
+        "kind": "sql",
+        "sql": {
+          "analyzed_query": {
+            "actions": [
+              "select"
+            ],
+            "tables": [
+              "misago_menus_menuitem"
+            ],
+            "columns": [
+              "misago_menus_menuitem.css_class",
+              "misago_menus_menuitem.id",
+              "misago_menus_menuitem.menu",
+              "misago_menus_menuitem.order",
+              "misago_menus_menuitem.rel",
+              "misago_menus_menuitem.target_blank",
+              "misago_menus_menuitem.title",
+              "misago_menus_menuitem.url"
+            ],
+            "joinCount": 0
+          }
+        }
+      },
+      {
+        "kind": "sql",
+        "sql": {
+          "analyzed_query": {
+            "actions": [
+              "select"
+            ],
+            "tables": [
+              "misago_menus_menuitem"
+            ],
+            "columns": [
+              "misago_menus_menuitem.css_class",
+              "misago_menus_menuitem.id",
+              "misago_menus_menuitem.menu",
+              "misago_menus_menuitem.order",
+              "misago_menus_menuitem.rel",
+              "misago_menus_menuitem.target_blank",
+              "misago_menus_menuitem.title",
+              "misago_menus_menuitem.url"
+            ],
+            "joinCount": 0
+          }
+        }
+      },
+      {
+        "kind": "sql",
+        "sql": {
+          "analyzed_query": {
+            "actions": [
+              "select"
+            ],
+            "tables": [
+              "misago_menus_menuitem"
+            ],
+            "columns": [
+              "misago_menus_menuitem.css_class",
+              "misago_menus_menuitem.id",
+              "misago_menus_menuitem.menu",
+              "misago_menus_menuitem.order",
+              "misago_menus_menuitem.rel",
+              "misago_menus_menuitem.target_blank",
+              "misago_menus_menuitem.title",
+              "misago_menus_menuitem.url"
+            ],
+            "joinCount": 0
+          }
+        }
+      },
+      {
+        "kind": "sql",
+        "sql": {
+          "analyzed_query": {
+            "actions": [
+              "select"
+            ],
+            "tables": [
+              "misago_menus_menuitem"
+            ],
+            "columns": [
+              "misago_menus_menuitem.css_class",
+              "misago_menus_menuitem.id",
+              "misago_menus_menuitem.menu",
+              "misago_menus_menuitem.order",
+              "misago_menus_menuitem.rel",
+              "misago_menus_menuitem.target_blank",
+              "misago_menus_menuitem.title",
+              "misago_menus_menuitem.url"
+            ],
+            "joinCount": 0
+          }
+        }
+      },
+      {
+        "kind": "sql",
+        "sql": {
+          "analyzed_query": {
+            "actions": [
+              "select"
+            ],
+            "tables": [
+              "misago_menus_menuitem"
+            ],
+            "columns": [
+              "misago_menus_menuitem.css_class",
+              "misago_menus_menuitem.id",
+              "misago_menus_menuitem.menu",
+              "misago_menus_menuitem.order",
+              "misago_menus_menuitem.rel",
+              "misago_menus_menuitem.target_blank",
+              "misago_menus_menuitem.title",
+              "misago_menus_menuitem.url"
+            ],
+            "joinCount": 0
+          }
+        }
+      },
+      {
+        "kind": "sql",
+        "sql": {
+          "analyzed_query": {
+            "actions": [
+              "select"
+            ],
+            "tables": [
+              "misago_menus_menuitem"
+            ],
+            "columns": [
+              "misago_menus_menuitem.css_class",
+              "misago_menus_menuitem.id",
+              "misago_menus_menuitem.menu",
+              "misago_menus_menuitem.order",
+              "misago_menus_menuitem.rel",
+              "misago_menus_menuitem.target_blank",
+              "misago_menus_menuitem.title",
+              "misago_menus_menuitem.url"
+            ],
+            "joinCount": 0
+          }
+        }
+      },
+      {
+        "kind": "sql",
+        "sql": {
+          "analyzed_query": {
+            "actions": [
+              "select"
+            ],
+            "tables": [
+              "misago_menus_menuitem"
+            ],
+            "columns": [
+              "misago_menus_menuitem.css_class",
+              "misago_menus_menuitem.id",
+              "misago_menus_menuitem.menu",
+              "misago_menus_menuitem.order",
+              "misago_menus_menuitem.rel",
+              "misago_menus_menuitem.target_blank",
+              "misago_menus_menuitem.title",
+              "misago_menus_menuitem.url"
+            ],
+            "joinCount": 0
+          }
+        }
+      },
+      {
+        "kind": "sql",
+        "sql": {
+          "analyzed_query": {
+            "actions": [
+              "select"
+            ],
+            "tables": [
+              "misago_menus_menuitem"
+            ],
+            "columns": [
+              "misago_menus_menuitem.css_class",
+              "misago_menus_menuitem.id",
+              "misago_menus_menuitem.menu",
+              "misago_menus_menuitem.order",
+              "misago_menus_menuitem.rel",
+              "misago_menus_menuitem.target_blank",
+              "misago_menus_menuitem.title",
+              "misago_menus_menuitem.url"
+            ],
+            "joinCount": 0
+          }
+        }
+      },
+      {
+        "kind": "sql",
+        "sql": {
+          "analyzed_query": {
+            "actions": [
+              "select"
+            ],
+            "tables": [
+              "misago_menus_menuitem"
+            ],
+            "columns": [
+              "misago_menus_menuitem.css_class",
+              "misago_menus_menuitem.id",
+              "misago_menus_menuitem.menu",
+              "misago_menus_menuitem.order",
+              "misago_menus_menuitem.rel",
+              "misago_menus_menuitem.target_blank",
+              "misago_menus_menuitem.title",
+              "misago_menus_menuitem.url"
+            ],
+            "joinCount": 0
+          }
+        }
+      },
+      {
+        "kind": "sql",
+        "sql": {
+          "analyzed_query": {
+            "actions": [
+              "select"
+            ],
+            "tables": [
+              "misago_menus_menuitem"
+            ],
+            "columns": [
+              "misago_menus_menuitem.css_class",
+              "misago_menus_menuitem.id",
+              "misago_menus_menuitem.menu",
+              "misago_menus_menuitem.order",
+              "misago_menus_menuitem.rel",
+              "misago_menus_menuitem.target_blank",
+              "misago_menus_menuitem.title",
+              "misago_menus_menuitem.url"
+            ],
+            "joinCount": 0
+          }
+        }
+      },
+      {
+        "kind": "sql",
+        "sql": {
+          "analyzed_query": {
+            "actions": [
+              "select"
+            ],
+            "tables": [
+              "misago_menus_menuitem"
+            ],
+            "columns": [
+              "misago_menus_menuitem.css_class",
+              "misago_menus_menuitem.id",
+              "misago_menus_menuitem.menu",
+              "misago_menus_menuitem.order",
+              "misago_menus_menuitem.rel",
+              "misago_menus_menuitem.target_blank",
+              "misago_menus_menuitem.title",
+              "misago_menus_menuitem.url"
+            ],
+            "joinCount": 0
+          }
+        }
+      },
+      {
+        "kind": "sql",
+        "sql": {
+          "analyzed_query": {
+            "actions": [
+              "select"
+            ],
+            "tables": [
+              "misago_menus_menuitem"
+            ],
+            "columns": [
+              "misago_menus_menuitem.css_class",
+              "misago_menus_menuitem.id",
+              "misago_menus_menuitem.menu",
+              "misago_menus_menuitem.order",
+              "misago_menus_menuitem.rel",
+              "misago_menus_menuitem.target_blank",
+              "misago_menus_menuitem.title",
+              "misago_menus_menuitem.url"
+            ],
+            "joinCount": 0
+          }
+        }
+      },
+      {
+        "kind": "sql",
+        "sql": {
+          "analyzed_query": {
+            "actions": [
+              "select"
+            ],
+            "tables": [
+              "misago_menus_menuitem"
+            ],
+            "columns": [
+              "misago_menus_menuitem.css_class",
+              "misago_menus_menuitem.id",
+              "misago_menus_menuitem.menu",
+              "misago_menus_menuitem.order",
+              "misago_menus_menuitem.rel",
+              "misago_menus_menuitem.target_blank",
+              "misago_menus_menuitem.title",
+              "misago_menus_menuitem.url"
+            ],
+            "joinCount": 0
+          }
+        }
+      },
+      {
+        "kind": "sql",
+        "sql": {
+          "analyzed_query": {
+            "actions": [
+              "select"
+            ],
+            "tables": [
+              "misago_socialauth_socialauthprovider"
+            ],
+            "columns": [
+              "misago_socialauth_socialauthprovider.button_color",
+              "misago_socialauth_socialauthprovider.button_text",
+              "misago_socialauth_socialauthprovider.is_active",
+              "misago_socialauth_socialauthprovider.order",
+              "misago_socialauth_socialauthprovider.provider",
+              "misago_socialauth_socialauthprovider.settings",
+              "true"
+            ],
+            "joinCount": 0
+          }
+        }
+      },
+      {
+        "kind": "sql",
+        "sql": {
+          "analyzed_query": {
+            "actions": [
+              "select"
+            ],
+            "tables": [
+              "misago_menus_menuitem"
+            ],
+            "columns": [
+              "misago_menus_menuitem.css_class",
+              "misago_menus_menuitem.id",
+              "misago_menus_menuitem.menu",
+              "misago_menus_menuitem.order",
+              "misago_menus_menuitem.rel",
+              "misago_menus_menuitem.target_blank",
+              "misago_menus_menuitem.title",
+              "misago_menus_menuitem.url"
+            ],
+            "joinCount": 0
+          }
+        }
+      },
+      {
+        "kind": "sql",
+        "sql": {
+          "analyzed_query": {
+            "actions": [
+              "select"
+            ],
+            "tables": [
+              "misago_menus_menuitem"
+            ],
+            "columns": [
+              "misago_menus_menuitem.css_class",
+              "misago_menus_menuitem.id",
+              "misago_menus_menuitem.menu",
+              "misago_menus_menuitem.order",
+              "misago_menus_menuitem.rel",
+              "misago_menus_menuitem.target_blank",
+              "misago_menus_menuitem.title",
+              "misago_menus_menuitem.url"
+            ],
+            "joinCount": 0
+          }
+        }
+      },
+      {
+        "kind": "sql",
+        "sql": {
+          "analyzed_query": {
+            "actions": [
+              "update"
+            ],
+            "tables": [
+              "misago_users_online"
+            ],
+            "columns": [
+              "last_click",
+              "misago_users_online.user_id"
+            ],
+            "joinCount": 0
+          }
+        }
+      }
+    ]
+  }
+]

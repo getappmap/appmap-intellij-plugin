@@ -3,16 +3,17 @@ package appland.index;
 import appland.AppMapBaseTest;
 import org.junit.Test;
 
+import java.io.IOException;
 import java.util.Comparator;
 
 public class AppMapMetadataIndexTest extends AppMapBaseTest {
     @Test
-    public void index() {
-        myFixture.configureByText("a.appmap.json", createAppMapMetadataJSON("a"));
-        myFixture.configureByText("b.appmap.json", createAppMapMetadataJSON("b"));
-        myFixture.configureByText("c.appmap.json", createAppMapMetadataJSON("c"));
+    public void index() throws Throwable {
+        createAppMapWithIndexes("a");
+        createAppMapWithIndexes("b");
+        createAppMapWithIndexes("c");
 
-        var appMaps = AppMapMetadataIndex.findAppMaps(getProject(), null);
+        var appMaps = AppMapMetadataService.getInstance(getProject()).findAppMaps();
         assertEquals(3, appMaps.size());
         appMaps.sort(Comparator.comparing(AppMapMetadata::getName));
 
@@ -20,24 +21,24 @@ public class AppMapMetadataIndexTest extends AppMapBaseTest {
         assertEquals(new AppMapMetadata("b", "/src/b.appmap.json"), appMaps.get(1));
         assertEquals(new AppMapMetadata("c", "/src/c.appmap.json"), appMaps.get(2));
 
-        myFixture.configureByText("d.appmap.json", createAppMapMetadataJSON("d"));
-        assertEquals(4, AppMapMetadataIndex.findAppMaps(getProject(), null).size());
+        createAppMapWithIndexes("d");
+        assertEquals(4, AppMapMetadataService.getInstance(getProject()).findAppMaps().size());
 
         // name filter
-        assertEquals(1, AppMapMetadataIndex.findAppMaps(getProject(), "a").size());
-        assertEquals(1, AppMapMetadataIndex.findAppMaps(getProject(), "b").size());
-        assertEquals(1, AppMapMetadataIndex.findAppMaps(getProject(), "c").size());
-        assertEquals(0, AppMapMetadataIndex.findAppMaps(getProject(), "not-present").size());
+        assertEquals(1, AppMapMetadataService.getInstance(getProject()).findAppMaps("a").size());
+        assertEquals(1, AppMapMetadataService.getInstance(getProject()).findAppMaps("b").size());
+        assertEquals(1, AppMapMetadataService.getInstance(getProject()).findAppMaps("c").size());
+        assertEquals(0, AppMapMetadataService.getInstance(getProject()).findAppMaps("not-present").size());
 
         // case-insensitive matching
-        assertEquals(1, AppMapMetadataIndex.findAppMaps(getProject(), "C").size());
+        assertEquals(1, AppMapMetadataService.getInstance(getProject()).findAppMaps("C").size());
     }
 
     @Test
-    public void indexWithCounts() {
-        myFixture.configureByText("a.appmap.json", createAppMapMetadataJSON("a", 5, 10, 15));
+    public void indexWithCounts() throws Throwable {
+        createAppMapWithIndexes("a", 5, 10, 15);
 
-        var appMaps = AppMapMetadataIndex.findAppMaps(getProject(), null);
+        var appMaps = AppMapMetadataService.getInstance(getProject()).findAppMaps();
         assertEquals(1, appMaps.size());
         assertEquals(5, appMaps.get(0).getRequestCount());
         assertEquals(10, appMaps.get(0).getQueryCount());
