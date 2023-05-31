@@ -97,7 +97,7 @@ public class AppMapFindingsAnnotator implements Annotator {
         public void invoke(@NotNull Project project, Editor editor, PsiFile file) throws IncorrectOperationException {
             var findingsFile = problem.getFindingsFile();
             if (findingsFile != null) {
-                var appMapFile = AppMapFiles.findAppMapSourceFile(findingsFile);
+                var appMapFile = AppMapFiles.findAppMapFileByMetadataFile(findingsFile);
                 if (appMapFile != null) {
                     new OpenAppMapFileNavigatable(project, appMapFile, problem.getFinding()).navigate(true);
                 }

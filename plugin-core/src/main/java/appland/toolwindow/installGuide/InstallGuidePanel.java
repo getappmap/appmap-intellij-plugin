@@ -3,8 +3,7 @@ package appland.toolwindow.installGuide;
 import appland.config.AppMapConfigFileListener;
 import appland.files.AppMapFileChangeListener;
 import appland.files.AppMapFiles;
-import appland.index.AppMapMetadataIndex;
-import appland.index.AppMapSearchScopes;
+import appland.index.AppMapNameIndex;
 import appland.installGuide.InstallGuideViewPage;
 import appland.problemsView.FindingsManager;
 import appland.problemsView.listener.ScannerFindingsListener;
@@ -22,13 +21,11 @@ import com.intellij.openapi.project.DumbService;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.Disposer;
 import com.intellij.psi.search.FilenameIndex;
-import com.intellij.util.CommonProcessors;
 import com.intellij.util.concurrency.AppExecutorUtil;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
@@ -179,14 +176,7 @@ public class InstallGuidePanel extends AppMapContentPanel implements Disposable 
      * presence of at least one .appmap.json file
      */
     private static void updateRecordAppMapsLabel(@NotNull Project project, @NotNull StatusLabel label) {
-        findIndexedStatus(project, label, () -> {
-            var found = new AtomicBoolean(false);
-            AppMapMetadataIndex.processAppMaps(project, AppMapSearchScopes.appMapsWithExcluded(project), (file, appmap) -> {
-                found.set(true);
-                return false;
-            });
-            return found.get();
-        });
+        findIndexedStatus(project, label, () -> !AppMapNameIndex.isEmpty(AppMapSearchScopes.appMapsWithExcluded(project)));
     }
 
     /**

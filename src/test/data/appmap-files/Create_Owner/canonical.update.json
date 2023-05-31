@@ -1,0 +1,31 @@
+[
+  {
+    "kind": "http_server_request",
+    "route": "POST /owners/new",
+    "status_code": 302,
+    "children": [
+      {
+        "kind": "sql",
+        "sql": {
+          "analyzed_query": {
+            "actions": [
+              "insert"
+            ],
+            "tables": [
+              "owners"
+            ],
+            "columns": [
+              "address",
+              "city",
+              "first_name",
+              "id",
+              "last_name",
+              "telephone"
+            ],
+            "joinCount": 0
+          }
+        }
+      }
+    ]
+  }
+]

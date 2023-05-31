@@ -1,0 +1,114 @@
+{
+  "language": {
+    "name": "python",
+    "engine": "CPython",
+    "version": "3.7.10"
+  },
+  "client": {
+    "name": "appmap",
+    "url": "https://github.com/applandinc/appmap-python"
+  },
+  "git": {
+    "repository": "https://github.com/rafalp/Misago.git",
+    "branch": "master",
+    "commit": "da14e8ef712a77603fdfec8bbff67c526c7d0c5c",
+    "status": [
+      "?? .appmap/",
+      "?? appmap.yml",
+      "?? tmp/"
+    ],
+    "tag": "0.27.0"
+  },
+  "feature_group": "Gender profile field tests",
+  "recording": {
+    "defined_class": "misago.users.tests.test_gender_profilefield.GenderProfileFieldTests",
+    "method_id": "test_api_edits_field",
+    "source_location": "misago/users/tests/test_gender_profilefield.py:284"
+  },
+  "name": "Gender profile field tests api edits field",
+  "feature": "Api edits field",
+  "app": "misage",
+  "frameworks": [
+    {
+      "name": "pytest",
+      "version": "5.4.2"
+    }
+  ],
+  "recorder": {
+    "name": "pytest"
+  },
+  "fingerprints": [
+    {
+      "appmap_digest": "bcadc41f2780e9a6d1c69b5bbe60be6bcb4a900283e5255cb846f005fc4a3956",
+      "canonicalization_algorithm": "classDependencies",
+      "digest": "e098da313232abda3ffad162ffdbdf0c7a1410978134ba554ea4d64417d4140d",
+      "fingerprint_algorithm": "sha256"
+    },
+    {
+      "appmap_digest": "bcadc41f2780e9a6d1c69b5bbe60be6bcb4a900283e5255cb846f005fc4a3956",
+      "canonicalization_algorithm": "classes",
+      "digest": "52a06494f693b9e185b5865954ffedbee0d240014ac4576b28fd5ce2b86c11a8",
+      "fingerprint_algorithm": "sha256"
+    },
+    {
+      "appmap_digest": "bcadc41f2780e9a6d1c69b5bbe60be6bcb4a900283e5255cb846f005fc4a3956",
+      "canonicalization_algorithm": "httpClientRequests",
+      "digest": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "fingerprint_algorithm": "sha256"
+    },
+    {
+      "appmap_digest": "bcadc41f2780e9a6d1c69b5bbe60be6bcb4a900283e5255cb846f005fc4a3956",
+      "canonicalization_algorithm": "httpServerRequests",
+      "digest": "c99f4ce69b27c342cb3d9b0d75c8000a5f7fc36f11a52269681999fdd985e69c",
+      "fingerprint_algorithm": "sha256"
+    },
+    {
+      "appmap_digest": "bcadc41f2780e9a6d1c69b5bbe60be6bcb4a900283e5255cb846f005fc4a3956",
+      "canonicalization_algorithm": "info",
+      "digest": "571bcb40620534bf503d1923b92f0f2e85f577c7c2389802ac4aafeae037a6dc",
+      "fingerprint_algorithm": "sha256"
+    },
+    {
+      "appmap_digest": "bcadc41f2780e9a6d1c69b5bbe60be6bcb4a900283e5255cb846f005fc4a3956",
+      "canonicalization_algorithm": "labels",
+      "digest": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "fingerprint_algorithm": "sha256"
+    },
+    {
+      "appmap_digest": "bcadc41f2780e9a6d1c69b5bbe60be6bcb4a900283e5255cb846f005fc4a3956",
+      "canonicalization_algorithm": "packageDependencies",
+      "digest": "767d5e89d3f63bad8a1b29a8954cb2029f1b9888ac6ff16b4a90601fb1646f66",
+      "fingerprint_algorithm": "sha256"
+    },
+    {
+      "appmap_digest": "bcadc41f2780e9a6d1c69b5bbe60be6bcb4a900283e5255cb846f005fc4a3956",
+      "canonicalization_algorithm": "packages",
+      "digest": "26424df216eda153cc05ec41d07778490e892e83b4526f3fd86d38232889e13e",
+      "fingerprint_algorithm": "sha256"
+    },
+    {
+      "appmap_digest": "bcadc41f2780e9a6d1c69b5bbe60be6bcb4a900283e5255cb846f005fc4a3956",
+      "canonicalization_algorithm": "sqlNormalized",
+      "digest": "a3ece054b4d0d628a2a14a98aaaca98a8c460277c112d572b9baed1a26d6d3f9",
+      "fingerprint_algorithm": "sha256"
+    },
+    {
+      "appmap_digest": "bcadc41f2780e9a6d1c69b5bbe60be6bcb4a900283e5255cb846f005fc4a3956",
+      "canonicalization_algorithm": "sqlTables",
+      "digest": "c545309e7ad583bb7e468fd4c345fbd03922a539aeef4ecb5d27563c33f96eaf",
+      "fingerprint_algorithm": "sha256"
+    },
+    {
+      "appmap_digest": "bcadc41f2780e9a6d1c69b5bbe60be6bcb4a900283e5255cb846f005fc4a3956",
+      "canonicalization_algorithm": "trace",
+      "digest": "05ef215f4229bb5503dd12e88c36e7ae62e081de65e2c27e6768cf0f7efb38c3",
+      "fingerprint_algorithm": "sha256"
+    },
+    {
+      "appmap_digest": "bcadc41f2780e9a6d1c69b5bbe60be6bcb4a900283e5255cb846f005fc4a3956",
+      "canonicalization_algorithm": "update",
+      "digest": "c721fbefd9fbe2c347f2fabdf10ac6d67a11e20204226bea9bcf8a65bc09a5c8",
+      "fingerprint_algorithm": "sha256"
+    }
+  ]
+}

@@ -1,0 +1,114 @@
+{
+  "language": {
+    "name": "python",
+    "engine": "CPython",
+    "version": "3.7.10"
+  },
+  "client": {
+    "name": "appmap",
+    "url": "https://github.com/applandinc/appmap-python"
+  },
+  "git": {
+    "repository": "https://github.com/rafalp/Misago.git",
+    "branch": "master",
+    "commit": "da14e8ef712a77603fdfec8bbff67c526c7d0c5c",
+    "status": [
+      "?? .appmap/",
+      "?? appmap.yml",
+      "?? tmp/"
+    ],
+    "tag": "0.27.0"
+  },
+  "feature_group": "Thread poll view tests",
+  "recording": {
+    "defined_class": "misago.threads.tests.test_threadview.ThreadPollViewTests",
+    "method_id": "test_poll_unvoted_display",
+    "source_location": "misago/threads/tests/test_threadview.py:470"
+  },
+  "name": "Thread poll view tests poll unvoted display",
+  "feature": "Poll unvoted display",
+  "app": "misage",
+  "frameworks": [
+    {
+      "name": "pytest",
+      "version": "5.4.2"
+    }
+  ],
+  "recorder": {
+    "name": "pytest"
+  },
+  "fingerprints": [
+    {
+      "appmap_digest": "eac03614ab9b2485ba3eb0bb81e5834d849add67047dd5dcfaf1ae1fed2802d9",
+      "canonicalization_algorithm": "classDependencies",
+      "digest": "ccfa19963a6e5e122e65ea01ec0d7d69d022ae7bd844bbe14e89360cb2856588",
+      "fingerprint_algorithm": "sha256"
+    },
+    {
+      "appmap_digest": "eac03614ab9b2485ba3eb0bb81e5834d849add67047dd5dcfaf1ae1fed2802d9",
+      "canonicalization_algorithm": "classes",
+      "digest": "4cab37fffbba47eb497998d584744530f942835dd320537197d33a2dd904f700",
+      "fingerprint_algorithm": "sha256"
+    },
+    {
+      "appmap_digest": "eac03614ab9b2485ba3eb0bb81e5834d849add67047dd5dcfaf1ae1fed2802d9",
+      "canonicalization_algorithm": "httpClientRequests",
+      "digest": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "fingerprint_algorithm": "sha256"
+    },
+    {
+      "appmap_digest": "eac03614ab9b2485ba3eb0bb81e5834d849add67047dd5dcfaf1ae1fed2802d9",
+      "canonicalization_algorithm": "httpServerRequests",
+      "digest": "07d1ea4db3620c53f1146960fbd7cae516387b2b7ebc468ec50bc8a964a15d31",
+      "fingerprint_algorithm": "sha256"
+    },
+    {
+      "appmap_digest": "eac03614ab9b2485ba3eb0bb81e5834d849add67047dd5dcfaf1ae1fed2802d9",
+      "canonicalization_algorithm": "info",
+      "digest": "977adf4a8b0974764be37b0e6fdb8a9d8b0830c0de3c6fdc7fef93c922b4961e",
+      "fingerprint_algorithm": "sha256"
+    },
+    {
+      "appmap_digest": "eac03614ab9b2485ba3eb0bb81e5834d849add67047dd5dcfaf1ae1fed2802d9",
+      "canonicalization_algorithm": "labels",
+      "digest": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "fingerprint_algorithm": "sha256"
+    },
+    {
+      "appmap_digest": "eac03614ab9b2485ba3eb0bb81e5834d849add67047dd5dcfaf1ae1fed2802d9",
+      "canonicalization_algorithm": "packageDependencies",
+      "digest": "a1e6c5e15366b4ded6bb8d0d06d93f561319c45e04e15f2b6a9b4bfc33c4e98c",
+      "fingerprint_algorithm": "sha256"
+    },
+    {
+      "appmap_digest": "eac03614ab9b2485ba3eb0bb81e5834d849add67047dd5dcfaf1ae1fed2802d9",
+      "canonicalization_algorithm": "packages",
+      "digest": "1b050ce8914f30fb7290647f80ff33c934b3e97b143b512355fae8764678e0c0",
+      "fingerprint_algorithm": "sha256"
+    },
+    {
+      "appmap_digest": "eac03614ab9b2485ba3eb0bb81e5834d849add67047dd5dcfaf1ae1fed2802d9",
+      "canonicalization_algorithm": "sqlNormalized",
+      "digest": "b80bd7f85460e6628b6721a42832c4ba6057cc3dbbcacd4e5cf9d9fae167fab9",
+      "fingerprint_algorithm": "sha256"
+    },
+    {
+      "appmap_digest": "eac03614ab9b2485ba3eb0bb81e5834d849add67047dd5dcfaf1ae1fed2802d9",
+      "canonicalization_algorithm": "sqlTables",
+      "digest": "938991b6257cf2655671ecd92b8bc14a0de3b774002b51f013b349b5982062a3",
+      "fingerprint_algorithm": "sha256"
+    },
+    {
+      "appmap_digest": "eac03614ab9b2485ba3eb0bb81e5834d849add67047dd5dcfaf1ae1fed2802d9",
+      "canonicalization_algorithm": "trace",
+      "digest": "a7797544176205993ed75ecfd4ef6f58483d28af4af10c14e944f220d569c0c8",
+      "fingerprint_algorithm": "sha256"
+    },
+    {
+      "appmap_digest": "eac03614ab9b2485ba3eb0bb81e5834d849add67047dd5dcfaf1ae1fed2802d9",
+      "canonicalization_algorithm": "update",
+      "digest": "b45a06d8d9a5d4f7ec0e41a1da7afe99ff7a9c199ca52757f5158132ebc73667",
+      "fingerprint_algorithm": "sha256"
+    }
+  ]
+}

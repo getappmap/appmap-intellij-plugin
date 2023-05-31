@@ -20,10 +20,13 @@ public class AppMapIndexableFilesContributorTest extends AppMapBaseTest {
 
         withExcludedFolder(excludedFolder, () -> {
             myFixture.copyFileToProject("appmap-files/Create_Owner.appmap.json", "excluded/appmap/Create_Owner.appmap.json");
+            myFixture.copyDirectoryToProject("appmap-files/Create_Owner", "excluded/appmap/Create_Owner");
+
             myFixture.copyFileToProject("appmap-files/Create_Owner.appmap.json", "excluded/appmap-not-indexed/Create_Owner.appmap.json");
+            myFixture.copyDirectoryToProject("appmap-files/Create_Owner", "excluded/appmap-not-indexed/Create_Owner");
 
             // 2020.2 EAP seems to always index excluded folders
-            var foundMaps = AppMapMetadataIndex.findAppMaps(getProject(), "Create Owner");
+            var foundMaps = AppMapMetadataService.getInstance(getProject()).findAppMaps("Create Owner");
             assertNotEmpty(foundMaps);
         });
     }

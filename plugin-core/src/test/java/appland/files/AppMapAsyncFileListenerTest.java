@@ -9,10 +9,10 @@ import java.util.concurrent.TimeUnit;
 
 public class AppMapAsyncFileListenerTest extends AppMapBaseTest {
     @Test
-    public void appMapCreated() throws InterruptedException {
+    public void appMapCreated() throws Throwable {
         var condition = createCondition();
 
-        myFixture.configureByText("a.appmap.json", createAppMapMetadataJSON("a"));
+        createAppMapWithIndexes("a");
 
         assertTrue(condition.await(10, TimeUnit.SECONDS));
     }

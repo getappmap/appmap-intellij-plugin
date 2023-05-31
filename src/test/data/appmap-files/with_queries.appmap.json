@@ -9,17 +9,27 @@
           "accept": "text/plain, application/json, application/*+json, */*",
           "user-agent": "Java/11.0.16.1"
         },
+        "normalized_path_info": "/owners/:ownerId",
         "path_info": "/owners/1",
         "protocol": "HTTP/1.1",
         "request_method": "GET"
       },
-      "id": 1942,
+      "id": 1,
+      "message": [
+        {
+          "class": "java.lang.String",
+          "kind": "req",
+          "name": "ownerId",
+          "object_id": 289819952,
+          "value": "1"
+        }
+      ],
       "thread_id": 455
     },
     {
       "defined_class": "org.springframework.samples.petclinic.owner.OwnerController",
       "event": "call",
-      "id": 1946,
+      "id": 2,
       "lineno": 57,
       "method_id": "setAllowedFields",
       "parameters": [
@@ -41,16 +51,16 @@
       "thread_id": 455
     },
     {
-      "elapsed": 9.8E-6,
+      "elapsed": 0.0000098,
       "event": "return",
-      "id": 1947,
-      "parent_id": 1946,
+      "id": 3,
+      "parent_id": 2,
       "thread_id": 455
     },
     {
       "defined_class": "org.springframework.samples.petclinic.owner.OwnerController",
       "event": "call",
-      "id": 1948,
+      "id": 4,
       "lineno": 62,
       "method_id": "findOwner",
       "parameters": [
@@ -73,7 +83,7 @@
     },
     {
       "event": "call",
-      "id": 1949,
+      "id": 5,
       "sql_query": {
         "database_type": "H2",
         "sql": "select owner0_.id as id1_0_0_, pets1_.id as id1_1_1_, owner0_.first_name as first_na2_0_0_, owner0_.last_name as last_nam3_0_0_, owner0_.address as address4_0_0_, owner0_.city as city5_0_0_, owner0_.telephone as telephon6_0_0_, pets1_.name as name2_1_1_, pets1_.birth_date as birth_da3_1_1_, pets1_.type_id as type_id4_1_1_, pets1_.owner_id as owner_id5_1_0__, pets1_.id as id1_1_0__ from owners owner0_ left outer join pets pets1_ on owner0_.id=pets1_.owner_id where owner0_.id=? order by pets1_.name"
@@ -81,15 +91,15 @@
       "thread_id": 455
     },
     {
-      "elapsed": 1.09E-4,
+      "elapsed": 0.000109,
       "event": "return",
-      "id": 1950,
-      "parent_id": 1949,
+      "id": 6,
+      "parent_id": 5,
       "thread_id": 455
     },
     {
       "event": "call",
-      "id": 1951,
+      "id": 7,
       "sql_query": {
         "database_type": "H2",
         "sql": "select pettype0_.id as id1_3_0_, pettype0_.name as name2_3_0_ from types pettype0_ where pettype0_.id=?"
@@ -97,15 +107,15 @@
       "thread_id": 455
     },
     {
-      "elapsed": 3.54E-5,
+      "elapsed": 0.0000354,
       "event": "return",
-      "id": 1952,
-      "parent_id": 1951,
+      "id": 8,
+      "parent_id": 7,
       "thread_id": 455
     },
     {
       "event": "call",
-      "id": 1953,
+      "id": 9,
       "sql_query": {
         "database_type": "H2",
         "sql": "select visits0_.pet_id as pet_id4_6_0_, visits0_.id as id1_6_0_, visits0_.id as id1_6_1_, visits0_.visit_date as visit_da2_6_1_, visits0_.description as descript3_6_1_ from visits visits0_ where visits0_.pet_id=? order by visits0_.visit_date asc"
@@ -113,17 +123,17 @@
       "thread_id": 455
     },
     {
-      "elapsed": 5.18E-5,
+      "elapsed": 0.0000518,
       "event": "return",
-      "id": 1954,
-      "parent_id": 1953,
+      "id": 10,
+      "parent_id": 9,
       "thread_id": 455
     },
     {
-      "elapsed": 6.642E-4,
+      "elapsed": 0.0006642,
       "event": "return",
-      "id": 1955,
-      "parent_id": 1948,
+      "id": 11,
+      "parent_id": 4,
       "return_value": {
         "class": "org.springframework.samples.petclinic.owner.Owner",
         "object_id": 1231241781,
@@ -134,7 +144,7 @@
     {
       "defined_class": "org.springframework.samples.petclinic.owner.OwnerController",
       "event": "call",
-      "id": 1956,
+      "id": 12,
       "lineno": 57,
       "method_id": "setAllowedFields",
       "parameters": [
@@ -156,16 +166,16 @@
       "thread_id": 455
     },
     {
-      "elapsed": 6.2E-6,
+      "elapsed": 0.0000062,
       "event": "return",
-      "id": 1957,
-      "parent_id": 1956,
+      "id": 13,
+      "parent_id": 12,
       "thread_id": 455
     },
     {
       "defined_class": "org.springframework.samples.petclinic.owner.OwnerController",
       "event": "call",
-      "id": 1958,
+      "id": 14,
       "lineno": 161,
       "method_id": "showOwner",
       "parameters": [
@@ -188,7 +198,7 @@
     },
     {
       "event": "call",
-      "id": 1959,
+      "id": 15,
       "sql_query": {
         "database_type": "H2",
         "sql": "select owner0_.id as id1_0_0_, pets1_.id as id1_1_1_, owner0_.first_name as first_na2_0_0_, owner0_.last_name as last_nam3_0_0_, owner0_.address as address4_0_0_, owner0_.city as city5_0_0_, owner0_.telephone as telephon6_0_0_, pets1_.name as name2_1_1_, pets1_.birth_date as birth_da3_1_1_, pets1_.type_id as type_id4_1_1_, pets1_.owner_id as owner_id5_1_0__, pets1_.id as id1_1_0__ from owners owner0_ left outer join pets pets1_ on owner0_.id=pets1_.owner_id where owner0_.id=? order by pets1_.name"
@@ -196,17 +206,17 @@
       "thread_id": 455
     },
     {
-      "elapsed": 5.7E-6,
+      "elapsed": 0.0000057,
       "event": "return",
-      "id": 1960,
-      "parent_id": 1959,
+      "id": 16,
+      "parent_id": 15,
       "thread_id": 455
     },
     {
-      "elapsed": 1.104E-4,
+      "elapsed": 0.0001104,
       "event": "return",
-      "id": 1961,
-      "parent_id": 1958,
+      "id": 17,
+      "parent_id": 14,
       "return_value": {
         "class": "org.springframework.web.servlet.ModelAndView",
         "object_id": 1341511123,
@@ -217,7 +227,7 @@
     {
       "defined_class": "org.springframework.samples.petclinic.owner.OwnerController",
       "event": "call",
-      "id": 1962,
+      "id": 18,
       "lineno": 57,
       "method_id": "setAllowedFields",
       "parameters": [
@@ -239,33 +249,11 @@
       "thread_id": 455
     },
     {
-      "elapsed": 5.9E-6,
+      "elapsed": 0.0000059,
       "event": "return",
-      "id": 1963,
-      "parent_id": 1962,
+      "id": 19,
+      "parent_id": 18,
       "thread_id": 455
-    },
-    {
-      "defined_class": "org.springframework.samples.petclinic.PetClinicIntegrationTests",
-      "event": "call",
-      "id": 1941,
-      "lineno": 53,
-      "method_id": "testOwnerDetails",
-      "path": "org/springframework/samples/petclinic/PetClinicIntegrationTests.java",
-      "receiver": {
-        "class": "org.springframework.samples.petclinic.PetClinicIntegrationTests",
-        "object_id": 1971411626,
-        "value": "org.springframework.samples.petclinic.PetClinicIntegrationTests@75815aaa"
-      },
-      "static": false,
-      "thread_id": 1
-    },
-    {
-      "elapsed": 0.0204024,
-      "event": "return",
-      "id": 1965,
-      "parent_id": 1941,
-      "thread_id": 1
     },
     {
       "elapsed": 0.0063736,
@@ -281,85 +269,31 @@
         },
         "status": 200
       },
-      "id": 1964,
-      "parent_id": 1942,
+      "id": 20,
+      "parent_id": 1,
       "thread_id": 455
-    }
-  ],
-  "classMap": [
+    },
     {
-      "children": [
-        {
-          "children": [
-            {
-              "children": [
-                {
-                  "children": [
-                    {
-                      "children": [
-                        {
-                          "labels": [],
-                          "location": "org/springframework/samples/petclinic/PetClinicIntegrationTests.java:53",
-                          "name": "testOwnerDetails",
-                          "static": false,
-                          "type": "function"
-                        }
-                      ],
-                      "location": "org/springframework/samples/petclinic/PetClinicIntegrationTests.java",
-                      "name": "PetClinicIntegrationTests",
-                      "static": false,
-                      "type": "class"
-                    },
-                    {
-                      "children": [
-                        {
-                          "children": [
-                            {
-                              "labels": [],
-                              "location": "org/springframework/samples/petclinic/owner/OwnerController.java:161",
-                              "name": "showOwner",
-                              "static": false,
-                              "type": "function"
-                            },
-                            {
-                              "labels": [],
-                              "location": "org/springframework/samples/petclinic/owner/OwnerController.java:57",
-                              "name": "setAllowedFields",
-                              "static": false,
-                              "type": "function"
-                            },
-                            {
-                              "labels": [],
-                              "location": "org/springframework/samples/petclinic/owner/OwnerController.java:62",
-                              "name": "findOwner",
-                              "static": false,
-                              "type": "function"
-                            }
-                          ],
-                          "location": "org/springframework/samples/petclinic/owner/OwnerController.java",
-                          "name": "OwnerController",
-                          "static": false,
-                          "type": "class"
-                        }
-                      ],
-                      "name": "owner",
-                      "type": "package"
-                    }
-                  ],
-                  "name": "petclinic",
-                  "type": "package"
-                }
-              ],
-              "name": "samples",
-              "type": "package"
-            }
-          ],
-          "name": "springframework",
-          "type": "package"
-        }
-      ],
-      "name": "org",
-      "type": "package"
+      "defined_class": "org.springframework.samples.petclinic.PetClinicIntegrationTests",
+      "event": "call",
+      "id": 21,
+      "lineno": 53,
+      "method_id": "testOwnerDetails",
+      "path": "org/springframework/samples/petclinic/PetClinicIntegrationTests.java",
+      "receiver": {
+        "class": "org.springframework.samples.petclinic.PetClinicIntegrationTests",
+        "object_id": 1971411626,
+        "value": "org.springframework.samples.petclinic.PetClinicIntegrationTests@75815aaa"
+      },
+      "static": false,
+      "thread_id": 1
+    },
+    {
+      "elapsed": 0.0204024,
+      "event": "return",
+      "id": 22,
+      "parent_id": 21,
+      "thread_id": 1
     }
   ],
   "version": "1.2",
@@ -386,34 +320,176 @@
     "framework": {
       "name": "junit"
     },
-    "test_status": "succeeded"
-  },
-  "eventUpdates": {
-    "1942": {
-      "event": "call",
-      "http_server_request": {
-        "headers": {
-          "host": "localhost:36775",
-          "connection": "keep-alive",
-          "accept": "text/plain, application/json, application/*+json, */*",
-          "user-agent": "Java/11.0.16.1"
-        },
-        "normalized_path_info": "/owners/:ownerId",
-        "path_info": "/owners/1",
-        "protocol": "HTTP/1.1",
-        "request_method": "GET"
+    "test_status": "succeeded",
+    "fingerprints": [
+      {
+        "appmap_digest": "83aba177ec51f815229ecc83bca8ce99d59d8d06e2a21e06158161edf4b49df9",
+        "canonicalization_algorithm": "classDependencies",
+        "digest": "06751c4b837183565397733ddabc17514dc6987913ee6b8d196b51617c0190fa",
+        "fingerprint_algorithm": "sha256"
       },
-      "id": 1942,
-      "message": [
+      {
+        "appmap_digest": "83aba177ec51f815229ecc83bca8ce99d59d8d06e2a21e06158161edf4b49df9",
+        "canonicalization_algorithm": "classes",
+        "digest": "60f3756679d014803937d77e596c1192450dcb9b3430bbad72826ccc7277bbf9",
+        "fingerprint_algorithm": "sha256"
+      },
+      {
+        "appmap_digest": "83aba177ec51f815229ecc83bca8ce99d59d8d06e2a21e06158161edf4b49df9",
+        "canonicalization_algorithm": "httpClientRequests",
+        "digest": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+        "fingerprint_algorithm": "sha256"
+      },
+      {
+        "appmap_digest": "83aba177ec51f815229ecc83bca8ce99d59d8d06e2a21e06158161edf4b49df9",
+        "canonicalization_algorithm": "httpServerRequests",
+        "digest": "1a5b2c96b077ef3a995cefadc0b9a237beeffe5a46bf40d7e1df8d5a6419984c",
+        "fingerprint_algorithm": "sha256"
+      },
+      {
+        "appmap_digest": "83aba177ec51f815229ecc83bca8ce99d59d8d06e2a21e06158161edf4b49df9",
+        "canonicalization_algorithm": "info",
+        "digest": "af8e50f5af1f3fd1200408c6443e7faa88ac50d27d06bf6910acc7b0f03fd3ed",
+        "fingerprint_algorithm": "sha256"
+      },
+      {
+        "appmap_digest": "83aba177ec51f815229ecc83bca8ce99d59d8d06e2a21e06158161edf4b49df9",
+        "canonicalization_algorithm": "labels",
+        "digest": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+        "fingerprint_algorithm": "sha256"
+      },
+      {
+        "appmap_digest": "83aba177ec51f815229ecc83bca8ce99d59d8d06e2a21e06158161edf4b49df9",
+        "canonicalization_algorithm": "packageDependencies",
+        "digest": "f5fc622e7d999238d6b11aa2bc69cd70aca33b8123e6b29787921a41846a7959",
+        "fingerprint_algorithm": "sha256"
+      },
+      {
+        "appmap_digest": "83aba177ec51f815229ecc83bca8ce99d59d8d06e2a21e06158161edf4b49df9",
+        "canonicalization_algorithm": "packages",
+        "digest": "348072e02be5f53e395cd98f287560e2647ec6ecae71f89dea8d68ecc15e994a",
+        "fingerprint_algorithm": "sha256"
+      },
+      {
+        "appmap_digest": "83aba177ec51f815229ecc83bca8ce99d59d8d06e2a21e06158161edf4b49df9",
+        "canonicalization_algorithm": "sqlNormalized",
+        "digest": "90782c5e90a90d58b56fb59fac05b701d78e3c56426aa0e60bd6b511072f8295",
+        "fingerprint_algorithm": "sha256"
+      },
+      {
+        "appmap_digest": "83aba177ec51f815229ecc83bca8ce99d59d8d06e2a21e06158161edf4b49df9",
+        "canonicalization_algorithm": "sqlTables",
+        "digest": "b2a21e653d26584397bab50461e2fc308eac6ff02b6f740bd4421afc7d0ecacf",
+        "fingerprint_algorithm": "sha256"
+      },
+      {
+        "appmap_digest": "83aba177ec51f815229ecc83bca8ce99d59d8d06e2a21e06158161edf4b49df9",
+        "canonicalization_algorithm": "trace",
+        "digest": "fca9fa2c8089e8c37f3203687dbabaa9d1e547760227a4625d698db2b2a3d610",
+        "fingerprint_algorithm": "sha256"
+      },
+      {
+        "appmap_digest": "83aba177ec51f815229ecc83bca8ce99d59d8d06e2a21e06158161edf4b49df9",
+        "canonicalization_algorithm": "update",
+        "digest": "2028672200e5ac225aba48c7706ce7a5c81cc4670759cfe2d4594b1aa70d2326",
+        "fingerprint_algorithm": "sha256"
+      }
+    ]
+  },
+  "classMap": [
+    {
+      "children": [
         {
-          "class": "java.lang.String",
-          "kind": "req",
-          "name": "ownerId",
-          "object_id": 289819952,
-          "value": "1"
+          "children": [
+            {
+              "children": [
+                {
+                  "children": [
+                    {
+                      "children": [
+                        {
+                          "name": "testOwnerDetails",
+                          "type": "function",
+                          "static": false,
+                          "location": "org/springframework/samples/petclinic/PetClinicIntegrationTests.java:53"
+                        }
+                      ],
+                      "name": "PetClinicIntegrationTests",
+                      "type": "class"
+                    },
+                    {
+                      "children": [
+                        {
+                          "children": [
+                            {
+                              "name": "showOwner",
+                              "type": "function",
+                              "static": false,
+                              "location": "org/springframework/samples/petclinic/owner/OwnerController.java:161"
+                            },
+                            {
+                              "name": "setAllowedFields",
+                              "type": "function",
+                              "static": false,
+                              "location": "org/springframework/samples/petclinic/owner/OwnerController.java:57"
+                            },
+                            {
+                              "name": "findOwner",
+                              "type": "function",
+                              "static": false,
+                              "location": "org/springframework/samples/petclinic/owner/OwnerController.java:62"
+                            }
+                          ],
+                          "name": "OwnerController",
+                          "type": "class"
+                        }
+                      ],
+                      "name": "owner",
+                      "type": "package"
+                    }
+                  ],
+                  "name": "petclinic",
+                  "type": "package"
+                }
+              ],
+              "name": "samples",
+              "type": "package"
+            }
+          ],
+          "name": "springframework",
+          "type": "package"
         }
       ],
-      "thread_id": 455
+      "name": "org",
+      "type": "package"
+    },
+    {
+      "type": "http",
+      "name": "HTTP server requests",
+      "children": [
+        {
+          "type": "route",
+          "name": "GET /owners/:ownerId"
+        }
+      ]
+    },
+    {
+      "type": "database",
+      "name": "Database",
+      "children": [
+        {
+          "type": "query",
+          "name": "select owner0_.id as id1_0_0_, pets1_.id as id1_1_1_, owner0_.first_name as first_na2_0_0_, owner0_.last_name as last_nam3_0_0_, owner0_.address as address4_0_0_, owner0_.city as city5_0_0_, owner0_.telephone as telephon6_0_0_, pets1_.name as name2_1_1_, pets1_.birth_date as birth_da3_1_1_, pets1_.type_id as type_id4_1_1_, pets1_.owner_id as owner_id5_1_0__, pets1_.id as id1_1_0__ from owners owner0_ left outer join pets pets1_ on owner0_.id=pets1_.owner_id where owner0_.id=? order by pets1_.name"
+        },
+        {
+          "type": "query",
+          "name": "select pettype0_.id as id1_3_0_, pettype0_.name as name2_3_0_ from types pettype0_ where pettype0_.id=?"
+        },
+        {
+          "type": "query",
+          "name": "select visits0_.pet_id as pet_id4_6_0_, visits0_.id as id1_6_0_, visits0_.id as id1_6_1_, visits0_.visit_date as visit_da2_6_1_, visits0_.description as descript3_6_1_ from visits visits0_ where visits0_.pet_id=? order by visits0_.visit_date asc"
+        }
+      ]
     }
-  }
+  ]
 }

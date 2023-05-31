@@ -1,0 +1,12 @@
+[
+  {
+    "route": "GET /",
+    "parameters": "()",
+    "status": 200
+  },
+  {
+    "route": "GET /",
+    "parameters": "()",
+    "status": 404
+  }
+]

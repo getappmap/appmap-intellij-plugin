@@ -7,7 +7,8 @@ public class AppMapRemoteAppMapTest extends AppMapBaseTest {
     @Test
     public void index() {
         myFixture.copyFileToProject("appmap-files/Create_Owner.appmap.json");
-        assertEquals(1, AppMapMetadataIndex.findAppMaps(getProject(), null).size());
-        assertEquals(1, AppMapMetadataIndex.findAppMaps(getProject(), "Create Owner").size());
+        myFixture.copyDirectoryToProject("appmap-files/Create_Owner", "appmap-files");
+        assertEquals(1, AppMapMetadataService.getInstance(getProject()).findAppMaps().size());
+        assertEquals(1, AppMapMetadataService.getInstance(getProject()).findAppMaps("Create Owner").size());
     }
 }

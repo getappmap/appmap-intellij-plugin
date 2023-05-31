@@ -1,0 +1,18 @@
+[
+  {
+    "caller": "HTTP server requests",
+    "callee": "Database"
+  },
+  {
+    "caller": "HTTP server requests",
+    "callee": "misago"
+  },
+  {
+    "caller": "misago",
+    "callee": "Database"
+  },
+  {
+    "caller": "misago",
+    "callee": "HTTP server requests"
+  }
+]

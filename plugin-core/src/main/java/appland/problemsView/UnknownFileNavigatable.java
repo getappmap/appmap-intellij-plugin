@@ -41,7 +41,7 @@ final class UnknownFileNavigatable implements Navigatable {
         var findingsFile = finding.getFindingsFile();
         if (findingsFile != null) {
             // move the lookup of the AppMap file into a background ReadAction
-            ReadAction.nonBlocking(() -> AppMapFiles.findAppMapSourceFile(findingsFile))
+            ReadAction.nonBlocking(() -> AppMapFiles.findAppMapFileByMetadataFile(findingsFile))
                     .finishOnUiThread(ModalityState.current(), appMapFile -> {
                         if (appMapFile != null) {
                             new OpenAppMapFileNavigatable(project, appMapFile, finding).navigate(requestFocus);

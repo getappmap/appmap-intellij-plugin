@@ -1,0 +1,115 @@
+[
+  {
+    "kind": "http_server_request",
+    "route": "GET /",
+    "status_code": 200,
+    "children": [
+      {
+        "kind": "sql",
+        "sql": {
+          "analyzed_query": {
+            "actions": [
+              "update"
+            ],
+            "tables": [
+              "misago_users_bancache"
+            ],
+            "columns": [
+              "ban_id",
+              "cache_version",
+              "expires_on",
+              "misago_users_bancache.user_id",
+              "staff_message",
+              "user_message"
+            ],
+            "joinCount": 0
+          }
+        }
+      },
+      {
+        "kind": "sql",
+        "sql": {
+          "analyzed_query": {
+            "actions": [
+              "insert"
+            ],
+            "tables": [
+              "misago_users_bancache"
+            ],
+            "columns": [
+              "ban_id",
+              "cache_version",
+              "expires_on",
+              "staff_message",
+              "user_id",
+              "user_message"
+            ],
+            "joinCount": 0
+          }
+        }
+      },
+      {
+        "kind": "sql",
+        "sql": {
+          "analyzed_query": {
+            "actions": [
+              "update"
+            ],
+            "tables": [
+              "misago_users_online"
+            ],
+            "columns": [
+              "last_click",
+              "misago_users_online.user_id"
+            ],
+            "joinCount": 0
+          }
+        }
+      },
+      {
+        "kind": "sql",
+        "sql": {
+          "analyzed_query": {
+            "actions": [
+              "update"
+            ],
+            "tables": [
+              "django_session"
+            ],
+            "columns": [
+              "django_session.session_key",
+              "expire_date",
+              "session_data"
+            ],
+            "joinCount": 0
+          }
+        }
+      }
+    ]
+  },
+  {
+    "kind": "http_server_request",
+    "route": "GET /",
+    "status_code": 404,
+    "children": [
+      {
+        "kind": "sql",
+        "sql": {
+          "analyzed_query": {
+            "actions": [
+              "update"
+            ],
+            "tables": [
+              "misago_users_online"
+            ],
+            "columns": [
+              "last_click",
+              "misago_users_online.user_id"
+            ],
+            "joinCount": 0
+          }
+        }
+      }
+    ]
+  }
+]

@@ -1,1 +1,777 @@
-{"version":"1.2","metadata":{"app":"spring-petclinic","language":{"name":"java","version":"11.0.10+9-LTS","engine":"OpenJDK 64-Bit Server VM"},"client":{"name":"appmap-java","url":"https://github.com/appland/appmap-java"},"recorder":{"name":"remote_recording"},"recording":{},"framework":{},"name":"Create Owner"},"events":[{"defined_class":"javax.servlet.http.HttpServlet","event":"call","http_server_request":{"normalized_path_info":"/owners/new","path_info":"/owners/new","protocol":"HTTP/1.1","request_method":"POST"},"id":161,"lineno":736,"message":[{"class":"java.lang.String","kind":"req","name":"firstName","object_id":948906332,"value":"John"},{"class":"java.lang.String","kind":"req","name":"lastName","object_id":1018210965,"value":"Doe"},{"class":"java.lang.String","kind":"req","name":"address","object_id":2041717607,"value":"Ample Street"},{"class":"java.lang.String","kind":"req","name":"city","object_id":151355997,"value":"London"},{"class":"java.lang.String","kind":"req","name":"telephone","object_id":1216454632,"value":"1234567891"}],"method_id":"service","path":"javax/servlet/http/HttpServlet.java","static":false,"thread_id":458},{"defined_class":"org.springframework.samples.petclinic.owner.OwnerController","event":"call","id":165,"lineno":55,"method_id":"setAllowedFields","parameters":[{"class":"org.springframework.web.servlet.mvc.method.annotation.ExtendedServletRequestDataBinder","kind":"req","name":"dataBinder","object_id":722482848,"value":"org.springframework.web.servlet.mvc.method.annotation.ExtendedServletRequestDataBinder@2b1036a0"}],"path":"org/springframework/samples/petclinic/owner/OwnerController.java","receiver":{"class":"org.springframework.samples.petclinic.owner.OwnerController","object_id":319144230,"value":"org.springframework.samples.petclinic.owner.OwnerController@1305c126"},"static":false,"thread_id":458},{"defined_class":"org.springframework.samples.petclinic.owner.OwnerController","event":"return","id":166,"lineno":55,"method_id":"setAllowedFields","path":"org/springframework/samples/petclinic/owner/OwnerController.java","static":false,"thread_id":458},{"defined_class":"org.springframework.samples.petclinic.owner.Owner","event":"call","id":167,"lineno":66,"method_id":"getAddress","path":"org/springframework/samples/petclinic/owner/Owner.java","receiver":{"class":"org.springframework.samples.petclinic.owner.Owner","object_id":643346754,"value":"[Owner@2658b142 id = [null], new = true, lastName = [null], firstName = [null], address = [null], city = [null], telephone = [null]]"},"static":false,"thread_id":458},{"defined_class":"org.springframework.samples.petclinic.owner.Owner","event":"return","id":168,"lineno":66,"method_id":"getAddress","path":"org/springframework/samples/petclinic/owner/Owner.java","static":false,"thread_id":458},{"defined_class":"org.springframework.samples.petclinic.owner.Owner","event":"call","id":169,"lineno":70,"method_id":"setAddress","parameters":[{"class":"java.lang.String","kind":"req","name":"address","object_id":2041717607,"value":"Ample Street"}],"path":"org/springframework/samples/petclinic/owner/Owner.java","receiver":{"class":"org.springframework.samples.petclinic.owner.Owner","object_id":643346754,"value":"[Owner@2658b142 id = [null], new = true, lastName = [null], firstName = [null], address = 'Ample Street', city = [null], telephone = [null]]"},"static":false,"thread_id":458},{"defined_class":"org.springframework.samples.petclinic.owner.Owner","event":"return","id":170,"lineno":70,"method_id":"setAddress","path":"org/springframework/samples/petclinic/owner/Owner.java","static":false,"thread_id":458},{"defined_class":"org.springframework.samples.petclinic.owner.Owner","event":"call","id":171,"lineno":74,"method_id":"getCity","path":"org/springframework/samples/petclinic/owner/Owner.java","receiver":{"class":"org.springframework.samples.petclinic.owner.Owner","object_id":643346754,"value":"[Owner@2658b142 id = [null], new = true, lastName = [null], firstName = [null], address = 'Ample Street', city = [null], telephone = [null]]"},"static":false,"thread_id":458},{"defined_class":"org.springframework.samples.petclinic.owner.Owner","event":"return","id":172,"lineno":74,"method_id":"getCity","path":"org/springframework/samples/petclinic/owner/Owner.java","static":false,"thread_id":458},{"defined_class":"org.springframework.samples.petclinic.owner.Owner","event":"call","id":173,"lineno":78,"method_id":"setCity","parameters":[{"class":"java.lang.String","kind":"req","name":"city","object_id":151355997,"value":"London"}],"path":"org/springframework/samples/petclinic/owner/Owner.java","receiver":{"class":"org.springframework.samples.petclinic.owner.Owner","object_id":643346754,"value":"[Owner@2658b142 id = [null], new = true, lastName = [null], firstName = [null], address = 'Ample Street', city = 'London', telephone = [null]]"},"static":false,"thread_id":458},{"defined_class":"org.springframework.samples.petclinic.owner.Owner","event":"return","id":174,"lineno":78,"method_id":"setCity","path":"org/springframework/samples/petclinic/owner/Owner.java","static":false,"thread_id":458},{"defined_class":"org.springframework.samples.petclinic.model.Person","event":"call","id":175,"lineno":39,"method_id":"getFirstName","path":"org/springframework/samples/petclinic/model/Person.java","receiver":{"class":"org.springframework.samples.petclinic.owner.Owner","object_id":643346754,"value":"[Owner@2658b142 id = [null], new = true, lastName = [null], firstName = [null], address = 'Ample Street', city = 'London', telephone = [null]]"},"static":false,"thread_id":458},{"defined_class":"org.springframework.samples.petclinic.model.Person","event":"return","id":176,"lineno":39,"method_id":"getFirstName","path":"org/springframework/samples/petclinic/model/Person.java","static":false,"thread_id":458},{"defined_class":"org.springframework.samples.petclinic.model.Person","event":"call","id":177,"lineno":43,"method_id":"setFirstName","parameters":[{"class":"java.lang.String","kind":"req","name":"firstName","object_id":948906332,"value":"John"}],"path":"org/springframework/samples/petclinic/model/Person.java","receiver":{"class":"org.springframework.samples.petclinic.owner.Owner","object_id":643346754,"value":"[Owner@2658b142 id = [null], new = true, lastName = [null], firstName = 'John', address = 'Ample Street', city = 'London', telephone = [null]]"},"static":false,"thread_id":458},{"defined_class":"org.springframework.samples.petclinic.model.Person","event":"return","id":178,"lineno":43,"method_id":"setFirstName","path":"org/springframework/samples/petclinic/model/Person.java","static":false,"thread_id":458},{"defined_class":"org.springframework.samples.petclinic.model.Person","event":"call","id":179,"lineno":47,"method_id":"getLastName","path":"org/springframework/samples/petclinic/model/Person.java","receiver":{"class":"org.springframework.samples.petclinic.owner.Owner","object_id":643346754,"value":"[Owner@2658b142 id = [null], new = true, lastName = [null], firstName = 'John', address = 'Ample Street', city = 'London', telephone = [null]]"},"static":false,"thread_id":458},{"defined_class":"org.springframework.samples.petclinic.model.Person","event":"return","id":180,"lineno":47,"method_id":"getLastName","path":"org/springframework/samples/petclinic/model/Person.java","static":false,"thread_id":458},{"defined_class":"org.springframework.samples.petclinic.model.Person","event":"call","id":181,"lineno":51,"method_id":"setLastName","parameters":[{"class":"java.lang.String","kind":"req","name":"lastName","object_id":1018210965,"value":"Doe"}],"path":"org/springframework/samples/petclinic/model/Person.java","receiver":{"class":"org.springframework.samples.petclinic.owner.Owner","object_id":643346754,"value":"[Owner@2658b142 id = [null], new = true, lastName = 'Doe', firstName = 'John', address = 'Ample Street', city = 'London', telephone = [null]]"},"static":false,"thread_id":458},{"defined_class":"org.springframework.samples.petclinic.model.Person","event":"return","id":182,"lineno":51,"method_id":"setLastName","path":"org/springframework/samples/petclinic/model/Person.java","static":false,"thread_id":458},{"defined_class":"org.springframework.samples.petclinic.owner.Owner","event":"call","id":183,"lineno":82,"method_id":"getTelephone","path":"org/springframework/samples/petclinic/owner/Owner.java","receiver":{"class":"org.springframework.samples.petclinic.owner.Owner","object_id":643346754,"value":"[Owner@2658b142 id = [null], new = true, lastName = 'Doe', firstName = 'John', address = 'Ample Street', city = 'London', telephone = [null]]"},"static":false,"thread_id":458},{"defined_class":"org.springframework.samples.petclinic.owner.Owner","event":"return","id":184,"lineno":82,"method_id":"getTelephone","path":"org/springframework/samples/petclinic/owner/Owner.java","static":false,"thread_id":458},{"defined_class":"org.springframework.samples.petclinic.owner.Owner","event":"call","id":185,"lineno":86,"method_id":"setTelephone","parameters":[{"class":"java.lang.String","kind":"req","name":"telephone","object_id":1216454632,"value":"1234567891"}],"path":"org/springframework/samples/petclinic/owner/Owner.java","receiver":{"class":"org.springframework.samples.petclinic.owner.Owner","object_id":643346754,"value":"[Owner@2658b142 id = [null], new = true, lastName = 'Doe', firstName = 'John', address = 'Ample Street', city = 'London', telephone = '1234567891']"},"static":false,"thread_id":458},{"defined_class":"org.springframework.samples.petclinic.owner.Owner","event":"return","id":186,"lineno":86,"method_id":"setTelephone","path":"org/springframework/samples/petclinic/owner/Owner.java","static":false,"thread_id":458},{"defined_class":"org.springframework.samples.petclinic.owner.OwnerController","event":"call","id":187,"lineno":67,"method_id":"processCreationForm","parameters":[{"class":"org.springframework.samples.petclinic.owner.Owner","kind":"req","name":"owner","object_id":643346754,"value":"[Owner@2658b142 id = [null], new = true, lastName = 'Doe', firstName = 'John', address = 'Ample Street', city = 'London', telephone = '1234567891']"},{"class":"org.springframework.validation.BeanPropertyBindingResult","kind":"req","name":"result","object_id":1838499006,"value":"org.springframework.validation.BeanPropertyBindingResult: 0 errors"}],"path":"org/springframework/samples/petclinic/owner/OwnerController.java","receiver":{"class":"org.springframework.samples.petclinic.owner.OwnerController","object_id":319144230,"value":"org.springframework.samples.petclinic.owner.OwnerController@1305c126"},"static":false,"thread_id":458},{"defined_class":"org.springframework.samples.petclinic.model.BaseEntity","event":"call","id":188,"lineno":40,"method_id":"getId","path":"org/springframework/samples/petclinic/model/BaseEntity.java","receiver":{"class":"org.springframework.samples.petclinic.owner.Owner","object_id":643346754,"value":"[Owner@2658b142 id = [null], new = true, lastName = 'Doe', firstName = 'John', address = 'Ample Street', city = 'London', telephone = '1234567891']"},"static":false,"thread_id":458},{"defined_class":"org.springframework.samples.petclinic.model.BaseEntity","event":"return","id":189,"lineno":40,"method_id":"getId","path":"org/springframework/samples/petclinic/model/BaseEntity.java","static":false,"thread_id":458},{"defined_class":"com.zaxxer.hikari.pool.ProxyConnection","event":"call","id":190,"lineno":344,"method_id":"prepareStatement","path":"com/zaxxer/hikari/pool/ProxyConnection.java","sql_query":{"database_type":"H2","sql":"insert into owners (id, first_name, last_name, address, city, telephone) values (null, ?, ?, ?, ?, ?)"},"static":false,"thread_id":458},{"defined_class":"com.zaxxer.hikari.pool.ProxyConnection","event":"return","id":191,"lineno":344,"method_id":"prepareStatement","path":"com/zaxxer/hikari/pool/ProxyConnection.java","static":false,"thread_id":458},{"defined_class":"org.springframework.samples.petclinic.model.BaseEntity","event":"call","id":192,"lineno":40,"method_id":"getId","path":"org/springframework/samples/petclinic/model/BaseEntity.java","receiver":{"class":"org.springframework.samples.petclinic.owner.Owner","object_id":643346754,"value":"[Owner@2658b142 id = 11, new = false, lastName = 'Doe', firstName = 'John', address = 'Ample Street', city = 'London', telephone = '1234567891']"},"static":false,"thread_id":458},{"defined_class":"org.springframework.samples.petclinic.model.BaseEntity","event":"return","id":193,"lineno":40,"method_id":"getId","path":"org/springframework/samples/petclinic/model/BaseEntity.java","return_value":{"class":"java.lang.Integer","object_id":56295793,"value":"11"},"static":false,"thread_id":458},{"defined_class":"org.springframework.samples.petclinic.owner.OwnerController","event":"return","id":194,"lineno":67,"method_id":"processCreationForm","path":"org/springframework/samples/petclinic/owner/OwnerController.java","return_value":{"class":"java.lang.String","object_id":1587513026,"value":"redirect:/owners/11"},"static":false,"thread_id":458},{"defined_class":"javax.servlet.http.HttpServlet","event":"return","http_server_response":{"status":302},"id":195,"lineno":736,"method_id":"service","path":"javax/servlet/http/HttpServlet.java","static":false,"thread_id":458}],"classMap":[{"children":[{"children":[{"children":[{"children":[{"location":"javax/servlet/http/HttpServlet.java:736","name":"service","static":false,"type":"function"}],"location":"javax/servlet/http/HttpServlet.java","name":"HttpServlet","static":false,"type":"class"}],"name":"http","type":"package"}],"name":"servlet","type":"package"}],"name":"javax","type":"package"},{"children":[{"children":[{"children":[{"children":[{"children":[{"children":[{"location":"org/springframework/samples/petclinic/owner/Owner.java:74","name":"getCity","static":false,"type":"function"},{"location":"org/springframework/samples/petclinic/owner/Owner.java:78","name":"setCity","static":false,"type":"function"},{"location":"org/springframework/samples/petclinic/owner/Owner.java:66","name":"getAddress","static":false,"type":"function"},{"location":"org/springframework/samples/petclinic/owner/Owner.java:82","name":"getTelephone","static":false,"type":"function"},{"location":"org/springframework/samples/petclinic/owner/Owner.java:70","name":"setAddress","static":false,"type":"function"},{"location":"org/springframework/samples/petclinic/owner/Owner.java:86","name":"setTelephone","static":false,"type":"function"}],"location":"org/springframework/samples/petclinic/owner/Owner.java","name":"Owner","static":false,"type":"class"},{"children":[{"location":"org/springframework/samples/petclinic/owner/OwnerController.java:55","name":"setAllowedFields","static":false,"type":"function"},{"location":"org/springframework/samples/petclinic/owner/OwnerController.java:67","name":"processCreationForm","static":false,"type":"function"}],"location":"org/springframework/samples/petclinic/owner/OwnerController.java","name":"OwnerController","static":false,"type":"class"}],"name":"owner","type":"package"},{"children":[{"children":[{"location":"org/springframework/samples/petclinic/model/Person.java:43","name":"setFirstName","static":false,"type":"function"},{"location":"org/springframework/samples/petclinic/model/Person.java:39","name":"getFirstName","static":false,"type":"function"},{"location":"org/springframework/samples/petclinic/model/Person.java:47","name":"getLastName","static":false,"type":"function"},{"location":"org/springframework/samples/petclinic/model/Person.java:51","name":"setLastName","static":false,"type":"function"}],"location":"org/springframework/samples/petclinic/model/Person.java","name":"Person","static":false,"type":"class"},{"children":[{"location":"org/springframework/samples/petclinic/model/BaseEntity.java:40","name":"getId","static":false,"type":"function"}],"location":"org/springframework/samples/petclinic/model/BaseEntity.java","name":"BaseEntity","static":false,"type":"class"}],"name":"model","type":"package"}],"name":"petclinic","type":"package"}],"name":"samples","type":"package"}],"name":"springframework","type":"package"}],"name":"org","type":"package"},{"children":[{"children":[{"children":[{"children":[{"children":[{"location":"com/zaxxer/hikari/pool/ProxyConnection.java:344","name":"prepareStatement","static":false,"type":"function"}],"location":"com/zaxxer/hikari/pool/ProxyConnection.java","name":"ProxyConnection","static":false,"type":"class"}],"name":"pool","type":"package"}],"name":"hikari","type":"package"}],"name":"zaxxer","type":"package"}],"name":"com","type":"package"}]}
+{
+  "events": [
+    {
+      "defined_class": "javax.servlet.http.HttpServlet",
+      "event": "call",
+      "http_server_request": {
+        "normalized_path_info": "/owners/new",
+        "path_info": "/owners/new",
+        "protocol": "HTTP/1.1",
+        "request_method": "POST"
+      },
+      "id": 1,
+      "lineno": 736,
+      "message": [
+        {
+          "class": "java.lang.String",
+          "kind": "req",
+          "name": "firstName",
+          "object_id": 948906332,
+          "value": "John"
+        },
+        {
+          "class": "java.lang.String",
+          "kind": "req",
+          "name": "lastName",
+          "object_id": 1018210965,
+          "value": "Doe"
+        },
+        {
+          "class": "java.lang.String",
+          "kind": "req",
+          "name": "address",
+          "object_id": 2041717607,
+          "value": "Ample Street"
+        },
+        {
+          "class": "java.lang.String",
+          "kind": "req",
+          "name": "city",
+          "object_id": 151355997,
+          "value": "London"
+        },
+        {
+          "class": "java.lang.String",
+          "kind": "req",
+          "name": "telephone",
+          "object_id": 1216454632,
+          "value": "1234567891"
+        }
+      ],
+      "method_id": "service",
+      "path": "javax/servlet/http/HttpServlet.java",
+      "static": false,
+      "thread_id": 458
+    },
+    {
+      "defined_class": "org.springframework.samples.petclinic.owner.OwnerController",
+      "event": "call",
+      "id": 2,
+      "lineno": 55,
+      "method_id": "setAllowedFields",
+      "parameters": [
+        {
+          "class": "org.springframework.web.servlet.mvc.method.annotation.ExtendedServletRequestDataBinder",
+          "kind": "req",
+          "name": "dataBinder",
+          "object_id": 722482848,
+          "value": "org.springframework.web.servlet.mvc.method.annotation.ExtendedServletRequestDataBinder@2b1036a0"
+        }
+      ],
+      "path": "org/springframework/samples/petclinic/owner/OwnerController.java",
+      "receiver": {
+        "class": "org.springframework.samples.petclinic.owner.OwnerController",
+        "object_id": 319144230,
+        "value": "org.springframework.samples.petclinic.owner.OwnerController@1305c126"
+      },
+      "static": false,
+      "thread_id": 458
+    },
+    {
+      "defined_class": "org.springframework.samples.petclinic.owner.OwnerController",
+      "event": "return",
+      "id": 3,
+      "lineno": 55,
+      "method_id": "setAllowedFields",
+      "path": "org/springframework/samples/petclinic/owner/OwnerController.java",
+      "static": false,
+      "thread_id": 458
+    },
+    {
+      "defined_class": "org.springframework.samples.petclinic.owner.Owner",
+      "event": "call",
+      "id": 4,
+      "lineno": 66,
+      "method_id": "getAddress",
+      "path": "org/springframework/samples/petclinic/owner/Owner.java",
+      "receiver": {
+        "class": "org.springframework.samples.petclinic.owner.Owner",
+        "object_id": 643346754,
+        "value": "[Owner@2658b142 id = [null], new = true, lastName = [null], firstName = [null], address = [null], city = [null], telephone = [null]]"
+      },
+      "static": false,
+      "thread_id": 458
+    },
+    {
+      "defined_class": "org.springframework.samples.petclinic.owner.Owner",
+      "event": "return",
+      "id": 5,
+      "lineno": 66,
+      "method_id": "getAddress",
+      "path": "org/springframework/samples/petclinic/owner/Owner.java",
+      "static": false,
+      "thread_id": 458
+    },
+    {
+      "defined_class": "org.springframework.samples.petclinic.owner.Owner",
+      "event": "call",
+      "id": 6,
+      "lineno": 70,
+      "method_id": "setAddress",
+      "parameters": [
+        {
+          "class": "java.lang.String",
+          "kind": "req",
+          "name": "address",
+          "object_id": 2041717607,
+          "value": "Ample Street"
+        }
+      ],
+      "path": "org/springframework/samples/petclinic/owner/Owner.java",
+      "receiver": {
+        "class": "org.springframework.samples.petclinic.owner.Owner",
+        "object_id": 643346754,
+        "value": "[Owner@2658b142 id = [null], new = true, lastName = [null], firstName = [null], address = 'Ample Street', city = [null], telephone = [null]]"
+      },
+      "static": false,
+      "thread_id": 458
+    },
+    {
+      "defined_class": "org.springframework.samples.petclinic.owner.Owner",
+      "event": "return",
+      "id": 7,
+      "lineno": 70,
+      "method_id": "setAddress",
+      "path": "org/springframework/samples/petclinic/owner/Owner.java",
+      "static": false,
+      "thread_id": 458
+    },
+    {
+      "defined_class": "org.springframework.samples.petclinic.owner.Owner",
+      "event": "call",
+      "id": 8,
+      "lineno": 74,
+      "method_id": "getCity",
+      "path": "org/springframework/samples/petclinic/owner/Owner.java",
+      "receiver": {
+        "class": "org.springframework.samples.petclinic.owner.Owner",
+        "object_id": 643346754,
+        "value": "[Owner@2658b142 id = [null], new = true, lastName = [null], firstName = [null], address = 'Ample Street', city = [null], telephone = [null]]"
+      },
+      "static": false,
+      "thread_id": 458
+    },
+    {
+      "defined_class": "org.springframework.samples.petclinic.owner.Owner",
+      "event": "return",
+      "id": 9,
+      "lineno": 74,
+      "method_id": "getCity",
+      "path": "org/springframework/samples/petclinic/owner/Owner.java",
+      "static": false,
+      "thread_id": 458
+    },
+    {
+      "defined_class": "org.springframework.samples.petclinic.owner.Owner",
+      "event": "call",
+      "id": 10,
+      "lineno": 78,
+      "method_id": "setCity",
+      "parameters": [
+        {
+          "class": "java.lang.String",
+          "kind": "req",
+          "name": "city",
+          "object_id": 151355997,
+          "value": "London"
+        }
+      ],
+      "path": "org/springframework/samples/petclinic/owner/Owner.java",
+      "receiver": {
+        "class": "org.springframework.samples.petclinic.owner.Owner",
+        "object_id": 643346754,
+        "value": "[Owner@2658b142 id = [null], new = true, lastName = [null], firstName = [null], address = 'Ample Street', city = 'London', telephone = [null]]"
+      },
+      "static": false,
+      "thread_id": 458
+    },
+    {
+      "defined_class": "org.springframework.samples.petclinic.owner.Owner",
+      "event": "return",
+      "id": 11,
+      "lineno": 78,
+      "method_id": "setCity",
+      "path": "org/springframework/samples/petclinic/owner/Owner.java",
+      "static": false,
+      "thread_id": 458
+    },
+    {
+      "defined_class": "org.springframework.samples.petclinic.model.Person",
+      "event": "call",
+      "id": 12,
+      "lineno": 39,
+      "method_id": "getFirstName",
+      "path": "org/springframework/samples/petclinic/model/Person.java",
+      "receiver": {
+        "class": "org.springframework.samples.petclinic.owner.Owner",
+        "object_id": 643346754,
+        "value": "[Owner@2658b142 id = [null], new = true, lastName = [null], firstName = [null], address = 'Ample Street', city = 'London', telephone = [null]]"
+      },
+      "static": false,
+      "thread_id": 458
+    },
+    {
+      "defined_class": "org.springframework.samples.petclinic.model.Person",
+      "event": "return",
+      "id": 13,
+      "lineno": 39,
+      "method_id": "getFirstName",
+      "path": "org/springframework/samples/petclinic/model/Person.java",
+      "static": false,
+      "thread_id": 458
+    },
+    {
+      "defined_class": "org.springframework.samples.petclinic.model.Person",
+      "event": "call",
+      "id": 14,
+      "lineno": 43,
+      "method_id": "setFirstName",
+      "parameters": [
+        {
+          "class": "java.lang.String",
+          "kind": "req",
+          "name": "firstName",
+          "object_id": 948906332,
+          "value": "John"
+        }
+      ],
+      "path": "org/springframework/samples/petclinic/model/Person.java",
+      "receiver": {
+        "class": "org.springframework.samples.petclinic.owner.Owner",
+        "object_id": 643346754,
+        "value": "[Owner@2658b142 id = [null], new = true, lastName = [null], firstName = 'John', address = 'Ample Street', city = 'London', telephone = [null]]"
+      },
+      "static": false,
+      "thread_id": 458
+    },
+    {
+      "defined_class": "org.springframework.samples.petclinic.model.Person",
+      "event": "return",
+      "id": 15,
+      "lineno": 43,
+      "method_id": "setFirstName",
+      "path": "org/springframework/samples/petclinic/model/Person.java",
+      "static": false,
+      "thread_id": 458
+    },
+    {
+      "defined_class": "org.springframework.samples.petclinic.model.Person",
+      "event": "call",
+      "id": 16,
+      "lineno": 47,
+      "method_id": "getLastName",
+      "path": "org/springframework/samples/petclinic/model/Person.java",
+      "receiver": {
+        "class": "org.springframework.samples.petclinic.owner.Owner",
+        "object_id": 643346754,
+        "value": "[Owner@2658b142 id = [null], new = true, lastName = [null], firstName = 'John', address = 'Ample Street', city = 'London', telephone = [null]]"
+      },
+      "static": false,
+      "thread_id": 458
+    },
+    {
+      "defined_class": "org.springframework.samples.petclinic.model.Person",
+      "event": "return",
+      "id": 17,
+      "lineno": 47,
+      "method_id": "getLastName",
+      "path": "org/springframework/samples/petclinic/model/Person.java",
+      "static": false,
+      "thread_id": 458
+    },
+    {
+      "defined_class": "org.springframework.samples.petclinic.model.Person",
+      "event": "call",
+      "id": 18,
+      "lineno": 51,
+      "method_id": "setLastName",
+      "parameters": [
+        {
+          "class": "java.lang.String",
+          "kind": "req",
+          "name": "lastName",
+          "object_id": 1018210965,
+          "value": "Doe"
+        }
+      ],
+      "path": "org/springframework/samples/petclinic/model/Person.java",
+      "receiver": {
+        "class": "org.springframework.samples.petclinic.owner.Owner",
+        "object_id": 643346754,
+        "value": "[Owner@2658b142 id = [null], new = true, lastName = 'Doe', firstName = 'John', address = 'Ample Street', city = 'London', telephone = [null]]"
+      },
+      "static": false,
+      "thread_id": 458
+    },
+    {
+      "defined_class": "org.springframework.samples.petclinic.model.Person",
+      "event": "return",
+      "id": 19,
+      "lineno": 51,
+      "method_id": "setLastName",
+      "path": "org/springframework/samples/petclinic/model/Person.java",
+      "static": false,
+      "thread_id": 458
+    },
+    {
+      "defined_class": "org.springframework.samples.petclinic.owner.Owner",
+      "event": "call",
+      "id": 20,
+      "lineno": 82,
+      "method_id": "getTelephone",
+      "path": "org/springframework/samples/petclinic/owner/Owner.java",
+      "receiver": {
+        "class": "org.springframework.samples.petclinic.owner.Owner",
+        "object_id": 643346754,
+        "value": "[Owner@2658b142 id = [null], new = true, lastName = 'Doe', firstName = 'John', address = 'Ample Street', city = 'London', telephone = [null]]"
+      },
+      "static": false,
+      "thread_id": 458
+    },
+    {
+      "defined_class": "org.springframework.samples.petclinic.owner.Owner",
+      "event": "return",
+      "id": 21,
+      "lineno": 82,
+      "method_id": "getTelephone",
+      "path": "org/springframework/samples/petclinic/owner/Owner.java",
+      "static": false,
+      "thread_id": 458
+    },
+    {
+      "defined_class": "org.springframework.samples.petclinic.owner.Owner",
+      "event": "call",
+      "id": 22,
+      "lineno": 86,
+      "method_id": "setTelephone",
+      "parameters": [
+        {
+          "class": "java.lang.String",
+          "kind": "req",
+          "name": "telephone",
+          "object_id": 1216454632,
+          "value": "1234567891"
+        }
+      ],
+      "path": "org/springframework/samples/petclinic/owner/Owner.java",
+      "receiver": {
+        "class": "org.springframework.samples.petclinic.owner.Owner",
+        "object_id": 643346754,
+        "value": "[Owner@2658b142 id = [null], new = true, lastName = 'Doe', firstName = 'John', address = 'Ample Street', city = 'London', telephone = '1234567891']"
+      },
+      "static": false,
+      "thread_id": 458
+    },
+    {
+      "defined_class": "org.springframework.samples.petclinic.owner.Owner",
+      "event": "return",
+      "id": 23,
+      "lineno": 86,
+      "method_id": "setTelephone",
+      "path": "org/springframework/samples/petclinic/owner/Owner.java",
+      "static": false,
+      "thread_id": 458
+    },
+    {
+      "defined_class": "org.springframework.samples.petclinic.owner.OwnerController",
+      "event": "call",
+      "id": 24,
+      "lineno": 67,
+      "method_id": "processCreationForm",
+      "parameters": [
+        {
+          "class": "org.springframework.samples.petclinic.owner.Owner",
+          "kind": "req",
+          "name": "owner",
+          "object_id": 643346754,
+          "value": "[Owner@2658b142 id = [null], new = true, lastName = 'Doe', firstName = 'John', address = 'Ample Street', city = 'London', telephone = '1234567891']"
+        },
+        {
+          "class": "org.springframework.validation.BeanPropertyBindingResult",
+          "kind": "req",
+          "name": "result",
+          "object_id": 1838499006,
+          "value": "org.springframework.validation.BeanPropertyBindingResult: 0 errors"
+        }
+      ],
+      "path": "org/springframework/samples/petclinic/owner/OwnerController.java",
+      "receiver": {
+        "class": "org.springframework.samples.petclinic.owner.OwnerController",
+        "object_id": 319144230,
+        "value": "org.springframework.samples.petclinic.owner.OwnerController@1305c126"
+      },
+      "static": false,
+      "thread_id": 458
+    },
+    {
+      "defined_class": "org.springframework.samples.petclinic.model.BaseEntity",
+      "event": "call",
+      "id": 25,
+      "lineno": 40,
+      "method_id": "getId",
+      "path": "org/springframework/samples/petclinic/model/BaseEntity.java",
+      "receiver": {
+        "class": "org.springframework.samples.petclinic.owner.Owner",
+        "object_id": 643346754,
+        "value": "[Owner@2658b142 id = [null], new = true, lastName = 'Doe', firstName = 'John', address = 'Ample Street', city = 'London', telephone = '1234567891']"
+      },
+      "static": false,
+      "thread_id": 458
+    },
+    {
+      "defined_class": "org.springframework.samples.petclinic.model.BaseEntity",
+      "event": "return",
+      "id": 26,
+      "lineno": 40,
+      "method_id": "getId",
+      "path": "org/springframework/samples/petclinic/model/BaseEntity.java",
+      "static": false,
+      "thread_id": 458
+    },
+    {
+      "defined_class": "com.zaxxer.hikari.pool.ProxyConnection",
+      "event": "call",
+      "id": 27,
+      "lineno": 344,
+      "method_id": "prepareStatement",
+      "path": "com/zaxxer/hikari/pool/ProxyConnection.java",
+      "sql_query": {
+        "database_type": "H2",
+        "sql": "insert into owners (id, first_name, last_name, address, city, telephone) values (null, ?, ?, ?, ?, ?)"
+      },
+      "static": false,
+      "thread_id": 458
+    },
+    {
+      "defined_class": "com.zaxxer.hikari.pool.ProxyConnection",
+      "event": "return",
+      "id": 28,
+      "lineno": 344,
+      "method_id": "prepareStatement",
+      "path": "com/zaxxer/hikari/pool/ProxyConnection.java",
+      "static": false,
+      "thread_id": 458
+    },
+    {
+      "defined_class": "org.springframework.samples.petclinic.model.BaseEntity",
+      "event": "call",
+      "id": 29,
+      "lineno": 40,
+      "method_id": "getId",
+      "path": "org/springframework/samples/petclinic/model/BaseEntity.java",
+      "receiver": {
+        "class": "org.springframework.samples.petclinic.owner.Owner",
+        "object_id": 643346754,
+        "value": "[Owner@2658b142 id = 11, new = false, lastName = 'Doe', firstName = 'John', address = 'Ample Street', city = 'London', telephone = '1234567891']"
+      },
+      "static": false,
+      "thread_id": 458
+    },
+    {
+      "defined_class": "org.springframework.samples.petclinic.model.BaseEntity",
+      "event": "return",
+      "id": 30,
+      "lineno": 40,
+      "method_id": "getId",
+      "path": "org/springframework/samples/petclinic/model/BaseEntity.java",
+      "return_value": {
+        "class": "java.lang.Integer",
+        "object_id": 56295793,
+        "value": "11"
+      },
+      "static": false,
+      "thread_id": 458
+    },
+    {
+      "defined_class": "org.springframework.samples.petclinic.owner.OwnerController",
+      "event": "return",
+      "id": 31,
+      "lineno": 67,
+      "method_id": "processCreationForm",
+      "path": "org/springframework/samples/petclinic/owner/OwnerController.java",
+      "return_value": {
+        "class": "java.lang.String",
+        "object_id": 1587513026,
+        "value": "redirect:/owners/11"
+      },
+      "static": false,
+      "thread_id": 458
+    },
+    {
+      "defined_class": "javax.servlet.http.HttpServlet",
+      "event": "return",
+      "http_server_response": {
+        "status": 302
+      },
+      "id": 32,
+      "lineno": 736,
+      "method_id": "service",
+      "path": "javax/servlet/http/HttpServlet.java",
+      "static": false,
+      "thread_id": 458
+    }
+  ],
+  "version": "1.2",
+  "metadata": {
+    "app": "spring-petclinic",
+    "language": {
+      "name": "java",
+      "version": "11.0.10+9-LTS",
+      "engine": "OpenJDK 64-Bit Server VM"
+    },
+    "client": {
+      "name": "appmap-java",
+      "url": "https://github.com/appland/appmap-java"
+    },
+    "recorder": {
+      "name": "remote_recording"
+    },
+    "recording": {},
+    "framework": {},
+    "name": "Create Owner",
+    "fingerprints": [
+      {
+        "appmap_digest": "85d64080e97d84ed908979b8120dd59881cab54f30ce834bf75c7afe5ece6017",
+        "canonicalization_algorithm": "classDependencies",
+        "digest": "b4f769eb9701a8f0768d7dec2ec638d245d925960ceda1734d46171ecdde0913",
+        "fingerprint_algorithm": "sha256"
+      },
+      {
+        "appmap_digest": "85d64080e97d84ed908979b8120dd59881cab54f30ce834bf75c7afe5ece6017",
+        "canonicalization_algorithm": "classes",
+        "digest": "9a69824c13b3cf5853d4bb4737e0a4f1e8fd9b5a3156d799129382aca193d2fb",
+        "fingerprint_algorithm": "sha256"
+      },
+      {
+        "appmap_digest": "85d64080e97d84ed908979b8120dd59881cab54f30ce834bf75c7afe5ece6017",
+        "canonicalization_algorithm": "httpClientRequests",
+        "digest": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+        "fingerprint_algorithm": "sha256"
+      },
+      {
+        "appmap_digest": "85d64080e97d84ed908979b8120dd59881cab54f30ce834bf75c7afe5ece6017",
+        "canonicalization_algorithm": "httpServerRequests",
+        "digest": "f141c83e203d7d06ca0bda63635ae0007c5d0fb5d50c302e2ec56548cc6cc8f5",
+        "fingerprint_algorithm": "sha256"
+      },
+      {
+        "appmap_digest": "85d64080e97d84ed908979b8120dd59881cab54f30ce834bf75c7afe5ece6017",
+        "canonicalization_algorithm": "info",
+        "digest": "bb0a4bca2e7f3559d8347ef70534925525ccfa10d325d108243635f8224ad630",
+        "fingerprint_algorithm": "sha256"
+      },
+      {
+        "appmap_digest": "85d64080e97d84ed908979b8120dd59881cab54f30ce834bf75c7afe5ece6017",
+        "canonicalization_algorithm": "labels",
+        "digest": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+        "fingerprint_algorithm": "sha256"
+      },
+      {
+        "appmap_digest": "85d64080e97d84ed908979b8120dd59881cab54f30ce834bf75c7afe5ece6017",
+        "canonicalization_algorithm": "packageDependencies",
+        "digest": "f5fc622e7d999238d6b11aa2bc69cd70aca33b8123e6b29787921a41846a7959",
+        "fingerprint_algorithm": "sha256"
+      },
+      {
+        "appmap_digest": "85d64080e97d84ed908979b8120dd59881cab54f30ce834bf75c7afe5ece6017",
+        "canonicalization_algorithm": "packages",
+        "digest": "3868fd85eaa3ee03fd5ef26291a6fb1c89212e5c744d208b92b87250fb72f176",
+        "fingerprint_algorithm": "sha256"
+      },
+      {
+        "appmap_digest": "85d64080e97d84ed908979b8120dd59881cab54f30ce834bf75c7afe5ece6017",
+        "canonicalization_algorithm": "sqlNormalized",
+        "digest": "d82c50f65065c32ac64192c43a742fcbd97fc45bdcd1dfc54f9643668291f9f8",
+        "fingerprint_algorithm": "sha256"
+      },
+      {
+        "appmap_digest": "85d64080e97d84ed908979b8120dd59881cab54f30ce834bf75c7afe5ece6017",
+        "canonicalization_algorithm": "sqlTables",
+        "digest": "36d0a780250de41a9f153e71270f74e4ec2688195e6be52c774bf215e07e1cb9",
+        "fingerprint_algorithm": "sha256"
+      },
+      {
+        "appmap_digest": "85d64080e97d84ed908979b8120dd59881cab54f30ce834bf75c7afe5ece6017",
+        "canonicalization_algorithm": "trace",
+        "digest": "880a9567b3d3ad287485ff61b5451ad87d725972d11e549f204a8126eb68a67a",
+        "fingerprint_algorithm": "sha256"
+      },
+      {
+        "appmap_digest": "85d64080e97d84ed908979b8120dd59881cab54f30ce834bf75c7afe5ece6017",
+        "canonicalization_algorithm": "update",
+        "digest": "72bedc3864734d98e5eaf64e2d0c5e0ace985763c365b6816aba44ca524b7e26",
+        "fingerprint_algorithm": "sha256"
+      }
+    ]
+  },
+  "classMap": [
+    {
+      "children": [
+        {
+          "children": [
+            {
+              "children": [
+                {
+                  "children": [
+                    {
+                      "children": [
+                        {
+                          "children": [
+                            {
+                              "name": "getCity",
+                              "type": "function",
+                              "static": false,
+                              "location": "org/springframework/samples/petclinic/owner/Owner.java:74"
+                            },
+                            {
+                              "name": "setCity",
+                              "type": "function",
+                              "static": false,
+                              "location": "org/springframework/samples/petclinic/owner/Owner.java:78"
+                            },
+                            {
+                              "name": "getAddress",
+                              "type": "function",
+                              "static": false,
+                              "location": "org/springframework/samples/petclinic/owner/Owner.java:66"
+                            },
+                            {
+                              "name": "getTelephone",
+                              "type": "function",
+                              "static": false,
+                              "location": "org/springframework/samples/petclinic/owner/Owner.java:82"
+                            },
+                            {
+                              "name": "setAddress",
+                              "type": "function",
+                              "static": false,
+                              "location": "org/springframework/samples/petclinic/owner/Owner.java:70"
+                            },
+                            {
+                              "name": "setTelephone",
+                              "type": "function",
+                              "static": false,
+                              "location": "org/springframework/samples/petclinic/owner/Owner.java:86"
+                            }
+                          ],
+                          "name": "Owner",
+                          "type": "class"
+                        },
+                        {
+                          "children": [
+                            {
+                              "name": "setAllowedFields",
+                              "type": "function",
+                              "static": false,
+                              "location": "org/springframework/samples/petclinic/owner/OwnerController.java:55"
+                            },
+                            {
+                              "name": "processCreationForm",
+                              "type": "function",
+                              "static": false,
+                              "location": "org/springframework/samples/petclinic/owner/OwnerController.java:67"
+                            }
+                          ],
+                          "name": "OwnerController",
+                          "type": "class"
+                        }
+                      ],
+                      "name": "owner",
+                      "type": "package"
+                    },
+                    {
+                      "children": [
+                        {
+                          "children": [
+                            {
+                              "name": "setFirstName",
+                              "type": "function",
+                              "static": false,
+                              "location": "org/springframework/samples/petclinic/model/Person.java:43"
+                            },
+                            {
+                              "name": "getFirstName",
+                              "type": "function",
+                              "static": false,
+                              "location": "org/springframework/samples/petclinic/model/Person.java:39"
+                            },
+                            {
+                              "name": "getLastName",
+                              "type": "function",
+                              "static": false,
+                              "location": "org/springframework/samples/petclinic/model/Person.java:47"
+                            },
+                            {
+                              "name": "setLastName",
+                              "type": "function",
+                              "static": false,
+                              "location": "org/springframework/samples/petclinic/model/Person.java:51"
+                            }
+                          ],
+                          "name": "Person",
+                          "type": "class"
+                        },
+                        {
+                          "children": [
+                            {
+                              "name": "getId",
+                              "type": "function",
+                              "static": false,
+                              "location": "org/springframework/samples/petclinic/model/BaseEntity.java:40"
+                            }
+                          ],
+                          "name": "BaseEntity",
+                          "type": "class"
+                        }
+                      ],
+                      "name": "model",
+                      "type": "package"
+                    }
+                  ],
+                  "name": "petclinic",
+                  "type": "package"
+                }
+              ],
+              "name": "samples",
+              "type": "package"
+            }
+          ],
+          "name": "springframework",
+          "type": "package"
+        }
+      ],
+      "name": "org",
+      "type": "package"
+    },
+    {
+      "type": "http",
+      "name": "HTTP server requests",
+      "children": [
+        {
+          "type": "route",
+          "name": "POST /owners/new"
+        }
+      ]
+    },
+    {
+      "type": "database",
+      "name": "Database",
+      "children": [
+        {
+          "type": "query",
+          "name": "insert into owners (id, first_name, last_name, address, city, telephone) values (null, ?, ?, ?, ?, ?)"
+        }
+      ]
+    }
+  ]
+}

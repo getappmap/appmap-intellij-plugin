@@ -1,0 +1,386 @@
+[
+  {
+    "caller": "HTTP server requests->GET /",
+    "callee": "Database->RELEASE SAVEPOINT \"s281473165533200_x8573\""
+  },
+  {
+    "caller": "HTTP server requests->GET /",
+    "callee": "Database->SAVEPOINT \"s281473165533200_x8573\""
+  },
+  {
+    "caller": "HTTP server requests->GET /",
+    "callee": "Database->UPDATE \"django_session\" SET \"session_data\" = 'ODg1YmY3NTYzMTdhZTQ3MjM1ZmVlMTIyNzA2MmU4NzcyNjdiY2E2ODp7Il9hdXRoX3VzZXJfaWQiOiIxOTU0IiwiX2F1dGhfdXNlcl9iYWNrZW5kIjoibWlzYWdvLnVzZXJzLmF1dGhiYWNrZW5kcy5NaXNhZ29CYWNrZW5kIiwiX2F1dGhfdXNlcl9oYXNoIjoiNTYwYWU2ZDIwMjg0MmIxM2YwNDcxNzJmMGI3NWFjNmZkN2VlOTQwOCIsIm1pc2Fnb19pcF9jaGVjayI6eyJ2ZXJzaW9uIjoiTkRORTZIbmgiLCJpcCI6IjEyNy4wLjAuMSIsImlzX2Jhbm5lZCI6ZmFsc2V9fQ==', \"expire_date\" = '2021-04-28T19:55:13.980283+00:00'::timestamptz WHERE \"django_session\".\"session_key\" = 'l9fc0alokmq3j6rs918i6z3zdpalgmy2'"
+  },
+  {
+    "caller": "HTTP server requests->GET /",
+    "callee": "misago/acl"
+  },
+  {
+    "caller": "HTTP server requests->GET /",
+    "callee": "misago/admin"
+  },
+  {
+    "caller": "HTTP server requests->GET /",
+    "callee": "misago/cache"
+  },
+  {
+    "caller": "HTTP server requests->GET /",
+    "callee": "misago/core"
+  },
+  {
+    "caller": "HTTP server requests->GET /",
+    "callee": "misago/threads"
+  },
+  {
+    "caller": "HTTP server requests->GET /",
+    "callee": "misago/users"
+  },
+  {
+    "caller": "misago/acl",
+    "callee": "misago/categories"
+  },
+  {
+    "caller": "misago/acl",
+    "callee": "misago/search"
+  },
+  {
+    "caller": "misago/acl",
+    "callee": "misago/threads"
+  },
+  {
+    "caller": "misago/acl",
+    "callee": "misago/users"
+  },
+  {
+    "caller": "misago/cache",
+    "callee": "Database->SELECT \"misago_cache_cacheversion\".\"cache\", \"misago_cache_cacheversion\".\"version\" FROM \"misago_cache_cacheversion\""
+  },
+  {
+    "caller": "misago/categories",
+    "callee": "Database->DECLARE \"_django_curs_281473165533200_12729\" NO SCROLL CURSOR WITHOUT HOLD FOR SELECT \"misago_categories_rolecategoryacl\".\"id\", \"misago_categories_rolecategoryacl\".\"role_id\", \"misago_categories_rolecategoryacl\".\"category_id\", \"misago_categories_rolecategoryacl\".\"category_role_id\", \"misago_categories_categoryrole\".\"id\", \"misago_categories_categoryrole\".\"name\", \"misago_categories_categoryrole\".\"special_role\", \"misago_categories_categoryrole\".\"permissions\" FROM \"misago_categories_rolecategoryacl\" INNER JOIN \"misago_categories_categoryrole\" ON (\"misago_categories_rolecategoryacl\".\"category_role_id\" = \"misago_categories_categoryrole\".\"id\") WHERE \"misago_categories_rolecategoryacl\".\"role_id\" IN (1, 8)"
+  },
+  {
+    "caller": "misago/categories",
+    "callee": "Database->DECLARE \"_django_curs_281473165533200_12730\" NO SCROLL CURSOR WITHOUT HOLD FOR SELECT \"misago_categories_rolecategoryacl\".\"id\", \"misago_categories_rolecategoryacl\".\"role_id\", \"misago_categories_rolecategoryacl\".\"category_id\", \"misago_categories_rolecategoryacl\".\"category_role_id\", \"misago_categories_categoryrole\".\"id\", \"misago_categories_categoryrole\".\"name\", \"misago_categories_categoryrole\".\"special_role\", \"misago_categories_categoryrole\".\"permissions\" FROM \"misago_categories_rolecategoryacl\" INNER JOIN \"misago_categories_categoryrole\" ON (\"misago_categories_rolecategoryacl\".\"category_role_id\" = \"misago_categories_categoryrole\".\"id\") WHERE \"misago_categories_rolecategoryacl\".\"role_id\" IN (1, 8)"
+  },
+  {
+    "caller": "misago/categories",
+    "callee": "Database->DECLARE \"_django_curs_281473165533200_12731\" NO SCROLL CURSOR WITHOUT HOLD FOR SELECT \"misago_categories_rolecategoryacl\".\"id\", \"misago_categories_rolecategoryacl\".\"role_id\", \"misago_categories_rolecategoryacl\".\"category_id\", \"misago_categories_rolecategoryacl\".\"category_role_id\", \"misago_categories_categoryrole\".\"id\", \"misago_categories_categoryrole\".\"name\", \"misago_categories_categoryrole\".\"special_role\", \"misago_categories_categoryrole\".\"permissions\" FROM \"misago_categories_rolecategoryacl\" INNER JOIN \"misago_categories_categoryrole\" ON (\"misago_categories_rolecategoryacl\".\"category_role_id\" = \"misago_categories_categoryrole\".\"id\") WHERE \"misago_categories_rolecategoryacl\".\"role_id\" IN (1, 8)"
+  },
+  {
+    "caller": "misago/categories",
+    "callee": "Database->DECLARE \"_django_curs_281473165533200_12734\" NO SCROLL CURSOR WITHOUT HOLD FOR SELECT \"misago_categories_rolecategoryacl\".\"id\", \"misago_categories_rolecategoryacl\".\"role_id\", \"misago_categories_rolecategoryacl\".\"category_id\", \"misago_categories_rolecategoryacl\".\"category_role_id\", \"misago_categories_categoryrole\".\"id\", \"misago_categories_categoryrole\".\"name\", \"misago_categories_categoryrole\".\"special_role\", \"misago_categories_categoryrole\".\"permissions\" FROM \"misago_categories_rolecategoryacl\" INNER JOIN \"misago_categories_categoryrole\" ON (\"misago_categories_rolecategoryacl\".\"category_role_id\" = \"misago_categories_categoryrole\".\"id\") WHERE \"misago_categories_rolecategoryacl\".\"role_id\" IN (1, 8)"
+  },
+  {
+    "caller": "misago/categories",
+    "callee": "Database->DECLARE \"_django_curs_281473165533200_12735\" NO SCROLL CURSOR WITHOUT HOLD FOR SELECT \"misago_categories_rolecategoryacl\".\"id\", \"misago_categories_rolecategoryacl\".\"role_id\", \"misago_categories_rolecategoryacl\".\"category_id\", \"misago_categories_rolecategoryacl\".\"category_role_id\", \"misago_categories_categoryrole\".\"id\", \"misago_categories_categoryrole\".\"name\", \"misago_categories_categoryrole\".\"special_role\", \"misago_categories_categoryrole\".\"permissions\" FROM \"misago_categories_rolecategoryacl\" INNER JOIN \"misago_categories_categoryrole\" ON (\"misago_categories_rolecategoryacl\".\"category_role_id\" = \"misago_categories_categoryrole\".\"id\") WHERE \"misago_categories_rolecategoryacl\".\"role_id\" IN (1, 8)"
+  },
+  {
+    "caller": "misago/categories",
+    "callee": "Database->DECLARE \"_django_curs_281473165533200_12736\" NO SCROLL CURSOR WITHOUT HOLD FOR SELECT \"misago_categories_rolecategoryacl\".\"id\", \"misago_categories_rolecategoryacl\".\"role_id\", \"misago_categories_rolecategoryacl\".\"category_id\", \"misago_categories_rolecategoryacl\".\"category_role_id\", \"misago_categories_categoryrole\".\"id\", \"misago_categories_categoryrole\".\"name\", \"misago_categories_categoryrole\".\"special_role\", \"misago_categories_categoryrole\".\"permissions\" FROM \"misago_categories_rolecategoryacl\" INNER JOIN \"misago_categories_categoryrole\" ON (\"misago_categories_rolecategoryacl\".\"category_role_id\" = \"misago_categories_categoryrole\".\"id\") WHERE \"misago_categories_rolecategoryacl\".\"role_id\" IN (1, 8)"
+  },
+  {
+    "caller": "misago/categories",
+    "callee": "Database->SELECT \"misago_categories_category\".\"id\", \"misago_categories_category\".\"parent_id\", \"misago_categories_category\".\"special_role\", \"misago_categories_category\".\"name\", \"misago_categories_category\".\"slug\", \"misago_categories_category\".\"description\", \"misago_categories_category\".\"is_closed\", \"misago_categories_category\".\"threads\", \"misago_categories_category\".\"posts\", \"misago_categories_category\".\"last_post_on\", \"misago_categories_category\".\"last_thread_id\", \"misago_categories_category\".\"last_thread_title\", \"misago_categories_category\".\"last_thread_slug\", \"misago_categories_category\".\"last_poster_id\", \"misago_categories_category\".\"last_poster_name\", \"misago_categories_category\".\"last_poster_slug\", \"misago_categories_category\".\"require_threads_approval\", \"misago_categories_category\".\"require_replies_approval\", \"misago_categories_category\".\"require_edits_approval\", \"misago_categories_category\".\"prune_started_after\", \"misago_categories_category\".\"prune_replied_after\", \"misago_categories_category\".\"archive_pruned_in_id\", \"misago_categories_category\".\"css_class\", \"misago_categories_category\".\"lft\", \"misago_categories_category\".\"rght\", \"misago_categories_category\".\"tree_id\", \"misago_categories_category\".\"level\" FROM \"misago_categories_category\" WHERE (\"misago_categories_category\".\"tree_id\" = 1 AND \"misago_categories_category\".\"level\" > 0) ORDER BY \"misago_categories_category\".\"lft\" ASC  LIMIT 21"
+  },
+  {
+    "caller": "misago/categories",
+    "callee": "Database->SELECT \"misago_categories_category\".\"id\", \"misago_categories_category\".\"parent_id\", \"misago_categories_category\".\"special_role\", \"misago_categories_category\".\"name\", \"misago_categories_category\".\"slug\", \"misago_categories_category\".\"description\", \"misago_categories_category\".\"is_closed\", \"misago_categories_category\".\"threads\", \"misago_categories_category\".\"posts\", \"misago_categories_category\".\"last_post_on\", \"misago_categories_category\".\"last_thread_id\", \"misago_categories_category\".\"last_thread_title\", \"misago_categories_category\".\"last_thread_slug\", \"misago_categories_category\".\"last_poster_id\", \"misago_categories_category\".\"last_poster_name\", \"misago_categories_category\".\"last_poster_slug\", \"misago_categories_category\".\"require_threads_approval\", \"misago_categories_category\".\"require_replies_approval\", \"misago_categories_category\".\"require_edits_approval\", \"misago_categories_category\".\"prune_started_after\", \"misago_categories_category\".\"prune_replied_after\", \"misago_categories_category\".\"archive_pruned_in_id\", \"misago_categories_category\".\"css_class\", \"misago_categories_category\".\"lft\", \"misago_categories_category\".\"rght\", \"misago_categories_category\".\"tree_id\", \"misago_categories_category\".\"level\" FROM \"misago_categories_category\" WHERE (\"misago_categories_category\".\"tree_id\" = 1 AND \"misago_categories_category\".\"level\" > 0) ORDER BY \"misago_categories_category\".\"lft\" ASC"
+  },
+  {
+    "caller": "misago/categories",
+    "callee": "Database->SELECT \"misago_categories_category\".\"id\", \"misago_categories_category\".\"parent_id\", \"misago_categories_category\".\"special_role\", \"misago_categories_category\".\"name\", \"misago_categories_category\".\"slug\", \"misago_categories_category\".\"description\", \"misago_categories_category\".\"is_closed\", \"misago_categories_category\".\"threads\", \"misago_categories_category\".\"posts\", \"misago_categories_category\".\"last_post_on\", \"misago_categories_category\".\"last_thread_id\", \"misago_categories_category\".\"last_thread_title\", \"misago_categories_category\".\"last_thread_slug\", \"misago_categories_category\".\"last_poster_id\", \"misago_categories_category\".\"last_poster_name\", \"misago_categories_category\".\"last_poster_slug\", \"misago_categories_category\".\"require_threads_approval\", \"misago_categories_category\".\"require_replies_approval\", \"misago_categories_category\".\"require_edits_approval\", \"misago_categories_category\".\"prune_started_after\", \"misago_categories_category\".\"prune_replied_after\", \"misago_categories_category\".\"archive_pruned_in_id\", \"misago_categories_category\".\"css_class\", \"misago_categories_category\".\"lft\", \"misago_categories_category\".\"rght\", \"misago_categories_category\".\"tree_id\", \"misago_categories_category\".\"level\" FROM \"misago_categories_category\" WHERE \"misago_categories_category\".\"special_role\" = 'private_threads'"
+  },
+  {
+    "caller": "misago/categories",
+    "callee": "Database->SELECT \"misago_categories_category\".\"id\", \"misago_categories_category\".\"parent_id\", \"misago_categories_category\".\"special_role\", \"misago_categories_category\".\"name\", \"misago_categories_category\".\"slug\", \"misago_categories_category\".\"description\", \"misago_categories_category\".\"is_closed\", \"misago_categories_category\".\"threads\", \"misago_categories_category\".\"posts\", \"misago_categories_category\".\"last_post_on\", \"misago_categories_category\".\"last_thread_id\", \"misago_categories_category\".\"last_thread_title\", \"misago_categories_category\".\"last_thread_slug\", \"misago_categories_category\".\"last_poster_id\", \"misago_categories_category\".\"last_poster_name\", \"misago_categories_category\".\"last_poster_slug\", \"misago_categories_category\".\"require_threads_approval\", \"misago_categories_category\".\"require_replies_approval\", \"misago_categories_category\".\"require_edits_approval\", \"misago_categories_category\".\"prune_started_after\", \"misago_categories_category\".\"prune_replied_after\", \"misago_categories_category\".\"archive_pruned_in_id\", \"misago_categories_category\".\"css_class\", \"misago_categories_category\".\"lft\", \"misago_categories_category\".\"rght\", \"misago_categories_category\".\"tree_id\", \"misago_categories_category\".\"level\" FROM \"misago_categories_category\" WHERE \"misago_categories_category\".\"special_role\" = 'root_category'"
+  },
+  {
+    "caller": "misago/categories",
+    "callee": "Database->SELECT \"misago_categories_category\".\"id\", \"misago_categories_category\".\"parent_id\", \"misago_categories_category\".\"special_role\", \"misago_categories_category\".\"name\", \"misago_categories_category\".\"slug\", \"misago_categories_category\".\"description\", \"misago_categories_category\".\"is_closed\", \"misago_categories_category\".\"threads\", \"misago_categories_category\".\"posts\", \"misago_categories_category\".\"last_post_on\", \"misago_categories_category\".\"last_thread_id\", \"misago_categories_category\".\"last_thread_title\", \"misago_categories_category\".\"last_thread_slug\", \"misago_categories_category\".\"last_poster_id\", \"misago_categories_category\".\"last_poster_name\", \"misago_categories_category\".\"last_poster_slug\", \"misago_categories_category\".\"require_threads_approval\", \"misago_categories_category\".\"require_replies_approval\", \"misago_categories_category\".\"require_edits_approval\", \"misago_categories_category\".\"prune_started_after\", \"misago_categories_category\".\"prune_replied_after\", \"misago_categories_category\".\"archive_pruned_in_id\", \"misago_categories_category\".\"css_class\", \"misago_categories_category\".\"lft\", \"misago_categories_category\".\"rght\", \"misago_categories_category\".\"tree_id\", \"misago_categories_category\".\"level\" FROM \"misago_categories_category\" WHERE \"misago_categories_category\".\"tree_id\" = 1 ORDER BY \"misago_categories_category\".\"lft\" ASC  LIMIT 21"
+  },
+  {
+    "caller": "misago/categories",
+    "callee": "misago/acl"
+  },
+  {
+    "caller": "misago/categories",
+    "callee": "misago/threads"
+  },
+  {
+    "caller": "misago/conf",
+    "callee": "Database->DECLARE \"_django_curs_281473165533200_12732\" NO SCROLL CURSOR WITHOUT HOLD FOR SELECT \"misago_conf_setting\".\"id\", \"misago_conf_setting\".\"setting\", \"misago_conf_setting\".\"python_type\", \"misago_conf_setting\".\"dry_value\", \"misago_conf_setting\".\"image\", \"misago_conf_setting\".\"image_size\", \"misago_conf_setting\".\"image_width\", \"misago_conf_setting\".\"image_height\", \"misago_conf_setting\".\"is_public\", \"misago_conf_setting\".\"is_lazy\" FROM \"misago_conf_setting\""
+  },
+  {
+    "caller": "misago/conf",
+    "callee": "Database->DECLARE \"_django_curs_281473165533200_12737\" NO SCROLL CURSOR WITHOUT HOLD FOR SELECT \"misago_conf_setting\".\"id\", \"misago_conf_setting\".\"setting\", \"misago_conf_setting\".\"python_type\", \"misago_conf_setting\".\"dry_value\", \"misago_conf_setting\".\"image\", \"misago_conf_setting\".\"image_size\", \"misago_conf_setting\".\"image_width\", \"misago_conf_setting\".\"image_height\", \"misago_conf_setting\".\"is_public\", \"misago_conf_setting\".\"is_lazy\" FROM \"misago_conf_setting\""
+  },
+  {
+    "caller": "misago/core",
+    "callee": "Database->SELECT \"misago_menus_menuitem\".\"id\", \"misago_menus_menuitem\".\"menu\", \"misago_menus_menuitem\".\"title\", \"misago_menus_menuitem\".\"url\", \"misago_menus_menuitem\".\"order\", \"misago_menus_menuitem\".\"css_class\", \"misago_menus_menuitem\".\"target_blank\", \"misago_menus_menuitem\".\"rel\" FROM \"misago_menus_menuitem\" WHERE NOT (\"misago_menus_menuitem\".\"menu\" = 'footer') ORDER BY \"misago_menus_menuitem\".\"order\" ASC"
+  },
+  {
+    "caller": "misago/core",
+    "callee": "Database->SELECT \"misago_menus_menuitem\".\"id\", \"misago_menus_menuitem\".\"menu\", \"misago_menus_menuitem\".\"title\", \"misago_menus_menuitem\".\"url\", \"misago_menus_menuitem\".\"order\", \"misago_menus_menuitem\".\"css_class\", \"misago_menus_menuitem\".\"target_blank\", \"misago_menus_menuitem\".\"rel\" FROM \"misago_menus_menuitem\" WHERE NOT (\"misago_menus_menuitem\".\"menu\" = 'navbar') ORDER BY \"misago_menus_menuitem\".\"order\" ASC"
+  },
+  {
+    "caller": "misago/core",
+    "callee": "Database->SELECT \"misago_threads_thread\".\"id\", \"misago_threads_thread\".\"category_id\", \"misago_threads_thread\".\"title\", \"misago_threads_thread\".\"slug\", \"misago_threads_thread\".\"replies\", \"misago_threads_thread\".\"has_events\", \"misago_threads_thread\".\"has_poll\", \"misago_threads_thread\".\"has_reported_posts\", \"misago_threads_thread\".\"has_open_reports\", \"misago_threads_thread\".\"has_unapproved_posts\", \"misago_threads_thread\".\"has_hidden_posts\", \"misago_threads_thread\".\"started_on\", \"misago_threads_thread\".\"last_post_on\", \"misago_threads_thread\".\"first_post_id\", \"misago_threads_thread\".\"starter_id\", \"misago_threads_thread\".\"starter_name\", \"misago_threads_thread\".\"starter_slug\", \"misago_threads_thread\".\"last_post_id\", \"misago_threads_thread\".\"last_post_is_event\", \"misago_threads_thread\".\"last_poster_id\", \"misago_threads_thread\".\"last_poster_name\", \"misago_threads_thread\".\"last_poster_slug\", \"misago_threads_thread\".\"weight\", \"misago_threads_thread\".\"is_unapproved\", \"misago_threads_thread\".\"is_hidden\", \"misago_threads_thread\".\"is_closed\", \"misago_threads_thread\".\"best_answer_id\", \"misago_threads_thread\".\"best_answer_is_protected\", \"misago_threads_thread\".\"best_answer_marked_on\", \"misago_threads_thread\".\"best_answer_marked_by_id\", \"misago_threads_thread\".\"best_answer_marked_by_name\", \"misago_threads_thread\".\"best_answer_marked_by_slug\", \"misago_users_user\".\"id\", \"misago_users_user\".\"password\", \"misago_users_user\".\"last_login\", \"misago_users_user\".\"is_superuser\", \"misago_users_user\".\"username\", \"misago_users_user\".\"slug\", \"misago_users_user\".\"email\", \"misago_users_user\".\"email_hash\", \"misago_users_user\".\"joined_on\", \"misago_users_user\".\"joined_from_ip\", \"misago_users_user\".\"is_hiding_presence\", \"misago_users_user\".\"rank_id\", \"misago_users_user\".\"title\", \"misago_users_user\".\"requires_activation\", \"misago_users_user\".\"is_staff\", \"misago_users_user\".\"acl_key\", \"misago_users_user\".\"is_active\", \"misago_users_user\".\"is_active_staff_message\", \"misago_users_user\".\"is_deleting_account\", \"misago_users_user\".\"avatar_tmp\", \"misago_users_user\".\"avatar_src\", \"misago_users_user\".\"avatar_crop\", \"misago_users_user\".\"avatars\", \"misago_users_user\".\"is_avatar_locked\", \"misago_users_user\".\"avatar_lock_user_message\", \"misago_users_user\".\"avatar_lock_staff_message\", \"misago_users_user\".\"signature\", \"misago_users_user\".\"signature_parsed\", \"misago_users_user\".\"signature_checksum\", \"misago_users_user\".\"is_signature_locked\", \"misago_users_user\".\"signature_lock_user_message\", \"misago_users_user\".\"signature_lock_staff_message\", \"misago_users_user\".\"followers\", \"misago_users_user\".\"following\", \"misago_users_user\".\"limits_private_thread_invites_to\", \"misago_users_user\".\"unread_private_threads\", \"misago_users_user\".\"sync_unread_private_threads\", \"misago_users_user\".\"subscribe_to_started_threads\", \"misago_users_user\".\"subscribe_to_replied_threads\", \"misago_users_user\".\"threads\", \"misago_users_user\".\"posts\", \"misago_users_user\".\"last_posted_on\", \"misago_users_user\".\"profile_fields\", \"misago_users_user\".\"agreements\", \"misago_users_user\".\"sso_id\", T4.\"id\", T4.\"password\", T4.\"last_login\", T4.\"is_superuser\", T4.\"username\", T4.\"slug\", T4.\"email\", T4.\"email_hash\", T4.\"joined_on\", T4.\"joined_from_ip\", T4.\"is_hiding_presence\", T4.\"rank_id\", T4.\"title\", T4.\"requires_activation\", T4.\"is_staff\", T4.\"acl_key\", T4.\"is_active\", T4.\"is_active_staff_message\", T4.\"is_deleting_account\", T4.\"avatar_tmp\", T4.\"avatar_src\", T4.\"avatar_crop\", T4.\"avatars\", T4.\"is_avatar_locked\", T4.\"avatar_lock_user_message\", T4.\"avatar_lock_staff_message\", T4.\"signature\", T4.\"signature_parsed\", T4.\"signature_checksum\", T4.\"is_signature_locked\", T4.\"signature_lock_user_message\", T4.\"signature_lock_staff_message\", T4.\"followers\", T4.\"following\", T4.\"limits_private_thread_invites_to\", T4.\"unread_private_threads\", T4.\"sync_unread_private_threads\", T4.\"subscribe_to_started_threads\", T4.\"subscribe_to_replied_threads\", T4.\"threads\", T4.\"posts\", T4.\"last_posted_on\", T4.\"profile_fields\", T4.\"agreements\", T4.\"sso_id\" FROM \"misago_threads_thread\" LEFT OUTER JOIN \"misago_users_user\" ON (\"misago_threads_thread\".\"starter_id\" = \"misago_users_user\".\"id\") LEFT OUTER JOIN \"misago_users_user\" T4 ON (\"misago_threads_thread\".\"last_poster_id\" = T4.\"id\") WHERE ((\"misago_threads_thread\".\"starter_id\" = 1954 OR \"misago_threads_thread\".\"is_unapproved\" = false) AND \"misago_threads_thread\".\"category_id\" IN (3) AND \"misago_threads_thread\".\"is_hidden\" = false AND \"misago_threads_thread\".\"category_id\" IN (2, 3) AND \"misago_threads_thread\".\"weight\" < 2) ORDER BY \"misago_threads_thread\".\"last_post_id\" DESC  LIMIT 21"
+  },
+  {
+    "caller": "misago/core",
+    "callee": "Database->SELECT \"misago_threads_thread\".\"id\", \"misago_threads_thread\".\"category_id\", \"misago_threads_thread\".\"title\", \"misago_threads_thread\".\"slug\", \"misago_threads_thread\".\"replies\", \"misago_threads_thread\".\"has_events\", \"misago_threads_thread\".\"has_poll\", \"misago_threads_thread\".\"has_reported_posts\", \"misago_threads_thread\".\"has_open_reports\", \"misago_threads_thread\".\"has_unapproved_posts\", \"misago_threads_thread\".\"has_hidden_posts\", \"misago_threads_thread\".\"started_on\", \"misago_threads_thread\".\"last_post_on\", \"misago_threads_thread\".\"first_post_id\", \"misago_threads_thread\".\"starter_id\", \"misago_threads_thread\".\"starter_name\", \"misago_threads_thread\".\"starter_slug\", \"misago_threads_thread\".\"last_post_id\", \"misago_threads_thread\".\"last_post_is_event\", \"misago_threads_thread\".\"last_poster_id\", \"misago_threads_thread\".\"last_poster_name\", \"misago_threads_thread\".\"last_poster_slug\", \"misago_threads_thread\".\"weight\", \"misago_threads_thread\".\"is_unapproved\", \"misago_threads_thread\".\"is_hidden\", \"misago_threads_thread\".\"is_closed\", \"misago_threads_thread\".\"best_answer_id\", \"misago_threads_thread\".\"best_answer_is_protected\", \"misago_threads_thread\".\"best_answer_marked_on\", \"misago_threads_thread\".\"best_answer_marked_by_id\", \"misago_threads_thread\".\"best_answer_marked_by_name\", \"misago_threads_thread\".\"best_answer_marked_by_slug\", \"misago_users_user\".\"id\", \"misago_users_user\".\"password\", \"misago_users_user\".\"last_login\", \"misago_users_user\".\"is_superuser\", \"misago_users_user\".\"username\", \"misago_users_user\".\"slug\", \"misago_users_user\".\"email\", \"misago_users_user\".\"email_hash\", \"misago_users_user\".\"joined_on\", \"misago_users_user\".\"joined_from_ip\", \"misago_users_user\".\"is_hiding_presence\", \"misago_users_user\".\"rank_id\", \"misago_users_user\".\"title\", \"misago_users_user\".\"requires_activation\", \"misago_users_user\".\"is_staff\", \"misago_users_user\".\"acl_key\", \"misago_users_user\".\"is_active\", \"misago_users_user\".\"is_active_staff_message\", \"misago_users_user\".\"is_deleting_account\", \"misago_users_user\".\"avatar_tmp\", \"misago_users_user\".\"avatar_src\", \"misago_users_user\".\"avatar_crop\", \"misago_users_user\".\"avatars\", \"misago_users_user\".\"is_avatar_locked\", \"misago_users_user\".\"avatar_lock_user_message\", \"misago_users_user\".\"avatar_lock_staff_message\", \"misago_users_user\".\"signature\", \"misago_users_user\".\"signature_parsed\", \"misago_users_user\".\"signature_checksum\", \"misago_users_user\".\"is_signature_locked\", \"misago_users_user\".\"signature_lock_user_message\", \"misago_users_user\".\"signature_lock_staff_message\", \"misago_users_user\".\"followers\", \"misago_users_user\".\"following\", \"misago_users_user\".\"limits_private_thread_invites_to\", \"misago_users_user\".\"unread_private_threads\", \"misago_users_user\".\"sync_unread_private_threads\", \"misago_users_user\".\"subscribe_to_started_threads\", \"misago_users_user\".\"subscribe_to_replied_threads\", \"misago_users_user\".\"threads\", \"misago_users_user\".\"posts\", \"misago_users_user\".\"last_posted_on\", \"misago_users_user\".\"profile_fields\", \"misago_users_user\".\"agreements\", \"misago_users_user\".\"sso_id\", T5.\"id\", T5.\"password\", T5.\"last_login\", T5.\"is_superuser\", T5.\"username\", T5.\"slug\", T5.\"email\", T5.\"email_hash\", T5.\"joined_on\", T5.\"joined_from_ip\", T5.\"is_hiding_presence\", T5.\"rank_id\", T5.\"title\", T5.\"requires_activation\", T5.\"is_staff\", T5.\"acl_key\", T5.\"is_active\", T5.\"is_active_staff_message\", T5.\"is_deleting_account\", T5.\"avatar_tmp\", T5.\"avatar_src\", T5.\"avatar_crop\", T5.\"avatars\", T5.\"is_avatar_locked\", T5.\"avatar_lock_user_message\", T5.\"avatar_lock_staff_message\", T5.\"signature\", T5.\"signature_parsed\", T5.\"signature_checksum\", T5.\"is_signature_locked\", T5.\"signature_lock_user_message\", T5.\"signature_lock_staff_message\", T5.\"followers\", T5.\"following\", T5.\"limits_private_thread_invites_to\", T5.\"unread_private_threads\", T5.\"sync_unread_private_threads\", T5.\"subscribe_to_started_threads\", T5.\"subscribe_to_replied_threads\", T5.\"threads\", T5.\"posts\", T5.\"last_posted_on\", T5.\"profile_fields\", T5.\"agreements\", T5.\"sso_id\" FROM \"misago_threads_thread\" LEFT OUTER JOIN \"misago_users_user\" ON (\"misago_threads_thread\".\"starter_id\" = \"misago_users_user\".\"id\") LEFT OUTER JOIN \"misago_users_user\" T5 ON (\"misago_threads_thread\".\"last_poster_id\" = T5.\"id\") WHERE ((\"misago_threads_thread\".\"starter_id\" = 1954 OR \"misago_threads_thread\".\"is_unapproved\" = false) AND \"misago_threads_thread\".\"category_id\" IN (3) AND \"misago_threads_thread\".\"is_hidden\" = false AND \"misago_threads_thread\".\"category_id\" IN (2, 3) AND \"misago_threads_thread\".\"weight\" < 2 AND \"misago_threads_thread\".\"last_post_id\" <= 2704) ORDER BY \"misago_threads_thread\".\"last_post_id\" DESC  LIMIT 6"
+  },
+  {
+    "caller": "misago/core",
+    "callee": "Database->SELECT \"misago_threads_thread\".\"id\", \"misago_threads_thread\".\"category_id\", \"misago_threads_thread\".\"title\", \"misago_threads_thread\".\"slug\", \"misago_threads_thread\".\"replies\", \"misago_threads_thread\".\"has_events\", \"misago_threads_thread\".\"has_poll\", \"misago_threads_thread\".\"has_reported_posts\", \"misago_threads_thread\".\"has_open_reports\", \"misago_threads_thread\".\"has_unapproved_posts\", \"misago_threads_thread\".\"has_hidden_posts\", \"misago_threads_thread\".\"started_on\", \"misago_threads_thread\".\"last_post_on\", \"misago_threads_thread\".\"first_post_id\", \"misago_threads_thread\".\"starter_id\", \"misago_threads_thread\".\"starter_name\", \"misago_threads_thread\".\"starter_slug\", \"misago_threads_thread\".\"last_post_id\", \"misago_threads_thread\".\"last_post_is_event\", \"misago_threads_thread\".\"last_poster_id\", \"misago_threads_thread\".\"last_poster_name\", \"misago_threads_thread\".\"last_poster_slug\", \"misago_threads_thread\".\"weight\", \"misago_threads_thread\".\"is_unapproved\", \"misago_threads_thread\".\"is_hidden\", \"misago_threads_thread\".\"is_closed\", \"misago_threads_thread\".\"best_answer_id\", \"misago_threads_thread\".\"best_answer_is_protected\", \"misago_threads_thread\".\"best_answer_marked_on\", \"misago_threads_thread\".\"best_answer_marked_by_id\", \"misago_threads_thread\".\"best_answer_marked_by_name\", \"misago_threads_thread\".\"best_answer_marked_by_slug\", \"misago_users_user\".\"id\", \"misago_users_user\".\"password\", \"misago_users_user\".\"last_login\", \"misago_users_user\".\"is_superuser\", \"misago_users_user\".\"username\", \"misago_users_user\".\"slug\", \"misago_users_user\".\"email\", \"misago_users_user\".\"email_hash\", \"misago_users_user\".\"joined_on\", \"misago_users_user\".\"joined_from_ip\", \"misago_users_user\".\"is_hiding_presence\", \"misago_users_user\".\"rank_id\", \"misago_users_user\".\"title\", \"misago_users_user\".\"requires_activation\", \"misago_users_user\".\"is_staff\", \"misago_users_user\".\"acl_key\", \"misago_users_user\".\"is_active\", \"misago_users_user\".\"is_active_staff_message\", \"misago_users_user\".\"is_deleting_account\", \"misago_users_user\".\"avatar_tmp\", \"misago_users_user\".\"avatar_src\", \"misago_users_user\".\"avatar_crop\", \"misago_users_user\".\"avatars\", \"misago_users_user\".\"is_avatar_locked\", \"misago_users_user\".\"avatar_lock_user_message\", \"misago_users_user\".\"avatar_lock_staff_message\", \"misago_users_user\".\"signature\", \"misago_users_user\".\"signature_parsed\", \"misago_users_user\".\"signature_checksum\", \"misago_users_user\".\"is_signature_locked\", \"misago_users_user\".\"signature_lock_user_message\", \"misago_users_user\".\"signature_lock_staff_message\", \"misago_users_user\".\"followers\", \"misago_users_user\".\"following\", \"misago_users_user\".\"limits_private_thread_invites_to\", \"misago_users_user\".\"unread_private_threads\", \"misago_users_user\".\"sync_unread_private_threads\", \"misago_users_user\".\"subscribe_to_started_threads\", \"misago_users_user\".\"subscribe_to_replied_threads\", \"misago_users_user\".\"threads\", \"misago_users_user\".\"posts\", \"misago_users_user\".\"last_posted_on\", \"misago_users_user\".\"profile_fields\", \"misago_users_user\".\"agreements\", \"misago_users_user\".\"sso_id\", T5.\"id\", T5.\"password\", T5.\"last_login\", T5.\"is_superuser\", T5.\"username\", T5.\"slug\", T5.\"email\", T5.\"email_hash\", T5.\"joined_on\", T5.\"joined_from_ip\", T5.\"is_hiding_presence\", T5.\"rank_id\", T5.\"title\", T5.\"requires_activation\", T5.\"is_staff\", T5.\"acl_key\", T5.\"is_active\", T5.\"is_active_staff_message\", T5.\"is_deleting_account\", T5.\"avatar_tmp\", T5.\"avatar_src\", T5.\"avatar_crop\", T5.\"avatars\", T5.\"is_avatar_locked\", T5.\"avatar_lock_user_message\", T5.\"avatar_lock_staff_message\", T5.\"signature\", T5.\"signature_parsed\", T5.\"signature_checksum\", T5.\"is_signature_locked\", T5.\"signature_lock_user_message\", T5.\"signature_lock_staff_message\", T5.\"followers\", T5.\"following\", T5.\"limits_private_thread_invites_to\", T5.\"unread_private_threads\", T5.\"sync_unread_private_threads\", T5.\"subscribe_to_started_threads\", T5.\"subscribe_to_replied_threads\", T5.\"threads\", T5.\"posts\", T5.\"last_posted_on\", T5.\"profile_fields\", T5.\"agreements\", T5.\"sso_id\" FROM \"misago_threads_thread\" LEFT OUTER JOIN \"misago_users_user\" ON (\"misago_threads_thread\".\"starter_id\" = \"misago_users_user\".\"id\") LEFT OUTER JOIN \"misago_users_user\" T5 ON (\"misago_threads_thread\".\"last_poster_id\" = T5.\"id\") WHERE ((\"misago_threads_thread\".\"starter_id\" = 1954 OR \"misago_threads_thread\".\"is_unapproved\" = false) AND \"misago_threads_thread\".\"category_id\" IN (3) AND \"misago_threads_thread\".\"is_hidden\" = false AND \"misago_threads_thread\".\"category_id\" IN (2, 3) AND \"misago_threads_thread\".\"weight\" < 2 AND \"misago_threads_thread\".\"last_post_id\" <= 2713) ORDER BY \"misago_threads_thread\".\"last_post_id\" DESC  LIMIT 6"
+  },
+  {
+    "caller": "misago/core",
+    "callee": "misago/acl"
+  },
+  {
+    "caller": "misago/core",
+    "callee": "misago/admin"
+  },
+  {
+    "caller": "misago/core",
+    "callee": "misago/conf"
+  },
+  {
+    "caller": "misago/core",
+    "callee": "misago/icons"
+  },
+  {
+    "caller": "misago/core",
+    "callee": "misago/legal"
+  },
+  {
+    "caller": "misago/core",
+    "callee": "misago/markup"
+  },
+  {
+    "caller": "misago/core",
+    "callee": "misago/menus"
+  },
+  {
+    "caller": "misago/core",
+    "callee": "misago/search"
+  },
+  {
+    "caller": "misago/core",
+    "callee": "misago/socialauth"
+  },
+  {
+    "caller": "misago/core",
+    "callee": "misago/themes"
+  },
+  {
+    "caller": "misago/core",
+    "callee": "misago/threads"
+  },
+  {
+    "caller": "misago/core",
+    "callee": "misago/users"
+  },
+  {
+    "caller": "misago/icons",
+    "callee": "Database->SELECT \"misago_icons_icon\".\"id\", \"misago_icons_icon\".\"type\", \"misago_icons_icon\".\"image\", \"misago_icons_icon\".\"size\", \"misago_icons_icon\".\"width\", \"misago_icons_icon\".\"height\" FROM \"misago_icons_icon\""
+  },
+  {
+    "caller": "misago/legal",
+    "callee": "Database->SELECT \"misago_legal_agreement\".\"id\", \"misago_legal_agreement\".\"type\", \"misago_legal_agreement\".\"title\", \"misago_legal_agreement\".\"link\", \"misago_legal_agreement\".\"text\", \"misago_legal_agreement\".\"is_active\", \"misago_legal_agreement\".\"created_on\", \"misago_legal_agreement\".\"created_by_id\", \"misago_legal_agreement\".\"created_by_name\", \"misago_legal_agreement\".\"last_modified_on\", \"misago_legal_agreement\".\"last_modified_by_id\", \"misago_legal_agreement\".\"last_modified_by_name\" FROM \"misago_legal_agreement\" WHERE \"misago_legal_agreement\".\"is_active\" = true"
+  },
+  {
+    "caller": "misago/menus",
+    "callee": "Database->SELECT \"misago_menus_menuitem\".\"id\", \"misago_menus_menuitem\".\"menu\", \"misago_menus_menuitem\".\"title\", \"misago_menus_menuitem\".\"url\", \"misago_menus_menuitem\".\"order\", \"misago_menus_menuitem\".\"css_class\", \"misago_menus_menuitem\".\"target_blank\", \"misago_menus_menuitem\".\"rel\" FROM \"misago_menus_menuitem\" WHERE NOT (\"misago_menus_menuitem\".\"menu\" = 'footer') ORDER BY \"misago_menus_menuitem\".\"order\" ASC  LIMIT 21"
+  },
+  {
+    "caller": "misago/menus",
+    "callee": "Database->SELECT \"misago_menus_menuitem\".\"id\", \"misago_menus_menuitem\".\"menu\", \"misago_menus_menuitem\".\"title\", \"misago_menus_menuitem\".\"url\", \"misago_menus_menuitem\".\"order\", \"misago_menus_menuitem\".\"css_class\", \"misago_menus_menuitem\".\"target_blank\", \"misago_menus_menuitem\".\"rel\" FROM \"misago_menus_menuitem\" WHERE NOT (\"misago_menus_menuitem\".\"menu\" = 'navbar') ORDER BY \"misago_menus_menuitem\".\"order\" ASC  LIMIT 21"
+  },
+  {
+    "caller": "misago/readtracker",
+    "callee": "Database->SELECT DISTINCT \"misago_threads_post\".\"thread_id\" FROM \"misago_threads_post\" WHERE (\"misago_threads_post\".\"posted_on\" > '2021-04-14T19:55:13.706145+00:00'::timestamptz AND \"misago_threads_post\".\"thread_id\" IN (1343, 1342, 1341, 1340, 1339) AND NOT (\"misago_threads_post\".\"id\" IN (SELECT U0.\"post_id\" FROM \"misago_readtracker_postread\" U0 WHERE U0.\"user_id\" = 1954)) AND NOT (\"misago_threads_post\".\"category_id\" IN (3) AND \"misago_threads_post\".\"is_event\" = true AND \"misago_threads_post\".\"is_hidden\" = true) AND (\"misago_threads_post\".\"poster_id\" = 1954 OR \"misago_threads_post\".\"is_unapproved\" = false) AND \"misago_threads_post\".\"category_id\" IN (3))"
+  },
+  {
+    "caller": "misago/readtracker",
+    "callee": "Database->SELECT DISTINCT \"misago_threads_post\".\"thread_id\" FROM \"misago_threads_post\" WHERE (\"misago_threads_post\".\"posted_on\" > '2021-04-14T19:55:13.706145+00:00'::timestamptz AND \"misago_threads_post\".\"thread_id\" IN (1343, 1342, 1341, 1340, 1339) AND NOT (\"misago_threads_post\".\"id\" IN (SELECT U0.\"post_id\" FROM \"misago_readtracker_postread\" U0 WHERE U0.\"user_id\" = 1954)))  LIMIT 21"
+  },
+  {
+    "caller": "misago/readtracker",
+    "callee": "misago/threads"
+  },
+  {
+    "caller": "misago/search",
+    "callee": "misago/acl"
+  },
+  {
+    "caller": "misago/search",
+    "callee": "misago/users"
+  },
+  {
+    "caller": "misago/socialauth",
+    "callee": "Database->SELECT \"misago_socialauth_socialauthprovider\".\"provider\", \"misago_socialauth_socialauthprovider\".\"button_text\", \"misago_socialauth_socialauthprovider\".\"button_color\", \"misago_socialauth_socialauthprovider\".\"settings\", \"misago_socialauth_socialauthprovider\".\"is_active\", \"misago_socialauth_socialauthprovider\".\"order\" FROM \"misago_socialauth_socialauthprovider\" WHERE \"misago_socialauth_socialauthprovider\".\"is_active\" = true ORDER BY \"misago_socialauth_socialauthprovider\".\"order\" ASC"
+  },
+  {
+    "caller": "misago/themes",
+    "callee": "Database->SELECT \"misago_themes_css\".\"id\", \"misago_themes_css\".\"theme_id\", \"misago_themes_css\".\"name\", \"misago_themes_css\".\"url\", \"misago_themes_css\".\"source_file\", \"misago_themes_css\".\"source_hash\", \"misago_themes_css\".\"source_needs_building\", \"misago_themes_css\".\"build_file\", \"misago_themes_css\".\"build_hash\", \"misago_themes_css\".\"size\", \"misago_themes_css\".\"order\", \"misago_themes_css\".\"modified_on\" FROM \"misago_themes_css\" WHERE \"misago_themes_css\".\"theme_id\" IN (1) ORDER BY \"misago_themes_css\".\"order\" ASC"
+  },
+  {
+    "caller": "misago/themes",
+    "callee": "Database->SELECT \"misago_themes_theme\".\"id\", \"misago_themes_theme\".\"parent_id\", \"misago_themes_theme\".\"name\", \"misago_themes_theme\".\"dirname\", \"misago_themes_theme\".\"is_default\", \"misago_themes_theme\".\"is_active\", \"misago_themes_theme\".\"version\", \"misago_themes_theme\".\"author\", \"misago_themes_theme\".\"url\", \"misago_themes_theme\".\"lft\", \"misago_themes_theme\".\"rght\", \"misago_themes_theme\".\"tree_id\", \"misago_themes_theme\".\"level\" FROM \"misago_themes_theme\" WHERE \"misago_themes_theme\".\"id\" = 1 ORDER BY \"misago_themes_theme\".\"tree_id\" ASC, \"misago_themes_theme\".\"lft\" ASC"
+  },
+  {
+    "caller": "misago/themes",
+    "callee": "Database->SELECT \"misago_themes_theme\".\"id\", \"misago_themes_theme\".\"parent_id\", \"misago_themes_theme\".\"name\", \"misago_themes_theme\".\"dirname\", \"misago_themes_theme\".\"is_default\", \"misago_themes_theme\".\"is_active\", \"misago_themes_theme\".\"version\", \"misago_themes_theme\".\"author\", \"misago_themes_theme\".\"url\", \"misago_themes_theme\".\"lft\", \"misago_themes_theme\".\"rght\", \"misago_themes_theme\".\"tree_id\", \"misago_themes_theme\".\"level\" FROM \"misago_themes_theme\" WHERE \"misago_themes_theme\".\"is_active\" = true"
+  },
+  {
+    "caller": "misago/threads",
+    "callee": "Database->DECLARE \"_django_curs_281473165533200_12733\" NO SCROLL CURSOR WITHOUT HOLD FOR SELECT \"misago_threads_subscription\".\"id\", \"misago_threads_subscription\".\"user_id\", \"misago_threads_subscription\".\"thread_id\", \"misago_threads_subscription\".\"category_id\", \"misago_threads_subscription\".\"last_read_on\", \"misago_threads_subscription\".\"send_email\" FROM \"misago_threads_subscription\" WHERE (\"misago_threads_subscription\".\"user_id\" = 1954 AND \"misago_threads_subscription\".\"thread_id\" IN (1343, 1342, 1341, 1340, 1339))"
+  },
+  {
+    "caller": "misago/threads",
+    "callee": "Database->SELECT DISTINCT \"misago_threads_post\".\"thread_id\" FROM \"misago_threads_post\" WHERE (\"misago_threads_post\".\"posted_on\" > '2021-04-14T19:55:13.706145+00:00'::timestamptz AND \"misago_threads_post\".\"thread_id\" IN (1343, 1342, 1341, 1340, 1339) AND NOT (\"misago_threads_post\".\"id\" IN (SELECT U0.\"post_id\" FROM \"misago_readtracker_postread\" U0 WHERE U0.\"user_id\" = 1954)) AND NOT (\"misago_threads_post\".\"category_id\" IN (3) AND \"misago_threads_post\".\"is_event\" = true AND \"misago_threads_post\".\"is_hidden\" = true) AND (\"misago_threads_post\".\"poster_id\" = 1954 OR \"misago_threads_post\".\"is_unapproved\" = false) AND \"misago_threads_post\".\"category_id\" IN (3))  LIMIT 21"
+  },
+  {
+    "caller": "misago/threads",
+    "callee": "Database->SELECT DISTINCT \"misago_threads_post\".\"thread_id\" FROM \"misago_threads_post\" WHERE (\"misago_threads_post\".\"posted_on\" > '2021-04-14T19:55:13.706145+00:00'::timestamptz AND \"misago_threads_post\".\"thread_id\" IN (1343, 1342, 1341, 1340, 1339) AND NOT (\"misago_threads_post\".\"id\" IN (SELECT U0.\"post_id\" FROM \"misago_readtracker_postread\" U0 WHERE U0.\"user_id\" = 1954)))  LIMIT 21"
+  },
+  {
+    "caller": "misago/threads",
+    "callee": "Database->SELECT \"misago_categories_category\".\"id\", \"misago_categories_category\".\"parent_id\", \"misago_categories_category\".\"special_role\", \"misago_categories_category\".\"name\", \"misago_categories_category\".\"slug\", \"misago_categories_category\".\"description\", \"misago_categories_category\".\"is_closed\", \"misago_categories_category\".\"threads\", \"misago_categories_category\".\"posts\", \"misago_categories_category\".\"last_post_on\", \"misago_categories_category\".\"last_thread_id\", \"misago_categories_category\".\"last_thread_title\", \"misago_categories_category\".\"last_thread_slug\", \"misago_categories_category\".\"last_poster_id\", \"misago_categories_category\".\"last_poster_name\", \"misago_categories_category\".\"last_poster_slug\", \"misago_categories_category\".\"require_threads_approval\", \"misago_categories_category\".\"require_replies_approval\", \"misago_categories_category\".\"require_edits_approval\", \"misago_categories_category\".\"prune_started_after\", \"misago_categories_category\".\"prune_replied_after\", \"misago_categories_category\".\"archive_pruned_in_id\", \"misago_categories_category\".\"css_class\", \"misago_categories_category\".\"lft\", \"misago_categories_category\".\"rght\", \"misago_categories_category\".\"tree_id\", \"misago_categories_category\".\"level\" FROM \"misago_categories_category\" WHERE \"misago_categories_category\".\"tree_id\" = 1 ORDER BY \"misago_categories_category\".\"lft\" ASC"
+  },
+  {
+    "caller": "misago/threads",
+    "callee": "Database->SELECT \"misago_categories_category\".\"id\", \"misago_categories_category\".\"parent_id\", \"misago_categories_category\".\"special_role\", \"misago_categories_category\".\"name\", \"misago_categories_category\".\"slug\", \"misago_categories_category\".\"description\", \"misago_categories_category\".\"is_closed\", \"misago_categories_category\".\"threads\", \"misago_categories_category\".\"posts\", \"misago_categories_category\".\"last_post_on\", \"misago_categories_category\".\"last_thread_id\", \"misago_categories_category\".\"last_thread_title\", \"misago_categories_category\".\"last_thread_slug\", \"misago_categories_category\".\"last_poster_id\", \"misago_categories_category\".\"last_poster_name\", \"misago_categories_category\".\"last_poster_slug\", \"misago_categories_category\".\"require_threads_approval\", \"misago_categories_category\".\"require_replies_approval\", \"misago_categories_category\".\"require_edits_approval\", \"misago_categories_category\".\"prune_started_after\", \"misago_categories_category\".\"prune_replied_after\", \"misago_categories_category\".\"archive_pruned_in_id\", \"misago_categories_category\".\"css_class\", \"misago_categories_category\".\"lft\", \"misago_categories_category\".\"rght\", \"misago_categories_category\".\"tree_id\", \"misago_categories_category\".\"level\", T2.\"id\", T2.\"parent_id\", T2.\"special_role\", T2.\"name\", T2.\"slug\", T2.\"description\", T2.\"is_closed\", T2.\"threads\", T2.\"posts\", T2.\"last_post_on\", T2.\"last_thread_id\", T2.\"last_thread_title\", T2.\"last_thread_slug\", T2.\"last_poster_id\", T2.\"last_poster_name\", T2.\"last_poster_slug\", T2.\"require_threads_approval\", T2.\"require_replies_approval\", T2.\"require_edits_approval\", T2.\"prune_started_after\", T2.\"prune_replied_after\", T2.\"archive_pruned_in_id\", T2.\"css_class\", T2.\"lft\", T2.\"rght\", T2.\"tree_id\", T2.\"level\" FROM \"misago_categories_category\" LEFT OUTER JOIN \"misago_categories_category\" T2 ON (\"misago_categories_category\".\"parent_id\" = T2.\"id\") WHERE (\"misago_categories_category\".\"tree_id\" = 1 AND \"misago_categories_category\".\"level\" > 0 AND \"misago_categories_category\".\"id\" IN (3, 1)) ORDER BY \"misago_categories_category\".\"lft\" ASC"
+  },
+  {
+    "caller": "misago/threads",
+    "callee": "Database->SELECT \"misago_menus_menuitem\".\"id\", \"misago_menus_menuitem\".\"menu\", \"misago_menus_menuitem\".\"title\", \"misago_menus_menuitem\".\"url\", \"misago_menus_menuitem\".\"order\", \"misago_menus_menuitem\".\"css_class\", \"misago_menus_menuitem\".\"target_blank\", \"misago_menus_menuitem\".\"rel\" FROM \"misago_menus_menuitem\" WHERE NOT (\"misago_menus_menuitem\".\"menu\" = 'footer') ORDER BY \"misago_menus_menuitem\".\"order\" ASC"
+  },
+  {
+    "caller": "misago/threads",
+    "callee": "Database->SELECT \"misago_menus_menuitem\".\"id\", \"misago_menus_menuitem\".\"menu\", \"misago_menus_menuitem\".\"title\", \"misago_menus_menuitem\".\"url\", \"misago_menus_menuitem\".\"order\", \"misago_menus_menuitem\".\"css_class\", \"misago_menus_menuitem\".\"target_blank\", \"misago_menus_menuitem\".\"rel\" FROM \"misago_menus_menuitem\" WHERE NOT (\"misago_menus_menuitem\".\"menu\" = 'navbar') ORDER BY \"misago_menus_menuitem\".\"order\" ASC"
+  },
+  {
+    "caller": "misago/threads",
+    "callee": "Database->SELECT \"misago_threads_thread\".\"id\", \"misago_threads_thread\".\"category_id\", \"misago_threads_thread\".\"title\", \"misago_threads_thread\".\"slug\", \"misago_threads_thread\".\"replies\", \"misago_threads_thread\".\"has_events\", \"misago_threads_thread\".\"has_poll\", \"misago_threads_thread\".\"has_reported_posts\", \"misago_threads_thread\".\"has_open_reports\", \"misago_threads_thread\".\"has_unapproved_posts\", \"misago_threads_thread\".\"has_hidden_posts\", \"misago_threads_thread\".\"started_on\", \"misago_threads_thread\".\"last_post_on\", \"misago_threads_thread\".\"first_post_id\", \"misago_threads_thread\".\"starter_id\", \"misago_threads_thread\".\"starter_name\", \"misago_threads_thread\".\"starter_slug\", \"misago_threads_thread\".\"last_post_id\", \"misago_threads_thread\".\"last_post_is_event\", \"misago_threads_thread\".\"last_poster_id\", \"misago_threads_thread\".\"last_poster_name\", \"misago_threads_thread\".\"last_poster_slug\", \"misago_threads_thread\".\"weight\", \"misago_threads_thread\".\"is_unapproved\", \"misago_threads_thread\".\"is_hidden\", \"misago_threads_thread\".\"is_closed\", \"misago_threads_thread\".\"best_answer_id\", \"misago_threads_thread\".\"best_answer_is_protected\", \"misago_threads_thread\".\"best_answer_marked_on\", \"misago_threads_thread\".\"best_answer_marked_by_id\", \"misago_threads_thread\".\"best_answer_marked_by_name\", \"misago_threads_thread\".\"best_answer_marked_by_slug\" FROM \"misago_threads_thread\" WHERE ((\"misago_threads_thread\".\"starter_id\" = 1954 OR \"misago_threads_thread\".\"is_unapproved\" = false) AND \"misago_threads_thread\".\"category_id\" IN (3) AND \"misago_threads_thread\".\"is_hidden\" = false)  LIMIT 21"
+  },
+  {
+    "caller": "misago/threads",
+    "callee": "Database->SELECT \"misago_threads_thread\".\"id\", \"misago_threads_thread\".\"category_id\", \"misago_threads_thread\".\"title\", \"misago_threads_thread\".\"slug\", \"misago_threads_thread\".\"replies\", \"misago_threads_thread\".\"has_events\", \"misago_threads_thread\".\"has_poll\", \"misago_threads_thread\".\"has_reported_posts\", \"misago_threads_thread\".\"has_open_reports\", \"misago_threads_thread\".\"has_unapproved_posts\", \"misago_threads_thread\".\"has_hidden_posts\", \"misago_threads_thread\".\"started_on\", \"misago_threads_thread\".\"last_post_on\", \"misago_threads_thread\".\"first_post_id\", \"misago_threads_thread\".\"starter_id\", \"misago_threads_thread\".\"starter_name\", \"misago_threads_thread\".\"starter_slug\", \"misago_threads_thread\".\"last_post_id\", \"misago_threads_thread\".\"last_post_is_event\", \"misago_threads_thread\".\"last_poster_id\", \"misago_threads_thread\".\"last_poster_name\", \"misago_threads_thread\".\"last_poster_slug\", \"misago_threads_thread\".\"weight\", \"misago_threads_thread\".\"is_unapproved\", \"misago_threads_thread\".\"is_hidden\", \"misago_threads_thread\".\"is_closed\", \"misago_threads_thread\".\"best_answer_id\", \"misago_threads_thread\".\"best_answer_is_protected\", \"misago_threads_thread\".\"best_answer_marked_on\", \"misago_threads_thread\".\"best_answer_marked_by_id\", \"misago_threads_thread\".\"best_answer_marked_by_name\", \"misago_threads_thread\".\"best_answer_marked_by_slug\" FROM \"misago_threads_thread\" WHERE ((\"misago_threads_thread\".\"starter_id\" = 1954 OR \"misago_threads_thread\".\"is_unapproved\" = false) AND \"misago_threads_thread\".\"category_id\" IN (3) AND \"misago_threads_thread\".\"is_hidden\" = false) ORDER BY \"misago_threads_thread\".\"last_post_id\" DESC  LIMIT 21"
+  },
+  {
+    "caller": "misago/threads",
+    "callee": "Database->SELECT \"misago_threads_thread\".\"id\", \"misago_threads_thread\".\"category_id\", \"misago_threads_thread\".\"title\", \"misago_threads_thread\".\"slug\", \"misago_threads_thread\".\"replies\", \"misago_threads_thread\".\"has_events\", \"misago_threads_thread\".\"has_poll\", \"misago_threads_thread\".\"has_reported_posts\", \"misago_threads_thread\".\"has_open_reports\", \"misago_threads_thread\".\"has_unapproved_posts\", \"misago_threads_thread\".\"has_hidden_posts\", \"misago_threads_thread\".\"started_on\", \"misago_threads_thread\".\"last_post_on\", \"misago_threads_thread\".\"first_post_id\", \"misago_threads_thread\".\"starter_id\", \"misago_threads_thread\".\"starter_name\", \"misago_threads_thread\".\"starter_slug\", \"misago_threads_thread\".\"last_post_id\", \"misago_threads_thread\".\"last_post_is_event\", \"misago_threads_thread\".\"last_poster_id\", \"misago_threads_thread\".\"last_poster_name\", \"misago_threads_thread\".\"last_poster_slug\", \"misago_threads_thread\".\"weight\", \"misago_threads_thread\".\"is_unapproved\", \"misago_threads_thread\".\"is_hidden\", \"misago_threads_thread\".\"is_closed\", \"misago_threads_thread\".\"best_answer_id\", \"misago_threads_thread\".\"best_answer_is_protected\", \"misago_threads_thread\".\"best_answer_marked_on\", \"misago_threads_thread\".\"best_answer_marked_by_id\", \"misago_threads_thread\".\"best_answer_marked_by_name\", \"misago_threads_thread\".\"best_answer_marked_by_slug\", \"misago_users_user\".\"id\", \"misago_users_user\".\"password\", \"misago_users_user\".\"last_login\", \"misago_users_user\".\"is_superuser\", \"misago_users_user\".\"username\", \"misago_users_user\".\"slug\", \"misago_users_user\".\"email\", \"misago_users_user\".\"email_hash\", \"misago_users_user\".\"joined_on\", \"misago_users_user\".\"joined_from_ip\", \"misago_users_user\".\"is_hiding_presence\", \"misago_users_user\".\"rank_id\", \"misago_users_user\".\"title\", \"misago_users_user\".\"requires_activation\", \"misago_users_user\".\"is_staff\", \"misago_users_user\".\"acl_key\", \"misago_users_user\".\"is_active\", \"misago_users_user\".\"is_active_staff_message\", \"misago_users_user\".\"is_deleting_account\", \"misago_users_user\".\"avatar_tmp\", \"misago_users_user\".\"avatar_src\", \"misago_users_user\".\"avatar_crop\", \"misago_users_user\".\"avatars\", \"misago_users_user\".\"is_avatar_locked\", \"misago_users_user\".\"avatar_lock_user_message\", \"misago_users_user\".\"avatar_lock_staff_message\", \"misago_users_user\".\"signature\", \"misago_users_user\".\"signature_parsed\", \"misago_users_user\".\"signature_checksum\", \"misago_users_user\".\"is_signature_locked\", \"misago_users_user\".\"signature_lock_user_message\", \"misago_users_user\".\"signature_lock_staff_message\", \"misago_users_user\".\"followers\", \"misago_users_user\".\"following\", \"misago_users_user\".\"limits_private_thread_invites_to\", \"misago_users_user\".\"unread_private_threads\", \"misago_users_user\".\"sync_unread_private_threads\", \"misago_users_user\".\"subscribe_to_started_threads\", \"misago_users_user\".\"subscribe_to_replied_threads\", \"misago_users_user\".\"threads\", \"misago_users_user\".\"posts\", \"misago_users_user\".\"last_posted_on\", \"misago_users_user\".\"profile_fields\", \"misago_users_user\".\"agreements\", \"misago_users_user\".\"sso_id\", T4.\"id\", T4.\"password\", T4.\"last_login\", T4.\"is_superuser\", T4.\"username\", T4.\"slug\", T4.\"email\", T4.\"email_hash\", T4.\"joined_on\", T4.\"joined_from_ip\", T4.\"is_hiding_presence\", T4.\"rank_id\", T4.\"title\", T4.\"requires_activation\", T4.\"is_staff\", T4.\"acl_key\", T4.\"is_active\", T4.\"is_active_staff_message\", T4.\"is_deleting_account\", T4.\"avatar_tmp\", T4.\"avatar_src\", T4.\"avatar_crop\", T4.\"avatars\", T4.\"is_avatar_locked\", T4.\"avatar_lock_user_message\", T4.\"avatar_lock_staff_message\", T4.\"signature\", T4.\"signature_parsed\", T4.\"signature_checksum\", T4.\"is_signature_locked\", T4.\"signature_lock_user_message\", T4.\"signature_lock_staff_message\", T4.\"followers\", T4.\"following\", T4.\"limits_private_thread_invites_to\", T4.\"unread_private_threads\", T4.\"sync_unread_private_threads\", T4.\"subscribe_to_started_threads\", T4.\"subscribe_to_replied_threads\", T4.\"threads\", T4.\"posts\", T4.\"last_posted_on\", T4.\"profile_fields\", T4.\"agreements\", T4.\"sso_id\" FROM \"misago_threads_thread\" LEFT OUTER JOIN \"misago_users_user\" ON (\"misago_threads_thread\".\"starter_id\" = \"misago_users_user\".\"id\") LEFT OUTER JOIN \"misago_users_user\" T4 ON (\"misago_threads_thread\".\"last_poster_id\" = T4.\"id\") WHERE ((\"misago_threads_thread\".\"starter_id\" = 1954 OR \"misago_threads_thread\".\"is_unapproved\" = false) AND \"misago_threads_thread\".\"category_id\" IN (3) AND \"misago_threads_thread\".\"is_hidden\" = false AND \"misago_threads_thread\".\"category_id\" IN (2, 3) AND \"misago_threads_thread\".\"weight\" < 2) ORDER BY \"misago_threads_thread\".\"last_post_id\" DESC  LIMIT 21"
+  },
+  {
+    "caller": "misago/threads",
+    "callee": "Database->SELECT \"misago_threads_thread\".\"id\", \"misago_threads_thread\".\"category_id\", \"misago_threads_thread\".\"title\", \"misago_threads_thread\".\"slug\", \"misago_threads_thread\".\"replies\", \"misago_threads_thread\".\"has_events\", \"misago_threads_thread\".\"has_poll\", \"misago_threads_thread\".\"has_reported_posts\", \"misago_threads_thread\".\"has_open_reports\", \"misago_threads_thread\".\"has_unapproved_posts\", \"misago_threads_thread\".\"has_hidden_posts\", \"misago_threads_thread\".\"started_on\", \"misago_threads_thread\".\"last_post_on\", \"misago_threads_thread\".\"first_post_id\", \"misago_threads_thread\".\"starter_id\", \"misago_threads_thread\".\"starter_name\", \"misago_threads_thread\".\"starter_slug\", \"misago_threads_thread\".\"last_post_id\", \"misago_threads_thread\".\"last_post_is_event\", \"misago_threads_thread\".\"last_poster_id\", \"misago_threads_thread\".\"last_poster_name\", \"misago_threads_thread\".\"last_poster_slug\", \"misago_threads_thread\".\"weight\", \"misago_threads_thread\".\"is_unapproved\", \"misago_threads_thread\".\"is_hidden\", \"misago_threads_thread\".\"is_closed\", \"misago_threads_thread\".\"best_answer_id\", \"misago_threads_thread\".\"best_answer_is_protected\", \"misago_threads_thread\".\"best_answer_marked_on\", \"misago_threads_thread\".\"best_answer_marked_by_id\", \"misago_threads_thread\".\"best_answer_marked_by_name\", \"misago_threads_thread\".\"best_answer_marked_by_slug\", \"misago_users_user\".\"id\", \"misago_users_user\".\"password\", \"misago_users_user\".\"last_login\", \"misago_users_user\".\"is_superuser\", \"misago_users_user\".\"username\", \"misago_users_user\".\"slug\", \"misago_users_user\".\"email\", \"misago_users_user\".\"email_hash\", \"misago_users_user\".\"joined_on\", \"misago_users_user\".\"joined_from_ip\", \"misago_users_user\".\"is_hiding_presence\", \"misago_users_user\".\"rank_id\", \"misago_users_user\".\"title\", \"misago_users_user\".\"requires_activation\", \"misago_users_user\".\"is_staff\", \"misago_users_user\".\"acl_key\", \"misago_users_user\".\"is_active\", \"misago_users_user\".\"is_active_staff_message\", \"misago_users_user\".\"is_deleting_account\", \"misago_users_user\".\"avatar_tmp\", \"misago_users_user\".\"avatar_src\", \"misago_users_user\".\"avatar_crop\", \"misago_users_user\".\"avatars\", \"misago_users_user\".\"is_avatar_locked\", \"misago_users_user\".\"avatar_lock_user_message\", \"misago_users_user\".\"avatar_lock_staff_message\", \"misago_users_user\".\"signature\", \"misago_users_user\".\"signature_parsed\", \"misago_users_user\".\"signature_checksum\", \"misago_users_user\".\"is_signature_locked\", \"misago_users_user\".\"signature_lock_user_message\", \"misago_users_user\".\"signature_lock_staff_message\", \"misago_users_user\".\"followers\", \"misago_users_user\".\"following\", \"misago_users_user\".\"limits_private_thread_invites_to\", \"misago_users_user\".\"unread_private_threads\", \"misago_users_user\".\"sync_unread_private_threads\", \"misago_users_user\".\"subscribe_to_started_threads\", \"misago_users_user\".\"subscribe_to_replied_threads\", \"misago_users_user\".\"threads\", \"misago_users_user\".\"posts\", \"misago_users_user\".\"last_posted_on\", \"misago_users_user\".\"profile_fields\", \"misago_users_user\".\"agreements\", \"misago_users_user\".\"sso_id\", T4.\"id\", T4.\"password\", T4.\"last_login\", T4.\"is_superuser\", T4.\"username\", T4.\"slug\", T4.\"email\", T4.\"email_hash\", T4.\"joined_on\", T4.\"joined_from_ip\", T4.\"is_hiding_presence\", T4.\"rank_id\", T4.\"title\", T4.\"requires_activation\", T4.\"is_staff\", T4.\"acl_key\", T4.\"is_active\", T4.\"is_active_staff_message\", T4.\"is_deleting_account\", T4.\"avatar_tmp\", T4.\"avatar_src\", T4.\"avatar_crop\", T4.\"avatars\", T4.\"is_avatar_locked\", T4.\"avatar_lock_user_message\", T4.\"avatar_lock_staff_message\", T4.\"signature\", T4.\"signature_parsed\", T4.\"signature_checksum\", T4.\"is_signature_locked\", T4.\"signature_lock_user_message\", T4.\"signature_lock_staff_message\", T4.\"followers\", T4.\"following\", T4.\"limits_private_thread_invites_to\", T4.\"unread_private_threads\", T4.\"sync_unread_private_threads\", T4.\"subscribe_to_started_threads\", T4.\"subscribe_to_replied_threads\", T4.\"threads\", T4.\"posts\", T4.\"last_posted_on\", T4.\"profile_fields\", T4.\"agreements\", T4.\"sso_id\" FROM \"misago_threads_thread\" LEFT OUTER JOIN \"misago_users_user\" ON (\"misago_threads_thread\".\"starter_id\" = \"misago_users_user\".\"id\") LEFT OUTER JOIN \"misago_users_user\" T4 ON (\"misago_threads_thread\".\"last_poster_id\" = T4.\"id\") WHERE ((\"misago_threads_thread\".\"starter_id\" = 1954 OR \"misago_threads_thread\".\"is_unapproved\" = false) AND \"misago_threads_thread\".\"category_id\" IN (3) AND \"misago_threads_thread\".\"is_hidden\" = false) ORDER BY \"misago_threads_thread\".\"last_post_id\" DESC  LIMIT 21"
+  },
+  {
+    "caller": "misago/threads",
+    "callee": "misago/acl"
+  },
+  {
+    "caller": "misago/threads",
+    "callee": "misago/categories"
+  },
+  {
+    "caller": "misago/threads",
+    "callee": "misago/conf"
+  },
+  {
+    "caller": "misago/threads",
+    "callee": "misago/core"
+  },
+  {
+    "caller": "misago/threads",
+    "callee": "misago/icons"
+  },
+  {
+    "caller": "misago/threads",
+    "callee": "misago/legal"
+  },
+  {
+    "caller": "misago/threads",
+    "callee": "misago/markup"
+  },
+  {
+    "caller": "misago/threads",
+    "callee": "misago/menus"
+  },
+  {
+    "caller": "misago/threads",
+    "callee": "misago/readtracker"
+  },
+  {
+    "caller": "misago/threads",
+    "callee": "misago/search"
+  },
+  {
+    "caller": "misago/threads",
+    "callee": "misago/socialauth"
+  },
+  {
+    "caller": "misago/threads",
+    "callee": "misago/themes"
+  },
+  {
+    "caller": "misago/threads",
+    "callee": "misago/users"
+  },
+  {
+    "caller": "misago/users",
+    "callee": "Database->DECLARE \"_django_curs_281473165533200_12727\" NO SCROLL CURSOR WITHOUT HOLD FOR SELECT \"misago_users_ban\".\"id\", \"misago_users_ban\".\"check_type\", \"misago_users_ban\".\"registration_only\", \"misago_users_ban\".\"banned_value\", \"misago_users_ban\".\"user_message\", \"misago_users_ban\".\"staff_message\", \"misago_users_ban\".\"expires_on\", \"misago_users_ban\".\"is_checked\" FROM \"misago_users_ban\" WHERE (\"misago_users_ban\".\"registration_only\" = false AND \"misago_users_ban\".\"check_type\" = 2) ORDER BY \"misago_users_ban\".\"id\" DESC"
+  },
+  {
+    "caller": "misago/users",
+    "callee": "Database->DECLARE \"_django_curs_281473165533200_12728\" NO SCROLL CURSOR WITHOUT HOLD FOR SELECT \"misago_users_ban\".\"id\", \"misago_users_ban\".\"check_type\", \"misago_users_ban\".\"registration_only\", \"misago_users_ban\".\"banned_value\", \"misago_users_ban\".\"user_message\", \"misago_users_ban\".\"staff_message\", \"misago_users_ban\".\"expires_on\", \"misago_users_ban\".\"is_checked\" FROM \"misago_users_ban\" WHERE (\"misago_users_ban\".\"registration_only\" = false AND \"misago_users_ban\".\"check_type\" IN (0, 1)) ORDER BY \"misago_users_ban\".\"id\" DESC"
+  },
+  {
+    "caller": "misago/users",
+    "callee": "Database->INSERT INTO \"misago_users_bancache\" (\"user_id\", \"ban_id\", \"cache_version\", \"user_message\", \"staff_message\", \"expires_on\") VALUES (1954, NULL, 'NDNE6Hnh', NULL, NULL, NULL)"
+  },
+  {
+    "caller": "misago/users",
+    "callee": "Database->SELECT \"django_session\".\"session_key\", \"django_session\".\"session_data\", \"django_session\".\"expire_date\" FROM \"django_session\" WHERE (\"django_session\".\"expire_date\" > '2021-04-14T19:55:13.861407+00:00'::timestamptz AND \"django_session\".\"session_key\" = 'l9fc0alokmq3j6rs918i6z3zdpalgmy2')"
+  },
+  {
+    "caller": "misago/users",
+    "callee": "Database->SELECT \"django_session\".\"session_key\", \"django_session\".\"session_data\", \"django_session\".\"expire_date\" FROM \"django_session\" WHERE (\"django_session\".\"expire_date\" > '2021-04-14T19:55:13.983423+00:00'::timestamptz AND \"django_session\".\"session_key\" = 'l9fc0alokmq3j6rs918i6z3zdpalgmy2')"
+  },
+  {
+    "caller": "misago/users",
+    "callee": "Database->SELECT \"misago_acl_role\".\"id\", \"misago_acl_role\".\"name\", \"misago_acl_role\".\"special_role\", \"misago_acl_role\".\"permissions\" FROM \"misago_acl_role\" INNER JOIN \"misago_users_rank_roles\" ON (\"misago_acl_role\".\"id\" = \"misago_users_rank_roles\".\"role_id\") WHERE \"misago_users_rank_roles\".\"rank_id\" = 2"
+  },
+  {
+    "caller": "misago/users",
+    "callee": "Database->SELECT \"misago_acl_role\".\"id\", \"misago_acl_role\".\"name\", \"misago_acl_role\".\"special_role\", \"misago_acl_role\".\"permissions\" FROM \"misago_acl_role\" INNER JOIN \"misago_users_user_roles\" ON (\"misago_acl_role\".\"id\" = \"misago_users_user_roles\".\"role_id\") WHERE \"misago_users_user_roles\".\"user_id\" = 1954"
+  },
+  {
+    "caller": "misago/users",
+    "callee": "Database->SELECT \"misago_users_user\".\"id\", \"misago_users_user\".\"password\", \"misago_users_user\".\"last_login\", \"misago_users_user\".\"is_superuser\", \"misago_users_user\".\"username\", \"misago_users_user\".\"slug\", \"misago_users_user\".\"email\", \"misago_users_user\".\"email_hash\", \"misago_users_user\".\"joined_on\", \"misago_users_user\".\"joined_from_ip\", \"misago_users_user\".\"is_hiding_presence\", \"misago_users_user\".\"rank_id\", \"misago_users_user\".\"title\", \"misago_users_user\".\"requires_activation\", \"misago_users_user\".\"is_staff\", \"misago_users_user\".\"acl_key\", \"misago_users_user\".\"is_active\", \"misago_users_user\".\"is_active_staff_message\", \"misago_users_user\".\"is_deleting_account\", \"misago_users_user\".\"avatar_tmp\", \"misago_users_user\".\"avatar_src\", \"misago_users_user\".\"avatar_crop\", \"misago_users_user\".\"avatars\", \"misago_users_user\".\"is_avatar_locked\", \"misago_users_user\".\"avatar_lock_user_message\", \"misago_users_user\".\"avatar_lock_staff_message\", \"misago_users_user\".\"signature\", \"misago_users_user\".\"signature_parsed\", \"misago_users_user\".\"signature_checksum\", \"misago_users_user\".\"is_signature_locked\", \"misago_users_user\".\"signature_lock_user_message\", \"misago_users_user\".\"signature_lock_staff_message\", \"misago_users_user\".\"followers\", \"misago_users_user\".\"following\", \"misago_users_user\".\"limits_private_thread_invites_to\", \"misago_users_user\".\"unread_private_threads\", \"misago_users_user\".\"sync_unread_private_threads\", \"misago_users_user\".\"subscribe_to_started_threads\", \"misago_users_user\".\"subscribe_to_replied_threads\", \"misago_users_user\".\"threads\", \"misago_users_user\".\"posts\", \"misago_users_user\".\"last_posted_on\", \"misago_users_user\".\"profile_fields\", \"misago_users_user\".\"agreements\", \"misago_users_user\".\"sso_id\", \"misago_users_rank\".\"id\", \"misago_users_rank\".\"name\", \"misago_users_rank\".\"slug\", \"misago_users_rank\".\"description\", \"misago_users_rank\".\"title\", \"misago_users_rank\".\"css_class\", \"misago_users_rank\".\"is_default\", \"misago_users_rank\".\"is_tab\", \"misago_users_rank\".\"order\", \"misago_users_online\".\"user_id\", \"misago_users_online\".\"last_click\", \"misago_users_bancache\".\"user_id\", \"misago_users_bancache\".\"ban_id\", \"misago_users_bancache\".\"cache_version\", \"misago_users_bancache\".\"user_message\", \"misago_users_bancache\".\"staff_message\", \"misago_users_bancache\".\"expires_on\" FROM \"misago_users_user\" LEFT OUTER JOIN \"misago_users_rank\" ON (\"misago_users_user\".\"rank_id\" = \"misago_users_rank\".\"id\") LEFT OUTER JOIN \"misago_users_online\" ON (\"misago_users_user\".\"id\" = \"misago_users_online\".\"user_id\") LEFT OUTER JOIN \"misago_users_bancache\" ON (\"misago_users_user\".\"id\" = \"misago_users_bancache\".\"user_id\") WHERE \"misago_users_user\".\"id\" = 1954"
+  },
+  {
+    "caller": "misago/users",
+    "callee": "Database->UPDATE \"misago_users_bancache\" SET \"ban_id\" = NULL, \"cache_version\" = 'NDNE6Hnh', \"user_message\" = NULL, \"staff_message\" = NULL, \"expires_on\" = NULL WHERE \"misago_users_bancache\".\"user_id\" = 1954"
+  },
+  {
+    "caller": "misago/users",
+    "callee": "Database->UPDATE \"misago_users_online\" SET \"last_click\" = '2021-04-14T19:55:13.979613+00:00'::timestamptz WHERE \"misago_users_online\".\"user_id\" = 1954"
+  },
+  {
+    "caller": "misago/users",
+    "callee": "Database->UPDATE \"misago_users_online\" SET \"last_click\" = '2021-04-14T19:55:14.040843+00:00'::timestamptz WHERE \"misago_users_online\".\"user_id\" = 1954"
+  },
+  {
+    "caller": "misago/users",
+    "callee": "misago/acl"
+  },
+  {
+    "caller": "misago/users",
+    "callee": "misago/core"
+  }
+]

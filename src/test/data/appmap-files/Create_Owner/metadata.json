@@ -1,0 +1,92 @@
+{
+  "app": "spring-petclinic",
+  "language": {
+    "name": "java",
+    "version": "11.0.10+9-LTS",
+    "engine": "OpenJDK 64-Bit Server VM"
+  },
+  "client": {
+    "name": "appmap-java",
+    "url": "https://github.com/appland/appmap-java"
+  },
+  "recorder": {
+    "name": "remote_recording"
+  },
+  "recording": {},
+  "framework": {},
+  "name": "Create Owner",
+  "fingerprints": [
+    {
+      "appmap_digest": "85d64080e97d84ed908979b8120dd59881cab54f30ce834bf75c7afe5ece6017",
+      "canonicalization_algorithm": "classDependencies",
+      "digest": "b4f769eb9701a8f0768d7dec2ec638d245d925960ceda1734d46171ecdde0913",
+      "fingerprint_algorithm": "sha256"
+    },
+    {
+      "appmap_digest": "85d64080e97d84ed908979b8120dd59881cab54f30ce834bf75c7afe5ece6017",
+      "canonicalization_algorithm": "classes",
+      "digest": "9a69824c13b3cf5853d4bb4737e0a4f1e8fd9b5a3156d799129382aca193d2fb",
+      "fingerprint_algorithm": "sha256"
+    },
+    {
+      "appmap_digest": "85d64080e97d84ed908979b8120dd59881cab54f30ce834bf75c7afe5ece6017",
+      "canonicalization_algorithm": "httpClientRequests",
+      "digest": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "fingerprint_algorithm": "sha256"
+    },
+    {
+      "appmap_digest": "85d64080e97d84ed908979b8120dd59881cab54f30ce834bf75c7afe5ece6017",
+      "canonicalization_algorithm": "httpServerRequests",
+      "digest": "f141c83e203d7d06ca0bda63635ae0007c5d0fb5d50c302e2ec56548cc6cc8f5",
+      "fingerprint_algorithm": "sha256"
+    },
+    {
+      "appmap_digest": "85d64080e97d84ed908979b8120dd59881cab54f30ce834bf75c7afe5ece6017",
+      "canonicalization_algorithm": "info",
+      "digest": "bb0a4bca2e7f3559d8347ef70534925525ccfa10d325d108243635f8224ad630",
+      "fingerprint_algorithm": "sha256"
+    },
+    {
+      "appmap_digest": "85d64080e97d84ed908979b8120dd59881cab54f30ce834bf75c7afe5ece6017",
+      "canonicalization_algorithm": "labels",
+      "digest": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "fingerprint_algorithm": "sha256"
+    },
+    {
+      "appmap_digest": "85d64080e97d84ed908979b8120dd59881cab54f30ce834bf75c7afe5ece6017",
+      "canonicalization_algorithm": "packageDependencies",
+      "digest": "f5fc622e7d999238d6b11aa2bc69cd70aca33b8123e6b29787921a41846a7959",
+      "fingerprint_algorithm": "sha256"
+    },
+    {
+      "appmap_digest": "85d64080e97d84ed908979b8120dd59881cab54f30ce834bf75c7afe5ece6017",
+      "canonicalization_algorithm": "packages",
+      "digest": "3868fd85eaa3ee03fd5ef26291a6fb1c89212e5c744d208b92b87250fb72f176",
+      "fingerprint_algorithm": "sha256"
+    },
+    {
+      "appmap_digest": "85d64080e97d84ed908979b8120dd59881cab54f30ce834bf75c7afe5ece6017",
+      "canonicalization_algorithm": "sqlNormalized",
+      "digest": "d82c50f65065c32ac64192c43a742fcbd97fc45bdcd1dfc54f9643668291f9f8",
+      "fingerprint_algorithm": "sha256"
+    },
+    {
+      "appmap_digest": "85d64080e97d84ed908979b8120dd59881cab54f30ce834bf75c7afe5ece6017",
+      "canonicalization_algorithm": "sqlTables",
+      "digest": "36d0a780250de41a9f153e71270f74e4ec2688195e6be52c774bf215e07e1cb9",
+      "fingerprint_algorithm": "sha256"
+    },
+    {
+      "appmap_digest": "85d64080e97d84ed908979b8120dd59881cab54f30ce834bf75c7afe5ece6017",
+      "canonicalization_algorithm": "trace",
+      "digest": "880a9567b3d3ad287485ff61b5451ad87d725972d11e549f204a8126eb68a67a",
+      "fingerprint_algorithm": "sha256"
+    },
+    {
+      "appmap_digest": "85d64080e97d84ed908979b8120dd59881cab54f30ce834bf75c7afe5ece6017",
+      "canonicalization_algorithm": "update",
+      "digest": "72bedc3864734d98e5eaf64e2d0c5e0ace985763c365b6816aba44ca524b7e26",
+      "fingerprint_algorithm": "sha256"
+    }
+  ]
+}

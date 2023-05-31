@@ -1,0 +1,114 @@
+{
+  "language": {
+    "name": "python",
+    "engine": "CPython",
+    "version": "3.7.10"
+  },
+  "client": {
+    "name": "appmap",
+    "url": "https://github.com/applandinc/appmap-python"
+  },
+  "git": {
+    "repository": "https://github.com/rafalp/Misago.git",
+    "branch": "master",
+    "commit": "da14e8ef712a77603fdfec8bbff67c526c7d0c5c",
+    "status": [
+      "?? .appmap/",
+      "?? appmap.yml",
+      "?? tmp/"
+    ],
+    "tag": "0.27.0"
+  },
+  "feature_group": "Category role admin views tests",
+  "recording": {
+    "defined_class": "misago.categories.admin.tests.test_permissions_admin_views.CategoryRoleAdminViewsTests",
+    "method_id": "test_editing_role_invalidates_acl_cache",
+    "source_location": "misago/categories/admin/tests/test_permissions_admin_views.py:72"
+  },
+  "name": "Category role admin views tests editing role invalidates acl cache",
+  "feature": "Editing role invalidates acl cache",
+  "app": "misage",
+  "frameworks": [
+    {
+      "name": "pytest",
+      "version": "5.4.2"
+    }
+  ],
+  "recorder": {
+    "name": "pytest"
+  },
+  "fingerprints": [
+    {
+      "appmap_digest": "26bda92cae8bb62be557ee1daee89356d051029102cbfcc7ec896a9eb0cdf684",
+      "canonicalization_algorithm": "classDependencies",
+      "digest": "b1e22fbcf46a3d0399eb50fadd2d407480935dc6821d2d895423d76ab312c3b6",
+      "fingerprint_algorithm": "sha256"
+    },
+    {
+      "appmap_digest": "26bda92cae8bb62be557ee1daee89356d051029102cbfcc7ec896a9eb0cdf684",
+      "canonicalization_algorithm": "classes",
+      "digest": "28be01a8dcd6aebcf53a1d7d0788e47487a40c1f342663399f45eb2d7d106dfa",
+      "fingerprint_algorithm": "sha256"
+    },
+    {
+      "appmap_digest": "26bda92cae8bb62be557ee1daee89356d051029102cbfcc7ec896a9eb0cdf684",
+      "canonicalization_algorithm": "httpClientRequests",
+      "digest": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "fingerprint_algorithm": "sha256"
+    },
+    {
+      "appmap_digest": "26bda92cae8bb62be557ee1daee89356d051029102cbfcc7ec896a9eb0cdf684",
+      "canonicalization_algorithm": "httpServerRequests",
+      "digest": "a542884494c603f13f232e6bf33b14fa720792f220abeef476d9c4a0b1c0da32",
+      "fingerprint_algorithm": "sha256"
+    },
+    {
+      "appmap_digest": "26bda92cae8bb62be557ee1daee89356d051029102cbfcc7ec896a9eb0cdf684",
+      "canonicalization_algorithm": "info",
+      "digest": "659666e5f1205018dec8f14a070c6110fabd226d90a2347ef488606cef9d0ebe",
+      "fingerprint_algorithm": "sha256"
+    },
+    {
+      "appmap_digest": "26bda92cae8bb62be557ee1daee89356d051029102cbfcc7ec896a9eb0cdf684",
+      "canonicalization_algorithm": "labels",
+      "digest": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "fingerprint_algorithm": "sha256"
+    },
+    {
+      "appmap_digest": "26bda92cae8bb62be557ee1daee89356d051029102cbfcc7ec896a9eb0cdf684",
+      "canonicalization_algorithm": "packageDependencies",
+      "digest": "767d5e89d3f63bad8a1b29a8954cb2029f1b9888ac6ff16b4a90601fb1646f66",
+      "fingerprint_algorithm": "sha256"
+    },
+    {
+      "appmap_digest": "26bda92cae8bb62be557ee1daee89356d051029102cbfcc7ec896a9eb0cdf684",
+      "canonicalization_algorithm": "packages",
+      "digest": "22e44e77535591bada78fd3efae71cf32b9b365182042a508659275974b93615",
+      "fingerprint_algorithm": "sha256"
+    },
+    {
+      "appmap_digest": "26bda92cae8bb62be557ee1daee89356d051029102cbfcc7ec896a9eb0cdf684",
+      "canonicalization_algorithm": "sqlNormalized",
+      "digest": "7580d31cd1e79ef664c81acef01ed5bbe590f6f54eef74cac3c61732bbd14373",
+      "fingerprint_algorithm": "sha256"
+    },
+    {
+      "appmap_digest": "26bda92cae8bb62be557ee1daee89356d051029102cbfcc7ec896a9eb0cdf684",
+      "canonicalization_algorithm": "sqlTables",
+      "digest": "a783aafb0a8f5cc8918629248afff51f1890581bb124b9f4a73e279a0593a324",
+      "fingerprint_algorithm": "sha256"
+    },
+    {
+      "appmap_digest": "26bda92cae8bb62be557ee1daee89356d051029102cbfcc7ec896a9eb0cdf684",
+      "canonicalization_algorithm": "trace",
+      "digest": "f37da592f8746b4c21c4f4b13f5b07cde6c50e49be85bfc2297f906649c5e450",
+      "fingerprint_algorithm": "sha256"
+    },
+    {
+      "appmap_digest": "26bda92cae8bb62be557ee1daee89356d051029102cbfcc7ec896a9eb0cdf684",
+      "canonicalization_algorithm": "update",
+      "digest": "e7e5b9b1061c7ceb0c1335681aecf03df39e9d44031f1051b9fd76fea6242305",
+      "fingerprint_algorithm": "sha256"
+    }
+  ]
+}

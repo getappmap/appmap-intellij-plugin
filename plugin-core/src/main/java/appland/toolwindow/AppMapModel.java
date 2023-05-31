@@ -2,7 +2,7 @@ package appland.toolwindow;
 
 import appland.Icons;
 import appland.index.AppMapMetadata;
-import appland.index.AppMapMetadataIndex;
+import appland.index.AppMapMetadataService;
 import com.intellij.openapi.project.DumbService;
 import com.intellij.openapi.project.Project;
 import com.intellij.ui.ColoredTreeCellRenderer;
@@ -77,11 +77,9 @@ public class AppMapModel extends BaseTreeModel<Object> implements InvokerSupplie
 
     @RequiresBackgroundThread
     private List<AppMapMetadata> calculateAppMaps() {
-        var maps = DumbService.getInstance(project).runReadActionInSmartMode(() -> {
-            var innerMaps = AppMapMetadataIndex.findAppMaps(project, nameFilter.get());
-            return innerMaps;
+        return DumbService.getInstance(project).runReadActionInSmartMode(() -> {
+            return AppMapMetadataService.getInstance(project).findAppMaps(nameFilter.get());
         });
-        return maps;
     }
 
     static class TreeCellRenderer extends ColoredTreeCellRenderer {
