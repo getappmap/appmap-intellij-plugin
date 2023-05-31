@@ -12,6 +12,7 @@ import com.intellij.openapi.wm.ToolWindowFactory;
 import com.intellij.openapi.wm.ToolWindowManager;
 import com.intellij.openapi.wm.ex.ToolWindowManagerListener;
 import com.intellij.ui.content.ContentFactory;
+import com.intellij.ui.jcef.JBCefApp;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
@@ -54,9 +55,8 @@ public class AppMapToolWindowFactory implements ToolWindowFactory, DumbAware {
             }
         });
 
-        assert panel instanceof JPanel;
         var content = ContentFactory.SERVICE.getInstance().createContent(null, null, false);
-        content.setComponent((JPanel) panel);
+        content.setComponent(panel);
         toolWindow.getContentManager().addContent(content);
 
         if (toolWindow.isVisible()) {
@@ -64,11 +64,15 @@ public class AppMapToolWindowFactory implements ToolWindowFactory, DumbAware {
         }
     }
 
-    @NotNull
-    private AppMapToolWindowContent createContentPanel(@NotNull Project project, @NotNull ToolWindow toolWindow) {
+    @SuppressWarnings("unchecked")
+    private <T extends JPanel & AppMapToolWindowContent> @NotNull T createContentPanel(@NotNull Project project, @NotNull ToolWindow toolWindow) {
+        if (!JBCefApp.isSupported()) {
+            return (T) new JcefUnsupportedPanel();
+        }
+
         return AppMapApplicationSettingsService.getInstance().isAuthenticated()
-                ? new AppMapWindowPanel(project, toolWindow.getDisposable())
-                : new SignInViewPanel(toolWindow.getDisposable());
+                ? (T) new AppMapWindowPanel(project, toolWindow.getDisposable())
+                : (T) new SignInViewPanel(toolWindow.getDisposable());
     }
 }
 
