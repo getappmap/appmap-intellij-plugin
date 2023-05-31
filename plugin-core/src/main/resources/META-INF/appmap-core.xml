@@ -77,7 +77,8 @@
 
         <notificationGroup id="appmap.remoteRecording" displayType="BALLOON"
                            key="notification.remoteRecording.displayName"/>
-        <statusBarWidgetFactory implementation="appland.remote.RemoteRecordingStatusBarFactory"/>
+        <statusBarWidgetFactory id="appmap.recordingStatusFactory"
+                                implementation="appland.remote.RemoteRecordingStatusBarFactory"/>
 
         <notificationGroup id="appmap.telemetry" displayType="STICKY_BALLOON"
                            key="telemetry.permission.title"/>
