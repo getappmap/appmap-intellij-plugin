@@ -1,5 +1,12 @@
 AppMap Plugin Changelog
 
+## [0.35.1](https://github.com/getappmap/appmap-intellij-plugin/compare/v0.35.0...v0.35.1) (2023-06-01)
+
+
+### Bug Fixes
+
+-  don't break index of AppMap code objects, exception "java.lang.IllegalStateException: Unexpected name: external-route" ([9794077]())
+
 ## [0.35.0](https://github.com/getappmap/appmap-intellij-plugin/compare/v0.34.1...v0.35.0) (2023-05-12)
 
 
