@@ -1,5 +1,12 @@
 AppMap Plugin Changelog
 
+## [0.35.3](https://github.com/getappmap/appmap-intellij-plugin/compare/v0.35.2...v0.35.3) (2023-06-05)
+
+
+### Bug Fixes
+
+-  properly handle reload of finding files to avoid an empty list of findings in the UI ([329f37c]())-  restrict runtime of the AppMap stats command with a timeout (20s) ([7e93fde]())
+
 ## [0.35.2](https://github.com/getappmap/appmap-intellij-plugin/compare/v0.35.1...v0.35.2) (2023-06-01)
 
 
