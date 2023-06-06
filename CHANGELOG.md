@@ -1,5 +1,16 @@
 AppMap Plugin Changelog
 
+## [0.36.0](https://github.com/getappmap/appmap-intellij-plugin/compare/v0.35.3...v0.36.0) (2023-06-06)
+
+
+### Features
+
+-  bundle java-agent 1.17.2 ([dba03ff]())
+
+### Bug Fixes
+
+-  warn about missing support for JCEF webviews instead of causing an exception when a project is opened. ([ea1b597]())
+
 ## [0.35.3](https://github.com/getappmap/appmap-intellij-plugin/compare/v0.35.2...v0.35.3) (2023-06-05)
 
 
