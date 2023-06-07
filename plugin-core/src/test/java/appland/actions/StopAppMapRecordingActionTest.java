@@ -1,31 +1,16 @@
 package appland.actions;
 
 import appland.AppMapBaseTest;
-import appland.settings.AppMapProjectSettingsService;
 import com.intellij.openapi.application.WriteAction;
 import com.intellij.util.PathUtil;
-import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
 
-import java.nio.file.Paths;
+import java.util.Set;
 
 public class StopAppMapRecordingActionTest extends AppMapBaseTest {
-    @Before
-    @After
-    public void resetSettings() {
-        AppMapProjectSettingsService.getState(getProject()).setRecentAppMapStorageLocation("");
-    }
-
     @Override
     protected boolean runInDispatchThread() {
         return false;
-    }
-
-    @Test
-    public void findDefaultStorageLocationSettings() {
-        AppMapProjectSettingsService.getState(getProject()).setRecentAppMapStorageLocation("/project/user/appMapDir");
-        assertEquals(Paths.get("/project/user/appMapDir"), StopAppMapRecordingAction.findDefaultStorageLocation(getProject()));
     }
 
     @Test
@@ -38,9 +23,20 @@ public class StopAppMapRecordingActionTest extends AppMapBaseTest {
     }
 
     @Test
+    public void findDefaultStorageLocationConfigTwoConfigurations() {
+        edt(() -> WriteAction.run(() -> myFixture.copyDirectoryToProject("projects/empty-appMapDir", "root1")));
+        edt(() -> WriteAction.run(() -> myFixture.copyDirectoryToProject("projects/empty-appMapDir", "root2")));
+
+        var location = StopAppMapRecordingAction.findDefaultStorageLocation(getProject());
+        assertNotNull(location);
+        var possibleResults = Set.of("/src/root1/tmp-appMapAgent/appmap/remote", "/src/root2/tmp-appMapAgent/appmap/remote");
+        assertTrue(possibleResults.contains(PathUtil.toSystemIndependentName(location.toString())));
+    }
+
+    @Test
     public void findDefaultStorageLocationFallback() {
         var location = StopAppMapRecordingAction.findDefaultStorageLocation(getProject());
         assertNotNull(location);
-        assertEquals("/src/tmp/appmap/remote", PathUtil.toSystemIndependentName(location.toString()));
+        assertEquals("/src/target/appmap/remote", PathUtil.toSystemIndependentName(location.toString()));
     }
 }

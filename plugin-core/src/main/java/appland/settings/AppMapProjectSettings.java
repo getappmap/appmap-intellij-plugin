@@ -17,7 +17,6 @@ import java.util.concurrent.CopyOnWriteArrayList;
 public class AppMapProjectSettings {
     private @Nullable List<String> recentRemoteRecordingURLs;
     private @Nullable String activeRecordingURL;
-    private @Nullable String recentAppMapStorageLocation;
     private @Nullable String cloudServerUrl;
     private boolean confirmAppMapUpload = true;
     private boolean openedAppMapEditor = false;
@@ -35,20 +34,10 @@ public class AppMapProjectSettings {
     public AppMapProjectSettings(@NotNull AppMapProjectSettings settings) {
         this.recentRemoteRecordingURLs = settings.recentRemoteRecordingURLs == null ? null : Lists.newLinkedList(settings.recentRemoteRecordingURLs);
         this.activeRecordingURL = settings.activeRecordingURL;
-        this.recentAppMapStorageLocation = settings.recentAppMapStorageLocation;
         this.cloudServerUrl = settings.cloudServerUrl;
         this.confirmAppMapUpload = settings.confirmAppMapUpload;
         this.openedAppMapEditor = settings.openedAppMapEditor;
         this.createdOpenAPI = settings.createdOpenAPI;
-    }
-
-    @NotNull
-    public synchronized String getRecentAppMapStorageLocation() {
-        return recentAppMapStorageLocation == null ? "" : recentAppMapStorageLocation;
-    }
-
-    public synchronized void setRecentAppMapStorageLocation(@NotNull String recentAppMapStorageLocation) {
-        this.recentAppMapStorageLocation = recentAppMapStorageLocation;
     }
 
     @NotNull
