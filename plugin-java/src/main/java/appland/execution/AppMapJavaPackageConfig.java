@@ -1,6 +1,7 @@
 package appland.execution;
 
 import appland.files.AppMapFiles;
+import appland.index.AppMapSearchScopes;
 import com.intellij.execution.configurations.RunProfile;
 import com.intellij.execution.configurations.SearchScopeProvidingRunProfile;
 import com.intellij.openapi.application.ReadAction;
@@ -50,7 +51,7 @@ public final class AppMapJavaPackageConfig {
                 ? ((SearchScopeProvidingRunProfile) runProfile).getSearchScope()
                 : null;
         if (runProfileScope == null) {
-            runProfileScope = GlobalSearchScope.everythingScope(project);
+            runProfileScope = AppMapSearchScopes.projectFilesWithExcluded(project);
         }
         var runProfileAndWorkingDir = workingDir == null
                 ? runProfileScope
