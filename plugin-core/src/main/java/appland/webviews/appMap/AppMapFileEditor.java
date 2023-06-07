@@ -270,6 +270,11 @@ public class AppMapFileEditor extends WebviewEditor<JsonObject> {
                     return;
                 }
 
+                if (!isWebViewReady()) {
+                    LOG.debug("AppMap file was modified before webview was fully initialized");
+                    return;
+                }
+
                 LOG.debug("AppMap file was modified, fromSave: " + event.isFromSave() + ", fromRefresh: " + event.isFromRefresh());
                 if (isSelected.get()) {
                     // load immediately if focused
