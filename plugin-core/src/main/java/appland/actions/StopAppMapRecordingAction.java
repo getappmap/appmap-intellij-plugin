@@ -24,17 +24,17 @@ import com.intellij.openapi.progress.Task;
 import com.intellij.openapi.project.DumbAware;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.project.ProjectUtil;
-import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.openapi.vfs.LocalFileSystem;
-import com.intellij.psi.search.GlobalSearchScope;
+import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.util.concurrency.annotations.RequiresBackgroundThread;
+import com.intellij.util.concurrency.annotations.RequiresReadLock;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.nio.file.Files;
-import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Objects;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class StopAppMapRecordingAction extends AnAction implements DumbAware {
@@ -57,93 +57,6 @@ public class StopAppMapRecordingAction extends AnAction implements DumbAware {
             var recording = RemoteRecordingStatusService.getInstance(project).getActiveRecordingURL() != null;
             e.getPresentation().setEnabledAndVisible(recording);
         }
-    }
-
-    /**
-     * Try to find a reasonable default for the storage location.
-     */
-    @RequiresBackgroundThread
-    protected static @Nullable Path findDefaultStorageLocation(@NotNull Project project) {
-        // use last used storage location, if possible
-        var recentLocation = AppMapProjectSettingsService.getState(project).getRecentAppMapStorageLocation();
-        if (StringUtil.isNotEmpty(recentLocation)) {
-            try {
-                return Paths.get(recentLocation);
-            } catch (InvalidPathException e) {
-                // continue
-            }
-        }
-
-        // use storage location from appmap.yml, if available
-        var configLocation = findConfiguredStorageLocation(project);
-        if (configLocation != null) {
-            return configLocation;
-        }
-
-        // fall back to "<project dir>/tmp/appmap/remote"
-        var projectDir = ProjectUtil.guessProjectDir(project);
-        if (projectDir != null) {
-            // we can't use the NIO path, because we have to support temp Vfs filesystems in tests
-            return AppMapVfsUtils.asNativePath(projectDir).resolve(Paths.get("tmp", "appmap", "remote"));
-        }
-        return null;
-    }
-
-    private static void stopAndSaveRemoteRecording(@NotNull Project project, @NotNull StopRemoteRecordingForm form) {
-        var storageDirectoryPath = form.getDirectoryLocation();
-        AppMapProjectSettingsService.getState(project).setRecentAppMapStorageLocation(storageDirectoryPath);
-
-        new Task.Backgroundable(project, AppMapBundle.get("action.stopAppMapRemoteRecording.progressTitle"), false) {
-            @Override
-            public void run(@NotNull ProgressIndicator indicator) {
-                Path nioStoragePath;
-                try {
-                    nioStoragePath = Paths.get(storageDirectoryPath);
-                } catch (InvalidPathException e) {
-                    LOG.debug("Invalid storage location", e);
-                    showStopRecordingFailedError(project, form.getURL());
-                    return;
-                }
-
-                var newFile = RemoteRecordingService.getInstance().stopRecording(form.getURL(), nioStoragePath, form.getName());
-                RemoteRecordingStatusService.getInstance(project).recordingStopped(form.getURL());
-
-                if (newFile != null && Files.exists(newFile)) {
-                    var newVfsFile = LocalFileSystem.getInstance().refreshAndFindFileByNioFile(newFile);
-                    if (newVfsFile != null) {
-                        // open the new file in an editor
-                        ApplicationManager.getApplication().invokeLater(() -> {
-                            FileEditorManager.getInstance(project).openFile(newVfsFile, true, true);
-                        }, ModalityState.defaultModalityState());
-                    }
-                } else {
-                    showStopRecordingFailedError(project, form.getURL());
-                }
-            }
-        }.queue();
-    }
-
-    @RequiresBackgroundThread
-    private static @Nullable Path findConfiguredStorageLocation(@NotNull Project project) {
-        var scope = AppMapSearchScopes.projectFilesWithExcluded(project);
-        var configFiles = ReadAction.compute(() -> AppMapFiles.findAppMapConfigFiles(project, scope));
-        if (configFiles.size() == 1) {
-            var configFile = configFiles.iterator().next();
-            if (configFile.isInLocalFileSystem()) {
-                // extract location from config file
-                var appMapDir = AppMapFiles.readAppMapDirConfigValue(configFile);
-                if (appMapDir != null) {
-                    try {
-                        var nativeParentPath = AppMapVfsUtils.asNativePath(configFile.getParent());
-                        return nativeParentPath.resolve(appMapDir).resolve("remote");
-                    } catch (InvalidPathException e) {
-                        LOG.debug("invalid configuration path", e);
-                        return null;
-                    }
-                }
-            }
-        }
-        return null;
     }
 
     @Override
@@ -171,16 +84,94 @@ public class StopAppMapRecordingAction extends AnAction implements DumbAware {
                 }
 
                 var locationResult = location.get();
-                var storageLocation = locationResult != null ? locationResult.toAbsolutePath().toString() : null;
+                if (locationResult == null) {
+                    LOG.warn("unable to locate the storage location for AppMaps");
+                    return;
+                }
+
                 var form = StopRemoteRecordingDialog.show(project,
-                        storageLocation,
                         RemoteRecordingStatusService.getInstance(project).getActiveRecordingURL(),
                         AppMapProjectSettingsService.getState(project).getRecentRemoteRecordingURLs());
                 if (form != null) {
-                    stopAndSaveRemoteRecording(project, form);
+                    stopAndSaveRemoteRecording(project, form, locationResult);
                 }
             }
         }.queue();
+    }
+
+    private static void stopAndSaveRemoteRecording(@NotNull Project project,
+                                                   @NotNull StopRemoteRecordingForm form,
+                                                   @NotNull Path storageLocation) {
+        new Task.Backgroundable(project, AppMapBundle.get("action.stopAppMapRemoteRecording.progressTitle"), false) {
+            @Override
+            public void run(@NotNull ProgressIndicator indicator) {
+                var newFile = RemoteRecordingService.getInstance().stopRecording(form.getURL(), storageLocation, form.getName());
+                RemoteRecordingStatusService.getInstance(project).recordingStopped(form.getURL());
+
+                if (newFile != null && Files.exists(newFile)) {
+                    var newVfsFile = LocalFileSystem.getInstance().refreshAndFindFileByNioFile(newFile);
+                    if (newVfsFile != null) {
+                        // open the new file in an editor
+                        ApplicationManager.getApplication().invokeLater(() -> {
+                            FileEditorManager.getInstance(project).openFile(newVfsFile, true, true);
+                        }, ModalityState.defaultModalityState());
+                    }
+                } else {
+                    showStopRecordingFailedError(project, form.getURL());
+                }
+            }
+        }.queue();
+    }
+
+    /**
+     * Try to find a reasonable default for the storage location.
+     */
+    @RequiresBackgroundThread
+    protected static @Nullable Path findDefaultStorageLocation(@NotNull Project project) {
+        // use storage location from a appmap.yml file, if available
+        var configLocation = findConfiguredStorageLocation(project);
+        if (configLocation != null) {
+            return configLocation;
+        }
+
+        // fall back to "<project dir>/target/appmap/remote"
+        var projectDir = ProjectUtil.guessProjectDir(project);
+        if (projectDir != null) {
+            // we can't use the NIO path, because we have to support temp Vfs filesystems in tests
+            return AppMapVfsUtils.asNativePath(projectDir).resolve(Paths.get("target", "appmap", "remote"));
+        }
+
+        return null;
+    }
+
+    /**
+     * @param project Current project
+     * @return The first found and valid storage location, which is configured in a appmap.yml file of the project
+     */
+    @RequiresBackgroundThread
+    private static @Nullable Path findConfiguredStorageLocation(@NotNull Project project) {
+        return ReadAction.compute(() -> AppMapFiles.findAppMapConfigFiles(project, AppMapSearchScopes.appMapsWithExcluded(project))
+                .stream()
+                .map(StopAppMapRecordingAction::findAppMapDirectory)
+                .filter(Objects::nonNull)
+                .findFirst()
+                .orElse(null));
+    }
+
+    @RequiresReadLock
+    private static @Nullable Path findAppMapDirectory(@NotNull VirtualFile appMapConfig) {
+        if (appMapConfig.isInLocalFileSystem()) {
+            var appMapDir = AppMapFiles.readAppMapDirConfigValue(appMapConfig);
+            if (appMapDir != null) {
+                try {
+                    var nativeParentPath = AppMapVfsUtils.asNativePath(appMapConfig.getParent());
+                    return nativeParentPath.resolve(appMapDir).resolve("remote");
+                } catch (Exception e) {
+                    // ignore
+                }
+            }
+        }
+        return null;
     }
 
     private static void showStopRecordingFailedError(@NotNull Project project, @NotNull String url) {
