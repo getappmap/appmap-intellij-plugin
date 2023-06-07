@@ -4,6 +4,7 @@ import appland.config.AppMapConfigFileListener;
 import appland.files.AppMapFileChangeListener;
 import appland.files.AppMapFiles;
 import appland.index.AppMapNameIndex;
+import appland.index.AppMapSearchScopes;
 import appland.installGuide.InstallGuideViewPage;
 import appland.problemsView.FindingsManager;
 import appland.problemsView.listener.ScannerFindingsListener;
@@ -21,6 +22,7 @@ import com.intellij.openapi.project.DumbService;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.Disposer;
 import com.intellij.psi.search.FilenameIndex;
+import com.intellij.util.CommonProcessors;
 import com.intellij.util.concurrency.AppExecutorUtil;
 import org.jetbrains.annotations.NotNull;
 
