@@ -1,5 +1,6 @@
 package appland.files;
 
+import appland.index.AppMapSearchScopes;
 import com.google.common.collect.Lists;
 import com.intellij.openapi.project.DumbService;
 import com.intellij.openapi.project.Project;
@@ -9,7 +10,6 @@ import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.openapi.vfs.LocalFileSystem;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.search.FilenameIndex;
-import com.intellij.psi.search.ProjectScope;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -51,7 +51,7 @@ public class FileLookup {
             return null;
         }
 
-        for (var candidate : FilenameIndex.getVirtualFilesByName(project, filename(relativePath), true, ProjectScope.getAllScope(project))) {
+        for (var candidate : FilenameIndex.getVirtualFilesByName(project, filename(relativePath), true, AppMapSearchScopes.projectFilesWithExcluded(project))) {
             var parent = candidate.getParent();
             for (String expectedParentName : parentsReversed(relativePath)) {
                 if (parent == null || !FileUtil.namesEqual(expectedParentName, parent.getName())) {

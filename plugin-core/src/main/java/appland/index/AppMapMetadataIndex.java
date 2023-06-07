@@ -6,7 +6,6 @@ import com.intellij.openapi.project.DumbService;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.search.GlobalSearchScope;
-import com.intellij.psi.search.ProjectScope;
 import com.intellij.util.indexing.FileBasedIndex;
 import com.intellij.util.indexing.ID;
 import com.intellij.util.indexing.SingleEntryFileBasedIndexExtension;
@@ -93,7 +92,7 @@ public class AppMapMetadataIndex extends SingleEntryFileBasedIndexExtension<AppM
 
         var lowercaseNameFilter = nameFilter == null ? null : nameFilter.toLowerCase();
         var result = new ArrayList<AppMapMetadata>();
-        processAppMaps(project, ProjectScope.getEverythingScope(project), (file, value) -> {
+        processAppMaps(project, AppMapSearchScopes.appMapsWithExcluded(project), (file, value) -> {
             if (nameFilter == null || value.getName().toLowerCase().contains(lowercaseNameFilter)) {
                 result.add(value);
             }
