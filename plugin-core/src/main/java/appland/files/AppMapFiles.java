@@ -11,11 +11,11 @@ import com.intellij.execution.process.ProcessOutput;
 import com.intellij.execution.util.ExecUtil;
 import com.intellij.openapi.application.ReadAction;
 import com.intellij.openapi.diagnostic.Logger;
-import com.intellij.openapi.fileEditor.FileDocumentManager;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.io.FileUtil;
 import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.openapi.vfs.VfsUtil;
+import com.intellij.openapi.vfs.VfsUtilCore;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.search.FilenameIndex;
 import com.intellij.psi.search.GlobalSearchScope;
@@ -163,18 +163,21 @@ public final class AppMapFiles {
      * Load the content of the file.
      *
      * @param file File to load
-     * @return File content or {@code null} if an error ocurred
+     * @return File content or {@code null} if an error occurred
      */
     @RequiresReadLock
     public static @Nullable String loadFileContent(@NotNull VirtualFile file) {
         return ReadAction.compute(() -> {
-            var document = FileDocumentManager.getInstance().getDocument(file);
-            if (document == null) {
-                LOG.error("unable to retrieve document for file: " + file.getPath());
+            if (!file.isValid()) {
                 return null;
             }
 
-            return document.getText();
+            try {
+                return VfsUtilCore.loadText(file);
+            } catch (IOException e) {
+                LOG.error("unable to load AppMap file content: " + file.getPath());
+                return null;
+            }
         });
     }
 
