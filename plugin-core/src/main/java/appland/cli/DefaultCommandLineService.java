@@ -8,6 +8,7 @@ import appland.settings.AppMapSettingsListener;
 import com.intellij.execution.CantRunException;
 import com.intellij.execution.ExecutionException;
 import com.intellij.execution.configurations.GeneralCommandLine;
+import com.intellij.execution.configurations.PtyCommandLine;
 import com.intellij.execution.process.KillableProcessHandler;
 import com.intellij.execution.process.ProcessAdapter;
 import com.intellij.execution.process.ProcessEvent;
@@ -149,7 +150,7 @@ public class DefaultCommandLineService implements AppLandCommandLineService {
 
     @Override
     public @Nullable GeneralCommandLine createInstallCommand(@NotNull Path installLocation, @NotNull String language) {
-        return createAppMapCliCommand("install", "-d", installLocation.toString());
+        return createAppMapPtyCommand("install", "-d", installLocation.toString());
     }
 
     @Override
@@ -160,7 +161,7 @@ public class DefaultCommandLineService implements AppLandCommandLineService {
             return null;
         }
 
-        return createAppMapCliCommand("openapi", "--appmap-dir", localPath.toString());
+        return createAppMapCommand("openapi", "--appmap-dir", localPath.toString());
     }
 
     @Override
@@ -171,7 +172,7 @@ public class DefaultCommandLineService implements AppLandCommandLineService {
             return null;
         }
 
-        return createAppMapCliCommand("prune", localPath.toString(), "--size", "10mb", "--output-data", "--auto");
+        return createAppMapCommand("prune", localPath.toString(), "--size", "10mb", "--output-data", "--auto");
     }
 
     @Override
@@ -182,7 +183,7 @@ public class DefaultCommandLineService implements AppLandCommandLineService {
             return null;
         }
 
-        return createAppMapCliCommand("stats", "--appmap-file", localPath.toString(), "--limit", String.valueOf(Long.MAX_VALUE), "--format", "json");
+        return createAppMapCommand("stats", "--appmap-file", localPath.toString(), "--limit", String.valueOf(Long.MAX_VALUE), "--format", "json");
     }
 
     private void stopLocked(@NotNull CliProcesses value, boolean waitForTermination) {
@@ -383,14 +384,29 @@ public class DefaultCommandLineService implements AppLandCommandLineService {
         }
     }
 
-    private static @Nullable GeneralCommandLine createAppMapCliCommand(@NotNull String... parameters) {
+    private static @Nullable GeneralCommandLine createAppMapCommand(@NotNull String... parameters) {
+        return createAppMapCliCommand(false, parameters);
+    }
+
+    private static @Nullable GeneralCommandLine createAppMapPtyCommand(@NotNull String... parameters) {
+        return createAppMapCliCommand(true, parameters);
+    }
+
+    private static @Nullable GeneralCommandLine createAppMapCliCommand(boolean createPtyCommandLine, @NotNull String... parameters) {
         var toolPath = AppLandDownloadService.getInstance().getDownloadFilePath(CliTool.AppMap);
         if (toolPath == null || Files.notExists(toolPath)) {
             LOG.debug("AppMap CLI executable not found: " + toolPath);
             return null;
         }
 
-        var cmd = new GeneralCommandLine();
+        GeneralCommandLine cmd;
+        if (createPtyCommandLine) {
+            var ptyCmd = new PtyCommandLine();
+            ptyCmd.withConsoleMode(true);
+            cmd = ptyCmd;
+        } else {
+            cmd = new GeneralCommandLine();
+        }
         cmd.withExePath(toolPath.toString());
         cmd.withParameters(parameters);
         cmd.withParentEnvironmentType(GeneralCommandLine.ParentEnvironmentType.CONSOLE);
