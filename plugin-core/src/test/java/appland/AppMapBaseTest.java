@@ -5,13 +5,16 @@ import appland.settings.AppMapApplicationSettings;
 import appland.settings.AppMapApplicationSettingsService;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.application.ReadAction;
+import com.intellij.openapi.roots.ContentEntry;
 import com.intellij.openapi.roots.ModuleRootModificationUtil;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.testFramework.fixtures.LightPlatformCodeInsightFixture4TestCase;
+import com.intellij.util.ThrowableRunnable;
 import org.jetbrains.annotations.NotNull;
 import org.junit.After;
 
 import java.util.Collections;
+import java.util.concurrent.atomic.AtomicReference;
 
 public abstract class AppMapBaseTest extends LightPlatformCodeInsightFixture4TestCase {
     @After
@@ -53,6 +56,28 @@ public abstract class AppMapBaseTest extends LightPlatformCodeInsightFixture4Tes
             ModuleRootModificationUtil.updateExcludedFolders(getModule(), excludedFolder.getParent(),
                     Collections.singletonList(excludedFolder.getUrl()),
                     Collections.emptyList());
+        }
+    }
+
+    protected void withContentRoot(@NotNull VirtualFile contentRoot, @NotNull ThrowableRunnable<Exception> runnable) throws Exception {
+        assertTrue(contentRoot.isDirectory());
+
+        var contentEntryRef = new AtomicReference<ContentEntry>();
+        try {
+            // hack to use ModuleRootModificationUtil and to keep a reference to the new entry
+            ModuleRootModificationUtil.updateModel(getModule(), modifiableRootModel -> {
+                contentEntryRef.set(modifiableRootModel.addContentEntry(contentRoot));
+            });
+
+            runnable.run();
+        } finally {
+            // remove again to avoid breaking follow-up tests
+            var newEntry = contentEntryRef.get();
+            assertNotNull(newEntry);
+
+            ModuleRootModificationUtil.updateModel(getModule(), modifiableRootModel -> {
+                modifiableRootModel.removeContentEntry(newEntry);
+            });
         }
     }
 

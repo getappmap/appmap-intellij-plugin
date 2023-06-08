@@ -1,14 +1,11 @@
 package appland.problemsView.listener;
 
 import appland.AppMapBaseTest;
-import appland.problemsView.FindingsManager;
 import com.intellij.openapi.application.ReadAction;
 import com.intellij.openapi.application.WriteAction;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiManager;
-import com.intellij.testFramework.fixtures.TempDirTestFixture;
-import com.intellij.testFramework.fixtures.impl.TempDirTestFixtureImpl;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -19,22 +16,6 @@ public class ScannerFilesAsyncListenerTest extends AppMapBaseTest {
     @Override
     protected boolean runInDispatchThread() {
         return false;
-    }
-
-    @Override
-    protected TempDirTestFixture createTempDirTestFixture() {
-        // creates files on the local filesystem
-        return new TempDirTestFixtureImpl();
-    }
-
-    @Test
-    public void findingsFileWatcher() throws InterruptedException {
-        var condition = createFindingsCondition();
-        // adding an appmap-findings.json file must trigger a refresh via the file watcher
-        myFixture.copyDirectoryToProject("vscode/workspaces/project-system", "root");
-        assertTrue(condition.await(30, TimeUnit.SECONDS));
-
-        assertFindings(1, 1);
     }
 
     @Test
@@ -85,24 +66,12 @@ public class ScannerFilesAsyncListenerTest extends AppMapBaseTest {
     }
 
     private CountDownLatch createFindingsCondition() {
-        var latch = new CountDownLatch(1);
-        getProject().getMessageBus().connect(getTestRootDisposable()).subscribe(ScannerFindingsListener.TOPIC, new ScannerFindingsListener() {
-            @Override
-            public void afterFindingsReloaded() {
-                latch.countDown();
-            }
-
-            @Override
-            public void afterFindingsChanged() {
-                latch.countDown();
-            }
-        });
-        return latch;
+        return ScannerTestUtil.createFindingsCondition(getProject(), getTestRootDisposable());
     }
 
     private PsiFile copyFindingsFixtureFile() throws InterruptedException {
         var condition = createFindingsCondition();
-        var file = myFixture.copyFileToProject("vscode/workspaces/project-system/appmap-findings.json");
+        var file = WriteAction.computeAndWait(() -> myFixture.copyFileToProject("vscode/workspaces/project-system/appmap-findings.json"));
         assertTrue(condition.await(10, TimeUnit.SECONDS));
 
         return ReadAction.compute(() -> PsiManager.getInstance(getProject()).findFile(file));
@@ -110,13 +79,8 @@ public class ScannerFilesAsyncListenerTest extends AppMapBaseTest {
 
     private VirtualFile copyFindingsFixtureDirectory() throws InterruptedException {
         var condition = createFindingsCondition();
-        var dir = myFixture.copyDirectoryToProject("vscode/workspaces/project-system", "findings");
+        var dir = WriteAction.computeAndWait(() -> myFixture.copyDirectoryToProject("vscode/workspaces/project-system", "findings"));
         assertTrue(condition.await(10, TimeUnit.SECONDS));
         return dir;
-    }
-
-    private void assertFindings(int problemFileCount, int problemCount) {
-        assertEquals(problemFileCount, FindingsManager.getInstance(getProject()).getProblemFileCount());
-        assertEquals(problemCount, FindingsManager.getInstance(getProject()).getProblemCount());
     }
 }
