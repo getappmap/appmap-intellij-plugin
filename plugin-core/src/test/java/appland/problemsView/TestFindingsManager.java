@@ -16,17 +16,34 @@ public class TestFindingsManager extends FindingsManager {
         FindingsManager.getInstance(project).reset();
     }
 
-    public static @NotNull CountDownLatch createFindingsCondition(@NotNull Project project, @NotNull Disposable disposable) {
+    public static @NotNull CountDownLatch createFindingsCondition(@NotNull Project project,
+                                                                  @NotNull Disposable disposable) {
+        return createFindingsCondition(project, disposable, true, true);
+    }
+
+    public static @NotNull CountDownLatch createFindingsReloadedCondition(@NotNull Project project,
+                                                                          @NotNull Disposable disposable) {
+        return createFindingsCondition(project, disposable, false, true);
+    }
+
+    public static @NotNull CountDownLatch createFindingsCondition(@NotNull Project project,
+                                                                  @NotNull Disposable disposable,
+                                                                  boolean listenToChanges,
+                                                                  boolean listenToReload) {
         var latch = new CountDownLatch(1);
         project.getMessageBus().connect(disposable).subscribe(ScannerFindingsListener.TOPIC, new ScannerFindingsListener() {
             @Override
             public void afterFindingsReloaded() {
-                latch.countDown();
+                if (listenToReload) {
+                    latch.countDown();
+                }
             }
 
             @Override
             public void afterFindingsChanged() {
-                latch.countDown();
+                if (listenToChanges) {
+                    latch.countDown();
+                }
             }
         });
         return latch;

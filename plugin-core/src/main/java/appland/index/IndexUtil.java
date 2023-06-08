@@ -10,7 +10,7 @@ import org.jetbrains.annotations.Nullable;
 
 final class IndexUtil {
     // base version for our indexes, increase when the data structures or the parsing logic change
-    static final int BASE_VERSION = 56;
+    static final int BASE_VERSION = 57;
 
     @RequiresReadLock
     static <T> @Nullable T getSingleEntryAppMapData(@NotNull ID<Integer, T> indexId,
