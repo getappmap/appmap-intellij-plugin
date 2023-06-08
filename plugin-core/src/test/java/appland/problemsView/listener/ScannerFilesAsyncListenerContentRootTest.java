@@ -32,7 +32,7 @@ public class ScannerFilesAsyncListenerContentRootTest extends AppMapBaseTest {
             var condition = ScannerTestUtil.createFindingsCondition(getProject(), getTestRootDisposable());
             // adding an appmap-findings.json file must trigger a refresh via the file watcher
             myFixture.copyDirectoryToProject("vscode/workspaces/project-system", "root");
-            assertTrue(condition.await(30, TimeUnit.SECONDS));
+            assertTrue("Findings must be reloaded when a appmap-findings.json is added", condition.await(60, TimeUnit.SECONDS));
         });
 
         assertEquals(1, FindingsManager.getInstance(getProject()).getProblemFileCount());

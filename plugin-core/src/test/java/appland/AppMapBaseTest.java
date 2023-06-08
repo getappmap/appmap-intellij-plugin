@@ -5,18 +5,49 @@ import appland.settings.AppMapApplicationSettings;
 import appland.settings.AppMapApplicationSettingsService;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.application.ReadAction;
+import com.intellij.openapi.application.WriteAction;
 import com.intellij.openapi.roots.ContentEntry;
 import com.intellij.openapi.roots.ModuleRootModificationUtil;
 import com.intellij.openapi.vfs.VirtualFile;
+import com.intellij.openapi.vfs.VirtualFileManager;
+import com.intellij.openapi.vfs.ex.temp.TempFileSystem;
 import com.intellij.testFramework.fixtures.LightPlatformCodeInsightFixture4TestCase;
 import com.intellij.util.ThrowableRunnable;
 import org.jetbrains.annotations.NotNull;
 import org.junit.After;
+import org.junit.Before;
 
 import java.util.Collections;
 import java.util.concurrent.atomic.AtomicReference;
 
 public abstract class AppMapBaseTest extends LightPlatformCodeInsightFixture4TestCase {
+    @Before
+    @After
+    public void cleanupFiles() {
+        if (ApplicationManager.getApplication().isDispatchThread()) {
+            cleanTempFileSystem();
+        } else {
+            edt(this::cleanTempFileSystem);
+        }
+    }
+
+    private void cleanTempFileSystem() {
+        WriteAction.run(() -> {
+            var contentRoot = VirtualFileManager.getInstance().findFileByUrl("temp:///");
+            var tempFs = (TempFileSystem) contentRoot.getFileSystem();
+            for (var child : contentRoot.getChildren()) {
+                if (!tempFs.exists(child)) {
+                    tempFs.createChildFile(this, contentRoot, child.getName());
+                }
+                try {
+                    child.delete(this);
+                } catch (Exception e) {
+                    //ignore
+                }
+            }
+        });
+    }
+
     @After
     public void shutdownAppMapProcesses() {
         AppLandCommandLineService.getInstance().stopAll(true);

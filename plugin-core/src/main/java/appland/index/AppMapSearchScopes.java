@@ -51,7 +51,7 @@ public final class AppMapSearchScopes {
                 }
             }
 
-            return fileIndex.isExcludedFile(file) || fileIndex.isInProjectScope(file);
+            return file.isValid() && fileIndex.isExcludedFile(file) || fileIndex.isInProjectScope(file);
         }
 
         @Override

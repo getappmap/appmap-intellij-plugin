@@ -223,10 +223,12 @@ public class FindingsManager implements ProblemsProvider {
                                 for (var findingFile : findingFiles) {
                                     ReadAction.run(() -> addFindingsFile(findingFile));
                                 }
-                                project.getMessageBus().syncPublisher(ScannerFindingsListener.TOPIC).afterFindingsReloaded();
                             }
                         } finally {
                             asyncPromise.setResult(findingFiles);
+                            if (!project.isDisposed()) {
+                                project.getMessageBus().syncPublisher(ScannerFindingsListener.TOPIC).afterFindingsReloaded();
+                            }
                         }
                     });
                     return asyncPromise;
