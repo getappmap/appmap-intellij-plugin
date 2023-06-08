@@ -3,6 +3,7 @@ package appland.cli;
 import appland.AppMapBaseTest;
 import appland.settings.AppMapApplicationSettingsService;
 import com.intellij.execution.ExecutionException;
+import com.intellij.execution.configurations.PtyCommandLine;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.application.WriteAction;
 import com.intellij.openapi.roots.ModuleRootModificationUtil;
@@ -20,6 +21,7 @@ import org.junit.Test;
 
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -149,6 +151,12 @@ public class DefaultCommandLineServiceTest extends AppMapBaseTest {
         });
         assertTrue(condition.await(30, TimeUnit.SECONDS));
         assertActiveRoots(newRootA, newRootB);
+    }
+
+    @Test
+    public void installCommandLineHasPty() {
+        var installCommand = AppLandCommandLineService.getInstance().createInstallCommand(Paths.get("/"), "java");
+        assertTrue("The install command must have PTY", installCommand instanceof PtyCommandLine);
     }
 
     @Test
