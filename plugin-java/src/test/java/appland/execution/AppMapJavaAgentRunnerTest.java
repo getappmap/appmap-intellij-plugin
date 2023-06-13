@@ -1,7 +1,7 @@
 package appland.execution;
 
 import appland.AppLandTestExecutionPolicy;
-import appland.AppMapPlugin;
+import appland.javaAgent.AppMapJavaAgentDownloadService;
 import com.intellij.execution.ProgramRunnerUtil;
 import com.intellij.execution.actions.ConfigurationContext;
 import com.intellij.execution.application.ApplicationConfiguration;
@@ -60,7 +60,12 @@ public class AppMapJavaAgentRunnerTest extends BaseAppMapJavaTest {
         var descriptor = runConfigDescriptor.get();
         assertNotNull(descriptor);
 
-        var cmdline = descriptor.getProcessHandler().toString();
-        assertTrue("The JVM command must be patched with the AppMap agent", cmdline.contains(AppMapPlugin.getJavaAgentPath().toString()));
+        var processHandler = descriptor.getProcessHandler();
+        assertNotNull(processHandler);
+        var cmdline = processHandler.toString();
+
+        var agentJarPath = AppMapJavaAgentDownloadService.getInstance().getJavaAgentPathIfExists();
+        assertNotNull(agentJarPath);
+        assertTrue("The JVM command must be patched with the AppMap agent", cmdline.contains(agentJarPath.toString()));
     }
 }

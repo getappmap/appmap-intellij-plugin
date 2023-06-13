@@ -40,10 +40,6 @@ public final class AppMapPlugin {
         return getPluginPath().resolve("appland-signin").resolve("index.html");
     }
 
-    public static Path getJavaAgentPath() {
-        return getPluginPath().resolve("appmap-agents").resolve("appmap-agent.jar");
-    }
-
     @NotNull
     public static PluginDescriptor getDescriptor() {
         var plugin = PluginManagerCore.getPlugin(PluginId.getId(PLUGIN_ID));

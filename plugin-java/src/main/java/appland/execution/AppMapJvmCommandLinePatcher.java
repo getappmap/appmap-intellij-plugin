@@ -1,6 +1,7 @@
 package appland.execution;
 
-import appland.AppMapPlugin;
+import appland.AppMapBundle;
+import appland.javaAgent.AppMapJavaAgentDownloadService;
 import com.intellij.execution.CantRunException;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -19,13 +20,18 @@ public class AppMapJvmCommandLinePatcher {
             throw new CantRunException("Unable to find an appmap.yml file");
         }
 
+        var agentJarPath = AppMapJavaAgentDownloadService.getInstance().getJavaAgentPathIfExists();
+        if (agentJarPath == null) {
+            throw new CantRunException(AppMapBundle.get("javaAgent.run.missingJar"));
+        }
+
         var jvmParams = new LinkedList<String>();
         //jvmParams.add("-Dappmap.debug");
         jvmParams.add("-Dappmap.config.file=" + appMapConfig);
         if (appMapOutputDirectory != null) {
             jvmParams.add("-Dappmap.output.directory=" + appMapOutputDirectory);
         }
-        jvmParams.add("-javaagent:" + AppMapPlugin.getJavaAgentPath());
+        jvmParams.add("-javaagent:" + agentJarPath);
         return jvmParams;
     }
 }

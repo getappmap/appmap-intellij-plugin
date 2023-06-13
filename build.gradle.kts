@@ -23,7 +23,6 @@ plugins {
 
 val pluginVersion = prop("pluginVersion")
 val lombokVersion = prop("lombokVersion")
-val appMapJvmAgentVersion = prop("appMapJvmAgent")
 
 group = "appland.appmap"
 version = pluginVersion
@@ -142,15 +141,11 @@ allprojects {
 }
 
 project(":") {
-    val appMapJavaAgent = configurations.create("appMapJavaAgent")
     dependencies {
         implementation(project(":plugin-core", "instrumentedJar"))
         implementation(project(":plugin-gradle", "instrumentedJar"))
         implementation(project(":plugin-java", "instrumentedJar"))
         implementation(project(":plugin-maven", "instrumentedJar"))
-
-        // to copy the appmap-java jar file into the plugin zip
-        appMapJavaAgent("com.appland:appmap-agent:$appMapJvmAgentVersion")
     }
 
     changelog {
@@ -163,7 +158,6 @@ project(":") {
             inputs.dir("${project.rootDir}/appland-install-guide")
             inputs.dir("${project.rootDir}/appland-findings")
             inputs.dir("${project.rootDir}/appland-signin")
-            inputs.files(appMapJavaAgent)
 
             destinationDir = project.buildDir
             from("${project.rootDir}/appland") {
@@ -185,15 +179,6 @@ project(":") {
                 into("appmap-assets/appland-signin")
                 include("index.html")
                 include("dist/**")
-            }
-            from(appMapJavaAgent) {
-                into("appmap-assets/appmap-agents")
-                rename {
-                    when (it.startsWith("appmap-agent-")) {
-                        true -> "appmap-agent.jar"
-                        false -> name
-                    }
-                }
             }
 
             processResources {

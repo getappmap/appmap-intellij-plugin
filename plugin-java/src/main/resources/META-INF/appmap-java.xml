@@ -1,5 +1,8 @@
 <idea-plugin>
     <extensions defaultExtensionNs="com.intellij">
+        <applicationService serviceImplementation="appland.javaAgent.AppMapJavaAgentDownloadService"/>
+        <postStartupActivity implementation="appland.javaAgent.AppMapJavaAgentDownloadActivity"/>
+
         <programRunner implementation="appland.execution.AppMapJavaAgentRunner"/>
         <java.programPatcher implementation="appland.execution.AppMapJavaProgramPatcher"/>
     </extensions>
