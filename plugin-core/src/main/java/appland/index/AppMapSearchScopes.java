@@ -17,7 +17,7 @@ public final class AppMapSearchScopes {
     }
 
     public static @NotNull GlobalSearchScope projectFilesWithExcluded(@NotNull Project project) {
-        return new ProjectWithExcludedScope(project);
+        return GlobalSearchScope.everythingScope(project);
     }
 
     /**
