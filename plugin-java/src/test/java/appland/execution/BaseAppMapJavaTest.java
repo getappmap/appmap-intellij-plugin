@@ -1,9 +1,11 @@
 package appland.execution;
 
 import appland.cli.AppLandCommandLineService;
+import appland.javaAgent.AppMapJavaAgentDownloadService;
 import com.intellij.openapi.application.WriteAction;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.externalSystem.service.execution.ExternalSystemJdkUtil;
+import com.intellij.openapi.progress.EmptyProgressIndicator;
 import com.intellij.openapi.projectRoots.Sdk;
 import com.intellij.openapi.projectRoots.impl.JavaAwareProjectJdkTableImpl;
 import com.intellij.openapi.util.Disposer;
@@ -14,6 +16,14 @@ public abstract class BaseAppMapJavaTest extends JavaPsiTestCase {
     @Override
     protected void setUp() throws Exception {
         EdtTestUtil.runInEdtAndWait(super::setUp);
+
+        try {
+            if (AppMapJavaAgentDownloadService.getInstance().getJavaAgentPathIfExists() == null) {
+                AppMapJavaAgentDownloadService.getInstance().downloadJavaAgentSync(new EmptyProgressIndicator());
+            }
+        } catch (Exception e) {
+            addSuppressedException(e);
+        }
     }
 
     @Override
