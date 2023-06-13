@@ -3,8 +3,8 @@ package appland.problemsView.listener;
 import appland.index.AppMapFindingsUtil;
 import appland.problemsView.FindingsManager;
 import com.intellij.openapi.application.ApplicationManager;
-import com.intellij.openapi.application.ReadAction;
 import com.intellij.openapi.progress.ProgressManager;
+import com.intellij.openapi.project.DumbService;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.project.ProjectManager;
 import com.intellij.openapi.util.ThrowableComputable;
@@ -123,10 +123,12 @@ public class ScannerFilesAsyncListener implements AsyncFileListener {
                         continue;
                     }
 
-                    // we need to run in smart mode because the findings manager uses the index to find relative files
-                    ReadAction.nonBlocking(() -> processChangesAsync(project, toAdd, toRemove, toRefresh, directories))
-                            .inSmartMode(project)
-                            .submit(executor);
+                    executor.submit(() -> {
+                        // we need to run in smart mode because the findings manager uses the index to find relative files
+                        DumbService.getInstance(project).runReadActionInSmartMode(() -> {
+                            processChangesAsync(project, toAdd, toRemove, toRefresh, directories);
+                        });
+                    });
                 }
             }
         };
