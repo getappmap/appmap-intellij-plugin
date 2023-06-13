@@ -1,5 +1,12 @@
 AppMap Plugin Changelog
 
+## [0.36.2](https://github.com/getappmap/appmap-intellij-plugin/compare/v0.36.1...v0.36.2) (2023-06-13)
+
+
+### Bug Fixes
+
+-  ensure to load up-to-date content of newly created AppMap files ([af24b19]())
+
 ## [0.36.1](https://github.com/getappmap/appmap-intellij-plugin/compare/v0.36.0...v0.36.1) (2023-06-06)
 
 
