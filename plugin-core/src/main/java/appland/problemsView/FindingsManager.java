@@ -28,8 +28,6 @@ import com.intellij.util.concurrency.AppExecutorUtil;
 import com.intellij.util.concurrency.annotations.RequiresReadLock;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.jetbrains.concurrency.AsyncPromise;
-import org.jetbrains.concurrency.Promise;
 
 import javax.annotation.concurrent.GuardedBy;
 import java.util.*;
@@ -204,32 +202,19 @@ public class FindingsManager implements ProblemsProvider {
         }
     }
 
-    public Promise<Collection<VirtualFile>> reloadAsync() {
+    public void reloadAsync() {
         // the non-blocking ReadAction must not have side effects, because it may be executed multiple times
-        return ReadAction.nonBlocking(this::findFindingsFiles)
+        ReadAction.nonBlocking(this::findFindingsFiles)
                 .inSmartMode(project)
                 .expireWith(this)
                 .coalesceBy(getClass(), project)
                 .submit(AppExecutorUtil.getAppExecutorService())
-                .thenAsync(findingFiles -> {
-                    // At least 2023.1 is (sometimes) executing the callback on the EDT.
-                    // We must not assume that we're in a background thread.
-
-                    var asyncPromise = new AsyncPromise<Collection<VirtualFile>>();
-                    ApplicationManager.getApplication().executeOnPooledThread(() -> {
-                        try {
-                            if (!project.isDisposed()) {
-                                clearAndNotify();
-                                for (var findingFile : findingFiles) {
-                                    ReadAction.run(() -> addFindingsFile(findingFile));
-                                }
-                                project.getMessageBus().syncPublisher(ScannerFindingsListener.TOPIC).afterFindingsReloaded();
-                            }
-                        } finally {
-                            asyncPromise.setResult(findingFiles);
-                        }
-                    });
-                    return asyncPromise;
+                .onSuccess(findingFiles -> {
+                    clearAndNotify();
+                    for (var findingFile : findingFiles) {
+                        addFindingsFile(findingFile);
+                    }
+                    project.getMessageBus().syncPublisher(ScannerFindingsListener.TOPIC).afterFindingsReloaded();
                 });
     }
 
