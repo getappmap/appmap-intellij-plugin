@@ -150,7 +150,7 @@ public class StopAppMapRecordingAction extends AnAction implements DumbAware {
      */
     @RequiresBackgroundThread
     private static @Nullable Path findConfiguredStorageLocation(@NotNull Project project) {
-        return ReadAction.compute(() -> AppMapFiles.findAppMapConfigFiles(project, AppMapSearchScopes.appMapsWithExcluded(project))
+        return ReadAction.compute(() -> AppMapFiles.findAppMapConfigFiles(project, AppMapSearchScopes.projectFilesWithExcluded(project))
                 .stream()
                 .map(StopAppMapRecordingAction::findAppMapDirectory)
                 .filter(Objects::nonNull)
