@@ -2,11 +2,9 @@ package appland.toolwindow.runtimeAnalysis;
 
 import appland.AppMapBaseTest;
 import appland.problemsView.FindingsManager;
-import appland.problemsView.listener.ScannerFilesAsyncListener;
+import appland.problemsView.TestFindingsManager;
 import appland.settings.AppMapApplicationSettingsService;
 import com.intellij.openapi.application.WriteAction;
-import com.intellij.openapi.project.DumbUtilImpl;
-import com.intellij.testFramework.fixtures.impl.CodeInsightTestFixtureImpl;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.junit.Assume;
@@ -104,9 +102,8 @@ public class RuntimeAnalysisModelTest extends AppMapBaseTest {
     }
 
     private void loadFindingsDirectory(@NotNull String directoryPath) throws Exception {
-        ScannerFilesAsyncListener.disableForTests(() -> {
-            return WriteAction.computeAndWait(() -> myFixture.copyDirectoryToProject(directoryPath, "root"));
-        });
-        FindingsManager.getInstance(getProject()).reloadAsync().blockingGet(30, TimeUnit.SECONDS);
+        var condition = TestFindingsManager.createFindingsCondition(getProject(), getTestRootDisposable());
+        WriteAction.computeAndWait(() -> myFixture.copyDirectoryToProject(directoryPath, "root"));
+        assertTrue(condition.await(30, TimeUnit.SECONDS));
     }
 }

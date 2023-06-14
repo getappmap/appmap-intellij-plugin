@@ -12,8 +12,9 @@ import com.intellij.testFramework.fixtures.impl.TempDirTestFixtureImpl;
 import org.junit.Test;
 
 import java.io.IOException;
-import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+
+import static appland.problemsView.TestFindingsManager.createFindingsCondition;
 
 public class ScannerFilesAsyncListenerTest extends AppMapBaseTest {
     @Override
@@ -29,7 +30,7 @@ public class ScannerFilesAsyncListenerTest extends AppMapBaseTest {
 
     @Test
     public void findingsFileWatcher() throws InterruptedException {
-        var condition = createFindingsCondition();
+        var condition = createFindingsCondition(getProject(), getTestRootDisposable());
         // adding an appmap-findings.json file must trigger a refresh via the file watcher
         myFixture.copyDirectoryToProject("vscode/workspaces/project-system", "root");
         assertTrue(condition.await(60, TimeUnit.SECONDS));
@@ -42,7 +43,7 @@ public class ScannerFilesAsyncListenerTest extends AppMapBaseTest {
         var file = myFixture.copyFileToProject("vscode/workspaces/project-system/appmap-findings.json", "a.json");
         var psiFile = ReadAction.compute(() -> PsiManager.getInstance(getProject()).findFile(file));
 
-        var condition = createFindingsCondition();
+        var condition = createFindingsCondition(getProject(), getTestRootDisposable());
         WriteAction.runAndWait(() -> myFixture.renameElement(psiFile, "appmap-findings.json"));
         assertTrue("Renaming a file to appmap-findings.json must refresh", condition.await(10, TimeUnit.SECONDS));
     }
@@ -51,7 +52,7 @@ public class ScannerFilesAsyncListenerTest extends AppMapBaseTest {
     public void findingsFileNameChange() throws InterruptedException {
         var file = copyFindingsFixtureFile();
 
-        var condition = createFindingsCondition();
+        var condition = createFindingsCondition(getProject(), getTestRootDisposable());
         WriteAction.runAndWait(() -> myFixture.renameElement(file, "a.json"));
         assertTrue("Renaming a appmap-findings.json must refresh", condition.await(10, TimeUnit.SECONDS));
     }
@@ -60,7 +61,7 @@ public class ScannerFilesAsyncListenerTest extends AppMapBaseTest {
     public void findingsFileDeletion() throws InterruptedException {
         var file = copyFindingsFixtureFile();
 
-        var condition = createFindingsCondition();
+        var condition = createFindingsCondition(getProject(), getTestRootDisposable());
         WriteAction.runAndWait(file::delete);
         assertTrue("Removing an appmap-findings.json without findings must refresh", condition.await(10, TimeUnit.SECONDS));
     }
@@ -70,7 +71,7 @@ public class ScannerFilesAsyncListenerTest extends AppMapBaseTest {
         var directory = copyFindingsFixtureDirectory();
         assertNotNull(directory);
 
-        var condition = createFindingsCondition();
+        var condition = createFindingsCondition(getProject(), getTestRootDisposable());
         WriteAction.runAndWait(() -> directory.delete(this));
         assertTrue("Removing a directory with appmap-findings.json files must refresh", condition.await(10, TimeUnit.SECONDS));
     }
@@ -79,29 +80,13 @@ public class ScannerFilesAsyncListenerTest extends AppMapBaseTest {
     public void emptyFindingsFileDeletion() throws InterruptedException {
         var file = myFixture.configureByText("appmap-findings.json", "{}");
 
-        var condition = createFindingsCondition();
+        var condition = createFindingsCondition(getProject(), getTestRootDisposable());
         WriteAction.runAndWait(file::delete);
         assertFalse("Removing an appmap-findings.json without findings must not refresh", condition.await(10, TimeUnit.SECONDS));
     }
 
-    private CountDownLatch createFindingsCondition() {
-        var latch = new CountDownLatch(1);
-        getProject().getMessageBus().connect(getTestRootDisposable()).subscribe(ScannerFindingsListener.TOPIC, new ScannerFindingsListener() {
-            @Override
-            public void afterFindingsReloaded() {
-                latch.countDown();
-            }
-
-            @Override
-            public void afterFindingsChanged() {
-                latch.countDown();
-            }
-        });
-        return latch;
-    }
-
     private PsiFile copyFindingsFixtureFile() throws InterruptedException {
-        var condition = createFindingsCondition();
+        var condition = createFindingsCondition(getProject(), getTestRootDisposable());
         var file = myFixture.copyFileToProject("vscode/workspaces/project-system/appmap-findings.json");
         assertTrue(condition.await(10, TimeUnit.SECONDS));
 
@@ -109,7 +94,7 @@ public class ScannerFilesAsyncListenerTest extends AppMapBaseTest {
     }
 
     private VirtualFile copyFindingsFixtureDirectory() throws InterruptedException {
-        var condition = createFindingsCondition();
+        var condition = createFindingsCondition(getProject(), getTestRootDisposable());
         var dir = myFixture.copyDirectoryToProject("vscode/workspaces/project-system", "findings");
         assertTrue(condition.await(10, TimeUnit.SECONDS));
         return dir;
