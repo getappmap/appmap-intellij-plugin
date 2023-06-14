@@ -1,5 +1,12 @@
 AppMap Plugin Changelog
 
+## [0.36.3](https://github.com/getappmap/appmap-intellij-plugin/compare/v0.36.2...v0.36.3) (2023-06-14)
+
+
+### Bug Fixes
+
+-  execute the AppMap install command with a PTY ([26bcbac]())-  stop AppMap recording: use appmap_dir defined in appmap.yml, don't use the most recently used location. Default to `target/appmap/remote` instead of `tmp/appmap/remote` as a fallback. ([322366f]())
+
 ## [0.36.2](https://github.com/getappmap/appmap-intellij-plugin/compare/v0.36.1...v0.36.2) (2023-06-13)
 
 
