@@ -4,6 +4,7 @@ import appland.AppMapBaseTest;
 import com.intellij.openapi.application.WriteAction;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiFile;
+import com.intellij.util.indexing.FileBasedIndexExtension;
 import org.jetbrains.annotations.NotNull;
 import org.junit.Test;
 
@@ -33,10 +34,15 @@ public class AppMapIndexableFilesContributorTest extends AppMapBaseTest {
 
     @Test
     public void files() throws IOException {
-        assertAccepted(createFile("sample.appmap.json"));
         assertAccepted(createFile("classMap.json"));
         assertAccepted(createFile("appmap-findings.json"));
+        for (var extension : FileBasedIndexExtension.EXTENSION_POINT_NAME.getExtensionList()) {
+            if (extension instanceof AbstractAppMapMetadataFileIndex<?>) {
+                assertAccepted(createFile(((AbstractAppMapMetadataFileIndex<?>) extension).getIndexedFileName()));
+            }
+        }
 
+        assertRejected(createFile("sample.appmap.json"));
         assertRejected(createFile("sample.json"));
         assertRejected(createFile("sample.txt"));
 
