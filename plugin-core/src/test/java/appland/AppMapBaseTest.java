@@ -7,14 +7,25 @@ import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.application.ReadAction;
 import com.intellij.openapi.roots.ModuleRootModificationUtil;
 import com.intellij.openapi.vfs.VirtualFile;
+import com.intellij.openapi.vfs.ex.temp.TempFileSystem;
 import com.intellij.testFramework.LightProjectDescriptor;
 import com.intellij.testFramework.fixtures.LightPlatformCodeInsightFixture4TestCase;
 import org.jetbrains.annotations.NotNull;
 import org.junit.After;
+import org.junit.Before;
 
 import java.util.Collections;
 
 public abstract class AppMapBaseTest extends LightPlatformCodeInsightFixture4TestCase {
+    @Before
+    public void cleanupTempFilesystem() {
+        if (ApplicationManager.getApplication().isDispatchThread()) {
+            TempFileSystem.getInstance().cleanupForNextTest();
+        } else {
+            edt(() -> TempFileSystem.getInstance().cleanupForNextTest());
+        }
+    }
+
     @Override
     protected LightProjectDescriptor getProjectDescriptor() {
         // we're returning a new instance, because we don't want to share the project setup between light tests.
