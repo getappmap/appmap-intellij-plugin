@@ -16,6 +16,7 @@ import com.google.gson.JsonSyntaxException;
 import com.intellij.analysis.problemsView.Problem;
 import com.intellij.analysis.problemsView.ProblemsProvider;
 import com.intellij.openapi.application.ApplicationManager;
+import com.intellij.openapi.application.ModalityState;
 import com.intellij.openapi.application.ReadAction;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.fileEditor.FileDocumentManager;
@@ -208,14 +209,19 @@ public class FindingsManager implements ProblemsProvider {
                 .inSmartMode(project)
                 .expireWith(this)
                 .coalesceBy(getClass(), project)
-                .submit(AppExecutorUtil.getAppExecutorService())
-                .onSuccess(findingFiles -> {
-                    clearAndNotify();
-                    for (var findingFile : findingFiles) {
-                        addFindingsFile(findingFile);
-                    }
-                    project.getMessageBus().syncPublisher(ScannerFindingsListener.TOPIC).afterFindingsReloaded();
-                });
+                .finishOnUiThread(ModalityState.any(), findingFiles -> {
+                    // We can't use "submit().onSuccess()" to process the files, because the non-blocking ReadAction
+                    // cancels the progress indicator, which is wrapping the code of "onSuccess()". But loading the
+                    // findings must not be cancelled, so we're moving into our own ReadAction outside the original
+                    // progress indicator.
+                    ApplicationManager.getApplication().executeOnPooledThread(() -> ReadAction.run(() -> {
+                        clearAndNotify();
+                        for (var findingFile : findingFiles) {
+                            addFindingsFile(findingFile);
+                        }
+                        project.getMessageBus().syncPublisher(ScannerFindingsListener.TOPIC).afterFindingsReloaded();
+                    }));
+                }).submit(AppExecutorUtil.getAppExecutorService());
     }
 
     public void addFindingsFile(@NotNull VirtualFile findingsFile) {
