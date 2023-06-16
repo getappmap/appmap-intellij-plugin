@@ -1,5 +1,12 @@
 AppMap Plugin Changelog
 
+## [0.36.4](https://github.com/getappmap/appmap-intellij-plugin/compare/v0.36.3...v0.36.4) (2023-06-16)
+
+
+### Bug Fixes
+
+-  don't reload AppMap webview if it's not fully initialized yet ([3d5b5d0]())-  don't use a non-blocking ReadAction to apply changes to the findings manager ([0746237]())
+
 ## [0.36.3](https://github.com/getappmap/appmap-intellij-plugin/compare/v0.36.2...v0.36.3) (2023-06-14)
 
 
