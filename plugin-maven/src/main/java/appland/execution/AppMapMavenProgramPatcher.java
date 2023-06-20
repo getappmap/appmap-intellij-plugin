@@ -19,10 +19,8 @@ public class AppMapMavenProgramPatcher extends AbstractAppMapJavaProgramPatcher 
 
     @Override
     protected @Nullable Path findAppMapOutputDirectory(@NotNull RunProfile configuration,
-                                                       @Nullable VirtualFile workingDirectory) {
-        return workingDirectory == null
-                ? null
-                : workingDirectory.toNioPath().resolve("target").resolve("appmap");
+                                                       @NotNull VirtualFile workingDirectory) {
+        return workingDirectory.toNioPath().resolve("target").resolve("appmap");
     }
 
     @Override
