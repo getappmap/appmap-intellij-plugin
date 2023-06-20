@@ -8,7 +8,7 @@ import org.jetbrains.annotations.NotNull;
 import java.nio.file.Path;
 
 public final class AppMapPlugin {
-    public static final String REMOTE_RECORDING_HELP_URL = "https://appmap.io/docs/reference/remote-recording";
+    public static final String REMOTE_RECORDING_HELP_URL = "https://appmap.io/docs/recording-methods.html#remote-recording";
 
     private static final String PLUGIN_ID = "appland.appmap";
 

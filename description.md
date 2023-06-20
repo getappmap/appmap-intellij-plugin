@@ -17,7 +17,7 @@ Supported programming languages: Java, Python, Ruby, Typescript, and JavaScript
 To start making AppMaps, you’ll need to install and configure the AppMap client agent for your project.
 Then, you’ll make AppMaps by running your app - either by
 [running test cases](https://appmap.io/docs/recording-methods.html#recording-test-cases), or by
-[recording a short interaction with your app](https://appmap.io/docs/reference/remote-recording.html). 
+[recording a short interaction with your app](https://appmap.io/docs/recording-methods.html#remote-recording). 
 
 ## Security
 
