@@ -47,31 +47,33 @@ public final class AppMapJavaPackageConfig {
     public static @Nullable Path findOrCreateAppMapConfig(@NotNull Project project,
                                                           @Nullable RunProfile runProfile,
                                                           @Nullable VirtualFile workingDir) throws IOException {
-        var runProfileScope = runProfile instanceof SearchScopeProvidingRunProfile
-                ? ((SearchScopeProvidingRunProfile) runProfile).getSearchScope()
-                : null;
-        if (runProfileScope == null) {
-            runProfileScope = AppMapSearchScopes.projectFilesWithExcluded(project);
-        }
-        var runProfileAndWorkingDir = workingDir == null
-                ? runProfileScope
-                : runProfileScope.uniteWith(new GlobalSearchScopesCore.DirectoryScope(project, workingDir, false));
+        var appMapConfigSearchScope = getAppMapConfigSearchScope(project, runProfile, workingDir);
 
         // attempt to find an existing file
         var appMapConfig = BackgroundTaskUtil.computeInBackgroundAndTryWait(
-                () -> findAppMapConfig(project, runProfileAndWorkingDir),
+                () -> findAppMapConfig(project, appMapConfigSearchScope),
                 EmptyConsumer.getInstance(), TimeUnit.SECONDS.toMillis(15));
 
         if (appMapConfig != null) {
             return appMapConfig.toNioPath();
         }
 
+        if (workingDir == null) {
+            return null;
+        }
+
+        return createAppMapConfig(project, appMapConfigSearchScope, workingDir);
+    }
+
+    private static @Nullable Path createAppMapConfig(@NotNull Project project,
+                                                     @NotNull GlobalSearchScope configSearchScope,
+                                                     @NotNull VirtualFile workingDir) throws IOException {
         var newConfigContent = BackgroundTaskUtil.computeInBackgroundAndTryWait(
-                () -> generateAppMapConfig(project, runProfileAndWorkingDir),
+                () -> generateAppMapConfig(project, configSearchScope),
                 EmptyConsumer.getInstance(),
                 TimeUnit.SECONDS.toMillis(15));
 
-        if (newConfigContent == null || workingDir == null) {
+        if (newConfigContent == null) {
             return null;
         }
 
@@ -83,6 +85,28 @@ public final class AppMapJavaPackageConfig {
         var appMapConfigPath = workingDirPath.resolve(AppMapFiles.APPMAP_YML);
         Files.write(appMapConfigPath, newConfigContent.getBytes(StandardCharsets.UTF_8));
         return appMapConfigPath;
+    }
+
+    /**
+     * @param project    Current project
+     * @param runProfile Current run profile
+     * @param workingDir Working directory
+     * @return The search scope to lookup appmap.yml, based on the working directory
+     */
+    private static @NotNull GlobalSearchScope getAppMapConfigSearchScope(@NotNull Project project,
+                                                                         @Nullable RunProfile runProfile,
+                                                                         @Nullable VirtualFile workingDir) {
+        var runProfileScope = runProfile instanceof SearchScopeProvidingRunProfile
+                ? ((SearchScopeProvidingRunProfile) runProfile).getSearchScope()
+                : null;
+
+        if (runProfileScope == null) {
+            runProfileScope = AppMapSearchScopes.projectFilesWithExcluded(project);
+        }
+
+        return workingDir == null
+                ? runProfileScope
+                : runProfileScope.uniteWith(new GlobalSearchScopesCore.DirectoryScope(project, workingDir, false));
     }
 
     // executed under progress
