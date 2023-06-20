@@ -21,7 +21,7 @@ public class AppMapJavaProgramPatcher extends AbstractAppMapJavaProgramPatcher {
 
     @Override
     protected @Nullable Path findAppMapOutputDirectory(@NotNull RunProfile configuration,
-                                                       @Nullable VirtualFile workingDirectory) {
+                                                       @NotNull VirtualFile workingDirectory) {
         if (!(configuration instanceof ModuleBasedConfiguration)) {
             return null;
         }

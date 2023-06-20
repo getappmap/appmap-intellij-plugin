@@ -13,7 +13,10 @@ import java.util.List;
 /**
  * Patching of a JVM commandline to add the AppMap agent to the execution of a Java program.
  */
-public class AppMapJvmCommandLinePatcher {
+public final class AppMapJvmCommandLinePatcher {
+    private AppMapJvmCommandLinePatcher() {
+    }
+
     @NotNull
     static List<String> createJvmParams(@Nullable Path appMapConfig, @Nullable Path appMapOutputDirectory) throws CantRunException {
         if (appMapConfig == null) {
@@ -26,7 +29,6 @@ public class AppMapJvmCommandLinePatcher {
         }
 
         var jvmParams = new LinkedList<String>();
-        //jvmParams.add("-Dappmap.debug");
         jvmParams.add("-Dappmap.config.file=" + appMapConfig);
         if (appMapOutputDirectory != null) {
             jvmParams.add("-Dappmap.output.directory=" + appMapOutputDirectory);
