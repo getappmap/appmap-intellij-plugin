@@ -1,5 +1,16 @@
 AppMap Plugin Changelog
 
+## [0.37.0](https://github.com/getappmap/appmap-intellij-plugin/compare/v0.36.4...v0.37.0) (2023-06-22)
+
+
+### Features
+
+-  index AppMap metadata instead of AppMap files itself to improve indexing performance ([3fe70c9]())
+
+### Bug Fixes
+
+-  avoid empty list of findings after a project is opened ([6914c1d]())-  don't show AppMaps, which are not inside a content root of the current project ([8f240e5]())-  update help link of the notification about failed remote recording ([fb58de3]())
+
 ## [0.36.4](https://github.com/getappmap/appmap-intellij-plugin/compare/v0.36.3...v0.36.4) (2023-06-16)
 
 
