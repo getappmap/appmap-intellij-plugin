@@ -129,7 +129,7 @@ public final class AppMapJavaPackageConfig {
 
         return workingDir == null
                 ? runProfileScope
-                : runProfileScope.uniteWith(new GlobalSearchScopesCore.DirectoryScope(project, workingDir, false));
+                : runProfileScope.intersectWith(GlobalSearchScopesCore.directoriesScope(project, true, workingDir));
     }
 
     // executed under progress
