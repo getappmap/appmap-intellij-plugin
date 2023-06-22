@@ -43,6 +43,16 @@ public class AppMapJavaAgentDownloadServiceTest extends AppMapBaseTest {
     }
 
     @Test
+    public void agentDirPath(){
+        var service = AppMapJavaAgentDownloadService.getInstance();
+        var agentDir = service.getOrCreateAgentDir();
+        assertNotNull(agentDir);
+
+        var expectedParent = Paths.get(System.getProperty("user.dir")).resolve(".appmap");
+        assertTrue("Agent dir must be under ~/.agent", agentDir.startsWith(expectedParent));
+    }
+
+    @Test
     public void multipleDownloadRequests() throws IOException {
         var service = AppMapJavaAgentDownloadService.getInstance();
         assertNull("JAR file must not exist in a clean temp directory", service.getJavaAgentPathIfExists());
@@ -70,7 +80,7 @@ public class AppMapJavaAgentDownloadServiceTest extends AppMapBaseTest {
         var agentDir = service.getOrCreateAgentDir();
         assertTrue("Agent target directory must exist", agentDir != null && Files.isDirectory(agentDir));
 
-        var lockFilePath = agentDir.resolve(jarAsset.getFileName().replace(".jar", ".downloading"));
+        var lockFilePath = agentDir.resolve(jarAsset.getFileName() + ".downloading");
         assertFalse(Files.exists(lockFilePath));
         Files.createFile(lockFilePath);
 

@@ -80,18 +80,18 @@ public final class AppMapJavaAgentDownloadService {
             return false;
         }
 
-        // e.g. appmap-1.7.2.downloading
-        var lockFilePath = assetDownloadPath.resolveSibling(latestAsset.getFileName().replace(".jar", ".downloading"));
+        // e.g. appmap-1.7.2.jar.downloading
+        var lockFilePath = assetDownloadPath.resolveSibling(latestAsset.getFileName() + ".downloading");
         assert !assetDownloadPath.equals(lockFilePath);
 
         if (!guardWithLockFile(lockFilePath, () -> downloadAgentJarFile(indicator, latestAsset, assetDownloadPath))) {
             return false;
         }
 
-        // create a symbolic link pointing to "appmap.jar"
+        // create a relative symbolic appmap.jar pointing to the downloaded JAR file
         try {
             Files.deleteIfExists(agentFilePath);
-            Files.createSymbolicLink(agentFilePath, assetDownloadPath);
+            Files.createSymbolicLink(agentFilePath, agentFilePath.getParent().relativize(assetDownloadPath));
         } catch (IOException e) {
             // copy the downloaded file to "agent.jar" as a fallback,
             // e.g. on system where symbolic links are unsupported
@@ -161,7 +161,7 @@ public final class AppMapJavaAgentDownloadService {
      * @return The path of the directory, where the AppMap Java agent should be stored (~/.appmap/lib/java).
      */
     @Nullable Path getOrCreateAgentDir() {
-        var agentDirPath = Paths.get(System.getProperty("user.dir")).resolve(Paths.get("appmap", "lib", "java"));
+        var agentDirPath = Paths.get(System.getProperty("user.dir")).resolve(Paths.get(".appmap", "lib", "java"));
         try {
             Files.createDirectories(agentDirPath);
             return agentDirPath;
