@@ -32,7 +32,7 @@ public class AppMapNameIndex extends AbstractAppMapMetadataFileIndex<String> {
      * @return The directories, based on this index, which contain AppMap metadata files.
      */
     public static @NotNull Set<VirtualFile> getAppMapMetadataDirectories(@NotNull Project project) {
-        var scope = GlobalSearchScope.getScopeRestrictedByFileTypes(new EverythingExceptLibrariesScope(project), JsonFileType.INSTANCE);
+        var scope = GlobalSearchScope.getScopeRestrictedByFileTypes(AppMapSearchScopes.projectFilesWithExcluded(project), JsonFileType.INSTANCE);
         var keys = new HashSet<Integer>();
         FileBasedIndex.getInstance().processAllKeys(INDEX_ID, Processors.cancelableCollectProcessor(keys), scope, null);
         if (keys.isEmpty()) {
