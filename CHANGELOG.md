@@ -1,5 +1,12 @@
 AppMap Plugin Changelog
 
+## [0.38.0](https://github.com/getappmap/appmap-intellij-plugin/compare/v0.37.0...v0.38.0) (2023-06-23)
+
+
+### Features
+
+-  download the latest AppMap Java agent at startup ([0333d46]())
+
 ## [0.37.0](https://github.com/getappmap/appmap-intellij-plugin/compare/v0.36.4...v0.37.0) (2023-06-22)
 
 
