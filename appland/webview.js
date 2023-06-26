@@ -31,6 +31,9 @@ export function mountWebview() {
           showInstructions() {
             this.$refs.ui.showInstructions();
           },
+          updateSavedFilters(message) {
+            this.$refs.ui.updateFilters(message.savedFilters);
+          },
         }
       }
   )
@@ -49,11 +52,15 @@ export function mountWebview() {
     app.$on('request-resolve-location', (location) => {
       app.$emit('response-resolve-location', {location, externalUrl: location});
     });
+    app.$on('saveFilter', (filter) => vscode.postMessage({command: 'saveFilter', filter}))
+    app.$on('deleteFilter', (filter) => vscode.postMessage({command: 'deleteFilter', filter}))
+    app.$on('defaultFilter', (filter) => vscode.postMessage({command: 'defaultFilter', filter}))
 
     // messages emitted by the Java host
     messages.on('loadAppMap', ({data}) => app.loadAppMap(data))
     messages.on('setAppMapState', (json) => app.setState(json.state))
     messages.on('showAppMapInstructions', () => app.showInstructions())
+    messages.on('updateSavedFilters', ({data}) => app.updateSavedFilters(data))
 
     // Load the AppMap data into the web view
     app.loadAppMap(initData);
