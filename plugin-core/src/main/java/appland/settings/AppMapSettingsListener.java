@@ -14,4 +14,7 @@ public interface AppMapSettingsListener {
 
     default void createOpenApiChanged() {
     }
+
+    default void appMapWebViewFiltersChanged() {
+    }
 }

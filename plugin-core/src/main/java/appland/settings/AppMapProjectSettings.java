@@ -7,7 +7,9 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 @EqualsAndHashCode
@@ -21,6 +23,10 @@ public class AppMapProjectSettings {
     private boolean confirmAppMapUpload = true;
     private boolean openedAppMapEditor = false;
     private boolean createdOpenAPI = false;
+    /**
+     * Maps filter name to the actual filter.
+     */
+    private @NotNull Map<String, AppMapWebViewFilter> appMapFilters = new HashMap<>();
 
     @SuppressWarnings("unused")
     public AppMapProjectSettings() {
@@ -38,6 +44,7 @@ public class AppMapProjectSettings {
         this.confirmAppMapUpload = settings.confirmAppMapUpload;
         this.openedAppMapEditor = settings.openedAppMapEditor;
         this.createdOpenAPI = settings.createdOpenAPI;
+        this.appMapFilters = new HashMap<>(settings.appMapFilters);
     }
 
     @NotNull
@@ -60,6 +67,60 @@ public class AppMapProjectSettings {
         }
         this.recentRemoteRecordingURLs.remove(url);
         this.recentRemoteRecordingURLs.add(0, url);
+    }
+
+    public synchronized @NotNull Map<String, AppMapWebViewFilter> getAppMapFilters() {
+        return appMapFilters;
+    }
+
+    /**
+     * Add the given filter to the stored AppMap filters.
+     *
+     * @param filter Filter to add.
+     */
+    public synchronized void saveAppMapWebViewFilter(@NotNull AppMapWebViewFilter filter) {
+        // if the new filter is the default filter, remove the default flag from all existing filers
+        if (filter.isDefault()) {
+            for (var value : appMapFilters.values()) {
+                value.setDefault(false);
+            }
+        }
+
+        appMapFilters.put(filter.filterName, filter);
+        settingsPublisher().appMapWebViewFiltersChanged();
+    }
+
+    /**
+     * Marks the given filter as default filter.
+     * If the filter already exists, then the existing value is marked as default filter.
+     * If the filter does not yet exist, then the supplied filter is added as new filter.
+     *
+     * @param filter Filter to mark as default filter.
+     */
+    public synchronized void saveDefaultFilter(@NotNull AppMapWebViewFilter filter) {
+        var storedFilter = appMapFilters.get(filter.filterName);
+        if (storedFilter == null) {
+            // save as new filter and properly update default flag of existing filters
+            saveAppMapWebViewFilter(filter);
+        } else {
+            // mark all others as "not default" and then mark the requested filter as default
+            for (var value : appMapFilters.values()) {
+                value.setDefault(false);
+            }
+            storedFilter.setDefault(true);
+            settingsPublisher().appMapWebViewFiltersChanged();
+        }
+    }
+
+    /**
+     * Remove the filter from the stored list of filters. The filter is identified by name.
+     *
+     * @param filter Filter to remove
+     */
+    public synchronized void removeAppMapWebViewFilter(@NotNull AppMapWebViewFilter filter) {
+        if (appMapFilters.remove(filter.filterName) != null) {
+            settingsPublisher().appMapWebViewFiltersChanged();
+        }
     }
 
     public void setCreatedOpenAPI(boolean createdOpenAPI) {
