@@ -35,11 +35,11 @@
     "webpack-cli": "^4.6.0"
   },
   "dependencies": {
-    "@appland/components": "^2.42.0",
-    "@appland/diagrams": "^1.6.3",
-    "vue": "^2.6.12",
-    "vue-template-compiler": "^2.6.12",
-    "url": "^0.11.0"
+    "@appland/components": "^2.50",
+    "@appland/diagrams": "^1.7",
+    "vue": "^2.7",
+    "vue-template-compiler": "^2.7",
+    "url": "^0.11"
   },
   "packageManager": "yarn@2.4.2"
 }
