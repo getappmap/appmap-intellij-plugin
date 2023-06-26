@@ -9,6 +9,9 @@ import appland.problemsView.FindingsManager;
 import appland.problemsView.FindingsUtil;
 import appland.problemsView.ResolvedStackLocation;
 import appland.settings.AppMapApplicationSettingsService;
+import appland.settings.AppMapProjectSettingsService;
+import appland.settings.AppMapSettingsListener;
+import appland.settings.AppMapWebViewFilter;
 import appland.telemetry.TelemetryService;
 import appland.upload.AppMapUploader;
 import appland.utils.GsonUtils;
@@ -102,6 +105,10 @@ public class AppMapFileEditor extends WebviewEditor<JsonObject> {
                 appMapJson.add("findings", FindingsUtil.createFindingsArray(gson, project, matchingFindings, "rule"));
             }
 
+            // add saved filters
+            var appMapFilters = AppMapProjectSettingsService.getState(project).getAppMapFilters();
+            appMapJson.add("savedFilters", gson.toJsonTree(appMapFilters));
+
             return appMapJson;
         } catch (Exception e) {
             LOG.warn("invalid AppMap json", e);
@@ -120,6 +127,13 @@ public class AppMapFileEditor extends WebviewEditor<JsonObject> {
             AppMapApplicationSettingsService.getInstance().setAppmapInstructionsViewed(true);
             //openAppMapInstructions(); - we're not doing this until we have better instructions
         }
+
+        project.getMessageBus().connect(this).subscribe(AppMapSettingsListener.TOPIC, new AppMapSettingsListener() {
+            @Override
+            public void appMapWebViewFiltersChanged() {
+                applyWebViewFilters();
+            }
+        });
 
         // TODO - provide `appmap.project.language` property which specifies the language of the AppMap via metadata.language
         TelemetryService.getInstance().sendEvent("appmap:open");
@@ -239,6 +253,28 @@ public class AppMapFileEditor extends WebviewEditor<JsonObject> {
                 }
                 return true;
 
+            // filters
+            case "saveFilter":
+                if (message != null && message.has("filter")) {
+                    var filter = gson.fromJson(message.getAsJsonObject("filter"), AppMapWebViewFilter.class);
+                    AppMapProjectSettingsService.getState(project).saveAppMapWebViewFilter(filter);
+                }
+                return true;
+
+            case "defaultFilter":
+                if (message != null && message.has("filter")) {
+                    var filter = gson.fromJson(message.getAsJsonObject("filter"), AppMapWebViewFilter.class);
+                    AppMapProjectSettingsService.getState(project).saveDefaultFilter(filter);
+                }
+                return true;
+
+            case "deleteFilter":
+                if (message != null && message.has("filter")) {
+                    var filter = gson.fromJson(message.getAsJsonObject("filter"), AppMapWebViewFilter.class);
+                    AppMapProjectSettingsService.getState(project).removeAppMapWebViewFilter(filter);
+                }
+                return true;
+
             default:
                 return false;
         }
@@ -295,6 +331,16 @@ public class AppMapFileEditor extends WebviewEditor<JsonObject> {
     private void applyWebViewState(@NotNull AppMapFileEditorState state) {
         var message = createMessageObject("setAppMapState");
         message.addProperty("state", state.jsonState);
+        postMessage(message);
+    }
+
+    /**
+     * Update the AppMap filters in the AppLand JS application.
+     */
+    private void applyWebViewFilters() {
+        var savedFilters = AppMapProjectSettingsService.getState(project).getAppMapFilters().values();
+        var message = createMessageObject("updateSavedFilters");
+        message.add("data", GsonUtils.GSON.toJsonTree(savedFilters));
         postMessage(message);
     }
 

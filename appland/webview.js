@@ -31,8 +31,8 @@ export function mountWebview() {
           showInstructions() {
             this.$refs.ui.showInstructions();
           },
-          updateSavedFilters(message) {
-            this.$refs.ui.updateFilters(message.savedFilters);
+          updateSavedFilters(filters) {
+            this.$refs.ui.updateFilters(filters);
           },
         }
       }
