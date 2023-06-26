@@ -1,7 +1,13 @@
-dist: jammy
-
 language: java
 jdk: openjdk17
+
+jobs:
+    include:
+        -
+            os: linux
+            dist: jammy
+        -
+            os: windows
 
 # https://github.com/travis-ci/travis-ci/issues/1147#issuecomment-441393807
 if: type != push OR branch = main OR branch =~ /^v\d+\.\d+(\.\d+)?(-\S*)?$/
@@ -39,4 +45,4 @@ deploy:
   script: semantic-release --debug
   on:
     branch: main
-
+    condition: "$TRAVIS_OS_NAME" == "linux"
