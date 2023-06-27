@@ -1,5 +1,12 @@
 AppMap Plugin Changelog
 
+## [0.40.0](https://github.com/getappmap/appmap-intellij-plugin/compare/v0.39.0...v0.40.0) (2023-06-27)
+
+
+### Features
+
+-  set appmap_dir before executing a run configuration with "Execute with AppMap" ([e520af5]())
+
 ## [0.39.0](https://github.com/getappmap/appmap-intellij-plugin/compare/v0.38.0...v0.39.0) (2023-06-26)
 
 
