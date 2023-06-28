@@ -1,5 +1,12 @@
 AppMap Plugin Changelog
 
+## [0.40.1](https://github.com/getappmap/appmap-intellij-plugin/compare/v0.40.0...v0.40.1) (2023-06-28)
+
+
+### Bug Fixes
+
+-  create appmap_dir of a appmap.yml file as system-independent path ([cd492c2]())-  use correct path for user home directory ([68ad869]())
+
 ## [0.40.0](https://github.com/getappmap/appmap-intellij-plugin/compare/v0.39.0...v0.40.0) (2023-06-27)
 
 
