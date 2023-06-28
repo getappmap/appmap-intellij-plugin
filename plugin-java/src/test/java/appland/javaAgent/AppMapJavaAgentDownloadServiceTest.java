@@ -1,6 +1,7 @@
 package appland.javaAgent;
 
 import appland.AppMapBaseTest;
+import appland.utils.SystemProperties;
 import com.intellij.openapi.progress.EmptyProgressIndicator;
 import com.intellij.openapi.util.SystemInfo;
 import com.intellij.openapi.util.io.NioFiles;
@@ -23,16 +24,9 @@ public class AppMapJavaAgentDownloadServiceTest extends AppMapBaseTest {
     public final TestRule systemPropertyUpdate = (statement, description) -> new Statement() {
         @Override
         public void evaluate() throws Throwable {
-            var oldUserHome = System.getProperty("user.dir");
-            try {
-                var path = Paths.get(myFixture.getTempDirFixture().getTempDirPath()).resolve("appmap-agent");
-                NioFiles.deleteRecursively(path);
-
-                System.setProperty("user.dir", path.toString());
-                statement.evaluate();
-            } finally {
-                System.setProperty("user.dir", oldUserHome);
-            }
+            var path = Paths.get(myFixture.getTempDirFixture().getTempDirPath()).resolve("appmap-agent");
+            NioFiles.deleteRecursively(path);
+            SystemProperties.withPropertyValue(SystemProperties.USER_HOME, path.toString(), statement::evaluate);
         }
     };
 
@@ -43,12 +37,12 @@ public class AppMapJavaAgentDownloadServiceTest extends AppMapBaseTest {
     }
 
     @Test
-    public void agentDirPath(){
+    public void agentDirPath() {
         var service = AppMapJavaAgentDownloadService.getInstance();
         var agentDir = service.getOrCreateAgentDir();
         assertNotNull(agentDir);
 
-        var expectedParent = Paths.get(System.getProperty("user.dir")).resolve(".appmap");
+        var expectedParent = Paths.get(SystemProperties.getUserHome()).resolve(".appmap");
         assertTrue("Agent dir must be under ~/.agent", agentDir.startsWith(expectedParent));
     }
 

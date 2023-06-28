@@ -1,6 +1,7 @@
 package appland.javaAgent;
 
 import appland.AppMapBundle;
+import appland.utils.SystemProperties;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.progress.PerformInBackgroundOption;
@@ -161,7 +162,7 @@ public final class AppMapJavaAgentDownloadService {
      * @return The path of the directory, where the AppMap Java agent should be stored (~/.appmap/lib/java).
      */
     @Nullable Path getOrCreateAgentDir() {
-        var agentDirPath = Paths.get(System.getProperty("user.dir")).resolve(Paths.get(".appmap", "lib", "java"));
+        var agentDirPath = Paths.get(SystemProperties.getUserHome()).resolve(Paths.get(".appmap", "lib", "java"));
         try {
             Files.createDirectories(agentDirPath);
             return agentDirPath;
