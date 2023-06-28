@@ -17,6 +17,7 @@ import com.intellij.psi.PsiPackage;
 import com.intellij.psi.search.GlobalSearchScope;
 import com.intellij.psi.search.GlobalSearchScopesCore;
 import com.intellij.util.EmptyConsumer;
+import com.intellij.util.PathUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -152,12 +153,15 @@ public final class AppMapJavaPackageConfig {
      * @param appMapOutputPath Relative path value for the `appmap_dir` property, if available.
      *                         If this is {@code null} or empty, then the "build_dir" property will not be set.
      */
-    private static AppMapConfigFile generateAppMapConfig(@NotNull Project project,
-                                                         @Nullable GlobalSearchScope runConfigurationScope,
-                                                         @Nullable String appMapOutputPath) {
+    static AppMapConfigFile generateAppMapConfig(@NotNull Project project,
+                                                 @Nullable GlobalSearchScope runConfigurationScope,
+                                                 @Nullable String appMapOutputPath) {
+        // appmap_dir should be "dir/subdir" even on Windows
+        var agnosticOutputPath = PathUtil.toSystemIndependentName(appMapOutputPath);
+
         var config = new AppMapConfigFile();
         config.setName(project.getName());
-        config.setAppMapDir(appMapOutputPath);
+        config.setAppMapDir(agnosticOutputPath);
         config.setPackages(ReadAction.compute(() -> findTopLevelPackages(project, runConfigurationScope)));
         return config;
     }
