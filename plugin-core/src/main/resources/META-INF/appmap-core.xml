@@ -48,6 +48,8 @@
         <fileEditorProvider implementation="appland.webviews.findings.FindingsOverviewEditorProvider"/>
         <fileEditorProvider implementation="appland.webviews.findingDetails.FindingDetailsEditorProvider"/>
 
+        <fileIconProvider implementation="appland.webviews.WebviewEditorIconProvider"/>
+
         <projectService serviceImplementation="appland.index.AppMapMetadataService"/>
         <fileBasedIndex implementation="appland.index.AppMapNameIndex"/>
         <fileBasedIndex implementation="appland.index.AppMapServerRequestCountIndex"/>
