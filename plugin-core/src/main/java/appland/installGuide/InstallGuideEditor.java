@@ -227,7 +227,7 @@ public class InstallGuideEditor extends UserDataHolderBase implements FileEditor
                             var viewProject = gson.fromJson(json.get("project"), ProjectMetadata.class);
                             var allProjects = findProjects();
                             var anyInstallable = allProjects.stream().anyMatch(p -> p.getScore() >= 2);
-                            var projectLanguage = viewProject.getLanguage();
+                            var projectLanguage = viewProject != null ? viewProject.getLanguage() : null;
                             var projectLanguageName = projectLanguage != null && projectLanguage.getName() != null
                                     ? projectLanguage.getName().toLowerCase()
                                     : "";
@@ -237,7 +237,7 @@ public class InstallGuideEditor extends UserDataHolderBase implements FileEditor
                                     (event) -> event
                                             .property("appmap.view.id", viewId)
                                             .property("appmap.project.language", projectLanguageName)
-                                            .property("appmap.project.installable", String.valueOf(viewProject.getScore() >= 2))
+                                            .property("appmap.project.installable", String.valueOf(viewProject != null && viewProject.getScore() >= 2))
                                             .property("appmap.project.any_installable", String.valueOf(anyInstallable))
                             );
                             break;
