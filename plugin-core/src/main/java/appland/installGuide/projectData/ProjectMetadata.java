@@ -25,6 +25,18 @@ public class ProjectMetadata {
     @SerializedName("hasNode")
     boolean hasNode;
 
+    // Reflects presence of appmap.yml within the project.
+    @SerializedName("agentInstalled")
+    boolean agentInstalled;
+
+    // Whether OpenAPI has been generated for this project
+    @SerializedName("generatedOpenApi")
+    boolean generatedOpenApi;
+
+    // Whether the user has viewed the AppMap Runtime Analysis instructions page for this project
+    @SerializedName("investigatedFindings")
+    boolean investigatedFindings;
+
     // needed for the findings page
     @SerializedName("analysisPerformed")
     boolean analysisPerformed;
@@ -50,6 +62,7 @@ public class ProjectMetadata {
     @SerializedName("webFramework")
     @Nullable ProjectMetadataFeature webFramework;
 
+    // The number of total AppMaps within the project
     @SerializedName("numAppMaps")
     @Nullable Integer numAppMaps;
 

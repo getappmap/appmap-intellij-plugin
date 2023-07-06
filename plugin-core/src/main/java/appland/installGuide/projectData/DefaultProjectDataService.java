@@ -1,9 +1,11 @@
 package appland.installGuide.projectData;
 
 import appland.AppMapBundle;
+import appland.files.AppMapFiles;
 import appland.index.*;
 import appland.installGuide.analyzer.*;
 import appland.problemsView.FindingsManager;
+import appland.settings.AppMapProjectSettingsService;
 import com.intellij.execution.configurations.GeneralCommandLine;
 import com.intellij.execution.configurations.PathEnvironmentVariableUtil;
 import com.intellij.execution.process.CapturingProcessRunner;
@@ -100,9 +102,18 @@ public class DefaultProjectDataService implements ProjectDataService {
 
         var sampleCodeObjects = findSampleCodeObjects(project);
 
+        var projectSettings = AppMapProjectSettingsService.getState(project);
+        var appMapConfigs = AppMapFiles.findAppMapConfigFiles(project, AppMapSearchScopes.projectFilesWithExcluded(project));
+        // fixme
+        var investigatedFindings = false;
+
         return ProjectMetadata.builder()
                 .name(root.getPresentableName())
                 .path(path)
+                .agentInstalled(!appMapConfigs.isEmpty())
+                .appMapOpened(projectSettings.isOpenedAppMapEditor())
+                .generatedOpenApi(projectSettings.isCreatedOpenAPI())
+                .investigatedFindings(investigatedFindings)
                 .score(analysis.getScore())
                 .analysisPerformed(isAnalysisPerformed(root))
                 .hasNode(isNodeSupported(nodeVersion))
