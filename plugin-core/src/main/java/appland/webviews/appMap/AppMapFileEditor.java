@@ -105,10 +105,6 @@ public class AppMapFileEditor extends WebviewEditor<JsonObject> {
                 appMapJson.add("findings", FindingsUtil.createFindingsArray(gson, project, matchingFindings, "rule"));
             }
 
-            // add saved filters
-            var appMapFilters = AppMapProjectSettingsService.getState(project).getAppMapFilters();
-            appMapJson.add("savedFilters", gson.toJsonTree(appMapFilters));
-
             return appMapJson;
         } catch (Exception e) {
             LOG.warn("invalid AppMap json", e);
@@ -118,7 +114,14 @@ public class AppMapFileEditor extends WebviewEditor<JsonObject> {
 
     @Override
     protected void setupInitMessage(@Nullable JsonObject initData, @NotNull JsonObject payload) {
+        var filters = AppMapProjectSettingsService.getState(project).getAppMapFilters().values();
+        var props = new JsonObject();
+        props.addProperty("appMapUploadable", false);
+        props.addProperty("defaultView", "viewSequence");
+        props.add("savedFilters", gson.toJsonTree(filters));
+
         payload.add("data", initData);
+        payload.add("props", props);
     }
 
     @Override
@@ -137,11 +140,6 @@ public class AppMapFileEditor extends WebviewEditor<JsonObject> {
 
         // TODO - provide `appmap.project.language` property which specifies the language of the AppMap via metadata.language
         TelemetryService.getInstance().sendEvent("appmap:open");
-
-        var state = webviewState;
-        if (state != null) {
-            applyWebViewState(state);
-        }
     }
 
     @Override
@@ -188,6 +186,13 @@ public class AppMapFileEditor extends WebviewEditor<JsonObject> {
         TelemetryService telemetryService = TelemetryService.getInstance();
 
         switch (messageId) {
+            case "webviewMounted":
+                var state = webviewState;
+                if (state != null) {
+                    applyWebViewState(state);
+                }
+                return true;
+
             case "uploadAppMap":
                 uploadAppMap();
                 return true;

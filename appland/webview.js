@@ -7,38 +7,46 @@ import vscode from './vsCodeBridge';
 export function mountWebview() {
   const messages = new MessagePublisher(vscode);
 
-  let app = new Vue(
-      {
-        el: '#app',
-        render: (h) => h(VVsCodeExtension, {ref: 'ui', props: {appMapUploadable: false, defaultView: "viewSequence"}}),
-        // "ready" activates the Java host, which then sends the init message
-        mounted: () => vscode.postMessage({command: 'ready'}),
-        methods: {
-          async loadAppMap(appmapData) {
-            try {
-              this.$refs.ui.loadData(appmapData);
-            } catch (e) {
-              console.error("error parsing JSON", e);
-            }
+  /**
+   * Mount the Vue application with the properties passed to this function.
+   * Loads AppMap content if it was passed to this function.
+   * @param properties Initial properties for the Vue component
+   * @param appMapContent JSON   content of the AppMap file
+   */
+  function doMount(properties, appMapContent) {
+    let app = new Vue(
+        {
+          el: '#app',
+          render: (h) => h(VVsCodeExtension, {ref: 'ui', props: properties}),
+          mounted() {
+            // tell the Java host to apply the initial state
+            vscode.postMessage({command: 'webviewMounted'});
           },
-          async setState(jsonString) {
-            try {
-              this.$refs.ui.setState(jsonString);
-            } catch (e) {
-              console.error("error setting state: " + jsonString, e);
-            }
-          },
-          showInstructions() {
-            this.$refs.ui.showInstructions();
-          },
-          updateSavedFilters(filters) {
-            this.$refs.ui.updateFilters(filters);
-          },
+          methods: {
+            async loadAppMap(appmapData) {
+              try {
+                this.$refs.ui.loadData(appmapData);
+              } catch (e) {
+                console.error("error parsing JSON", e);
+              }
+            },
+            async setState(jsonString) {
+              try {
+                this.$refs.ui.setState(jsonString);
+              } catch (e) {
+                console.error("error setting state: " + jsonString, e);
+              }
+            },
+            showInstructions() {
+              this.$refs.ui.showInstructions();
+            },
+            updateSavedFilters(filters) {
+              this.$refs.ui.updateFilters(filters);
+            },
+          }
         }
-      }
-  )
+    )
 
-  messages.on('init', ({data: initData}) => {
     // messages emitted by the webview
     app.$on('viewSource', (location) => vscode.postMessage({command: 'viewSource', location}))
     app.$on('clearSelection', () => vscode.postMessage({command: 'clearSelection'}))
@@ -62,7 +70,16 @@ export function mountWebview() {
     messages.on('showAppMapInstructions', () => app.showInstructions())
     messages.on('updateSavedFilters', ({data}) => app.updateSavedFilters(data))
 
-    // Load the AppMap data into the web view
-    app.loadAppMap(initData);
+    if (appMapContent) {
+      app.loadAppMap(appMapContent);
+    }
+  }
+
+  // called by the Java host after it received "ready", which is sent below
+  messages.on('init', ({data: initData, props}) => {
+    doMount(props || {}, initData)
   })
+
+  // "ready" activates the Java host, which then sends the init message
+  vscode.postMessage({command: 'ready'});
 }
