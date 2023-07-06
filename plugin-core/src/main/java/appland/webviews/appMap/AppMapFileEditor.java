@@ -117,6 +117,7 @@ public class AppMapFileEditor extends WebviewEditor<JsonObject> {
         var filters = AppMapProjectSettingsService.getState(project).getAppMapFilters().values();
         var props = new JsonObject();
         props.addProperty("appMapUploadable", false);
+        props.addProperty("flamegraphEnabled", true);
         props.addProperty("defaultView", "viewSequence");
         props.add("savedFilters", gson.toJsonTree(filters));
 
