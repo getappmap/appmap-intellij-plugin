@@ -1,5 +1,12 @@
 AppMap Plugin Changelog
 
+## [0.42.0](https://github.com/getappmap/appmap-intellij-plugin/compare/v0.41.0...v0.42.0) (2023-07-08)
+
+
+### Features
+
+-  show flame graphs in the AppMap webview ([25ff566]())
+
 ## [0.41.0](https://github.com/getappmap/appmap-intellij-plugin/compare/v0.40.1...v0.41.0) (2023-07-08)
 
 
