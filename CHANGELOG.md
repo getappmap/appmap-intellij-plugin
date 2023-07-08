@@ -1,5 +1,12 @@
 AppMap Plugin Changelog
 
+## [0.41.0](https://github.com/getappmap/appmap-intellij-plugin/compare/v0.40.1...v0.41.0) (2023-07-08)
+
+
+### Features
+
+-  support AppMap filters in the AppMap webview ([6e1db53]())
+
 ## [0.40.1](https://github.com/getappmap/appmap-intellij-plugin/compare/v0.40.0...v0.40.1) (2023-06-28)
 
 
