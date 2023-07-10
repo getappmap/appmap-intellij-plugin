@@ -1,5 +1,12 @@
 AppMap Plugin Changelog
 
+## [0.42.1](https://github.com/getappmap/appmap-intellij-plugin/compare/v0.42.0...v0.42.1) (2023-07-10)
+
+
+### Bug Fixes
+
+-  show AppMap icons for our webviews ([e14536c]())
+
 ## [0.42.0](https://github.com/getappmap/appmap-intellij-plugin/compare/v0.41.0...v0.42.0) (2023-07-08)
 
 
