@@ -19,6 +19,8 @@ import com.intellij.openapi.roots.ProjectRootManager;
 import com.intellij.openapi.vfs.VfsUtil;
 import com.intellij.openapi.vfs.VfsUtilCore;
 import com.intellij.openapi.vfs.VirtualFile;
+import com.intellij.psi.search.FilenameIndex;
+import com.intellij.psi.search.GlobalSearchScopes;
 import com.intellij.util.concurrency.annotations.RequiresReadLock;
 import it.unimi.dsi.fastutil.ints.IntSet;
 import org.jetbrains.annotations.NotNull;
@@ -189,8 +191,14 @@ public class DefaultProjectDataService implements ProjectDataService {
         return appMaps.stream().mapToInt(AppMapMetadata::getRequestCount).sum();
     }
 
+    /**
+     * It's considered as "performed" if there's at least one appmap-findings.json under root,
+     * event if it does not contain any findings.
+     */
+    @RequiresReadLock
     private boolean isAnalysisPerformed(@NotNull VirtualFile root) {
-        return FindingsManager.getInstance(project).getProblemFileCount(root) > 0;
+        var searchScope = GlobalSearchScopes.directoryScope(project, root, true);
+        return !FilenameIndex.getVirtualFilesByName(AppMapFindingsUtil.FINDINGS_FILE_NAME, searchScope).isEmpty();
     }
 
     private boolean isNodeSupported(@Nullable NodeVersion nodeVersion) {
