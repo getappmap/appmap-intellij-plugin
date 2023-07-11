@@ -19,21 +19,21 @@ export function mountInstallGuide() {
           props: {
             projects: this.projects,
             editor: 'jetbrains',
-            disabledPages: new Set(this.disabledPages),
-            featureFlags: new Set(['disable-record-pending']),
             analysisEnabled: this.analysisEnabled,
-            findingsEnabled: this.findingsEnabled,
             userAuthenticated: this.userAuthenticated,
+            featureFlags: new Set(['disable-record-pending']),
+            disabledPages: new Set(this.disabledPages),
+            findingsEnabled: this.findingsEnabled,
           },
         });
       },
       data() {
         return {
           projects: initialData.projects,
-          disabledPages: initialData.disabledPages,
           analysisEnabled: initialData.analysisEnabled,
-          findingsEnabled: initialData.findingsEnabled,
           userAuthenticated: initialData.userAuthenticated,
+          disabledPages: initialData.disabledPages,
+          findingsEnabled: initialData.findingsEnabled,
         };
       },
       beforeCreate() {
@@ -47,6 +47,7 @@ export function mountInstallGuide() {
             command: 'open-page',
             page: currentPage,
             project: currentProject,
+            projects: this.projects,
           });
         });
       },
@@ -87,12 +88,12 @@ export function mountInstallGuide() {
       vscode.postMessage({command: 'open-file', file});
     });
 
-    app.$on('perform-install', (path, language) => {
-      vscode.postMessage({command: 'perform-install', path, language});
-    });
-
     app.$on('open-instruction', (pageId) => {
       app.$refs.ui.jumpTo(pageId);
+    });
+
+    app.$on('perform-install', (path, language) => {
+      vscode.postMessage({command: 'perform-install', path, language});
     });
 
     app.$on('generate-openapi', (projectPath) => {
