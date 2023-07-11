@@ -23,6 +23,8 @@ public class AppMapProjectSettings {
     private boolean confirmAppMapUpload = true;
     private boolean openedAppMapEditor = false;
     private boolean createdOpenAPI = false;
+    private boolean investigatedFindings = false;
+
     /**
      * Maps filter name to the actual filter.
      */
@@ -44,6 +46,7 @@ public class AppMapProjectSettings {
         this.confirmAppMapUpload = settings.confirmAppMapUpload;
         this.openedAppMapEditor = settings.openedAppMapEditor;
         this.createdOpenAPI = settings.createdOpenAPI;
+        this.investigatedFindings = settings.investigatedFindings;
         this.appMapFilters = new HashMap<>(settings.appMapFilters);
     }
 
