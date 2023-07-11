@@ -104,8 +104,7 @@ public class DefaultProjectDataService implements ProjectDataService {
 
         var projectSettings = AppMapProjectSettingsService.getState(project);
         var appMapConfigs = AppMapFiles.findAppMapConfigFiles(project, AppMapSearchScopes.projectFilesWithExcluded(project));
-        // fixme
-        var investigatedFindings = false;
+        var investigatedFindings = projectSettings.isInvestigatedFindings();
 
         return ProjectMetadata.builder()
                 .name(root.getPresentableName())

@@ -11,6 +11,7 @@ import appland.installGuide.projectData.ProjectMetadata;
 import appland.oauth.AppMapLoginAction;
 import appland.problemsView.FindingsViewTab;
 import appland.settings.AppMapApplicationSettingsService;
+import appland.settings.AppMapProjectSettingsService;
 import appland.settings.AppMapSettingsListener;
 import appland.telemetry.TelemetryService;
 import com.google.gson.*;
@@ -109,6 +110,9 @@ public class InstallGuideEditor extends UserDataHolderBase implements FileEditor
 
     public void navigateTo(@NotNull InstallGuideViewPage page) {
         this.type = page;
+        if (page == InstallGuideViewPage.RuntimeAnalysis) {
+            AppMapProjectSettingsService.getState(project).setInvestigatedFindings(true);
+        }
         postMessage(createPageNavigationJSON(page));
     }
 
