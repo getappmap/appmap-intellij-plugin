@@ -16,6 +16,8 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 public class JavaScriptLanguageAnalyzer implements LanguageAnalyzer {
     @Override
@@ -38,7 +40,8 @@ public class JavaScriptLanguageAnalyzer implements LanguageAnalyzer {
         var dependencies = new ArrayList<Pair<String, String>>();
         loadPackageJson(directory, dependencies);
         loadPackageLock(directory, dependencies);
-        loadYarnLock(directory, dependencies);
+        loadYarn1Lock(directory, dependencies);
+        loadYarn2Lock(directory, dependencies);
 
         if (dependencies.isEmpty()) {
             return null;
@@ -161,9 +164,40 @@ public class JavaScriptLanguageAnalyzer implements LanguageAnalyzer {
     }
 
     /**
-     * Reads YAML file "yarn.lock".
+     * Reads file "yarn.lock" of Yarn v1, which isn't valid YAML but a custom format.
+     * We're implementing a very simple lookup to avoid writing a parser.
      */
-    private void loadYarnLock(@NotNull VirtualFile directory, List<Pair<String, String>> target) {
+    private void loadYarn1Lock(@NotNull VirtualFile directory, List<Pair<String, String>> target) {
+        var lockFile = directory.findChild("yarn.lock");
+        if (lockFile == null) {
+            return;
+        }
+
+        var document = FileDocumentManager.getInstance().getDocument(lockFile);
+        if (document == null) {
+            return;
+        }
+
+        // Dependencies are
+        //    "mocha@~10.2.0":
+        // or
+        //    mocha@~10.2.0:
+
+        var dependencyPattern = Pattern.compile("^\"?(.+?)@(.+?)\"?:$");
+        for (var line : document.getText().lines().collect(Collectors.toList())) {
+            var dependencyMatch = dependencyPattern.matcher(line);
+            if (dependencyMatch.matches()) {
+                var name = dependencyMatch.group(1);
+                var version = dependencyMatch.group(2);
+                target.add(Pair.create(name, version));
+            }
+        }
+    }
+
+    /**
+     * Reads YAML file "yarn.lock" of Yarn v2.
+     */
+    private void loadYarn2Lock(@NotNull VirtualFile directory, List<Pair<String, String>> target) {
         var yaml = loadYamlFile(directory, "yarn.lock");
         if (yaml instanceof ObjectNode) {
             for (var it = yaml.fields(); it.hasNext(); ) {
