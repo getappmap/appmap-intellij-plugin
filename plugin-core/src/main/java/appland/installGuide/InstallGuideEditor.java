@@ -137,6 +137,16 @@ public class InstallGuideEditor extends UserDataHolderBase implements FileEditor
             public void enableFindingsChanged() {
                 settingsRefreshAlarm.cancelAndRequest();
             }
+
+            @Override
+            public void createOpenApiChanged() {
+                settingsRefreshAlarm.cancelAndRequest();
+            }
+
+            @Override
+            public void openedAppMapChanged() {
+                settingsRefreshAlarm.cancelAndRequest();
+            }
         });
     }
 
@@ -385,7 +395,9 @@ public class InstallGuideEditor extends UserDataHolderBase implements FileEditor
     private @NotNull JsonObject createUpdateSettingsMessage() {
         // we're reusing the init properties to avoid duplicate code,
         // the "settings" handler of installGuideView.js is only applying supported properties
-        return createBasePropertiesMessage("settings");
+        var settings = createBasePropertiesMessage("settings");
+        settings.add("projects", gson.toJsonTree(findProjects()));
+        return settings;
     }
 
     @NotNull

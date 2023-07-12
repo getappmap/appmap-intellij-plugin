@@ -1,7 +1,6 @@
 package appland.toolwindow.installGuide;
 
 import appland.config.AppMapConfigFileListener;
-import appland.files.AppMapFileChangeListener;
 import appland.files.AppMapFiles;
 import appland.index.AppMapNameIndex;
 import appland.index.AppMapSearchScopes;
@@ -13,16 +12,15 @@ import appland.settings.AppMapProjectSettingsService;
 import appland.settings.AppMapSettingsListener;
 import appland.toolwindow.AppMapContentPanel;
 import com.intellij.openapi.Disposable;
-import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.application.ModalityState;
 import com.intellij.openapi.application.ReadAction;
-import com.intellij.openapi.fileEditor.FileEditorManagerEvent;
-import com.intellij.openapi.fileEditor.FileEditorManagerListener;
 import com.intellij.openapi.project.DumbService;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.Disposer;
 import com.intellij.psi.search.FilenameIndex;
+import com.intellij.util.Alarm;
 import com.intellij.util.CommonProcessors;
+import com.intellij.util.SingleAlarm;
 import com.intellij.util.concurrency.AppExecutorUtil;
 import org.jetbrains.annotations.NotNull;
 
@@ -38,27 +36,34 @@ import static appland.installGuide.InstallGuideEditorProvider.open;
  */
 public class InstallGuidePanel extends AppMapContentPanel implements Disposable {
     private final Project project;
+    private final List<StatusLabel> statusLabels;
+    // debounce label updates by 500ms
+    private final SingleAlarm labelRefreshAlarm = new SingleAlarm(this::refreshInitialStatus, 500, this, Alarm.ThreadToUse.SWING_THREAD);
 
     public InstallGuidePanel(@NotNull Project project, @NotNull Disposable parent) {
         super(false);
         Disposer.register(parent, this);
 
         this.project = project;
+        this.statusLabels = Arrays.stream(InstallGuideViewPage.values())
+                .map(page -> new StatusLabel(page, () -> open(project, page)))
+                .collect(Collectors.toList());
         setupPanel();
     }
 
     @Override
     protected void setupPanel() {
-        var statusLabels = Arrays.stream(InstallGuideViewPage.values())
-                .map(page -> new StatusLabel(page, () -> open(project, page)))
-                .collect(Collectors.toList());
         statusLabels.forEach(this::add);
-        refreshInitialStatus(project, statusLabels);
+        refreshInitialStatus();
         registerStatusUpdateListeners(project, this, statusLabels);
     }
 
-    private void refreshInitialStatus(@NotNull Project project, @NotNull List<StatusLabel> labels) {
-        for (var label : labels) {
+    private void triggerLabelStatusUpdate() {
+        labelRefreshAlarm.cancelAndRequest();
+    }
+
+    private void refreshInitialStatus() {
+        for (var label : statusLabels) {
             updateLabelStatus(project, label);
         }
     }
@@ -68,71 +73,43 @@ public class InstallGuidePanel extends AppMapContentPanel implements Disposable 
                                                @NotNull List<StatusLabel> labels) {
         var connection = project.getMessageBus().connect(parent);
 
-        // general settings change handling
         connection.subscribe(AppMapSettingsListener.TOPIC, new AppMapSettingsListener() {
             @Override
             public void apiKeyChanged() {
-                refreshItems();
+                triggerLabelStatusUpdate();
             }
 
             @Override
             public void enableFindingsChanged() {
-                refreshItems();
-            }
-
-            private void refreshItems() {
-                ApplicationManager.getApplication().invokeLater(() -> {
-                    refreshInitialStatus(project, labels);
-                }, ModalityState.defaultModalityState());
+                triggerLabelStatusUpdate();
             }
         });
 
-        // per-page handling
-        for (var label : labels) {
-            switch (label.getPage()) {
-                case InstallAgent:
-                    connection.subscribe(AppMapConfigFileListener.TOPIC, () -> updateInstallAgentLabel(project, label));
-                    break;
-
-                case RecordAppMaps:
-                    connection.subscribe(AppMapFileChangeListener.TOPIC, changes -> updateRecordAppMapsLabel(project, label));
-                    break;
-
-                case OpenAppMaps:
-                    connection.subscribe(FileEditorManagerListener.FILE_EDITOR_MANAGER, new FileEditorManagerListener() {
-                        @Override
-                        public void selectionChanged(@NotNull FileEditorManagerEvent event) {
-                            if (event.getNewFile() != null && AppMapFiles.isAppMap(event.getNewFile())) {
-                                updateOpenAppMapsLabel(project, label);
-                            }
-                        }
-                    });
-                    break;
-
-                case GenerateOpenAPI:
-                    connection.subscribe(AppMapSettingsListener.TOPIC, new AppMapSettingsListener() {
-                        @Override
-                        public void createOpenApiChanged() {
-                            updateGenerateOpenApiLabel(project, label);
-                        }
-                    });
-                    break;
-
-                case RuntimeAnalysis:
-                    project.getMessageBus().connect(parent).subscribe(ScannerFindingsListener.TOPIC, new ScannerFindingsListener() {
-                        @Override
-                        public void afterFindingsReloaded() {
-                            updateRuntimeAnalysisLabel(project, label);
-                        }
-
-                        @Override
-                        public void afterFindingsChanged() {
-                            updateRuntimeAnalysisLabel(project, label);
-                        }
-                    });
-                    break;
+        connection.subscribe(ScannerFindingsListener.TOPIC, new ScannerFindingsListener() {
+            @Override
+            public void afterFindingsReloaded() {
+                triggerLabelStatusUpdate();
             }
-        }
+
+            @Override
+            public void afterFindingsChanged() {
+                triggerLabelStatusUpdate();
+            }
+        });
+
+        connection.subscribe(AppMapSettingsListener.TOPIC, new AppMapSettingsListener() {
+            @Override
+            public void createOpenApiChanged() {
+                triggerLabelStatusUpdate();
+            }
+
+            @Override
+            public void openedAppMapChanged() {
+                triggerLabelStatusUpdate();
+            }
+        });
+
+        connection.subscribe(AppMapConfigFileListener.TOPIC, this::triggerLabelStatusUpdate);
     }
 
     private void updateLabelStatus(@NotNull Project project, @NotNull StatusLabel label) {
@@ -220,7 +197,7 @@ public class InstallGuidePanel extends AppMapContentPanel implements Disposable 
                                           @NotNull Supplier<Boolean> statusSupplier) {
         ReadAction.nonBlocking(statusSupplier::get)
                 .inSmartMode(project)
-                .finishOnUiThread(ModalityState.current(), found -> {
+                .finishOnUiThread(ModalityState.defaultModalityState(), found -> {
                     label.setStatus(found ? InstallGuideStatus.Completed : InstallGuideStatus.Incomplete);
                 })
                 .submit(AppExecutorUtil.getAppExecutorService());

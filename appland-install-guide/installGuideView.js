@@ -114,7 +114,7 @@ export function mountInstallGuide() {
       app.$forceUpdate();
     });
 
-    messages.on('settings', ({userAuthenticated, analysisEnabled, findingsEnabled}) => {
+    messages.on('settings', ({userAuthenticated, analysisEnabled, findingsEnabled, projects}) => {
       if (userAuthenticated !== undefined) {
         app.userAuthenticated = userAuthenticated;
       }
@@ -123,6 +123,9 @@ export function mountInstallGuide() {
       }
       if (findingsEnabled !== undefined) {
         app.findingsEnabled = findingsEnabled;
+      }
+      if (projects !== undefined) {
+        app.projects = projects;
       }
       app.$forceUpdate();
     });
