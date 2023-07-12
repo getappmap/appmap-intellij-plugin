@@ -50,8 +50,16 @@ public class JavaScriptLanguageAnalyzerTest extends LanguageAnalyzerBaseTest {
     }
 
     @Test
-    public void mochaYarnLock() {
+    public void mochaYarn1Lock() {
         var result = loadDirectory("javascript-mocha-yarn1", new JavaScriptLanguageAnalyzer());
+        assertJavaScriptSettings(result.getFeatures(), "package.json", "@appland/appmap-agent-js");
+        assertFramework(result.getFeatures().test, "mocha", Score.Okay);
+        assertNull(result.getFeatures().web);
+    }
+
+    @Test
+    public void mochaYarn2Lock() {
+        var result = loadDirectory("javascript-mocha-yarn2", new JavaScriptLanguageAnalyzer());
         assertJavaScriptSettings(result.getFeatures(), "package.json", "@appland/appmap-agent-js");
         assertFramework(result.getFeatures().test, "mocha", Score.Okay);
         assertNull(result.getFeatures().web);
