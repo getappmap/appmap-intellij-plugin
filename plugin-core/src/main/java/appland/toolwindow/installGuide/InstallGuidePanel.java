@@ -178,7 +178,7 @@ public class InstallGuidePanel extends AppMapContentPanel implements Disposable 
      * presence of at least one .appmap.json file
      */
     private static void updateRecordAppMapsLabel(@NotNull Project project, @NotNull StatusLabel label) {
-        findIndexedStatus(project, label, () -> !AppMapNameIndex.isEmpty(AppMapSearchScopes.appMapsWithExcluded(project)));
+        findIndexedStatus(project, label, () -> !AppMapNameIndex.isEmpty(project, AppMapSearchScopes.appMapsWithExcluded(project)));
     }
 
     /**
