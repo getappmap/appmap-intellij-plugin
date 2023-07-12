@@ -138,6 +138,18 @@ public class AppMapProjectSettings {
         }
     }
 
+    public void setOpenedAppMapEditor(boolean openedAppMapEditor) {
+        boolean changed;
+        synchronized (this) {
+            changed = this.openedAppMapEditor != openedAppMapEditor;
+            this.openedAppMapEditor = openedAppMapEditor;
+        }
+
+        if (changed) {
+            settingsPublisher().openedAppMapChanged();
+        }
+    }
+
     @NotNull
     private AppMapSettingsListener settingsPublisher() {
         return ApplicationManager.getApplication().getMessageBus().syncPublisher(AppMapSettingsListener.TOPIC);
