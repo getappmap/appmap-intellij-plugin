@@ -7,7 +7,6 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VfsUtilCore;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.search.GlobalSearchScope;
-import com.intellij.util.CommonProcessors;
 import com.intellij.util.Processors;
 import com.intellij.util.indexing.FileBasedIndex;
 import com.intellij.util.indexing.ID;
@@ -58,11 +57,23 @@ public class AppMapNameIndex extends AbstractAppMapMetadataFileIndex<String> {
     }
 
     /**
-     * @param scope Search scope
+     * @param project Current project
+     * @param scope   Search scope
      * @return {@code true} if there's no indexed AppMap in the given scope
      */
-    public static boolean isEmpty(@NotNull GlobalSearchScope scope) {
-        return FileBasedIndex.getInstance().processAllKeys(INDEX_ID, CommonProcessors.alwaysFalse(), scope, null);
+    public static boolean isEmpty(@NotNull Project project, @NotNull GlobalSearchScope scope) {
+        var index = FileBasedIndex.getInstance();
+
+        // we need to validate against the scope because the index keys may be outdated, e.g. of deleted files
+        for (var key : index.getAllKeys(INDEX_ID, project)) {
+            for (var file : index.getContainingFiles(INDEX_ID, key, scope)) {
+                if (scope.contains(file)) {
+                    return false;
+                }
+            }
+        }
+
+        return true;
     }
 
     @Override
