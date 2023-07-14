@@ -1,5 +1,12 @@
 AppMap Plugin Changelog
 
+## [0.43.0](https://github.com/getappmap/appmap-intellij-plugin/compare/v0.42.1...v0.43.0) (2023-07-14)
+
+
+### Features
+
+-  detect JS frameworks in package-lock.json and yarn.lock files ([caf8222]())
+
 ## [0.42.1](https://github.com/getappmap/appmap-intellij-plugin/compare/v0.42.0...v0.42.1) (2023-07-10)
 
 
