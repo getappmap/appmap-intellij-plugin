@@ -8,6 +8,8 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public class JavaLanguageAnalyzer implements LanguageAnalyzer {
+    public static final String JAVA_LANGUAGE_TITLE = "Java";
+
     @Override
     public boolean isAccepting(Languages.@NotNull Language language) {
         return "java".equals(language.id);
@@ -92,7 +94,7 @@ public class JavaLanguageAnalyzer implements LanguageAnalyzer {
 
     private @NotNull FeatureEx createJavaBase() {
         var feature = new FeatureEx();
-        feature.title = "Java";
+        feature.title = JAVA_LANGUAGE_TITLE;
         feature.score = Score.Good;
         feature.text = "This project looks like Java. It's one of the languages supported by AppMap.";
         return feature;
@@ -100,7 +102,7 @@ public class JavaLanguageAnalyzer implements LanguageAnalyzer {
 
     private @NotNull FeatureEx createLanguageFallback() {
         var feature = new FeatureEx();
-        feature.title = "Java";
+        feature.title = JAVA_LANGUAGE_TITLE;
         feature.score = Score.Okay;
         feature.text = "This project looks like Java. It's one of the languages supported by AppMap, but no supported dependency file was found.";
         return feature;

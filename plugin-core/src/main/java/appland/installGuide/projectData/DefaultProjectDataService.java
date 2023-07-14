@@ -4,6 +4,7 @@ import appland.AppMapBundle;
 import appland.files.AppMapFiles;
 import appland.index.*;
 import appland.installGuide.analyzer.*;
+import appland.installGuide.analyzer.languages.JavaLanguageAnalyzer;
 import appland.problemsView.FindingsManager;
 import appland.settings.AppMapProjectSettingsService;
 import com.intellij.execution.configurations.GeneralCommandLine;
@@ -108,10 +109,12 @@ public class DefaultProjectDataService implements ProjectDataService {
         var appMapConfigs = AppMapFiles.findAppMapConfigFiles(project, AppMapSearchScopes.projectFilesWithExcluded(project));
         var investigatedFindings = projectSettings.isInvestigatedFindings();
 
+        var isJavaProject = JavaLanguageAnalyzer.JAVA_LANGUAGE_TITLE.equals(analysis.getFeatures().getLang().title);
+
         return ProjectMetadata.builder()
                 .name(root.getPresentableName())
                 .path(path)
-                .agentInstalled(!appMapConfigs.isEmpty())
+                .agentInstalled(!appMapConfigs.isEmpty() || isJavaProject)
                 .appMapOpened(projectSettings.isOpenedAppMapEditor())
                 .generatedOpenApi(projectSettings.isCreatedOpenAPI())
                 .investigatedFindings(investigatedFindings)
