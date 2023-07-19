@@ -1,5 +1,16 @@
 AppMap Plugin Changelog
 
+## [0.44.0](https://github.com/getappmap/appmap-intellij-plugin/compare/v0.43.0...v0.44.0) (2023-07-19)
+
+
+### Features
+
+-  show user progress in the install guide webview ([51b88d1]())
+
+### Bug Fixes
+
+-  don't show "your project has not been scanned" if there's at least one appmap-findings.json file in a project ([615c3e9]())
+
 ## [0.43.0](https://github.com/getappmap/appmap-intellij-plugin/compare/v0.42.1...v0.43.0) (2023-07-14)
 
 
