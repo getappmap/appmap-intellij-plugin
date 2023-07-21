@@ -1,10 +1,7 @@
 package appland.execution;
 
 import com.intellij.execution.ExecutionException;
-import com.intellij.execution.configurations.JavaCommandLineState;
-import com.intellij.execution.configurations.JavaParameters;
-import com.intellij.execution.configurations.RunProfile;
-import com.intellij.execution.configurations.RunnerSettings;
+import com.intellij.execution.configurations.*;
 import com.intellij.execution.impl.DefaultJavaProgramRunner;
 import com.intellij.execution.runners.ExecutionEnvironment;
 import com.intellij.execution.runners.JavaProgramPatcher;
@@ -37,8 +34,19 @@ public abstract class AbstractAppMapJavaAgentRunner extends DefaultJavaProgramRu
                       @NotNull RunProfile runProfile,
                       boolean beforeExecution) {
         try {
-            // invokes our AppMapJavaProgramPatcher, but inside a read action.
-            JavaProgramPatcher.runCustomPatchers(javaParameters, AppMapJvmExecutor.getInstance(), runProfile);
+            var project = (runProfile instanceof RunConfiguration)
+                    ? ((RunConfiguration) runProfile).getProject()
+                    : null;
+
+            if (project != null) {
+                JavaProgramPatcher.patchJavaCommandLineParamsUnderProgress(project, () -> {
+                    // invokes our AppMapJavaProgramPatcher, but inside a read action.
+                    JavaProgramPatcher.runCustomPatchers(javaParameters, AppMapJvmExecutor.getInstance(), runProfile);
+                });
+            } else {
+                // invokes our AppMapJavaProgramPatcher, but inside a read action.
+                JavaProgramPatcher.runCustomPatchers(javaParameters, AppMapJvmExecutor.getInstance(), runProfile);
+            }
         } catch (Exception e) {
             throw new RuntimeException("Failed to update JVM command line for AppMap", e);
         }
