@@ -21,37 +21,38 @@ public abstract class AbstractAppMapJavaProgramPatcher extends JavaProgramPatche
 
     @Override
     public void patchJavaParameters(Executor executor, RunProfile configuration, JavaParameters javaParameters) {
-        if (executor instanceof AppMapJvmExecutor && isSupported(configuration)) {
-            var project = ((RunConfiguration) configuration).getProject();
+        if (!(executor instanceof AppMapJvmExecutor) || !isSupported(configuration)) {
+            return;
+        }
 
-            try {
-                var workingDir = ProgramParameterUtils.findWorkingDir(project, javaParameters);
-                if (workingDir == null) {
-                    throw new IllegalStateException("unable to locate working directory to store AppMap files");
-                }
-
-                var workingDirPath = workingDir.toNioPath();
-                var appMapOutputDirectory = findAppMapOutputDirectory(configuration, workingDir);
-                if (appMapOutputDirectory == null) {
-                    // default to tmp/appmap
-                    appMapOutputDirectory = workingDirPath.resolve("tmp").resolve("appmap");
-                }
-
-                var config = AppMapJavaPackageConfig.createOrUpdateAppMapConfig(project,
-                        configuration,
-                        workingDir,
-                        appMapOutputDirectory);
-
-                var jvmParams = AppMapJvmCommandLinePatcher.createJvmParams(config, appMapOutputDirectory);
-                applyJvmParameters(javaParameters, jvmParams);
-            } catch (Exception e) {
-                LOG.warn("Unable to execute run configuration", e);
-                AppMapNotifications.showExpiringRecordingNotification(project,
-                        null,
-                        AppMapBundle.get("appMapExecutor.executionError.message", e.getMessage()),
-                        NotificationType.ERROR,
-                        true);
+        var project = ((RunConfiguration) configuration).getProject();
+        try {
+            var workingDir = ProgramParameterUtils.findWorkingDir(project, javaParameters);
+            if (workingDir == null) {
+                throw new IllegalStateException("unable to locate working directory to store AppMap files");
             }
+
+            var workingDirPath = workingDir.toNioPath();
+            var appMapOutputDirectory = findAppMapOutputDirectory(configuration, workingDir);
+            if (appMapOutputDirectory == null) {
+                // default to tmp/appmap
+                appMapOutputDirectory = workingDirPath.resolve("tmp").resolve("appmap");
+            }
+
+            var config = AppMapJavaPackageConfig.createOrUpdateAppMapConfig(project,
+                    configuration,
+                    workingDir,
+                    appMapOutputDirectory);
+
+            var jvmParams = AppMapJvmCommandLinePatcher.createJvmParams(config, appMapOutputDirectory);
+            applyJvmParameters(javaParameters, jvmParams);
+        } catch (Exception e) {
+            LOG.warn("Unable to execute run configuration", e);
+            AppMapNotifications.showExpiringRecordingNotification(project,
+                    null,
+                    AppMapBundle.get("appMapExecutor.executionError.message", e.getMessage()),
+                    NotificationType.ERROR,
+                    true);
         }
     }
 
