@@ -1,7 +1,7 @@
 package appland.execution;
 
+import appland.utils.RunConfigurationUtil;
 import com.intellij.execution.JavaRunConfigurationBase;
-import com.intellij.execution.configurations.ModuleBasedConfiguration;
 import com.intellij.execution.configurations.RunProfile;
 import com.intellij.openapi.compiler.CompilerPaths;
 import com.intellij.openapi.vfs.VirtualFile;
@@ -22,13 +22,9 @@ public class AppMapJavaProgramPatcher extends AbstractAppMapJavaProgramPatcher {
     @Override
     protected @Nullable Path findAppMapOutputDirectory(@NotNull RunProfile configuration,
                                                        @NotNull VirtualFile workingDirectory) {
-        if (!(configuration instanceof ModuleBasedConfiguration)) {
-            return null;
-        }
-
-        var module = ((ModuleBasedConfiguration<?, ?>) configuration).getConfigurationModule();
-        if (module != null && module.getModule() != null) {
-            var classesPath = CompilerPaths.getModuleOutputDirectory(module.getModule(), false);
+        var module = RunConfigurationUtil.getRunConfigurationModule(configuration);
+        if (module != null) {
+            var classesPath = CompilerPaths.getModuleOutputDirectory(module, false);
             if (classesPath != null) {
                 return classesPath.getParent().toNioPath().resolve("appmap");
             }
