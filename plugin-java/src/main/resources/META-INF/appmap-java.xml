@@ -1,4 +1,9 @@
 <idea-plugin>
+    <projectListeners>
+        <listener topic="appland.installGuide.InstallGuideListener"
+                  class="appland.installGuide.JavaInstallGuideListener"/>
+    </projectListeners>
+
     <extensions defaultExtensionNs="com.intellij">
         <applicationService serviceImplementation="appland.javaAgent.AppMapJavaAgentDownloadService"/>
         <postStartupActivity implementation="appland.javaAgent.AppMapJavaAgentDownloadActivity"/>
