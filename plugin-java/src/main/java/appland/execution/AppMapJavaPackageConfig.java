@@ -6,9 +6,10 @@ import appland.index.AppMapSearchScopes;
 import com.intellij.execution.configurations.RunProfile;
 import com.intellij.execution.configurations.SearchScopeProvidingRunProfile;
 import com.intellij.openapi.application.ReadAction;
+import com.intellij.openapi.module.Module;
 import com.intellij.openapi.progress.util.BackgroundTaskUtil;
 import com.intellij.openapi.project.Project;
-import com.intellij.openapi.roots.OrderEnumerator;
+import com.intellij.openapi.roots.ModuleRootManager;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.JavaDirectoryService;
 import com.intellij.psi.PsiDirectory;
@@ -18,6 +19,8 @@ import com.intellij.psi.search.GlobalSearchScope;
 import com.intellij.psi.search.GlobalSearchScopesCore;
 import com.intellij.util.EmptyConsumer;
 import com.intellij.util.PathUtil;
+import com.intellij.util.concurrency.annotations.RequiresNoReadLock;
+import com.intellij.util.concurrency.annotations.RequiresReadLock;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -30,6 +33,7 @@ import java.util.stream.Collectors;
 /**
  * Generates the content for an appmap.yml file, based on the current project.
  */
+@SuppressWarnings("UnstableApiUsage")
 public final class AppMapJavaPackageConfig {
     private AppMapJavaPackageConfig() {
     }
@@ -38,47 +42,50 @@ public final class AppMapJavaPackageConfig {
      * Attempts to locate a suitable appmap.yml file and creates a new one if none could be found.
      * If an existing appmap.yml does not contain an appmap_dir property, then the file is updated.
      *
-     * @param project         Current project
-     * @param runProfile      Run profile to be executed
-     * @param appMapDirectory Path of the directory, where generated AppMaps files should be stored
+     * @param module     Current module
+     * @param runProfile Run profile to be executed
+     * @param context    Context to help locate the parent directory for a newly create appmap.yml
      * @return The path to the appmap.yml file to pass to the AppMap agent. {@code null} if no file exists and creating the new file failed.
      */
-    public static @NotNull Path createOrUpdateAppMapConfig(@NotNull Project project,
+    @RequiresNoReadLock
+    public static @NotNull Path createOrUpdateAppMapConfig(@NotNull Module module,
                                                            @NotNull RunProfile runProfile,
-                                                           @NotNull VirtualFile workingDir,
-                                                           @NotNull Path appMapDirectory) throws IOException {
-        var workingDirPath = workingDir.toNioPath();
-        if (!appMapDirectory.startsWith(workingDirPath)) {
-            throw new IllegalStateException("AppMap output directory is not inside the working directory: " + workingDir + ", " + appMapDirectory);
-        }
+                                                           @NotNull VirtualFile context,
+                                                           @NotNull Path appMapOutputDirectory) throws IOException {
 
-        var appMapConfigSearchScope = getAppMapConfigSearchScope(project, runProfile, workingDir);
-        var relativeAppMapOutputPath = workingDirPath.relativize(appMapDirectory);
+        // scope to locate existing appmap.yml
+        var appMapConfigSearchScope = getAppMapConfigSearchScope(module, runProfile);
 
-        // attempt to find an existing file
-        var appMapConfig = BackgroundTaskUtil.computeInBackgroundAndTryWait(
-                () -> findAppMapConfig(project, appMapConfigSearchScope),
+        // attempt to find an existing appmap.yml file
+        // fixme lookup only in module (and dependencies?)
+        var existingConfig = BackgroundTaskUtil.computeInBackgroundAndTryWait(
+                () -> findAppMapConfig(module.getProject(), appMapConfigSearchScope),
                 EmptyConsumer.getInstance(), TimeUnit.SECONDS.toMillis(15));
 
-        if (appMapConfig != null) {
-            var configNioPath = appMapConfig.toNioPath();
-            updateAppMapConfig(configNioPath, relativeAppMapOutputPath);
+        if (existingConfig != null) {
+            var relativeOutputPath = existingConfig.getParent().toNioPath().relativize(appMapOutputDirectory);
+            var configNioPath = existingConfig.toNioPath();
+            updateAppMapConfig(configNioPath, relativeOutputPath);
             return configNioPath;
         }
 
-        return createAppMapConfig(project,
-                appMapConfigSearchScope,
-                relativeAppMapOutputPath.toString(),
-                workingDir.toNioPath());
+        var configParentDirectory = AppMapJavaConfigUtil.findBestAppMapContentRootDirectory(module, context);
+        return createAppMapConfig(module, configParentDirectory, appMapOutputDirectory);
     }
 
-    private static @NotNull Path createAppMapConfig(@NotNull Project project,
-                                                    @NotNull GlobalSearchScope configSearchScope,
-                                                    @Nullable String relativeAppMapOutputPath,
-                                                    @NotNull Path workingDirPath) throws IOException {
+    @RequiresNoReadLock
+    public static @NotNull Path createAppMapConfig(@NotNull Module module,
+                                                   @NotNull VirtualFile configParentDirectory,
+                                                   @NotNull Path appMapOutputDirectory) throws IOException {
+        var configParentPath = configParentDirectory.toNioPath();
+        if (appMapOutputDirectory.isAbsolute() && !appMapOutputDirectory.startsWith(configParentPath)) {
+            throw new IllegalStateException(String.format("AppMap output directory is not inside the working directory: %s, %s",
+                    configParentPath,
+                    appMapOutputDirectory));
+        }
 
         var appMapConfig = BackgroundTaskUtil.computeInBackgroundAndTryWait(
-                () -> generateAppMapConfig(project, configSearchScope, relativeAppMapOutputPath),
+                () -> generateAppMapConfig(module, configParentPath.relativize(appMapOutputDirectory).toString()),
                 EmptyConsumer.getInstance(),
                 TimeUnit.SECONDS.toMillis(60));
 
@@ -90,7 +97,7 @@ public final class AppMapJavaPackageConfig {
         // and we can't execute a WriteAction inside a read action
         // The only known workaround is to create the new configuration as an external file,
         // outside the VirtualFileSystem
-        var appMapConfigPath = workingDirPath.resolve(AppMapFiles.APPMAP_YML);
+        var appMapConfigPath = configParentPath.resolve(AppMapFiles.APPMAP_YML);
         appMapConfig.writeTo(appMapConfigPath);
         return appMapConfigPath;
     }
@@ -112,33 +119,28 @@ public final class AppMapJavaPackageConfig {
     }
 
     /**
-     * @param project    Current project
+     * @param module     Current module
      * @param runProfile Current run profile
-     * @param workingDir Working directory
      * @return The search scope to lookup appmap.yml, based on the working directory
      */
-    private static @NotNull GlobalSearchScope getAppMapConfigSearchScope(@NotNull Project project,
-                                                                         @Nullable RunProfile runProfile,
-                                                                         @Nullable VirtualFile workingDir) {
-        var runProfileScope = runProfile instanceof SearchScopeProvidingRunProfile
+    private static @NotNull GlobalSearchScope getAppMapConfigSearchScope(@NotNull Module module, @Nullable RunProfile runProfile) {
+        var scope = runProfile instanceof SearchScopeProvidingRunProfile
                 ? ((SearchScopeProvidingRunProfile) runProfile).getSearchScope()
                 : null;
 
-        if (runProfileScope == null) {
-            runProfileScope = AppMapSearchScopes.projectFilesWithExcluded(project);
+        if (scope == null) {
+            scope = AppMapSearchScopes.appMapConfigSearchScope(module.getProject());
         }
 
-        return workingDir == null
-                ? runProfileScope
-                : runProfileScope.intersectWith(GlobalSearchScopesCore.directoriesScope(project, true, workingDir));
+        scope = scope.intersectWith(module.getModuleScope(true));
+        return scope;
     }
 
     // executed under progress
     private static @Nullable VirtualFile findAppMapConfig(@NotNull Project project,
                                                           @NotNull GlobalSearchScope runProfileScope) {
         return ReadAction.compute(() -> {
-            var scope = runProfileScope.intersectWith(AppMapSearchScopes.appMapConfigSearchScope(project));
-            var files = AppMapFiles.findAppMapConfigFiles(project, scope);
+            var files = AppMapFiles.findAppMapConfigFiles(project, runProfileScope);
             return files.size() == 1 ? files.iterator().next() : null;
         });
     }
@@ -154,47 +156,47 @@ public final class AppMapJavaPackageConfig {
      * @param appMapOutputPath Relative path value for the `appmap_dir` property, if available.
      *                         If this is {@code null} or empty, then the "build_dir" property will not be set.
      */
-    static AppMapConfigFile generateAppMapConfig(@NotNull Project project,
-                                                 @Nullable GlobalSearchScope runConfigurationScope,
-                                                 @Nullable String appMapOutputPath) {
+    @RequiresNoReadLock
+    static AppMapConfigFile generateAppMapConfig(@NotNull Module module, @Nullable String appMapOutputPath) {
         // appmap_dir should be "dir/subdir" even on Windows
         var agnosticOutputPath = PathUtil.toSystemIndependentName(appMapOutputPath);
 
         var config = new AppMapConfigFile();
-        config.setName(project.getName());
+        config.setName(module.getProject().getName());
         config.setAppMapDir(agnosticOutputPath);
-        config.setPackages(ReadAction.compute(() -> findTopLevelPackages(project, runConfigurationScope)));
+        config.setPackages(ReadAction.compute(() -> findTopLevelPackages(module)));
         return config;
     }
 
+    /**
+     * Top-level java packages located in the module or modules reachable from it (i.e. in dependency modules).
+     * Only packages located in the current project are returned.
+     *
+     * @param module Starting point
+     * @return List of Java package names
+     */
     @NotNull
-    private static List<String> findTopLevelPackages(@NotNull Project project,
-                                                     @Nullable GlobalSearchScope runConfigurationScope) {
-        var roots = OrderEnumerator.orderEntries(project)
-                .withoutLibraries().withoutSdk().withoutDepModules()
-                .sources()
-                .usingCache()
-                .getRoots();
-
+    @RequiresReadLock
+    private static List<String> findTopLevelPackages(@NotNull Module module) {
+        var roots = collectRootsWithDependencies(module);
         if (roots.length == 0) {
             return Collections.emptyList();
         }
 
-        var sourceDirScope = GlobalSearchScopesCore.directoriesScope(project, true, roots);
-        var packageScope = runConfigurationScope != null
-                ? sourceDirScope.intersectWith(runConfigurationScope)
-                : sourceDirScope;
-
-        var psiManager = PsiManager.getInstance(project);
+        var sourceDirScope = GlobalSearchScopesCore.directoriesScope(module.getProject(), true, roots);
+        var psiManager = PsiManager.getInstance(module.getProject());
         var result = new HashSet<String>();
         for (var sourceRoot : roots) {
             var directory = psiManager.findDirectory(sourceRoot);
             if (directory != null) {
-                collectTopLevelPackages(directory, packageScope, result);
+                collectTopLevelPackages(directory, sourceDirScope, result);
             }
         }
+
         // sort for stable results
-        return result.stream().sorted(String.CASE_INSENSITIVE_ORDER).collect(Collectors.toList());
+        return result.stream()
+                .sorted(String.CASE_INSENSITIVE_ORDER)
+                .collect(Collectors.toList());
     }
 
     private static void collectTopLevelPackages(@NotNull PsiDirectory directory,
@@ -242,5 +244,16 @@ public final class AppMapJavaPackageConfig {
             child = child.getNextSibling();
         }
         return true;
+    }
+
+    @NotNull
+    private static VirtualFile[] collectRootsWithDependencies(@NotNull Module module) {
+        var allModules = new HashSet<Module>();
+        allModules.add(module);
+        allModules.addAll(Arrays.asList(ModuleRootManager.getInstance(module).getDependencies()));
+
+        return allModules.stream()
+                .flatMap(m -> Arrays.stream(ModuleRootManager.getInstance(m).getContentRoots()))
+                .toArray(VirtualFile[]::new);
     }
 }

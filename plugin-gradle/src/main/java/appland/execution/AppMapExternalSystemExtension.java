@@ -2,6 +2,7 @@ package appland.execution;
 
 import appland.AppMapBundle;
 import appland.notifications.AppMapNotifications;
+import appland.utils.RunConfigurationUtil;
 import com.intellij.execution.Executor;
 import com.intellij.execution.configurations.RunnerSettings;
 import com.intellij.execution.configurations.SimpleJavaParameters;
@@ -27,8 +28,7 @@ public class AppMapExternalSystemExtension extends ExternalSystemRunConfiguratio
                                    @Nullable RunnerSettings runnerSettings,
                                    @NotNull Executor executor) {
         if (executor instanceof AppMapJvmExecutor) {
-            var gradleRunConfig = (GradleRunConfiguration) configuration;
-            var project = gradleRunConfig.getProject();
+            var project = configuration.getProject();
 
             try {
                 var workingDir = ProgramParameterUtils.findWorkingDir(project, javaParameters);
@@ -36,9 +36,14 @@ public class AppMapExternalSystemExtension extends ExternalSystemRunConfiguratio
                     throw new IllegalStateException("unable to locate working directory to store AppMap files");
                 }
 
-                var appMapOutputDirectory = workingDir.toNioPath().resolve("build").resolve("appmap");
-                var config = AppMapJavaPackageConfig.createOrUpdateAppMapConfig(project,
-                        gradleRunConfig,
+                var module = RunConfigurationUtil.getRunConfigurationModule(project, configuration, workingDir);
+                var appMapOutputDirectory = AppMapJavaConfigUtil.findAppMapOutputDirectory(module, workingDir);
+                if (appMapOutputDirectory == null) {
+                    throw new IllegalStateException("unable to locate directory to store AppMap files");
+                }
+
+                var config = AppMapJavaPackageConfig.createOrUpdateAppMapConfig(module,
+                        configuration,
                         workingDir,
                         appMapOutputDirectory);
 
