@@ -1,8 +1,13 @@
 <idea-plugin>
-    <projectListeners>
-        <listener topic="appland.installGuide.InstallGuideListener"
-                  class="appland.installGuide.JavaInstallGuideListener"/>
-    </projectListeners>
+    <extensionPoints>
+        <extensionPoint dynamic="true"
+                        qualifiedName="appland.execution.programPatcher"
+                        interface="appland.execution.AppMapProgramPatcher"/>
+    </extensionPoints>
+
+    <extensions defaultExtensionNs="appland.execution">
+        <programPatcher implementation="appland.execution.AppMapJavaProgramPatcher"/>
+    </extensions>
 
     <extensions defaultExtensionNs="com.intellij">
         <applicationService serviceImplementation="appland.javaAgent.AppMapJavaAgentDownloadService"/>
