@@ -1,6 +1,7 @@
 package appland.installGuide;
 
 import appland.AppMapBundle;
+import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.fileEditor.FileEditor;
 import com.intellij.openapi.fileEditor.FileEditorManager;
 import com.intellij.openapi.fileEditor.FileEditorPolicy;
@@ -25,22 +26,29 @@ public class InstallGuideEditorProvider implements FileEditorProvider, DumbAware
     }
 
     public static void open(@NotNull Project project, @NotNull InstallGuideViewPage page) {
-        var editorManager = FileEditorManager.getInstance(project);
-        // try to re-use an already open editor for "Install Guide"
-        for (var editor : editorManager.getAllEditors()) {
-            var file = editor.getFile();
-            if (file != null && isInstallGuideFile(file)) {
-                assert editor instanceof InstallGuideEditor;
+        try {
+            var editorManager = FileEditorManager.getInstance(project);
+            // try to re-use an already open editor for "Install Guide"
+            for (var editor : editorManager.getAllEditors()) {
+                var file = editor.getFile();
+                if (file != null && isInstallGuideFile(file)) {
+                    assert editor instanceof InstallGuideEditor;
 
-                FileEditorManagerEx.getInstanceEx(project).openFile(file, true, true);
-                ((InstallGuideEditor) editor).navigateTo(page);
-                return;
+                    FileEditorManagerEx.getInstanceEx(project).openFile(file, true, true);
+                    ((InstallGuideEditor) editor).navigateTo(page);
+                    return;
+                }
             }
-        }
 
-        var file = new LightVirtualFile(AppMapBundle.get("installGuide.editor.title"));
-        INSTALL_GUIDE_PAGE_KEY.set(file, page);
-        editorManager.openFile(file, true);
+            var file = new LightVirtualFile(AppMapBundle.get("installGuide.editor.title"));
+            INSTALL_GUIDE_PAGE_KEY.set(file, page);
+            editorManager.openFile(file, true);
+        } finally {
+            // notify in a background thread because we don't want to delay opening the editor
+            ApplicationManager.getApplication().executeOnPooledThread(() -> {
+                project.getMessageBus().syncPublisher(InstallGuideListener.TOPIC).afterInstallGuidePageOpened(page);
+            });
+        }
     }
 
     @NotNull
