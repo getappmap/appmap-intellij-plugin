@@ -137,7 +137,8 @@ public final class AppMapJavaPackageConfig {
     private static @Nullable VirtualFile findAppMapConfig(@NotNull Project project,
                                                           @NotNull GlobalSearchScope runProfileScope) {
         return ReadAction.compute(() -> {
-            var files = AppMapFiles.findAppMapConfigFiles(project, runProfileScope);
+            var scope = runProfileScope.intersectWith(AppMapSearchScopes.appMapConfigSearchScope(project));
+            var files = AppMapFiles.findAppMapConfigFiles(project, scope);
             return files.size() == 1 ? files.iterator().next() : null;
         });
     }

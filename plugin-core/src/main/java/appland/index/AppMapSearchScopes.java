@@ -7,6 +7,7 @@ import com.intellij.openapi.roots.FileIndexFacade;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.search.GlobalSearchScope;
 import com.intellij.psi.search.ProjectAwareVirtualFile;
+import com.intellij.psi.search.ProjectScope;
 import com.intellij.psi.search.ProjectScopeImpl;
 import org.jetbrains.annotations.NotNull;
 
@@ -28,6 +29,9 @@ public final class AppMapSearchScopes {
         return GlobalSearchScope.getScopeRestrictedByFileTypes(projectFilesWithExcluded(project), JsonFileType.INSTANCE);
     }
 
+    public static @NotNull GlobalSearchScope appMapConfigSearchScope(@NotNull Project project) {
+        return ProjectScope.getContentScope(project);
+    }
     /**
      * Search scope, which contains all project files and also excluded files of the project.
      * This implementation is based on IntelliJ's {@link ProjectScopeImpl}.

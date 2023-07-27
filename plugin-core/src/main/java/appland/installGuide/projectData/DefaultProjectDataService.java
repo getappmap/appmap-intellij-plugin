@@ -106,7 +106,7 @@ public class DefaultProjectDataService implements ProjectDataService {
         var sampleCodeObjects = findSampleCodeObjects(project);
 
         var projectSettings = AppMapProjectSettingsService.getState(project);
-        var appMapConfigs = AppMapFiles.findAppMapConfigFiles(project, AppMapSearchScopes.projectFilesWithExcluded(project));
+        var appMapConfigs = AppMapFiles.findAppMapConfigFiles(project);
         var investigatedFindings = projectSettings.isInvestigatedFindings();
 
         var isJavaProject = JavaLanguageAnalyzer.JAVA_LANGUAGE_TITLE.equals(analysis.getFeatures().getLang().title);
