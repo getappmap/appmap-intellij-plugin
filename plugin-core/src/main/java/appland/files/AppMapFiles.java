@@ -1,6 +1,7 @@
 package appland.files;
 
 import appland.cli.AppLandCommandLineService;
+import appland.index.AppMapSearchScopes;
 import appland.utils.GsonUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
@@ -49,6 +50,15 @@ public final class AppMapFiles {
 
     public static boolean isAppMapConfigFileName(@NotNull String fileName) {
         return FileUtil.fileNameEquals(fileName, APPMAP_YML);
+    }
+
+    /**
+     * @return The appmap.yaml files available in the current project.
+     * appmap.yml files are not searched inside excluded folders, libraries or dependencies of the project.
+     */
+    @RequiresReadLock
+    public static @NotNull Collection<VirtualFile> findAppMapConfigFiles(@NotNull Project project) {
+        return findAppMapConfigFiles(project, AppMapSearchScopes.appMapConfigSearchScope(project));
     }
 
     /**

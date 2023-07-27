@@ -4,7 +4,6 @@ import appland.AppMapBundle;
 import appland.Icons;
 import appland.files.AppMapFiles;
 import appland.files.AppMapVfsUtils;
-import appland.index.AppMapSearchScopes;
 import appland.notifications.AppMapNotifications;
 import appland.remote.RemoteRecordingService;
 import appland.remote.RemoteRecordingStatusService;
@@ -150,7 +149,7 @@ public class StopAppMapRecordingAction extends AnAction implements DumbAware {
      */
     @RequiresBackgroundThread
     private static @Nullable Path findConfiguredStorageLocation(@NotNull Project project) {
-        return ReadAction.compute(() -> AppMapFiles.findAppMapConfigFiles(project, AppMapSearchScopes.projectFilesWithExcluded(project))
+        return ReadAction.compute(() -> AppMapFiles.findAppMapConfigFiles(project)
                 .stream()
                 .map(StopAppMapRecordingAction::findAppMapDirectory)
                 .filter(Objects::nonNull)

@@ -2,7 +2,6 @@ package appland.index;
 
 import appland.utils.GsonUtils;
 import com.google.gson.annotations.SerializedName;
-import com.intellij.json.JsonFileType;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VfsUtilCore;
 import com.intellij.openapi.vfs.VirtualFile;
@@ -31,7 +30,7 @@ public class AppMapNameIndex extends AbstractAppMapMetadataFileIndex<String> {
      * @return The directories, based on this index, which contain AppMap metadata files.
      */
     public static @NotNull Set<VirtualFile> getAppMapMetadataDirectories(@NotNull Project project) {
-        var scope = GlobalSearchScope.getScopeRestrictedByFileTypes(AppMapSearchScopes.projectFilesWithExcluded(project), JsonFileType.INSTANCE);
+        var scope = AppMapSearchScopes.appMapsWithExcluded(project);
         var keys = new HashSet<Integer>();
         FileBasedIndex.getInstance().processAllKeys(INDEX_ID, Processors.cancelableCollectProcessor(keys), scope, null);
         if (keys.isEmpty()) {
