@@ -8,6 +8,7 @@ import com.intellij.execution.runners.ProgramRunner;
 import com.intellij.openapi.externalSystem.service.execution.ExternalSystemJdkUtil;
 import com.intellij.openapi.externalSystem.util.ExternalSystemApiUtil;
 import com.intellij.openapi.externalSystem.util.ExternalSystemConstants;
+import com.intellij.openapi.project.DumbService;
 import org.jetbrains.annotations.NonNls;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.plugins.gradle.service.execution.GradleRunConfiguration;
@@ -25,7 +26,9 @@ public class AppMapGradleAgentRunner implements ProgramRunner<RunnerSettings> {
 
     @Override
     public boolean canRun(@NotNull String executorId, @NotNull RunProfile profile) {
-        return AppMapJvmExecutor.EXECUTOR_ID.equals(executorId) && profile instanceof GradleRunConfiguration;
+        return AppMapJvmExecutor.EXECUTOR_ID.equals(executorId)
+                && profile instanceof GradleRunConfiguration
+                && !DumbService.isDumb(((GradleRunConfiguration) profile).getProject());
     }
 
     @Override
