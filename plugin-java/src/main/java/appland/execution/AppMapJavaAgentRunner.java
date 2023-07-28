@@ -4,6 +4,7 @@ import com.intellij.execution.ExecutionException;
 import com.intellij.execution.JavaRunConfigurationBase;
 import com.intellij.execution.configurations.RunProfile;
 import com.intellij.execution.runners.ExecutionEnvironment;
+import com.intellij.openapi.project.DumbService;
 import org.jetbrains.annotations.NonNls;
 import org.jetbrains.annotations.NotNull;
 
@@ -24,6 +25,8 @@ public class AppMapJavaAgentRunner extends AbstractAppMapJavaAgentRunner {
 
     @Override
     public boolean canRun(@NotNull String executorId, @NotNull RunProfile profile) {
-        return AppMapJvmExecutor.EXECUTOR_ID.equals(executorId) && profile instanceof JavaRunConfigurationBase;
+        return AppMapJvmExecutor.EXECUTOR_ID.equals(executorId)
+                && profile instanceof JavaRunConfigurationBase
+                && !DumbService.isDumb(((JavaRunConfigurationBase) profile).getProject());
     }
 }
