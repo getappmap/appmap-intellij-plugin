@@ -1,5 +1,12 @@
 AppMap Plugin Changelog
 
+## [0.44.1](https://github.com/getappmap/appmap-intellij-plugin/compare/v0.44.0...v0.44.1) (2023-07-28)
+
+
+### Bug Fixes
+
+-  don't execute JDK validation on the EDT ([a9863ff]())-  improve empty message in the AppMap tool window ([33938d3]())
+
 ## [0.44.0](https://github.com/getappmap/appmap-intellij-plugin/compare/v0.43.0...v0.44.0) (2023-07-19)
 
 
