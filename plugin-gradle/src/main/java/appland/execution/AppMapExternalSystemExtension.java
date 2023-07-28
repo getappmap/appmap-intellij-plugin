@@ -2,7 +2,6 @@ package appland.execution;
 
 import appland.AppMapBundle;
 import appland.notifications.AppMapNotifications;
-import appland.utils.RunConfigurationUtil;
 import com.intellij.execution.Executor;
 import com.intellij.execution.configurations.RunnerSettings;
 import com.intellij.execution.configurations.SimpleJavaParameters;
@@ -29,25 +28,8 @@ public class AppMapExternalSystemExtension extends ExternalSystemRunConfiguratio
                                    @NotNull Executor executor) {
         if (executor instanceof AppMapJvmExecutor) {
             var project = configuration.getProject();
-
             try {
-                var workingDir = ProgramParameterUtils.findWorkingDir(project, javaParameters);
-                if (workingDir == null) {
-                    throw new IllegalStateException("unable to locate working directory to store AppMap files");
-                }
-
-                var module = RunConfigurationUtil.getRunConfigurationModule(project, configuration, workingDir);
-                var appMapOutputDirectory = AppMapJavaConfigUtil.findAppMapOutputDirectory(module, workingDir);
-                if (appMapOutputDirectory == null) {
-                    throw new IllegalStateException("unable to locate directory to store AppMap files");
-                }
-
-                var config = AppMapJavaPackageConfig.createOrUpdateAppMapConfig(module,
-                        configuration,
-                        workingDir,
-                        appMapOutputDirectory);
-
-                var jvmParams = AppMapJvmCommandLinePatcher.createJvmParams(config, appMapOutputDirectory);
+                var jvmParams = AppMapPatcherUtil.prepareJavaParameters(project, configuration, javaParameters);
                 javaParameters.getVMParametersList().addAll(jvmParams);
             } catch (Exception e) {
                 LOG.warn("Unable to execute run configuration", e);

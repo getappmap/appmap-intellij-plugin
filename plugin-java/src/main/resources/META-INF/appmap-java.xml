@@ -14,6 +14,5 @@
         <postStartupActivity implementation="appland.javaAgent.AppMapJavaAgentDownloadActivity"/>
 
         <programRunner implementation="appland.execution.AppMapJavaAgentRunner"/>
-        <java.programPatcher implementation="appland.execution.AppMapJavaProgramPatcher"/>
     </extensions>
 </idea-plugin>
