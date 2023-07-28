@@ -39,8 +39,14 @@ public abstract class AbstractAppMapJavaAgentRunner extends DefaultJavaProgramRu
                       @Nullable RunnerSettings settings,
                       @NotNull RunProfile runProfile,
                       boolean beforeExecution) {
+
         try {
-            // Invokes our AppMapJavaProgramPatcher, but inside a read action.
+            // run our own patchers outside a ReadAction
+            AppMapProgramPatcher.EP_NAME.forEachExtensionSafe(patcher -> {
+                patcher.patchJavaParameters(AppMapJvmExecutor.getInstance(), runProfile, javaParameters);
+            });
+
+            // Invokes all other patchers in a ReadAction.
             // Don't wrap this in "JavaProgramPatcher.patchJavaCommandLineParamsUnderProgress",
             // because com.intellij.execution.impl.DefaultJavaProgramRunner.doExecute
             // is already using it when it's calling this patch method.
