@@ -7,7 +7,6 @@ import com.intellij.execution.configurations.RunProfile;
 import com.intellij.execution.configurations.SearchScopeProvidingRunProfile;
 import com.intellij.openapi.application.ReadAction;
 import com.intellij.openapi.module.Module;
-import com.intellij.openapi.progress.util.BackgroundTaskUtil;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.roots.ModuleRootManager;
 import com.intellij.openapi.vfs.VirtualFile;
@@ -17,7 +16,6 @@ import com.intellij.psi.PsiManager;
 import com.intellij.psi.PsiPackage;
 import com.intellij.psi.search.GlobalSearchScope;
 import com.intellij.psi.search.GlobalSearchScopesCore;
-import com.intellij.util.EmptyConsumer;
 import com.intellij.util.PathUtil;
 import com.intellij.util.concurrency.annotations.RequiresNoReadLock;
 import com.intellij.util.concurrency.annotations.RequiresReadLock;
@@ -27,7 +25,6 @@ import org.jetbrains.annotations.Nullable;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.*;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 /**
@@ -58,9 +55,7 @@ public final class AppMapJavaPackageConfig {
 
         // attempt to find an existing appmap.yml file
         // fixme lookup only in module (and dependencies?)
-        var existingConfig = BackgroundTaskUtil.computeInBackgroundAndTryWait(
-                () -> findAppMapConfig(module.getProject(), appMapConfigSearchScope),
-                EmptyConsumer.getInstance(), TimeUnit.SECONDS.toMillis(15));
+        var existingConfig = findAppMapConfig(module.getProject(), appMapConfigSearchScope);
 
         if (existingConfig != null) {
             var relativeOutputPath = existingConfig.getParent().toNioPath().relativize(appMapOutputDirectory);
@@ -84,14 +79,7 @@ public final class AppMapJavaPackageConfig {
                     appMapOutputDirectory));
         }
 
-        var appMapConfig = BackgroundTaskUtil.computeInBackgroundAndTryWait(
-                () -> generateAppMapConfig(module, configParentPath.relativize(appMapOutputDirectory).toString()),
-                EmptyConsumer.getInstance(),
-                TimeUnit.SECONDS.toMillis(60));
-
-        if (appMapConfig == null) {
-            throw new IOException("Timeout creating a new AppMap configuration file");
-        }
+        var appMapConfig = generateAppMapConfig(module, configParentPath.relativize(appMapOutputDirectory).toString());
 
         // create outside a read action, because JavaProgramPatcher is always called with a ReadAction
         // and we can't execute a WriteAction inside a read action
