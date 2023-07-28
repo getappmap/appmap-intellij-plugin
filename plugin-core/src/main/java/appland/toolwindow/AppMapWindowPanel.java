@@ -199,8 +199,9 @@ public class AppMapWindowPanel extends SimpleToolWindowPanel implements DataProv
                                                   @NotNull TreeModel treeModel) {
         var tree = new SimpleTree(new AsyncTreeModel(treeModel, disposable));
         tree.setCellRenderer(new AppMapModel.TreeCellRenderer());
-        tree.getEmptyText().setText(AppMapBundle.get("toolwindow.appmap.emptyText"));
-        tree.getEmptyText().appendSecondaryText(
+        tree.getEmptyText().appendLine(AppMapBundle.get("toolwindow.appmap.emptyText.line1"));
+        tree.getEmptyText().appendLine(AppMapBundle.get("toolwindow.appmap.emptyText.line2"));
+        tree.getEmptyText().appendLine(
                 AppMapBundle.get("toolwindow.appmap.installAgentEmptyText"),
                 SimpleTextAttributes.LINK_ATTRIBUTES,
                 e -> InstallGuideEditorProvider.open(project, InstallGuideViewPage.InstallAgent));
