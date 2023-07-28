@@ -225,7 +225,7 @@ public class AppMapWindowPanel extends SimpleToolWindowPanel implements DataProv
 
     @NotNull
     private static JPanel createInstallGuidePanel(@NotNull Project project, @NotNull Disposable parent) {
-        return new CollapsiblePanel(AppMapBundle.get("toolwindow.appmap.quickstart"), false, new InstallGuidePanel(project, parent), false);
+        return new CollapsiblePanel(AppMapBundle.get("toolwindow.appmap.instructions"), false, new InstallGuidePanel(project, parent), false);
     }
 
     @NotNull
