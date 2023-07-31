@@ -9,6 +9,7 @@ import com.intellij.openapi.application.ReadAction;
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.roots.ModuleRootManager;
+import com.intellij.openapi.vfs.LocalFileSystem;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.JavaDirectoryService;
 import com.intellij.psi.PsiDirectory;
@@ -87,6 +88,10 @@ public final class AppMapJavaPackageConfig {
         // outside the VirtualFileSystem
         var appMapConfigPath = configParentPath.resolve(AppMapFiles.APPMAP_YML);
         appMapConfig.writeTo(appMapConfigPath);
+
+        // must NOT be called in a read action to avoid a dead-lock, see JavaDoc of the method
+        LocalFileSystem.getInstance().refreshAndFindFileByNioFile(appMapConfigPath);
+
         return appMapConfigPath;
     }
 
