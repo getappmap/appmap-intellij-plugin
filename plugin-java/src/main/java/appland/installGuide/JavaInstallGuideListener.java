@@ -1,5 +1,6 @@
 package appland.installGuide;
 
+import appland.AppMapBundle;
 import appland.execution.AppMapJavaConfigUtil;
 import appland.execution.AppMapJavaPackageConfig;
 import appland.files.AppMapFiles;
@@ -9,6 +10,10 @@ import com.intellij.openapi.module.JavaModuleType;
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.module.ModuleManager;
 import com.intellij.openapi.module.ModuleType;
+import com.intellij.openapi.progress.PerformInBackgroundOption;
+import com.intellij.openapi.progress.ProgressIndicator;
+import com.intellij.openapi.progress.ProgressManager;
+import com.intellij.openapi.progress.Task;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.roots.ModuleRootManager;
 import com.intellij.openapi.util.Pair;
@@ -40,29 +45,39 @@ public class JavaInstallGuideListener implements InstallGuideListener {
             return;
         }
 
-        var moduleWithRootForNewConfig = ReadAction.compute(() -> {
-            return AppMapFiles.findAppMapConfigFiles(project).isEmpty()
-                    ? findTargetModuleWithRoot()
-                    : null;
-        });
+        // Create the new appmap.yml in a background task.
+        // Because we need an index to collect the Java packages.
+        new Task.Backgroundable(project, AppMapBundle.get("appMapConfig.checkingOrCreatingConfig"), true, PerformInBackgroundOption.ALWAYS_BACKGROUND) {
+            @Override
+            public void run(@NotNull ProgressIndicator indicator) {
+                var moduleWithRootForNewConfig = ReadAction.compute(() -> {
+                    return AppMapFiles.findAppMapConfigFiles(project).isEmpty()
+                            ? findTargetModuleWithRoot()
+                            : null;
+                });
 
-        // skip, if there already is an appmap.yml file in the project
-        if (moduleWithRootForNewConfig == null) {
-            return;
-        }
+                // skip, if there already is an appmap.yml file in the project
+                ProgressManager.checkCanceled();
+                if (moduleWithRootForNewConfig == null) {
+                    return;
+                }
 
-        var module = moduleWithRootForNewConfig.first;
-        var contentRoot = moduleWithRootForNewConfig.second;
-        try {
-            var appMapOutputDir = ReadAction.compute(() -> AppMapJavaConfigUtil.findAppMapOutputDirectory(module, contentRoot));
-            if (appMapOutputDir != null) {
-                AppMapJavaPackageConfig.createAppMapConfig(module,
-                        contentRoot,
-                        contentRoot.toNioPath());
+                var module = moduleWithRootForNewConfig.first;
+                var contentRoot = moduleWithRootForNewConfig.second;
+                try {
+                    var appMapOutputDir = ReadAction.compute(() -> {
+                        return AppMapJavaConfigUtil.findAppMapOutputDirectory(module, contentRoot);
+                    });
+
+                    if (appMapOutputDir != null) {
+                        ProgressManager.checkCanceled();
+                        AppMapJavaPackageConfig.createAppMapConfig(module, contentRoot, appMapOutputDir);
+                    }
+                } catch (Exception e) {
+                    LOG.debug("error creating new appmap configuration", e);
+                }
             }
-        } catch (Exception e) {
-            LOG.debug("error creating new appmap configuration", e);
-        }
+        }.queue();
     }
 
     /**
