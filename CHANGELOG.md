@@ -1,5 +1,12 @@
 AppMap Plugin Changelog
 
+## [0.44.2](https://github.com/getappmap/appmap-intellij-plugin/compare/v0.44.1...v0.44.2) (2023-08-01)
+
+
+### Bug Fixes
+
+-  always show icons of install guide links in the same color ([df5a991]())
+
 ## [0.44.1](https://github.com/getappmap/appmap-intellij-plugin/compare/v0.44.0...v0.44.1) (2023-07-28)
 
 
