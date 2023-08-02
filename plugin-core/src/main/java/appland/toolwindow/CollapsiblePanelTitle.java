@@ -20,8 +20,8 @@ class CollapsiblePanelTitle extends JPanel {
     private static final KeyStroke KEY_ENTER = KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0);
     private static final KeyStroke KEY_SPACE = KeyStroke.getKeyStroke(KeyEvent.VK_SPACE, 0);
     private final JBLabel label;
-    private final Icon expandIcon = UIUtil.getTreeCollapsedIcon();
-    private final Icon collapseIcon = UIUtil.getTreeExpandedIcon();
+    private final Icon expandIcon = UIUtil.getTreeExpandedIcon();
+    private final Icon collapseIcon = UIUtil.getTreeCollapsedIcon();
 
     private final List<Runnable> labelActionListeners = new LinkedList<>();
 
