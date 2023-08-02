@@ -1,5 +1,7 @@
 package appland.toolwindow;
 
+import com.intellij.ide.util.PropertiesComponent;
+import com.intellij.openapi.project.Project;
 import com.intellij.util.containers.ContainerUtil;
 import org.jetbrains.annotations.NotNull;
 
@@ -11,25 +13,38 @@ import java.util.Collection;
  * A collapsible panel with a title (always visible) and content (visible only if expanded).
  */
 public class CollapsiblePanel extends JPanel {
-    private final Collection<CollapsingListener> listeners = ContainerUtil.createLockFreeCopyOnWriteList();
-    private final JComponent content;
-    private final CollapsiblePanelTitle title;
-    private final boolean growVertically;
+    private final @NotNull Collection<CollapsingListener> listeners = ContainerUtil.createLockFreeCopyOnWriteList();
+    private final @NotNull JComponent content;
+    private final @NotNull CollapsiblePanelTitle title;
     private boolean isCollapsed;
-    private boolean isInitialized = false;
 
-    public CollapsiblePanel(@NotNull String title, boolean isCollapsed, @NotNull JComponent content, boolean growVertically) {
+    public CollapsiblePanel(@NotNull Project project,
+                            @NotNull String title,
+                            @NotNull String collapsedPropertyKey,
+                            boolean isCollapsedDefault,
+                            @NotNull JComponent content) {
         super(new BorderLayout());
 
         this.content = content;
-        this.growVertically = growVertically;
 
-        this.title = new CollapsiblePanelTitle(title, isCollapsed);
-        this.title.addLabelActionListener(() -> setCollapsed(!isCollapsed()));
+        this.title = new CollapsiblePanelTitle(title, isCollapsedDefault);
+        this.title.addLabelActionListener(() -> {
+            setCollapsed(!isCollapsed());
+            PropertiesComponent.getInstance(project).setValue(collapsedPropertyKey, isCollapsed, isCollapsedDefault);
+        });
         add(this.title, BorderLayout.NORTH);
 
         setFocusable(false);
-        setCollapsed(isCollapsed);
+        setCollapsed(PropertiesComponent.getInstance(project).getBoolean(collapsedPropertyKey, isCollapsedDefault));
+    }
+
+    @Override
+    public void doLayout() {
+        super.doLayout();
+
+        if (getParent() != null) {
+            updateCollapsedSize();
+        }
     }
 
     public boolean isCollapsed() {
@@ -37,39 +52,37 @@ public class CollapsiblePanel extends JPanel {
     }
 
     protected void setCollapsed(boolean collapse) {
-        try {
-            var maxSize = getMaximumSize();
-            var maxWidth = maxSize != null ? maxSize.width : Integer.MAX_VALUE;
-            var verticalInsets = getInsets().top + getInsets().bottom;
+        if (collapse) {
+            remove(content);
+        } else {
+            add(content, BorderLayout.CENTER);
+        }
 
-            if (!collapse) {
-                add(content, BorderLayout.CENTER);
+        isCollapsed = collapse;
+        title.setCollapsed(isCollapsed);
 
-                var maxHeight = growVertically
-                        ? Integer.MAX_VALUE
-                        : title.getHeight() + content.getHeight() + verticalInsets;
-                setMaximumSize(new Dimension(maxWidth, maxHeight));
-            } else if (isInitialized) {
-                remove(content);
+        if (getParent() != null) {
+            updateCollapsedSize();
+        }
 
-                var maxHeight = title.getHeight() + verticalInsets;
-                setMaximumSize(new Dimension(maxWidth, maxHeight));
-            }
+        notifyListeners();
 
-            isCollapsed = collapse;
-            title.setCollapsed(isCollapsed);
+        revalidate();
+        repaint();
+    }
 
-            notifyListeners();
-
-            revalidate();
-            repaint();
-        } finally {
-            isInitialized = true;
+    private void updateCollapsedSize() {
+        if (isCollapsed) {
+            var insets = getInsets();
+            var dimension = new Dimension(Integer.MAX_VALUE, title.getHeight() + insets.top + insets.bottom);
+            setMaximumSize(dimension);
+        } else {
+            setMaximumSize(null);
         }
     }
 
     private void notifyListeners() {
-        for (CollapsingListener listener : listeners) {
+        for (var listener : listeners) {
             listener.onCollapsingChanged(this, isCollapsed());
         }
     }
