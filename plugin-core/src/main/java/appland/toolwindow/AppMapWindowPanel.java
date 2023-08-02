@@ -213,27 +213,36 @@ public class AppMapWindowPanel extends SimpleToolWindowPanel implements DataProv
                     var d = getDividerWidth();
                     if (height > d) {
                         var maxSize1 = first.getMaximumSize();
+                        var maxHeight1 = maxSize1 != null && maxSize1.getHeight() < Integer.MAX_VALUE
+                                ? maxSize1.getHeight()
+                                : null;
                         var maxSize2 = second.getMaximumSize();
+                        var maxHeight2 = maxSize2 != null && maxSize2.getHeight() < Integer.MAX_VALUE
+                                ? maxSize2.getHeight()
+                                : null;
+                        var height1Invalid = maxHeight1 != null && first.getHeight() > maxHeight1;
+                        var height2Invalid = maxHeight2 != null && second.getHeight() > maxHeight2;
 
-                        int iSize1;
-                        int iSize2;
-                        if (maxSize1 != null && first.getHeight() > maxSize1.height) {
-                            // limit height of 1st component to its max height
-                            iSize1 = (int) Math.round(maxSize1.getHeight());
-                            iSize2 = height - iSize1 - d;
-                        } else if (maxSize2 != null && second.getHeight() > maxSize2.height) {
+                        int height1;
+                        int height2;
+                        if (maxHeight1 != null && maxHeight2 != null || height1Invalid) {
+                            // distribute available space to 2nd component,
+                            // because we don't want to show a large "AppMaps" panel without content
+                            height1 = (int) Math.round(maxHeight1);
+                            height2 = height - height1 - d;
+                        } else if (height2Invalid) {
                             // limit height of 2nd component to its max height
-                            iSize2 = (int) Math.round(maxSize2.getHeight());
-                            iSize1 = height - iSize2 - d;
+                            height2 = (int) Math.round(maxHeight2);
+                            height1 = height - height2 - d;
                         } else {
                             // no update needed
                             return;
                         }
 
                         int width = getWidth();
-                        var firstRect = new Rectangle(0, 0, width, iSize1);
-                        var dividerRect = new Rectangle(0, iSize1, width, d);
-                        var secondRect = new Rectangle(0, iSize1 + d, width, iSize2);
+                        var firstRect = new Rectangle(0, 0, width, height1);
+                        var dividerRect = new Rectangle(0, height1, width, d);
+                        var secondRect = new Rectangle(0, height1 + d, width, height2);
 
                         myDivider.setVisible(true);
 
