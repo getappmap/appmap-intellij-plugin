@@ -184,14 +184,66 @@ public class AppMapWindowPanel extends SimpleToolWindowPanel implements DataProv
     private static @NotNull JComponent createContentPanel(@NotNull Project project,
                                                           @NotNull JComponent viewport,
                                                           @NotNull Disposable parent) {
-        var firstComponent = ScrollPaneFactory.createScrollPane(viewport, true);
-        firstComponent.setMinimumSize(new JBDimension(0, 200));
-
-        var splitter = new OnePixelSplitter(true, "appmap.toolWindow", 0.7f);
-        splitter.setFirstComponent(firstComponent);
+        var splitter = createSplitter();
+        splitter.setFirstComponent(createAppMapPanel(project, viewport));
         splitter.setSecondComponent(createSouthPanel(project, parent));
-        splitter.setHonorComponentsMinimumSize(true);
-        return splitter;
+
+        var panel = new JPanel(new BorderLayout());
+        panel.add(createInstallGuidePanel(project, parent), BorderLayout.NORTH);
+        panel.add(splitter, BorderLayout.CENTER);
+        return panel;
+    }
+
+    /**
+     * @return Splitter, which distributes the remaining space to the other component if a component has its maximum size set.
+     */
+    @NotNull
+    private static OnePixelSplitter createSplitter() {
+        return new OnePixelSplitter(true, "appmap.toolWindow.state", 0.75f) {
+            @Override
+            public void doLayout() {
+                super.doLayout();
+
+                var first = getFirstComponent();
+                var second = getSecondComponent();
+                if (first != null && first.isVisible() && second != null && second.isVisible()) {
+                    assert isVertical();
+
+                    int height = getHeight();
+                    var d = getDividerWidth();
+                    if (height > d) {
+                        var maxSize1 = first.getMaximumSize();
+                        var maxSize2 = second.getMaximumSize();
+
+                        int iSize1;
+                        int iSize2;
+                        if (maxSize1 != null && first.getHeight() > maxSize1.height) {
+                            // limit height of 1st component to its max height
+                            iSize1 = (int) Math.round(maxSize1.getHeight());
+                            iSize2 = height - iSize1 - d;
+                        } else if (maxSize2 != null && second.getHeight() > maxSize2.height) {
+                            // limit height of 2nd component to its max height
+                            iSize2 = (int) Math.round(maxSize2.getHeight());
+                            iSize1 = height - iSize2 - d;
+                        } else {
+                            // no update needed
+                            return;
+                        }
+
+                        int width = getWidth();
+                        var firstRect = new Rectangle(0, 0, width, iSize1);
+                        var dividerRect = new Rectangle(0, iSize1, width, d);
+                        var secondRect = new Rectangle(0, iSize1 + d, width, iSize2);
+
+                        myDivider.setVisible(true);
+
+                        first.setBounds(firstRect);
+                        myDivider.setBounds(dividerRect);
+                        second.setBounds(secondRect);
+                    }
+                }
+            }
+        };
     }
 
     private static @NotNull SimpleTree createTree(@NotNull Project project,
@@ -214,10 +266,19 @@ public class AppMapWindowPanel extends SimpleToolWindowPanel implements DataProv
         return tree;
     }
 
+    private static JPanel createAppMapPanel(@NotNull Project project, @NotNull JComponent viewport) {
+        var appMapListPanel = ScrollPaneFactory.createScrollPane(viewport, true);
+        appMapListPanel.setMinimumSize(new JBDimension(0, 200));
+        return new CollapsiblePanel(project,
+                AppMapBundle.get("toolwindow.appmap.appMaps"),
+                "appmap.toolWindow.appMaps.collapsed",
+                true,
+                appMapListPanel);
+    }
+
     private static @NotNull JComponent createSouthPanel(@NotNull Project project, @NotNull Disposable parent) {
         var contentPanel = new VerticalBox();
         contentPanel.add(createRuntimeAnalysisPanel(project, parent));
-        contentPanel.add(createInstallGuidePanel(project, parent));
         contentPanel.add(createCodeObjectsPanel(project, parent));
         contentPanel.add(createDocumentationLinksPanel(project));
         return contentPanel;
@@ -248,7 +309,7 @@ public class AppMapWindowPanel extends SimpleToolWindowPanel implements DataProv
         var codeObjectsPanel = new CodeObjectsPanel(project, parentDisposable);
         codeObjectsPanel.setMinimumSize(new JBDimension(0, 100));
         return new CollapsiblePanel(project,
-                AppMapBundle.get("toolWindow.appmap.codeObjects"),
+                AppMapBundle.get("toolwindow.appmap.codeObjects"),
                 "appmap.toolWindow.codeObjects.collapsed",
                 true,
                 codeObjectsPanel);
@@ -256,9 +317,8 @@ public class AppMapWindowPanel extends SimpleToolWindowPanel implements DataProv
 
     @NotNull
     private static JPanel createDocumentationLinksPanel(@NotNull Project project) {
-        return new CollapsiblePanel(
-                project,
-                AppMapBundle.get("toolWindow.appmap.documentation"),
+        return new CollapsiblePanel(project,
+                AppMapBundle.get("toolwindow.appmap.documentation"),
                 "appmap.toolWindow.documentation.collapsed",
                 true,
                 new AppMapContentPanel(true) {
