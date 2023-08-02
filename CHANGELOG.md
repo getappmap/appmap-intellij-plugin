@@ -1,5 +1,16 @@
 AppMap Plugin Changelog
 
+## [0.45.0](https://github.com/getappmap/appmap-intellij-plugin/compare/v0.44.2...v0.45.0) (2023-08-02)
+
+
+### Features
+
+-  reorder panels in the AppMap toolwindow ([8a78cec]())
+
+### Bug Fixes
+
+-  correctly calculate maximum size of collapsed panels in the AppMap tool window ([a684a2e]())-  properly update maximum size of collapsed panels, restore collapsed state when the toolwindow is recreated ([78ce4bd]())-  use correct icons show show display the collapsed state of panels inside the AppMap toolwindow ([49314da]())
+
 ## [0.44.2](https://github.com/getappmap/appmap-intellij-plugin/compare/v0.44.1...v0.44.2) (2023-08-01)
 
 
