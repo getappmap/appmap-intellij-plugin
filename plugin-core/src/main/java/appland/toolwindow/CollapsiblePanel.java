@@ -40,20 +40,21 @@ public class CollapsiblePanel extends JPanel {
         try {
             var maxSize = getMaximumSize();
             var maxWidth = maxSize != null ? maxSize.width : Integer.MAX_VALUE;
-            var maxHeight = maxSize != null ? maxSize.height : Integer.MAX_VALUE;
-            var verticalInsets = content.getHeight() + getInsets().top + getInsets().bottom;
+            var verticalInsets = getInsets().top + getInsets().bottom;
 
             if (!collapse) {
                 add(content, BorderLayout.CENTER);
-                maxHeight = growVertically
+
+                var maxHeight = growVertically
                         ? Integer.MAX_VALUE
-                        : title.getHeight() + verticalInsets;
+                        : title.getHeight() + content.getHeight() + verticalInsets;
+                setMaximumSize(new Dimension(maxWidth, maxHeight));
             } else if (isInitialized) {
                 remove(content);
-                maxHeight = title.getHeight() + verticalInsets;
-            }
 
-            setMaximumSize(new Dimension(maxWidth, maxHeight));
+                var maxHeight = title.getHeight() + verticalInsets;
+                setMaximumSize(new Dimension(maxWidth, maxHeight));
+            }
 
             isCollapsed = collapse;
             title.setCollapsed(isCollapsed);
