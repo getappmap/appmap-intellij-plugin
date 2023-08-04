@@ -8,7 +8,8 @@ import com.intellij.openapi.vfs.VirtualFileManager;
 import org.jetbrains.annotations.NotNull;
 
 /**
- * Force a sync of the filesystem to make sure that newly added AppMaps are found.
+ * Force a sync of the filesystem after a AppMap run configuration terminated
+ * to make sure that newly added AppMaps are found.
  */
 public class AppMapExecutionListener implements ExecutionListener {
     private static final Logger LOG = Logger.getInstance(AppMapExecutionListener.class);
