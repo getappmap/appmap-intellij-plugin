@@ -29,6 +29,9 @@
 
         <listener topic="appland.cli.AppLandDownloadListener"
                   class="appland.cli.StartServicesAfterDownloadListener"/>
+
+        <listener topic="com.intellij.execution.ExecutionListener"
+                  class="appland.execution.AppMapExecutionListener"/>
     </projectListeners>
 
     <extensions defaultExtensionNs="com.intellij">
