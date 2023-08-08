@@ -63,7 +63,9 @@ public final class AppMapJavaPackageConfig {
             return configNioPath;
         }
 
-        var configParentDirectory = AppMapJavaConfigUtil.findBestAppMapContentRootDirectory(module, context);
+        var configParentDirectory = ReadAction.compute(() -> {
+            return AppMapJavaConfigUtil.findBestAppMapContentRootDirectory(module, context);
+        });
         return createAppMapConfig(module, configParentDirectory, appMapOutputDirectory);
     }
 
