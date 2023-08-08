@@ -88,6 +88,8 @@ public final class AppMapJavaConfigUtil {
     @RequiresReadLock
     public static @NotNull VirtualFile findBestAppMapContentRootDirectory(@NotNull Module module,
                                                                           @NotNull VirtualFile context) {
+        ApplicationManager.getApplication().assertReadAccessAllowed();
+
         // content root of the module, which contains the context file
         var matchingModuleRoot = Arrays.stream(ModuleRootManager.getInstance(module).getContentRoots())
                 .filter(root -> VfsUtilCore.isAncestor(root, context, false))
@@ -100,8 +102,10 @@ public final class AppMapJavaConfigUtil {
         // Some project models, e.g. Gradle, create multiple modules for a single gradle project.
         // For example, Gradle module "main" with content root "<root>/module-one/src/main"
         // and a top-level module with content root "<root>/module-one".
-        // The context (e.g. "<root>/module-one") may be located outside the root of module (.e.g "main").
-        var projectContentRoot = ProjectRootManager.getInstance(module.getProject()).getFileIndex().getContentRootForFile(context, false);
+        // The context (e.g. "<root>/module-one") may be located outside the root of module (e.g "main").
+        var projectContentRoot = ProjectRootManager.getInstance(module.getProject())
+                .getFileIndex()
+                .getContentRootForFile(context, false);
         if (projectContentRoot != null) {
             return projectContentRoot;
         }
@@ -112,6 +116,7 @@ public final class AppMapJavaConfigUtil {
                 : context.getParent();
     }
 
+    @RequiresReadLock
     private static boolean isLocatedInProject(@NotNull Module module, @NotNull VirtualFile dir) {
         var index = ProjectRootManager.getInstance(module.getProject()).getFileIndex();
         return index.getContentRootForFile(dir, false) != null;
