@@ -3,10 +3,9 @@ package appland.index;
 import appland.config.AppMapConfigFile;
 import appland.files.AppMapFiles;
 import com.intellij.openapi.application.ApplicationManager;
-import com.intellij.openapi.module.ModuleManager;
 import com.intellij.openapi.progress.ProcessCanceledException;
 import com.intellij.openapi.project.Project;
-import com.intellij.openapi.roots.ModuleRootManager;
+import com.intellij.openapi.roots.ProjectRootManager;
 import com.intellij.openapi.vfs.VfsUtilCore;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.util.concurrency.annotations.RequiresReadLock;
@@ -36,44 +35,28 @@ final class IndexUtil {
     static Set<VirtualFile> findAppMapIndexDirectories(@NotNull Project project) {
         ApplicationManager.getApplication().assertReadAccessAllowed();
 
-        var appMapDirs = VfsUtilCore.createCompactVirtualFileSet();
-        collectAppMapOutputDirectories(project, appMapDirs);
-        return appMapDirs;
-    }
-
-    private static void collectAppMapOutputDirectories(@NotNull Project project, @NotNull Set<VirtualFile> target) {
-        var configFiles = findConfigFilesByExcludedDirs(project);
-        for (var configFile : configFiles) {
+        var appMapOutputDirs = VfsUtilCore.createCompactVirtualFileSet();
+        for (var configFile : findConfigFilesWithoutIndex(project)) {
             var config = AppMapConfigFile.parseConfigFile(configFile);
             if (config != null && config.getAppMapDir() != null) {
                 var appMapDir = VfsUtilCore.findRelativeFile(config.getAppMapDir(), configFile.getParent());
                 if (appMapDir != null && appMapDir.isValid() && appMapDir.isInLocalFileSystem()) {
-                    target.add(appMapDir);
+                    appMapOutputDirs.add(appMapDir);
                 }
             }
         }
+        return appMapOutputDirs;
     }
 
     /**
-     * Locate appmap.yml files without index access.
+     * Locate appmap.yml files without index access by checking the content roots of the project.
      */
-    private static @NotNull Collection<VirtualFile> findConfigFilesByExcludedDirs(@NotNull Project project) {
+    private static @NotNull Collection<VirtualFile> findConfigFilesWithoutIndex(@NotNull Project project) {
         var configFiles = VfsUtilCore.createCompactVirtualFileSet();
-        for (var module : ModuleManager.getInstance(project).getModules()) {
-            for (var root : ModuleRootManager.getInstance(module).getExcludeRoots()) {
-                // we're only checking two parents at most
-                var start = root;
-                for (var i = 0; i < 2 && start != null; i++) {
-                    var parent = start.getParent();
-                    if (parent != null && parent.isValid()) {
-                        var config = parent.findChild(AppMapFiles.APPMAP_YML);
-                        if (config != null) {
-                            configFiles.add(config);
-                            break;
-                        }
-                    }
-                    start = parent;
-                }
+        for (var contentRoot : ProjectRootManager.getInstance(project).getContentRoots()) {
+            var config = contentRoot.findChild(AppMapFiles.APPMAP_YML);
+            if (config != null && !config.isDirectory()) {
+                configFiles.add(config);
             }
         }
         return configFiles;
