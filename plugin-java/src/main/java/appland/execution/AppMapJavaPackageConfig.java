@@ -18,7 +18,6 @@ import com.intellij.psi.PsiPackage;
 import com.intellij.psi.search.GlobalSearchScope;
 import com.intellij.psi.search.GlobalSearchScopesCore;
 import com.intellij.util.PathUtil;
-import com.intellij.util.concurrency.annotations.RequiresNoReadLock;
 import com.intellij.util.concurrency.annotations.RequiresReadLock;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -45,7 +44,6 @@ public final class AppMapJavaPackageConfig {
      * @param context    Context to help locate the parent directory for a newly create appmap.yml
      * @return The path to the appmap.yml file to pass to the AppMap agent. {@code null} if no file exists and creating the new file failed.
      */
-    @RequiresNoReadLock
     public static @NotNull Path createOrUpdateAppMapConfig(@NotNull Module module,
                                                            @NotNull RunProfile runProfile,
                                                            @NotNull VirtualFile context,
@@ -69,7 +67,6 @@ public final class AppMapJavaPackageConfig {
         return createAppMapConfig(module, configParentDirectory, appMapOutputDirectory);
     }
 
-    @RequiresNoReadLock
     public static @NotNull Path createAppMapConfig(@NotNull Module module,
                                                    @NotNull VirtualFile configParentDirectory,
                                                    @NotNull Path appMapOutputDirectory) throws IOException {
@@ -149,7 +146,6 @@ public final class AppMapJavaPackageConfig {
      * @param appMapOutputPath Relative path value for the `appmap_dir` property, if available.
      *                         If this is {@code null} or empty, then the "build_dir" property will not be set.
      */
-    @RequiresNoReadLock
     static AppMapConfigFile generateAppMapConfig(@NotNull Module module, @Nullable String appMapOutputPath) {
         // appmap_dir should be "dir/subdir" even on Windows
         var agnosticOutputPath = PathUtil.toSystemIndependentName(appMapOutputPath);
