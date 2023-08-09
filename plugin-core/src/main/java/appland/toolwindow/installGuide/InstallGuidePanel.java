@@ -1,10 +1,11 @@
 package appland.toolwindow.installGuide;
 
 import appland.config.AppMapConfigFileListener;
-import appland.files.AppMapFiles;
 import appland.index.AppMapNameIndex;
 import appland.index.AppMapSearchScopes;
 import appland.installGuide.InstallGuideViewPage;
+import appland.installGuide.projectData.ProjectDataService;
+import appland.installGuide.projectData.ProjectMetadata;
 import appland.problemsView.FindingsManager;
 import appland.problemsView.listener.ScannerFindingsListener;
 import appland.settings.AppMapApplicationSettingsService;
@@ -12,14 +13,13 @@ import appland.settings.AppMapProjectSettingsService;
 import appland.settings.AppMapSettingsListener;
 import appland.toolwindow.AppMapContentPanel;
 import com.intellij.openapi.Disposable;
+import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.application.ModalityState;
 import com.intellij.openapi.application.ReadAction;
 import com.intellij.openapi.project.DumbService;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.Disposer;
-import com.intellij.psi.search.FilenameIndex;
 import com.intellij.util.Alarm;
-import com.intellij.util.CommonProcessors;
 import com.intellij.util.SingleAlarm;
 import com.intellij.util.concurrency.AppExecutorUtil;
 import org.jetbrains.annotations.NotNull;
@@ -144,10 +144,16 @@ public class InstallGuidePanel extends AppMapContentPanel implements Disposable 
      * Presence of at least one appmap.yml file.
      */
     private static void updateInstallAgentLabel(@NotNull Project project, @NotNull StatusLabel label) {
-        findIndexedStatus(project, label, () -> {
-            var processor = CommonProcessors.alwaysFalse();
-            var scope = AppMapSearchScopes.projectFilesWithExcluded(project);
-            return FilenameIndex.processFilesByName(AppMapFiles.APPMAP_YML, false, processor, scope, project);
+        ApplicationManager.getApplication().executeOnPooledThread(() -> {
+            // Always mark supported Java projects as supported, but only if all modules are supported.
+            // isAgentInstalled already checking for supported Java projects and the presence of appmap.yml.
+            var anySupported = ProjectDataService.getInstance(project).getAppMapProjects()
+                    .stream()
+                    .anyMatch(ProjectMetadata::isAgentInstalled);
+
+            ApplicationManager.getApplication().invokeLater(() -> {
+                label.setStatus(anySupported ? InstallGuideStatus.Completed : InstallGuideStatus.Incomplete);
+            });
         });
     }
 
