@@ -1,5 +1,12 @@
 AppMap Plugin Changelog
 
+## [0.45.1](https://github.com/getappmap/appmap-intellij-plugin/compare/v0.45.0...v0.45.1) (2023-08-09)
+
+
+### Bug Fixes
+
+-  sync the local filesystem after a run configuration was executed with the AppMap executor ([9f8737a]())-  watch AppMap output directories and add indexable file set contributor for 2023.2 ([a170d7e]())-  watch AppMap output directories and add indexable file set contributor for 2023.2 ([be04187]())
+
 ## [0.45.0](https://github.com/getappmap/appmap-intellij-plugin/compare/v0.44.2...v0.45.0) (2023-08-02)
 
 
