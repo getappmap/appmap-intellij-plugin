@@ -23,6 +23,7 @@ class StatusLabel extends JBLabel {
         this.page = page;
         this.clickAction = clickAction;
 
+        setStatus(InstallGuideStatus.Incomplete);
         setCopyable(true);
     }
 
