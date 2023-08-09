@@ -1,8 +1,8 @@
 package appland.installGuide;
 
 import appland.AppMapBaseTest;
-import appland.installGuide.analyzer.Languages;
 import appland.installGuide.projectData.ProjectDataService;
+import com.intellij.openapi.application.WriteAction;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -12,10 +12,15 @@ public class VSCodeFixturesTest extends AppMapBaseTest {
         return "vscode/workspaces";
     }
 
+    @Override
+    protected boolean runInDispatchThread() {
+        return false;
+    }
+
     @Test
     public void projectA() {
         // copy into src, which is the only content root of the test project
-        myFixture.copyDirectoryToProject("project-a", "");
+        WriteAction.runAndWait(() -> myFixture.copyDirectoryToProject("project-a", ""));
 
         var projects = ProjectDataService.getInstance(getProject()).getAppMapProjects();
         Assert.assertEquals(1, projects.size());

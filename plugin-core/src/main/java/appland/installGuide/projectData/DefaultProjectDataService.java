@@ -11,6 +11,7 @@ import com.intellij.execution.configurations.GeneralCommandLine;
 import com.intellij.execution.configurations.PathEnvironmentVariableUtil;
 import com.intellij.execution.process.CapturingProcessRunner;
 import com.intellij.execution.process.KillableProcessHandler;
+import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.application.ReadAction;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.progress.ProgressIndicator;
@@ -46,8 +47,11 @@ public class DefaultProjectDataService implements ProjectDataService {
         this.project = project;
     }
 
+    @SuppressWarnings("UnstableApiUsage")
     @Override
     public @NotNull List<ProjectMetadata> getAppMapProjects() {
+        ApplicationManager.getApplication().assertReadAccessNotAllowed();
+
         updateMetadata();
         return cachedProjects.get();
     }
