@@ -1,5 +1,12 @@
 AppMap Plugin Changelog
 
+## [0.45.2](https://github.com/getappmap/appmap-intellij-plugin/compare/v0.45.1...v0.45.2) (2023-08-09)
+
+
+### Bug Fixes
+
+-  compilation with 2023.2 ([8d3a1cb]())-  Disable "Run with AppMap" while indexing is in progress. "Run with AppMap" needs index access to locate the top-level Java packages. ([6671735]())-  refresh local file system after a new appmap.yml file was created ([7d316b1]())-  When "Run with AppMap" is invoked, create a missing appmap with a modal task and outside a ReadAction to avoid dead-locks, e.g. when indexing is in progress. ([b6573b7]())
+
 ## [0.45.1](https://github.com/getappmap/appmap-intellij-plugin/compare/v0.45.0...v0.45.1) (2023-08-09)
 
 
