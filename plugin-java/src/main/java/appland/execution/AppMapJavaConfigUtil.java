@@ -12,6 +12,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.Set;
 
@@ -26,12 +27,13 @@ public final class AppMapJavaConfigUtil {
     /**
      * Locate the directory, where AppMap JSON files should be stored in the given module.
      *
-     * @param module  Current module
-     * @param context Context, which is used to compute the fallback if no output directory is defined for the module.
+     * @param module               Current module
+     * @param context              Context, which is used to compute the fallback if no output directory is defined for the module.
+     * @param relativeFallbackPath Better fallback path then tmp/appmap, if available
      * @return The path to the directory, where AppMap files should be stored.
      */
     @RequiresReadLock
-    public static @Nullable Path findAppMapOutputDirectory(@NotNull Module module, @NotNull VirtualFile context) {
+    public static @Nullable Path findAppMapOutputDirectory(@NotNull Module module, @NotNull VirtualFile context, @Nullable Path relativeFallbackPath) {
         ApplicationManager.getApplication().assertReadAccessAllowed();
 
         var topLevelOutputDir = findSupportedTopLevelOutputDirectory(module);
@@ -45,7 +47,10 @@ public final class AppMapJavaConfigUtil {
         var contentRoot = findBestAppMapContentRootDirectory(module, context);
         var contentRootPath = contentRoot.getFileSystem().getNioPath(contentRoot);
         if (contentRootPath != null) {
-            return contentRootPath.resolve("tmp").resolve("appmap");
+            var appMapDir = relativeFallbackPath != null && !relativeFallbackPath.isAbsolute()
+                    ? relativeFallbackPath
+                    : Paths.get("tmp", "appmap");
+            return contentRootPath.resolve(appMapDir);
         }
 
         return null;

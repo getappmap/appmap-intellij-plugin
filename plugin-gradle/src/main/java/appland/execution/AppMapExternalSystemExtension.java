@@ -13,6 +13,8 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.plugins.gradle.service.execution.GradleRunConfiguration;
 
+import java.nio.file.Paths;
+
 public class AppMapExternalSystemExtension extends ExternalSystemRunConfigurationExtension {
     private static final Logger LOG = Logger.getInstance(AppMapExternalSystemExtension.class);
 
@@ -29,7 +31,9 @@ public class AppMapExternalSystemExtension extends ExternalSystemRunConfiguratio
         if (executor instanceof AppMapJvmExecutor) {
             var project = configuration.getProject();
             try {
-                var jvmParams = AppMapPatcherUtil.prepareJavaParameters(project, configuration, javaParameters);
+                // we know that we're executing with Gradle
+                var gradleFallbackPath = Paths.get("build", "appmap");
+                var jvmParams = AppMapPatcherUtil.prepareJavaParameters(project, configuration, javaParameters, gradleFallbackPath);
                 javaParameters.getVMParametersList().addAll(jvmParams);
             } catch (Exception e) {
                 LOG.warn("Unable to execute run configuration", e);
