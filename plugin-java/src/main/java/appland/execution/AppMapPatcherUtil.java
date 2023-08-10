@@ -36,7 +36,9 @@ public final class AppMapPatcherUtil {
     public static @NotNull List<String> prepareJavaParameters(@NotNull Project project,
                                                               @NotNull RunProfile configuration,
                                                               @NotNull SimpleJavaParameters javaParameters) throws Exception {
-        ApplicationManager.getApplication().assertReadAccessNotAllowed();
+        if (!ApplicationManager.getApplication().isDispatchThread()) {
+            ApplicationManager.getApplication().assertReadAccessNotAllowed();
+        }
 
         var task = new Task.WithResult<List<String>, Exception>(project, AppMapBundle.get("appMapConfig.creatingConfig"), true) {
             @Override
