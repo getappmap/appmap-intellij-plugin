@@ -1,5 +1,12 @@
 AppMap Plugin Changelog
 
+## [0.45.5](https://github.com/getappmap/appmap-intellij-plugin/compare/v0.45.4...v0.45.5) (2023-08-11)
+
+
+### Bug Fixes
+
+-  fallback to "build/appmap" for AppMap output directory if a Gradle-based run configuration is executed ([bfb8acd]())-  fallback to "target/appmap" for AppMap output directory if a Maven-based run configuration is executed ([d223bd2]())
+
 ## [0.45.4](https://github.com/getappmap/appmap-intellij-plugin/compare/v0.45.3...v0.45.4) (2023-08-11)
 
 
