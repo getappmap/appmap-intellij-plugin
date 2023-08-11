@@ -1,5 +1,12 @@
 AppMap Plugin Changelog
 
+## [0.45.3](https://github.com/getappmap/appmap-intellij-plugin/compare/v0.45.2...v0.45.3) (2023-08-11)
+
+
+### Bug Fixes
+
+-  don't check assertion on the EDT, which always has read access enabled ([d77cf14]())-  use read action to fix exception "Read action required" with 2023.2 ([9f1078b]())
+
 ## [0.45.2](https://github.com/getappmap/appmap-intellij-plugin/compare/v0.45.1...v0.45.2) (2023-08-09)
 
 
