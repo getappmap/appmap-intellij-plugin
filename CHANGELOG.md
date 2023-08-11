@@ -1,5 +1,12 @@
 AppMap Plugin Changelog
 
+## [0.45.4](https://github.com/getappmap/appmap-intellij-plugin/compare/v0.45.3...v0.45.4) (2023-08-11)
+
+
+### Bug Fixes
+
+-  restrict the search for top-level Java packages for "Execute with AppMap". ([999d9df]())
+
 ## [0.45.3](https://github.com/getappmap/appmap-intellij-plugin/compare/v0.45.2...v0.45.3) (2023-08-11)
 
 
