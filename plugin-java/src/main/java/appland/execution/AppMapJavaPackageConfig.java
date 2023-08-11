@@ -7,9 +7,12 @@ import com.intellij.execution.configurations.RunProfile;
 import com.intellij.execution.configurations.SearchScopeProvidingRunProfile;
 import com.intellij.openapi.application.ReadAction;
 import com.intellij.openapi.module.Module;
+import com.intellij.openapi.module.ModuleUtil;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.roots.ModuleRootManager;
+import com.intellij.openapi.roots.ProjectRootManager;
 import com.intellij.openapi.vfs.LocalFileSystem;
+import com.intellij.openapi.vfs.VfsUtilCore;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.JavaDirectoryService;
 import com.intellij.psi.PsiDirectory;
@@ -169,18 +172,21 @@ public final class AppMapJavaPackageConfig {
     @NotNull
     @RequiresReadLock
     private static List<String> findTopLevelPackages(@NotNull Module module) {
-        var roots = collectRootsWithDependencies(module);
+        var roots = collectSourceRootsWithDependencies(module);
         if (roots.length == 0) {
             return Collections.emptyList();
         }
 
-        var sourceDirScope = GlobalSearchScopesCore.directoriesScope(module.getProject(), true, roots);
+        // directoriesScope allows to search in libraries, and we must not add library Java packages to appmap.yml
+        var sourcesWithoutLibrariesScope = GlobalSearchScopesCore.directoriesScope(module.getProject(), true, roots)
+                .intersectWith(GlobalSearchScope.projectScope(module.getProject()));
+
         var psiManager = PsiManager.getInstance(module.getProject());
         var result = new HashSet<String>();
         for (var sourceRoot : roots) {
             var directory = psiManager.findDirectory(sourceRoot);
             if (directory != null) {
-                collectTopLevelPackages(directory, sourceDirScope, result);
+                collectTopLevelPackages(directory, sourcesWithoutLibrariesScope, result);
             }
         }
 
@@ -237,14 +243,26 @@ public final class AppMapJavaPackageConfig {
         return true;
     }
 
+    /**
+     * @param module Starting point
+     * @return All source roots (sources and resources), which may contain packages for appmap.yml
+     */
     @NotNull
-    private static VirtualFile[] collectRootsWithDependencies(@NotNull Module module) {
-        var allModules = new HashSet<Module>();
-        allModules.add(module);
-        allModules.addAll(Arrays.asList(ModuleRootManager.getInstance(module).getDependencies()));
+    private static VirtualFile[] collectSourceRootsWithDependencies(@NotNull Module module) {
+        var moduleWithRecursiveDependencies = new HashSet<Module>();
+        ModuleUtil.getDependencies(module, moduleWithRecursiveDependencies);
 
-        return allModules.stream()
+        // because "module" may not contain source roots, but only a content roots
+        // (for example, the top-level module of Gradle-based projects), we need to collect content roots first and
+        // then all source roots, which are below any of these content roots.
+        // We need source roots to avoid loading packages from build output directories,
+        // as seen with spring-petclinic classes at build/classes/java/aotTest.
+        var contentRoots = moduleWithRecursiveDependencies.stream()
                 .flatMap(m -> Arrays.stream(ModuleRootManager.getInstance(m).getContentRoots()))
+                .collect(Collectors.toUnmodifiableSet());
+
+        return Arrays.stream(ProjectRootManager.getInstance(module.getProject()).getContentSourceRoots())
+                .filter(sourceRoot -> VfsUtilCore.isUnder(sourceRoot, contentRoots))
                 .toArray(VirtualFile[]::new);
     }
 }
