@@ -12,7 +12,7 @@ AppMap helps you understand any codebase, map a database-backed web application 
 
 Supported web applications and API frameworks: Ruby on Rails, Django, Flask, Express, and Spring
 
-Supported programming languages: Java, Python, Ruby, Typescript, and JavaScript
+Supported programming languages: Java, Python, Ruby, TypeScript/JavaScript (for Node.js applications)
 
 To start making AppMaps, you’ll need to install and configure the AppMap client agent for your project.
 Then, you’ll make AppMaps by running your app - either by
@@ -25,7 +25,7 @@ Then, you’ll make AppMaps by running your app - either by
 
 [Terms and conditions](https://appmap.io/community/terms-and-conditions.html)
 
-Data usage: AppMap runtime recordings and diagrams are created and stored locally on your machine. AppMap does not require any permissions to your web hosted code repo in order to run. 
+Data usage: AppMap runtime recordings and diagrams are created and stored locally on your machine. AppMap does not require any permissions to your web hosted code repo in order to run. For more information, see the AppMap [security disclosure](https://appmap.io/security).
 
 Sign-in via GitHub or GitLab is required to obtain a license key to start using AppMap in your code editor.
 
