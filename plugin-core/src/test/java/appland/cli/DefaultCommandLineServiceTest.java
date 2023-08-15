@@ -79,10 +79,12 @@ public class DefaultCommandLineServiceTest extends AppMapBaseTest {
         assertActiveRoots(tempDir);
 
         service.stop(tempDir, true);
-        assertFalse(service.isRunning(tempDir, true));
-        assertFalse(service.isRunning(tempDir, false));
-        assertFalse(service.isRunning(nestedDir, true));
-        assertFalse(service.isRunning(nestedDir, false));
+
+        var debugInfo = service.toString();
+        assertFalse("Expected not to be running: " + debugInfo, service.isRunning(tempDir, true));
+        assertFalse("Expected not to be running: " + debugInfo, service.isRunning(tempDir, false));
+        assertFalse("Expected not to be running: " + debugInfo, service.isRunning(nestedDir, true));
+        assertFalse("Expected not to be running: " + debugInfo, service.isRunning(nestedDir, false));
     }
 
     @Test
@@ -107,7 +109,7 @@ public class DefaultCommandLineServiceTest extends AppMapBaseTest {
         var dirA = myFixture.addFileToProject("parentA/file.txt", "").getParent().getVirtualFile();
         var dirB = myFixture.addFileToProject("parentB/file.txt", "").getParent().getVirtualFile();
 
-        var service = TestAppLandCommandLineService.getInstance();
+        var service = AppLandCommandLineService.getInstance();
 
         // no appmap.yml files -> no processes
         addContentRootAndLaunchService(dirA);
@@ -129,8 +131,10 @@ public class DefaultCommandLineServiceTest extends AppMapBaseTest {
         assertActiveRoots(dirA, dirB);
 
         service.stopAll(true);
-        assertFalse("No services expected for parentA: " + service.getDebugInfo(), service.isRunning(dirA, true));
-        assertFalse("No services expected for parentB: " + service.getDebugInfo(), service.isRunning(dirB, true));
+
+        var debugInfo = service.toString();
+        assertFalse("No services expected for parentA: " + debugInfo, service.isRunning(dirA, true));
+        assertFalse("No services expected for parentB: " + debugInfo, service.isRunning(dirB, true));
     }
 
     @Test
