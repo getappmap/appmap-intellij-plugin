@@ -320,6 +320,13 @@ public class FindingsManager implements ProblemsProvider {
             for (var finding : fileData.findings) {
                 finding.setFindingsFile(findingsFile);
 
+                // multiple metadata values exist to support scanner batch mode,
+                // but this is mostly deprecated now and shouldn't exist for user-generated AppMap data.
+                if (fileData.metadata != null && !fileData.metadata.isEmpty()) {
+                    var metaData = fileData.metadata.values().iterator().next();
+                    finding.setFindingsMetaData(metaData);
+                }
+
                 var annotatedFile = finding.findAnnotatedFile(project, findingsFile);
                 if (annotatedFile != null) {
                     sourceMapping.put(findingsFile.getPath(), annotatedFile);

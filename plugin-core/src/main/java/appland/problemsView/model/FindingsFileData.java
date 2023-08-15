@@ -16,6 +16,9 @@ public final class FindingsFileData {
     @SerializedName("checks")
     public @Nullable List<CheckInfo> checks;
 
+    @SerializedName("appMapMetadata")
+    public @Nullable Map<String, FindingsMetadata> metadata;
+
     public @NotNull Map<String, RuleInfo> createRuleInfoMapping() {
         if (checks == null || checks.isEmpty()) {
             return Collections.emptyMap();

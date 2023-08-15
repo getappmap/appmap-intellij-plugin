@@ -13,6 +13,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 
 @EqualsAndHashCode
@@ -54,6 +55,11 @@ public class ScannerFinding {
     @Getter
     @Setter
     private transient @Nullable VirtualFile findingsFile;
+
+    // attached after JSON parsing, links to the source appmap-findings.file metadata
+    @Getter
+    @Setter
+    private transient @Nullable FindingsMetadata findingsMetaData;
 
     public @Nullable String getAppMapHashWithFallback() {
         return StringUtil.nullize(StringUtil.defaultIfEmpty(appMapHashV2, appMapHash));
