@@ -51,6 +51,7 @@ import com.intellij.terminal.TerminalExecutionConsole;
 import com.intellij.ui.jcef.JBCefBrowserBase;
 import com.intellij.ui.jcef.JBCefJSQuery;
 import com.intellij.ui.jcef.JCEFHtmlPanel;
+import com.intellij.util.Alarm;
 import com.intellij.util.SingleAlarm;
 import com.intellij.util.io.BaseDataReader;
 import com.intellij.util.io.BaseOutputReader;
@@ -90,10 +91,10 @@ public class InstallGuideEditor extends UserDataHolderBase implements FileEditor
             .create();
 
     // to debounce the JS refresh of available AppMaps
-    private final SingleAlarm projectRefreshAlarm = new SingleAlarm(this::refreshProjects, 500, this);
+    private final SingleAlarm projectRefreshAlarm = new SingleAlarm(this::refreshProjects, 500, this, Alarm.ThreadToUse.POOLED_THREAD);
 
     // to debounce the JS refresh when settings change
-    private final SingleAlarm settingsRefreshAlarm = new SingleAlarm(this::refreshSettings, 500, this);
+    private final SingleAlarm settingsRefreshAlarm = new SingleAlarm(this::refreshSettings, 500, this, Alarm.ThreadToUse.POOLED_THREAD);
 
     public InstallGuideEditor(@NotNull Project project, @NotNull VirtualFile file, @NotNull InstallGuideViewPage type) {
         this.project = project;
