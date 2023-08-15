@@ -23,6 +23,8 @@ import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.openapi.vfs.ex.temp.TempFileSystem;
 import com.intellij.util.io.BaseOutputReader;
 import com.intellij.util.system.CpuArch;
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -38,7 +40,7 @@ public class DefaultCommandLineService implements AppLandCommandLineService {
     private static final Logger LOG = Logger.getInstance(DefaultCommandLineService.class);
 
     @GuardedBy("this")
-    private final Map<VirtualFile, CliProcesses> processes = new HashMap<>();
+    protected final Map<VirtualFile, CliProcesses> processes = new HashMap<>();
 
     public DefaultCommandLineService() {
         var connection = ApplicationManager.getApplication().getMessageBus().connect(this);
@@ -415,7 +417,9 @@ public class DefaultCommandLineService implements AppLandCommandLineService {
         return cmd;
     }
 
-    private static final class CliProcesses {
+    @ToString
+    @EqualsAndHashCode
+    protected static final class CliProcesses {
         @NotNull KillableProcessHandler indexer;
         // only launched if the enableFindings flags is set
         @Nullable KillableProcessHandler scanner;
