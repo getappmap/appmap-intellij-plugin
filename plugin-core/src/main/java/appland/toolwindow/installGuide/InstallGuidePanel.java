@@ -146,7 +146,7 @@ public class InstallGuidePanel extends AppMapContentPanel implements Disposable 
     private static void updateInstallAgentLabel(@NotNull Project project, @NotNull StatusLabel label) {
         ApplicationManager.getApplication().executeOnPooledThread(() -> {
             // Always mark supported Java projects as supported, but only if all modules are supported.
-            // isAgentInstalled already checking for supported Java projects and the presence of appmap.yml.
+            // isAgentInstalled is already checking for supported Java projects and the presence of appmap.yml.
             var anySupported = ProjectDataService.getInstance(project).getAppMapProjects()
                     .stream()
                     .anyMatch(ProjectMetadata::isAgentInstalled);
