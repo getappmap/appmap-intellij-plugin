@@ -48,6 +48,12 @@ public class ScannerFinding {
     @SerializedName("relatedEvents")
     public @Nullable List<ScannerFindingEvent> relatedEvents = null;
 
+    @SerializedName("eventsModifiedDate")
+    public @Nullable Date eventsModifiedDate = null;
+
+    @SerializedName("scopeModifiedDate")
+    public @Nullable Date scopeModifiedDate = null;
+
     // attached after JSON parsing, not defined in appmap-findings.json
     public transient @Nullable RuleInfo ruleInfo = null;
 

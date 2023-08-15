@@ -7,7 +7,7 @@ import org.jetbrains.annotations.NotNull;
 @Getter
 public enum TestStatus {
     @SerializedName("succeeded")
-    Security("succeeded"),
+    Succeeded("succeeded"),
     @SerializedName("failed")
     Failed("failed");
 
