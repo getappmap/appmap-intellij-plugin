@@ -17,7 +17,17 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * Tree model to show a tree of findings in a hierarchy of "Impact domain -> Finding title -> Finding".
+ * Tree model to show a tree of findings in a hierarchy of
+ * <pre>
+ *  &lt;Project name&gt;
+ *    -> Findings
+ *       -> &lt;Date Bucket&gt;
+ *          -> &lt;Impact domain&gt;
+ *             -> &lt;Rule&gt;
+ *                -> Finding
+ *    -> Failed Tests
+ *        -> &lt;AppMap name&gt;
+ * </pre>
  */
 class RuntimeAnalysisModel extends BaseTreeModel<Node> implements InvokerSupplier {
     @Getter
