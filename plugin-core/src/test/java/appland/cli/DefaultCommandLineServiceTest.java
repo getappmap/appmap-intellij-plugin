@@ -107,7 +107,7 @@ public class DefaultCommandLineServiceTest extends AppMapBaseTest {
         var dirA = myFixture.addFileToProject("parentA/file.txt", "").getParent().getVirtualFile();
         var dirB = myFixture.addFileToProject("parentB/file.txt", "").getParent().getVirtualFile();
 
-        var service = AppLandCommandLineService.getInstance();
+        var service = TestAppLandCommandLineService.getInstance();
 
         // no appmap.yml files -> no processes
         addContentRootAndLaunchService(dirA);
@@ -129,8 +129,8 @@ public class DefaultCommandLineServiceTest extends AppMapBaseTest {
         assertActiveRoots(dirA, dirB);
 
         service.stopAll(true);
-        assertFalse(service.isRunning(dirA, true));
-        assertFalse(service.isRunning(dirB, true));
+        assertFalse("No services expected for parentA: " + service.getDebugInfo(), service.isRunning(dirA, true));
+        assertFalse("No services expected for parentB: " + service.getDebugInfo(), service.isRunning(dirB, true));
     }
 
     @Test
