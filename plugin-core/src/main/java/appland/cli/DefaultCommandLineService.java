@@ -138,16 +138,20 @@ public class DefaultCommandLineService implements AppLandCommandLineService {
     }
 
     @Override
-    public synchronized void stopAll(boolean waitForTermination) {
-        for (var processes : processes.values()) {
+    public void stopAll(boolean waitForTermination) {
+        List<CliProcesses> activeProcesses;
+        synchronized (this) {
+            activeProcesses = List.copyOf(processes.values());
+            processes.clear();
+        }
+
+        for (var processes : activeProcesses) {
             try {
                 stopLocked(processes, waitForTermination);
             } catch (Exception e) {
-                LOG.error("Error shutting down processes on disposal", e);
+                LOG.warn("Error shutting down processes on disposal", e);
             }
         }
-
-        processes.clear();
     }
 
     @Override
@@ -186,6 +190,13 @@ public class DefaultCommandLineService implements AppLandCommandLineService {
         }
 
         return createAppMapCommand("stats", "--appmap-file", localPath.toString(), "--limit", String.valueOf(Long.MAX_VALUE), "--format", "json");
+    }
+
+    @Override
+    public synchronized String toString() {
+        return "DefaultCommandLineService{" +
+                "processes=" + processes +
+                '}';
     }
 
     private void stopLocked(@NotNull CliProcesses value, boolean waitForTermination) {
@@ -367,7 +378,7 @@ public class DefaultCommandLineService implements AppLandCommandLineService {
         return processHandler;
     }
 
-    private static void shutdownInBackground(@NotNull KillableProcessHandler process, boolean waitForTermination) throws java.util.concurrent.ExecutionException, InterruptedException {
+    private static void shutdownInBackground(@NotNull KillableProcessHandler process, boolean waitForTermination) throws Exception {
         var future = ApplicationManager.getApplication().executeOnPooledThread(() -> {
             process.destroyProcess();
             process.waitFor(500);
