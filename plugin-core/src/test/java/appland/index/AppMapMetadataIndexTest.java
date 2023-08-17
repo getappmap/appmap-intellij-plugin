@@ -9,17 +9,17 @@ import java.util.Comparator;
 public class AppMapMetadataIndexTest extends AppMapBaseTest {
     @Test
     public void index() throws Throwable {
-        createAppMapWithIndexes("a");
-        createAppMapWithIndexes("b");
-        createAppMapWithIndexes("c");
+        var appMapA = createAppMapWithIndexes("a");
+        var appMapB = createAppMapWithIndexes("b");
+        var appMapC = createAppMapWithIndexes("c");
 
         var appMaps = AppMapMetadataService.getInstance(getProject()).findAppMaps();
         assertEquals(3, appMaps.size());
         appMaps.sort(Comparator.comparing(AppMapMetadata::getName));
 
-        assertEquals(new AppMapMetadata("a", "/src/a.appmap.json"), appMaps.get(0));
-        assertEquals(new AppMapMetadata("b", "/src/b.appmap.json"), appMaps.get(1));
-        assertEquals(new AppMapMetadata("c", "/src/c.appmap.json"), appMaps.get(2));
+        assertEquals(new AppMapMetadata("a", appMapA), appMaps.get(0));
+        assertEquals(new AppMapMetadata("b", appMapB), appMaps.get(1));
+        assertEquals(new AppMapMetadata("c", appMapC), appMaps.get(2));
 
         createAppMapWithIndexes("d");
         assertEquals(4, AppMapMetadataService.getInstance(getProject()).findAppMaps().size());

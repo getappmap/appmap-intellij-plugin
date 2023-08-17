@@ -1,4 +1,4 @@
-package appland.toolwindow.runtimeAnalysis;
+package appland.toolwindow.runtimeAnalysis.nodes;
 
 import com.intellij.ide.util.treeView.NodeDescriptor;
 import com.intellij.ide.util.treeView.PresentableNodeDescriptor;
@@ -11,7 +11,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
-abstract class Node extends PresentableNodeDescriptor<Node> implements LeafState.Supplier {
+public abstract class Node extends PresentableNodeDescriptor<Node> implements LeafState.Supplier {
     protected Node(@NotNull Project project, @Nullable NodeDescriptor parentDescriptor) {
         super(project, parentDescriptor);
     }

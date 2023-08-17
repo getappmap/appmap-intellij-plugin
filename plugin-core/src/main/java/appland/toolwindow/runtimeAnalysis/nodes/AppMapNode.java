@@ -1,4 +1,4 @@
-package appland.toolwindow.runtimeAnalysis;
+package appland.toolwindow.runtimeAnalysis.nodes;
 
 import appland.Icons;
 import appland.files.OpenAppMapFileNavigatable;

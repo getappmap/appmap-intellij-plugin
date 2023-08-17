@@ -1,4 +1,4 @@
-package appland.toolwindow.runtimeAnalysis;
+package appland.toolwindow.runtimeAnalysis.nodes;
 
 import appland.problemsView.ScannerProblem;
 import appland.problemsView.model.ImpactDomain;
@@ -16,7 +16,7 @@ import java.util.stream.Collectors;
  * Node representing an impact domain.
  * Child nodes are the actual findings of this domain.
  */
-final class ImpactDomainNode extends Node {
+public final class ImpactDomainNode extends Node {
     private final @NotNull ImpactDomain impactDomain;
     private final @NotNull List<ScannerProblem> domainFindings;
 
