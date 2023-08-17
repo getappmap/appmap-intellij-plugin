@@ -1,5 +1,6 @@
 package appland.toolwindow.runtimeAnalysis;
 
+import appland.AppMapBundle;
 import appland.webviews.findings.FindingsOverviewEditorProvider;
 import com.intellij.ide.projectView.PresentationData;
 import com.intellij.ide.util.treeView.NodeDescriptor;
@@ -21,7 +22,7 @@ class OverviewNode extends Node implements Navigatable {
     @Override
     protected void update(@NotNull PresentationData presentation) {
         presentation.setAttributesKey(CodeInsightColors.HYPERLINK_ATTRIBUTES);
-        presentation.setPresentableText("Overview");
+        presentation.setPresentableText(AppMapBundle.get("runtimeAnalysis.node.findingsTable.label"));
     }
 
     @Override

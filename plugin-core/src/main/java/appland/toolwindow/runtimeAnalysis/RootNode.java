@@ -13,6 +13,10 @@ import org.jetbrains.annotations.NotNull;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * The root node groups the findings by "project name", using the same rules as the
+ * data of the AppMap project picker.
+ */
 class RootNode extends Node implements Disposable {
     private final OverviewNode overviewNode = new OverviewNode(myProject, this);
     private final RuntimeAnalysisModel treeModel;
