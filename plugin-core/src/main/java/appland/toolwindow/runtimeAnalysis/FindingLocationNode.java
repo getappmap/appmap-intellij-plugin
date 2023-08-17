@@ -1,6 +1,6 @@
 package appland.toolwindow.runtimeAnalysis;
 
-import appland.problemsView.ScannerProblemWithFile;
+import appland.problemsView.ScannerProblem;
 import appland.webviews.findingDetails.FindingDetailsEditorProvider;
 import com.intellij.ide.projectView.PresentationData;
 import com.intellij.ide.util.treeView.NodeDescriptor;
@@ -18,16 +18,16 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * Node representing the location of a finding.
+ * Node representing a single findings and its location.
  */
-class FindingLocationNode extends Node {
-    private final @NotNull ScannerProblemWithFile finding;
+final class FindingLocationNode extends Node {
+    private final @NotNull ScannerProblem problem;
 
     public FindingLocationNode(@NotNull Project project,
                                @NotNull NodeDescriptor parentDescriptor,
-                               @NotNull ScannerProblemWithFile finding) {
+                               @NotNull ScannerProblem problem) {
         super(project, parentDescriptor);
-        this.finding = finding;
+        this.problem = problem;
     }
 
     @Override
@@ -36,16 +36,16 @@ class FindingLocationNode extends Node {
     }
 
     @Override
-    public @Nullable VirtualFile getFile() {
-        return finding.getSourceFile();
+    public @NotNull VirtualFile getFile() {
+        return problem.getFile();
     }
 
     @Override
-    public @Nullable Navigatable getNavigatable() {
+    public @NotNull Navigatable getNavigatable() {
         return new Navigatable() {
             @Override
             public void navigate(boolean requestFocus) {
-                FindingDetailsEditorProvider.openEditor(myProject, List.of(finding.getProblem()));
+                FindingDetailsEditorProvider.openEditor(myProject, List.of(problem));
             }
 
             @Override
@@ -67,8 +67,7 @@ class FindingLocationNode extends Node {
 
     @Override
     protected void update(@NotNull PresentationData presentation) {
-        var sourceFile = finding.getSourceFile();
-        presentation.setPresentableText(sourceFile != null ? sourceFile.getPresentableName() : "-unknown-");
+        presentation.setPresentableText(problem.getFile().getPresentableName());
 
         var psiFile = findPsiFile();
         if (psiFile != null) {
@@ -83,10 +82,6 @@ class FindingLocationNode extends Node {
 
     @Nullable
     private PsiFile findPsiFile() {
-        var file = finding.getSourceFile();
-        if (file == null) {
-            return null;
-        }
-        return ReadAction.compute(() -> PsiManager.getInstance(myProject).findFile(file));
+        return ReadAction.compute(() -> PsiManager.getInstance(myProject).findFile(problem.getFile()));
     }
 }

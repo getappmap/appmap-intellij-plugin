@@ -1,6 +1,7 @@
 package appland.index;
 
 import appland.files.AppMapFiles;
+import appland.problemsView.model.TestStatus;
 import com.intellij.openapi.project.DumbService;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
@@ -59,10 +60,10 @@ public class AppMapMetadataService {
         var appMapDirectories = AppMapNameIndex.getAppMapMetadataDirectories(project);
         var result = new ArrayList<AppMapMetadata>(appMapDirectories.size());
         for (var directory : appMapDirectories) {
-            var name = AppMapNameIndex.getName(project, directory);
-            if (name != null) {
-                if (lowercaseNameFilter == null || name.toLowerCase().contains(lowercaseNameFilter)) {
-                    result.add(createMetadataWithIndex(directory, name));
+            var data = AppMapNameIndex.getBasicMetadata(project, directory);
+            if (data != null && data.getName() != null) {
+                if (lowercaseNameFilter == null || data.getName().toLowerCase().contains(lowercaseNameFilter)) {
+                    result.add(createMetadataWithIndex(directory, data.getName(), data.testStatus));
                 }
             }
             if (result.size() >= maxSize) {
@@ -82,17 +83,27 @@ public class AppMapMetadataService {
     }
 
     private @Nullable AppMapMetadata createMetadataWithIndex(@NotNull VirtualFile appMapMetadataDirectory) {
-        var name = AppMapNameIndex.getName(project, appMapMetadataDirectory);
-        return name != null ? createMetadataWithIndex(appMapMetadataDirectory, name) : null;
+        var data = AppMapNameIndex.getBasicMetadata(project, appMapMetadataDirectory);
+        if (data == null) {
+            return null;
+        }
+
+        var name = data.name;
+        if (name == null) {
+            return null;
+        }
+
+        return createMetadataWithIndex(appMapMetadataDirectory, name, data.testStatus);
     }
 
-    private @NotNull AppMapMetadata createMetadataWithIndex(@NotNull VirtualFile directory, @NotNull String name) {
+    private @NotNull AppMapMetadata createMetadataWithIndex(@NotNull VirtualFile directory,
+                                                            @NotNull String name,
+                                                            @Nullable TestStatus testStatus) {
         var appMapFile = AppMapFiles.findAppMapByMetadataDirectory(directory);
-        var filePath = appMapFile != null ? appMapFile.getPath() : "";
         var requestCount = AppMapServerRequestCountIndex.getRequestCount(project, directory);
         var queryCount = AppMapSqlQueriesCountIndex.getQueryCount(project, directory);
         var functionsCount = ClassMapTypeIndex.findItemsByAppMapDirectory(project, directory, ClassMapItemType.Function).size();
 
-        return new AppMapMetadata(name, filePath, requestCount, queryCount, functionsCount);
+        return new AppMapMetadata(name, appMapFile, testStatus, requestCount, queryCount, functionsCount);
     }
 }

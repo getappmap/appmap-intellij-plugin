@@ -1,5 +1,6 @@
 package appland.index;
 
+import appland.problemsView.model.TestStatus;
 import appland.utils.GsonUtils;
 import com.google.gson.annotations.SerializedName;
 import com.intellij.openapi.project.Project;
@@ -10,7 +11,6 @@ import com.intellij.util.Processors;
 import com.intellij.util.indexing.FileBasedIndex;
 import com.intellij.util.indexing.ID;
 import com.intellij.util.io.DataExternalizer;
-import com.intellij.util.io.EnumeratorStringDescriptor;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -21,8 +21,8 @@ import java.util.Set;
 /**
  * Indexes metadata.json files to extract the name property.
  */
-public class AppMapNameIndex extends AbstractAppMapMetadataFileIndex<String> {
-    private static final ID<Integer, String> INDEX_ID = ID.create("appmap.metadataFile");
+public class AppMapNameIndex extends AbstractAppMapMetadataFileIndex<BasicAppMapMetadata> {
+    private static final ID<Integer, BasicAppMapMetadata> INDEX_ID = ID.create("appmap.metadataFile");
     private static final String FILENAME = "metadata.json";
 
     /**
@@ -51,7 +51,19 @@ public class AppMapNameIndex extends AbstractAppMapMetadataFileIndex<String> {
      * @param appMapMetadataDirectory Metadata directory of an AppMap
      * @return The name of the AppMap, as defined by metadata.json
      */
-    public static @Nullable String getName(@NotNull Project project, @NotNull VirtualFile appMapMetadataDirectory) {
+    public static @Nullable String getName(@NotNull Project project,
+                                           @NotNull VirtualFile appMapMetadataDirectory) {
+        var data = IndexUtil.getSingleEntryAppMapData(INDEX_ID, project, appMapMetadataDirectory, FILENAME);
+        return data != null ? data.name : null;
+    }
+
+    /**
+     * @param project                 Current project
+     * @param appMapMetadataDirectory Metadata directory of an AppMap
+     * @return The name of the AppMap, as defined by metadata.json
+     */
+    public static @Nullable BasicAppMapMetadata getBasicMetadata(@NotNull Project project,
+                                                                 @NotNull VirtualFile appMapMetadataDirectory) {
         return IndexUtil.getSingleEntryAppMapData(INDEX_ID, project, appMapMetadataDirectory, FILENAME);
     }
 
@@ -76,7 +88,7 @@ public class AppMapNameIndex extends AbstractAppMapMetadataFileIndex<String> {
     }
 
     @Override
-    public @NotNull ID<Integer, String> getName() {
+    public @NotNull ID<Integer, BasicAppMapMetadata> getName() {
         return INDEX_ID;
     }
 
@@ -86,23 +98,26 @@ public class AppMapNameIndex extends AbstractAppMapMetadataFileIndex<String> {
     }
 
     @Override
-    protected @Nullable String parseMetadataFile(@NotNull String fileContent) {
+    protected @Nullable BasicAppMapMetadata parseMetadataFile(@NotNull String fileContent) {
         if (!fileContent.isEmpty()) {
             var json = GsonUtils.GSON.fromJson(fileContent, MetadataFileContent.class);
             if (json != null) {
-                return json.name;
+                return new BasicAppMapMetadata(json.name, json.testStatus);
             }
         }
         return null;
     }
 
     @Override
-    public @NotNull DataExternalizer<String> getValueExternalizer() {
-        return EnumeratorStringDescriptor.INSTANCE;
+    public @NotNull DataExternalizer<BasicAppMapMetadata> getValueExternalizer() {
+        return BasicAppMapMetadataExternalizer.INSTANCE;
     }
 
     private static class MetadataFileContent {
         @SerializedName("name")
         public String name;
+
+        @SerializedName("test_status")
+        public @Nullable TestStatus testStatus = null;
     }
 }

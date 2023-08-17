@@ -1,24 +1,27 @@
 package appland.toolwindow.runtimeAnalysis;
 
+import appland.files.AppMapFiles;
 import appland.problemsView.FindingsManager;
+import appland.problemsView.ScannerProblem;
 import appland.problemsView.listener.ScannerFindingsListener;
-import appland.problemsView.model.ImpactDomain;
 import com.intellij.ide.projectView.PresentationData;
 import com.intellij.openapi.Disposable;
+import com.intellij.openapi.application.ReadAction;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.Disposer;
 import com.intellij.ui.tree.LeafState;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * The root node groups the findings by "project name", using the same rules as the
  * data of the AppMap project picker.
  */
-class RootNode extends Node implements Disposable {
-    private final OverviewNode overviewNode = new OverviewNode(myProject, this);
+final class RootNode extends Node implements Disposable {
+    private final FindingsTableNode findingsTableNode = new FindingsTableNode(myProject, this);
     private final RuntimeAnalysisModel treeModel;
 
     protected RootNode(@NotNull Project project, @NotNull RuntimeAnalysisModel treeModel) {
@@ -42,20 +45,38 @@ class RootNode extends Node implements Disposable {
 
     @Override
     public List<? extends Node> getChildren() {
-        var domainFindings = FindingsManager.getInstance(myProject).getProblemsByImpactDomain();
-        if (domainFindings.isEmpty()) {
-            return List.of(overviewNode);
+        FindingsManager findingsManager = FindingsManager.getInstance(myProject);
+        var problems = findingsManager.getAllProblems();
+        if (problems.isEmpty()) {
+            return List.of(findingsTableNode);
         }
 
-        var children = new ArrayList<Node>();
-        children.add(overviewNode);
-        for (var domain : ImpactDomain.values()) { // iterating values to keep predefined order
-            var findings = domainFindings.get(domain);
-            if (findings != null && !findings.isEmpty()) {
-                children.add(new ImpactDomainNode(myProject, this, domain, findings));
+        var byProjectName = problems.stream().collect(Collectors.groupingBy(this::getAppMapProjectName));
+
+        var nodes = byProjectName.entrySet().stream()
+                .map(entry -> (Node) new AppMapProjectFindingsNode(myProject, this, entry.getKey(), entry.getValue()))
+                .collect(Collectors.toCollection(LinkedList::new));
+        nodes.addFirst(findingsTableNode);
+
+        return nodes;
+    }
+
+    private @NotNull String getAppMapProjectName(@NotNull ScannerProblem problem) {
+        return ReadAction.compute(() -> {
+            var sourceFile = problem.getFile();
+
+            // fixme reuse code
+            var dir = sourceFile.getParent();
+            while (dir != null && dir.isDirectory() && dir.isValid()) {
+                if (dir.findChild(AppMapFiles.APPMAP_YML) != null) {
+                    return dir.getName();
+                }
+                dir = dir.getParent();
             }
-        }
-        return children;
+
+            // fallback for now
+            return sourceFile.getParent().getName();
+        });
     }
 
     @Override

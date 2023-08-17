@@ -1,53 +1,55 @@
 package appland.index;
 
-import com.intellij.util.PathUtil;
+import appland.problemsView.model.TestStatus;
+import com.intellij.openapi.vfs.VirtualFile;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.ToString;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.TestOnly;
 
 /**
  * Contains metadata about a single AppMap.
  */
+@Getter
 @EqualsAndHashCode
 @ToString
 public final class AppMapMetadata {
     /**
      * The name defined by the metadata.
      */
-    @Getter
     private final @NotNull String name;
-    /**
-     * System-independent file path.
-     */
-    private final @NotNull String systemIndependentFilePath;
-    @Getter
+    private final @Nullable TestStatus testStatus;
     private final int requestCount;
-    @Getter
     private final int queryCount;
-    @Getter
     private final int functionsCount;
+    private final @Nullable VirtualFile appMapFile;
 
-    public AppMapMetadata(@NotNull String name, @NotNull String systemIndependentFilePath) {
-        this(name, systemIndependentFilePath, 0, 0, 0);
+    @TestOnly
+    public AppMapMetadata(@NotNull String name, @Nullable VirtualFile appMapFile) {
+        this(name, appMapFile, null, 0, 0, 0);
     }
 
-    public AppMapMetadata(@NotNull String name, @NotNull String systemIndependentFilePath, int requestCount, int queryCount, int functionsCount) {
+    public AppMapMetadata(@NotNull String name,
+                          @Nullable VirtualFile appMapFile,
+                          @Nullable TestStatus testStatus, int requestCount,
+                          int queryCount,
+                          int functionsCount) {
         this.name = name;
-        this.systemIndependentFilePath = systemIndependentFilePath;
+        this.appMapFile = appMapFile;
         this.requestCount = requestCount;
         this.queryCount = queryCount;
         this.functionsCount = functionsCount;
+        this.testStatus = testStatus;
     }
 
-    @NotNull
-    public String getSystemIndependentFilepath() {
-        return systemIndependentFilePath;
+    public @Nullable String getSystemIndependentFilepath() {
+        return appMapFile != null ? appMapFile.getPath() : null;
     }
 
-    @NotNull
-    public String getFilename() {
-        return PathUtil.getFileName(systemIndependentFilePath);
+    public @Nullable String getFilename() {
+        return appMapFile != null ? appMapFile.getName() : null;
     }
 
     public boolean hasAnyCount() {
