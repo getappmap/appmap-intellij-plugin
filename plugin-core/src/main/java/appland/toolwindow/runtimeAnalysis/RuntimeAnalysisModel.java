@@ -2,6 +2,8 @@ package appland.toolwindow.runtimeAnalysis;
 
 import appland.settings.AppMapApplicationSettingsService;
 import appland.settings.AppMapSettingsListener;
+import appland.toolwindow.runtimeAnalysis.nodes.Node;
+import appland.toolwindow.runtimeAnalysis.nodes.RootNode;
 import com.intellij.openapi.Disposable;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.Disposer;
@@ -29,7 +31,7 @@ import java.util.List;
  *        -> &lt;AppMap name&gt;
  * </pre>
  */
-class RuntimeAnalysisModel extends BaseTreeModel<Node> implements InvokerSupplier {
+public class RuntimeAnalysisModel extends BaseTreeModel<Node> implements InvokerSupplier {
     @Getter
     private final @NotNull Invoker invoker = Invoker.forBackgroundPoolWithoutReadAction(this);
     private final @NotNull RootNode root;

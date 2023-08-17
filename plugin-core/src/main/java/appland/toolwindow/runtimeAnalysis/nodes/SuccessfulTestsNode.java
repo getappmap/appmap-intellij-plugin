@@ -1,4 +1,4 @@
-package appland.toolwindow.runtimeAnalysis;
+package appland.toolwindow.runtimeAnalysis.nodes;
 
 import appland.AppMapBundle;
 import appland.problemsView.ScannerProblem;

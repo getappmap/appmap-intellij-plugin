@@ -1,4 +1,4 @@
-package appland.toolwindow.runtimeAnalysis;
+package appland.toolwindow.runtimeAnalysis.nodes;
 
 import appland.AppMapBundle;
 import appland.webviews.findings.FindingsOverviewEditorProvider;
@@ -14,7 +14,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Collections;
 import java.util.List;
 
-final class FindingsTableNode extends Node implements Navigatable {
+public final class FindingsTableNode extends Node implements Navigatable {
     protected FindingsTableNode(@NotNull Project project, @NotNull NodeDescriptor parentDescriptor) {
         super(project, parentDescriptor);
     }

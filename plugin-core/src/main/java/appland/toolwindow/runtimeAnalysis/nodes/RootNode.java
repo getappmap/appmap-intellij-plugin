@@ -1,9 +1,10 @@
-package appland.toolwindow.runtimeAnalysis;
+package appland.toolwindow.runtimeAnalysis.nodes;
 
 import appland.files.AppMapFiles;
 import appland.problemsView.FindingsManager;
 import appland.problemsView.ScannerProblem;
 import appland.problemsView.listener.ScannerFindingsListener;
+import appland.toolwindow.runtimeAnalysis.RuntimeAnalysisModel;
 import com.intellij.ide.projectView.PresentationData;
 import com.intellij.openapi.Disposable;
 import com.intellij.openapi.application.ReadAction;
@@ -20,11 +21,11 @@ import java.util.stream.Collectors;
  * The root node groups the findings by "project name", using the same rules as the
  * data of the AppMap project picker.
  */
-final class RootNode extends Node implements Disposable {
+public final class RootNode extends Node implements Disposable {
     private final FindingsTableNode findingsTableNode = new FindingsTableNode(myProject, this);
     private final RuntimeAnalysisModel treeModel;
 
-    protected RootNode(@NotNull Project project, @NotNull RuntimeAnalysisModel treeModel) {
+    public RootNode(@NotNull Project project, @NotNull RuntimeAnalysisModel treeModel) {
         super(project, null);
         this.treeModel = treeModel;
         Disposer.register(treeModel, this);

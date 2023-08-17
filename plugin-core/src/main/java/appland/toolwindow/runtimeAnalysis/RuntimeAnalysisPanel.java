@@ -4,6 +4,7 @@ import appland.AppMapBundle;
 import appland.installGuide.InstallGuideEditorProvider;
 import appland.installGuide.InstallGuideViewPage;
 import appland.oauth.AppMapLoginAction;
+import appland.toolwindow.runtimeAnalysis.nodes.Node;
 import com.intellij.openapi.Disposable;
 import com.intellij.openapi.actionSystem.CommonDataKeys;
 import com.intellij.openapi.actionSystem.DataProvider;

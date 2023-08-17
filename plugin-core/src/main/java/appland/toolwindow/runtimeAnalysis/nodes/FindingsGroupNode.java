@@ -1,4 +1,4 @@
-package appland.toolwindow.runtimeAnalysis;
+package appland.toolwindow.runtimeAnalysis.nodes;
 
 import appland.problemsView.ScannerProblem;
 import com.intellij.ide.projectView.PresentationData;
