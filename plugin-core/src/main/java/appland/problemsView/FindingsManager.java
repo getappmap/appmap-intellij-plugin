@@ -5,7 +5,6 @@ import appland.index.AppMapSearchScopes;
 import appland.problemsView.listener.ScannerFindingsListener;
 import appland.problemsView.model.FindingsDomainCount;
 import appland.problemsView.model.FindingsFileData;
-import appland.problemsView.model.ImpactDomain;
 import appland.problemsView.model.ScannerFinding;
 import appland.utils.GsonUtils;
 import com.google.common.collect.HashMultiset;
@@ -22,7 +21,6 @@ import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.fileEditor.FileDocumentManager;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.roots.ProjectRootManager;
-import com.intellij.openapi.vfs.VfsUtilCore;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.search.FilenameIndex;
 import com.intellij.util.concurrency.AppExecutorUtil;
@@ -31,7 +29,9 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import javax.annotation.concurrent.GuardedBy;
-import java.util.*;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
@@ -80,35 +80,22 @@ public class FindingsManager implements ProblemsProvider {
         }
     }
 
-    public @NotNull List<ScannerProblem> getAllProblems() {
-        synchronized (lock) {
-            return List.copyOf(problems.values());
-        }
-    }
-
     public int getProblemFileCount() {
         synchronized (lock) {
             return problems.size();
         }
     }
 
-    /**
-     * @param root Root directory to limit the scope
-     * @return The number of problem files, which are located under root
-     */
-    public int getProblemFileCount(@NotNull VirtualFile root) {
+    public @NotNull List<ScannerProblem> getAllProblems() {
         synchronized (lock) {
-            return (int) problems.keySet()
-                    .stream()
-                    .filter(file -> VfsUtilCore.isAncestor(root, file, false))
-                    .count();
+            return List.copyOf(problems.values());
         }
     }
 
     /**
      * @return List of files, which are associated with problems.
      */
-    public Collection<VirtualFile> getProblemFiles() {
+    public @NotNull Collection<VirtualFile> getProblemFiles() {
         synchronized (lock) {
             return List.copyOf(problems.keySet());
         }
@@ -165,30 +152,6 @@ public class FindingsManager implements ProblemsProvider {
             }
         }
         return domainMapping;
-    }
-
-    /**
-     * @return Counts of impact domain of all findings of this project.
-     */
-    public @NotNull Map<ImpactDomain, List<ScannerProblemWithFile>> getProblemsByImpactDomain() {
-        var groups = new EnumMap<ImpactDomain, List<ScannerProblemWithFile>>(ImpactDomain.class);
-
-        synchronized (lock) {
-            for (var entry : problems.entries()) {
-                var finding = entry.getValue();
-                var domain = finding.getFinding().impactDomain;
-                if (domain != null) {
-                    var sourceFile = entry.getKey();
-                    if (groups.containsKey(domain)) {
-                        groups.get(domain).add(new ScannerProblemWithFile(finding, sourceFile));
-                    } else {
-                        groups.put(domain, new ArrayList<>(List.of(new ScannerProblemWithFile(finding, sourceFile))));
-                    }
-                }
-            }
-        }
-
-        return groups;
     }
 
     public int getOtherProblemCount() {

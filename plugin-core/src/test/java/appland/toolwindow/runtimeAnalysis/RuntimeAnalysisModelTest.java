@@ -97,8 +97,8 @@ public class RuntimeAnalysisModelTest extends AppMapBaseTest {
     }
 
     private void assertOverviewNode(@NotNull RootNode root) {
-        var node = assertNode(root.getChildren().get(0), "Overview");
-        assertTrue(node instanceof OverviewNode);
+        var node = assertNode(root.getChildren().get(0), "Findings Table");
+        assertTrue(node instanceof FindingsTableNode);
     }
 
     private void loadFindingsDirectory(@NotNull String directoryPath) throws Exception {

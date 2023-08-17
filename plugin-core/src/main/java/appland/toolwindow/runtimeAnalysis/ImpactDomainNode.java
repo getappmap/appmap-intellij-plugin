@@ -1,6 +1,6 @@
 package appland.toolwindow.runtimeAnalysis;
 
-import appland.problemsView.ScannerProblemWithFile;
+import appland.problemsView.ScannerProblem;
 import appland.problemsView.model.ImpactDomain;
 import com.intellij.ide.projectView.PresentationData;
 import com.intellij.ide.util.treeView.NodeDescriptor;
@@ -8,21 +8,22 @@ import com.intellij.openapi.project.Project;
 import com.intellij.ui.tree.LeafState;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.List;
 import java.util.stream.Collectors;
 
 /**
  * Node representing an impact domain.
  * Child nodes are the actual findings of this domain.
  */
-class ImpactDomainNode extends Node {
+final class ImpactDomainNode extends Node {
     private final @NotNull ImpactDomain impactDomain;
-    private final @NotNull List<ScannerProblemWithFile> domainFindings;
+    private final @NotNull List<ScannerProblem> domainFindings;
 
     public ImpactDomainNode(@NotNull Project project,
                             @NotNull NodeDescriptor parentDescriptor,
                             @NotNull ImpactDomain impactDomain,
-                            @NotNull List<ScannerProblemWithFile> domainFindings) {
+                            @NotNull List<ScannerProblem> domainFindings) {
         super(project, parentDescriptor);
         this.impactDomain = impactDomain;
         this.domainFindings = domainFindings;
@@ -39,21 +40,12 @@ class ImpactDomainNode extends Node {
             return Collections.emptyList();
         }
 
-        // group by finding title
-        Map<String, List<ScannerProblemWithFile>> byTitle = new HashMap<>();
-        for (var finding : domainFindings) {
-            var title = finding.getProblem().getFinding().ruleTitle;
-            if (!title.isEmpty()) {
-                byTitle.merge(title, List.of(finding), (a, b) -> {
-                    var merged = new ArrayList<ScannerProblemWithFile>(a.size() + b.size());
-                    merged.addAll(a);
-                    merged.addAll(b);
-                    return merged;
-                });
-            }
-        }
-        return byTitle.entrySet()
-                .stream()
+        var byRuleTitle = domainFindings.stream().collect(Collectors.groupingBy(problem -> {
+            var ruleTitle = problem.getFinding().ruleTitle;
+            return ruleTitle.isEmpty() ? "Unknown" : ruleTitle;
+        }));
+
+        return byRuleTitle.entrySet().stream()
                 .map(entry -> new FindingsGroupNode(myProject, this, entry.getKey(), entry.getValue()))
                 .collect(Collectors.toList());
     }

@@ -4,6 +4,7 @@ import com.google.gson.annotations.SerializedName;
 import lombok.Getter;
 import org.jetbrains.annotations.NotNull;
 
+@Getter
 public enum ImpactDomain {
     @SerializedName("Security")
     Security("Security"),
@@ -14,7 +15,6 @@ public enum ImpactDomain {
     @SerializedName("Maintainability")
     Maintainability("Maintainability");
 
-    @Getter
     private final @NotNull String jsonId;
 
     ImpactDomain(@NotNull String jsonId) {

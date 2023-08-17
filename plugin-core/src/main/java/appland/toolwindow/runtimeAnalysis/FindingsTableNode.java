@@ -14,8 +14,8 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Collections;
 import java.util.List;
 
-class OverviewNode extends Node implements Navigatable {
-    protected OverviewNode(@NotNull Project project, @NotNull NodeDescriptor parentDescriptor) {
+final class FindingsTableNode extends Node implements Navigatable {
+    protected FindingsTableNode(@NotNull Project project, @NotNull NodeDescriptor parentDescriptor) {
         super(project, parentDescriptor);
     }
 

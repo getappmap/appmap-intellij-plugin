@@ -1,6 +1,6 @@
 package appland.toolwindow.runtimeAnalysis;
 
-import appland.problemsView.ScannerProblemWithFile;
+import appland.problemsView.ScannerProblem;
 import com.intellij.ide.projectView.PresentationData;
 import com.intellij.ide.util.treeView.NodeDescriptor;
 import com.intellij.openapi.project.Project;
@@ -17,22 +17,19 @@ import java.util.stream.Collectors;
  * Node representing a unique finding title.
  * Child nodes are the actual locations of this finding.
  */
-class FindingsGroupNode extends Node {
+final class FindingsGroupNode extends Node {
     private final @NotNull String title;
     private final @NotNull List<FindingLocationNode> findings;
 
     public FindingsGroupNode(@NotNull Project project,
                              @NotNull NodeDescriptor parentDescriptor,
                              @NotNull String title,
-                             @NotNull List<ScannerProblemWithFile> findings) {
+                             @NotNull List<ScannerProblem> problems) {
         super(project, parentDescriptor);
         this.title = title;
-        this.findings = deduplicateFindings(findings)
+        this.findings = deduplicateFindings(problems)
                 .stream()
-                .sorted(Comparator.comparing(e -> {
-                    var sourceFile = e.getSourceFile();
-                    return sourceFile != null ? sourceFile.getPresentableName() : "";
-                }))
+                .sorted(Comparator.comparing(e -> e.getFile().getPresentableName()))
                 .map(finding -> new FindingLocationNode(project, this, finding))
                 .collect(Collectors.toUnmodifiableList());
     }
@@ -56,16 +53,16 @@ class FindingsGroupNode extends Node {
      * Deduplicate findings by AppMap hash code.
      */
     @NotNull
-    private static List<ScannerProblemWithFile> deduplicateFindings(@NotNull List<ScannerProblemWithFile> findings) {
+    private static List<ScannerProblem> deduplicateFindings(@NotNull List<ScannerProblem> problems) {
         var foundFindingHashes = new HashSet<String>();
 
-        var findingNodes = new ArrayList<ScannerProblemWithFile>();
-        for (var finding : findings) {
-            var hashCode = finding.getProblem().getFinding().getAppMapHashWithFallback();
+        var findingNodes = new ArrayList<ScannerProblem>();
+        for (var problem : problems) {
+            var hashCode = problem.getFinding().getAppMapHashWithFallback();
             if (hashCode != null && !hashCode.isEmpty()) {
                 if (!foundFindingHashes.contains(hashCode)) {
                     foundFindingHashes.add(hashCode);
-                    findingNodes.add(finding);
+                    findingNodes.add(problem);
                 }
             }
         }
