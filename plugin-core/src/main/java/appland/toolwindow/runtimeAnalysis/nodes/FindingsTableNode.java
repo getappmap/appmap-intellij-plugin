@@ -2,6 +2,7 @@ package appland.toolwindow.runtimeAnalysis.nodes;
 
 import appland.AppMapBundle;
 import appland.webviews.findings.FindingsOverviewEditorProvider;
+import com.intellij.icons.AllIcons;
 import com.intellij.ide.projectView.PresentationData;
 import com.intellij.ide.util.treeView.NodeDescriptor;
 import com.intellij.openapi.editor.colors.CodeInsightColors;
@@ -23,6 +24,7 @@ public final class FindingsTableNode extends Node implements Navigatable {
     protected void update(@NotNull PresentationData presentation) {
         presentation.setAttributesKey(CodeInsightColors.HYPERLINK_ATTRIBUTES);
         presentation.setPresentableText(AppMapBundle.get("runtimeAnalysis.node.findingsTable.label"));
+        presentation.setIcon(AllIcons.Nodes.DataTables);
     }
 
     @Override

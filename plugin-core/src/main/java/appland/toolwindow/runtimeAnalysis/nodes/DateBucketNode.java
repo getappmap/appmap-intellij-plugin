@@ -1,6 +1,7 @@
 package appland.toolwindow.runtimeAnalysis.nodes;
 
 import appland.problemsView.ScannerProblem;
+import com.intellij.icons.AllIcons;
 import com.intellij.ide.projectView.PresentationData;
 import com.intellij.ide.util.treeView.NodeDescriptor;
 import com.intellij.openapi.project.Project;
@@ -36,6 +37,7 @@ final class DateBucketNode extends Node {
     @Override
     protected void update(@NotNull PresentationData presentation) {
         presentation.setPresentableText(label);
+        presentation.setIcon(AllIcons.Actions.GroupBy);
     }
 
     @Override

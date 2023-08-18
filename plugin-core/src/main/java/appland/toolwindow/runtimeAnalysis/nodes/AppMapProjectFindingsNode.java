@@ -2,6 +2,7 @@ package appland.toolwindow.runtimeAnalysis.nodes;
 
 import appland.problemsView.ScannerProblem;
 import appland.problemsView.model.TestStatus;
+import com.intellij.icons.AllIcons;
 import com.intellij.ide.projectView.PresentationData;
 import com.intellij.ide.util.treeView.NodeDescriptor;
 import com.intellij.openapi.project.Project;
@@ -33,6 +34,7 @@ final class AppMapProjectFindingsNode extends Node {
     @Override
     protected void update(@NotNull PresentationData presentation) {
         presentation.setPresentableText(projectName);
+        presentation.setIcon(AllIcons.Nodes.Folder);
     }
 
     @Override

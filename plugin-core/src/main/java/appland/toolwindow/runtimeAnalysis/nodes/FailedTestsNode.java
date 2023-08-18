@@ -4,6 +4,7 @@ import appland.AppMapBundle;
 import appland.index.AppMapMetadata;
 import appland.index.AppMapMetadataService;
 import appland.problemsView.model.TestStatus;
+import com.intellij.icons.AllIcons;
 import com.intellij.ide.projectView.PresentationData;
 import com.intellij.ide.util.treeView.NodeDescriptor;
 import com.intellij.openapi.application.ReadAction;
@@ -38,6 +39,7 @@ final class FailedTestsNode extends Node {
     @Override
     protected void update(@NotNull PresentationData presentation) {
         presentation.setPresentableText(AppMapBundle.get("runtimeAnalysis.node.failedTests.label"));
+        presentation.setIcon(AllIcons.RunConfigurations.TestFailed);
     }
 
     @Override
