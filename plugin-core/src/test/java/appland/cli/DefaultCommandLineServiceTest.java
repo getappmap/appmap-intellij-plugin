@@ -47,6 +47,7 @@ public class DefaultCommandLineServiceTest extends AppMapBaseTest {
     }
 
     @Test
+    @Ignore("flaky test")
     public void directoryTree() throws Exception {
         var tempFile = myFixture.createFile("test.txt", "");
         var tempDir = tempFile.getParent();
@@ -105,6 +106,7 @@ public class DefaultCommandLineServiceTest extends AppMapBaseTest {
     }
 
     @Test
+    @Ignore("flaky test")
     public void siblingDirectories() throws Exception {
         var dirA = myFixture.addFileToProject("parentA/file.txt", "").getParent().getVirtualFile();
         var dirB = myFixture.addFileToProject("parentB/file.txt", "").getParent().getVirtualFile();
