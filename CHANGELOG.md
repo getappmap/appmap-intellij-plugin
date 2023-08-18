@@ -1,5 +1,12 @@
 AppMap Plugin Changelog
 
+## [0.45.6](https://github.com/getappmap/appmap-intellij-plugin/compare/v0.45.5...v0.45.6) (2023-08-18)
+
+
+### Bug Fixes
+
+-  exception "Read access is not allowed" when "Install Guide" view is displayed ([54ff60a]())-  mark "Install AppMap agent" as completed for Java projects ([84115d5]())
+
 ## [0.45.5](https://github.com/getappmap/appmap-intellij-plugin/compare/v0.45.4...v0.45.5) (2023-08-11)
 
 
