@@ -19,8 +19,10 @@ cache:
 before_install:
 - chmod +x gradlew
 
-install:
-    - ./gradlew --info build verifyPlugin runPluginVerifier
+install: skip
+
+script:
+  - ./gradlew --info build verifyPlugin runPluginVerifier
 
 before_deploy:
 - |
