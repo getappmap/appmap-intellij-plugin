@@ -9,13 +9,13 @@ import com.intellij.openapi.project.Project;
 import com.intellij.pom.Navigatable;
 import com.intellij.ui.tree.LeafState;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.Collections;
 import java.util.List;
 
 public final class FindingsTableNode extends Node implements Navigatable {
-    protected FindingsTableNode(@NotNull Project project, @NotNull NodeDescriptor parentDescriptor) {
+    FindingsTableNode(@NotNull Project project,
+                      @NotNull NodeDescriptor parentDescriptor) {
         super(project, parentDescriptor);
     }
 
@@ -36,7 +36,7 @@ public final class FindingsTableNode extends Node implements Navigatable {
     }
 
     @Override
-    public @Nullable Navigatable getNavigatable() {
+    public @NotNull Navigatable getNavigatable() {
         return this;
     }
 

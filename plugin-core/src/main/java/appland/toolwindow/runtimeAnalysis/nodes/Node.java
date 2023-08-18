@@ -12,7 +12,8 @@ import org.jetbrains.annotations.Nullable;
 import java.util.List;
 
 public abstract class Node extends PresentableNodeDescriptor<Node> implements LeafState.Supplier {
-    protected Node(@NotNull Project project, @Nullable NodeDescriptor parentDescriptor) {
+    protected Node(@NotNull Project project,
+                   @Nullable NodeDescriptor parentDescriptor) {
         super(project, parentDescriptor);
     }
 

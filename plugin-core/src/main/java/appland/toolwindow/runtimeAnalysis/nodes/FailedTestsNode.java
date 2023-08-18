@@ -10,7 +10,6 @@ import com.intellij.openapi.application.ReadAction;
 import com.intellij.openapi.project.Project;
 import com.intellij.ui.tree.LeafState;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.Comparator;
 import java.util.List;
@@ -25,7 +24,7 @@ final class FailedTestsNode extends Node {
     private final @NotNull List<AppMapMetadata> failedAppMaps;
 
     public FailedTestsNode(@NotNull Project project,
-                           @Nullable NodeDescriptor parentDescriptor,
+                           @NotNull NodeDescriptor parentDescriptor,
                            @NotNull List<AppMapMetadata> failedAppMaps) {
         super(project, parentDescriptor);
         this.failedAppMaps = failedAppMaps;
@@ -51,11 +50,9 @@ final class FailedTestsNode extends Node {
     }
 
     static List<AppMapMetadata> findFailedAppMaps(@NotNull Project project) {
-        return ReadAction.compute(() -> {
-            return AppMapMetadataService.getInstance(project).findAppMaps()
-                    .stream()
-                    .filter(data -> data.getTestStatus() == TestStatus.Failed)
-                    .collect(Collectors.toList());
-        });
+        return ReadAction.compute(() -> AppMapMetadataService.getInstance(project).findAppMaps()
+                .stream()
+                .filter(data -> data.getTestStatus() == TestStatus.Failed)
+                .collect(Collectors.toList()));
     }
 }

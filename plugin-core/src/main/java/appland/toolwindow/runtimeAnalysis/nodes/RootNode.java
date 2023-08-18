@@ -25,7 +25,8 @@ public final class RootNode extends Node implements Disposable {
     private final FindingsTableNode findingsTableNode = new FindingsTableNode(myProject, this);
     private final RuntimeAnalysisModel treeModel;
 
-    public RootNode(@NotNull Project project, @NotNull RuntimeAnalysisModel treeModel) {
+    public RootNode(@NotNull Project project,
+                    @NotNull RuntimeAnalysisModel treeModel) {
         super(project, null);
         this.treeModel = treeModel;
         Disposer.register(treeModel, this);
@@ -46,8 +47,7 @@ public final class RootNode extends Node implements Disposable {
 
     @Override
     public List<? extends Node> getChildren() {
-        FindingsManager findingsManager = FindingsManager.getInstance(myProject);
-        var problems = findingsManager.getAllProblems();
+        var problems = FindingsManager.getInstance(myProject).getAllProblems();
         if (problems.isEmpty()) {
             return List.of(findingsTableNode);
         }
@@ -57,6 +57,7 @@ public final class RootNode extends Node implements Disposable {
         var nodes = byProjectName.entrySet().stream()
                 .map(entry -> (Node) new AppMapProjectFindingsNode(myProject, this, entry.getKey(), entry.getValue()))
                 .collect(Collectors.toCollection(LinkedList::new));
+        // prepend the "Findings Table" node
         nodes.addFirst(findingsTableNode);
 
         return nodes;

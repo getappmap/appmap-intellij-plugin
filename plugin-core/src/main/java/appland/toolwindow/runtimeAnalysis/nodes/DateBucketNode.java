@@ -6,20 +6,23 @@ import com.intellij.ide.util.treeView.NodeDescriptor;
 import com.intellij.openapi.project.Project;
 import com.intellij.ui.tree.LeafState;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
 
+/**
+ * Node displaying a date bucket, e.g. "Last 30 days".
+ * It creates child nodes grouped by impact domain.
+ */
 final class DateBucketNode extends Node {
     private final String label;
     private final List<ScannerProblem> problems;
 
     public DateBucketNode(@NotNull Project project,
-                          @Nullable NodeDescriptor parentDescriptor,
+                          @NotNull NodeDescriptor parentDescriptor,
                           @NotNull String label,
-                          List<ScannerProblem> problems) {
+                          @NotNull List<ScannerProblem> problems) {
         super(project, parentDescriptor);
         this.label = label;
         this.problems = problems;

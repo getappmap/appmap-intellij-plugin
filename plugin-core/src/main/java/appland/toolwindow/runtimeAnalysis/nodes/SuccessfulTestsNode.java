@@ -21,8 +21,8 @@ final class SuccessfulTestsNode extends Node {
     private final List<ScannerProblem> problems;
 
     public SuccessfulTestsNode(@NotNull Project project,
-                               @Nullable NodeDescriptor parentDescriptor,
-                               List<ScannerProblem> problems) {
+                               @NotNull NodeDescriptor parentDescriptor,
+                               @NotNull List<ScannerProblem> problems) {
         super(project, parentDescriptor);
         this.problems = problems;
     }
@@ -40,6 +40,7 @@ final class SuccessfulTestsNode extends Node {
     @Override
     public List<? extends Node> getChildren() {
         var now = Instant.now();
+
         var byDateBucket = problems.stream().collect(Collectors.groupingBy(problem -> {
             var finding = problem.getFinding();
             var date = finding.eventsModifiedDate != null ? finding.eventsModifiedDate : finding.scopeModifiedDate;
