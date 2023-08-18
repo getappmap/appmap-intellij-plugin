@@ -17,8 +17,6 @@ import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.progress.ProgressIndicator;
 import com.intellij.openapi.progress.ProgressManager;
 import com.intellij.openapi.project.Project;
-import com.intellij.openapi.roots.ProjectRootManager;
-import com.intellij.openapi.vfs.VfsUtil;
 import com.intellij.openapi.vfs.VfsUtilCore;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.search.FilenameIndex;
@@ -218,7 +216,7 @@ public class DefaultProjectDataService implements ProjectDataService {
         var projects = new HashMap<VirtualFile, ProjectAnalysis>();
         var resolver = new LanguageResolver(project);
 
-        for (var root : findTopLevelContentRoots()) {
+        for (var root : AppMapFiles.findTopLevelContentRoots(project)) {
             var language = resolver.getLanguage(root);
             if (language != null) {
                 var analyzer = LanguageAnalyzer.create(language);
@@ -229,23 +227,6 @@ public class DefaultProjectDataService implements ProjectDataService {
         }
 
         return projects;
-    }
-
-    private @NotNull VirtualFile[] findTopLevelContentRoots() {
-        var roots = new ArrayList<>(List.of(ProjectRootManager.getInstance(project).getContentRoots()));
-        roots.sort(Comparator.comparingInt(o -> o.getPath().length()));
-
-        var visited = new HashSet<VirtualFile>();
-        for (var iterator = roots.iterator(); iterator.hasNext(); ) {
-            var root = iterator.next();
-            if (VfsUtil.isUnder(root, visited)) {
-                iterator.remove();
-            } else {
-                visited.add(root);
-            }
-        }
-
-        return roots.toArray(VirtualFile.EMPTY_ARRAY);
     }
 
     private @Nullable NodeVersion findNodeVersion(@NotNull ProgressIndicator indicator, @NotNull VirtualFile rootFolder) {

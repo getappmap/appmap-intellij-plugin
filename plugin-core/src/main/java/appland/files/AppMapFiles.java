@@ -13,6 +13,7 @@ import com.intellij.execution.util.ExecUtil;
 import com.intellij.openapi.application.ReadAction;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.roots.ProjectRootManager;
 import com.intellij.openapi.util.io.FileUtil;
 import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.openapi.vfs.VfsUtil;
@@ -29,7 +30,7 @@ import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Collection;
+import java.util.*;
 
 public final class AppMapFiles {
     private static final Logger LOG = Logger.getInstance("#appmap.files");
@@ -225,6 +226,35 @@ public final class AppMapFiles {
     @RequiresBackgroundThread
     public static @Nullable String loadAppMapFile(@NotNull VirtualFile file) {
         return loadAppMapFile(file, SIZE_THRESHOLD_GIANT_BYTES, SIZE_THRESHOLD_LARGE_BYTES, APPMAP_CLI_MAX_PRUNE_SIZE);
+    }
+
+    @RequiresReadLock
+    public static @Nullable VirtualFile findTopLevelContentRoot(@NotNull Project project,
+                                                                @NotNull VirtualFile insideContentRoot) {
+        for (VirtualFile root : findTopLevelContentRoots(project)) {
+            if (VfsUtilCore.isAncestor(root, insideContentRoot, false)) {
+                return root;
+            }
+        }
+        return null;
+    }
+
+    @RequiresReadLock
+    public static @NotNull VirtualFile[] findTopLevelContentRoots(@NotNull Project project) {
+        var roots = new ArrayList<>(List.of(ProjectRootManager.getInstance(project).getContentRoots()));
+        roots.sort(Comparator.comparingInt(o -> o.getPath().length()));
+
+        var visited = new HashSet<VirtualFile>();
+        for (var iterator = roots.iterator(); iterator.hasNext(); ) {
+            var root = iterator.next();
+            if (VfsUtil.isUnder(root, visited)) {
+                iterator.remove();
+            } else {
+                visited.add(root);
+            }
+        }
+
+        return roots.toArray(VirtualFile.EMPTY_ARRAY);
     }
 
     /**
