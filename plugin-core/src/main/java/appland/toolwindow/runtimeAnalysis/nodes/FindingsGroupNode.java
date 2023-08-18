@@ -55,17 +55,24 @@ final class FindingsGroupNode extends Node {
     @NotNull
     private static List<ScannerProblem> deduplicateFindings(@NotNull List<ScannerProblem> problems) {
         var foundFindingHashes = new HashSet<String>();
-
         var findingNodes = new ArrayList<ScannerProblem>();
-        for (var problem : problems) {
-            var hashCode = problem.getFinding().getAppMapHashWithFallback();
-            if (hashCode != null && !hashCode.isEmpty()) {
-                if (!foundFindingHashes.contains(hashCode)) {
-                    foundFindingHashes.add(hashCode);
-                    findingNodes.add(problem);
-                }
-            }
-        }
+
+        // deduplicate after sorting to get a reliable result for tests
+        problems.stream()
+                .sorted(Comparator.comparing(problem -> {
+                    var file = problem.getFinding().getFindingsFile();
+                    return file != null ? file.getPath() : problem.getFinding().getFindingTitle();
+                }))
+                .forEachOrdered(problem -> {
+                    var hashCode = problem.getFinding().getAppMapHashWithFallback();
+                    if (hashCode != null && !hashCode.isEmpty()) {
+                        if (!foundFindingHashes.contains(hashCode)) {
+                            foundFindingHashes.add(hashCode);
+                            findingNodes.add(problem);
+                        }
+                    }
+                });
+
         return findingNodes;
     }
 }
