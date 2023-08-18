@@ -8,7 +8,11 @@ import appland.toolwindow.runtimeAnalysis.nodes.FindingsTableNode;
 import appland.toolwindow.runtimeAnalysis.nodes.ImpactDomainNode;
 import appland.toolwindow.runtimeAnalysis.nodes.Node;
 import appland.toolwindow.runtimeAnalysis.nodes.RootNode;
+import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.application.WriteAction;
+import com.intellij.ui.tree.AsyncTreeModel;
+import com.intellij.ui.tree.TreeTestUtil;
+import com.intellij.ui.treeStructure.Tree;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.junit.Assume;
@@ -80,6 +84,28 @@ public class RuntimeAnalysisModelTest extends AppMapBaseTest {
         }
     }
 
+    @Test
+    public void hierarchy() throws Exception {
+        loadFindingsDirectory("projects/runtime_analysis_tree");
+
+        var model = new RuntimeAnalysisModel(getProject(), getTestRootDisposable());
+
+        var expected = "-Root\n" +
+                " Findings Table\n" +
+                " -src\n" +
+                "  -Failed tests\n" +
+                "   Failed test 1\n" +
+                "   Failed test 2\n" +
+                "  -Findings\n" +
+                "   -More than 30 days ago\n" +
+                "    -Maintainability\n" +
+                "     -Data update performed in GET or HEAD request\n" +
+                "      user_successful_test_2.rb\n" +
+                "      user_successful_test_2.rb\n" +
+                "      user_successful_test_2.rb\n";
+        assertTreeHierarchy(model, expected);
+    }
+
     @NotNull
     private static List<? extends Node> assertChildren(@NotNull Node findingsRuleNode, int expectedSize) {
         return assertChildren(null, findingsRuleNode, expectedSize);
@@ -103,6 +129,18 @@ public class RuntimeAnalysisModelTest extends AppMapBaseTest {
     private void assertOverviewNode(@NotNull RootNode root) {
         var node = assertNode(root.getChildren().get(0), "Findings Table");
         assertTrue(node instanceof FindingsTableNode);
+    }
+
+    private void assertTreeHierarchy(RuntimeAnalysisModel model, @NotNull String expected) {
+        ApplicationManager.getApplication().invokeAndWait(() -> {
+            new TreeTestUtil(new Tree(new AsyncTreeModel(model, getTestRootDisposable())))
+                    .expandAll()
+                    .expandAll()
+                    .expandAll()
+                    .expandAll()
+                    .expandAll()
+                    .assertStructure(expected);
+        });
     }
 
     private void loadFindingsDirectory(@NotNull String directoryPath) throws Exception {

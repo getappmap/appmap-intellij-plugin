@@ -74,6 +74,8 @@ public final class RootNode extends Node implements Disposable {
 
     @Override
     protected void update(@NotNull PresentationData presentation) {
+        // not visible in UI, but used by tests
+        presentation.setPresentableText("Root");
     }
 
     @Override
