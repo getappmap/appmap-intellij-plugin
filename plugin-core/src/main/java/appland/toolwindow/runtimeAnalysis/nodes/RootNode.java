@@ -65,19 +65,10 @@ public final class RootNode extends Node implements Disposable {
 
     private @NotNull String getAppMapProjectName(@NotNull ScannerProblem problem) {
         return ReadAction.compute(() -> {
-            var sourceFile = problem.getFile();
-
-            // fixme reuse code
-            var dir = sourceFile.getParent();
-            while (dir != null && dir.isDirectory() && dir.isValid()) {
-                if (dir.findChild(AppMapFiles.APPMAP_YML) != null) {
-                    return dir.getName();
-                }
-                dir = dir.getParent();
-            }
-
-            // fallback for now
-            return sourceFile.getParent().getName();
+            var root = AppMapFiles.findTopLevelContentRoot(myProject, problem.getFile());
+            return root != null
+                    ? root.getName()
+                    : problem.getFile().getParent().getName();
         });
     }
 
