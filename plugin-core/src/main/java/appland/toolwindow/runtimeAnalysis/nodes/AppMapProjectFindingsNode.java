@@ -7,7 +7,6 @@ import com.intellij.ide.util.treeView.NodeDescriptor;
 import com.intellij.openapi.project.Project;
 import com.intellij.ui.tree.LeafState;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -23,9 +22,9 @@ final class AppMapProjectFindingsNode extends Node {
     private final List<ScannerProblem> problems;
 
     public AppMapProjectFindingsNode(@NotNull Project project,
-                                     @Nullable NodeDescriptor parentDescriptor,
+                                     @NotNull NodeDescriptor parentDescriptor,
                                      @NotNull String projectName,
-                                     List<ScannerProblem> problems) {
+                                     @NotNull List<ScannerProblem> problems) {
         super(project, parentDescriptor);
         this.projectName = projectName;
         this.problems = problems;

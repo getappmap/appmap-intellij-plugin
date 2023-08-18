@@ -20,12 +20,12 @@ import java.util.List;
 /**
  * Node representing an AppMap.
  */
-class AppMapNode extends Node {
+final class AppMapNode extends Node {
     private final @NotNull VirtualFile appMap;
     private final @Nullable AppMapMetadata appMapMetadata;
 
     public AppMapNode(@NotNull Project project,
-                      @Nullable NodeDescriptor parentDescriptor,
+                      @NotNull NodeDescriptor parentDescriptor,
                       @NotNull VirtualFile appMap) {
         super(project, parentDescriptor);
         this.appMap = appMap;
