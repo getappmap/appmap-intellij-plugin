@@ -1,6 +1,7 @@
 import org.commonmark.parser.Parser
 import org.commonmark.renderer.html.HtmlRenderer
 import org.gradle.api.JavaVersion.VERSION_11
+import org.gradle.api.tasks.testing.logging.TestLogEvent
 import org.jetbrains.intellij.tasks.PrepareSandboxTask
 import org.jetbrains.intellij.tasks.RunPluginVerifierTask
 
@@ -124,10 +125,8 @@ allprojects {
             // always execute tests, don't skip by Gradle's up-to-date checks in development
             outputs.upToDateWhen { false }
 
-            if (isCI) {
-                testLogging {
-                    setEvents(listOf("failed", "standardError"))
-                }
+            testLogging {
+                setEvents(listOf(TestLogEvent.FAILED, TestLogEvent.STANDARD_OUT, TestLogEvent.STANDARD_ERROR))
             }
         }
 
