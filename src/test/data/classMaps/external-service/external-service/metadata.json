@@ -1,0 +1,35 @@
+{
+  "app": "solidus",
+  "git": {
+    "branch": "appland",
+    "commit": "620695333ac6621e408f21ef86fc34ef766a674f",
+    "repository": "https://github.com/land-of-apps/solidus.git"
+  },
+  "name": "Cancel items when all items are not cancelable does not display the link to cancel items",
+  "client": {
+    "url": "https://github.com/getappmap/appmap-ruby",
+    "name": "appmap",
+    "version": "0.37.2"
+  },
+  "feature": "Cancel items when all items are not cancelable",
+  "language": {
+    "name": "ruby",
+    "engine": "ruby",
+    "version": "2.6.5"
+  },
+  "recorder": {
+    "name": "rspec"
+  },
+  "frameworks": [
+    {
+      "name": "rails",
+      "version": "6.0.3.4"
+    },
+    {
+      "name": "rspec",
+      "version": "3.10.0"
+    }
+  ],
+  "feature_group": "Cancel items",
+  "source_location": "spec/system/application_spec.rb"
+}

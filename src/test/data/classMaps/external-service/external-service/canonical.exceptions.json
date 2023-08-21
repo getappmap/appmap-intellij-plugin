@@ -1,0 +1,56 @@
+[
+  {
+    "class": "JSON::ParserError",
+    "message": "767: unexpected token at 'PjWXCtB4Y9DH4KajHNB1lkxlOuG7PuhxktaiFETErowH0kNO+VCJ292e854O+LeS/pLOEjzI7nj2EDSATCOdr103jdWt5JY3CFh8eHAyNNwQQiD1XQY2SvfaG+ld9T7t0KjOQx1zkayjlZP9+X/LsUuy1g77cQA83qDtCAL18dRu29OEjnCf1St3UU+X/gRmun7Og7ffd+tkIGNi4lmKA==--MhYqMRJLLhRkZLU3z1N1LA=='",
+    "stack": [
+      "/home/travis/.rvm/gems/ruby-2.6.5/bundler/gems/appmap-ruby-d2ba81e811c2/lib/appmap/hook/method.rb:67",
+      "JSON::Ext::Parser#parse"
+    ],
+    "location": "/home/travis/.rvm/gems/ruby-2.6.5/bundler/gems/appmap-ruby-d2ba81e811c2/lib/appmap/hook/method.rb:67"
+  },
+  {
+    "class": "JSON::ParserError",
+    "message": "767: unexpected token at 'QEN2RDyn3pLBTxQx++KNvAkwuuAk1T8xzc4K7YHOY3p6zxaVxHFwHBJLcoFsb3bJxxKweqGW8/6jpJQ1Q10nSLKoImt+5uIuc/yq9Q6YgriPNSuxGhotlU9eioWWraaegfV7/MWdPzlsH2jTpMVK3XQBpsy5Cth9UfboaZJi5XuyF8NL0o2XF2pten637eD8+rj9kLUDNao75uk3pXHSg==--fQ+8YJdUT2Tx2Bwr+ji+cA=='",
+    "stack": [
+      "/home/travis/.rvm/gems/ruby-2.6.5/bundler/gems/appmap-ruby-d2ba81e811c2/lib/appmap/hook/method.rb:67",
+      "JSON::Ext::Parser#parse"
+    ],
+    "location": "/home/travis/.rvm/gems/ruby-2.6.5/bundler/gems/appmap-ruby-d2ba81e811c2/lib/appmap/hook/method.rb:67"
+  },
+  {
+    "class": "JSON::ParserError",
+    "message": "767: unexpected token at '\u0004\bI\"\u001btl6XJ4RO1HrIDc1OU_u2kw\u0006:\u0006EF'",
+    "stack": [
+      "/home/travis/.rvm/gems/ruby-2.6.5/bundler/gems/appmap-ruby-d2ba81e811c2/lib/appmap/hook/method.rb:67",
+      "JSON::Ext::Parser#parse"
+    ],
+    "location": "/home/travis/.rvm/gems/ruby-2.6.5/bundler/gems/appmap-ruby-d2ba81e811c2/lib/appmap/hook/method.rb:67"
+  },
+  {
+    "class": "JSON::ParserError",
+    "message": "767: unexpected token at '\u0004\b{\bI\"\u000fsession_id\u0006:\u0006ETI\"%7e0725c1d81062278d9c31654355e0fe\u0006;'",
+    "stack": [
+      "/home/travis/.rvm/gems/ruby-2.6.5/bundler/gems/appmap-ruby-d2ba81e811c2/lib/appmap/hook/method.rb:67",
+      "JSON::Ext::Parser#parse"
+    ],
+    "location": "/home/travis/.rvm/gems/ruby-2.6.5/bundler/gems/appmap-ruby-d2ba81e811c2/lib/appmap/hook/method.rb:67"
+  },
+  {
+    "class": "JSON::ParserError",
+    "message": "767: unexpected token at '\u0004\b{\u0007I\"\u000fsession_id\u0006:\u0006ETI\"%7e0725c1d81062278d9c31654355e0fe\u0006;'",
+    "stack": [
+      "/home/travis/.rvm/gems/ruby-2.6.5/bundler/gems/appmap-ruby-d2ba81e811c2/lib/appmap/hook/method.rb:67",
+      "JSON::Ext::Parser#parse"
+    ],
+    "location": "/home/travis/.rvm/gems/ruby-2.6.5/bundler/gems/appmap-ruby-d2ba81e811c2/lib/appmap/hook/method.rb:67"
+  },
+  {
+    "class": "JSON::ParserError",
+    "message": "767: unexpected token at 'rbhR4nRgSkFMzJW2uZj6a/ePWI9KX8ckHvDOIzwNu6+avqscXjE/q2u65z5Eun2huWw/jxOP9q3RppaweCgnAG4l2yLhqfPJSwzvnpWdKrhh1iBfPc1mejKG2h4y2caY--l6xfePqbqwh/KPeFNlZd7Q=='",
+    "stack": [
+      "/home/travis/.rvm/gems/ruby-2.6.5/bundler/gems/appmap-ruby-d2ba81e811c2/lib/appmap/hook/method.rb:67",
+      "JSON::Ext::Parser#parse"
+    ],
+    "location": "/home/travis/.rvm/gems/ruby-2.6.5/bundler/gems/appmap-ruby-d2ba81e811c2/lib/appmap/hook/method.rb:67"
+  }
+]

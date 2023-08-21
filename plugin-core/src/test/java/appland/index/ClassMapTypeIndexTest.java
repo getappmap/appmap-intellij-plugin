@@ -1,12 +1,10 @@
 package appland.index;
 
 import appland.AppMapBaseTest;
-import com.intellij.openapi.roots.ModuleRootModificationUtil;
 import com.intellij.openapi.vfs.VirtualFile;
 import org.jetbrains.annotations.NotNull;
 import org.junit.Test;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -47,6 +45,15 @@ public class ClassMapTypeIndexTest extends AppMapBaseTest {
         // items must still be found even if one of the items has an unknown class map type
         assertSize(1, ClassMapTypeIndex.findItems(getProject(), ClassMapItemType.Database));
         assertSize(1, ClassMapTypeIndex.findItems(getProject(), ClassMapItemType.HTTP));
+    }
+
+    @Test
+    public void externalService() {
+        // use fixture dir, because the index only analyzes files with name classMap.json
+        myFixture.copyDirectoryToProject("classMaps/external-service", "root");
+
+        assertSize(1, ClassMapTypeIndex.findItems(getProject(), ClassMapItemType.ExternalService));
+        assertSize(1, ClassMapTypeIndex.findItems(getProject(), ClassMapItemType.ExternalRoute));
     }
 
     @Test

@@ -13,6 +13,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
+@Getter
 public enum ClassMapItemType {
     ROOT(-1, "<root>", ""),
     // root item types
@@ -25,13 +26,11 @@ public enum ClassMapItemType {
     Route(5, "route"),
     Query(6, "query"),
     Class(7, "class", "::"),
-    Function(8, "function", "#");
+    Function(8, "function", "#"),
+    ExternalRoute(9, "external-route");
 
-    @Getter
     private final int id;
-    @Getter
     private final @NotNull String name;
-    @Getter
     private final @NotNull String separator;
 
     private static final Map<String, ClassMapItemType> nameToTypeMap;
