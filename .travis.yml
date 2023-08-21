@@ -22,7 +22,7 @@ before_install:
 install: skip
 
 script:
-  - ./gradlew --info build verifyPlugin runPluginVerifier
+  - ./gradlew build verifyPlugin runPluginVerifier
 
 before_deploy:
 - |
