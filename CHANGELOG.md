@@ -1,5 +1,12 @@
 AppMap Plugin Changelog
 
+## [0.45.7](https://github.com/getappmap/appmap-intellij-plugin/compare/v0.45.6...v0.45.7) (2023-08-22)
+
+
+### Bug Fixes
+
+-  update instructions for java agent jar location ([3ccffdb]())
+
 ## [0.45.6](https://github.com/getappmap/appmap-intellij-plugin/compare/v0.45.5...v0.45.6) (2023-08-18)
 
 
