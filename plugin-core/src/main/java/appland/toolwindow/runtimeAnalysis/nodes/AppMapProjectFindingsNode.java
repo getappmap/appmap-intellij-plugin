@@ -1,7 +1,6 @@
 package appland.toolwindow.runtimeAnalysis.nodes;
 
 import appland.problemsView.ScannerProblem;
-import appland.problemsView.model.TestStatus;
 import com.intellij.icons.AllIcons;
 import com.intellij.ide.projectView.PresentationData;
 import com.intellij.ide.util.treeView.NodeDescriptor;
@@ -12,7 +11,6 @@ import org.jetbrains.annotations.NotNull;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * Findings of a particular AppMap project.
@@ -39,15 +37,7 @@ final class AppMapProjectFindingsNode extends Node {
 
     @Override
     public List<? extends Node> getChildren() {
-        @SuppressWarnings("DataFlowIssue")
-        var byTestStatus = problems.stream()
-                .filter(item -> {
-                    var metaData = item.getFinding().getFindingsMetaData();
-                    return metaData != null && metaData.testStatus != null;
-                })
-                .collect(Collectors.groupingBy(item -> item.getFinding().getFindingsMetaData().testStatus));
-
-        if (byTestStatus.isEmpty()) {
+        if (problems.isEmpty()) {
             return Collections.emptyList();
         }
 
@@ -58,10 +48,7 @@ final class AppMapProjectFindingsNode extends Node {
             nodes.add(new FailedTestsNode(myProject, this, failedAppMaps));
         }
 
-        var successfulTests = byTestStatus.get(TestStatus.Succeeded);
-        if (successfulTests != null && !successfulTests.isEmpty()) {
-            nodes.add(new SuccessfulTestsNode(myProject, this, successfulTests));
-        }
+        nodes.add(new FailedAndSuccessfulFindingsNode(myProject, this, problems));
 
         return nodes;
     }

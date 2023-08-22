@@ -100,9 +100,9 @@ public class RuntimeAnalysisModelTest extends AppMapBaseTest {
                 "   -More than 30 days ago\n" +
                 "    -Maintainability\n" +
                 "     -Data update performed in GET or HEAD request\n" +
-                "      user_successful_test_1.rb\n" +
-                "      user_successful_test_1.rb\n" +
-                "      user_successful_test_1.rb\n";
+                "      user.rb\n" +
+                "      user.rb\n" +
+                "      user.rb\n";
         assertTreeHierarchy(model, expected);
     }
 
