@@ -18,12 +18,15 @@ import java.util.TreeMap;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
-final class SuccessfulTestsNode extends Node {
+/**
+ * Displays all findings, regardless of the test_status flag.
+ */
+final class FailedAndSuccessfulFindingsNode extends Node {
     private final List<ScannerProblem> problems;
 
-    public SuccessfulTestsNode(@NotNull Project project,
-                               @NotNull NodeDescriptor parentDescriptor,
-                               @NotNull List<ScannerProblem> problems) {
+    public FailedAndSuccessfulFindingsNode(@NotNull Project project,
+                                           @NotNull NodeDescriptor parentDescriptor,
+                                           @NotNull List<ScannerProblem> problems) {
         super(project, parentDescriptor);
         this.problems = problems;
     }
