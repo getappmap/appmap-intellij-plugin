@@ -1,5 +1,12 @@
 AppMap Plugin Changelog
 
+## [0.46.0](https://github.com/getappmap/appmap-intellij-plugin/compare/v0.45.7...v0.46.0) (2023-08-23)
+
+
+### Features
+
+-  group items in the "Runtime Analysis" panel ([4c10e57]())
+
 ## [0.45.7](https://github.com/getappmap/appmap-intellij-plugin/compare/v0.45.6...v0.45.7) (2023-08-22)
 
 
