@@ -1,3 +1,4 @@
+import com.adarshr.gradle.testlogger.theme.ThemeType
 import de.undercouch.gradle.tasks.download.Download
 import groovy.json.JsonSlurper
 import org.commonmark.parser.Parser
@@ -139,6 +140,10 @@ allprojects {
             // logging setup
             testLogging {
                 setEvents(listOf(TestLogEvent.FAILED, TestLogEvent.STANDARD_OUT, TestLogEvent.STANDARD_ERROR))
+            }
+
+            testlogger {
+                theme = ThemeType.PLAIN
             }
         }
 
