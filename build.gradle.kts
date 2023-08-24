@@ -244,6 +244,9 @@ project(":") {
             dest(project.buildDir.resolve("appmap-java.json"))
             overwrite(true)
             quiet(true)
+            if (isCI) {
+                header("Authorization", "Bearer ${System.getenv("GITHUB_TOKEN")}")
+            }
 
             doLast {
                 val json = JsonSlurper().parseText(dest.readText()) as Map<*, *>
@@ -256,6 +259,9 @@ project(":") {
                     src(jarAsset)
                     dest(agentOutputPath)
                     overwrite(false)
+                    if (isCI) {
+                        header("Authorization", "Bearer ${System.getenv("GITHUB_TOKEN")}")
+                    }
                 }
             }
         }
