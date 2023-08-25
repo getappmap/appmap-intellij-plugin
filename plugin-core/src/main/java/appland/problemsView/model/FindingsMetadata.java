@@ -10,7 +10,7 @@ import org.jetbrains.annotations.Nullable;
 @EqualsAndHashCode
 public final class FindingsMetadata {
     @SerializedName("name")
-    public @Nullable String name = null;
+    public @Nullable String appMapName = null;
 
     @SerializedName("test_status")
     public @Nullable TestStatus testStatus = null;
