@@ -1,5 +1,12 @@
 name: Build
-on: [push]
+on:
+    pull_request:
+    push:
+        branches:
+            - master
+    schedule:
+        - cron: "0 0 * * 0"
+
 jobs:
     test:
         name: Test
@@ -44,3 +51,10 @@ jobs:
                   path: |
                       build/reports/
                       **/build/reports/
+
+            - name: Save AppMaps
+              uses: actions/cache/save@v3
+              if: always()
+              with:
+                  path: tmp/appmap
+                  key: appmaps-${{ github.sha }}-${{ github.run_attempt }}
