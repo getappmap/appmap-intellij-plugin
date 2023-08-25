@@ -56,5 +56,11 @@ jobs:
               uses: actions/cache/save@v3
               if: always()
               with:
-                  path: tmp/appmap
+                  path: build/appmap
                   key: appmaps-${{ github.sha }}-${{ github.run_attempt }}
+
+    appmap-analysis:
+        permissions: write-all
+        if: always()
+        needs: [test]
+        uses: ./.github/workflows/appmap-analysis.yml
