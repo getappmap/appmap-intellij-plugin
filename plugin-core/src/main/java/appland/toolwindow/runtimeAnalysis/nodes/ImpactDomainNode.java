@@ -1,7 +1,7 @@
 package appland.toolwindow.runtimeAnalysis.nodes;
 
-import appland.problemsView.ScannerProblem;
 import appland.problemsView.model.ImpactDomain;
+import appland.problemsView.model.ScannerFinding;
 import com.intellij.ide.projectView.PresentationData;
 import com.intellij.ide.util.treeView.NodeDescriptor;
 import com.intellij.openapi.project.Project;
@@ -18,12 +18,12 @@ import java.util.stream.Collectors;
  */
 public final class ImpactDomainNode extends Node {
     private final @NotNull ImpactDomain impactDomain;
-    private final @NotNull List<ScannerProblem> domainFindings;
+    private final @NotNull List<ScannerFinding> domainFindings;
 
     public ImpactDomainNode(@NotNull Project project,
                             @NotNull NodeDescriptor parentDescriptor,
                             @NotNull ImpactDomain impactDomain,
-                            @NotNull List<ScannerProblem> domainFindings) {
+                            @NotNull List<ScannerFinding> domainFindings) {
         super(project, parentDescriptor);
         this.impactDomain = impactDomain;
         this.domainFindings = domainFindings;
@@ -41,7 +41,7 @@ public final class ImpactDomainNode extends Node {
         }
 
         var byRuleTitle = domainFindings.stream().collect(Collectors.groupingBy(problem -> {
-            var ruleTitle = problem.getFinding().ruleTitle;
+            var ruleTitle = problem.ruleTitle;
             return ruleTitle.isEmpty() ? "Unknown" : ruleTitle;
         }));
 

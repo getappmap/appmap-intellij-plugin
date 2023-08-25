@@ -1,7 +1,7 @@
 package appland.toolwindow.runtimeAnalysis.nodes;
 
 import appland.AppMapBundle;
-import appland.problemsView.ScannerProblem;
+import appland.problemsView.model.ScannerFinding;
 import com.intellij.icons.AllIcons;
 import com.intellij.ide.projectView.PresentationData;
 import com.intellij.ide.util.treeView.NodeDescriptor;
@@ -22,13 +22,13 @@ import java.util.stream.Collectors;
  * Displays all findings, regardless of the test_status flag.
  */
 final class FailedAndSuccessfulFindingsNode extends Node {
-    private final List<ScannerProblem> problems;
+    private final @NotNull List<ScannerFinding> findings;
 
     public FailedAndSuccessfulFindingsNode(@NotNull Project project,
                                            @NotNull NodeDescriptor parentDescriptor,
-                                           @NotNull List<ScannerProblem> problems) {
+                                           @NotNull List<ScannerFinding> findings) {
         super(project, parentDescriptor);
-        this.problems = problems;
+        this.findings = findings;
     }
 
     @Override
@@ -46,8 +46,7 @@ final class FailedAndSuccessfulFindingsNode extends Node {
     public List<? extends Node> getChildren() {
         var now = Instant.now();
 
-        var byDateBucket = problems.stream().collect(Collectors.groupingBy(problem -> {
-            var finding = problem.getFinding();
+        var byDateBucket = findings.stream().collect(Collectors.groupingBy(finding -> {
             var date = finding.eventsModifiedDate != null ? finding.eventsModifiedDate : finding.scopeModifiedDate;
             var ageMillis = date != null ? ChronoUnit.MILLIS.between(date.toInstant(), now) : null;
             return DateBucket.findBucket(ageMillis);

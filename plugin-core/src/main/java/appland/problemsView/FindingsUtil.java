@@ -2,6 +2,7 @@ package appland.problemsView;
 
 import appland.files.AppMapFiles;
 import appland.files.FileLocation;
+import appland.problemsView.model.ScannerFinding;
 import appland.webviews.appMap.AppMapFileEditorState;
 import com.google.gson.*;
 import com.intellij.openapi.application.ReadAction;
@@ -36,7 +37,7 @@ public final class FindingsUtil {
      */
     public static @NotNull JsonArray createFindingsArray(@NotNull Gson gson,
                                                          @NotNull Project project,
-                                                         @NotNull List<ScannerProblem> findings,
+                                                         @NotNull List<ScannerFinding> findings,
                                                          @NotNull String rulePropertyName) {
         var findingsJSON = new JsonArray();
         for (var finding : findings) {
@@ -47,10 +48,10 @@ public final class FindingsUtil {
 
     private static @NotNull JsonObject createFindingItemJson(@NotNull Gson gson,
                                                              @NotNull Project project,
-                                                             @NotNull ScannerProblem finding,
+                                                             @NotNull ScannerFinding finding,
                                                              @NotNull String rulePropertyName) {
         var jsonItem = new JsonObject();
-        jsonItem.add("finding", gson.toJsonTree(finding.getFinding()));
+        jsonItem.add("finding", gson.toJsonTree(finding));
         jsonItem.add("appMapUri", createAppMapUriJson(finding));
         jsonItem.add("problemLocation", createProblemLocationJson(finding));
         jsonItem.add("stackLocations", ReadAction.compute(() -> createStackLocationsJson(gson, project, finding)));
@@ -63,7 +64,7 @@ public final class FindingsUtil {
     /**
      * follows VSCode's "filterFinding"
      */
-    private static @Nullable String findAppMapName(@NotNull ScannerProblem finding) {
+    private static @Nullable String findAppMapName(@NotNull ScannerFinding finding) {
         var appMapFile = AppMapFiles.findAppMapFileByMetadataFile(finding.getFindingsFile());
         if (appMapFile == null) {
             return null;
@@ -74,8 +75,8 @@ public final class FindingsUtil {
         return index == -1 ? filename : filename.substring(0, index);
     }
 
-    private static @NotNull JsonElement createProblemLocationJson(@NotNull ScannerProblem finding) {
-        var location = finding.getFinding().getProblemLocation();
+    private static @NotNull JsonElement createProblemLocationJson(@NotNull ScannerFinding finding) {
+        var location = finding.getProblemLocationFromStack();
         if (location == null) {
             return JsonNull.INSTANCE;
         }
@@ -92,9 +93,9 @@ public final class FindingsUtil {
 
     private static @NotNull JsonElement createStackLocationsJson(@NotNull Gson gson,
                                                                  @NotNull Project project,
-                                                                 @NotNull ScannerProblem finding) {
+                                                                 @NotNull ScannerFinding finding) {
         var baseFile = finding.getFindingsFile();
-        var stackLocations = finding.getFinding().stack.stream()
+        var stackLocations = finding.stack.stream()
                 .map(frame -> resolveStackFrame(project, frame, baseFile))
                 .filter(Objects::nonNull)
                 .collect(Collectors.toUnmodifiableList());
@@ -106,14 +107,14 @@ public final class FindingsUtil {
         return json;
     }
 
-    private static @NotNull JsonElement createRuleInfoJson(@NotNull Gson gson, @NotNull ScannerProblem finding) {
-        return gson.toJsonTree(finding.getFinding().ruleInfo);
+    private static @NotNull JsonElement createRuleInfoJson(@NotNull Gson gson, @NotNull ScannerFinding finding) {
+        return gson.toJsonTree(finding.ruleInfo);
     }
 
     /**
      * follows VSCode's "resolveAppMapUri"
      */
-    private static @NotNull JsonElement createAppMapUriJson(@NotNull ScannerProblem finding) {
+    private static @NotNull JsonElement createAppMapUriJson(@NotNull ScannerFinding finding) {
         var appMapFile = AppMapFiles.findAppMapFileByMetadataFile(finding.getFindingsFile());
         if (appMapFile == null) {
             return JsonNull.INSTANCE;
@@ -121,7 +122,7 @@ public final class FindingsUtil {
 
         // Adds the state of the webview as URI anchor.
         // The AppMap webview needs property "fragment" and doesn't work with a path containing #fragment.
-        var state = AppMapFileEditorState.createViewFlowState(finding.getFinding().getEventId(), finding.getFinding().relatedEvents).jsonState;
+        var state = AppMapFileEditorState.createViewFlowState(finding.getEventId(), finding.relatedEvents).jsonState;
         var json = new JsonObject();
         json.addProperty("path", appMapFile.toNioPath().toString());
         json.addProperty("fragment", state);

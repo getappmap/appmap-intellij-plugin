@@ -26,7 +26,7 @@ public final class ScannerProblem implements FileProblem {
         this.annotatedFile = annotatedFile;
         this.finding = finding;
 
-        var location = finding.getProblemLocation();
+        var location = finding.getProblemLocationFromStack();
         this.line = location != null ? location.getZeroBasedLine(-1) : -1;
     }
 

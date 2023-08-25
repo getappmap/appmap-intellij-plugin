@@ -1,18 +1,15 @@
 package appland.toolwindow.runtimeAnalysis.nodes;
 
-import appland.problemsView.ScannerProblem;
+import appland.problemsView.model.ScannerFinding;
 import appland.webviews.findingDetails.FindingDetailsEditorProvider;
 import com.intellij.ide.projectView.PresentationData;
 import com.intellij.ide.util.treeView.NodeDescriptor;
-import com.intellij.openapi.application.ReadAction;
+import com.intellij.openapi.fileTypes.FileTypeManager;
 import com.intellij.openapi.project.Project;
-import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.pom.Navigatable;
-import com.intellij.psi.PsiFile;
-import com.intellij.psi.PsiManager;
 import com.intellij.ui.tree.LeafState;
+import com.intellij.util.PathUtil;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.Collections;
 import java.util.List;
@@ -21,13 +18,13 @@ import java.util.List;
  * Node representing a single findings and its location.
  */
 final class FindingLocationNode extends Node {
-    private final @NotNull ScannerProblem problem;
+    private final @NotNull ScannerFinding finding;
 
     public FindingLocationNode(@NotNull Project project,
                                @NotNull NodeDescriptor parentDescriptor,
-                               @NotNull ScannerProblem problem) {
+                               @NotNull ScannerFinding finding) {
         super(project, parentDescriptor);
-        this.problem = problem;
+        this.finding = finding;
     }
 
     @Override
@@ -36,16 +33,11 @@ final class FindingLocationNode extends Node {
     }
 
     @Override
-    public @NotNull VirtualFile getFile() {
-        return problem.getFile();
-    }
-
-    @Override
     public @NotNull Navigatable getNavigatable() {
         return new Navigatable() {
             @Override
             public void navigate(boolean requestFocus) {
-                FindingDetailsEditorProvider.openEditor(myProject, List.of(problem));
+                FindingDetailsEditorProvider.openEditor(myProject, List.of(finding));
             }
 
             @Override
@@ -67,21 +59,18 @@ final class FindingLocationNode extends Node {
 
     @Override
     protected void update(@NotNull PresentationData presentation) {
-        presentation.setPresentableText(problem.getFile().getPresentableName());
+        if (finding.getProblemLocationFromStack() != null) {
+            var filePath = finding.getProblemLocationFromStack().filePath;
+            var fileName = PathUtil.getFileName(filePath);
+            presentation.setPresentableText(fileName);
 
-        var psiFile = findPsiFile();
-        if (psiFile != null) {
-            var filePresentation = psiFile.getPresentation();
-            if (filePresentation != null) {
-                presentation.setPresentableText(filePresentation.getPresentableText());
-                presentation.setLocationString(filePresentation.getLocationString());
-                presentation.setIcon(ReadAction.compute(() -> filePresentation.getIcon(false)));
-            }
+            var fileType = FileTypeManager.getInstance().getFileTypeByFileName(fileName);
+            presentation.setIcon(fileType.getIcon());
+
+            presentation.setLocationString(filePath);
+        } else {
+            // fixme
+            presentation.setPresentableText("- unknown -");
         }
-    }
-
-    @Nullable
-    private PsiFile findPsiFile() {
-        return ReadAction.compute(() -> PsiManager.getInstance(myProject).findFile(problem.getFile()));
     }
 }

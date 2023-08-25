@@ -1,6 +1,6 @@
 package appland.toolwindow.runtimeAnalysis.nodes;
 
-import appland.problemsView.ScannerProblem;
+import appland.problemsView.model.ScannerFinding;
 import com.intellij.icons.AllIcons;
 import com.intellij.ide.projectView.PresentationData;
 import com.intellij.ide.util.treeView.NodeDescriptor;
@@ -18,15 +18,15 @@ import java.util.stream.Collectors;
  */
 final class DateBucketNode extends Node {
     private final String label;
-    private final List<ScannerProblem> problems;
+    private final List<ScannerFinding> findings;
 
     public DateBucketNode(@NotNull Project project,
                           @NotNull NodeDescriptor parentDescriptor,
                           @NotNull String label,
-                          @NotNull List<ScannerProblem> problems) {
+                          @NotNull List<ScannerFinding> findings) {
         super(project, parentDescriptor);
         this.label = label;
-        this.problems = problems;
+        this.findings = findings;
     }
 
     @Override
@@ -42,10 +42,10 @@ final class DateBucketNode extends Node {
 
     @Override
     public List<? extends Node> getChildren() {
-        var byImpactDomain = problems.stream()
-                .filter(problem -> problem.getFinding().impactDomain != null)
+        var byImpactDomain = findings.stream()
+                .filter(problem -> problem.impactDomain != null)
                 .collect(Collectors.groupingBy(
-                        item -> item.getFinding().impactDomain,
+                        finding -> finding.impactDomain,
                         TreeMap::new,
                         Collectors.toList()));
 

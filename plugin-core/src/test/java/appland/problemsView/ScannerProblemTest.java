@@ -13,7 +13,7 @@ public class ScannerProblemTest extends AppMapBaseTest {
         var scannerFinding = new ScannerFinding();
         scannerFinding.stack = List.of("parent/child/package/file.java:100");
         scannerFinding.setFindingsFile(new LightVirtualFile());
-        var problemLocation = scannerFinding.getProblemLocation();
+        var problemLocation = scannerFinding.getProblemLocationFromStack();
         assertNotNull(problemLocation);
         assertEquals(Integer.valueOf(100), problemLocation.line);
 
