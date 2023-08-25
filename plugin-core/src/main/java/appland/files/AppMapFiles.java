@@ -152,7 +152,10 @@ public final class AppMapFiles {
      * @return The .appmap.json file, which is the source of the given metadata file
      */
     @RequiresReadLock
-    public static @Nullable VirtualFile findAppMapFileByMetadataFile(@NotNull VirtualFile appMapMetadataFile) {
+    public static @Nullable VirtualFile findAppMapFileByMetadataFile(@Nullable VirtualFile appMapMetadataFile) {
+        if (appMapMetadataFile == null) {
+            return null;
+        }
         return findAppMapByMetadataDirectory(appMapMetadataFile.getParent());
     }
 

@@ -2,7 +2,7 @@ package appland.webviews.findingDetails;
 
 import appland.AppMapBundle;
 import appland.Icons;
-import appland.problemsView.ScannerProblem;
+import appland.problemsView.model.ScannerFinding;
 import appland.telemetry.TelemetryService;
 import appland.webviews.WebviewEditor;
 import appland.webviews.WebviewEditorProvider;
@@ -21,7 +21,7 @@ import java.util.Objects;
 
 public class FindingDetailsEditorProvider extends WebviewEditorProvider {
     private static final String TYPE_ID = "appland.findingDetails";
-    static final Key<List<ScannerProblem>> KEY_FINDINGS = Key.create("appmap.findingDetailsData");
+    static final Key<List<ScannerFinding>> KEY_FINDINGS = Key.create("appmap.findingDetailsData");
 
     public FindingDetailsEditorProvider() {
         super(TYPE_ID);
@@ -34,7 +34,7 @@ public class FindingDetailsEditorProvider extends WebviewEditorProvider {
      * @param project  Current project
      * @param findings Findings to show in the webview
      */
-    public static void openEditor(@NotNull Project project, @NotNull List<ScannerProblem> findings) {
+    public static void openEditor(@NotNull Project project, @NotNull List<ScannerFinding> findings) {
         var provider = WebviewEditorProvider.findEditorProvider(TYPE_ID);
         assert provider != null;
 
@@ -64,7 +64,7 @@ public class FindingDetailsEditorProvider extends WebviewEditorProvider {
      * because we only want to reuse for the same list of findings.
      */
     private static boolean reuseExistingEditor(@NotNull Project project,
-                                               @NotNull List<ScannerProblem> findings,
+                                               @NotNull List<ScannerFinding> findings,
                                                @NotNull WebviewEditorProvider provider) {
         for (var editor : FileEditorManager.getInstance(project).getAllEditors()) {
             var file = editor.getFile();
@@ -79,13 +79,13 @@ public class FindingDetailsEditorProvider extends WebviewEditorProvider {
         return false;
     }
 
-    private static String findEditorTitle(@NotNull List<ScannerProblem> findings) {
+    private static String findEditorTitle(@NotNull List<ScannerFinding> findings) {
         return findings.isEmpty()
                 ? AppMapBundle.get("webview.findingDetails.title")
-                : findings.get(0).getFinding().ruleTitle;
+                : findings.get(0).ruleTitle;
     }
 
-    private static void queueTelemetryMessage(@NotNull List<ScannerProblem> findings) {
+    private static void queueTelemetryMessage(@NotNull List<ScannerFinding> findings) {
         if (findings.isEmpty()) {
             return;
         }
@@ -94,11 +94,10 @@ public class FindingDetailsEditorProvider extends WebviewEditorProvider {
         // and have the same properties
         var finding = findings.get(0);
         TelemetryService.getInstance().sendEvent("analysis:view_finding", eventData -> {
-            eventData.property("appmap.finding.rule", finding.getFinding().ruleId);
-            eventData.property("appmap.finding.hash", finding.getFinding().getAppMapHashWithFallback());
-            var impactDomain = finding.getFinding().impactDomain;
-            if (impactDomain != null) {
-                eventData.property("appmap.finding.impact_domain", impactDomain.getJsonId());
+            eventData.property("appmap.finding.rule", finding.ruleId);
+            eventData.property("appmap.finding.hash", finding.getAppMapHashWithFallback());
+            if (finding.impactDomain != null) {
+                eventData.property("appmap.finding.impact_domain", finding.impactDomain.getJsonId());
             }
             return eventData;
         });

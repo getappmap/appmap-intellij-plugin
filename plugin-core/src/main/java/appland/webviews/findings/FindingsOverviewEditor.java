@@ -118,7 +118,7 @@ public class FindingsOverviewEditor extends WebviewEditor<List<ScannerFinding>> 
     }
 
     private void openFindingsByHash(@NotNull String hash) {
-        var findings = FindingsManager.getInstance(project).findProblemByHash(hash);
+        var findings = FindingsManager.getInstance(project).findFindingsByHash(hash);
         ApplicationManager.getApplication().invokeLater(() -> {
             if (findings.isEmpty()) {
                 Messages.showErrorDialog("Unable to locate AppMap with ID", "Error Locating AppMap");

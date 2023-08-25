@@ -1,6 +1,6 @@
 package appland.toolwindow.runtimeAnalysis.nodes;
 
-import appland.problemsView.ScannerProblem;
+import appland.problemsView.model.ScannerFinding;
 import com.intellij.icons.AllIcons;
 import com.intellij.ide.projectView.PresentationData;
 import com.intellij.ide.util.treeView.NodeDescriptor;
@@ -18,15 +18,15 @@ import java.util.List;
  */
 final class AppMapProjectFindingsNode extends Node {
     private final String projectName;
-    private final List<ScannerProblem> problems;
+    private final @NotNull List<ScannerFinding> findings;
 
     public AppMapProjectFindingsNode(@NotNull Project project,
                                      @NotNull NodeDescriptor parentDescriptor,
                                      @NotNull String projectName,
-                                     @NotNull List<ScannerProblem> problems) {
+                                     @NotNull List<ScannerFinding> findings) {
         super(project, parentDescriptor);
         this.projectName = projectName;
-        this.problems = problems;
+        this.findings = findings;
     }
 
     @Override
@@ -37,7 +37,7 @@ final class AppMapProjectFindingsNode extends Node {
 
     @Override
     public List<? extends Node> getChildren() {
-        if (problems.isEmpty()) {
+        if (findings.isEmpty()) {
             return Collections.emptyList();
         }
 
@@ -48,7 +48,7 @@ final class AppMapProjectFindingsNode extends Node {
             nodes.add(new FailedTestsNode(myProject, this, failedAppMaps));
         }
 
-        nodes.add(new FailedAndSuccessfulFindingsNode(myProject, this, problems));
+        nodes.add(new FailedAndSuccessfulFindingsNode(myProject, this, findings));
 
         return nodes;
     }

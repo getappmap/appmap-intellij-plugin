@@ -98,7 +98,7 @@ public class AppMapFileEditor extends WebviewEditor<JsonObject> {
             // attach findings, which belong to this AppMap, as property "findings" (same as in VSCode)
             var findingsFile = ReadAction.compute(() -> AppMapFiles.findRelatedFindingsFile(file));
             if (findingsFile != null) {
-                var matchingFindings = FindingsManager.getInstance(project).getAllProblems()
+                var matchingFindings = FindingsManager.getInstance(project).getAllFindings()
                         .stream()
                         .filter(problem -> findingsFile.equals(problem.getFindingsFile()))
                         .collect(Collectors.toList());

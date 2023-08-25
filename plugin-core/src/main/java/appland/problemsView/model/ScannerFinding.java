@@ -9,6 +9,7 @@ import com.intellij.openapi.vfs.VirtualFile;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -17,6 +18,7 @@ import java.util.Date;
 import java.util.List;
 
 @EqualsAndHashCode
+@ToString
 public class ScannerFinding {
     @SerializedName("hash")
     public @Nullable String appMapHash = null;
@@ -89,7 +91,7 @@ public class ScannerFinding {
         return null;
     }
 
-    public @Nullable FileLocation getProblemLocation() {
+    public @Nullable FileLocation getProblemLocationFromStack() {
         if (stack.isEmpty()) {
             return null;
         }
@@ -103,7 +105,7 @@ public class ScannerFinding {
     }
 
     public @Nullable VirtualFile findAnnotatedSourceFile(@NotNull Project project, @NotNull VirtualFile findingsFile) {
-        var location = getProblemLocation();
+        var location = getProblemLocationFromStack();
         return location != null
                 ? FileLookup.findRelativeFile(project, findingsFile.getParent(), location.filePath)
                 : null;

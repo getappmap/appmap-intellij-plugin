@@ -1,16 +1,13 @@
 package appland.toolwindow.runtimeAnalysis.nodes;
 
-import appland.problemsView.ScannerProblem;
+import appland.problemsView.model.ScannerFinding;
 import com.intellij.ide.projectView.PresentationData;
 import com.intellij.ide.util.treeView.NodeDescriptor;
 import com.intellij.openapi.project.Project;
 import com.intellij.ui.tree.LeafState;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.HashSet;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -24,12 +21,12 @@ final class FindingsGroupNode extends Node {
     public FindingsGroupNode(@NotNull Project project,
                              @NotNull NodeDescriptor parentDescriptor,
                              @NotNull String title,
-                             @NotNull List<ScannerProblem> problems) {
+                             @NotNull List<ScannerFinding> findings) {
         super(project, parentDescriptor);
         this.title = title;
-        this.findings = deduplicateFindings(problems)
+        this.findings = deduplicateFindings(findings)
                 .stream()
-                .sorted(Comparator.comparing(e -> e.getFile().getPresentableName()))
+                .sorted(Comparator.comparing(Object::toString))
                 .map(finding -> new FindingLocationNode(project, this, finding))
                 .collect(Collectors.toUnmodifiableList());
     }
@@ -53,18 +50,18 @@ final class FindingsGroupNode extends Node {
      * Deduplicate findings by AppMap hash code.
      */
     @NotNull
-    private static List<ScannerProblem> deduplicateFindings(@NotNull List<ScannerProblem> problems) {
+    private static List<ScannerFinding> deduplicateFindings(@NotNull List<ScannerFinding> problems) {
         var foundFindingHashes = new HashSet<String>();
-        var findingNodes = new ArrayList<ScannerProblem>();
+        var findingNodes = new ArrayList<ScannerFinding>();
 
         // deduplicate after sorting to get a reliable result for tests
         problems.stream()
-                .sorted(Comparator.comparing(problem -> {
-                    var file = problem.getFinding().getFindingsFile();
-                    return file != null ? file.getPath() : problem.getFinding().getFindingTitle();
+                .sorted(Comparator.comparing(finding -> {
+                    var file = finding.getFindingsFile();
+                    return file != null ? file.getPath() : finding.getFindingTitle();
                 }))
                 .forEachOrdered(problem -> {
-                    var hashCode = problem.getFinding().getAppMapHashWithFallback();
+                    var hashCode = problem.getAppMapHashWithFallback();
                     if (hashCode != null && !hashCode.isEmpty()) {
                         if (!foundFindingHashes.contains(hashCode)) {
                             foundFindingHashes.add(hashCode);

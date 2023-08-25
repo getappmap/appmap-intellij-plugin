@@ -217,10 +217,11 @@ public class FindingsManager implements ProblemsProvider {
         }
     }
 
-    public @NotNull List<ScannerProblem> findProblemByHash(@NotNull String hashV2) {
+    public @NotNull List<ScannerFinding> findFindingsByHash(@NotNull String hashV2) {
         synchronized (lock) {
             return sourceFileToProblems.values().stream()
-                    .filter(p -> hashV2.equals(p.getFinding().getAppMapHashWithFallback()))
+                    .map(ScannerProblem::getFinding)
+                    .filter(p -> hashV2.equals(p.getAppMapHashWithFallback()))
                     .collect(Collectors.toList());
         }
     }

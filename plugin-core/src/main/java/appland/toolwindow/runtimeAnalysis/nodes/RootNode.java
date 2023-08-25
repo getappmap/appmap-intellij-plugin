@@ -2,8 +2,8 @@ package appland.toolwindow.runtimeAnalysis.nodes;
 
 import appland.files.AppMapFiles;
 import appland.problemsView.FindingsManager;
-import appland.problemsView.ScannerProblem;
 import appland.problemsView.listener.ScannerFindingsListener;
+import appland.problemsView.model.ScannerFinding;
 import appland.toolwindow.runtimeAnalysis.RuntimeAnalysisModel;
 import com.intellij.ide.projectView.PresentationData;
 import com.intellij.openapi.Disposable;
@@ -47,12 +47,12 @@ public final class RootNode extends Node implements Disposable {
 
     @Override
     public List<? extends Node> getChildren() {
-        var problems = FindingsManager.getInstance(myProject).getAllProblems();
-        if (problems.isEmpty()) {
+        var findings = FindingsManager.getInstance(myProject).getAllFindings();
+        if (findings.isEmpty()) {
             return List.of(findingsTableNode);
         }
 
-        var byProjectName = problems.stream().collect(Collectors.groupingBy(this::getAppMapProjectName));
+        var byProjectName = findings.stream().collect(Collectors.groupingBy(this::getAppMapProjectName));
 
         var nodes = byProjectName.entrySet().stream()
                 .map(entry -> (Node) new AppMapProjectFindingsNode(myProject, this, entry.getKey(), entry.getValue()))
@@ -63,12 +63,14 @@ public final class RootNode extends Node implements Disposable {
         return nodes;
     }
 
-    private @NotNull String getAppMapProjectName(@NotNull ScannerProblem problem) {
+    private @NotNull String getAppMapProjectName(@NotNull ScannerFinding finding) {
         return ReadAction.compute(() -> {
-            var root = AppMapFiles.findTopLevelContentRoot(myProject, problem.getFile());
+            var root = finding.getFindingsFile() != null
+                    ? AppMapFiles.findTopLevelContentRoot(myProject, finding.getFindingsFile())
+                    : null;
             return root != null
                     ? root.getName()
-                    : problem.getFile().getParent().getName();
+                    : "- unknown -";
         });
     }
 
