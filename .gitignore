@@ -1,5 +1,8 @@
 .idea
+.vscode
 .gradle
 .yarn
 build
 node_modules
+bin
+plugin-core/bin
