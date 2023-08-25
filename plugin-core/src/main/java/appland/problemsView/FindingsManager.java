@@ -69,11 +69,15 @@ public class FindingsManager implements ProblemsProvider {
         return project;
     }
 
+    /**
+     * @return All known findings, including findings without known source files in the project.
+     */
     public @NotNull List<ScannerFinding> getAllFindings() {
         synchronized (lock) {
-            return sourceFileToProblems.values().stream()
-                    .map(ScannerProblem::getFinding)
-                    .collect(Collectors.toList());
+            return Streams.concat(
+                    sourceFileToProblems.values().stream().map(ScannerProblem::getFinding),
+                    findingsWithoutSourceFiles.stream()
+            ).collect(Collectors.toList());
         }
     }
 
