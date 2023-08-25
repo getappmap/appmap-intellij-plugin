@@ -7,10 +7,7 @@ import appland.problemsView.model.FindingsDomainCount;
 import appland.problemsView.model.FindingsFileData;
 import appland.problemsView.model.ScannerFinding;
 import appland.utils.GsonUtils;
-import com.google.common.collect.HashMultiset;
-import com.google.common.collect.Multimap;
-import com.google.common.collect.MultimapBuilder;
-import com.google.common.collect.Multiset;
+import com.google.common.collect.*;
 import com.google.gson.JsonSyntaxException;
 import com.intellij.analysis.problemsView.Problem;
 import com.intellij.analysis.problemsView.ProblemsProvider;
@@ -45,18 +42,18 @@ public class FindingsManager implements ProblemsProvider {
     private final ScannerFindingsListener publisher;
 
     private final Object lock = new Object();
-    // findings file -> reference problem holders
+    // findings file path -> annotated source files
     @GuardedBy("lock")
-    private final Multimap<String, VirtualFile> sourceMapping = MultimapBuilder.hashKeys().hashSetValues().build();
-    // problem holder -> problem
+    private final Multimap<String, VirtualFile> findingPathToSourceFiles = MultimapBuilder.hashKeys().hashSetValues().build();
+    // findings files path -> findings without source files
     @GuardedBy("lock")
-    private final Multimap<VirtualFile, ScannerProblem> problems = MultimapBuilder.hashKeys().arrayListValues().build();
-    // findings files with unknown problem target files
+    private final Multimap<String, ScannerFinding> findingPathToFindings = MultimapBuilder.hashKeys().hashSetValues().build();
+    // reverse mapping: annotated source file -> problem representing finding and source file
     @GuardedBy("lock")
-    private final Multimap<String, ScannerFinding> sourceMappingOther = MultimapBuilder.hashKeys().hashSetValues().build();
+    private final Multimap<VirtualFile, ScannerProblem> sourceFileToProblems = MultimapBuilder.hashKeys().arrayListValues().build();
     // problems where the target file couldn't be found
     @GuardedBy("lock")
-    private final Multiset<ScannerFinding> problemsOther = HashMultiset.create();
+    private final Multiset<ScannerFinding> findingsWithoutSourceFiles = HashMultiset.create();
 
     public static @NotNull FindingsManager getInstance(@NotNull Project project) {
         return project.getService(FindingsManager.class);
@@ -74,7 +71,7 @@ public class FindingsManager implements ProblemsProvider {
 
     public @NotNull List<ScannerFinding> getAllFindings() {
         synchronized (lock) {
-            return problems.values().stream()
+            return sourceFileToProblems.values().stream()
                     .map(ScannerProblem::getFinding)
                     .collect(Collectors.toList());
         }
@@ -82,13 +79,13 @@ public class FindingsManager implements ProblemsProvider {
 
     public int getProblemFileCount() {
         synchronized (lock) {
-            return problems.size();
+            return sourceFileToProblems.size();
         }
     }
 
     public @NotNull List<ScannerProblem> getAllProblems() {
         synchronized (lock) {
-            return List.copyOf(problems.values());
+            return List.copyOf(sourceFileToProblems.values());
         }
     }
 
@@ -97,19 +94,19 @@ public class FindingsManager implements ProblemsProvider {
      */
     public @NotNull Collection<VirtualFile> getProblemFiles() {
         synchronized (lock) {
-            return List.copyOf(problems.keySet());
+            return List.copyOf(sourceFileToProblems.keySet());
         }
     }
 
     public List<Problem> getProblems(@NotNull VirtualFile file) {
         synchronized (lock) {
-            return List.copyOf(problems.get(file));
+            return List.copyOf(sourceFileToProblems.get(file));
         }
     }
 
     public List<ScannerProblem> getScannerProblems(@NotNull VirtualFile file) {
         synchronized (lock) {
-            return List.copyOf(problems.get(file));
+            return List.copyOf(sourceFileToProblems.get(file));
         }
     }
 
@@ -118,7 +115,7 @@ public class FindingsManager implements ProblemsProvider {
      */
     public int getProblemCount() {
         synchronized (lock) {
-            return problems.size() + problemsOther.size();
+            return sourceFileToProblems.size() + findingsWithoutSourceFiles.size();
         }
     }
 
@@ -128,7 +125,7 @@ public class FindingsManager implements ProblemsProvider {
      */
     public int getProblemCount(@NotNull VirtualFile file) {
         synchronized (lock) {
-            return problems.get(file).size();
+            return sourceFileToProblems.get(file).size();
         }
     }
 
@@ -138,14 +135,14 @@ public class FindingsManager implements ProblemsProvider {
     public @NotNull FindingsDomainCount getFindingsImpactDomainCount() {
         var domainMapping = new FindingsDomainCount();
         synchronized (lock) {
-            for (var problem : problems.values()) {
+            for (var problem : sourceFileToProblems.values()) {
                 var finding = problem.getFinding();
                 if (finding.impactDomain != null) {
                     domainMapping.add(finding.impactDomain);
                 }
             }
 
-            for (var finding : sourceMappingOther.values()) {
+            for (var finding : findingPathToFindings.values()) {
                 if (finding.impactDomain != null) {
                     domainMapping.add(finding.impactDomain);
                 }
@@ -156,13 +153,13 @@ public class FindingsManager implements ProblemsProvider {
 
     public int getOtherProblemCount() {
         synchronized (lock) {
-            return problemsOther.size();
+            return findingsWithoutSourceFiles.size();
         }
     }
 
     public Collection<ScannerFinding> getOtherProblems() {
         synchronized (lock) {
-            return List.copyOf(problemsOther);
+            return List.copyOf(findingsWithoutSourceFiles);
         }
     }
 
@@ -218,7 +215,7 @@ public class FindingsManager implements ProblemsProvider {
 
     public @NotNull List<ScannerProblem> findProblemByHash(@NotNull String hashV2) {
         synchronized (lock) {
-            return problems.values().stream()
+            return sourceFileToProblems.values().stream()
                     .filter(p -> hashV2.equals(p.getFinding().getAppMapHashWithFallback()))
                     .collect(Collectors.toList());
         }
@@ -231,43 +228,43 @@ public class FindingsManager implements ProblemsProvider {
 
     void reset() {
         synchronized (lock) {
-            sourceMapping.clear();
-            problems.clear();
-            sourceMappingOther.clear();
-            problemsOther.clear();
+            findingPathToSourceFiles.clear();
+            sourceFileToProblems.clear();
+            findingPathToFindings.clear();
+            findingsWithoutSourceFiles.clear();
         }
     }
 
     private void clearAndNotify() {
         synchronized (lock) {
             var allPaths = new HashSet<String>();
-            allPaths.addAll(sourceMapping.keySet());
-            allPaths.addAll(sourceMappingOther.keySet());
+            allPaths.addAll(findingPathToSourceFiles.keySet());
+            allPaths.addAll(findingPathToFindings.keySet());
 
             for (var path : allPaths) {
                 removeFindingsFileLocked(path);
             }
 
-            assert sourceMapping.isEmpty();
-            assert sourceMappingOther.isEmpty();
-            assert problems.isEmpty();
-            assert problemsOther.isEmpty();
+            assert findingPathToSourceFiles.isEmpty();
+            assert findingPathToFindings.isEmpty();
+            assert sourceFileToProblems.isEmpty();
+            assert findingsWithoutSourceFiles.isEmpty();
         }
     }
 
     private void removeFindingsFileLocked(@NotNull String path) {
         var dataChanged = false;
 
-        for (var targetFile : sourceMapping.removeAll(path)) {
-            for (var problem : problems.removeAll(targetFile)) {
+        for (var annotatedSourceFile : findingPathToSourceFiles.removeAll(path)) {
+            for (var problem : sourceFileToProblems.removeAll(annotatedSourceFile)) {
                 publisher.problemDisappeared(problem);
                 dataChanged = true;
             }
         }
 
-        var unknownFileMapping = sourceMappingOther.removeAll(path);
+        var unknownFileMapping = findingPathToFindings.removeAll(path);
         if (!unknownFileMapping.isEmpty()) {
-            problemsOther.removeAll(unknownFileMapping);
+            findingsWithoutSourceFiles.removeAll(unknownFileMapping);
             publisher.afterUnknownFileProblemsChange();
             dataChanged = true;
         }
@@ -290,18 +287,18 @@ public class FindingsManager implements ProblemsProvider {
                     finding.setFindingsMetaData(metaData);
                 }
 
-                var annotatedFile = finding.findAnnotatedFile(project, findingsFile);
-                if (annotatedFile != null) {
-                    sourceMapping.put(findingsFile.getPath(), annotatedFile);
+                var annotatedSourceFile = finding.findAnnotatedSourceFile(project, findingsFile);
+                if (annotatedSourceFile != null) {
+                    findingPathToSourceFiles.put(findingsFile.getPath(), annotatedSourceFile);
 
-                    var problem = new ScannerProblem(this, annotatedFile, finding);
-                    problems.put(annotatedFile, problem);
+                    var problem = new ScannerProblem(this, annotatedSourceFile, finding);
+                    sourceFileToProblems.put(annotatedSourceFile, problem);
 
                     // this takes care of problemAppeared, problemDisappeared, problemUpdated notifications
                     notifier.accept(problem);
                 } else {
-                    sourceMappingOther.put(findingsFile.getPath(), finding);
-                    problemsOther.add(finding);
+                    findingPathToFindings.put(findingsFile.getPath(), finding);
+                    findingsWithoutSourceFiles.add(finding);
 
                     publisher.afterUnknownFileProblemsChange();
                 }
