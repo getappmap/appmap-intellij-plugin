@@ -52,6 +52,11 @@ jobs:
                       build/reports/
                       **/build/reports/
 
+            - name: Find the AppMaps
+              shell: bash
+              run: |
+                  find .
+
             - name: Save AppMaps
               uses: actions/cache/save@v3
               if: always()
