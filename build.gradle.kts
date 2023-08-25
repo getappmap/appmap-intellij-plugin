@@ -143,13 +143,6 @@ allprojects {
             // always execute tests, don't skip by Gradle's up-to-date checks in development
             outputs.upToDateWhen { false }
 
-            // attach AppMap agent
-            dependsOn(":downloadAppMapAgent")
-            jvmArgs("-javaagent:$agentOutputPath",
-                    "-Dappmap.config.file=${rootProject.file("appmap.yml")}",
-                    "-Dappmap.output.directory=${rootProject.buildDir.resolve("appmap")}")
-            systemProperty("appmap.test.withAgent", "true")
-
             // logging setup
             testLogging {
                 setEvents(listOf(TestLogEvent.FAILED, TestLogEvent.STANDARD_OUT, TestLogEvent.STANDARD_ERROR))
