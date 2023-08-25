@@ -102,13 +102,11 @@ public class ScannerFinding {
         return FileLocation.parse(candidate);
     }
 
-    public @Nullable VirtualFile findAnnotatedFile(@NotNull Project project, @NotNull VirtualFile findingsFile) {
-        var parentDir = findingsFile.getParent();
+    public @Nullable VirtualFile findAnnotatedSourceFile(@NotNull Project project, @NotNull VirtualFile findingsFile) {
         var location = getProblemLocation();
-        if (location != null) {
-            return FileLookup.findRelativeFile(project, parentDir, location.filePath);
-        }
-        return null;
+        return location != null
+                ? FileLookup.findRelativeFile(project, findingsFile.getParent(), location.filePath)
+                : null;
     }
 
     public @Nullable Integer getEventId() {
