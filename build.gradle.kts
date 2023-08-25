@@ -1,6 +1,4 @@
 import com.adarshr.gradle.testlogger.theme.ThemeType
-import de.undercouch.gradle.tasks.download.Download
-import groovy.json.JsonSlurper
 import org.commonmark.parser.Parser
 import org.commonmark.renderer.html.HtmlRenderer
 import org.gradle.api.JavaVersion.VERSION_11
@@ -25,6 +23,7 @@ plugins {
     id("org.jetbrains.changelog") version "1.3.1"
     id("com.adarshr.test-logger") version "3.2.0"
     id("de.undercouch.download") version "5.4.0"
+    id("com.appland.appmap") version "1.1.1"
 }
 
 val pluginVersion = prop("pluginVersion")
@@ -46,6 +45,7 @@ allprojects {
         plugin("idea")
         plugin("org.jetbrains.intellij")
         plugin("com.adarshr.test-logger")
+        plugin("com.appland.appmap")
     }
 
     val testOutput = configurations.create("testOutput")
@@ -121,9 +121,18 @@ allprojects {
             }
         }
 
-        withType<Test> {
+        appmap {
+            configFile.set(rootProject.file("appmap.yml"))
+            outputDirectory.set(rootProject.buildDir.resolve("appmap"))
+            debugFile.set(rootProject.buildDir.resolve("appmap/agent.log"))
+        }
+
+        named<Test>("test") {
+            // dependsOn("appmap")
+
             systemProperty("idea.test.execution.policy", "appland.AppLandTestExecutionPolicy")
             systemProperty("appland.testDataPath", rootProject.rootDir.resolve("src/test/data").path)
+            systemProperty("appmap.test.withAgent", "true")
             if (isCI) {
                 systemProperty("appland.github_token", System.getenv("GITHUB_TOKEN"))
             }
@@ -133,15 +142,6 @@ allprojects {
 
             // always execute tests, don't skip by Gradle's up-to-date checks in development
             outputs.upToDateWhen { false }
-
-            // attach AppMap agent, but only if Gradle is online
-            if (!project.gradle.startParameter.isOffline) {
-                dependsOn(":downloadAppMapAgent")
-                jvmArgs("-javaagent:$agentOutputPath",
-                        "-Dappmap.config.file=${rootProject.file("appmap.yml")}",
-                        "-Dappmap.output.directory=${rootProject.buildDir.resolve("appmap")}")
-                systemProperty("appmap.test.withAgent", "true")
-            }
 
             // logging setup
             testLogging {
@@ -236,34 +236,6 @@ project(":") {
                     changelog.get(pluginVersion).toHTML()
                 }
             })
-        }
-
-        @Suppress("UNCHECKED_CAST")
-        task<Download>("downloadAppMapAgent") {
-            src("https://api.github.com/repos/getappmap/appmap-java/releases/latest")
-            dest(project.buildDir.resolve("appmap-java.json"))
-            overwrite(true)
-            quiet(true)
-            if (isCI) {
-                header("Authorization", "Bearer ${System.getenv("GITHUB_TOKEN")}")
-            }
-
-            doLast {
-                val json = JsonSlurper().parseText(dest.readText()) as Map<*, *>
-                val jarAsset = (json["assets"] as List<Map<*, *>>)
-                        .filter { (it["name"] as? String)?.endsWith(".jar") == true }
-                        .map { it["browser_download_url"]!! }
-                        .firstOrNull()
-
-                download.run {
-                    src(jarAsset)
-                    dest(agentOutputPath)
-                    overwrite(false)
-                    if (isCI) {
-                        header("Authorization", "Bearer ${System.getenv("GITHUB_TOKEN")}")
-                    }
-                }
-            }
         }
     }
 }
