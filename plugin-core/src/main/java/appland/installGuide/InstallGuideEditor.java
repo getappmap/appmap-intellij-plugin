@@ -70,12 +70,15 @@ public class InstallGuideEditor extends WebviewEditor<List<ProjectMetadata>> {
         this.type = type;
     }
 
-    public void navigateTo(@NotNull InstallGuideViewPage page) {
+    public void navigateTo(@NotNull InstallGuideViewPage page, boolean postWebviewMessage) {
         this.type = page;
         if (page == InstallGuideViewPage.RuntimeAnalysis) {
             AppMapProjectSettingsService.getState(project).setInvestigatedFindings(true);
         }
-        postMessage(createPageNavigationJSON(page));
+
+        if (postWebviewMessage) {
+            postMessage(createPageNavigationJSON(page));
+        }
     }
 
     private void refreshProjects() {
@@ -111,6 +114,11 @@ public class InstallGuideEditor extends WebviewEditor<List<ProjectMetadata>> {
                     public void openedAppMapChanged() {
                         settingsRefreshAlarm.cancelAndRequest();
                     }
+
+            @Override
+            public void investigatedFindingsChanged() {
+                settingsRefreshAlarm.cancelAndRequest();
+            }
                 });
     }
 
