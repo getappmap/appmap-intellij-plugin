@@ -135,13 +135,11 @@ allprojects {
             outputs.upToDateWhen { false }
 
             // attach AppMap agent, but only if Gradle is online
-            if (!project.gradle.startParameter.isOffline) {
-                dependsOn(":downloadAppMapAgent")
-                jvmArgs("-javaagent:$agentOutputPath",
-                        "-Dappmap.config.file=${rootProject.file("appmap.yml")}",
-                        "-Dappmap.output.directory=${rootProject.buildDir.resolve("appmap")}")
-                systemProperty("appmap.test.withAgent", "true")
-            }
+            dependsOn(":downloadAppMapAgent")
+            jvmArgs("-javaagent:$agentOutputPath",
+                    "-Dappmap.config.file=${rootProject.file("appmap.yml")}",
+                    "-Dappmap.output.directory=${rootProject.buildDir.resolve("appmap")}")
+            systemProperty("appmap.test.withAgent", "true")
 
             // logging setup
             testLogging {
