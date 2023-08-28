@@ -1,0 +1,66 @@
+name: Build
+on:
+    pull_request:
+    push:
+        branches:
+            - master
+    schedule:
+        - cron: "0 0 * * 0"
+
+jobs:
+    test:
+        name: Test
+        runs-on: ubuntu-latest
+        steps:
+            - name: Fetch Sources
+              uses: actions/checkout@v3
+
+            - name: Gradle Wrapper Validation
+              uses: gradle/wrapper-validation-action@v1
+
+            - name: Setup Java
+              uses: actions/setup-java@v3
+              with:
+                  distribution: temurin
+                  java-version: 17
+
+            # https://docs.github.com/en/rest/overview/resources-in-the-rest-api?apiVersion=2022-11-28#rate-limits-for-requests-from-github-actions
+            - name: Show GitHub Actions rate limit
+              shell: bash
+              run: |
+                  curl -s -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" -i https://api.github.com/users/octocat | grep x-ratelimit
+
+            - name: Run Linters and Test
+              env:
+                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+              run: ./gradlew check
+
+            - name: Verify plugin
+              shell: bash
+              run: ./gradlew verifyPlugin
+
+            - name: Run Plugin Verifier
+              shell: bash
+              run: ./gradlew runPluginVerifier
+
+            - name: Upload Test Reports
+              uses: actions/upload-artifact@v3
+              if: failure()
+              with:
+                  name: test-reports-linux
+                  path: |
+                      build/reports/
+                      **/build/reports/
+
+            - name: Save AppMaps
+              uses: actions/cache/save@v3
+              if: always()
+              with:
+                  path: build/appmap
+                  key: appmaps-${{ github.sha }}-${{ github.run_attempt }}
+
+    appmap-analysis:
+        permissions: write-all
+        if: always()
+        needs: [test]
+        uses: ./.github/workflows/appmap-analysis.yml

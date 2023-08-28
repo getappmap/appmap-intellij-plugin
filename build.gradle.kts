@@ -1,3 +1,6 @@
+import com.adarshr.gradle.testlogger.theme.ThemeType
+import de.undercouch.gradle.tasks.download.Download
+import groovy.json.JsonSlurper
 import org.commonmark.parser.Parser
 import org.commonmark.renderer.html.HtmlRenderer
 import org.gradle.api.JavaVersion.VERSION_11
@@ -21,6 +24,7 @@ plugins {
     id("org.jetbrains.intellij") version "1.13.2"
     id("org.jetbrains.changelog") version "1.3.1"
     id("com.adarshr.test-logger") version "3.2.0"
+    id("de.undercouch.download") version "5.4.0"
 }
 
 val pluginVersion = prop("pluginVersion")
@@ -30,6 +34,7 @@ group = "appland.appmap"
 version = pluginVersion
 
 val isCI = System.getenv("CI") == "true"
+val agentOutputPath = rootProject.buildDir.resolve("appmap-agent.jar")
 
 allprojects {
     repositories {
@@ -119,14 +124,30 @@ allprojects {
         withType<Test> {
             systemProperty("idea.test.execution.policy", "appland.AppLandTestExecutionPolicy")
             systemProperty("appland.testDataPath", rootProject.rootDir.resolve("src/test/data").path)
+            if (isCI) {
+                systemProperty("appland.github_token", System.getenv("GITHUB_TOKEN"))
+            }
+
             // to allow tests to access the custom Java 11 JDK
             systemProperties["NO_FS_ROOTS_ACCESS_CHECK"] = true
 
             // always execute tests, don't skip by Gradle's up-to-date checks in development
             outputs.upToDateWhen { false }
 
+            // attach AppMap agent, but only if Gradle is online
+            dependsOn(":downloadAppMapAgent")
+            jvmArgs("-javaagent:$agentOutputPath",
+                    "-Dappmap.config.file=${rootProject.file("appmap.yml")}",
+                    "-Dappmap.output.directory=${rootProject.buildDir.resolve("appmap")}")
+            systemProperty("appmap.test.withAgent", "true")
+
+            // logging setup
             testLogging {
                 setEvents(listOf(TestLogEvent.FAILED, TestLogEvent.STANDARD_OUT, TestLogEvent.STANDARD_ERROR))
+            }
+
+            testlogger {
+                theme = ThemeType.PLAIN
             }
         }
 
@@ -213,6 +234,34 @@ project(":") {
                     changelog.get(pluginVersion).toHTML()
                 }
             })
+        }
+
+        @Suppress("UNCHECKED_CAST")
+        task<Download>("downloadAppMapAgent") {
+            src("https://api.github.com/repos/getappmap/appmap-java/releases/latest")
+            dest(project.buildDir.resolve("appmap-java.json"))
+            overwrite(true)
+            quiet(true)
+            if (isCI) {
+                header("Authorization", "Bearer ${System.getenv("GITHUB_TOKEN")}")
+            }
+
+            doLast {
+                val json = JsonSlurper().parseText(dest.readText()) as Map<*, *>
+                val jarAsset = (json["assets"] as List<Map<*, *>>)
+                        .filter { (it["name"] as? String)?.endsWith(".jar") == true }
+                        .map { it["browser_download_url"]!! }
+                        .firstOrNull()
+
+                download.run {
+                    src(jarAsset)
+                    dest(agentOutputPath)
+                    overwrite(false)
+                    if (isCI) {
+                        header("Authorization", "Bearer ${System.getenv("GITHUB_TOKEN")}")
+                    }
+                }
+            }
         }
     }
 }

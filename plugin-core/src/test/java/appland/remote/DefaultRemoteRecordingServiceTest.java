@@ -8,6 +8,8 @@ import com.intellij.openapi.util.ThrowableComputable;
 import com.intellij.testFramework.fixtures.TempDirTestFixture;
 import com.intellij.testFramework.fixtures.impl.TempDirTestFixtureImpl;
 import org.apache.http.HttpStatus;
+import org.junit.Assume;
+import org.junit.BeforeClass;
 import org.junit.Rule;
 import org.junit.Test;
 
@@ -15,6 +17,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Objects;
 
 import static appland.remote.DefaultRemoteRecordingService.url;
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
@@ -22,6 +25,11 @@ import static com.github.tomakehurst.wiremock.client.WireMock.*;
 public class DefaultRemoteRecordingServiceTest extends AppMapBaseTest {
     @Rule
     public final WireMockRule serverRule = new WireMockRule(WireMockConfiguration.options().dynamicPort());
+
+    @BeforeClass
+    public static void compatibility() {
+        Assume.assumeFalse(Objects.equals(System.getProperty("appmap.test.withAgent"), "true"));
+    }
 
     @Override
     protected TempDirTestFixture createTempDirTestFixture() {
