@@ -2,6 +2,7 @@ package appland.toolwindow.runtimeAnalysis.nodes;
 
 import appland.problemsView.model.ScannerFinding;
 import appland.webviews.findingDetails.FindingDetailsEditorProvider;
+import com.intellij.icons.AllIcons;
 import com.intellij.ide.projectView.PresentationData;
 import com.intellij.ide.util.treeView.NodeDescriptor;
 import com.intellij.openapi.fileTypes.FileTypeManager;
@@ -59,6 +60,8 @@ final class FindingLocationNode extends Node {
 
     @Override
     protected void update(@NotNull PresentationData presentation) {
+        var event = finding.event;
+
         if (finding.getProblemLocationFromStack() != null) {
             var filePath = finding.getProblemLocationFromStack().filePath;
             var fileName = PathUtil.getFileName(filePath);
@@ -68,9 +71,13 @@ final class FindingLocationNode extends Node {
             presentation.setIcon(fileType.getIcon());
 
             presentation.setLocationString(filePath);
-        } else {
-            // fixme
-            presentation.setPresentableText("- unknown -");
+        } else if (event != null) {
+            if (event.path != null) {
+                presentation.setPresentableText(event.path);
+            } else if (event.httpServerRequest != null) {
+                var request = event.httpServerRequest;
+                presentation.setPresentableText(String.format("%s %s", request.requestMethod, request.pathInfo));
+            }
         }
     }
 }
