@@ -6,7 +6,6 @@ import appland.index.AppMapSearchScopes;
 import appland.installGuide.InstallGuideViewPage;
 import appland.installGuide.projectData.ProjectDataService;
 import appland.installGuide.projectData.ProjectMetadata;
-import appland.problemsView.FindingsManager;
 import appland.problemsView.listener.ScannerFindingsListener;
 import appland.settings.AppMapApplicationSettingsService;
 import appland.settings.AppMapProjectSettingsService;
@@ -16,7 +15,6 @@ import com.intellij.openapi.Disposable;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.application.ModalityState;
 import com.intellij.openapi.application.ReadAction;
-import com.intellij.openapi.project.DumbService;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.Disposer;
 import com.intellij.util.Alarm;
@@ -68,48 +66,17 @@ public class InstallGuidePanel extends AppMapContentPanel implements Disposable 
         }
     }
 
-    private void registerStatusUpdateListeners(@NotNull Project project,
-                                               @NotNull Disposable parent,
-                                               @NotNull List<StatusLabel> labels) {
-        var connection = project.getMessageBus().connect(parent);
+    /**
+     * if findings are enabled, completed if at least one appmap-findings.json file was found
+     */
+    private static void updateRuntimeAnalysisLabel(@NotNull Project project, @NotNull StatusLabel label) {
+        if (!AppMapApplicationSettingsService.getInstance().isAnalysisEnabled()) {
+            label.setStatus(InstallGuideStatus.Unavailable);
+            return;
+        }
 
-        connection.subscribe(AppMapSettingsListener.TOPIC, new AppMapSettingsListener() {
-            @Override
-            public void apiKeyChanged() {
-                triggerLabelStatusUpdate();
-            }
-
-            @Override
-            public void enableFindingsChanged() {
-                triggerLabelStatusUpdate();
-            }
-        });
-
-        connection.subscribe(ScannerFindingsListener.TOPIC, new ScannerFindingsListener() {
-            @Override
-            public void afterFindingsReloaded() {
-                triggerLabelStatusUpdate();
-            }
-
-            @Override
-            public void afterFindingsChanged() {
-                triggerLabelStatusUpdate();
-            }
-        });
-
-        connection.subscribe(AppMapSettingsListener.TOPIC, new AppMapSettingsListener() {
-            @Override
-            public void createOpenApiChanged() {
-                triggerLabelStatusUpdate();
-            }
-
-            @Override
-            public void openedAppMapChanged() {
-                triggerLabelStatusUpdate();
-            }
-        });
-
-        connection.subscribe(AppMapConfigFileListener.TOPIC, this::triggerLabelStatusUpdate);
+        var hasFindings = AppMapProjectSettingsService.getState(project).isInvestigatedFindings();
+        label.setStatus(hasFindings ? InstallGuideStatus.Completed : InstallGuideStatus.Incomplete);
     }
 
     private void updateLabelStatus(@NotNull Project project, @NotNull StatusLabel label) {
@@ -179,20 +146,53 @@ public class InstallGuidePanel extends AppMapContentPanel implements Disposable 
                 : InstallGuideStatus.Incomplete);
     }
 
-    /**
-     * if findings are enabled, completed if at least one appmap-findings.json file was found
-     */
-    private static void updateRuntimeAnalysisLabel(@NotNull Project project, @NotNull StatusLabel label) {
-        if (!AppMapApplicationSettingsService.getInstance().isAnalysisEnabled()) {
-            label.setStatus(InstallGuideStatus.Unavailable);
-            return;
-        }
+    private void registerStatusUpdateListeners(@NotNull Project project,
+                                               @NotNull Disposable parent,
+                                               @NotNull List<StatusLabel> labels) {
+        var connection = project.getMessageBus().connect(parent);
 
-        DumbService.getInstance(project).runWhenSmart(() -> {
-            var manager = FindingsManager.getInstance(project);
-            var hasFindings = manager.getProblemFileCount() > 0 || manager.getOtherProblemCount() > 0;
-            label.setStatus(hasFindings ? InstallGuideStatus.Completed : InstallGuideStatus.Incomplete);
+        connection.subscribe(AppMapSettingsListener.TOPIC, new AppMapSettingsListener() {
+            @Override
+            public void apiKeyChanged() {
+                triggerLabelStatusUpdate();
+            }
+
+            @Override
+            public void enableFindingsChanged() {
+                triggerLabelStatusUpdate();
+            }
         });
+
+        connection.subscribe(ScannerFindingsListener.TOPIC, new ScannerFindingsListener() {
+            @Override
+            public void afterFindingsReloaded() {
+                triggerLabelStatusUpdate();
+            }
+
+            @Override
+            public void afterFindingsChanged() {
+                triggerLabelStatusUpdate();
+            }
+        });
+
+        connection.subscribe(AppMapSettingsListener.TOPIC, new AppMapSettingsListener() {
+            @Override
+            public void createOpenApiChanged() {
+                triggerLabelStatusUpdate();
+            }
+
+            @Override
+            public void openedAppMapChanged() {
+                triggerLabelStatusUpdate();
+            }
+
+            @Override
+            public void investigatedFindingsChanged() {
+                triggerLabelStatusUpdate();
+            }
+        });
+
+        connection.subscribe(AppMapConfigFileListener.TOPIC, this::triggerLabelStatusUpdate);
     }
 
     /**
