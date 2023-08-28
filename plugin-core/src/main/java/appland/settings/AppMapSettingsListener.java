@@ -18,6 +18,9 @@ public interface AppMapSettingsListener {
     default void openedAppMapChanged() {
     }
 
+    default void investigatedFindingsChanged() {
+    }
+
     default void appMapWebViewFiltersChanged() {
     }
 }

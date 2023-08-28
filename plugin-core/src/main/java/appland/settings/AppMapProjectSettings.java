@@ -150,6 +150,18 @@ public class AppMapProjectSettings {
         }
     }
 
+    public void setInvestigatedFindings(boolean investigatedFindings) {
+        boolean changed;
+        synchronized (this) {
+            changed = this.investigatedFindings != investigatedFindings;
+            this.investigatedFindings = investigatedFindings;
+        }
+
+        if (changed) {
+            settingsPublisher().investigatedFindingsChanged();
+        }
+    }
+
     @NotNull
     private AppMapSettingsListener settingsPublisher() {
         return ApplicationManager.getApplication().getMessageBus().syncPublisher(AppMapSettingsListener.TOPIC);
