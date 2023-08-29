@@ -2,7 +2,8 @@
     <resource-bundle>messages.appland</resource-bundle>
 
     <extensionPoints>
-        <extensionPoint qualifiedName="appland.languageAnalyzer"
+        <extensionPoint dynamic="true"
+                        qualifiedName="appland.languageAnalyzer"
                         interface="appland.installGuide.analyzer.LanguageAnalyzer"/>
     </extensionPoints>
 
