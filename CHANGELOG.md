@@ -1,5 +1,17 @@
 AppMap Plugin Changelog
 
+## [0.47.0](https://github.com/getappmap/appmap-intellij-plugin/compare/v0.46.0...v0.47.0) (2023-08-29)
+
+
+### Features
+
+-  display findings without known source file location in the "Runtime Analysis" panel
+
+### Bug Fixes
+
+-  update status of install guide step "Runtime Analysis" when the user navigates to the page for the first time
+-  update "Runtime Analysis" step in the AppMap instructions panel when the user opens the page in the AppMap installation guide webview. Use the same logic as the update of the webview status.
+
 ## [0.46.0](https://github.com/getappmap/appmap-intellij-plugin/compare/v0.45.7...v0.46.0) (2023-08-23)
 
 
