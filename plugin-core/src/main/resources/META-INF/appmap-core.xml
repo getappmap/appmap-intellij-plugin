@@ -156,7 +156,5 @@
         </group>
         <action id="openInstallGuide" class="appland.actions.OpenInstallGuideAction"
                 text="AppLand: Install Guide (Beta)"/>
-
-        <!--<action text="AppMap: Open Install Guide DevTools" class="appland.installGuide.OpenDevToolsAction"/>-->
     </actions>
 </idea-plugin>
