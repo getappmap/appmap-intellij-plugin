@@ -2,10 +2,10 @@
 const path = require('path');
 
 module.exports = {
-  entry: './installGuide.js',
+  entry: './main.js',
   output: {
     path: path.resolve(__dirname, 'dist'),
-    filename: 'installGuide.js',
+    filename: 'main.js',
     devtoolModuleFilenameTemplate: '[resource-path]',
     library: 'AppLandWeb',
   },
@@ -13,7 +13,7 @@ module.exports = {
   resolve: {
     extensions: ['.js', '.mjs'],
     alias: {
-      vue: path.resolve('./node_modules/vue/dist/vue.esm.browser.js'),
+      vue: path.resolve('./node_modules/vue'),
       vuex: path.resolve('./node_modules/vuex'),
     },
     fallback: {
