@@ -30,7 +30,7 @@ import java.util.stream.Collectors;
 
 public class FindingsOverviewEditor extends WebviewEditor<List<ScannerFinding>> {
     public FindingsOverviewEditor(@NotNull Project project, @NotNull VirtualFile file) {
-        super(project, file);
+        super(project, file, Set.of("open-problems-tab", "open-finding-info"));
     }
 
     @Override
@@ -87,21 +87,18 @@ public class FindingsOverviewEditor extends WebviewEditor<List<ScannerFinding>> 
     }
 
     @Override
-    public boolean handleMessage(@NotNull String messageId, @Nullable JsonObject message) {
+    protected void handleMessage(@NotNull String messageId, @Nullable JsonObject message) {
         switch (messageId) {
             case "open-problems-tab":
                 ApplicationManager.getApplication().invokeLater(() -> FindingsViewTab.activateFindingsTab(project));
-                return true;
+                break;
 
             case "open-finding-info":
                 // locate finding by hash, then open it in a new AppMap webview
                 if (message != null && message.has("hash")) {
                     openFindingsByHash(message.getAsJsonPrimitive("hash").getAsString());
                 }
-                return true;
-
-            default:
-                return false;
+                break;
         }
     }
 

@@ -38,6 +38,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.nio.file.Path;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
@@ -59,7 +60,9 @@ public class AppMapFileEditor extends WebviewEditor<JsonObject> {
     private final AtomicBoolean isModified = new AtomicBoolean(false);
 
     public AppMapFileEditor(@NotNull Project project, @NotNull VirtualFile file) {
-        super(project, file);
+        super(project, file, Set.of("webviewMounted", "uploadAppMap", "clearSelection", "viewSource",
+                "sidebarSearchFocused", "clickFilterButton", "clickTab", "selectObjectInSidebar", "resetDiagram",
+                "exportSVG", "saveFilter", "defaultFilter", "deleteFilter"));
         setupVfsListener(file);
     }
 
@@ -183,7 +186,7 @@ public class AppMapFileEditor extends WebviewEditor<JsonObject> {
     }
 
     @Override
-    public boolean handleMessage(@NotNull String messageId, @Nullable JsonObject message) throws Exception {
+    protected void handleMessage(@NotNull String messageId, @Nullable JsonObject message) throws Exception {
         TelemetryService telemetryService = TelemetryService.getInstance();
 
         switch (messageId) {
@@ -192,31 +195,31 @@ public class AppMapFileEditor extends WebviewEditor<JsonObject> {
                 if (state != null) {
                     applyWebViewState(state);
                 }
-                return true;
+                break;
 
             case "uploadAppMap":
                 uploadAppMap();
-                return true;
+                break;
 
             case "clearSelection":
                 // set empty state to the editor to restore with cleared selection
                 setWebViewState(AppMapFileEditorState.EMPTY);
-                return true;
+                break;
 
             case "viewSource":
                 // message is {..., location: {location:"path/file.java", externalSource="path/file.java"}}
                 assert message != null;
                 assert message.has("location");
                 showSource(message.getAsJsonObject("location").getAsJsonPrimitive("location").getAsString());
-                return true;
+                break;
 
             case "sidebarSearchFocused":
                 telemetryService.sendEvent("sidebar_search_focused");
-                return true;
+                break;
 
             case "clickFilterButton":
                 telemetryService.sendEvent("click_filter_button");
-                return true;
+                break;
 
             case "clickTab":
                 if (message != null) {
@@ -228,7 +231,7 @@ public class AppMapFileEditor extends WebviewEditor<JsonObject> {
                         });
                     }
                 }
-                return true;
+                break;
 
             case "selectObjectInSidebar":
                 if (message != null) {
@@ -240,11 +243,11 @@ public class AppMapFileEditor extends WebviewEditor<JsonObject> {
                         });
                     }
                 }
-                return true;
+                break;
 
             case "resetDiagram":
                 telemetryService.sendEvent("reset_diagram");
-                return true;
+                break;
 
             case "exportSVG":
                 if (message != null) {
@@ -257,7 +260,7 @@ public class AppMapFileEditor extends WebviewEditor<JsonObject> {
                         });
                     }, ModalityState.defaultModalityState());
                 }
-                return true;
+                break;
 
             // filters
             case "saveFilter":
@@ -265,24 +268,21 @@ public class AppMapFileEditor extends WebviewEditor<JsonObject> {
                     var filter = gson.fromJson(message.getAsJsonObject("filter"), AppMapWebViewFilter.class);
                     AppMapProjectSettingsService.getState(project).saveAppMapWebViewFilter(filter);
                 }
-                return true;
+                break;
 
             case "defaultFilter":
                 if (message != null && message.has("filter")) {
                     var filter = gson.fromJson(message.getAsJsonObject("filter"), AppMapWebViewFilter.class);
                     AppMapProjectSettingsService.getState(project).saveDefaultFilter(filter);
                 }
-                return true;
+                break;
 
             case "deleteFilter":
                 if (message != null && message.has("filter")) {
                     var filter = gson.fromJson(message.getAsJsonObject("filter"), AppMapWebViewFilter.class);
                     AppMapProjectSettingsService.getState(project).removeAppMapWebViewFilter(filter);
                 }
-                return true;
-
-            default:
-                return false;
+                break;
         }
     }
 

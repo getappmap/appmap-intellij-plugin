@@ -27,13 +27,13 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.nio.file.Path;
+import java.util.Set;
 
 import static appland.utils.GsonUtils.singlePropertyObject;
 
 public class FindingDetailsEditor extends WebviewEditor<Void> {
-
     public FindingDetailsEditor(@NotNull Project project, @NotNull VirtualFile file) {
-        super(project, file);
+        super(project, file, Set.of("open-findings-overview", "open-in-source-code", "open-map"));
     }
 
     @Override
@@ -47,18 +47,18 @@ public class FindingDetailsEditor extends WebviewEditor<Void> {
     }
 
     @Override
-    public boolean handleMessage(@NotNull String messageId, @Nullable JsonObject message) throws Exception {
+    protected void handleMessage(@NotNull String messageId, @Nullable JsonObject message) throws Exception {
         switch (messageId) {
             case "open-findings-overview":
                 ApplicationManager.getApplication().invokeLater(() -> {
                     FindingsOverviewEditorProvider.openEditor(project);
                 }, ModalityState.defaultModalityState());
-                return true;
+                break;
 
             case "open-in-source-code":
                 assert message != null;
                 openEditorForLocation(gson.fromJson(message.getAsJsonObject("location"), ResolvedStackLocation.class));
-                return true;
+                break;
 
             case "open-map":
                 // file path to the AppMap is at uri > path
@@ -68,10 +68,7 @@ public class FindingDetailsEditor extends WebviewEditor<Void> {
                     var fragment = GsonUtils.getPath(message, "uri", "fragment");
                     openAppMapUri(path.getAsString(), fragment != null ? fragment.getAsString() : "{}");
                 }
-                return true;
-
-            default:
-                return false;
+                break;
         }
     }
 

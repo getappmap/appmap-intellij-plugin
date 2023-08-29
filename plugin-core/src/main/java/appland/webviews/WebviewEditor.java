@@ -35,17 +35,19 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.nio.file.Path;
 import java.util.Objects;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * Base class for editors based on a JCEF webview.
  * It implements most of the shared functionality and allows to customize link handling, message handling and more.
  */
-public abstract class WebviewEditor<T> extends UserDataHolderBase implements FileEditor, SimpleWebviewMessageHandler {
+public abstract class WebviewEditor<T> extends UserDataHolderBase implements FileEditor {
     private static final Logger LOG = Logger.getInstance(WebviewEditor.class);
 
     protected final @NotNull Project project;
     protected final @NotNull VirtualFile file;
+    private final @NotNull Set<String> supportedMessages;
     protected final @NotNull Gson gson;
     protected final @NotNull JCEFHtmlPanel contentPanel = new JCEFHtmlPanel(true, null, null);
 
@@ -54,9 +56,10 @@ public abstract class WebviewEditor<T> extends UserDataHolderBase implements Fil
     // queries must be created before the webview is initialized
     private final @NotNull JBCefJSQuery postMessageQuery = JBCefJSQuery.create((JBCefBrowserBase) contentPanel);
 
-    public WebviewEditor(@NotNull Project project, @NotNull VirtualFile file) {
+    public WebviewEditor(@NotNull Project project, @NotNull VirtualFile file, @NotNull Set<String> supportedMessages) {
         this.project = project;
         this.file = file;
+        this.supportedMessages = supportedMessages;
         this.gson = Objects.requireNonNullElse(createCustomizedGson(), GsonUtils.GSON);
 
         // contentPanel and jcefBridge register with the client as Disposable parent
@@ -95,6 +98,11 @@ public abstract class WebviewEditor<T> extends UserDataHolderBase implements Fil
      * @return {@code java.nio.file.Path} to the HTML file to load into the webview.
      */
     protected abstract @NotNull Path getApplicationFile();
+
+    /**
+     * @throws Exception If an error occurred while handling the message
+     */
+    abstract protected void handleMessage(@NotNull String messageId, @Nullable JsonObject message) throws Exception;
 
     /**
      * @return A customized instance of {@code com.google.gson.Gson} or {@code null} if not customized GSON is needed
@@ -217,13 +225,26 @@ public abstract class WebviewEditor<T> extends UserDataHolderBase implements Fil
                 var json = gson.fromJson(request, JsonObject.class);
                 var type = json.has("type") ? json.getAsJsonPrimitive("type").getAsString() : null;
                 if (type != null) {
-                    return handleWebviewMessage(type, json);
+                    if (!supportedMessages.contains(type)) {
+                        return null;
+                    }
+
+                    ApplicationManager.getApplication().executeOnPooledThread(() -> {
+                        try {
+                            handleMessage(type, json);
+                        } catch (Exception e) {
+                            LOG.warn("error handling webview message: " + type, e);
+                        }
+                    });
+
+                    return new JBCefJSQuery.Response("success");
                 }
             } catch (Exception e) {
                 LOG.warn("error handling command: " + request, e);
             }
             return null;
         });
+
         contentPanel.getCefBrowser().executeJavaScript(createCallbackJS(postMessageQuery, "postMessage"), "", 0);
 
         // send init message to webview to launch the JS application in a background thread
