@@ -53,7 +53,8 @@ public class AppMapWindowPanel extends SimpleToolWindowPanel implements DataProv
     // debounce requests for AppMap tree refresh
     private final SingleAlarm treeRefreshAlarm;
     // debounce filter requests when search text changes
-    private volatile Alarm filterInputAlarm;
+    private final SearchTextField textFilter = new SearchTextField();
+    private final Alarm filterInputAlarm = new Alarm(textFilter, this);
 
     private volatile boolean isToolWindowVisible;
     private volatile boolean hasPendingTreeRefresh;
@@ -67,8 +68,7 @@ public class AppMapWindowPanel extends SimpleToolWindowPanel implements DataProv
         this.tree = createTree(project, this, appMapModel);
         this.treeRefreshAlarm = new SingleAlarm(appMapModel::refresh, TREE_REFRESH_DELAY_MILLIS, this, Alarm.ThreadToUse.POOLED_THREAD);
 
-        setToolbar(createToolBar(appMapModel));
-        setContent(createContentPanel(project, tree, this));
+        setContent(createContentPanel(project, tree, this, appMapModel));
 
         IndexedFileListenerUtil.registerListeners(project, this, true, false, () -> rebuild(false));
     }
@@ -131,9 +131,6 @@ public class AppMapWindowPanel extends SimpleToolWindowPanel implements DataProv
     }
 
     private @NotNull SearchTextField createNameFilter(@NotNull AppMapModel appMapModel) {
-        var textFilter = new SearchTextField();
-        filterInputAlarm = new Alarm(textFilter, this);
-
         textFilter.getTextEditor().getEmptyText().setText(AppMapBundle.get("toolwindow.appmap.filterEmptyText"));
         textFilter.getTextEditor().addActionListener(e -> {
             LOG.debug("applying appmap filter: " + textFilter.getText());
@@ -181,11 +178,12 @@ public class AppMapWindowPanel extends SimpleToolWindowPanel implements DataProv
         }
     }
 
-    private static @NotNull JComponent createContentPanel(@NotNull Project project,
-                                                          @NotNull JComponent viewport,
-                                                          @NotNull Disposable parent) {
+    private @NotNull JComponent createContentPanel(@NotNull Project project,
+                                                   @NotNull JComponent viewport,
+                                                   @NotNull Disposable parent,
+                                                   @NotNull AppMapModel appMapModel) {
         var splitter = createSplitter();
-        splitter.setFirstComponent(createAppMapPanel(project, viewport));
+        splitter.setFirstComponent(createAppMapPanel(project, viewport, appMapModel));
         splitter.setSecondComponent(createSouthPanel(project, parent));
 
         var panel = new JPanel(new BorderLayout());
@@ -275,14 +273,21 @@ public class AppMapWindowPanel extends SimpleToolWindowPanel implements DataProv
         return tree;
     }
 
-    private static JPanel createAppMapPanel(@NotNull Project project, @NotNull JComponent viewport) {
+    private JPanel createAppMapPanel(@NotNull Project project,
+                                     @NotNull JComponent viewport,
+                                     @NotNull AppMapModel appMapModel) {
         var appMapListPanel = ScrollPaneFactory.createScrollPane(viewport, true);
         appMapListPanel.setMinimumSize(new JBDimension(0, 200));
+
+        var panelWithFilter = new JPanel(new BorderLayout());
+        panelWithFilter.add(createToolBar(appMapModel), BorderLayout.NORTH);
+        panelWithFilter.add(appMapListPanel, BorderLayout.CENTER);
+
         return new CollapsiblePanel(project,
                 AppMapBundle.get("toolwindow.appmap.appMaps"),
                 "appmap.toolWindow.appMaps.collapsed",
                 true,
-                appMapListPanel);
+                panelWithFilter);
     }
 
     private static @NotNull JComponent createSouthPanel(@NotNull Project project, @NotNull Disposable parent) {
