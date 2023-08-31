@@ -42,7 +42,6 @@ public class DefaultCommandLineServiceTest extends AppMapBaseTest {
         TestAppLandDownloadService.ensureDownloaded();
 
         RegisterContentRootsActivity.listenForContentRootChanges(getProject(), getTestRootDisposable());
-        AppMapApplicationSettingsService.getInstance().setEnableFindings(true);
         AppMapApplicationSettingsService.getInstance().setApiKey("api-key");
     }
 
