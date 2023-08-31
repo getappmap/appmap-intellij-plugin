@@ -13,8 +13,6 @@ import com.intellij.openapi.startup.StartupActivity;
 import com.intellij.openapi.startup.StartupManager;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.concurrent.atomic.AtomicBoolean;
-
 public class AppLandStartupActivity implements StartupActivity {
     @Override
     public void runActivity(@NotNull Project project) {
@@ -40,25 +38,9 @@ public class AppLandStartupActivity implements StartupActivity {
         project.getMessageBus()
                 .connect(AppLandLifecycleService.getInstance(project))
                 .subscribe(AppMapSettingsListener.TOPIC, new AppMapSettingsListener() {
-                    private final AtomicBoolean lastEnabledState = new AtomicBoolean(AppMapApplicationSettingsService.getInstance().isAnalysisEnabled());
-
                     @Override
                     public void apiKeyChanged() {
-                        sendRuntimeAnalysisTelemetry();
                         sendAuthenticationTelemetry();
-                    }
-
-                    @Override
-                    public void enableFindingsChanged() {
-                        sendRuntimeAnalysisTelemetry();
-                    }
-
-                    private void sendRuntimeAnalysisTelemetry() {
-                        var newEnabledState = AppMapApplicationSettingsService.getInstance().isAnalysisEnabled();
-                        if (lastEnabledState.getAndSet(newEnabledState) != newEnabledState) {
-                            var eventName = newEnabledState ? "analysis:enable" : "analysis:disable";
-                            TelemetryService.getInstance().sendEvent(eventName);
-                        }
                     }
 
                     private void sendAuthenticationTelemetry() {
