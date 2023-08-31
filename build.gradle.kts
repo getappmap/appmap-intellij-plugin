@@ -105,7 +105,7 @@ allprojects {
         runIde {
             onlyIf { this.project == rootProject }
             systemProperty("appmap.sandbox", "true")
-
+            jvmArgs("-Xmx2048m")
         }
 
         verifyPlugin {
