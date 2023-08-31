@@ -24,9 +24,6 @@ public class AppMapApplicationSettings {
     private volatile boolean firstStart = true;
 
     @Setter
-    private volatile boolean enableFindings = true;
-
-    @Setter
     private volatile boolean enableTelemetry = true;
 
     @Setter
@@ -38,18 +35,8 @@ public class AppMapApplicationSettings {
     public AppMapApplicationSettings(@NotNull AppMapApplicationSettings settings) {
         this.appmapInstructionsViewed = settings.appmapInstructionsViewed;
         this.firstStart = settings.firstStart;
-        this.enableFindings = settings.enableFindings;
         this.enableTelemetry = settings.enableTelemetry;
         this.apiKey = settings.apiKey;
-    }
-
-    public void setEnableFindingsNotifying(boolean enableFindings) {
-        var changed = !Objects.equals(enableFindings, this.enableFindings);
-        this.enableFindings = enableFindings;
-
-        if (changed) {
-            settingsPublisher().enableFindingsChanged();
-        }
     }
 
     public void setApiKeyNotifying(@Nullable String apiKey) {
@@ -59,10 +46,6 @@ public class AppMapApplicationSettings {
         if (changed) {
             settingsPublisher().apiKeyChanged();
         }
-    }
-
-    public boolean isAnalysisEnabled() {
-        return isAuthenticated() && enableFindings;
     }
 
     public boolean isAuthenticated() {
