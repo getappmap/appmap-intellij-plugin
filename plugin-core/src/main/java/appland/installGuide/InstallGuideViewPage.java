@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.jetbrains.annotations.NotNull;
 
+@Getter
 @AllArgsConstructor
 public enum InstallGuideViewPage {
     InstallAgent("project-picker"),
@@ -14,7 +15,6 @@ public enum InstallGuideViewPage {
     RuntimeAnalysis("investigate-findings");
 
     // value used by the JS application as "page" values
-    @Getter
     private final String pageId;
 
     public @NotNull String getPageTitle() {

@@ -13,26 +13,22 @@ import java.util.Objects;
 /**
  * Persistent application state of the AppMap plugin.
  */
+@Getter
 @ToString
 @EqualsAndHashCode
 public class AppMapApplicationSettings {
-    @Getter
     @Setter
     private volatile boolean appmapInstructionsViewed = false;
 
-    @Getter
     @Setter
     private volatile boolean firstStart = true;
 
-    @Getter
     @Setter
     private volatile boolean enableFindings = true;
 
-    @Getter
     @Setter
     private volatile boolean enableTelemetry = true;
 
-    @Getter
     @Setter
     private volatile @Nullable String apiKey = null;
 

@@ -8,10 +8,9 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Set;
 
+@Getter
 class HttpRouteNode extends AbstractClassMapItemNode {
-    @Getter
     private final String httpMethodName;
-    @Getter
     private final String httpPath;
 
     protected HttpRouteNode(@NotNull NodeDescriptor parentNode, @NotNull ClassMapItem item) {
