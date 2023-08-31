@@ -13,7 +13,7 @@ module.exports = {
   resolve: {
     extensions: ['.js', '.mjs'],
     alias: {
-      vue: path.resolve('./node_modules/vue'),
+      vue: path.resolve('./node_modules/vue/dist/vue.esm.browser.js'),
       vuex: path.resolve('./node_modules/vuex'),
     },
     fallback: {
