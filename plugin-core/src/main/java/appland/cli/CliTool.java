@@ -4,6 +4,7 @@ import appland.AppMapBundle;
 import lombok.Getter;
 import org.jetbrains.annotations.NotNull;
 
+@Getter
 public enum CliTool {
     AppMap("appmap",
             "https://github.com/getappmap/appmap-js/releases/download/%40appland%2Fappmap",
@@ -14,13 +15,9 @@ public enum CliTool {
             "https://registry.npmjs.org/@appland%2Fscanner/latest",
             AppMapBundle.get("cli.scanner.name"));
 
-    @Getter
     private final String id;
-    @Getter
     private final String baseURL;
-    @Getter
     private final String latestVersionURL;
-    @Getter
     private final String presentableName;
 
     CliTool(@NotNull String id, @NotNull String baseURL, String latestVersionURL, String presentableName) {
