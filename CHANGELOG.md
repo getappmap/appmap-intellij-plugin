@@ -1,5 +1,14 @@
 AppMap Plugin Changelog
 
+## [0.48.0](https://github.com/getappmap/appmap-intellij-plugin/compare/v0.47.0...v0.48.0) (2023-09-01)
+
+
+### Bug Fixes
+
+-  don't test for local filesystem when indexing AppMap metadata files, extract indexer into field to follow the IntelliJ SDK's implementations, show more information about indexing and empty index values in debug mode ([6589559]())
+-  make our custom extension points dynamic to not prevent dynamic loading of the AppMap plugin ([ff2b959]())
+-  move text input to filter AppMaps into the AppMaps subpanel of the AppMap tool window ([9662509]())
+
 ## [0.47.0](https://github.com/getappmap/appmap-intellij-plugin/compare/v0.46.0...v0.47.0) (2023-08-29)
 
 
