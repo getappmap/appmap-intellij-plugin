@@ -17,6 +17,7 @@ import com.intellij.testFramework.LightProjectDescriptor;
 import com.intellij.testFramework.fixtures.LightPlatformCodeInsightFixture4TestCase;
 import com.intellij.util.ThrowableRunnable;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.junit.After;
 import org.junit.Before;
 
@@ -49,17 +50,23 @@ public abstract class AppMapBaseTest extends LightPlatformCodeInsightFixture4Tes
     }
 
     public @NotNull VirtualFile createAppMapWithIndexes(@NotNull String appMapName) throws Throwable {
-        return createAppMapWithIndexes(appMapName, 0, 0, 0);
+        return createAppMapWithIndexes(appMapName, 0, 0, 0, appMapName);
     }
 
-    public @NotNull VirtualFile createAppMapWithIndexes(@NotNull String appMapName, int requestCount, int queryCount, int functionCount) throws Throwable {
+    public @NotNull VirtualFile createAppMapWithIndexes(@NotNull String appMapName,
+                                                        int requestCount,
+                                                        int queryCount,
+                                                        int functionCount,
+                                                        @Nullable String appMapNameProperty) throws Throwable {
+        var namePropertyValue = appMapNameProperty != null ? "\"" + appMapNameProperty + "\"" : null;
+
         return WriteAction.computeAndWait((ThrowableComputable<VirtualFile, Throwable>) () -> {
             // create empty .appmap.json files because we're not indexing it
             var appMapFile = myFixture.createFile(appMapName + ".appmap.json", "");
 
             // create name/metadata.json with a name property
             var appMapDir = appMapFile.getParent().createChildDirectory(this, appMapName);
-            VfsUtil.saveText(appMapDir.createChildData(this, "metadata.json"), "{\"name\": \"" + appMapName + "\"}");
+            VfsUtil.saveText(appMapDir.createChildData(this, "metadata.json"), "{\"name\": " + namePropertyValue + "}");
 
             if (requestCount > 0) {
                 var json = "[" + StringUtil.trimEnd(StringUtil.repeat("{},", requestCount), ",") + "]";
