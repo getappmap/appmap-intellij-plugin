@@ -238,7 +238,6 @@ public class InstallGuideEditor extends WebviewEditor<List<ProjectMetadata>> {
         json.addProperty("page", type.getPageId());
         json.addProperty("userAuthenticated", settings.getApiKey() != null);
         json.addProperty("analysisEnabled", true);
-        json.addProperty("findingsEnabled", true);
     }
 
     private void handleMessageClickLink(@NotNull JsonObject message) {
