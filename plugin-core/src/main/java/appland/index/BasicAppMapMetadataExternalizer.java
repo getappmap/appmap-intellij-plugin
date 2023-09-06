@@ -10,13 +10,17 @@ import java.io.DataOutput;
 import java.io.IOException;
 
 class BasicAppMapMetadataExternalizer implements DataExternalizer<BasicAppMapMetadata> {
-    public static final BasicAppMapMetadataExternalizer INSTANCE = new BasicAppMapMetadataExternalizer();
+    static final @NotNull BasicAppMapMetadataExternalizer INSTANCE = new BasicAppMapMetadataExternalizer();
+
+    private BasicAppMapMetadataExternalizer() {
+    }
 
     @Override
     public BasicAppMapMetadata read(@NotNull DataInput in) throws IOException {
-        var name = IOUtil.readUTF(in);
-        var hasTestStatus = in.readBoolean();
+        var hasName = in.readBoolean();
+        var name = hasName ? IOUtil.readUTF(in) : null;
 
+        var hasTestStatus = in.readBoolean();
         TestStatus testStatus = null;
         if (hasTestStatus) {
             var jsonId = IOUtil.readUTF(in);
@@ -27,8 +31,11 @@ class BasicAppMapMetadataExternalizer implements DataExternalizer<BasicAppMapMet
     }
 
     @Override
-    public void save(@NotNull DataOutput out, BasicAppMapMetadata value) throws IOException {
-        IOUtil.writeUTF(out, value.name);
+    public void save(@NotNull DataOutput out, @NotNull BasicAppMapMetadata value) throws IOException {
+        out.writeBoolean(value.name != null);
+        if (value.name != null) {
+            IOUtil.writeUTF(out, value.name);
+        }
 
         out.writeBoolean(value.testStatus != null);
         if (value.testStatus != null) {
