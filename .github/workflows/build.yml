@@ -37,11 +37,20 @@ jobs:
               run: |
                   curl -s -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" -i https://api.github.com/users/octocat | grep x-ratelimit
 
-            - name: Run Linters and Test
+            - name: Run Linters and Test (Linux and macOS)
+              if: runner.os != 'Windows'
               env:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
               shell: bash
               run: ./gradlew check
+
+            # Termination of AppMap CLI processes is failing with IC-2021.3 for unknown reasons (process.destroy() etc.)
+            - name: Run Linters and Test with 2023.2 (Windows)
+              if: runner.os == 'Windows'
+              env:
+                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+              shell: bash
+              run: ./gradlew check -PideVersion=IC-2023.2.1
 
             - name: Verify plugin
               shell: bash
