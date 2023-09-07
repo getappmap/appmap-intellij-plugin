@@ -87,10 +87,6 @@ public class InstallGuidePanel extends AppMapContentPanel implements Disposable 
                 updateOpenAppMapsLabel(project, label);
                 break;
 
-            case GenerateOpenAPI:
-                updateGenerateOpenApiLabel(project, label);
-                break;
-
             case RuntimeAnalysis:
                 updateRuntimeAnalysisLabel(project, label);
                 break;

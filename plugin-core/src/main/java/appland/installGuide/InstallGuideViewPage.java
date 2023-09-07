@@ -11,7 +11,6 @@ public enum InstallGuideViewPage {
     InstallAgent("project-picker"),
     RecordAppMaps("record-appmaps"),
     OpenAppMaps("open-appmaps"),
-    GenerateOpenAPI("openapi"),
     RuntimeAnalysis("investigate-findings");
 
     // value used by the JS application as "page" values
@@ -25,8 +24,6 @@ public enum InstallGuideViewPage {
                 return AppMapBundle.get("installGuide.pageRecordAppMaps.title");
             case OpenAppMaps:
                 return AppMapBundle.get("installGuide.pageOpenAppMaps.title");
-            case GenerateOpenAPI:
-                return AppMapBundle.get("installGuide.pageGenerateOpenAPI.title");
             case RuntimeAnalysis:
                 return AppMapBundle.get("installGuide.pageRuntimeAnalysis.title");
             default:
