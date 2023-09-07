@@ -2,7 +2,6 @@ package appland.installGuide;
 
 import appland.AppMapBundle;
 import appland.AppMapPlugin;
-import appland.actions.GenerateOpenApiAction;
 import appland.cli.AppLandCommandLineService;
 import appland.index.AppMapMetadata;
 import appland.index.IndexedFileListenerUtil;
@@ -30,11 +29,9 @@ import com.intellij.ide.actions.runAnything.execution.RunAnythingRunProfile;
 import com.intellij.openapi.actionSystem.CommonDataKeys;
 import com.intellij.openapi.actionSystem.impl.AsyncDataContext;
 import com.intellij.openapi.application.ApplicationManager;
-import com.intellij.openapi.application.ModalityState;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.fileEditor.FileEditorManager;
 import com.intellij.openapi.project.Project;
-import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.openapi.vfs.LocalFileSystem;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.util.Alarm;
@@ -152,7 +149,7 @@ public class InstallGuideEditor extends WebviewEditor<List<ProjectMetadata>> {
     }
 
     @Override
-    protected void handleMessage(@NotNull String messageId, @Nullable JsonObject message) throws Exception {
+    protected void handleMessage(@NotNull String messageId, @Nullable JsonObject message) {
         switch (messageId) {
             case "click-link":
                 assert message != null;
@@ -187,12 +184,6 @@ public class InstallGuideEditor extends WebviewEditor<List<ProjectMetadata>> {
 
             case "perform-auth": {
                 handleMessagePerformAuth();
-                break;
-            }
-
-            case "generate-openapi": {
-                assert message != null;
-                handleMessageGenerateOpenApi(message);
                 break;
             }
 
@@ -249,21 +240,6 @@ public class InstallGuideEditor extends WebviewEditor<List<ProjectMetadata>> {
     private void handleMessagePerformAuth() {
         AppMapLoginAction.authenticate();
         TelemetryService.getInstance().sendEvent("analysis:cta_interaction");
-    }
-
-    private void handleMessageGenerateOpenApi(@NotNull JsonObject message) {
-        var projectPath = message.has("projectPath") ? message.getAsJsonPrimitive("projectPath").getAsString() : null;
-        var appMapRoot = StringUtil.isNotEmpty(projectPath)
-                ? LocalFileSystem.getInstance().findFileByNioFile(Paths.get(projectPath))
-                : null;
-
-        ApplicationManager.getApplication().invokeLater(() -> {
-            if (appMapRoot != null) {
-                GenerateOpenApiAction.createOpenApiFile(project, appMapRoot, false);
-            } else {
-                GenerateOpenApiAction.createOpenApiFileInteractive(project, false);
-            }
-        }, ModalityState.defaultModalityState());
     }
 
     private void handleMessagePerformInstall(@NotNull JsonObject message) {
