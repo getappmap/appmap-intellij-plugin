@@ -19,7 +19,7 @@ public class AppMapSearchScopesTest extends AppMapBaseTest {
         try {
             assertFalse("scope must not contain folders, which are outside content roots", scope.contains(topLevelDir));
 
-            withContentRoot(topLevelDir, () -> {
+            withContentRoot(getModule(), topLevelDir, () -> {
                 assertTrue("scope must contain content roots", scope.contains(topLevelDir));
 
                 withExcludedFolder(topLevelDir, () -> {

@@ -29,7 +29,7 @@ public class ScannerFilesAsyncListenerContentRootTest extends AppMapBaseTest {
         // create src/root to add it as content root to the current module
         // the file listener is using a project scope, which needs a properly set up content root
         var rootDir = myFixture.getTempDirFixture().findOrCreateDir("root");
-        withContentRoot(rootDir, () -> {
+        withContentRoot(getModule(), rootDir, () -> {
             var condition = TestFindingsManager.createFindingsCondition(getProject(), getTestRootDisposable());
             // adding an appmap-findings.json file must trigger a refresh via the file watcher
             myFixture.copyDirectoryToProject("vscode/workspaces/project-system", "root");
