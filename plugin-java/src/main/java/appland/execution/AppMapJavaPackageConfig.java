@@ -60,7 +60,9 @@ public final class AppMapJavaPackageConfig {
         var existingConfig = findAppMapConfig(module.getProject(), appMapConfigSearchScope);
 
         if (existingConfig != null) {
-            var relativeOutputPath = existingConfig.getParent().toNioPath().relativize(appMapOutputDirectory);
+            var relativeOutputPath = appMapOutputDirectory.isAbsolute()
+                    ? existingConfig.getParent().toNioPath().relativize(appMapOutputDirectory)
+                    : appMapOutputDirectory;
             var configNioPath = existingConfig.toNioPath();
             updateAppMapConfig(configNioPath, relativeOutputPath);
             return configNioPath;
@@ -82,7 +84,10 @@ public final class AppMapJavaPackageConfig {
                     appMapOutputDirectory));
         }
 
-        var appMapConfig = generateAppMapConfig(module, configParentPath.relativize(appMapOutputDirectory).toString());
+        var relativeAppMapOutputPath = appMapOutputDirectory.isAbsolute()
+                ? configParentPath.relativize(appMapOutputDirectory)
+                : appMapOutputDirectory;
+        var appMapConfig = generateAppMapConfig(module, relativeAppMapOutputPath.toString());
 
         // create outside a read action, because JavaProgramPatcher is always called with a ReadAction
         // and we can't execute a WriteAction inside a read action
@@ -127,7 +132,7 @@ public final class AppMapJavaPackageConfig {
             scope = AppMapSearchScopes.appMapConfigSearchScope(module.getProject());
         }
 
-        scope = scope.intersectWith(module.getModuleScope(true));
+        scope = scope.intersectWith(module.getModuleContentScope());
         return scope;
     }
 
