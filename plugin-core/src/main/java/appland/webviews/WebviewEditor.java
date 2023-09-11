@@ -252,6 +252,11 @@ public abstract class WebviewEditor<T> extends UserDataHolderBase implements Fil
         new Task.Backgroundable(project, getLoadingProgressTitle(), false, PerformInBackgroundOption.ALWAYS_BACKGROUND) {
             @Override
             public void run(@NotNull ProgressIndicator indicator) {
+                if (!isValid()) {
+                    // editor was closed before the init completed
+                    return;
+                }
+
                 var initData = createInitData();
                 var initMessage = createMessageObject("init");
                 setupInitMessage(initData, initMessage);
