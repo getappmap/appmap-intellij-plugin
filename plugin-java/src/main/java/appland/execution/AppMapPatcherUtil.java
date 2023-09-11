@@ -11,13 +11,9 @@ import com.intellij.openapi.progress.ProgressIndicator;
 import com.intellij.openapi.progress.Task;
 import com.intellij.openapi.project.Project;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
-import java.nio.file.Path;
 import java.util.List;
-
-import static appland.execution.AppMapJavaConfigUtil.findAppMapOutputDirectory;
 
 @SuppressWarnings({"UnstableApiUsage", "DialogTitleCapitalization"})
 public final class AppMapPatcherUtil {
@@ -29,17 +25,15 @@ public final class AppMapPatcherUtil {
      * If there's no appmap.yml file yet, it's created.
      * This operation is executed as modal task
      *
-     * @param project                          Current project
-     * @param configuration                    The run configuration
-     * @param javaParameters                   Parameters to provide context
-     * @param relativeAppMapOutputFallbackPath The fallback (instead of tmp/appmap) if the context (e.g. a Gradle run configuration) supports to locate it.
+     * @param project        Current project
+     * @param configuration  The run configuration
+     * @param javaParameters Parameters to provide context
      * @return The JVM parameters to add to the command line
      * @throws Exception Throw if unable to calculate the parameters
      */
     public static @NotNull List<String> prepareJavaParameters(@NotNull Project project,
                                                               @NotNull RunProfile configuration,
-                                                              @NotNull SimpleJavaParameters javaParameters,
-                                                              @Nullable Path relativeAppMapOutputFallbackPath) throws Exception {
+                                                              @NotNull SimpleJavaParameters javaParameters) throws Exception {
         if (!ApplicationManager.getApplication().isDispatchThread()) {
             ApplicationManager.getApplication().assertReadAccessNotAllowed();
         }
@@ -47,7 +41,7 @@ public final class AppMapPatcherUtil {
         var task = new Task.WithResult<List<String>, Exception>(project, AppMapBundle.get("appMapConfig.creatingConfig"), true) {
             @Override
             protected List<String> compute(@NotNull ProgressIndicator indicator) throws Exception {
-                return prepareUnderProgress(project, configuration, javaParameters, relativeAppMapOutputFallbackPath);
+                return prepareUnderProgress(project, configuration, javaParameters);
             }
         };
         task.queue();
@@ -57,8 +51,7 @@ public final class AppMapPatcherUtil {
     @NotNull
     private static List<String> prepareUnderProgress(@NotNull Project project,
                                                      @NotNull RunProfile configuration,
-                                                     @NotNull SimpleJavaParameters javaParameters,
-                                                     @Nullable Path relativeFallbackPath) throws CantRunException, IOException {
+                                                     @NotNull SimpleJavaParameters javaParameters) throws CantRunException, IOException {
         var workingDir = ProgramParameterUtils.findWorkingDir(project, javaParameters);
         if (workingDir == null) {
             throw new CantRunException("Unable to locate working directory to store AppMap files");
@@ -66,7 +59,7 @@ public final class AppMapPatcherUtil {
 
         var module = RunConfigurationUtil.getRunConfigurationModule(project, configuration, workingDir);
 
-        var appMapOutputDirectory = ReadAction.compute(() -> findAppMapOutputDirectory(module, workingDir, relativeFallbackPath));
+        var appMapOutputDirectory = ReadAction.compute(() -> AppMapJavaConfigUtil.findAppMapOutputDirectory(module, workingDir));
         if (appMapOutputDirectory == null) {
             throw new CantRunException("Unable to locate directory to store AppMap files");
         }

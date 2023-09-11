@@ -1,7 +1,6 @@
 package appland.execution;
 
 import com.intellij.openapi.application.ApplicationManager;
-import com.intellij.openapi.compiler.CompilerPaths;
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.roots.ModuleRootManager;
 import com.intellij.openapi.roots.ProjectRootManager;
@@ -14,73 +13,29 @@ import org.jetbrains.annotations.Nullable;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
-import java.util.Set;
 
 public final class AppMapJavaConfigUtil {
     private AppMapJavaConfigUtil() {
     }
 
-    // Supported top-level names of build output directories of Gradle and Maven.
-    // We're not including IntelliJ's default of "out" because we're using a fallback of "tmp" instead.
-    private static final Set<String> OUTPUT_TOP_LEVEL_NAMES = Set.of("target", "build");
-
     /**
      * Locate the directory, where AppMap JSON files should be stored in the given module.
+     * It always uses tmp/appmap as output directory. The returned tmp/appmap path is located in the most suitable
+     * content root of the module.
      *
-     * @param module               Current module
-     * @param context              Context, which is used to compute the fallback if no output directory is defined for the module.
-     * @param relativeFallbackPath Better fallback path then tmp/appmap, if available
-     * @return The path to the directory, where AppMap files should be stored.
+     * @param module  Current module
+     * @param context Context to locate the most suitable content root for the AppMap output directory.
+     * @return The path to the tmp/appmap directory, where AppMap files should be stored.
      */
     @RequiresReadLock
-    public static @Nullable Path findAppMapOutputDirectory(@NotNull Module module, @NotNull VirtualFile context, @Nullable Path relativeFallbackPath) {
+    public static @Nullable Path findAppMapOutputDirectory(@NotNull Module module, @NotNull VirtualFile context) {
         ApplicationManager.getApplication().assertReadAccessAllowed();
-
-        var topLevelOutputDir = findSupportedTopLevelOutputDirectory(module);
-        if (topLevelOutputDir != null) {
-            var nioPath = topLevelOutputDir.getFileSystem().getNioPath(topLevelOutputDir);
-            return nioPath != null
-                    ? nioPath.resolve("appmap")
-                    : null;
-        }
 
         var contentRoot = findBestAppMapContentRootDirectory(module, context);
         var contentRootPath = contentRoot.getFileSystem().getNioPath(contentRoot);
-        if (contentRootPath != null) {
-            var appMapDir = relativeFallbackPath != null && !relativeFallbackPath.isAbsolute()
-                    ? relativeFallbackPath
-                    : Paths.get("tmp", "appmap");
-            return contentRootPath.resolve(appMapDir);
-        }
-
-        return null;
-    }
-
-    @RequiresReadLock
-    private static @Nullable VirtualFile findSupportedTopLevelOutputDirectory(@NotNull Module module) {
-        // e.g. "<root>/build/java/classes/main" (Gradle) or "<root>/target/classes" (Maven)
-        var outputDirectory = CompilerPaths.getModuleOutputDirectory(module, false);
-        if (outputDirectory == null) {
-            return null;
-        }
-
-        var dir = outputDirectory;
-        while (dir != null) {
-            if (OUTPUT_TOP_LEVEL_NAMES.contains(dir.getName())) {
-                try {
-                    // It's only valid if it's still located inside the project,
-                    // a path like "/work/build" for output directory "/work/build/my-project/out/class" is invalid.
-                    return isLocatedInProject(module, dir)
-                            ? dir
-                            : null;
-                } catch (Exception e) {
-                    return null;
-                }
-            }
-            dir = dir.getParent();
-        }
-
-        return null;
+        return contentRootPath != null
+                ? contentRootPath.resolve(Paths.get("tmp", "appmap"))
+                : null;
     }
 
     /**
@@ -119,11 +74,5 @@ public final class AppMapJavaConfigUtil {
         return context.isDirectory()
                 ? context
                 : context.getParent();
-    }
-
-    @RequiresReadLock
-    private static boolean isLocatedInProject(@NotNull Module module, @NotNull VirtualFile dir) {
-        var index = ProjectRootManager.getInstance(module.getProject()).getFileIndex();
-        return index.getContentRootForFile(dir, false) != null;
     }
 }
