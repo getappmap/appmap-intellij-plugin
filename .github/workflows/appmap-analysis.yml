@@ -16,7 +16,6 @@ jobs:
             - name: Install AppMap tools
               uses: getappmap/install-action@v1
               with:
-                  tools-url: https://github.com/getappmap/appmap-js/releases/download/%40appland%2Fappmap-faster-v1.0-pre.8/appmap-linux-x64
                   github-token: ${{ secrets.GITHUB_TOKEN }}
                   install-appmap-library: false
 
