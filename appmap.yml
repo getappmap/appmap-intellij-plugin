@@ -1,4 +1,4 @@
 name: intellij-appmap
 packages:
     - path: appland
-appmap_dir: build/appmap
+appmap_dir: tmp/appmap
