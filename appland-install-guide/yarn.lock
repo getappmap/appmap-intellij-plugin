@@ -2,10 +2,10 @@
 # yarn lockfile v1
 
 
-"@appland/components@^2.61":
-  version "2.61.0"
-  resolved "https://registry.yarnpkg.com/@appland/components/-/components-2.61.0.tgz#d05ab30bcbee51b8ec5fa1bc009677dbd5f0ba5e"
-  integrity sha512-4U0eD/rQHFgqHktbdv3nXmr/UkVNNcRZqafxhr9LRenjHmY+bFyK7P2op6UG4u42ME3jIVnEN425kJaOAjoOnQ==
+"@appland/components@^2.61.2":
+  version "2.61.2"
+  resolved "https://registry.yarnpkg.com/@appland/components/-/components-2.61.2.tgz#ee9123c32095e8489091fe2a0f116a7a3178187b"
+  integrity sha512-72SlQV+MCkHi3yowvcXDV7nFXbBQWre+XmUuXpEVkzLtNHMwMpMG282Ndr1Fr22P0iD3uUN0aOgv/7BjdSyqYA==
   dependencies:
     "@appland/diagrams" "^1.7.0"
     "@appland/models" "^2.6.3"
