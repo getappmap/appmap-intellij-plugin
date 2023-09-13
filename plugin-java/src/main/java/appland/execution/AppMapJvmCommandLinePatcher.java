@@ -18,7 +18,7 @@ public final class AppMapJvmCommandLinePatcher {
     }
 
     @NotNull
-    static List<String> createJvmParams(@Nullable Path appMapConfig, @Nullable Path appMapOutputDirectory) throws CantRunException {
+    static List<String> createJvmParams(@Nullable Path appMapConfig) throws CantRunException {
         if (appMapConfig == null) {
             throw new CantRunException("Unable to find an appmap.yml file");
         }
@@ -30,9 +30,6 @@ public final class AppMapJvmCommandLinePatcher {
 
         var jvmParams = new LinkedList<String>();
         jvmParams.add("-Dappmap.config.file=" + appMapConfig);
-        if (appMapOutputDirectory != null) {
-            jvmParams.add("-Dappmap.output.directory=" + appMapOutputDirectory);
-        }
         jvmParams.add("-javaagent:" + agentJarPath);
         return jvmParams;
     }
