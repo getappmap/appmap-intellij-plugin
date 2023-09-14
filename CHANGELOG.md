@@ -1,7 +1,25 @@
 AppMap Plugin Changelog
 
-## [0.48.0](https://github.com/getappmap/appmap-intellij-plugin/compare/v0.47.0...v0.48.0) (2023-09-01)
+## [0.49.0](https://github.com/getappmap/appmap-intellij-plugin/compare/v0.48.0...v0.49.0) (2023-09-14)
 
+### Features
+
+- Default output directory for AppMaps now tmp for Java projects 
+- Changed the "Apply" button to "Load" on the Filter dialog
+- Findings are always enabled if the user is signed in
+- OpenAPI removed from the onboarding flow
+- Onboarding flow begins immediately after plugin installation
+- Sequence diagram fixes for readability and usability
+
+### Bug Fixes
+
+- appmap.yml no longer overwritten by "Run with AppMap" if it already exists
+- Simplified file change watching algorithm
+- Findings now open to the correct map view
+- Findings without associated source files are now shown in the Runtime Analysis tree
+- No longer passing unnecessary appmap.output.directory to the AppMap agent
+
+## [0.48.0](https://github.com/getappmap/appmap-intellij-plugin/compare/v0.47.0...v0.48.0) (2023-09-01)
 
 ### Bug Fixes
 
