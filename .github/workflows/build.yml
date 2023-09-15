@@ -56,7 +56,7 @@ jobs:
               uses: actions/cache/save@v3
               if: always()
               with:
-                  path: build/appmap
+                  path: tmp/appmap
                   key: appmaps-${{ github.sha }}-${{ github.run_attempt }}
 
     appmap-analysis:
