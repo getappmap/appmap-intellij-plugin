@@ -172,6 +172,7 @@ project(":") {
 
     changelog {
         path.set("${project.projectDir}/CHANGELOG.md")
+
     }
 
     tasks {
