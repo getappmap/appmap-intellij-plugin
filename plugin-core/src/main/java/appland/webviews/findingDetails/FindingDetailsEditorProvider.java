@@ -3,7 +3,6 @@ package appland.webviews.findingDetails;
 import appland.AppMapBundle;
 import appland.Icons;
 import appland.problemsView.model.ScannerFinding;
-import appland.telemetry.TelemetryService;
 import appland.webviews.WebviewEditor;
 import appland.webviews.WebviewEditorProvider;
 import com.intellij.openapi.fileEditor.FileEditor;
@@ -46,7 +45,6 @@ public class FindingDetailsEditorProvider extends WebviewEditorProvider {
         KEY_FINDINGS.set(file, findings);
         FileEditorManager.getInstance(project).openFile(file, true);
 
-        queueTelemetryMessage(findings);
     }
 
     @Override
@@ -83,23 +81,5 @@ public class FindingDetailsEditorProvider extends WebviewEditorProvider {
         return findings.isEmpty()
                 ? AppMapBundle.get("webview.findingDetails.title")
                 : findings.get(0).ruleTitle;
-    }
-
-    private static void queueTelemetryMessage(@NotNull List<ScannerFinding> findings) {
-        if (findings.isEmpty()) {
-            return;
-        }
-
-        // we're assuming that all findings shown in this webview share the same hash
-        // and have the same properties
-        var finding = findings.get(0);
-        TelemetryService.getInstance().sendEvent("analysis:view_finding", eventData -> {
-            eventData.property("appmap.finding.rule", finding.ruleId);
-            eventData.property("appmap.finding.hash", finding.getAppMapHashWithFallback());
-            if (finding.impactDomain != null) {
-                eventData.property("appmap.finding.impact_domain", finding.impactDomain.getJsonId());
-            }
-            return eventData;
-        });
     }
 }

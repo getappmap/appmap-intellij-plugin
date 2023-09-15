@@ -23,9 +23,7 @@ public class FirstAppMapLaunchStartupActivity implements StartupActivity.DumbAwa
     }
 
     private static void sendTelemetry(@NotNull Project project) {
-        var telemetry = TelemetryService.getInstance();
-        telemetry.notifyTelemetryUsage(project);
-        telemetry.sendEvent("plugin:install");
+        TelemetryService.getInstance().notifyTelemetryUsage(project);
     }
 
     @Override

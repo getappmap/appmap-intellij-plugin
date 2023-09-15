@@ -6,7 +6,6 @@ import appland.installGuide.InstallGuideViewPage;
 import appland.problemsView.FindingsManager;
 import appland.settings.AppMapApplicationSettingsService;
 import appland.settings.AppMapSettingsListener;
-import appland.telemetry.TelemetryService;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.application.ModalityState;
 import com.intellij.openapi.project.Project;
@@ -21,24 +20,7 @@ public class AppLandStartupActivity implements StartupActivity {
         FindingsManager.getInstance(project).reloadAsync();
 
         var projectMessageBus = project.getMessageBus().connect(AppLandLifecycleService.getInstance(project));
-        registerFindingsTelemetryListener(projectMessageBus);
         registerShowInstructionsAfterSignIn(project, projectMessageBus);
-    }
-
-    private void registerFindingsTelemetryListener(@NotNull MessageBusConnection projectMessageBus) {
-        projectMessageBus.subscribe(AppMapSettingsListener.TOPIC, new AppMapSettingsListener() {
-            @Override
-            public void apiKeyChanged() {
-                sendAuthenticationTelemetry();
-            }
-
-            private void sendAuthenticationTelemetry() {
-                var eventName = AppMapApplicationSettingsService.getInstance().getApiKey() != null
-                        ? "authentication:success"
-                        : "authentication:sign_out";
-                TelemetryService.getInstance().sendEvent(eventName);
-            }
-        });
     }
 
     private void registerShowInstructionsAfterSignIn(@NotNull Project project,

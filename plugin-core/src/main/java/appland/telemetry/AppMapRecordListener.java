@@ -16,10 +16,6 @@ public class AppMapRecordListener implements AppMapFileChangeListener {
             return;
         }
 
-        if (!appMapRecordedThisSession.compareAndSet(false, true)) {
-            return;
-        }
-
-        TelemetryService.getInstance().sendEvent("appmap:create");
+        appMapRecordedThisSession.compareAndSet(false, true);
     }
 }
