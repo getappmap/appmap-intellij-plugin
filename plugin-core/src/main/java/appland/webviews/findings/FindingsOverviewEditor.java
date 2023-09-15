@@ -6,7 +6,6 @@ import appland.problemsView.FindingsManager;
 import appland.problemsView.FindingsViewTab;
 import appland.problemsView.model.ImpactDomain;
 import appland.problemsView.model.ScannerFinding;
-import appland.telemetry.TelemetryService;
 import appland.utils.GsonUtils;
 import appland.webviews.WebviewEditor;
 import appland.webviews.findingDetails.FindingDetailsEditorProvider;
@@ -15,7 +14,6 @@ import com.google.gson.JsonObject;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.Messages;
-import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.openapi.vfs.VirtualFile;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntMaps;
@@ -53,37 +51,6 @@ public class FindingsOverviewEditor extends WebviewEditor<List<ScannerFinding>> 
 
     @Override
     protected void afterInit(@Nullable List<ScannerFinding> initData) {
-        assert initData != null;
-
-        var deduplicatedFindings = deduplicateFindingsByHash(initData);
-        var ruleIds = findUniqueRuleIds(initData);
-        var impactDomainsLowercase = findUniqueImpactDomainsLowercase(initData);
-        var impactDomainCounts = createImpactDomainCounts(initData);
-        var uniqueImpactDomainCounts = createImpactDomainCounts(deduplicatedFindings);
-
-        TelemetryService.getInstance().sendEvent("analysis:view_overview", event -> {
-            // properties
-            event.property("appmap.analysis.rules", StringUtil.join(ruleIds, ","));
-            event.property("appmap.analysis.impact_domains", StringUtil.join(impactDomainsLowercase, ","));
-
-            // metrics
-            event.metric("num_findings.num_total_findings", (double) initData.size());
-            event.metric("num_findings.num_unique_findings", (double) deduplicatedFindings.size());
-
-            impactDomainCounts.forEach((domain, count) -> {
-                if (count > 0) {
-                    event.metric("num_findings.num_" + domain.getJsonId().toLowerCase(), count.doubleValue());
-                }
-            });
-
-            uniqueImpactDomainCounts.forEach((domain, count) -> {
-                if (count > 0) {
-                    event.metric("num_findings.num_unique_" + domain.getJsonId().toLowerCase(), count.doubleValue());
-                }
-            });
-
-            return event;
-        });
     }
 
     @Override

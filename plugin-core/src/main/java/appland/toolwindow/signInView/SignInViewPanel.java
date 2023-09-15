@@ -2,7 +2,6 @@ package appland.toolwindow.signInView;
 
 import appland.AppMapPlugin;
 import appland.oauth.AppMapLoginAction;
-import appland.telemetry.TelemetryService;
 import appland.toolwindow.AppMapToolWindowContent;
 import appland.utils.GsonUtils;
 import appland.webviews.ConsoleInitMessageHandler;
@@ -121,13 +120,8 @@ public class SignInViewPanel extends SimpleToolWindowPanel implements Disposable
                 AppMapLoginAction.authenticate();
                 return true;
 
+            // known message, but not handled
             case "click-sign-in-link":
-                if (message.has("linkType")) {
-                    TelemetryService.getInstance().sendEvent("clicked_sign_in_link", eventData -> {
-                        var linkType = message.getAsJsonPrimitive("linkType").getAsString();
-                        return eventData.property("appmap.link_type", linkType);
-                    });
-                }
                 return true;
 
             default:

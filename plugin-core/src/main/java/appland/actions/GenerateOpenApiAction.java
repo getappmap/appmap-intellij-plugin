@@ -2,8 +2,6 @@ package appland.actions;
 
 import appland.AppMapBundle;
 import appland.cli.AppLandCommandLineService;
-import appland.installGuide.analyzer.LanguageResolver;
-import appland.installGuide.analyzer.Languages;
 import appland.settings.AppMapProjectSettingsService;
 import appland.telemetry.TelemetryService;
 import com.intellij.execution.ExecutionException;
@@ -11,8 +9,6 @@ import com.intellij.execution.process.CapturingProcessHandler;
 import com.intellij.ide.actions.OpenInRightSplitAction;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
-import com.intellij.openapi.application.ApplicationManager;
-import com.intellij.openapi.application.ReadAction;
 import com.intellij.openapi.application.WriteAction;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.fileEditor.FileEditorManager;
@@ -22,7 +18,6 @@ import com.intellij.openapi.project.DumbAware;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.Messages;
 import com.intellij.openapi.ui.popup.JBPopupFactory;
-import com.intellij.openapi.util.ThrowableComputable;
 import com.intellij.openapi.vcs.changes.ui.VirtualFileListCellRenderer;
 import com.intellij.openapi.vfs.VfsUtil;
 import com.intellij.openapi.vfs.VirtualFile;
@@ -104,8 +99,6 @@ public class GenerateOpenApiAction extends AnAction implements DumbAware {
                     } else {
                         editorManager.openFile(openApiFile, true);
                     }
-
-                    sendSuccessTelemetry(project, projectRoot);
                 }
             }
 
@@ -140,24 +133,6 @@ public class GenerateOpenApiAction extends AnAction implements DumbAware {
                 }
             }
         }.queue();
-    }
-
-    private static void sendSuccessTelemetry(@NotNull Project project, @NotNull VirtualFile projectRoot) {
-        ApplicationManager.getApplication().executeOnPooledThread(() -> {
-            Languages.Language language;
-            try {
-                language = ReadAction.compute((ThrowableComputable<Languages.Language, Exception>) () -> {
-                    return new LanguageResolver(project).getLanguage(projectRoot);
-                });
-            } catch (Exception e) {
-                language = null;
-            }
-
-            var languageId = language == null ? "unknown" : language.id;
-            TelemetryService.getInstance().sendEvent("open_api:generate", data -> {
-                return data.property("appmap.project.language", languageId);
-            });
-        });
     }
 
     private static void sendErrorTelemetry() {
