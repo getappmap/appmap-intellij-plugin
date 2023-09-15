@@ -31,7 +31,7 @@ jobs:
               uses: getappmap/archive-action@main
 
             - name: Analyze AppMaps
-              uses: getappmap/analyze-action@feat/customize-sections
+              uses: getappmap/analyze-action@v1
               if: github.event_name == 'pull_request'
               with:
                   base-revision: ${{ github.event.pull_request.base.sha }}
