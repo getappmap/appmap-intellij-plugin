@@ -138,7 +138,8 @@ allprojects {
             // attach AppMap agent, but only if Gradle is online
             dependsOn(":downloadAppMapAgent")
             jvmArgs("-javaagent:$agentOutputPath",
-                    "-Dappmap.config.file=${rootProject.file("appmap.yml")}")
+                    "-Dappmap.config.file=${rootProject.file("appmap.yml")}",
+                    "-Dappmap.output.directory=${rootProject.file("tmp/appmap")}")
             systemProperty("appmap.test.withAgent", "true")
 
             // logging setup
