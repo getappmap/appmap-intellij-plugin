@@ -136,9 +136,6 @@ public class AppMapFileEditor extends WebviewEditor<JsonObject> {
                 applyWebViewFilters();
             }
         });
-
-        // TODO - provide `appmap.project.language` property which specifies the language of the AppMap via metadata.language
-        TelemetryService.getInstance().sendEvent("appmap:open");
     }
 
     @Override
@@ -208,12 +205,12 @@ public class AppMapFileEditor extends WebviewEditor<JsonObject> {
                 showSource(message.getAsJsonObject("location").getAsJsonPrimitive("location").getAsString());
                 break;
 
+            // known message, but not handled
             case "sidebarSearchFocused":
-                telemetryService.sendEvent("sidebar_search_focused");
                 break;
 
+            // known message, but not handled
             case "clickFilterButton":
-                telemetryService.sendEvent("click_filter_button");
                 break;
 
             case "clickTab":
@@ -228,20 +225,12 @@ public class AppMapFileEditor extends WebviewEditor<JsonObject> {
                 }
                 break;
 
+            // known message, but not handled
             case "selectObjectInSidebar":
-                if (message != null) {
-                    var category = message.getAsJsonPrimitive("category");
-                    if (category.isString()) {
-                        telemetryService.sendEvent("select_object_in_sidebar", eventData -> {
-                            eventData.property("appmap.select_object_in_sidebar.type", category.getAsString());
-                            return eventData;
-                        });
-                    }
-                }
                 break;
 
+            // known message, but not handled
             case "resetDiagram":
-                telemetryService.sendEvent("reset_diagram");
                 break;
 
             case "exportSVG":

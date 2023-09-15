@@ -27,11 +27,7 @@ public abstract class AbstractAppMapJavaAgentRunner extends DefaultJavaProgramRu
     @Override
     public void execute(@NotNull ExecutionEnvironment environment) throws ExecutionException {
         verifyJdk(environment);
-        try {
-            super.execute(environment);
-        } finally {
-            AppMapJvmExecutor.sendTelemetry(environment.getRunProfile());
-        }
+        super.execute(environment);
     }
 
     @Override

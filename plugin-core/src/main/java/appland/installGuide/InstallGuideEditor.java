@@ -241,7 +241,6 @@ public class InstallGuideEditor extends WebviewEditor<List<ProjectMetadata>> {
 
     private void handleMessagePerformAuth() {
         AppMapLoginAction.authenticate();
-        TelemetryService.getInstance().sendEvent("analysis:cta_interaction");
     }
 
     private void handleMessagePerformInstall(@NotNull JsonObject message) {
@@ -274,26 +273,8 @@ public class InstallGuideEditor extends WebviewEditor<List<ProjectMetadata>> {
     }
 
     private void handleMessageOpenPage(@NotNull JsonObject message) {
-        var allProjects = findProjects();
-
-        var viewId = message.getAsJsonPrimitive("page").getAsString();
-        var viewProject = gson.fromJson(message.get("project"), ProjectMetadata.class);
-        var anyInstallable = allProjects.stream().anyMatch(p -> p.getScore() >= 2);
-        var projectLanguage = viewProject != null ? viewProject.getLanguage() : null;
-        var projectLanguageName = projectLanguage != null && projectLanguage.getName() != null
-                ? projectLanguage.getName().toLowerCase()
-                : "";
-
-        TelemetryService.getInstance().sendEvent(
-                "view:open",
-                (event) -> event
-                        .property("appmap.view.id", viewId)
-                        .property("appmap.project.language", projectLanguageName)
-                        .property("appmap.project.installable", String.valueOf(viewProject != null && viewProject.getScore() >= 2))
-                        .property("appmap.project.any_installable", String.valueOf(anyInstallable))
-        );
-
         // update state, which is based on the new page
+        var viewId = message.getAsJsonPrimitive("page").getAsString();
         navigateTo(InstallGuideViewPage.findByPageId(viewId), false);
     }
 

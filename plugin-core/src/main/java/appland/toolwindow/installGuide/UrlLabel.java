@@ -1,11 +1,9 @@
 package appland.toolwindow.installGuide;
 
 import appland.Icons;
-import appland.telemetry.TelemetryService;
 import com.intellij.ide.BrowserUtil;
 import com.intellij.ui.HyperlinkAdapter;
 import com.intellij.ui.components.JBLabel;
-import org.apache.commons.lang.StringUtils;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.event.HyperlinkEvent;
@@ -25,11 +23,6 @@ public class UrlLabel extends JBLabel {
         return String.format("<html><a href='%s'>%s</a></html>", url, label);
     }
 
-    @NotNull
-    private static String urlPropertyKey(String url) {
-        return "appland.url." + url;
-    }
-
     @Override
     protected @NotNull HyperlinkListener createHyperlinkListener() {
         return new HyperlinkAdapter() {
@@ -37,11 +30,6 @@ public class UrlLabel extends JBLabel {
             protected void hyperlinkActivated(HyperlinkEvent e) {
                 var url = e.getDescription();
                 BrowserUtil.browse(url);
-
-                TelemetryService.getInstance().sendEvent("click_docs_link_in_tree", eventData -> {
-                    eventData.property("appmap.docs_path", StringUtils.remove(url, "https://appmap.io"));
-                    return eventData;
-                });
             }
         };
     }
