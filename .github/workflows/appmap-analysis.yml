@@ -23,7 +23,7 @@ jobs:
             - name: Restore AppMaps
               uses: actions/cache/restore@v3
               with:
-                  path: build/appmap
+                  path: tmp/appmap
                   key: appmaps-${{ github.sha }}-${{ github.run_attempt }}
 
             - name: Archive AppMaps
