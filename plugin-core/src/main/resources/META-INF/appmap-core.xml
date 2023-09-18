@@ -33,6 +33,9 @@
 
         <listener topic="com.intellij.execution.ExecutionListener"
                   class="appland.execution.AppMapExecutionListener"/>
+
+        <listener topic="appland.files.AppMapFileChangeListener"
+                  class="appland.notifications.FirstAppMapListener"/>
     </projectListeners>
 
     <extensions defaultExtensionNs="com.intellij">
@@ -41,7 +44,7 @@
         <projectService serviceImplementation="appland.AppLandLifecycleService"/>
 
         <postStartupActivity implementation="appland.startup.AppLandStartupActivity"/>
-        <postStartupActivity implementation="appland.startup.ShowAppLandToolWindowStartupActivity"/>
+        <postStartupActivity implementation="appland.startup.FirstAppMapLaunchStartupActivity"/>
         <postStartupActivity implementation="appland.cli.RegisterContentRootsActivity"/>
         <postStartupActivity implementation="appland.cli.DownloadToolsStartupActivity"/>
 
