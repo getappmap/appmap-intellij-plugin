@@ -12,8 +12,8 @@ import com.intellij.openapi.util.EmptyRunnable;
 import com.intellij.openapi.wm.ToolWindowManager;
 import org.jetbrains.annotations.NotNull;
 
-public class ShowAppLandToolWindowStartupActivity implements StartupActivity.DumbAware {
-    private static void showAppMapToolWindow(@NotNull Project project) {
+public class FirstAppMapLaunchStartupActivity implements StartupActivity.DumbAware {
+    public static void showAppMapToolWindow(@NotNull Project project) {
         StartupManager.getInstance(project).runAfterOpened(() -> ApplicationManager.getApplication().invokeLater(() -> {
             var toolWindow = ToolWindowManager.getInstance(project).getToolWindow(AppMapToolWindowFactory.TOOLWINDOW_ID);
             if (toolWindow != null && !toolWindow.isVisible()) {
@@ -37,9 +37,17 @@ public class ShowAppLandToolWindowStartupActivity implements StartupActivity.Dum
      * If it's the first launch of the AppLand plugin, it opens the AppMap toolwindow and sends telemetry.
      */
     static void handleFirstStart(@NotNull Project project) {
+        if (ApplicationManager.getApplication().isUnitTestMode()) {
+            return;
+        }
+
         var settings = AppMapApplicationSettingsService.getInstance();
-        if (settings.isFirstStart() && !ApplicationManager.getApplication().isUnitTestMode()) {
+        if (settings.isFirstStart()) {
             settings.setFirstStart(false);
+
+            // set to false at first startup to enable the notification
+            settings.setShowFirstAppMapNotification(true);
+
             showAppMapToolWindow(project);
             sendTelemetry(project);
         }
