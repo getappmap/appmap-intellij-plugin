@@ -8,7 +8,6 @@ import org.junit.Test;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.List;
 
 public class CodeObjectsModelTest extends AppMapBaseTest {
     @Test
@@ -53,8 +52,9 @@ public class CodeObjectsModelTest extends AppMapBaseTest {
                                  @NotNull String expectedOutputFileName) throws IOException {
         var output = new StringBuilder();
         buildTreeRepresentation(model, node, output, 0);
-        var expectedOutput = Files.readString(Paths.get(getTestDataPath()).resolve(expectedOutputFileName));
-        assertEquals("Tree rendering does not match expected file content: " + expectedOutputFileName, expectedOutput.trim(), output.toString().trim());
+        var fileContent = Files.readString(Paths.get(getTestDataPath()).resolve(expectedOutputFileName));
+        var expectedOutput = StringUtil.convertLineSeparators(fileContent).trim();
+        assertEquals("Tree rendering does not match expected file content: " + expectedOutputFileName, expectedOutput, output.toString().trim());
     }
 
     private void buildTreeRepresentation(@NotNull CodeObjectsModel model, @NotNull Node node, @NotNull StringBuilder output, int indentationLevel) {

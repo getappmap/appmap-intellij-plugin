@@ -9,8 +9,13 @@ on:
 
 jobs:
     test:
-        name: Test
-        runs-on: ubuntu-latest
+        strategy:
+            matrix:
+                os: [ ubuntu-latest, windows-latest, macos-latest ]
+
+        name: Test ${{ matrix.os }}
+        runs-on: ${{ matrix.os }}
+        timeout-minutes: 45
         steps:
             - name: Fetch Sources
               uses: actions/checkout@v3
@@ -27,13 +32,25 @@ jobs:
             # https://docs.github.com/en/rest/overview/resources-in-the-rest-api?apiVersion=2022-11-28#rate-limits-for-requests-from-github-actions
             - name: Show GitHub Actions rate limit
               shell: bash
+              # curl is unavailable on Windows
+              if: runner.os != 'Windows'
               run: |
                   curl -s -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" -i https://api.github.com/users/octocat | grep x-ratelimit
 
-            - name: Run Linters and Test
+            - name: Run Linters and Test (Linux and macOS)
+              if: runner.os != 'Windows'
               env:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+              shell: bash
               run: ./gradlew check
+
+            # Termination of AppMap CLI processes is failing with IC-2021.3 for unknown reasons (process.destroy() etc.)
+            - name: Run Linters and Test with 2023.2 (Windows)
+              if: runner.os == 'Windows'
+              env:
+                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+              shell: bash
+              run: ./gradlew check -PideVersion=IC-2023.2.1
 
             - name: Verify plugin
               shell: bash
@@ -41,20 +58,22 @@ jobs:
 
             - name: Run Plugin Verifier
               shell: bash
+              # JetBrains plugin verifier should always report the same results, regardless of the OS
+              if: runner.os == 'Linux'
               run: ./gradlew runPluginVerifier
 
             - name: Upload Test Reports
               uses: actions/upload-artifact@v3
               if: always()
               with:
-                  name: test-reports-linux
+                  name: test-reports-${{ matrix.os }}
                   path: |
                       build/reports/
                       **/build/reports/
 
             - name: Save AppMaps
               uses: actions/cache/save@v3
-              if: always()
+              if: runner.os == 'Linux'
               with:
                   path: tmp/appmap
                   key: appmaps-${{ github.sha }}-${{ github.run_attempt }}
