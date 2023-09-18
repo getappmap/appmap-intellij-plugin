@@ -2,9 +2,9 @@ AppMap is a free and open-source runtime code analysis tool.
 
 AppMap records code execution traces, collecting information about how your code works and what it does. Then it presents this information as interactive diagrams that you can search and navigate. In the diagrams, you can see exactly how functions, web services, data stores, security, I/O, and dependent services all work together when application code runs.
 
-## Requirements and use
+## Requirements and Use
 
-**2021.1** and newer JetBrains IDEs are required to use this plugin.
+**2021.3** and newer JetBrains IDEs are required to use this plugin.
 
 Supported web applications and API frameworks: Ruby on Rails, Django, Flask, Express, and Spring.
 
