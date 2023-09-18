@@ -2,6 +2,7 @@ package appland.files;
 
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.util.messages.Topic;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Set;
 
@@ -24,5 +25,5 @@ public interface AppMapFileChangeListener {
      * Sent after any refresh of the local file system
      * and after changes to .appmap.json files (e.g. created, updated, deleted, renamed).
      */
-    void refreshAppMaps(Set<AppMapFileEventType> changeTypes);
+    void refreshAppMaps(@NotNull Set<AppMapFileEventType> changeTypes);
 }
