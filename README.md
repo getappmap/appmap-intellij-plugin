@@ -1,18 +1,18 @@
 # AppMap for JetBrains IDEs
 
 ## System Requirements
-**IntelliJ IDEA 2021.1 or later** is required to use this plugin.
+**IntelliJ IDEA 2021.3 or later** is required to use this plugin.
 
 Only installations, which use the bundled JetBrains Java runtime, support the JCEF engine for rendering.
 
 ## Build
-Please make sure that a **Java JDK, version 11 to 15** is installed. Building the plugin is only supported with Java 11 or later.
+Please make sure that a **Java JDK, version 11 or later** is installed. Building the plugin is only supported with Java 11 or later.
 
 ```bash
 ./gradlew clean build
 ```
 
-After executing these commands the plugin is available at `./build/distributions/intellij-appmap-<versin>.zip`. 
+After executing these commands the plugin is available at `./build/distributions/intellij-appmap-<version>.zip`. 
 
 ### Releases
 The content of `plugin-description.md` is converted into HTML as part of the build process. The HTML content is displayed as description on the JetBrains marketplace and in plugin lists in the IDEs.
