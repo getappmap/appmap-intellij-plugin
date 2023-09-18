@@ -63,7 +63,7 @@ public class InstallGuideEditor extends WebviewEditor<List<ProjectMetadata>> {
     public InstallGuideEditor(@NotNull Project project,
                               @NotNull VirtualFile file,
                               @NotNull InstallGuideViewPage page) {
-        super(project, file, Set.of("click-link", "open-file", "open-page", "view-problems", "clipboard",
+        super(project, file, Set.of("click-link", "open-file", "open-page", "open-findings-overview", "clipboard",
                 "perform-install", "perform-auth", "generate-openapi"));
         this.currentPage = page;
     }
@@ -168,7 +168,7 @@ public class InstallGuideEditor extends WebviewEditor<List<ProjectMetadata>> {
                 handleMessageOpenPage(message);
                 break;
 
-            case "view-problems":
+            case "open-findings-overview":
                 handleMessageViewProblems();
                 break;
 
