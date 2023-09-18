@@ -235,7 +235,9 @@ public class DefaultCommandLineService implements AppLandCommandLineService {
                                 LOG.debug("Refreshing local filesystem for indexed file: " + filePath);
                             }
 
-                            VfsUtil.markDirtyAndRefresh(true, false, false, Path.of(filePath).toFile());
+                            // Refresh parent directory of the indexed AppMap, because it contains both
+                            // myAppMap.appmap.json file and the corresponding metadata directory myAppMap/
+                            VfsUtil.markDirtyAndRefresh(true, false, false, Path.of(filePath).getParent().toFile());
                         } catch (InvalidPathException e) {
                             if (LOG.isDebugEnabled()) {
                                 LOG.debug("Error parsing indexed file path: " + filePath, e);
