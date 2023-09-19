@@ -70,6 +70,6 @@ public final class AppMapPatcherUtil {
                 workingDir,
                 appMapOutputDirectory);
 
-        return AppMapJvmCommandLinePatcher.createJvmParams(config);
+        return AppMapJvmCommandLinePatcher.createJvmParams(config, appMapOutputDirectory);
     }
 }
