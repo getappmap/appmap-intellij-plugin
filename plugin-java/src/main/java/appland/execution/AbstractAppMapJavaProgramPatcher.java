@@ -26,7 +26,7 @@ public abstract class AbstractAppMapJavaProgramPatcher implements AppMapProgramP
         if (executor instanceof AppMapJvmExecutor && isSupported(configuration)) {
             var project = ((RunConfiguration) configuration).getProject();
             try {
-                var jvmParams = AppMapPatcherUtil.prepareJavaParameters(project, configuration, javaParameters);
+                var jvmParams = AppMapPatcherUtil.prepareJavaParameters(project, configuration, javaParameters, getRelativeOutputFallback());
                 applyJvmParameters(javaParameters, jvmParams);
             } catch (Exception e) {
                 LOG.warn("Unable to execute run configuration", e);
@@ -37,6 +37,13 @@ public abstract class AbstractAppMapJavaProgramPatcher implements AppMapProgramP
                         true);
             }
         }
+    }
+
+    /**
+     * @return A relative fallback path if the context allows to provide a better value than "tmp/appmap".
+     */
+    protected @Nullable Path getRelativeOutputFallback() {
+        return null;
     }
 
     protected void applyJvmParameters(JavaParameters javaParameters, List<String> jvmParams) {
