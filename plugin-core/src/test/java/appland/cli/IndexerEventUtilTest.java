@@ -39,4 +39,16 @@ public class IndexerEventUtilTest extends AppMapBaseTest {
         assertNull(extractIndexedFilePath("\"\""));
         assertNull(extractIndexedFilePath("Not an indexed message"));
     }
+
+    @Test
+    public void unescapeOrder() {
+        // newline
+        assertEquals("\n", extractIndexedFilePath("Indexed \"\\n\""));
+        // backslash
+        assertEquals("\\", extractIndexedFilePath("Indexed \"\\\\\""));
+        // backslash, 'n'
+        assertEquals("\\n", extractIndexedFilePath("Indexed \"\\\\n\""));
+        // 'a', newline, backslash, 'n'
+        assertEquals("a\n\\n.txt", extractIndexedFilePath("Indexed \"a\\n\\\\n.txt\""));
+    }
 }
