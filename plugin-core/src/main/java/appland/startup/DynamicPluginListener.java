@@ -19,7 +19,7 @@ public class DynamicPluginListener implements com.intellij.ide.plugins.DynamicPl
         }
 
         if (AppMapPlugin.getDescriptor().equals(pluginDescriptor)) {
-            FirstAppMapLaunchStartupActivity.handleFirstStart(project);
+            ShowAppLandToolWindowStartupActivity.handleFirstStart(project);
         }
     }
 }

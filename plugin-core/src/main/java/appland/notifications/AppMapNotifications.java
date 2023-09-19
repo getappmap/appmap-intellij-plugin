@@ -1,13 +1,7 @@
 package appland.notifications;
 
-import appland.AppMapBundle;
 import appland.AppMapPlugin;
 import appland.actions.StopAppMapRecordingAction;
-import appland.installGuide.InstallGuideEditorProvider;
-import appland.installGuide.InstallGuideViewPage;
-import appland.startup.FirstAppMapLaunchStartupActivity;
-import appland.toolwindow.AppMapToolWindowFactory;
-import appland.webviews.findings.FindingsOverviewEditorProvider;
 import com.intellij.ide.BrowserUtil;
 import com.intellij.notification.Notification;
 import com.intellij.notification.NotificationAction;
@@ -15,10 +9,7 @@ import com.intellij.notification.NotificationListener;
 import com.intellij.notification.NotificationType;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.application.ModalityState;
-import com.intellij.openapi.fileEditor.FileEditorManager;
 import com.intellij.openapi.project.Project;
-import com.intellij.openapi.vfs.VirtualFile;
-import com.intellij.util.ui.EdtInvocationManager;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -118,27 +109,6 @@ public final class AppMapNotifications {
             });
 
             notification = notification.addAction(denyAction);
-            notification.notify(project);
-        });
-    }
-
-    public static void showFirstAppMapNotification(@NotNull Project project, @NotNull VirtualFile appMap) {
-        EdtInvocationManager.invokeLaterIfNeeded(() -> {
-            var content = AppMapBundle.get("notification.firstAppMap.content");
-
-            Notification notification = new AppMapFullContentNotification(
-                    GENERIC_NOTIFICATIONS_ID, null,
-                    null, null, content,
-                    NotificationType.INFORMATION, null
-            );
-
-            var openAction = NotificationAction.create(lazy("notification.firstAppMap.openAction"), (e, n) -> {
-                InstallGuideEditorProvider.open(project, InstallGuideViewPage.OpenAppMaps);
-                FirstAppMapLaunchStartupActivity.showAppMapToolWindow(project);
-                n.expire();
-            });
-
-            notification = notification.addAction(openAction);
             notification.notify(project);
         });
     }

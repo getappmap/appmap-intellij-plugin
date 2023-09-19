@@ -14,19 +14,20 @@ import java.util.Objects;
  * Persistent application state of the AppMap plugin.
  */
 @Getter
-@Setter
 @ToString
 @EqualsAndHashCode
 public class AppMapApplicationSettings {
+    @Setter
     private volatile boolean appmapInstructionsViewed = false;
+
+    @Setter
     private volatile boolean firstStart = true;
+
+    @Setter
     private volatile boolean enableTelemetry = true;
+
+    @Setter
     private volatile @Nullable String apiKey = null;
-    /**
-     * {@code true} if the notification should be displayed the next time an AppMap is created.
-     * This flag is synced with {@link  #firstStart} to avoid the notification with existing users.
-     */
-    private volatile boolean showFirstAppMapNotification = false;
 
     public AppMapApplicationSettings() {
     }
@@ -36,7 +37,6 @@ public class AppMapApplicationSettings {
         this.firstStart = settings.firstStart;
         this.enableTelemetry = settings.enableTelemetry;
         this.apiKey = settings.apiKey;
-        this.showFirstAppMapNotification = settings.showFirstAppMapNotification;
     }
 
     public void setApiKeyNotifying(@Nullable String apiKey) {
