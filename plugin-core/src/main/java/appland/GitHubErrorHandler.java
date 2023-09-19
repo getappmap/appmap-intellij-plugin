@@ -1,7 +1,9 @@
 package appland;
 
 import com.intellij.ide.BrowserUtil;
+import com.intellij.ide.DataManager;
 import com.intellij.idea.IdeaLogger;
+import com.intellij.openapi.actionSystem.CommonDataKeys;
 import com.intellij.openapi.application.ApplicationInfo;
 import com.intellij.openapi.diagnostic.ErrorReportSubmitter;
 import com.intellij.openapi.diagnostic.IdeaLoggingEvent;
@@ -35,6 +37,11 @@ public class GitHubErrorHandler extends ErrorReportSubmitter {
                           @Nullable String additionalInfo,
                           @NotNull Component parentComponent,
                           @NotNull Consumer<? super SubmittedReportInfo> consumer) {
+
+        var mgr = DataManager.getInstance();
+        var context = mgr.getDataContext(parentComponent);
+        var project = CommonDataKeys.PROJECT.getData(context);
+
         var stacktrace = "";
         if (events.length >= 1) {
             stacktrace = events[0].getThrowableText();
@@ -66,7 +73,7 @@ public class GitHubErrorHandler extends ErrorReportSubmitter {
         out.append("Version|").append(AppMapPlugin.getDescriptor().getVersion()).append("\n");
         out.append("IDE|").append(ApplicationInfo.getInstance().getBuild().asString()).append("\n");
         out.append("OS|").append(SystemInfoRt.OS_NAME).append(" ").append(SystemInfoRt.OS_VERSION).append("\n");
-        out.append("Last action|").append(lastAction == null ? "" : lastAction).append("\n");
+        out.append("Last action|").append(lastAction == null ? "" : "").append("\n");
 
         out.append("\n");
         out.append("### Description\n");
