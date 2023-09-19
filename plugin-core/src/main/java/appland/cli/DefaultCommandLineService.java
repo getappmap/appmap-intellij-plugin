@@ -7,14 +7,15 @@ import com.intellij.execution.CantRunException;
 import com.intellij.execution.ExecutionException;
 import com.intellij.execution.configurations.GeneralCommandLine;
 import com.intellij.execution.configurations.PtyCommandLine;
-import com.intellij.execution.process.*;
+import com.intellij.execution.process.KillableProcessHandler;
+import com.intellij.execution.process.ProcessAdapter;
+import com.intellij.execution.process.ProcessEvent;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.project.ProjectManager;
 import com.intellij.openapi.roots.ProjectRootManager;
 import com.intellij.openapi.util.Key;
 import com.intellij.openapi.util.SystemInfo;
-import com.intellij.openapi.vfs.VfsUtil;
 import com.intellij.openapi.vfs.VfsUtilCore;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.openapi.vfs.ex.temp.TempFileSystem;
@@ -27,7 +28,6 @@ import org.jetbrains.annotations.Nullable;
 
 import javax.annotation.concurrent.GuardedBy;
 import java.nio.file.Files;
-import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashMap;
@@ -87,8 +87,6 @@ public class DefaultCommandLineService implements AppLandCommandLineService {
         var newProcesses = startProcesses(directory);
         if (newProcesses != null) {
             processes.put(directory, newProcesses);
-
-            attachIndexEventsListener(newProcesses.indexer);
         }
     }
 
@@ -214,39 +212,6 @@ public class DefaultCommandLineService implements AppLandCommandLineService {
         stopAll(false);
     }
 
-    /**
-     * Listen to index events of the indexer.
-     *
-     * @param processHandler Indexer process
-     */
-    private void attachIndexEventsListener(@NotNull ProcessHandler processHandler) {
-        processHandler.addProcessListener(new ProcessAdapter() {
-            @Override
-            public void onTextAvailable(@NotNull ProcessEvent event, @NotNull Key outputType) {
-                if (LOG.isTraceEnabled()) {
-                    LOG.trace("Indexer output: " + event.getText());
-                }
-
-                if (outputType == ProcessOutputType.STDOUT && IndexerEventUtil.isIndexedEvent(event.getText())) {
-                    var filePath = IndexerEventUtil.extractIndexedFilePath(event.getText());
-                    if (filePath != null) {
-                        try {
-                            if (LOG.isDebugEnabled()) {
-                                LOG.debug("Refreshing local filesystem for indexed file: " + filePath);
-                            }
-
-                            VfsUtil.markDirtyAndRefresh(true, false, false, Path.of(filePath).toFile());
-                        } catch (InvalidPathException e) {
-                            if (LOG.isDebugEnabled()) {
-                                LOG.debug("Error parsing indexed file path: " + filePath, e);
-                            }
-                        }
-                    }
-                }
-            }
-        }, this);
-    }
-
     private static @Nullable CliProcesses startProcesses(@NotNull VirtualFile directory) throws ExecutionException {
         if (!isSupported()) {
             return null;
@@ -279,7 +244,7 @@ public class DefaultCommandLineService implements AppLandCommandLineService {
             }
         }
 
-        var indexer = startProcess(workingDir, indexerPath.toString(), "index", "--verbose", "--watch", "--appmap-dir", watchedDir.toString());
+        var indexer = startProcess(workingDir, indexerPath.toString(), "index", "--watch", "--appmap-dir", watchedDir.toString());
 
         try {
             var scanner = startProcess(workingDir, scannerPath.toString(), "scan", "--watch", "--appmap-dir", watchedDir.toString());
@@ -389,7 +354,7 @@ public class DefaultCommandLineService implements AppLandCommandLineService {
 
             @Override
             protected BaseOutputReader.@NotNull Options readerOptions() {
-                return BaseOutputReader.Options.BLOCKING;
+                return BaseOutputReader.Options.forMostlySilentProcess();
             }
         };
 
