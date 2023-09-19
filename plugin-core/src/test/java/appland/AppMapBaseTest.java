@@ -6,7 +6,6 @@ import appland.settings.AppMapApplicationSettingsService;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.application.ReadAction;
 import com.intellij.openapi.application.WriteAction;
-import com.intellij.openapi.module.Module;
 import com.intellij.openapi.roots.ContentEntry;
 import com.intellij.openapi.roots.ModuleRootModificationUtil;
 import com.intellij.openapi.util.ThrowableComputable;
@@ -129,13 +128,13 @@ public abstract class AppMapBaseTest extends LightPlatformCodeInsightFixture4Tes
         }
     }
 
-    protected void withContentRoot(@NotNull Module module, @NotNull VirtualFile contentRoot, @NotNull ThrowableRunnable<Exception> runnable) throws Exception {
+    protected void withContentRoot(@NotNull VirtualFile contentRoot, @NotNull ThrowableRunnable<Exception> runnable) throws Exception {
         assertTrue(contentRoot.isDirectory());
 
         var contentEntryRef = new AtomicReference<ContentEntry>();
         try {
             // hack to use ModuleRootModificationUtil and to keep a reference to the new entry
-            ModuleRootModificationUtil.updateModel(module, modifiableRootModel -> {
+            ModuleRootModificationUtil.updateModel(getModule(), modifiableRootModel -> {
                 contentEntryRef.set(modifiableRootModel.addContentEntry(contentRoot));
             });
 
@@ -145,7 +144,7 @@ public abstract class AppMapBaseTest extends LightPlatformCodeInsightFixture4Tes
             var newEntry = contentEntryRef.get();
             assertNotNull(newEntry);
 
-            ModuleRootModificationUtil.updateModel(module, modifiableRootModel -> {
+            ModuleRootModificationUtil.updateModel(getModule(), modifiableRootModel -> {
                 modifiableRootModel.removeContentEntry(newEntry);
             });
         }
