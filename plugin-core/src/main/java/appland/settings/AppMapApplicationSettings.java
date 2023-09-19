@@ -22,6 +22,10 @@ public class AppMapApplicationSettings {
     private volatile boolean enableTelemetry = true;
     private volatile @Nullable String apiKey = null;
     /**
+     * {@code true} if page "Install AppMap Agent" of the installation guide webview was at least shown once.
+     */
+    private volatile boolean installInstructionsViewed = false;
+    /**
      * {@code true} if the notification should be displayed the next time an AppMap is created.
      * This flag is synced with {@link  #firstStart} to avoid the notification with existing users.
      */
@@ -34,6 +38,7 @@ public class AppMapApplicationSettings {
         this.firstStart = settings.firstStart;
         this.enableTelemetry = settings.enableTelemetry;
         this.apiKey = settings.apiKey;
+        this.installInstructionsViewed = settings.installInstructionsViewed;
         this.showFirstAppMapNotification = settings.showFirstAppMapNotification;
     }
 
