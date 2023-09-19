@@ -6,4 +6,3 @@ build
 node_modules
 bin
 plugin-core/bin
-tmp/appmap
