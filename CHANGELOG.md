@@ -1,5 +1,12 @@
 AppMap Plugin Changelog
 
+## [0.50.0](https://github.com/getappmap/appmap-intellij-plugin/compare/v0.49.0...v0.50.0) (2023-09-19)
+
+
+### Features
+
+-  show installation instructions after first sign in to AppMap ([7a21d83]())
+
 ## [0.49.0](https://github.com/getappmap/appmap-intellij-plugin/compare/v0.48.0...v0.49.0) (2023-09-14)
 
 ### Features
