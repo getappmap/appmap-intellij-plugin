@@ -48,7 +48,7 @@ public class GitHubErrorHandler extends ErrorReportSubmitter {
         params.put("labels", "user report");
         params.put("body", body);
 
-        var url = Urls.newUrl("https", HOST, URL_PATH);
+        var url = Urls.newHttpUrl(HOST, URL_PATH);
         url = url.addParameters(params);
 
         BrowserUtil.browse(url.toExternalForm());
