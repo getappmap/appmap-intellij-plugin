@@ -18,7 +18,6 @@ import java.util.Objects;
 @ToString
 @EqualsAndHashCode
 public class AppMapApplicationSettings {
-    private volatile boolean appmapInstructionsViewed = false;
     private volatile boolean firstStart = true;
     private volatile boolean enableTelemetry = true;
     private volatile @Nullable String apiKey = null;
@@ -32,7 +31,6 @@ public class AppMapApplicationSettings {
     }
 
     public AppMapApplicationSettings(@NotNull AppMapApplicationSettings settings) {
-        this.appmapInstructionsViewed = settings.appmapInstructionsViewed;
         this.firstStart = settings.firstStart;
         this.enableTelemetry = settings.enableTelemetry;
         this.apiKey = settings.apiKey;
