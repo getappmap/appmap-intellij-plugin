@@ -79,7 +79,8 @@
                             serviceImplementation="appland.remote.DefaultRemoteRecordingService"/>
 
         <applicationService serviceInterface="appland.cli.AppLandCommandLineService"
-                            serviceImplementation="appland.cli.DefaultCommandLineService"/>
+                            serviceImplementation="appland.cli.DefaultCommandLineService"
+                            testServiceImplementation="appland.cli.TestCommandLineService"/>
 
         <applicationService serviceInterface="appland.cli.AppLandDownloadService"
                             serviceImplementation="appland.cli.DefaultAppLandDownloadService"
