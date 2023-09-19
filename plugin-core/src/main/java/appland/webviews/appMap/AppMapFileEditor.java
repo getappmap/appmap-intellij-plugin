@@ -130,11 +130,6 @@ public class AppMapFileEditor extends WebviewEditor<JsonObject> {
 
     @Override
     protected void afterInit(@Nullable JsonObject initData) {
-        if (!AppMapApplicationSettingsService.getInstance().isAppmapInstructionsViewed()) {
-            AppMapApplicationSettingsService.getInstance().setAppmapInstructionsViewed(true);
-            //openAppMapInstructions(); - we're not doing this until we have better instructions
-        }
-
         project.getMessageBus().connect(this).subscribe(AppMapSettingsListener.TOPIC, new AppMapSettingsListener() {
             @Override
             public void appMapWebViewFiltersChanged() {
