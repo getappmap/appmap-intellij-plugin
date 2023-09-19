@@ -35,7 +35,6 @@ version = pluginVersion
 
 val isCI = System.getenv("CI") == "true"
 val agentOutputPath = rootProject.buildDir.resolve("appmap-agent.jar")
-val githubToken = System.getenv("GITHUB_TOKEN").takeUnless { it.isNullOrEmpty() }
 
 allprojects {
     repositories {
@@ -125,8 +124,8 @@ allprojects {
         withType<Test> {
             systemProperty("idea.test.execution.policy", "appland.AppLandTestExecutionPolicy")
             systemProperty("appland.testDataPath", rootProject.rootDir.resolve("src/test/data").path)
-            if (isCI && githubToken != null) {
-                systemProperty("appland.github_token", githubToken)
+            if (isCI) {
+                systemProperty("appland.github_token", System.getenv("GITHUB_TOKEN"))
             }
 
             // to allow tests to access the custom Java 11 JDK
@@ -243,8 +242,8 @@ project(":") {
             dest(project.buildDir.resolve("appmap-java.json"))
             overwrite(true)
             quiet(true)
-            if (isCI && githubToken != null) {
-                header("Authorization", "Bearer $githubToken")
+            if (isCI) {
+                header("Authorization", "Bearer ${System.getenv("GITHUB_TOKEN")}")
             }
 
             doLast {
@@ -258,8 +257,8 @@ project(":") {
                     src(jarAsset)
                     dest(agentOutputPath)
                     overwrite(false)
-                    if (isCI && githubToken != null) {
-                        header("Authorization", "Bearer $githubToken")
+                    if (isCI) {
+                        header("Authorization", "Bearer ${System.getenv("GITHUB_TOKEN")}")
                     }
                 }
             }
