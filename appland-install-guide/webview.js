@@ -80,8 +80,8 @@ export function mountWebview() {
       currentProject = project;
     });
 
-    app.$on('open-findings-overview', () => {
-      vscode.postMessage({command: 'open-findings-overview'});
+    app.$on('view-problems', (projectPath) => {
+      vscode.postMessage({command: 'view-problems', projectPath});
     });
 
     app.$on('openAppmap', (file) => {
