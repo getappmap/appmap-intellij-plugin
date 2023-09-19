@@ -3,6 +3,7 @@ package appland.index;
 import appland.AppMapBaseTest;
 import org.junit.Test;
 
+import java.io.IOException;
 import java.util.Comparator;
 
 public class AppMapMetadataIndexTest extends AppMapBaseTest {
@@ -35,7 +36,7 @@ public class AppMapMetadataIndexTest extends AppMapBaseTest {
 
     @Test
     public void indexWithCounts() throws Throwable {
-        createAppMapWithIndexes("a", 5, 10, 15, "a");
+        createAppMapWithIndexes("a", 5, 10, 15);
 
         var appMaps = AppMapMetadataService.getInstance(getProject()).findAppMaps();
         assertEquals(1, appMaps.size());
