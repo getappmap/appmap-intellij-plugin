@@ -174,31 +174,17 @@ public class FindingsManager implements ProblemsProvider {
                 .expireWith(this)
                 .coalesceBy(getClass(), project)
                 .finishOnUiThread(ModalityState.any(), findingFiles -> {
-                    if (project.isDisposed()) {
-                        return;
-                    }
-
                     // We can't use "submit().onSuccess()" to process the files, because the non-blocking ReadAction
                     // cancels the progress indicator, which is wrapping the code of "onSuccess()". But loading the
                     // findings must not be cancelled, so we're moving into our own ReadAction outside the original
                     // progress indicator.
-                    ApplicationManager.getApplication().executeOnPooledThread(() -> {
-                        if (project.isDisposed()) {
-                            return;
+                    ApplicationManager.getApplication().executeOnPooledThread(() -> ReadAction.run(() -> {
+                        clearAndNotify();
+                        for (var findingFile : findingFiles) {
+                            addFindingsFile(findingFile);
                         }
-
-                        ReadAction.run(() -> {
-                            if (project.isDisposed()) {
-                                return;
-                            }
-
-                            clearAndNotify();
-                            for (var findingFile : findingFiles) {
-                                addFindingsFile(findingFile);
-                            }
-                            project.getMessageBus().syncPublisher(ScannerFindingsListener.TOPIC).afterFindingsReloaded();
-                        });
-                    });
+                        project.getMessageBus().syncPublisher(ScannerFindingsListener.TOPIC).afterFindingsReloaded();
+                    }));
                 }).submit(AppExecutorUtil.getAppExecutorService());
     }
 
