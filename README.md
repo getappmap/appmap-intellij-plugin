@@ -1,4 +1,4 @@
-# AppMap for JetBrains IDEs
+# AppLand for JetBrains IDEs
 
 ## System Requirements
 **IntelliJ IDEA 2021.1 or later** is required to use this plugin.
@@ -42,6 +42,36 @@ After building the plugin you can drag & drop the file `./build/distributions/in
 A custom file editor is opened when a `.appmap.json` file is opened.
 If JCEF is unsupported on your system, then an error message will be shown instead.
 
+## Status
+The current JCEF integration is only to test the capabilities of JCEF and if it provides the features to render an AppMap.
+
+For a complete implementation the following needs to be verified and implemented:
+- <s>Someone with deeper knowledge of the JS AppLand application should test it to identify possible issues.</s> DONE
+- Reload the AppMap when the file on disk changes.
+- Open a file inside the IDE when "Show source" inside the AppMap is clicked.
+- Workaround JCEF limitations. Even JCEF of 2021.1 has its limitations, e.g. tiny fonts on certain Linux system, scrollbars which don't follow the theme, etc.
+- Decide if IntelliJ 2020.3 should be supported. 2021.1 is the current major version. As far as I know previous major versions won't receive new builds of JCEF as it's bundled into the Java JRE.  
+- Test with all of Windows, Linux, macOS Intel, macOS M1 and each of IntelliJ Ultimate, IntelliJ Community.   
+- Theme handling. If possible, the theme of the AppMap should follow IntelliJ's theme (light / dark)
+- ...
+
+## MVP Goals
+- Open .json.appmap files in the project FS in the AppMap viewer
+- Detect and reload AppMaps when files get changed on disk
+- Open source files referenced from AppMaps in right split [(see screenshot)](https://user-images.githubusercontent.com/42008542/114739490-ec0c4300-9d16-11eb-86f7-1eb0d3a81926.png)
+- "Open the most recently modified AppMap" action
+- Show error message when JCEF not available
+- Dark theme
+- Tested on Windows, macOS, Linux with the JDK shipped with the IDE
+- Address rendering issues on Linux
+- Version: 2021.1
+- Marketplace plugin description and docs
+- Published in JetBrains plugin repo so the plugin is easy to find and install from the IDE and online marketplace
+
+### not critical for MVP
+- light theme
+- optionally open .appmap.json files in a text editor
+
 ## Releasing
 - Find the latest official release from [GitHub Releases](https://github.com/getappmap/appmap-intellij-plugin/releases)
 - Download the plugin as a `zip` file.
@@ -50,6 +80,7 @@ If JCEF is unsupported on your system, then an error message will be shown inste
     - AppMap rendering
     - Installation instructions
     - Indexing and scanning
+    - OpenAPI generation
     - Authentication
 - Navigate to the [AppMap plugin page](https://plugins.jetbrains.com/plugin/16701-appmap).
 - As an authorized user, click `Upload Update`.
@@ -59,4 +90,4 @@ If JCEF is unsupported on your system, then an error message will be shown inste
 
 [Open screenshot](./appmap-intellij.png)
 
-<img alt="Screenshot of AppMap with IntelliJ" src="appmap-intellij.png" width="100%">
+<img alt="Screenshot of AppLand with IntelliJ" src="appmap-intellij.png" width="100%">
