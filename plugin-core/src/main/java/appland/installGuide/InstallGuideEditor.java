@@ -14,7 +14,6 @@ import appland.settings.AppMapProjectSettingsService;
 import appland.settings.AppMapSettingsListener;
 import appland.telemetry.TelemetryService;
 import appland.webviews.WebviewEditor;
-import appland.webviews.findings.FindingsOverviewEditorProvider;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
@@ -260,7 +259,9 @@ public class InstallGuideEditor extends WebviewEditor<List<ProjectMetadata>> {
     }
 
     private void handleMessageViewProblems() {
-        ApplicationManager.getApplication().invokeLater(() -> FindingsOverviewEditorProvider.openEditor(project));
+        ApplicationManager.getApplication().invokeLater(() -> {
+            FindingsViewTab.activateFindingsTab(project);
+        });
     }
 
     private void handleMessageOpenFile(@NotNull JsonObject message) {
