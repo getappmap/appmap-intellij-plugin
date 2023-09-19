@@ -27,10 +27,36 @@ class IndexerEventUtil {
     }
 
     private static @NotNull String unescapeFilePath(@NotNull String value) {
-        return value
-                .replace("\\\\", "\\")
-                .replace("\\n", "\n")
-                .replace("\\0", "\0")
-                .replace("\\\"", "\"");
+        var result = new StringBuilder(value.length());
+        var escaped = false;
+        for (var i = 0; i < value.length(); i++) {
+            var c = value.charAt(i);
+
+            if (!escaped) {
+                if (c == '\\') {
+                    escaped = true;
+                } else {
+                    result.append(c);
+                }
+            } else {
+                switch (c) {
+                    case '\\':
+                        result.append('\\');
+                        break;
+                    case 'n':
+                        result.append('\n');
+                        break;
+                    case '0':
+                        result.append('\0');
+                        break;
+                    case '"':
+                        result.append('"');
+                        break;
+                }
+
+                escaped = false;
+            }
+        }
+        return result.toString();
     }
 }
