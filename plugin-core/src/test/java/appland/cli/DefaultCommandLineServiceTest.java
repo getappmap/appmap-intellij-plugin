@@ -7,6 +7,7 @@ import com.intellij.execution.configurations.PtyCommandLine;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.application.WriteAction;
 import com.intellij.openapi.roots.ModuleRootModificationUtil;
+import com.intellij.openapi.util.SystemInfo;
 import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.openapi.vfs.LocalFileSystem;
 import com.intellij.openapi.vfs.VirtualFile;
@@ -15,6 +16,7 @@ import com.intellij.testFramework.fixtures.TempDirTestFixture;
 import com.intellij.testFramework.fixtures.impl.TempDirTestFixtureImpl;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.junit.Assume;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -162,6 +164,23 @@ public class DefaultCommandLineServiceTest extends AppMapBaseTest {
     public void installCommandLineHasPty() {
         var installCommand = AppLandCommandLineService.getInstance().createInstallCommand(Paths.get("/"), "java");
         assertTrue("The install command must have PTY", installCommand instanceof PtyCommandLine);
+    }
+
+    @Test
+    public void directoryRefreshAfterAppMapIndexing() throws Throwable {
+        Assume.assumeFalse("AppMap processes don't terminate reliably on Windows", SystemInfo.isWindows);
+
+        var projectDir = myFixture.copyDirectoryToProject("projects/without_existing_index", "test-project");
+
+        var refreshCondition = TestCommandLineService.newVfsRefreshCondition(getProject(), getTestRootDisposable());
+        withContentRoot(getModule(), projectDir, () -> {
+            assertTrue(refreshCondition.await(30, TimeUnit.SECONDS));
+
+            var refreshedFiles = TestCommandLineService.getInstance().getRefreshedFiles();
+            assertSize(1, refreshedFiles);
+            var refreshedPath = refreshedFiles.iterator().next();
+            assertTrue("The parent directory of the AppMap must be refreshed", refreshedPath.endsWith("appmap"));
+        });
     }
 
     @Test

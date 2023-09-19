@@ -1,6 +1,7 @@
 package appland;
 
 import appland.cli.AppLandCommandLineService;
+import appland.cli.TestCommandLineService;
 import appland.settings.AppMapApplicationSettings;
 import appland.settings.AppMapApplicationSettingsService;
 import com.intellij.openapi.application.ApplicationManager;
@@ -14,8 +15,6 @@ import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.openapi.vfs.VfsUtil;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.openapi.vfs.ex.temp.TempFileSystem;
-import com.intellij.testFramework.EdtTestUtil;
-import com.intellij.testFramework.EdtTestUtilKt;
 import com.intellij.testFramework.LightProjectDescriptor;
 import com.intellij.testFramework.fixtures.LightPlatformCodeInsightFixture4TestCase;
 import com.intellij.util.ThrowableRunnable;
@@ -43,6 +42,11 @@ public abstract class AppMapBaseTest extends LightPlatformCodeInsightFixture4Tes
         // we're returning a new instance, because we don't want to share the project setup between light tests.
         // many of our tests require a clean filesystem.
         return new LightProjectDescriptor();
+    }
+
+    @After
+    public void resetState() {
+        TestCommandLineService.getInstance().reset();
     }
 
     @After
