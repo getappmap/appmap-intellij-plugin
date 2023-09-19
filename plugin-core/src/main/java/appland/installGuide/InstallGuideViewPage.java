@@ -16,16 +16,6 @@ public enum InstallGuideViewPage {
     // value used by the JS application as "page" values
     private final String pageId;
 
-    public static @NotNull InstallGuideViewPage findByPageId(@NotNull String id) {
-        for (var currentId : values()) {
-            if (id.equals(currentId.pageId)) {
-                return currentId;
-            }
-        }
-
-        throw new IllegalStateException("Unsupported id: " + id);
-    }
-
     public @NotNull String getPageTitle() {
         switch (this) {
             case InstallAgent:

@@ -52,8 +52,8 @@ import java.util.Set;
 public class InstallGuideEditor extends WebviewEditor<List<ProjectMetadata>> {
     private static final @NotNull Logger LOG = Logger.getInstance(InstallGuideEditor.class);
 
-    // currently displayed page, may be read or modified from different threads
-    private volatile @NotNull InstallGuideViewPage currentPage;
+    // currently displayed page
+    private @NotNull InstallGuideViewPage type;
     // to debounce the JS refresh of available AppMaps
     private final SingleAlarm projectRefreshAlarm = new SingleAlarm(this::refreshProjects, 500, this, Alarm.ThreadToUse.POOLED_THREAD);
     // to debounce the JS refresh when settings change
@@ -61,15 +61,14 @@ public class InstallGuideEditor extends WebviewEditor<List<ProjectMetadata>> {
 
     public InstallGuideEditor(@NotNull Project project,
                               @NotNull VirtualFile file,
-                              @NotNull InstallGuideViewPage page) {
+                              @NotNull InstallGuideViewPage type) {
         super(project, file, Set.of("click-link", "open-file", "open-page", "view-problems", "clipboard",
                 "perform-install", "perform-auth", "generate-openapi"));
-        this.currentPage = page;
+        this.type = type;
     }
 
     public void navigateTo(@NotNull InstallGuideViewPage page, boolean postWebviewMessage) {
-        this.currentPage = page;
-
+        this.type = page;
         if (page == InstallGuideViewPage.RuntimeAnalysis) {
             AppMapProjectSettingsService.getState(project).setInvestigatedFindings(true);
         }
@@ -189,7 +188,7 @@ public class InstallGuideEditor extends WebviewEditor<List<ProjectMetadata>> {
             }
 
             default:
-                LOG.warn("Unhandled message type: " + messageId);
+                LOG.warn("Unhandled message type: " + type);
         }
     }
 
@@ -227,7 +226,7 @@ public class InstallGuideEditor extends WebviewEditor<List<ProjectMetadata>> {
     private void addBaseProperties(@NotNull JsonObject json) {
         var settings = AppMapApplicationSettingsService.getInstance();
 
-        json.addProperty("page", currentPage.getPageId());
+        json.addProperty("page", type.getPageId());
         json.addProperty("userAuthenticated", settings.getApiKey() != null);
         json.addProperty("analysisEnabled", true);
     }
@@ -293,9 +292,6 @@ public class InstallGuideEditor extends WebviewEditor<List<ProjectMetadata>> {
                         .property("appmap.project.installable", String.valueOf(viewProject != null && viewProject.getScore() >= 2))
                         .property("appmap.project.any_installable", String.valueOf(anyInstallable))
         );
-
-        // update state, which is based on the new page
-        navigateTo(InstallGuideViewPage.findByPageId(viewId), false);
     }
 
     private void executeInstallCommand(String path, String language) {
