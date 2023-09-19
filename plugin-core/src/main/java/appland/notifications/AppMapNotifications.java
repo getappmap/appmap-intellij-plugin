@@ -14,9 +14,10 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
-import java.util.function.Consumer;
 
 import static appland.AppMapBundle.lazy;
+
+import java.util.function.Consumer;
 
 public final class AppMapNotifications {
     public static final String REMOTE_RECORDING_ID = "appmap.remoteRecording";
@@ -92,16 +93,16 @@ public final class AppMapNotifications {
     }
 
     public static void showTelemetryNotification(@NotNull Project project,
-                                                 @Nullable String title,
-                                                 @NotNull String content,
-                                                 @NotNull NotificationType type,
-                                                 @NotNull Consumer<Boolean> onDismiss) {
+    @Nullable String title,
+    @NotNull String content,
+    @NotNull NotificationType type,
+    @NotNull Consumer<Boolean> onDismiss) {
         ApplicationManager.getApplication().invokeLater(() -> {
             Notification notification = new AppMapFullContentNotification(
-                    TELEMETRY_ID, null,
-                    title, null, content,
-                    type, null
-            );
+                        TELEMETRY_ID, null,
+                        title, null, content,
+                        type, null
+                );
 
             var denyAction = NotificationAction.create(lazy("telemetry.permission.deny"), (e, n) -> {
                 onDismiss.accept(false);
