@@ -1,5 +1,9 @@
 package appland.toolwindow.runtimeAnalysis;
 
+import appland.AppMapBundle;
+import appland.installGuide.InstallGuideEditorProvider;
+import appland.installGuide.InstallGuideViewPage;
+import appland.oauth.AppMapLoginAction;
 import appland.toolwindow.runtimeAnalysis.nodes.Node;
 import com.intellij.openapi.Disposable;
 import com.intellij.openapi.actionSystem.CommonDataKeys;
@@ -7,8 +11,10 @@ import com.intellij.openapi.actionSystem.DataProvider;
 import com.intellij.openapi.actionSystem.PlatformCoreDataKeys;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.Disposer;
+import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.pom.Navigatable;
 import com.intellij.ui.ScrollPaneFactory;
+import com.intellij.ui.SimpleTextAttributes;
 import com.intellij.ui.TreeSpeedSearch;
 import com.intellij.ui.tree.AsyncTreeModel;
 import com.intellij.ui.tree.RestoreSelectionListener;
@@ -86,6 +92,23 @@ public class RuntimeAnalysisPanel extends JPanel implements Disposable, DataProv
         new TreeSpeedSearch(tree);
         EditSourceOnDoubleClickHandler.install(tree);
         EditSourceOnEnterKeyHandler.install(tree);
+
+        var empty = tree.getEmptyText();
+        empty.setShowAboveCenter(true);
+        // the panel does not wrap text, we're splitting into rows by \n
+        var label = AppMapBundle.get("runtimeAnalysis.tree.emptyText.label");
+        for (var line : StringUtil.splitByLines(label)) {
+            empty.appendLine(line);
+        }
+
+        empty.appendLine(
+                AppMapBundle.get("runtimeAnalysis.tree.emptyText.loginText"),
+                SimpleTextAttributes.LINK_ATTRIBUTES,
+                e -> AppMapLoginAction.authenticate());
+        empty.appendLine(
+                AppMapBundle.get("runtimeAnalysis.tree.emptyText.learnModeText"),
+                SimpleTextAttributes.LINK_ATTRIBUTES,
+                e -> InstallGuideEditorProvider.open(project, InstallGuideViewPage.RuntimeAnalysis));
 
         return tree;
     }

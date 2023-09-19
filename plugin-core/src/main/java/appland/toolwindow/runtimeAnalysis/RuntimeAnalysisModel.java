@@ -39,10 +39,22 @@ public class RuntimeAnalysisModel extends BaseTreeModel<Node> implements Invoker
     public RuntimeAnalysisModel(@NotNull Project project, @NotNull Disposable parent) {
         this.root = new RootNode(project, this);
         Disposer.register(parent, this);
+
+        // update root node state and the empty panel when the login state changed
+        project.getMessageBus().connect(this).subscribe(AppMapSettingsListener.TOPIC, new AppMapSettingsListener() {
+            @Override
+            public void enableFindingsChanged() {
+                structureChanged(null);
+            }
+        });
     }
 
     @Override
     public @Nullable RootNode getRoot() {
+        if (!AppMapApplicationSettingsService.getInstance().isEnableFindings()) {
+            return null;
+        }
+
         if (invoker.isValidThread()) {
             root.update();
         }

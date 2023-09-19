@@ -101,6 +101,11 @@ public class InstallGuideEditor extends WebviewEditor<List<ProjectMetadata>> {
                     }
 
                     @Override
+                    public void enableFindingsChanged() {
+                        settingsRefreshAlarm.cancelAndRequest();
+                    }
+
+                    @Override
                     public void createOpenApiChanged() {
                         settingsRefreshAlarm.cancelAndRequest();
                     }
@@ -110,10 +115,10 @@ public class InstallGuideEditor extends WebviewEditor<List<ProjectMetadata>> {
                         settingsRefreshAlarm.cancelAndRequest();
                     }
 
-                    @Override
-                    public void investigatedFindingsChanged() {
-                        settingsRefreshAlarm.cancelAndRequest();
-                    }
+            @Override
+            public void investigatedFindingsChanged() {
+                settingsRefreshAlarm.cancelAndRequest();
+            }
                 });
     }
 
@@ -237,8 +242,8 @@ public class InstallGuideEditor extends WebviewEditor<List<ProjectMetadata>> {
 
         json.addProperty("page", type.getPageId());
         json.addProperty("userAuthenticated", settings.getApiKey() != null);
-        json.addProperty("analysisEnabled", true);
-        json.addProperty("findingsEnabled", true);
+        json.addProperty("analysisEnabled", settings.isAnalysisEnabled());
+        json.addProperty("findingsEnabled", settings.isEnableFindings());
     }
 
     private void handleMessageClickLink(@NotNull JsonObject message) {

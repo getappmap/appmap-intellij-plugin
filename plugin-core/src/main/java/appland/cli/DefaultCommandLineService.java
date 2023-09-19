@@ -3,6 +3,8 @@ package appland.cli;
 import appland.config.AppMapConfigFile;
 import appland.config.AppMapConfigFileListener;
 import appland.files.AppMapVfsUtils;
+import appland.settings.AppMapApplicationSettingsService;
+import appland.settings.AppMapSettingsListener;
 import com.intellij.execution.CantRunException;
 import com.intellij.execution.ExecutionException;
 import com.intellij.execution.configurations.GeneralCommandLine;
@@ -43,6 +45,12 @@ public class DefaultCommandLineService implements AppLandCommandLineService {
     public DefaultCommandLineService() {
         var connection = ApplicationManager.getApplication().getMessageBus().connect(this);
         connection.subscribe(AppMapConfigFileListener.TOPIC, (AppMapConfigFileListener) this::refreshForOpenProjectsInBackground);
+        connection.subscribe(AppMapSettingsListener.TOPIC, new AppMapSettingsListener() {
+            @Override
+            public void enableFindingsChanged() {
+                refreshForOpenProjectsInBackground();
+            }
+        });
     }
 
     @Override
@@ -212,6 +220,45 @@ public class DefaultCommandLineService implements AppLandCommandLineService {
         stopAll(false);
     }
 
+    private void doRefreshForOpenProjectsLocked() {
+        var topLevelRoots = new VfsUtilCore.DistinctVFilesRootsCollection(VirtualFile.EMPTY_ARRAY);
+        for (var project : ProjectManager.getInstance().getOpenProjects()) {
+            if (!project.isDefault() && !project.isDisposed()) {
+                for (var contentRoot : ProjectRootManager.getInstance(project).getContentRoots()) {
+                    if (isDirectoryEnabled(contentRoot)) {
+                        topLevelRoots.add(contentRoot);
+                    }
+                }
+            }
+        }
+
+        var scannerProcessRequired = AppMapApplicationSettingsService.getInstance().isAnalysisEnabled();
+
+        // remove processes of roots, which no longer have a matching content root in a project
+        // or which don't match the settings anymore. We need to launch the scanner when "enableFindings" changes.
+        // We're iterating on a copy, because stop() is called inside the loop and modifies "processes"
+        for (var entry : List.copyOf(processes.entrySet())) {
+            var activeRoot = entry.getKey();
+            var scannerProcessMismatch = scannerProcessRequired == (entry.getValue().scanner == null);
+            if (!topLevelRoots.contains(activeRoot) || scannerProcessMismatch) {
+                try {
+                    stop(activeRoot, false);
+                } catch (Exception e) {
+                    LOG.warn("Error stopping processes for root: " + activeRoot.getPath());
+                }
+            }
+        }
+
+        // launch missing cli processes
+        for (var root : topLevelRoots) {
+            try {
+                start(root, false);
+            } catch (ExecutionException e) {
+                LOG.warn("Error launching cli process for root: " + root);
+            }
+        }
+    }
+
     private static @Nullable CliProcesses startProcesses(@NotNull VirtualFile directory) throws ExecutionException {
         if (!isSupported()) {
             return null;
@@ -227,8 +274,9 @@ public class DefaultCommandLineService implements AppLandCommandLineService {
             return null;
         }
 
+        var launchScanner = AppMapApplicationSettingsService.getInstance().isAnalysisEnabled();
         var scannerPath = AppLandDownloadService.getInstance().getDownloadFilePath(CliTool.Scanner);
-        if (scannerPath == null || Files.notExists(scannerPath)) {
+        if (launchScanner && (scannerPath == null || Files.notExists(scannerPath))) {
             return null;
         }
 
@@ -245,6 +293,9 @@ public class DefaultCommandLineService implements AppLandCommandLineService {
         }
 
         var indexer = startProcess(workingDir, indexerPath.toString(), "index", "--watch", "--appmap-dir", watchedDir.toString());
+        if (!launchScanner) {
+            return new CliProcesses(indexer, null);
+        }
 
         try {
             var scanner = startProcess(workingDir, scannerPath.toString(), "scan", "--watch", "--appmap-dir", watchedDir.toString());
@@ -257,42 +308,6 @@ public class DefaultCommandLineService implements AppLandCommandLineService {
                 LOG.debug("Error terminating scanner process", ex);
             }
             throw new CantRunException("Failed to execute AppMap scanner process", e);
-        }
-    }
-
-    private void doRefreshForOpenProjectsLocked() {
-        var topLevelRoots = new VfsUtilCore.DistinctVFilesRootsCollection(VirtualFile.EMPTY_ARRAY);
-        for (var project : ProjectManager.getInstance().getOpenProjects()) {
-            if (!project.isDefault() && !project.isDisposed()) {
-                for (var contentRoot : ProjectRootManager.getInstance(project).getContentRoots()) {
-                    if (isDirectoryEnabled(contentRoot)) {
-                        topLevelRoots.add(contentRoot);
-                    }
-                }
-            }
-        }
-
-        // remove processes of roots, which no longer have a matching content root in a project
-        // or which don't match the settings anymore. We need to launch the scanner when "enableFindings" changes.
-        // We're iterating on a copy, because stop() is called inside the loop and modifies "processes"
-        for (var entry : List.copyOf(processes.entrySet())) {
-            var activeRoot = entry.getKey();
-            if (!topLevelRoots.contains(activeRoot)) {
-                try {
-                    stop(activeRoot, false);
-                } catch (Exception e) {
-                    LOG.warn("Error stopping processes for root: " + activeRoot.getPath());
-                }
-            }
-        }
-
-        // launch missing cli processes
-        for (var root : topLevelRoots) {
-            try {
-                start(root, false);
-            } catch (ExecutionException e) {
-                LOG.warn("Error launching cli process for root: " + root);
-            }
         }
     }
 

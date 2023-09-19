@@ -7,6 +7,7 @@ import appland.installGuide.InstallGuideViewPage;
 import appland.installGuide.projectData.ProjectDataService;
 import appland.installGuide.projectData.ProjectMetadata;
 import appland.problemsView.listener.ScannerFindingsListener;
+import appland.settings.AppMapApplicationSettingsService;
 import appland.settings.AppMapProjectSettingsService;
 import appland.settings.AppMapSettingsListener;
 import appland.toolwindow.AppMapContentPanel;
@@ -69,6 +70,11 @@ public class InstallGuidePanel extends AppMapContentPanel implements Disposable 
      * if findings are enabled, completed if at least one appmap-findings.json file was found
      */
     private static void updateRuntimeAnalysisLabel(@NotNull Project project, @NotNull StatusLabel label) {
+        if (!AppMapApplicationSettingsService.getInstance().isAnalysisEnabled()) {
+            label.setStatus(InstallGuideStatus.Unavailable);
+            return;
+        }
+
         var hasFindings = AppMapProjectSettingsService.getState(project).isInvestigatedFindings();
         label.setStatus(hasFindings ? InstallGuideStatus.Completed : InstallGuideStatus.Incomplete);
     }
@@ -148,6 +154,11 @@ public class InstallGuidePanel extends AppMapContentPanel implements Disposable 
         connection.subscribe(AppMapSettingsListener.TOPIC, new AppMapSettingsListener() {
             @Override
             public void apiKeyChanged() {
+                triggerLabelStatusUpdate();
+            }
+
+            @Override
+            public void enableFindingsChanged() {
                 triggerLabelStatusUpdate();
             }
         });

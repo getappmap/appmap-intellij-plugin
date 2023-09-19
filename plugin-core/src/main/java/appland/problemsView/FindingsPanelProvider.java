@@ -1,5 +1,6 @@
 package appland.problemsView;
 
+import appland.settings.AppMapApplicationSettingsService;
 import com.intellij.analysis.problemsView.toolWindow.ProblemsViewPanelProvider;
 import com.intellij.analysis.problemsView.toolWindow.ProblemsViewState;
 import com.intellij.analysis.problemsView.toolWindow.ProblemsViewTab;
@@ -20,6 +21,8 @@ public class FindingsPanelProvider implements ProblemsViewPanelProvider {
     @Nullable
     @Override
     public ProblemsViewTab create() {
-        return new FindingsViewTab(project, ProblemsViewState.getInstance(project));
+        return AppMapApplicationSettingsService.getInstance().isAnalysisEnabled()
+                ? new FindingsViewTab(project, ProblemsViewState.getInstance(project))
+                : null;
     }
 }

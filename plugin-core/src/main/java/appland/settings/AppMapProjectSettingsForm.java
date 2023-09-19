@@ -13,6 +13,7 @@ class AppMapProjectSettingsForm {
     private JPanel mainPanel;
     private JBTextField serverName;
     private JBCheckBox confirmUpload;
+    private JBCheckBox enableFindings;
     private JBCheckBox enableTelemetry;
 
     AppMapProjectSettingsForm() {
@@ -28,6 +29,7 @@ class AppMapProjectSettingsForm {
         serverName.setText(settings.getCloudServerUrl());
         confirmUpload.setSelected(settings.isConfirmAppMapUpload());
 
+        enableFindings.setSelected(applicationSettings.isEnableFindings());
         enableTelemetry.setSelected(applicationSettings.isEnableTelemetry());
     }
 
@@ -40,5 +42,10 @@ class AppMapProjectSettingsForm {
 
         // application
         applicationSettings.setEnableTelemetry(enableTelemetry.isSelected());
+        if (notify) {
+            applicationSettings.setEnableFindingsNotifying(enableFindings.isSelected());
+        } else {
+            applicationSettings.setEnableFindings(enableFindings.isSelected());
+        }
     }
 }

@@ -9,6 +9,9 @@ public interface AppMapSettingsListener {
     default void apiKeyChanged() {
     }
 
+    default void enableFindingsChanged() {
+    }
+
     default void createOpenApiChanged() {
     }
 
