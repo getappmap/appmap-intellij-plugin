@@ -113,9 +113,7 @@ public final class AppMapJavaPackageConfig {
                                            @NotNull Path relativeAppMapOutputPath) throws IOException {
         var config = AppMapConfigFile.parseConfigFile(appMapConfig);
         if (config != null) {
-            // appmap_dir should be "dir/subdir" even on Windows
-            var agnosticOutputPath = PathUtil.toSystemIndependentName(relativeAppMapOutputPath.toString());
-            config.setAppMapDir(agnosticOutputPath);
+            config.setAppMapDir(relativeAppMapOutputPath.toString());
             config.writeTo(appMapConfig);
         }
     }
