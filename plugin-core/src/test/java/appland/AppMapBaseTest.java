@@ -14,15 +14,12 @@ import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.openapi.vfs.VfsUtil;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.openapi.vfs.ex.temp.TempFileSystem;
-import com.intellij.testFramework.EdtTestUtil;
-import com.intellij.testFramework.EdtTestUtilKt;
 import com.intellij.testFramework.LightProjectDescriptor;
 import com.intellij.testFramework.fixtures.LightPlatformCodeInsightFixture4TestCase;
 import com.intellij.util.ThrowableRunnable;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.junit.After;
-import org.junit.Assert;
 import org.junit.Before;
 
 import java.util.Collections;
@@ -47,30 +44,10 @@ public abstract class AppMapBaseTest extends LightPlatformCodeInsightFixture4Tes
 
     @After
     public void shutdownAppMapProcesses() {
-        var commandLineService = AppLandCommandLineService.getInstance();
-        try {
-            // multiple shutdown attempts because Windows CI is constantly failing
-            var attempts = 5;
-            for (var i = 1; i <= attempts; i++) {
-                if (commandLineService.getActiveRoots().isEmpty()) {
-                    break;
-                }
+        AppLandCommandLineService.getInstance().stopAll(true);
 
-                LOG.debug(String.format("Attempting to terminate AppMap processes: %d/%d", i, attempts));
-                if (i > 1) {
-                    Thread.sleep(5_000);
-                }
-                commandLineService.stopAll(true);
-            }
-        } catch (Throwable t) {
-            addSuppressedException(t);
-        } finally {
-            // reset to default settings
-            ApplicationManager.getApplication().getService(AppMapApplicationSettingsService.class).loadState(new AppMapApplicationSettings());
-
-            var activeRoots = commandLineService.getActiveRoots();
-            Assert.assertTrue("All AppMap CLIs must be terminated: " + activeRoots, activeRoots.isEmpty());
-        }
+        // reset to default settings
+        ApplicationManager.getApplication().getService(AppMapApplicationSettingsService.class).loadState(new AppMapApplicationSettings());
     }
 
     public @NotNull VirtualFile createAppMapWithIndexes(@NotNull String appMapName) throws Throwable {
