@@ -1,6 +1,6 @@
 package appland.startup;
 
-import appland.AppMapPlugin;
+import appland.settings.AppMapApplicationSettingsService;
 import com.intellij.ide.plugins.IdeaPluginDescriptor;
 import com.intellij.openapi.project.Project;
 import org.jetbrains.annotations.NotNull;
@@ -18,8 +18,9 @@ public class DynamicPluginListener implements com.intellij.ide.plugins.DynamicPl
             return;
         }
 
-        if (AppMapPlugin.getDescriptor().equals(pluginDescriptor)) {
-            ShowAppLandToolWindowStartupActivity.handleFirstStart(project);
+        if (AppMapApplicationSettingsService.getInstance().isFirstStart()) {
+            AppMapApplicationSettingsService.getInstance().setFirstStart(false);
+            AppLandStartupActivity.openToolWindowAndQuickstart(project);
         }
     }
 }
