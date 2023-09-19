@@ -24,9 +24,6 @@ import javax.swing.*;
  * state of user authentication.
  */
 public class AppMapToolWindowFactory implements ToolWindowFactory, DumbAware {
-    // must match the value in plugin.xml
-    public static final String TOOLWINDOW_ID = "applandToolWindow";
-
     @Override
     public void createToolWindowContent(@NotNull Project project, @NotNull ToolWindow toolWindow) {
         updateToolWindowContent(project, toolWindow);
