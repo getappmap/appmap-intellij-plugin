@@ -2,6 +2,7 @@ package appland.toolwindow;
 
 import appland.settings.AppMapApplicationSettingsService;
 import appland.settings.AppMapSettingsListener;
+import appland.toolwindow.appmap.AppMapWindowPanel;
 import appland.toolwindow.signInView.SignInViewPanel;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.application.ModalityState;
