@@ -1,4 +1,4 @@
-package appland.toolwindow;
+package appland.toolwindow.appmap;
 
 import appland.AppMapBundle;
 import appland.actions.StartAppMapRecordingAction;
@@ -7,6 +7,9 @@ import appland.index.AppMapMetadata;
 import appland.index.IndexedFileListenerUtil;
 import appland.installGuide.InstallGuideEditorProvider;
 import appland.installGuide.InstallGuideViewPage;
+import appland.toolwindow.AppMapContentPanel;
+import appland.toolwindow.AppMapToolWindowContent;
+import appland.toolwindow.CollapsiblePanel;
 import appland.toolwindow.codeObjects.CodeObjectsPanel;
 import appland.toolwindow.installGuide.InstallGuidePanel;
 import appland.toolwindow.installGuide.UrlLabel;
@@ -283,7 +286,7 @@ public class AppMapWindowPanel extends SimpleToolWindowPanel implements DataProv
         panelWithFilter.add(createToolBar(appMapModel), BorderLayout.NORTH);
         panelWithFilter.add(appMapListPanel, BorderLayout.CENTER);
 
-        return new CollapsiblePanel(project,
+        return new appland.toolwindow.CollapsiblePanel(project,
                 AppMapBundle.get("toolwindow.appmap.appMaps"),
                 "appmap.toolWindow.appMaps.collapsed",
                 true,
@@ -300,7 +303,7 @@ public class AppMapWindowPanel extends SimpleToolWindowPanel implements DataProv
 
     @NotNull
     private static JPanel createInstallGuidePanel(@NotNull Project project, @NotNull Disposable parent) {
-        return new CollapsiblePanel(project,
+        return new appland.toolwindow.CollapsiblePanel(project,
                 AppMapBundle.get("toolwindow.appmap.instructions"),
                 "appmap.toolWindow.installGuide.collapsed",
                 false,
@@ -311,7 +314,7 @@ public class AppMapWindowPanel extends SimpleToolWindowPanel implements DataProv
     private static JPanel createRuntimeAnalysisPanel(@NotNull Project project, @NotNull Disposable parent) {
         var runtimeAnalysisPanel = new RuntimeAnalysisPanel(project, parent);
         runtimeAnalysisPanel.setMinimumSize(new JBDimension(0, 100));
-        return new CollapsiblePanel(project,
+        return new appland.toolwindow.CollapsiblePanel(project,
                 AppMapBundle.get("toolwindow.appmap.runtimeAnalysis"),
                 "appmap.toolWindow.runtimeAnalysis.collapsed",
                 true,
@@ -322,7 +325,7 @@ public class AppMapWindowPanel extends SimpleToolWindowPanel implements DataProv
     private static JPanel createCodeObjectsPanel(@NotNull Project project, @NotNull Disposable parentDisposable) {
         var codeObjectsPanel = new CodeObjectsPanel(project, parentDisposable);
         codeObjectsPanel.setMinimumSize(new JBDimension(0, 100));
-        return new CollapsiblePanel(project,
+        return new appland.toolwindow.CollapsiblePanel(project,
                 AppMapBundle.get("toolwindow.appmap.codeObjects"),
                 "appmap.toolWindow.codeObjects.collapsed",
                 true,
