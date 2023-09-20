@@ -1,4 +1,4 @@
-package appland.toolwindow;
+package appland.toolwindow.appmap;
 
 import appland.Icons;
 import appland.index.AppMapMetadata;
