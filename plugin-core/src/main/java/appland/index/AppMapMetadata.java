@@ -21,6 +21,9 @@ public final class AppMapMetadata {
      */
     private final @NotNull String name;
     private final @Nullable TestStatus testStatus;
+    private final @Nullable String languageName;
+    private final @Nullable String recorderType;
+    private final @Nullable String recorderName;
     private final int requestCount;
     private final int queryCount;
     private final int functionsCount;
@@ -28,16 +31,23 @@ public final class AppMapMetadata {
 
     @TestOnly
     public AppMapMetadata(@NotNull String name, @Nullable VirtualFile appMapFile) {
-        this(name, appMapFile, null, 0, 0, 0);
+        this(name, appMapFile, null, null, null, null, 0, 0, 0);
     }
 
     public AppMapMetadata(@NotNull String name,
                           @Nullable VirtualFile appMapFile,
-                          @Nullable TestStatus testStatus, int requestCount,
+                          @Nullable TestStatus testStatus,
+                          @Nullable String languageName,
+                          @Nullable String recorderType,
+                          @Nullable String recorderName,
+                          int requestCount,
                           int queryCount,
                           int functionsCount) {
         this.name = name;
         this.appMapFile = appMapFile;
+        this.languageName = languageName;
+        this.recorderType = recorderType;
+        this.recorderName = recorderName;
         this.requestCount = requestCount;
         this.queryCount = queryCount;
         this.functionsCount = functionsCount;

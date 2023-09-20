@@ -12,9 +12,13 @@ import com.intellij.util.concurrency.annotations.RequiresReadLock;
 import com.intellij.util.indexing.FileBasedIndex;
 import com.intellij.util.indexing.FileBasedIndexExtension;
 import com.intellij.util.indexing.ID;
+import com.intellij.util.io.IOUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.io.DataInput;
+import java.io.DataOutput;
+import java.io.IOException;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Set;
@@ -22,10 +26,22 @@ import java.util.stream.Collectors;
 
 final class IndexUtil {
     // base version for our indexes, increase when the data structures or the parsing logic change
-    static final int BASE_VERSION = 62;
+    static final int BASE_VERSION = 64;
 
     // filenames covered by our own indexes
     static final Set<String> indexedFilenames = Collections.unmodifiableSet(findIndexedFilenames());
+
+    static void writeOptionalString(@NotNull DataOutput out, @Nullable String value) throws IOException {
+        out.writeBoolean(value != null);
+        if (value != null) {
+            IOUtil.writeUTF(out, value);
+        }
+    }
+
+    static @Nullable String readOptionalString(@NotNull DataInput in) throws IOException {
+        var available = in.readBoolean();
+        return available ? IOUtil.readUTF(in) : null;
+    }
 
     /**
      * @param project Current project

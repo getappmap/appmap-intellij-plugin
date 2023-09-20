@@ -63,7 +63,12 @@ public class AppMapMetadataService {
             var data = AppMapNameIndex.getBasicMetadata(project, directory);
             if (data != null && data.getName() != null) {
                 if (lowercaseNameFilter == null || data.getName().toLowerCase().contains(lowercaseNameFilter)) {
-                    result.add(createMetadataWithIndex(directory, data.getName(), data.testStatus));
+                    result.add(createMetadataWithIndex(directory,
+                            data.getName(),
+                            data.testStatus,
+                            data.languageName, data.recorderType,
+                            data.recorderName
+                    ));
                 }
             }
             if (result.size() >= maxSize) {
@@ -93,17 +98,33 @@ public class AppMapMetadataService {
             return null;
         }
 
-        return createMetadataWithIndex(appMapMetadataDirectory, name, data.testStatus);
+        return createMetadataWithIndex(appMapMetadataDirectory,
+                name,
+                data.testStatus,
+                data.languageName,
+                data.recorderType,
+                data.recorderName
+        );
     }
 
     private @NotNull AppMapMetadata createMetadataWithIndex(@NotNull VirtualFile directory,
                                                             @NotNull String name,
-                                                            @Nullable TestStatus testStatus) {
+                                                            @Nullable TestStatus testStatus,
+                                                            @Nullable String languageName, @Nullable String recorderType,
+                                                            @Nullable String recorderName) {
         var appMapFile = AppMapFiles.findAppMapByMetadataDirectory(directory);
         var requestCount = AppMapServerRequestCountIndex.getRequestCount(project, directory);
         var queryCount = AppMapSqlQueriesCountIndex.getQueryCount(project, directory);
         var functionsCount = ClassMapTypeIndex.findItemsByAppMapDirectory(project, directory, ClassMapItemType.Function).size();
 
-        return new AppMapMetadata(name, appMapFile, testStatus, requestCount, queryCount, functionsCount);
+        return new AppMapMetadata(name,
+                appMapFile,
+                testStatus,
+                languageName,
+                recorderType,
+                recorderName,
+                requestCount,
+                queryCount,
+                functionsCount);
     }
 }

@@ -1,38 +1,30 @@
 package appland.toolwindow.appmap;
 
-import appland.Icons;
-import appland.index.AppMapMetadata;
-import appland.index.AppMapMetadataService;
-import com.intellij.openapi.project.DumbService;
+import appland.toolwindow.appmap.nodes.Node;
+import appland.toolwindow.appmap.nodes.RootNode;
 import com.intellij.openapi.project.Project;
-import com.intellij.ui.ColoredTreeCellRenderer;
-import com.intellij.ui.SimpleTextAttributes;
 import com.intellij.ui.tree.BaseTreeModel;
-import com.intellij.util.ObjectUtils;
 import com.intellij.util.concurrency.Invoker;
 import com.intellij.util.concurrency.InvokerSupplier;
-import com.intellij.util.concurrency.annotations.RequiresBackgroundThread;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import javax.swing.*;
-import javax.swing.tree.TreePath;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
-public class AppMapModel extends BaseTreeModel<Object> implements InvokerSupplier {
-    private final Object root = ObjectUtils.sentinel("services root");
+public class AppMapModel extends BaseTreeModel<Node> implements InvokerSupplier {
+    private final RootNode root;
     private final Invoker invoker = Invoker.forBackgroundPoolWithoutReadAction(this);
-    private final AtomicBoolean needAppMapRefresh = new AtomicBoolean(true);
-    private final AtomicReference<List<AppMapMetadata>> cachedAppMaps = new AtomicReference<>();
-    private final Project project;
     private final AtomicReference<String> nameFilter = new AtomicReference<>();
 
-    public AppMapModel(Project project) {
-        this.project = project;
+    public AppMapModel(@NotNull Project project) {
+        this.root = new RootNode(project, this);
+    }
+
+    public @Nullable String getNameFilter() {
+        return nameFilter.get();
     }
 
     public void setNameFilter(@Nullable String name) {
@@ -42,9 +34,14 @@ public class AppMapModel extends BaseTreeModel<Object> implements InvokerSupplie
         }
     }
 
+    @Override
+    public boolean isLeaf(Object object) {
+        return root != object && super.isLeaf(object);
+    }
+
     public void refresh() {
-        needAppMapRefresh.set(true);
-        treeStructureChanged(new TreePath(root), null, null);
+        root.queueAppMapRefresh();
+        treeStructureChanged(null, null, null);
     }
 
     @Override
@@ -53,52 +50,25 @@ public class AppMapModel extends BaseTreeModel<Object> implements InvokerSupplie
     }
 
     @Override
-    public Object getRoot() {
+    public @Nullable RootNode getRoot() {
+        if (invoker.isValidThread()) {
+            root.update();
+        }
         return root;
     }
 
     @Override
-    public boolean isLeaf(Object object) {
-        return object != root;
-    }
+    public List<? extends Node> getChildren(Object parent) {
+        assert invoker.isValidThread();
 
-    @Override
-    public List<?> getChildren(Object parent) {
-        if (parent != root) {
+        var node = parent instanceof Node ? (Node) parent : null;
+        if (node == null) {
             return Collections.emptyList();
         }
 
-        if (needAppMapRefresh.compareAndSet(true, false)) {
-            cachedAppMaps.set(calculateAppMaps());
-        }
-
-        return cachedAppMaps.get();
-    }
-
-    @RequiresBackgroundThread
-    private List<AppMapMetadata> calculateAppMaps() {
-        return DumbService.getInstance(project).runReadActionInSmartMode(() -> {
-            return AppMapMetadataService.getInstance(project).findAppMaps(nameFilter.get());
-        });
-    }
-
-    static class TreeCellRenderer extends ColoredTreeCellRenderer {
-        @Override
-        public void customizeCellRenderer(@NotNull JTree tree,
-                                          Object value,
-                                          boolean selected,
-                                          boolean expanded,
-                                          boolean leaf,
-                                          int row,
-                                          boolean hasFocus) {
-            if (!(value instanceof AppMapMetadata)) {
-                return;
-            }
-
-            var data = (AppMapMetadata) value;
-            setIcon(Icons.APPMAP_FILE_SMALL);
-            append(data.getName());
-            append(" " + data.getFilename(), SimpleTextAttributes.GRAYED_ATTRIBUTES);
-        }
+        var childNodes = node.getChildren();
+        node.update();
+        childNodes.forEach(Node::update);
+        return childNodes;
     }
 }
