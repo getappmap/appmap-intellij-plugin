@@ -8,11 +8,7 @@ import appland.toolwindow.runtimeAnalysis.nodes.FindingsTableNode;
 import appland.toolwindow.runtimeAnalysis.nodes.ImpactDomainNode;
 import appland.toolwindow.runtimeAnalysis.nodes.Node;
 import appland.toolwindow.runtimeAnalysis.nodes.RootNode;
-import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.application.WriteAction;
-import com.intellij.ui.tree.AsyncTreeModel;
-import com.intellij.ui.tree.TreeTestUtil;
-import com.intellij.ui.treeStructure.Tree;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.junit.Assume;
@@ -21,6 +17,8 @@ import org.junit.Test;
 
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+
+import static appland.utils.ModelTestUtil.assertTreeHierarchy;
 
 public class RuntimeAnalysisModelTest extends AppMapBaseTest {
     @Override
@@ -103,7 +101,7 @@ public class RuntimeAnalysisModelTest extends AppMapBaseTest {
                 "      user.rb\n" +
                 "      user.rb\n" +
                 "      user.rb\n";
-        assertTreeHierarchy(model, expected);
+        assertTreeHierarchy(model, expected, getTestRootDisposable());
     }
 
     @NotNull
@@ -129,18 +127,6 @@ public class RuntimeAnalysisModelTest extends AppMapBaseTest {
     private void assertOverviewNode(@NotNull RootNode root) {
         var node = assertNode(root.getChildren().get(0), "Findings Table");
         assertTrue(node instanceof FindingsTableNode);
-    }
-
-    private void assertTreeHierarchy(RuntimeAnalysisModel model, @NotNull String expected) {
-        ApplicationManager.getApplication().invokeAndWait(() -> {
-            new TreeTestUtil(new Tree(new AsyncTreeModel(model, getTestRootDisposable())))
-                    .expandAll()
-                    .expandAll()
-                    .expandAll()
-                    .expandAll()
-                    .expandAll()
-                    .assertStructure(expected);
-        });
     }
 
     private void loadFindingsDirectory(@NotNull String directoryPath) throws Exception {

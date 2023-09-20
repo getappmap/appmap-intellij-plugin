@@ -2,12 +2,14 @@ package appland.index;
 
 import appland.problemsView.model.TestStatus;
 import com.intellij.util.io.DataExternalizer;
-import com.intellij.util.io.IOUtil;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
+
+import static appland.index.IndexUtil.readOptionalString;
+import static appland.index.IndexUtil.writeOptionalString;
 
 class BasicAppMapMetadataExternalizer implements DataExternalizer<BasicAppMapMetadata> {
     static final @NotNull BasicAppMapMetadataExternalizer INSTANCE = new BasicAppMapMetadataExternalizer();
@@ -17,29 +19,24 @@ class BasicAppMapMetadataExternalizer implements DataExternalizer<BasicAppMapMet
 
     @Override
     public BasicAppMapMetadata read(@NotNull DataInput in) throws IOException {
-        var hasName = in.readBoolean();
-        var name = hasName ? IOUtil.readUTF(in) : null;
+        var name = readOptionalString(in);
 
-        var hasTestStatus = in.readBoolean();
-        TestStatus testStatus = null;
-        if (hasTestStatus) {
-            var jsonId = IOUtil.readUTF(in);
-            testStatus = TestStatus.byJsonId(jsonId);
-        }
+        var testStatusValue = readOptionalString(in);
+        var testStatus = testStatusValue != null ? TestStatus.byJsonId(testStatusValue) : null;
 
-        return new BasicAppMapMetadata(name, testStatus);
+        var recorderType = readOptionalString(in);
+        var recorderName = readOptionalString(in);
+        var languageName = readOptionalString(in);
+
+        return new BasicAppMapMetadata(name, testStatus, recorderType, recorderName, languageName);
     }
 
     @Override
     public void save(@NotNull DataOutput out, @NotNull BasicAppMapMetadata value) throws IOException {
-        out.writeBoolean(value.name != null);
-        if (value.name != null) {
-            IOUtil.writeUTF(out, value.name);
-        }
-
-        out.writeBoolean(value.testStatus != null);
-        if (value.testStatus != null) {
-            IOUtil.writeUTF(out, value.testStatus.getJsonId());
-        }
+        writeOptionalString(out, value.name);
+        writeOptionalString(out, value.testStatus != null ? value.testStatus.getJsonId() : null);
+        writeOptionalString(out, value.recorderType);
+        writeOptionalString(out, value.recorderName);
+        writeOptionalString(out, value.languageName);
     }
 }

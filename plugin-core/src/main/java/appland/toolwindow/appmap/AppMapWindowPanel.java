@@ -3,13 +3,13 @@ package appland.toolwindow.appmap;
 import appland.AppMapBundle;
 import appland.actions.StartAppMapRecordingAction;
 import appland.actions.StopAppMapRecordingAction;
-import appland.index.AppMapMetadata;
 import appland.index.IndexedFileListenerUtil;
 import appland.installGuide.InstallGuideEditorProvider;
 import appland.installGuide.InstallGuideViewPage;
 import appland.toolwindow.AppMapContentPanel;
 import appland.toolwindow.AppMapToolWindowContent;
 import appland.toolwindow.CollapsiblePanel;
+import appland.toolwindow.appmap.nodes.Node;
 import appland.toolwindow.codeObjects.CodeObjectsPanel;
 import appland.toolwindow.installGuide.InstallGuidePanel;
 import appland.toolwindow.installGuide.UrlLabel;
@@ -20,7 +20,6 @@ import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.SimpleToolWindowPanel;
 import com.intellij.openapi.util.Disposer;
-import com.intellij.openapi.vfs.LocalFileSystem;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiManager;
 import com.intellij.ui.*;
@@ -40,7 +39,6 @@ import org.jetbrains.annotations.Nullable;
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
 import javax.swing.tree.TreeModel;
-import javax.swing.tree.TreePath;
 import java.awt.*;
 import java.util.List;
 
@@ -69,7 +67,7 @@ public class AppMapWindowPanel extends SimpleToolWindowPanel implements DataProv
         var appMapModel = new AppMapModel(project);
         this.project = project;
         this.tree = createTree(project, this, appMapModel);
-        this.treeRefreshAlarm = new SingleAlarm(appMapModel::refresh, TREE_REFRESH_DELAY_MILLIS, this, Alarm.ThreadToUse.POOLED_THREAD);
+        this.treeRefreshAlarm = new SingleAlarm(() -> refreshAndExpand(appMapModel), TREE_REFRESH_DELAY_MILLIS, this, Alarm.ThreadToUse.POOLED_THREAD);
 
         setContent(createContentPanel(project, tree, this, appMapModel));
 
@@ -101,10 +99,13 @@ public class AppMapWindowPanel extends SimpleToolWindowPanel implements DataProv
 
     @Override
     public @Nullable Object getData(@NotNull @NonNls String dataId) {
-        var selectedFile = getSelectedFile();
+        if (PlatformCoreDataKeys.PROJECT.is(dataId)) {
+            return project;
+        }
 
         if (PlatformCoreDataKeys.SLOW_DATA_PROVIDERS.is(dataId)) {
             return List.of((DataProvider) id -> {
+                var selectedFile = getSelectedFile();
                 if (CommonDataKeys.NAVIGATABLE.is(id) && selectedFile != null) {
                     return PsiManager.getInstance(project).findFile(selectedFile);
                 }
@@ -113,24 +114,21 @@ public class AppMapWindowPanel extends SimpleToolWindowPanel implements DataProv
         }
 
         if (CommonDataKeys.VIRTUAL_FILE.is(dataId)) {
-            return selectedFile;
+            return getSelectedFile();
         }
 
         return super.getData(dataId);
     }
 
     private @Nullable VirtualFile getSelectedFile() {
-        TreePath path = tree.getSelectionPath();
+        var path = tree.getSelectionPath();
         if (path == null) {
             return null;
         }
-        var node = path.getLastPathComponent();
-        if (!(node instanceof AppMapMetadata)) {
-            return null;
-        }
 
-        var filepath = ((AppMapMetadata) node).getSystemIndependentFilepath();
-        return LocalFileSystem.getInstance().findFileByPath(filepath);
+        var node = path.getLastPathComponent();
+        var file = node instanceof Node ? ((Node) node).getFile() : null;
+        return file != null && file.isValid() ? file : null;
     }
 
     private @NotNull SearchTextField createNameFilter(@NotNull AppMapModel appMapModel) {
@@ -179,6 +177,11 @@ public class AppMapWindowPanel extends SimpleToolWindowPanel implements DataProv
             LOG.debug("rebuild with hidden AppMap tool window");
             hasPendingTreeRefresh = true;
         }
+    }
+
+    private void refreshAndExpand(@NotNull AppMapModel appMapModel) {
+        appMapModel.refresh();
+        appMapModel.getInvoker().invokeLater(() -> TreeUtil.expand(this.tree, 3));
     }
 
     private @NotNull JComponent createContentPanel(@NotNull Project project,
@@ -260,7 +263,6 @@ public class AppMapWindowPanel extends SimpleToolWindowPanel implements DataProv
                                                   @NotNull Disposable disposable,
                                                   @NotNull TreeModel treeModel) {
         var tree = new SimpleTree(new AsyncTreeModel(treeModel, disposable));
-        tree.setCellRenderer(new AppMapModel.TreeCellRenderer());
         tree.getEmptyText().appendLine(AppMapBundle.get("toolwindow.appmap.emptyText.line1"));
         tree.getEmptyText().appendLine(AppMapBundle.get("toolwindow.appmap.emptyText.line2"));
         tree.getEmptyText().appendLine(
