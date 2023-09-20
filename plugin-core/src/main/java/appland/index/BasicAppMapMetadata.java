@@ -15,4 +15,7 @@ import org.jetbrains.annotations.Nullable;
 public class BasicAppMapMetadata {
     @Nullable String name = null;
     @Nullable TestStatus testStatus = null;
+    @Nullable String recorderType = null;
+    @Nullable String recorderName = null;
+    @Nullable String languageName = null;
 }

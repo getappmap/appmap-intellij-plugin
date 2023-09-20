@@ -1,10 +1,10 @@
 package appland.toolwindow.runtimeAnalysis.nodes;
 
-import appland.files.AppMapFiles;
 import appland.problemsView.FindingsManager;
 import appland.problemsView.listener.ScannerFindingsListener;
 import appland.problemsView.model.ScannerFinding;
 import appland.toolwindow.runtimeAnalysis.RuntimeAnalysisModel;
+import appland.utils.AppMapProjectUtil;
 import com.intellij.ide.projectView.PresentationData;
 import com.intellij.openapi.Disposable;
 import com.intellij.openapi.application.ReadAction;
@@ -64,14 +64,7 @@ public final class RootNode extends Node implements Disposable {
     }
 
     private @NotNull String getAppMapProjectName(@NotNull ScannerFinding finding) {
-        return ReadAction.compute(() -> {
-            var root = finding.getFindingsFile() != null
-                    ? AppMapFiles.findTopLevelContentRoot(myProject, finding.getFindingsFile())
-                    : null;
-            return root != null
-                    ? root.getName()
-                    : "- unknown -";
-        });
+        return ReadAction.compute(() -> AppMapProjectUtil.getAppMapProjectName(myProject, finding.getFindingsFile()));
     }
 
     @Override

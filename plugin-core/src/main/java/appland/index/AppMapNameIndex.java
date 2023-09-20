@@ -102,7 +102,10 @@ public class AppMapNameIndex extends AbstractAppMapMetadataFileIndex<BasicAppMap
         if (!fileContent.isEmpty()) {
             var json = GsonUtils.GSON.fromJson(fileContent, MetadataFileContent.class);
             if (json != null) {
-                return new BasicAppMapMetadata(json.name, json.testStatus);
+                var languageName = json.language != null ? json.language.name : null;
+                var recorderType = json.recorder != null ? json.recorder.type : null;
+                var recorderName = json.recorder != null ? json.recorder.name : null;
+                return new BasicAppMapMetadata(json.name, json.testStatus, recorderType, recorderName, languageName);
             }
         }
         return null;
@@ -113,11 +116,29 @@ public class AppMapNameIndex extends AbstractAppMapMetadataFileIndex<BasicAppMap
         return BasicAppMapMetadataExternalizer.INSTANCE;
     }
 
+    private static class MetadataRecorder {
+        @SerializedName("type")
+        public String type;
+        @SerializedName("name")
+        public String name;
+    }
+
+    private static class MetadataLanguage {
+        @SerializedName("name")
+        public String name;
+    }
+
     private static class MetadataFileContent {
         @SerializedName("name")
         public String name;
 
+        @SerializedName("language")
+        public @Nullable MetadataLanguage language = null;
+
         @SerializedName("test_status")
         public @Nullable TestStatus testStatus = null;
+
+        @SerializedName("recorder")
+        public @Nullable MetadataRecorder recorder = null;
     }
 }
