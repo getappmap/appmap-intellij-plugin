@@ -66,7 +66,6 @@ public final class AppMapPatcherUtil {
 
         // launches its own ReadAction
         var config = AppMapJavaPackageConfig.createOrUpdateAppMapConfig(module,
-                configuration,
                 workingDir,
                 appMapOutputDirectory);
 
