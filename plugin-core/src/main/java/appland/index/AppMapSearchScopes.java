@@ -32,6 +32,7 @@ public final class AppMapSearchScopes {
     public static @NotNull GlobalSearchScope appMapConfigSearchScope(@NotNull Project project) {
         return ProjectScope.getContentScope(project);
     }
+
     /**
      * Search scope, which contains all project files and also excluded files of the project.
      * This implementation is based on IntelliJ's {@link ProjectScopeImpl}.
