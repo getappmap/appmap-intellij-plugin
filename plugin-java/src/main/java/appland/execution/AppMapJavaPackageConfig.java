@@ -2,9 +2,6 @@ package appland.execution;
 
 import appland.config.AppMapConfigFile;
 import appland.files.AppMapFiles;
-import appland.index.AppMapSearchScopes;
-import com.intellij.execution.configurations.RunProfile;
-import com.intellij.execution.configurations.SearchScopeProvidingRunProfile;
 import com.intellij.openapi.application.ReadAction;
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.module.ModuleUtil;
@@ -33,7 +30,6 @@ import java.util.stream.Collectors;
 /**
  * Generates the content for an appmap.yml file, based on the current project.
  */
-@SuppressWarnings("UnstableApiUsage")
 public final class AppMapJavaPackageConfig {
     private AppMapJavaPackageConfig() {
     }
@@ -42,22 +38,16 @@ public final class AppMapJavaPackageConfig {
      * Attempts to locate a suitable appmap.yml file and creates a new one if none could be found.
      * If an existing appmap.yml does not contain an appmap_dir property, then the file is updated.
      *
-     * @param module     Current module
-     * @param runProfile Run profile to be executed
-     * @param context    Context to help locate the parent directory for a newly create appmap.yml
+     * @param module  Current module
+     * @param context Context to help locate the parent directory for a newly create appmap.yml
      * @return The path to the appmap.yml file to pass to the AppMap agent. {@code null} if no file exists and creating the new file failed.
      */
     public static @NotNull Path createOrUpdateAppMapConfig(@NotNull Module module,
-                                                           @NotNull RunProfile runProfile,
                                                            @NotNull VirtualFile context,
                                                            @NotNull Path appMapOutputDirectory) throws IOException {
 
-        // scope to locate existing appmap.yml
-        var appMapConfigSearchScope = getAppMapConfigSearchScope(module, runProfile);
-
-        // attempt to find an existing appmap.yml file
-        // fixme lookup only in module (and dependencies?)
-        var existingConfig = findAppMapConfig(module.getProject(), appMapConfigSearchScope);
+        // attempt to find an existing appmap.yml file in the module
+        var existingConfig = findAppMapConfig(module.getProject(), module.getModuleContentScope());
 
         if (existingConfig != null) {
             var relativeOutputPath = appMapOutputDirectory.isAbsolute()
@@ -120,29 +110,11 @@ public final class AppMapJavaPackageConfig {
         }
     }
 
-    /**
-     * @param module     Current module
-     * @param runProfile Current run profile
-     * @return The search scope to lookup appmap.yml, based on the working directory
-     */
-    private static @NotNull GlobalSearchScope getAppMapConfigSearchScope(@NotNull Module module, @Nullable RunProfile runProfile) {
-        var scope = runProfile instanceof SearchScopeProvidingRunProfile
-                ? ((SearchScopeProvidingRunProfile) runProfile).getSearchScope()
-                : null;
-
-        if (scope == null) {
-            scope = AppMapSearchScopes.appMapConfigSearchScope(module.getProject());
-        }
-
-        scope = scope.intersectWith(module.getModuleContentScope());
-        return scope;
-    }
-
     // executed under progress
     private static @Nullable VirtualFile findAppMapConfig(@NotNull Project project,
-                                                          @NotNull GlobalSearchScope runProfileScope) {
+                                                          @NotNull GlobalSearchScope searchScope) {
         return ReadAction.compute(() -> {
-            var files = AppMapFiles.findAppMapConfigFiles(project, runProfileScope);
+            var files = AppMapFiles.findAppMapConfigFiles(project, searchScope);
             return files.size() == 1 ? files.iterator().next() : null;
         });
     }

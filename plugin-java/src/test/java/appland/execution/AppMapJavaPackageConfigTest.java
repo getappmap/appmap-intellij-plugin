@@ -3,6 +3,7 @@ package appland.execution;
 import appland.AppMapBaseTest;
 import appland.config.AppMapConfigFile;
 import com.intellij.execution.RunManager;
+import com.intellij.execution.jar.JarApplicationConfiguration;
 import com.intellij.execution.jar.JarApplicationConfigurationType;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.testFramework.fixtures.TempDirTestFixture;
@@ -47,10 +48,12 @@ public class AppMapJavaPackageConfigTest extends AppMapBaseTest {
     private void assertConfigUpdate(@NotNull VirtualFile contextFile,
                                     @NotNull Path appMapOutputDirPath,
                                     @NotNull String expectedAppMapDir) throws IOException {
-        var runConfig = RunManager.getInstance(getProject()).createConfiguration("temp run config", JarApplicationConfigurationType.class);
+        var runConfigSettings = RunManager.getInstance(getProject()).createConfiguration("temp run config", JarApplicationConfigurationType.class);
+        var runConfig = (JarApplicationConfiguration) runConfigSettings.getConfiguration();
+        // update module to enforce a search scope of the run configuration
+        runConfig.setModule(getModule());
 
         var configFilePath = AppMapJavaPackageConfig.createOrUpdateAppMapConfig(getModule(),
-                runConfig.getConfiguration(),
                 contextFile,
                 appMapOutputDirPath);
 
@@ -63,7 +66,6 @@ public class AppMapJavaPackageConfigTest extends AppMapBaseTest {
         config.writeTo(configFilePath);
 
         var updatedConfigFilePath = AppMapJavaPackageConfig.createOrUpdateAppMapConfig(getModule(),
-                runConfig.getConfiguration(),
                 contextFile,
                 Path.of(appMapOutputDirPath + "-updated"));
         assertEquals("Update must write to the same file again", configFilePath, updatedConfigFilePath);
