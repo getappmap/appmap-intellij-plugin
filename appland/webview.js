@@ -71,7 +71,10 @@ export function mountWebview() {
     messages.on('updateSavedFilters', ({data}) => app.updateSavedFilters(data))
 
     if (appMapContent) {
-      app.loadAppMap(appMapContent);
+      // queue loadAppMap to avoid applying it immediately (which would turn off the progress spinner)
+      setTimeout(() => {
+        app.loadAppMap(appMapContent);
+      }, 0);
     }
   }
 
