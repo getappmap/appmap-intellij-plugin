@@ -273,7 +273,7 @@ project(":plugin-java") {
     }
 
     intellij {
-        plugins.set(listOf("java"))
+        plugins.set(listOf("java", "com.intellij.properties"))
     }
 }
 
@@ -284,7 +284,7 @@ project(":plugin-gradle") {
     }
 
     intellij {
-        plugins.set(listOf("java", "gradle"))
+        plugins.set(listOf("java", "gradle", "com.intellij.properties"))
     }
 }
 
@@ -295,7 +295,7 @@ project(":plugin-maven") {
     }
 
     intellij {
-        plugins.set(listOf("java", "maven"))
+        plugins.set(listOf("java", "maven", "com.intellij.properties"))
     }
 }
 
