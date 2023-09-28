@@ -29,7 +29,10 @@ abstract class StreamingClassMapIterator {
         }
     }
 
-    private void parseArray(@NotNull JsonReaderEx json, int level, @Nullable String parentId, @NotNull ClassMapItemType parentType) {
+    private void parseArray(@NotNull JsonReaderEx json,
+                            int level,
+                            @Nullable String parentId,
+                            @NotNull ClassMapItemType parentType) {
         json.beginArray();
 
         while (json.hasNext()) {
@@ -43,7 +46,9 @@ abstract class StreamingClassMapIterator {
     }
 
     @NotNull
-    private static String findItemSeparator(@NotNull ClassMapItemType parentType, @NotNull ClassMapItemType type, @Nullable Boolean isStatic) {
+    private static String findItemSeparator(@NotNull ClassMapItemType parentType,
+                                            @NotNull ClassMapItemType type,
+                                            @Nullable Boolean isStatic) {
         // special handling for functions
         if (type == ClassMapItemType.Function) {
             return isStatic == Boolean.TRUE ? "." : "#";
@@ -51,11 +56,10 @@ abstract class StreamingClassMapIterator {
         return parentType.getSeparator();
     }
 
-    private String joinPath(@NotNull String delimiter, @Nullable String parent, @NotNull String child) {
-        return parent == null || parent.isEmpty() ? child : parent + delimiter + child;
-    }
-
-    private void parseItem(@NotNull JsonReaderEx json, int level, @Nullable String parentId, @NotNull ClassMapItemType parentType) {
+    private void parseItem(@NotNull JsonReaderEx json,
+                           int level,
+                           @Nullable String parentId,
+                           @NotNull ClassMapItemType parentType) {
         json.beginObject();
 
         String name = null;
@@ -109,17 +113,15 @@ abstract class StreamingClassMapIterator {
 
                 // Some code object entries have a path-delimited package name,
                 // but we want each package name token to be its own object.
-                String itemPath;
+                var itemPath = getItemPath(parentId, parentType, type, separator, name);
                 var childLevel = level;
                 if (type == ClassMapItemType.Package) {
-                    itemPath = parentId;
                     for (var parentName : StringUtil.split(name, type.getSeparator())) {
                         itemPath = joinPath(type.getSeparator(), itemPath, parentName);
                         onItem(type, parentIdWithType, typeName + ":" + itemPath, name, location, childLevel);
                         childLevel++;
                     }
                 } else {
-                    itemPath = joinPath(separator, parentId, name);
                     onItem(type, parentIdWithType, typeName + ":" + itemPath, name, location, childLevel);
                     childLevel++;
                 }
@@ -139,5 +141,29 @@ abstract class StreamingClassMapIterator {
         }
 
         json.endObject();
+    }
+
+    private static String joinPath(@NotNull String delimiter, @Nullable String parent, @NotNull String child) {
+        return parent == null || parent.isEmpty() ? child : parent + delimiter + child;
+    }
+
+    private static String getItemPath(@Nullable String parentId,
+                                      @NotNull ClassMapItemType parentType,
+                                      @NotNull ClassMapItemType type,
+                                      @NotNull String separator,
+                                      @NotNull String name) {
+        if (type == ClassMapItemType.Package) {
+            return parentId;
+        }
+
+        // follow https://github.com/getappmap/vscode-appland/blob/39eeb851b4b4283aba263e76e7bcff9a83a81568/src/lib/CodeObjectEntry.ts#L125-L128
+        var resetItemPath = parentType == ClassMapItemType.Folder && type != ClassMapItemType.Folder
+                || parentType == ClassMapItemType.HTTP
+                || parentType == ClassMapItemType.Database;
+        if (resetItemPath) {
+            return name;
+        }
+
+        return joinPath(separator, parentId, name);
     }
 }
