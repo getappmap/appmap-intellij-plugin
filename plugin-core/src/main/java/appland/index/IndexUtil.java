@@ -26,7 +26,7 @@ import java.util.stream.Collectors;
 
 final class IndexUtil {
     // base version for our indexes, increase when the data structures or the parsing logic change
-    static final int BASE_VERSION = 64;
+    static final int BASE_VERSION = 65;
 
     // filenames covered by our own indexes
     static final Set<String> indexedFilenames = Collections.unmodifiableSet(findIndexedFilenames());
