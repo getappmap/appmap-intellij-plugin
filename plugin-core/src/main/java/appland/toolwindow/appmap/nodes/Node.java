@@ -8,6 +8,7 @@ import com.intellij.ui.tree.LeafState;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Collections;
 import java.util.List;
 
 public abstract class Node extends PresentableNodeDescriptor<Node> implements LeafState.Supplier {
@@ -30,5 +31,13 @@ public abstract class Node extends PresentableNodeDescriptor<Node> implements Le
      */
     public @Nullable VirtualFile getFile() {
         return null;
+    }
+
+    /**
+     * @return List of {@link VirtualFile} associated with this node or an empty list if no files are associated.
+     */
+    public @NotNull List<VirtualFile> getFiles() {
+        var file = getFile();
+        return file != null ? List.of(file) : Collections.emptyList();
     }
 }

@@ -8,13 +8,12 @@ import com.intellij.ide.projectView.PresentationData;
 import com.intellij.openapi.application.ReadAction;
 import com.intellij.openapi.project.DumbService;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.ui.tree.LeafState;
 import com.intellij.util.concurrency.annotations.RequiresBackgroundThread;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
@@ -57,6 +56,19 @@ public class RootNode extends Node {
                 .sorted(Map.Entry.comparingByKey())
                 .map(entry -> (Node) new ProjectNode(myProject, this, entry.getKey(), entry.getValue()))
                 .collect(Collectors.toCollection(LinkedList::new));
+    }
+
+    @Override
+    public @NotNull List<VirtualFile> getFiles() {
+        var appMaps = getCachedAppMaps();
+        if (appMaps.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        return appMaps.stream()
+                .map(AppMapMetadata::getAppMapFile)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
     }
 
     private @NotNull String getAppMapProjectName(@NotNull AppMapMetadata appMapMetadata) {

@@ -5,6 +5,7 @@ import com.intellij.icons.AllIcons;
 import com.intellij.ide.projectView.PresentationData;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.text.StringUtil;
+import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.ui.tree.LeafState;
 import lombok.Value;
 import org.jetbrains.annotations.NotNull;
@@ -12,6 +13,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 class ProjectNode extends Node {
@@ -80,5 +82,13 @@ class ProjectNode extends Node {
         public int compareTo(@NotNull ProjectNode.GroupMetadata other) {
             return title.compareTo(other.title);
         }
+    }
+
+    @Override
+    public @NotNull List<VirtualFile> getFiles() {
+        return appMaps.stream()
+                .map(AppMapMetadata::getAppMapFile)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
     }
 }
