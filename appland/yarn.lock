@@ -10,14 +10,14 @@
     "@jridgewell/gen-mapping" "^0.3.0"
     "@jridgewell/trace-mapping" "^0.3.9"
 
-"@appland/components@^3.5.0":
-  version "3.5.0"
-  resolved "https://registry.yarnpkg.com/@appland/components/-/components-3.5.0.tgz#6509f8ff717f6c3136a1bc5cfb16e7aed510c9e3"
-  integrity sha512-lhd0WJemjKW8vqB/pULoRBB6a0OGausuaAKBh4tNS5WqxCT9JcOY5/6rsQ/qV+kOV0e1ZBj6Jsacisf9yqXmaA==
+"@appland/components@^3.8.0":
+  version "3.8.0"
+  resolved "https://registry.yarnpkg.com/@appland/components/-/components-3.8.0.tgz#01aff1f9a9a504cc387a071c3ee7b857a01a9a97"
+  integrity sha512-dGnvT4XwkPmvEBkNj/5IWodpOdMlgFDfMwuWg1WH5jpWwTjGxFRqpyLAiYLjrei+CXWNdRmv6e5NFY2vefkquw==
   dependencies:
     "@appland/diagrams" "^1.7.0"
     "@appland/models" "^2.6.3"
-    "@appland/sequence-diagram" "^1.6.1"
+    "@appland/sequence-diagram" "^1.8.1"
     buffer "^6.0.3"
     d3 "^7.8.4"
     d3-flame-graph "^4.1.3"
@@ -65,10 +65,10 @@
     "@appland/models" "^2.2.0"
     js-yaml "^4.1.0"
 
-"@appland/sequence-diagram@^1.6.1":
-  version "1.7.0"
-  resolved "https://registry.yarnpkg.com/@appland/sequence-diagram/-/sequence-diagram-1.7.0.tgz#9643d8da16e48e7d006edd3cedff2c1787a70ec3"
-  integrity sha512-dZ8bUBUttXMDZzRInEet6wVtIX5WWGEPdFBBuHZZS5Biwk8Rw4XLeqNVJF8oLRlwrruaNew9VsteyNsx9hoUyg==
+"@appland/sequence-diagram@^1.8.1":
+  version "1.8.1"
+  resolved "https://registry.yarnpkg.com/@appland/sequence-diagram/-/sequence-diagram-1.8.1.tgz#bcfc317852c3390b848a574bddf9c2c682f74366"
+  integrity sha512-mTzIEZn9yHL8CGLrPdSqVlLJFwhmt3rdKiivM6LXgrGtu4TAisG/NdXPYT1aquG3bQR++1N2bhZj6pbEdca62g==
   dependencies:
     "@appland/models" "^2.6.3"
     "@appland/openapi" "^1.4.3"
