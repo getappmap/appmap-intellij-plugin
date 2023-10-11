@@ -1,0 +1,19 @@
+{
+  "name": "GET /owners/1 (200) - 10:48:59.009",
+  "app": "spring-petclinic",
+  "language": {
+    "name": "java",
+    "version": "17.0.8+7-b1000.8",
+    "engine": "OpenJDK 64-Bit Server VM"
+  },
+  "client": {
+    "name": "appmap-java",
+    "url": "https://github.com/appland/appmap-java"
+  },
+  "recorder": {
+    "name": "request_recording",
+    "type": "requests"
+  },
+  "recording": {},
+  "framework": {}
+}
