@@ -85,7 +85,7 @@ public class FindingsOverviewEditor extends WebviewEditor<List<ScannerFinding>> 
                 var title = AppMapBundle.get("findingsOverview.openFindingsByHashError.title");
                 Messages.showErrorDialog(message, title);
             } else {
-                FindingDetailsEditorProvider.openEditor(project, findings);
+                FindingDetailsEditorProvider.openEditor(project, hash, findings);
             }
         });
     }

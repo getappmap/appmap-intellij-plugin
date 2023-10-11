@@ -65,8 +65,9 @@ public class FindingDetailsEditor extends WebviewEditor<Void> {
                 assert message != null;
                 var path = GsonUtils.getPath(message, "uri", "path");
                 if (path != null) {
-                    var fragment = GsonUtils.getPath(message, "uri", "fragment");
-                    openAppMapUri(path.getAsString(), fragment != null ? fragment.getAsString() : "{}");
+                    var hash = FindingDetailsEditorProvider.KEY_FINDING_HASH.get(file);
+                    assert hash != null;
+                    openAppMapUri(path.getAsString(), AppMapFileEditorState.createFindingState(hash));
                 }
                 break;
         }
@@ -115,13 +116,13 @@ public class FindingDetailsEditor extends WebviewEditor<Void> {
         }
     }
 
-    private void openAppMapUri(@NotNull String appMapUri, @NotNull String jsonState) {
+    private void openAppMapUri(@NotNull String appMapUri, @NotNull AppMapFileEditorState editorState) {
         var file = LocalFileSystem.getInstance().findFileByPath(StringUtil.split(appMapUri, "#").get(0));
         if (file != null) {
             ApplicationManager.getApplication().invokeLater(() -> {
                 var appMapEditors = FileEditorManager.getInstance(project).openFile(file, true);
                 if (appMapEditors.length == 1 && appMapEditors[0] instanceof AppMapFileEditor) {
-                    ((AppMapFileEditor) appMapEditors[0]).setWebViewState(AppMapFileEditorState.of(jsonState));
+                    ((AppMapFileEditor) appMapEditors[0]).setWebViewState(editorState);
                 }
             }, ModalityState.defaultModalityState());
         } else {

@@ -20,6 +20,7 @@ import java.util.Objects;
 
 public class FindingDetailsEditorProvider extends WebviewEditorProvider {
     private static final String TYPE_ID = "appland.findingDetails";
+    static final Key<String> KEY_FINDING_HASH = Key.create("appmap.findingDetailsHash");
     static final Key<List<ScannerFinding>> KEY_FINDINGS = Key.create("appmap.findingDetailsData");
 
     public FindingDetailsEditorProvider() {
@@ -33,7 +34,9 @@ public class FindingDetailsEditorProvider extends WebviewEditorProvider {
      * @param project  Current project
      * @param findings Findings to show in the webview
      */
-    public static void openEditor(@NotNull Project project, @NotNull List<ScannerFinding> findings) {
+    public static void openEditor(@NotNull Project project,
+                                  @NotNull String findingHash,
+                                  @NotNull List<ScannerFinding> findings) {
         var provider = WebviewEditorProvider.findEditorProvider(TYPE_ID);
         assert provider != null;
 
@@ -42,6 +45,7 @@ public class FindingDetailsEditorProvider extends WebviewEditorProvider {
         }
 
         var file = provider.createVirtualFile(findEditorTitle(findings));
+        KEY_FINDING_HASH.set(file, findingHash);
         KEY_FINDINGS.set(file, findings);
         FileEditorManager.getInstance(project).openFile(file, true);
 
