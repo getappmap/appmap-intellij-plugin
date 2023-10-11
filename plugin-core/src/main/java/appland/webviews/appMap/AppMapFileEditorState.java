@@ -47,4 +47,14 @@ public class AppMapFileEditorState {
         state.addProperty("selectedObject", nodeId);
         return new AppMapFileEditorState(GsonUtils.GSON.toJson(state));
     }
+
+    /**
+     * @param findingHash Hash of the finding to show in the AppMap webview.
+     * @return State to instruct the AppMap webview to center on the given finding.
+     */
+    public static @NotNull AppMapFileEditorState createFindingState(@NotNull String findingHash) {
+        var state = new JsonObject();
+        state.addProperty("selectedObject", String.format("analysis-finding:%s", findingHash));
+        return new AppMapFileEditorState(GsonUtils.GSON.toJson(state));
+    }
 }
