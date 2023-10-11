@@ -1,0 +1,11 @@
+[
+  {
+    "class": "java.lang.RuntimeException",
+    "message": "Expected: controller used to showcase what happens when an exception is thrown",
+    "stack": [
+      "CrashController.java:33",
+      "org/springframework/samples/petclinic/system/CrashController.java:33"
+    ],
+    "location": "CrashController.java:33"
+  }
+]

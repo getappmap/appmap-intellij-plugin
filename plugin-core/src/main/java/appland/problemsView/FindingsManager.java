@@ -31,6 +31,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * Service managing the AppMap findings of a project.
@@ -233,8 +234,9 @@ public class FindingsManager implements ProblemsProvider {
 
     public @NotNull List<ScannerFinding> findFindingsByHash(@NotNull String hashV2) {
         synchronized (lock) {
-            return sourceFileToProblems.values().stream()
-                    .map(ScannerProblem::getFinding)
+            return Stream.concat(
+                            getOtherProblems().stream(),
+                            sourceFileToProblems.values().stream().map(ScannerProblem::getFinding))
                     .filter(p -> hashV2.equals(p.getAppMapHashWithFallback()))
                     .collect(Collectors.toList());
         }

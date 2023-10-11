@@ -90,4 +90,15 @@ public class FindingsManagerTest extends AppMapBaseTest {
         var expectedDate = Date.from(Instant.from(DateTimeFormatter.ISO_INSTANT.parse("2022-04-12T14:25:33.000Z")));
         assertEquals(expectedDate, problem.getFinding().eventsModifiedDate);
     }
+
+    @Test
+    public void findOtherFindingByHash() throws InterruptedException {
+        var condition = TestFindingsManager.createFindingsCondition(getProject(), getTestRootDisposable());
+        myFixture.copyDirectoryToProject("projects/with_http_requests", "root");
+        assertTrue(condition.await(30, TimeUnit.SECONDS));
+
+        var manager = FindingsManager.getInstance(getProject());
+        var findings = manager.findFindingsByHash("b751d44a3b3cf40dd0fa5ba47b2f910f3d73229907b7b5d3b47de87b0c747541");
+        assertEquals(1, findings.size());
+    }
 }
