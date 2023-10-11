@@ -1,5 +1,16 @@
 AppMap Plugin Changelog
 
+## [0.51.0](https://github.com/getappmap/appmap-intellij-plugin/compare/v0.50.0...v0.51.0) (2023-10-11)
+
+
+### Features
+
+-  remove telemetry except of messages, which may indicate a bug in our code ([19ac6b6]())-  show hierarchy of AppMaps in the AppMap tool window ([c477d4b]())-  support 2023.3 eap ([#461](https://github.com/getappmap/appmap-intellij-plugin/issues/461)) ([2fecbac]())-  Update @appland/components to 3.8.0 ([f0ba300]())-  update to latest AppLand JS components ([#463](https://github.com/getappmap/appmap-intellij-plugin/issues/463)) ([f911c59]())
+
+### Bug Fixes
+
+-  don't override properties of an existing appmap.yml file ([cefd915]())-  navigating to a query or request code object didn't show it in the AppMap view ([e4eef31]())-  properly unescape indexer file paths ([d4b106e]())-  refresh parent directory of new AppMap to enforce indexing of the AppMap metadata directory ([dcfe030]())-  show progress spinner when loading AppMaps ([147b334]())
+
 ## [0.50.0](https://github.com/getappmap/appmap-intellij-plugin/compare/v0.49.0...v0.50.0) (2023-09-19)
 
 
