@@ -13,15 +13,24 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 class AppMapGroupNode extends Node {
-    private final String groupName;
-    private final List<AppMapMetadata> appMaps;
+    private final @NotNull String groupName;
+    private final boolean sortItemsByModificationDate;
+    private final @NotNull List<AppMapMetadata> appMaps;
+    private final Comparator<AppMapMetadata> nameComparator = Comparator.comparing(AppMapMetadata::getName);
+    private final Comparator<AppMapMetadata> modificationDateComparator = Comparator.comparingLong(data -> {
+        var file = data.getAppMapFile();
+        // sort the newest items to the top and items without AppMap file to the end
+        return file != null ? -file.getTimeStamp() : Long.MAX_VALUE;
+    });
 
     AppMapGroupNode(@NotNull Project project,
                     @NotNull NodeDescriptor parentDescriptor,
                     @NotNull String groupName,
+                    boolean sortItemsByModificationDate,
                     @NotNull List<AppMapMetadata> appMaps) {
         super(project, parentDescriptor);
         this.groupName = groupName;
+        this.sortItemsByModificationDate = sortItemsByModificationDate;
         this.appMaps = appMaps;
     }
 
@@ -38,8 +47,12 @@ class AppMapGroupNode extends Node {
 
     @Override
     public List<? extends Node> getChildren() {
+        var comparator = sortItemsByModificationDate
+                ? modificationDateComparator.thenComparing(nameComparator)
+                : nameComparator;
+
         return appMaps.stream()
-                .sorted(Comparator.comparing(AppMapMetadata::getName))
+                .sorted(comparator)
                 .map(appMap -> new AppMapNode(myProject, this, appMap))
                 .collect(Collectors.toList());
     }

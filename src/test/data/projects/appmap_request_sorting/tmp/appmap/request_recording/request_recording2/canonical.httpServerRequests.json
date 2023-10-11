@@ -1,0 +1,7 @@
+[
+  {
+    "route": "GET /owners/{ownerId}",
+    "parameters": "()",
+    "status": 200
+  }
+]
