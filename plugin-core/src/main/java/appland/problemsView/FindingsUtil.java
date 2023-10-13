@@ -51,7 +51,7 @@ public final class FindingsUtil {
                                                              @NotNull ScannerFinding finding,
                                                              @NotNull String rulePropertyName) {
         var jsonItem = new JsonObject();
-        jsonItem.add("finding", gson.toJsonTree(finding));
+        jsonItem.add("finding", finding.getOriginalJsonData());
         jsonItem.add("appMapUri", createAppMapUriJson(finding));
         jsonItem.add("problemLocation", createProblemLocationJson(finding));
         jsonItem.add("stackLocations", ReadAction.compute(() -> createStackLocationsJson(gson, project, finding)));

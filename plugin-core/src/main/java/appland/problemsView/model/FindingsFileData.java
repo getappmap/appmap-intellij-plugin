@@ -1,5 +1,6 @@
 package appland.problemsView.model;
 
+import com.google.gson.JsonObject;
 import com.google.gson.annotations.SerializedName;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -11,7 +12,7 @@ import java.util.Map;
 
 public final class FindingsFileData {
     @SerializedName("findings")
-    public @Nullable List<ScannerFinding> findings;
+    public @Nullable List<JsonObject> findingsJSON;
 
     @SerializedName("checks")
     public @Nullable List<CheckInfo> checks;

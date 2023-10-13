@@ -297,14 +297,24 @@ public class FindingsManager implements ProblemsProvider {
 
     private void loadFileLocked(@NotNull VirtualFile findingsFile, @NotNull Consumer<Problem> notifier) {
         var fileData = loadFindingsFile(findingsFile);
-        if (fileData != null && fileData.findings != null) {
-            for (var finding : fileData.findings) {
-                finding.setFindingsFile(findingsFile);
+        if (fileData != null && fileData.findingsJSON != null) {
+            var ruleMapping = fileData.createRuleInfoMapping();
 
-                // multiple metadata values exist to support scanner batch mode,
-                // but this is mostly deprecated now and shouldn't exist for user-generated AppMap data.
-                if (fileData.metadata != null && !fileData.metadata.isEmpty()) {
-                    var metaData = fileData.metadata.values().iterator().next();
+            // Multiple metadata values exist to support scanner batch mode, but this is mostly deprecated now and
+            // shouldn't exist for user-generated AppMap data.
+            var metaData = fileData.metadata != null && !fileData.metadata.isEmpty()
+                    ? fileData.metadata.values().iterator().next()
+                    : null;
+
+            for (var findingJSON : fileData.findingsJSON) {
+                var finding = GsonUtils.GSON.fromJson(findingJSON, ScannerFinding.class);
+                finding.setFindingsFile(findingsFile);
+                finding.setOriginalJsonData(findingJSON);
+
+                // update rule info with the ruleId of the finding
+                finding.ruleInfo = ruleMapping.get(finding.ruleId);
+
+                if (metaData != null) {
                     finding.setFindingsMetaData(metaData);
                 }
 
@@ -355,15 +365,7 @@ public class FindingsManager implements ProblemsProvider {
         }
 
         try {
-            var data = GsonUtils.GSON.fromJson(doc.getText(), FindingsFileData.class);
-            if (data != null && data.findings != null && !data.findings.isEmpty()) {
-                var ruleMapping = data.createRuleInfoMapping();
-                for (var finding : data.findings) {
-                    // update rule info with the ruleId of the finding
-                    finding.ruleInfo = ruleMapping.get(finding.ruleId);
-                }
-            }
-            return data;
+            return GsonUtils.GSON.fromJson(doc.getText(), FindingsFileData.class);
         } catch (JsonSyntaxException e) {
             if (LOG.isDebugEnabled()) {
                 LOG.debug("Failed to load findings file: " + file.getPath(), e);

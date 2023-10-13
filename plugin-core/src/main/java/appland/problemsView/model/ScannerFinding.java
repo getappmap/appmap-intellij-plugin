@@ -2,6 +2,7 @@ package appland.problemsView.model;
 
 import appland.files.FileLocation;
 import appland.files.FileLookup;
+import com.google.gson.JsonObject;
 import com.google.gson.annotations.SerializedName;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.text.StringUtil;
@@ -68,6 +69,12 @@ public class ScannerFinding {
     @Getter
     @Setter
     private transient @Nullable FindingsMetadata findingsMetaData;
+
+    // attached after JSON parsing, links to the original source of this finding to pass the complete data to the AppMap
+    // webview.
+    @Getter
+    @Setter
+    private transient @Nullable JsonObject originalJsonData;
 
     public @Nullable String getAppMapHashWithFallback() {
         return StringUtil.nullize(StringUtil.defaultIfEmpty(appMapHashV2, appMapHash));
