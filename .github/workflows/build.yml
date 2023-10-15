@@ -79,7 +79,11 @@ jobs:
                   key: appmaps-${{ github.sha }}-${{ github.run_attempt }}
 
     appmap-analysis:
-        permissions: write-all
         if: always()
         needs: [test]
-        uses: ./.github/workflows/appmap-analysis.yml
+        uses: getappmap/analyze-action/.github/workflows/appmap-analysis.yml@v1
+        permissions:
+          actions: read
+          contents: read
+          checks: write
+          pull-requests: write
