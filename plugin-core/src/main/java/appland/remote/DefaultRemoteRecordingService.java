@@ -13,11 +13,12 @@ import org.apache.http.HttpStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.concurrent.TimeUnit;
+
+import static com.intellij.openapi.util.io.FileUtil.createTempFile;
 
 @SuppressWarnings("UnstableApiUsage")
 public class DefaultRemoteRecordingService implements RemoteRecordingService {
@@ -58,7 +59,9 @@ public class DefaultRemoteRecordingService implements RemoteRecordingService {
     }
 
     @Override
-    public @Nullable Path stopRecording(@NotNull String baseURL, @NotNull Path storageDirectoryPath, @NotNull String name) {
+    public @Nullable Path stopRecording(@NotNull String baseURL,
+                                        @NotNull Path storageDirectoryPath,
+                                        @NotNull String name) {
         assertIsNotEDT();
         assert ProgressManager.getInstance().hasProgressIndicator();
 
@@ -68,22 +71,26 @@ public class DefaultRemoteRecordingService implements RemoteRecordingService {
 
         var request = setupRequest(HttpRequests.delete(appMapServerUrl, HttpRequests.JSON_CONTENT_TYPE));
         try {
-            // stream to file on disk, it creates the necessary parent directories.
-            // throws a HttpStatusException for response status >= 400
-            request.saveToFile(appMapFile, ProgressManager.getGlobalProgressIndicator());
+            // Temporary location without extension .appmap.json to prevent the AppMap indexer to index it.
+            // We're changing it immediately after storing it, which can cause a data race with the indexer,
+            // i.e. cause that the indexer does not refresh the index data for this AppMap.
+            var appMapTempFile = createTempFile(storageDirectoryPath.toFile(), "", "appmap.temp", false).toPath();
+            try {
+                // Stream to file on disk, it creates the necessary parent directories.
+                // Throws a HttpStatusException for response status >= 400
+                request.saveToFile(appMapTempFile, ProgressManager.getGlobalProgressIndicator());
 
-            AppMapFiles.updateMetadata(appMapFile, name, StandardCharsets.UTF_8);
+                AppMapFiles.updateMetadata(appMapTempFile, name, StandardCharsets.UTF_8);
+                Files.move(appMapTempFile, appMapFile);
+            } finally {
+                deleteSafe(appMapTempFile);
+            }
 
             return appMapFile;
         } catch (Exception e) {
             LOG.debug("exception retrieving AppMap data from remote server " + appMapServerUrl, e);
-
-            try {
-                // delete the AppMap file, because it may only contain some response data
-                Files.deleteIfExists(appMapFile);
-            } catch (IOException ex) {
-                // ignore
-            }
+            // delete the AppMap file, because it may only contain a part of the response data
+            deleteSafe(appMapFile);
             return null;
         }
     }
@@ -104,5 +111,13 @@ public class DefaultRemoteRecordingService implements RemoteRecordingService {
 
     static void assertIsNotEDT() {
         assert !ApplicationManager.getApplication().isDispatchThread();
+    }
+
+    private static void deleteSafe(@NotNull Path appMapTempFile) {
+        try {
+            Files.deleteIfExists(appMapTempFile);
+        } catch (Exception e) {
+            // ignore
+        }
     }
 }
