@@ -122,7 +122,22 @@ allprojects {
             }
         }
 
+        // Target to execute tests, which are incompatible with the AppMap agent.
+        // Only tests with category "appland.WithoutAppMapAgent" are executed.
+        create<Test>("testWithoutAgent") {
+            useJUnit {
+                includeCategories("appland.WithoutAppMapAgent")
+            }
+        }
+
+        named("check") {
+            dependsOn(named("testWithoutAgent"))
+        }
+
         withType<Test> {
+            // all our tests need the jar, even if the agent is disabled
+            dependsOn(":downloadAppMapAgent")
+
             systemProperty("idea.test.execution.policy", "appland.AppLandTestExecutionPolicy")
             systemProperty("appland.testDataPath", rootProject.rootDir.resolve("src/test/data").path)
             if (isCI && githubToken != null) {
@@ -135,13 +150,6 @@ allprojects {
             // always execute tests, don't skip by Gradle's up-to-date checks in development
             outputs.upToDateWhen { false }
 
-            // attach AppMap agent, but only if Gradle is online
-            dependsOn(":downloadAppMapAgent")
-            jvmArgs("-javaagent:$agentOutputPath",
-                    "-Dappmap.config.file=${rootProject.file("appmap.yml")}",
-                    "-Dappmap.output.directory=${rootProject.file("tmp/appmap")}")
-            systemProperty("appmap.test.withAgent", "true")
-
             // logging setup
             testLogging {
                 setEvents(listOf(TestLogEvent.FAILED, TestLogEvent.STANDARD_OUT, TestLogEvent.STANDARD_ERROR))
@@ -149,6 +157,19 @@ allprojects {
 
             testlogger {
                 theme = ThemeType.PLAIN
+            }
+        }
+
+        // only run the default test target with the AppMap agent
+        named<Test>("test") {
+            // attach AppMap agent, but only if Gradle is online
+            jvmArgs("-javaagent:$agentOutputPath",
+                    "-Dappmap.config.file=${rootProject.file("appmap.yml")}",
+                    "-Dappmap.output.directory=${rootProject.file("tmp/appmap")}")
+            systemProperty("appmap.test.withAgent", "true")
+
+            useJUnit {
+                excludeCategories("appland.WithoutAppMapAgent")
             }
         }
 
