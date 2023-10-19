@@ -61,6 +61,12 @@ allprojects {
         // http://wiremock.org, Apache 2 license
         testImplementation("com.github.tomakehurst:wiremock-jre8:2.33.1")
 
+        // JUnit Vintage
+        testImplementation("org.junit.jupiter:junit-jupiter:5.10.0")
+        testCompileOnly("junit:junit:4.13.2")
+        testRuntimeOnly("org.junit.vintage:junit-vintage-engine")
+        testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+
         // Project Lombok, only for compilation
         compileOnly("org.projectlombok:lombok:$lombokVersion")
         annotationProcessor("org.projectlombok:lombok:$lombokVersion")
@@ -149,6 +155,10 @@ allprojects {
 
             testlogger {
                 theme = ThemeType.PLAIN
+            }
+
+            useJUnitPlatform {
+                includeEngines("junit-vintage")
             }
         }
 
