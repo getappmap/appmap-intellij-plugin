@@ -10,14 +10,14 @@
     "@jridgewell/gen-mapping" "^0.3.0"
     "@jridgewell/trace-mapping" "^0.3.9"
 
-"@appland/components@^3.8.0":
-  version "3.8.0"
-  resolved "https://registry.yarnpkg.com/@appland/components/-/components-3.8.0.tgz#01aff1f9a9a504cc387a071c3ee7b857a01a9a97"
-  integrity sha512-dGnvT4XwkPmvEBkNj/5IWodpOdMlgFDfMwuWg1WH5jpWwTjGxFRqpyLAiYLjrei+CXWNdRmv6e5NFY2vefkquw==
+"@appland/components@^3.9.0":
+  version "3.9.0"
+  resolved "https://registry.yarnpkg.com/@appland/components/-/components-3.9.0.tgz#fe2e1712e5179ba5c0e3369a97c3be608367d355"
+  integrity sha512-EqHydCldCxVpBNYsnF1SrSZ5uB/2SBNFy8J5RrCFqqrHblLkwoIT/ejKbNfOUcao2dHO483JaNON6UzoNmT7QQ==
   dependencies:
     "@appland/diagrams" "^1.7.0"
-    "@appland/models" "^2.6.3"
-    "@appland/sequence-diagram" "^1.8.1"
+    "@appland/models" "^2.7.0"
+    "@appland/sequence-diagram" "^1.9.0"
     buffer "^6.0.3"
     d3 "^7.8.4"
     d3-flame-graph "^4.1.3"
@@ -49,10 +49,10 @@
     "@appland/sql-parser" "^1.5.0"
     crypto-js "^4.0.0"
 
-"@appland/models@^2.6.3":
-  version "2.6.4"
-  resolved "https://registry.yarnpkg.com/@appland/models/-/models-2.6.4.tgz#a351bd48be8af10634fa3a924b5f14be9b61a639"
-  integrity sha512-DL13Psam8mRw4egSzrvVTxPs+yubRNFF+jV2ZzBxIIC2gPpbYWSwZgHcew9U1O8SkeEq5Q84gXQGSYTt+TU39A==
+"@appland/models@^2.7.0":
+  version "2.7.0"
+  resolved "https://registry.yarnpkg.com/@appland/models/-/models-2.7.0.tgz#4c7ee7297f28d23e01c821f6c34d66a44ec83203"
+  integrity sha512-UwKTGnAugF+2kvNALmxkMEgmXI1Pg+FCytYzRQVrHLekV2cdtGGQRLI96ShAhRb+pVJmz0GlkM3c+1rg9PQZMw==
   dependencies:
     "@appland/sql-parser" "^1.5.0"
     crypto-js "^4.0.0"
@@ -65,16 +65,17 @@
     "@appland/models" "^2.2.0"
     js-yaml "^4.1.0"
 
-"@appland/sequence-diagram@^1.8.1":
-  version "1.8.1"
-  resolved "https://registry.yarnpkg.com/@appland/sequence-diagram/-/sequence-diagram-1.8.1.tgz#bcfc317852c3390b848a574bddf9c2c682f74366"
-  integrity sha512-mTzIEZn9yHL8CGLrPdSqVlLJFwhmt3rdKiivM6LXgrGtu4TAisG/NdXPYT1aquG3bQR++1N2bhZj6pbEdca62g==
+"@appland/sequence-diagram@^1.9.0":
+  version "1.9.0"
+  resolved "https://registry.yarnpkg.com/@appland/sequence-diagram/-/sequence-diagram-1.9.0.tgz#c1e19ddda20b487908f693413e26127b648e9cae"
+  integrity sha512-e43mPehViQ0KpDyXqPjY1y6qezKY+NgUwXchvYINsVRUUGl+QdwiIjpMjIOz3ofpVs2FGoGy75cs6B8yeeZEdA==
   dependencies:
-    "@appland/models" "^2.6.3"
+    "@appland/models" "^2.7.0"
     "@appland/openapi" "^1.4.3"
     "@datastructures-js/priority-queue" "^6.1.3"
     crypto-js "^4.1.1"
     diff "^5.1.0"
+    lru-cache "6.0.0"
 
 "@appland/sql-parser@^1.5.0":
   version "1.5.1"
@@ -2425,6 +2426,13 @@ lower-case@^2.0.2:
   dependencies:
     tslib "^2.0.3"
 
+lru-cache@6.0.0, lru-cache@^6.0.0:
+  version "6.0.0"
+  resolved "https://registry.yarnpkg.com/lru-cache/-/lru-cache-6.0.0.tgz#6d6fe6570ebd96aaf90fcad1dafa3b2566db3a94"
+  integrity sha512-Jo6dJ04CmSjuznwJSS3pUeWmd/H0ffTlkXXgwZi+eq1UCmqQwCh+eLsYOYCwY991i2Fah4h1BEMCx4qThGbsiA==
+  dependencies:
+    yallist "^4.0.0"
+
 lru-cache@^4.1.2:
   version "4.1.5"
   resolved "https://registry.yarnpkg.com/lru-cache/-/lru-cache-4.1.5.tgz#8bbe50ea85bed59bc9e33dcab8235ee9bcf443cd"
@@ -2439,13 +2447,6 @@ lru-cache@^5.1.1:
   integrity sha512-KpNARQA3Iwv+jTA0utUVVbrh+Jlrr1Fv0e56GGzAFOXN7dk/FviaDW8LHmK52DlcH4WP2n6gI8vN1aesBFgo9w==
   dependencies:
     yallist "^3.0.2"
-
-lru-cache@^6.0.0:
-  version "6.0.0"
-  resolved "https://registry.yarnpkg.com/lru-cache/-/lru-cache-6.0.0.tgz#6d6fe6570ebd96aaf90fcad1dafa3b2566db3a94"
-  integrity sha512-Jo6dJ04CmSjuznwJSS3pUeWmd/H0ffTlkXXgwZi+eq1UCmqQwCh+eLsYOYCwY991i2Fah4h1BEMCx4qThGbsiA==
-  dependencies:
-    yallist "^4.0.0"
 
 make-dir@^3.0.2, make-dir@^3.1.0:
   version "3.1.0"
