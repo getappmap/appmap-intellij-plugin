@@ -25,7 +25,7 @@ public class AppMapJavaPackageConfigTest extends AppMapBaseTest {
     @Test
     public void systemIndependentAppMapDir() {
         var config = AppMapJavaPackageConfig.generateAppMapConfig(getModule(), "tmp\\appmap");
-        assertEquals("tmp/appmap", config.getAppMapDir());
+        assertEquals("tmp/not-appmap", config.getAppMapDir());
     }
 
     @Test
