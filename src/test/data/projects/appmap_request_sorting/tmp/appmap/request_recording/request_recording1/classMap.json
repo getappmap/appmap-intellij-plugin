@@ -1,0 +1,58 @@
+[
+  {
+    "children": [
+      {
+        "children": [
+          {
+            "children": [
+              {
+                "children": [
+                  {
+                    "children": [
+                      {
+                        "children": [
+                          {
+                            "name": "triggerException",
+                            "type": "function",
+                            "static": false,
+                            "location": "org/springframework/samples/petclinic/system/CrashController.java:33"
+                          }
+                        ],
+                        "name": "CrashController",
+                        "type": "class"
+                      }
+                    ],
+                    "name": "system",
+                    "type": "package"
+                  }
+                ],
+                "name": "petclinic",
+                "type": "package"
+              }
+            ],
+            "name": "samples",
+            "type": "package"
+          }
+        ],
+        "name": "springframework",
+        "type": "package"
+      }
+    ],
+    "name": "org",
+    "type": "package"
+  },
+  {
+    "type": "http",
+    "name": "HTTP server requests",
+    "children": [
+      {
+        "type": "route",
+        "name": "GET /oups"
+      },
+      {
+        "type": "route",
+        "name": "GET /error"
+      }
+    ]
+  }
+]

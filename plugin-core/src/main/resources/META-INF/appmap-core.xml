@@ -111,6 +111,7 @@
 
         <!-- Generic AppMap file handling -->
         <vfs.asyncListener implementation="appland.files.AppMapAsyncFileListener"/>
+        <vfs.asyncListener implementation="appland.files.DeleteAppMapIndexDataFileListener"/>
         <virtualFileManagerListener implementation="appland.files.VirtualFileManagerLister"/>
 
         <!-- CLI service -->

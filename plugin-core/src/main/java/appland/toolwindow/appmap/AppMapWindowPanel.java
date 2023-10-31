@@ -1,6 +1,7 @@
 package appland.toolwindow.appmap;
 
 import appland.AppMapBundle;
+import appland.Icons;
 import appland.actions.StartAppMapRecordingAction;
 import appland.actions.StopAppMapRecordingAction;
 import appland.index.IndexedFileListenerUtil;
@@ -14,14 +15,22 @@ import appland.toolwindow.codeObjects.CodeObjectsPanel;
 import appland.toolwindow.installGuide.InstallGuidePanel;
 import appland.toolwindow.installGuide.UrlLabel;
 import appland.toolwindow.runtimeAnalysis.RuntimeAnalysisPanel;
+import com.intellij.ide.CommonActionsManager;
+import com.intellij.ide.DefaultTreeExpander;
+import com.intellij.ide.DeleteProvider;
+import com.intellij.ide.TitledHandler;
+import com.intellij.ide.actions.DeleteAction;
 import com.intellij.openapi.Disposable;
 import com.intellij.openapi.actionSystem.*;
+import com.intellij.openapi.actionSystem.ex.ActionUtil;
 import com.intellij.openapi.diagnostic.Logger;
+import com.intellij.openapi.fileChooser.actions.VirtualFileDeleteProvider;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.SimpleToolWindowPanel;
 import com.intellij.openapi.util.Disposer;
+import com.intellij.openapi.util.NlsActions;
 import com.intellij.openapi.vfs.VirtualFile;
-import com.intellij.psi.PsiManager;
+import com.intellij.psi.util.PsiUtilCore;
 import com.intellij.ui.*;
 import com.intellij.ui.components.panels.VerticalBox;
 import com.intellij.ui.tree.AsyncTreeModel;
@@ -40,12 +49,16 @@ import javax.swing.*;
 import javax.swing.event.DocumentEvent;
 import javax.swing.tree.TreeModel;
 import java.awt.*;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 
 public class AppMapWindowPanel extends SimpleToolWindowPanel implements DataProvider, Disposable, AppMapToolWindowContent {
     private static final Logger LOG = Logger.getInstance("#appmap.toolwindow");
     private static final int TREE_REFRESH_DELAY_MILLIS = 250;
     private static final long INPUT_FILTER_DELAY_MILLIS = 250L; // + TREE_REFRESH_DELAY after typing stopped
+    // key to provide all available AppMaps in our data context for the "Delete all AppMaps" action
+    public static final @NotNull DataKey<VirtualFile[]> KEY_ALL_APPMAPS = DataKey.create("appland.allAppMaps");
 
     @NotNull
     private final SimpleTree tree;
@@ -56,6 +69,8 @@ public class AppMapWindowPanel extends SimpleToolWindowPanel implements DataProv
     // debounce filter requests when search text changes
     private final SearchTextField textFilter = new SearchTextField();
     private final Alarm filterInputAlarm = new Alarm(textFilter, this);
+    // custom delete provider to support "Edit -> Delete" with an overridden action label
+    private final DeleteProvider deleteDataProvider = new AppMapDeleteProvider();
 
     private volatile boolean isToolWindowVisible;
     private volatile boolean hasPendingTreeRefresh;
@@ -99,22 +114,57 @@ public class AppMapWindowPanel extends SimpleToolWindowPanel implements DataProv
 
     @Override
     public @Nullable Object getData(@NotNull @NonNls String dataId) {
+        if (PlatformCoreDataKeys.SLOW_DATA_PROVIDERS.is(dataId)) {
+            return List.of((DataProvider) this::getDataImpl);
+        }
+        return getDataImpl(dataId);
+    }
+
+    @Override
+    public void onToolWindowShown() {
+        LOG.debug("onToolWindowShown");
+        this.isToolWindowVisible = true;
+
+        if (hasPendingTreeRefresh) {
+            LOG.debug("Triggering pending refresh of AppMap tool window");
+            rebuild(true);
+        }
+    }
+
+    @Override
+    public void onToolWindowHidden() {
+        LOG.debug("onToolWindowHidden");
+        this.isToolWindowVisible = false;
+    }
+
+    private @Nullable Object getDataImpl(@NotNull @NonNls String dataId) {
+        if (PlatformDataKeys.DELETE_ELEMENT_PROVIDER.is(dataId)) {
+            return deleteDataProvider;
+        }
+
+        if (KEY_ALL_APPMAPS.is(dataId)) {
+            var root = tree.getModel().getRoot();
+            if (root != null) {
+                assert root instanceof Node;
+                return ((Node) root).getFiles().toArray(VirtualFile.EMPTY_ARRAY);
+            }
+        }
+
         if (PlatformCoreDataKeys.PROJECT.is(dataId)) {
             return project;
         }
 
-        if (PlatformCoreDataKeys.SLOW_DATA_PROVIDERS.is(dataId)) {
-            return List.of((DataProvider) id -> {
-                var selectedFile = getSelectedFile();
-                if (CommonDataKeys.NAVIGATABLE.is(id) && selectedFile != null) {
-                    return PsiManager.getInstance(project).findFile(selectedFile);
-                }
-                return null;
-            });
-        }
-
         if (CommonDataKeys.VIRTUAL_FILE.is(dataId)) {
             return getSelectedFile();
+        }
+
+        if (CommonDataKeys.VIRTUAL_FILE_ARRAY.is(dataId)) {
+            return getSelectedFiles();
+        }
+
+        if (CommonDataKeys.NAVIGATABLE.is(dataId) || CommonDataKeys.PSI_FILE.is(dataId)) {
+            var file = getSelectedFile();
+            return file != null ? PsiUtilCore.getPsiFile(project, file) : null;
         }
 
         return super.getData(dataId);
@@ -122,13 +172,30 @@ public class AppMapWindowPanel extends SimpleToolWindowPanel implements DataProv
 
     private @Nullable VirtualFile getSelectedFile() {
         var path = tree.getSelectionPath();
-        if (path == null) {
+        var file = path != null && path.getLastPathComponent() instanceof Node
+                ? ((Node) path.getLastPathComponent()).getFile()
+                : null;
+        return file != null && file.isValid() ? file : null;
+    }
+
+    /**
+     * @return Files of the selected items. If a selected item is a group of AppMaps,
+     * then all child AppMaps are added to the result.
+     */
+    private @Nullable VirtualFile[] getSelectedFiles() {
+        var paths = tree.getSelectionPaths();
+        if (paths == null || paths.length == 0) {
             return null;
         }
 
-        var node = path.getLastPathComponent();
-        var file = node instanceof Node ? ((Node) node).getFile() : null;
-        return file != null && file.isValid() ? file : null;
+        var files = new HashSet<VirtualFile>();
+        for (var path : paths) {
+            var pathItem = path.getLastPathComponent();
+            if (pathItem instanceof Node) {
+                files.addAll(((Node) pathItem).getFiles());
+            }
+        }
+        return files.stream().filter(VirtualFile::isValid).toArray(VirtualFile[]::new);
     }
 
     private @NotNull SearchTextField createNameFilter(@NotNull AppMapModel appMapModel) {
@@ -150,23 +217,6 @@ public class AppMapWindowPanel extends SimpleToolWindowPanel implements DataProv
             }
         });
         return textFilter;
-    }
-
-    @Override
-    public void onToolWindowShown() {
-        LOG.debug("onToolWindowShown");
-        this.isToolWindowVisible = true;
-
-        if (hasPendingTreeRefresh) {
-            LOG.debug("Triggering pending refresh of AppMap tool window");
-            rebuild(true);
-        }
-    }
-
-    @Override
-    public void onToolWindowHidden() {
-        LOG.debug("onToolWindowHidden");
-        this.isToolWindowVisible = false;
     }
 
     private void rebuild(boolean force) {
@@ -273,9 +323,43 @@ public class AppMapWindowPanel extends SimpleToolWindowPanel implements DataProv
         tree.setShowsRootHandles(false);
 
         TreeUtil.installActions(tree);
-        new EditSourceOnDoubleClickHandler.TreeMouseListener(tree, null).installOn(tree);
+        EditSourceOnDoubleClickHandler.install(tree);
         EditSourceOnEnterKeyHandler.install(tree);
+
+        PopupHandler.installPopupMenu(tree, createPopupGroup(tree), ActionPlaces.TOOLWINDOW_POPUP);
+
         return tree;
+    }
+
+    private static @NotNull ActionGroup createPopupGroup(@NotNull JTree tree) {
+        var actions = new DefaultActionGroup();
+
+        // our own actions
+        actions.add(createDeleteAppMapsAction());
+        actions.add(new DeleteAllMapsAction());
+
+        // default actions to work with trees
+        var expander = new DefaultTreeExpander(tree);
+        var commonActionsManager = CommonActionsManager.getInstance();
+
+        actions.add(Separator.getInstance());
+        actions.add(Objects.requireNonNull(ActionManager.getInstance().getActionOrStub(IdeActions.ACTION_EDIT_SOURCE)));
+        actions.addAction(commonActionsManager.createExpandAllAction(expander, tree));
+        actions.addAction(commonActionsManager.createCollapseAllAction(expander, tree));
+
+        return actions;
+    }
+
+    private static @NotNull DeleteAction createDeleteAppMapsAction() {
+        var action = new DeleteAction() {
+            @Override
+            public void update(@NotNull AnActionEvent e) {
+                super.update(e);
+                e.getPresentation().setIcon(Icons.APPMAP_FILE);
+            }
+        };
+        ActionUtil.copyFrom(action, IdeActions.ACTION_DELETE);
+        return action;
     }
 
     private JPanel createAppMapPanel(@NotNull Project project,
@@ -356,5 +440,27 @@ public class AppMapWindowPanel extends SimpleToolWindowPanel implements DataProv
                         add(new UrlLabel("Community", "https://appmap.io/docs/community"));
                     }
                 });
+    }
+
+    /**
+     * Delete handler to override the Action title shown in the popup of the AppMap tree and in the edit menu of the IDE.
+     */
+    private static final class AppMapDeleteProvider implements DeleteProvider, TitledHandler {
+        private final DeleteProvider delegate = new VirtualFileDeleteProvider();
+
+        @Override
+        public @NlsActions.ActionText String getActionTitle() {
+            return AppMapBundle.get("toolwindow.appmap.actions.deleteAppMap.title");
+        }
+
+        @Override
+        public boolean canDeleteElement(@NotNull DataContext dataContext) {
+            return delegate.canDeleteElement(dataContext);
+        }
+
+        @Override
+        public void deleteElement(@NotNull DataContext dataContext) {
+            delegate.deleteElement(dataContext);
+        }
     }
 }

@@ -1,0 +1,372 @@
+{
+  "events": [
+    {
+      "event": "call",
+      "http_server_request": {
+        "headers": {
+          "host": "localhost:34027",
+          "connection": "keep-alive",
+          "accept": "text/plain, application/json, application/*+json, */*",
+          "user-agent": "Java/17.0.8"
+        },
+        "normalized_path_info": "/owners/{ownerId}",
+        "path_info": "/owners/1",
+        "protocol": "HTTP/1.1",
+        "request_method": "GET"
+      },
+      "id": 1,
+      "thread_id": 45
+    },
+    {
+      "defined_class": "org.springframework.samples.petclinic.owner.OwnerController",
+      "event": "call",
+      "id": 2,
+      "lineno": 57,
+      "method_id": "setAllowedFields",
+      "parameters": [
+        {
+          "class": "org.springframework.web.servlet.mvc.method.annotation.ExtendedServletRequestDataBinder",
+          "kind": "req",
+          "name": "dataBinder",
+          "object_id": 1390193238,
+          "value": "org.springframework.web.servlet.mvc.method.annotation.ExtendedServletRequestDataBinder@52dcaa56"
+        }
+      ],
+      "path": "org/springframework/samples/petclinic/owner/OwnerController.java",
+      "receiver": {
+        "class": "org.springframework.samples.petclinic.owner.OwnerController",
+        "object_id": 84561486,
+        "value": "org.springframework.samples.petclinic.owner.OwnerController@50a4e4e"
+      },
+      "static": false,
+      "thread_id": 45
+    },
+    {
+      "elapsed": 0.0001987267,
+      "event": "return",
+      "id": 3,
+      "parent_id": 2,
+      "thread_id": 45
+    },
+    {
+      "defined_class": "org.springframework.samples.petclinic.owner.OwnerController",
+      "event": "call",
+      "id": 4,
+      "lineno": 62,
+      "method_id": "findOwner",
+      "parameters": [
+        {
+          "class": "java.lang.Integer",
+          "kind": "req",
+          "name": "ownerId",
+          "object_id": 2140264019,
+          "value": "1"
+        }
+      ],
+      "path": "org/springframework/samples/petclinic/owner/OwnerController.java",
+      "receiver": {
+        "class": "org.springframework.samples.petclinic.owner.OwnerController",
+        "object_id": 84561486,
+        "value": "org.springframework.samples.petclinic.owner.OwnerController@50a4e4e"
+      },
+      "static": false,
+      "thread_id": 45
+    },
+    {
+      "event": "call",
+      "id": 5,
+      "sql_query": {
+        "database_type": "MySQL",
+        "sql": "select o1_0.id,o1_0.address,o1_0.city,o1_0.first_name,o1_0.last_name,p1_0.owner_id,p1_0.id,p1_0.birth_date,p1_0.name,p1_0.type_id,o1_0.telephone from owners o1_0 left join pets p1_0 on o1_0.id=p1_0.owner_id where o1_0.id=? order by p1_0.name"
+      },
+      "thread_id": 45
+    },
+    {
+      "elapsed": 0.0000365887,
+      "event": "return",
+      "id": 6,
+      "parent_id": 5,
+      "thread_id": 45
+    },
+    {
+      "event": "call",
+      "id": 7,
+      "sql_query": {
+        "database_type": "MySQL",
+        "sql": "select p1_0.id,p1_0.name from types p1_0 where p1_0.id=?"
+      },
+      "thread_id": 45
+    },
+    {
+      "elapsed": 0.0000142524,
+      "event": "return",
+      "id": 8,
+      "parent_id": 7,
+      "thread_id": 45
+    },
+    {
+      "event": "call",
+      "id": 9,
+      "sql_query": {
+        "database_type": "MySQL",
+        "sql": "select v1_0.pet_id,v1_0.id,v1_0.visit_date,v1_0.description from visits v1_0 where v1_0.pet_id=? order by v1_0.visit_date"
+      },
+      "thread_id": 45
+    },
+    {
+      "elapsed": 0.0000124065,
+      "event": "return",
+      "id": 10,
+      "parent_id": 9,
+      "thread_id": 45
+    },
+    {
+      "elapsed": 0.0023567625,
+      "event": "return",
+      "id": 11,
+      "parent_id": 4,
+      "return_value": {
+        "class": "org.springframework.samples.petclinic.owner.Owner",
+        "object_id": 690236938,
+        "value": "[Owner@29242e0a id = 1, new = false, lastName = 'Franklin', firstName = 'George', address = '110 W. Liberty St.', city = 'Madison', telephone = '6085551023']"
+      },
+      "thread_id": 45
+    },
+    {
+      "defined_class": "org.springframework.samples.petclinic.owner.OwnerController",
+      "event": "call",
+      "id": 12,
+      "lineno": 57,
+      "method_id": "setAllowedFields",
+      "parameters": [
+        {
+          "class": "org.springframework.web.servlet.mvc.method.annotation.ExtendedServletRequestDataBinder",
+          "kind": "req",
+          "name": "dataBinder",
+          "object_id": 2041001955,
+          "value": "org.springframework.web.servlet.mvc.method.annotation.ExtendedServletRequestDataBinder@79a737e3"
+        }
+      ],
+      "path": "org/springframework/samples/petclinic/owner/OwnerController.java",
+      "receiver": {
+        "class": "org.springframework.samples.petclinic.owner.OwnerController",
+        "object_id": 84561486,
+        "value": "org.springframework.samples.petclinic.owner.OwnerController@50a4e4e"
+      },
+      "static": false,
+      "thread_id": 45
+    },
+    {
+      "elapsed": 0.0001271114,
+      "event": "return",
+      "id": 13,
+      "parent_id": 12,
+      "thread_id": 45
+    },
+    {
+      "defined_class": "org.springframework.samples.petclinic.owner.OwnerController",
+      "event": "call",
+      "id": 14,
+      "lineno": 154,
+      "method_id": "showOwner",
+      "parameters": [
+        {
+          "class": "java.lang.Integer",
+          "kind": "req",
+          "name": "ownerId",
+          "object_id": 2140264019,
+          "value": "1"
+        }
+      ],
+      "path": "org/springframework/samples/petclinic/owner/OwnerController.java",
+      "receiver": {
+        "class": "org.springframework.samples.petclinic.owner.OwnerController",
+        "object_id": 84561486,
+        "value": "org.springframework.samples.petclinic.owner.OwnerController@50a4e4e"
+      },
+      "static": false,
+      "thread_id": 45
+    },
+    {
+      "event": "call",
+      "id": 15,
+      "sql_query": {
+        "database_type": "MySQL",
+        "sql": "select o1_0.id,o1_0.address,o1_0.city,o1_0.first_name,o1_0.last_name,p1_0.owner_id,p1_0.id,p1_0.birth_date,p1_0.name,p1_0.type_id,o1_0.telephone from owners o1_0 left join pets p1_0 on o1_0.id=p1_0.owner_id where o1_0.id=? order by p1_0.name"
+      },
+      "thread_id": 45
+    },
+    {
+      "elapsed": 0.000027902,
+      "event": "return",
+      "id": 16,
+      "parent_id": 15,
+      "thread_id": 45
+    },
+    {
+      "elapsed": 0.0003138005,
+      "event": "return",
+      "id": 17,
+      "parent_id": 14,
+      "return_value": {
+        "class": "org.springframework.web.servlet.ModelAndView",
+        "object_id": 1583334874,
+        "value": "ModelAndView [view=\"owners/ownerDetails\"; model={owner=[Owner@29242e0a id = 1, new = false, lastName = 'Franklin', firstName = 'George', address = '110 W. Liberty St.', city = 'Madison', telephone = '6085551023']}]"
+      },
+      "thread_id": 45
+    },
+    {
+      "defined_class": "org.springframework.samples.petclinic.owner.OwnerController",
+      "event": "call",
+      "id": 18,
+      "lineno": 57,
+      "method_id": "setAllowedFields",
+      "parameters": [
+        {
+          "class": "org.springframework.web.servlet.mvc.method.annotation.ExtendedServletRequestDataBinder",
+          "kind": "req",
+          "name": "dataBinder",
+          "object_id": 925213764,
+          "value": "org.springframework.web.servlet.mvc.method.annotation.ExtendedServletRequestDataBinder@3725a444"
+        }
+      ],
+      "path": "org/springframework/samples/petclinic/owner/OwnerController.java",
+      "receiver": {
+        "class": "org.springframework.samples.petclinic.owner.OwnerController",
+        "object_id": 84561486,
+        "value": "org.springframework.samples.petclinic.owner.OwnerController@50a4e4e"
+      },
+      "static": false,
+      "thread_id": 45
+    },
+    {
+      "elapsed": 0.000027985,
+      "event": "return",
+      "id": 19,
+      "parent_id": 18,
+      "thread_id": 45
+    },
+    {
+      "elapsed": 0.025315642,
+      "event": "return",
+      "http_server_response": {
+        "headers": {
+          "Transfer-Encoding": "chunked",
+          "Keep-Alive": "timeout=60",
+          "Connection": "keep-alive",
+          "Content-Language": "de-DE",
+          "Date": "Wed, 11 Oct 2023 08:48:59 GMT",
+          "Content-Type": "text/html;charset=UTF-8"
+        },
+        "status": 200
+      },
+      "id": 20,
+      "parent_id": 1,
+      "thread_id": 45
+    }
+  ],
+  "version": "1.2",
+  "metadata": {
+    "name": "GET /owners/1 (200) - 10:48:59.009",
+    "app": "spring-petclinic",
+    "language": {
+      "name": "java",
+      "version": "17.0.8+7-b1000.8",
+      "engine": "OpenJDK 64-Bit Server VM"
+    },
+    "client": {
+      "name": "appmap-java",
+      "url": "https://github.com/appland/appmap-java"
+    },
+    "recorder": {
+      "name": "request_recording",
+      "type": "requests"
+    },
+    "recording": {},
+    "framework": {}
+  },
+  "classMap": [
+    {
+      "children": [
+        {
+          "children": [
+            {
+              "children": [
+                {
+                  "children": [
+                    {
+                      "children": [
+                        {
+                          "children": [
+                            {
+                              "name": "showOwner",
+                              "type": "function",
+                              "static": false,
+                              "location": "org/springframework/samples/petclinic/owner/OwnerController.java:154"
+                            },
+                            {
+                              "name": "setAllowedFields",
+                              "type": "function",
+                              "static": false,
+                              "location": "org/springframework/samples/petclinic/owner/OwnerController.java:57"
+                            },
+                            {
+                              "name": "findOwner",
+                              "type": "function",
+                              "static": false,
+                              "location": "org/springframework/samples/petclinic/owner/OwnerController.java:62"
+                            }
+                          ],
+                          "name": "OwnerController",
+                          "type": "class"
+                        }
+                      ],
+                      "name": "owner",
+                      "type": "package"
+                    }
+                  ],
+                  "name": "petclinic",
+                  "type": "package"
+                }
+              ],
+              "name": "samples",
+              "type": "package"
+            }
+          ],
+          "name": "springframework",
+          "type": "package"
+        }
+      ],
+      "name": "org",
+      "type": "package"
+    },
+    {
+      "type": "http",
+      "name": "HTTP server requests",
+      "children": [
+        {
+          "type": "route",
+          "name": "GET /owners/{ownerId}"
+        }
+      ]
+    },
+    {
+      "type": "database",
+      "name": "Database",
+      "children": [
+        {
+          "type": "query",
+          "name": "select o1_0.id,o1_0.address,o1_0.city,o1_0.first_name,o1_0.last_name,p1_0.owner_id,p1_0.id,p1_0.birth_date,p1_0.name,p1_0.type_id,o1_0.telephone from owners o1_0 left join pets p1_0 on o1_0.id=p1_0.owner_id where o1_0.id=? order by p1_0.name"
+        },
+        {
+          "type": "query",
+          "name": "select p1_0.id,p1_0.name from types p1_0 where p1_0.id=?"
+        },
+        {
+          "type": "query",
+          "name": "select v1_0.pet_id,v1_0.id,v1_0.visit_date,v1_0.description from visits v1_0 where v1_0.pet_id=? order by v1_0.visit_date"
+        }
+      ]
+    }
+  ]
+}

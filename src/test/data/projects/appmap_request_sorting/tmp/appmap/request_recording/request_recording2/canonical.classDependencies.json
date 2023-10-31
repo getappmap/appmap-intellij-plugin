@@ -1,0 +1,18 @@
+[
+  {
+    "caller": "GET /owners/{ownerId}",
+    "callee": "org/springframework"
+  },
+  {
+    "caller": "org/springframework",
+    "callee": "select o1_0.id,o1_0.address,o1_0.city,o1_0.first_name,o1_0.last_name,p1_0.owner_id,p1_0.id,p1_0.birth_date,p1_0.name,p1_0.type_id,o1_0.telephone from owners o1_0 left join pets p1_0 on o1_0.id=p1_0.owner_id where o1_0.id=? order by p1_0.name"
+  },
+  {
+    "caller": "org/springframework",
+    "callee": "select p1_0.id,p1_0.name from types p1_0 where p1_0.id=?"
+  },
+  {
+    "caller": "org/springframework",
+    "callee": "select v1_0.pet_id,v1_0.id,v1_0.visit_date,v1_0.description from visits v1_0 where v1_0.pet_id=? order by v1_0.visit_date"
+  }
+]

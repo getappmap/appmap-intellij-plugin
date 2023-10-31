@@ -2,7 +2,6 @@ package appland.toolwindow.runtimeAnalysis.nodes;
 
 import appland.problemsView.model.ScannerFinding;
 import appland.webviews.findingDetails.FindingDetailsEditorProvider;
-import com.intellij.icons.AllIcons;
 import com.intellij.ide.projectView.PresentationData;
 import com.intellij.ide.util.treeView.NodeDescriptor;
 import com.intellij.openapi.fileTypes.FileTypeManager;
@@ -38,7 +37,9 @@ final class FindingLocationNode extends Node {
         return new Navigatable() {
             @Override
             public void navigate(boolean requestFocus) {
-                FindingDetailsEditorProvider.openEditor(myProject, List.of(finding));
+                var hash = finding.getAppMapHashWithFallback();
+                assert hash != null;
+                FindingDetailsEditorProvider.openEditor(myProject, hash, List.of(finding));
             }
 
             @Override
