@@ -1,5 +1,16 @@
 AppMap Plugin Changelog
 
+## [0.52.0](https://github.com/getappmap/appmap-intellij-plugin/compare/v0.51.0...v0.52.0) (2023-10-31)
+
+
+### Features
+
+-  remove corresponding AppMap index data directory when an AppMap JSON file is deleted ([c030e16]())-  sort AppMaps of request or remote recording by modification date ([7154a12]())-  support "Delete AppMaps" and "Delete all AppMaps" in the AppMap tool window ([7361a26]())-  Update @appland/components to 3.9.0 ([5667237]())-  when opening an AppMap for a finding, center on the source finding ([fc1602c]())
+
+### Bug Fixes
+
+-  open findings from overview, which don't have an attached source file ([26c318b]())-  remote recordings now always display the name given by the user ([e7970e6]())-  rendering of findings were different compared to VSCode ([a2ebf7a]())
+
 ## [0.51.0](https://github.com/getappmap/appmap-intellij-plugin/compare/v0.50.0...v0.51.0) (2023-10-11)
 
 
