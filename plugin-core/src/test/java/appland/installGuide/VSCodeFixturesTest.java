@@ -22,7 +22,7 @@ public class VSCodeFixturesTest extends AppMapBaseTest {
         // copy into src, which is the only content root of the test project
         WriteAction.runAndWait(() -> myFixture.copyDirectoryToProject("project-a", ""));
 
-        var projects = ProjectDataService.getInstance(getProject()).getAppMapProjects();
+        var projects = ProjectDataService.getInstance(getProject()).getAppMapProjects(true);
         Assert.assertEquals(1, projects.size());
 
         var projectA = projects.get(0);

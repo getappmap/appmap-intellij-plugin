@@ -1,6 +1,7 @@
 package appland.toolwindow.installGuide;
 
 import appland.config.AppMapConfigFileListener;
+import appland.index.AppMapFindingsUtil;
 import appland.index.AppMapNameIndex;
 import appland.index.AppMapSearchScopes;
 import appland.installGuide.InstallGuideViewPage;
@@ -11,7 +12,6 @@ import appland.settings.AppMapProjectSettingsService;
 import appland.settings.AppMapSettingsListener;
 import appland.toolwindow.AppMapContentPanel;
 import com.intellij.openapi.Disposable;
-import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.application.ModalityState;
 import com.intellij.openapi.application.ReadAction;
 import com.intellij.openapi.project.Project;
@@ -19,10 +19,12 @@ import com.intellij.openapi.util.Disposer;
 import com.intellij.util.Alarm;
 import com.intellij.util.SingleAlarm;
 import com.intellij.util.concurrency.AppExecutorUtil;
+import com.intellij.util.concurrency.annotations.RequiresBackgroundThread;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
@@ -35,7 +37,7 @@ public class InstallGuidePanel extends AppMapContentPanel implements Disposable 
     private final Project project;
     private final List<StatusLabel> statusLabels;
     // debounce label updates by 500ms
-    private final SingleAlarm labelRefreshAlarm = new SingleAlarm(this::refreshInitialStatus, 500, this, Alarm.ThreadToUse.SWING_THREAD);
+    private final SingleAlarm labelRefreshAlarm = new SingleAlarm(this::refreshInitialStatus, 500, this, Alarm.ThreadToUse.POOLED_THREAD);
 
     public InstallGuidePanel(@NotNull Project project, @NotNull Disposable parent) {
         super(false);
@@ -49,91 +51,106 @@ public class InstallGuidePanel extends AppMapContentPanel implements Disposable 
     }
 
     @Override
+    public void dispose() {
+    }
+
+    @Override
     protected void setupPanel() {
         statusLabels.forEach(this::add);
-        refreshInitialStatus();
         registerStatusUpdateListeners(project, this, statusLabels);
+        labelRefreshAlarm.request(true);
     }
 
     private void triggerLabelStatusUpdate() {
         labelRefreshAlarm.cancelAndRequest();
     }
 
+    @RequiresBackgroundThread
     private void refreshInitialStatus() {
-        for (var label : statusLabels) {
-            updateLabelStatus(project, label);
-        }
+        // Force a refresh of the metadata outside the non-blocking ReadAction below
+        // The refresh must not be executed within a ReadAction.
+        ProjectDataService.getInstance(project).getAppMapProjects(true);
+
+        ReadAction.nonBlocking(() -> {
+                    return statusLabels.stream().collect(Collectors.toMap(Function.identity(), label -> {
+                        return updateLabelStatus(project, label);
+                    }));
+                })
+                .coalesceBy(this)
+                .expireWith(this)
+                .inSmartMode(project)
+                .finishOnUiThread(ModalityState.any(), statusMapping -> {
+                            for (var entry : statusMapping.entrySet()) {
+                                entry.getKey().setStatus(entry.getValue());
+                            }
+                        }
+                )
+                .submit(AppExecutorUtil.getAppExecutorService());
     }
 
     /**
-     * if findings are enabled, completed if at least one appmap-findings.json file was found
+     * @param project Current project
+     * @param label   Label to check
+     * @return {@code true} if the label should be enabled, {@code false} if it should be disabled
      */
-    private static void updateRuntimeAnalysisLabel(@NotNull Project project, @NotNull StatusLabel label) {
-        var hasFindings = AppMapProjectSettingsService.getState(project).isInvestigatedFindings();
-        label.setStatus(hasFindings ? InstallGuideStatus.Completed : InstallGuideStatus.Incomplete);
-    }
-
-    private void updateLabelStatus(@NotNull Project project, @NotNull StatusLabel label) {
+    private @NotNull InstallGuideStatus updateLabelStatus(@NotNull Project project, @NotNull StatusLabel label) {
         switch (label.getPage()) {
             case InstallAgent:
-                updateInstallAgentLabel(project, label);
-                break;
-
+                return updateInstallAgentLabel(project);
             case RecordAppMaps:
-                updateRecordAppMapsLabel(project, label);
-                break;
-
+                return updateRecordAppMapsLabel(project);
             case OpenAppMaps:
-                updateOpenAppMapsLabel(project, label);
-                break;
-
+                return updateOpenAppMapsLabel(project);
             case RuntimeAnalysis:
-                updateRuntimeAnalysisLabel(project, label);
-                break;
+                return updateRuntimeAnalysisLabel(project);
+            default:
+                throw new IllegalStateException("unexpected label: " + label);
         }
-    }
-
-    @Override
-    public void dispose() {
     }
 
     /**
      * Presence of at least one appmap.yml file.
      */
-    private static void updateInstallAgentLabel(@NotNull Project project, @NotNull StatusLabel label) {
-        ApplicationManager.getApplication().executeOnPooledThread(() -> {
-            // Always mark supported Java projects as supported, but only if all modules are supported.
-            // isAgentInstalled is already checking for supported Java projects and the presence of appmap.yml.
-            var anySupported = ProjectDataService.getInstance(project).getAppMapProjects()
-                    .stream()
-                    .anyMatch(ProjectMetadata::isAgentInstalled);
-
-            ApplicationManager.getApplication().invokeLater(() -> {
-                label.setStatus(anySupported ? InstallGuideStatus.Completed : InstallGuideStatus.Incomplete);
-            });
-        });
+    private static @NotNull InstallGuideStatus updateInstallAgentLabel(@NotNull Project project) {
+        // Always mark supported Java projects as supported, but only if all modules are supported.
+        // isAgentInstalled is already checking for supported Java projects and the presence of appmap.yml.
+        var anySupported = ProjectDataService.getInstance(project).getAppMapProjects(false)
+                .stream()
+                .anyMatch(ProjectMetadata::isAgentInstalled);
+        return anySupported ? InstallGuideStatus.Completed : InstallGuideStatus.Incomplete;
     }
 
     /**
-     * presence of at least one .appmap.json file
+     * Presence of at least one .appmap.json file.
      */
-    private static void updateRecordAppMapsLabel(@NotNull Project project, @NotNull StatusLabel label) {
-        findIndexedStatus(project, label, () -> !AppMapNameIndex.isEmpty(project, AppMapSearchScopes.appMapsWithExcluded(project)));
+    private static @NotNull InstallGuideStatus updateRecordAppMapsLabel(@NotNull Project project) {
+        return !AppMapNameIndex.isEmpty(project, AppMapSearchScopes.appMapsWithExcluded(project))
+                ? InstallGuideStatus.Completed
+                : InstallGuideStatus.Incomplete;
     }
 
     /**
-     * if the AppMap webview was at least shown once
+     * If the AppMap webview was at least shown once
      */
-    private static void updateOpenAppMapsLabel(@NotNull Project project, @NotNull StatusLabel label) {
-        label.setStatus(AppMapProjectSettingsService.getState(project).isOpenedAppMapEditor()
+    private static @NotNull InstallGuideStatus updateOpenAppMapsLabel(@NotNull Project project) {
+        return AppMapProjectSettingsService.getState(project).isOpenedAppMapEditor()
                 ? InstallGuideStatus.Completed
-                : InstallGuideStatus.Incomplete);
+                : InstallGuideStatus.Incomplete;
     }
 
-    private static void updateGenerateOpenApiLabel(@NotNull Project project, @NotNull StatusLabel label) {
-        label.setStatus(AppMapProjectSettingsService.getState(project).isCreatedOpenAPI()
+    /**
+     * The label is updated under the following conditions:
+     * - The user navigated to the "Runtime Analysis" step in the installation guide webview
+     * - AppMaps have been opened
+     * - There are AppMaps in the project, and they have been scanned, regardless if findings were detected
+     */
+    private static @NotNull InstallGuideStatus updateRuntimeAnalysisLabel(@NotNull Project project) {
+        var navigated = AppMapProjectSettingsService.getState(project).isInvestigatedFindings();
+        var openedAppMaps = AppMapProjectSettingsService.getState(project).isOpenedAppMapEditor();
+        var scannedAppMaps = AppMapFindingsUtil.isAnalysisPerformed(AppMapSearchScopes.projectFilesWithExcluded(project));
+        return navigated && openedAppMaps && scannedAppMaps
                 ? InstallGuideStatus.Completed
-                : InstallGuideStatus.Incomplete);
+                : InstallGuideStatus.Incomplete;
     }
 
     private void registerStatusUpdateListeners(@NotNull Project project,

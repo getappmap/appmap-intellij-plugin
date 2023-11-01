@@ -10,5 +10,10 @@ public interface ProjectDataService {
         return project.getService(ProjectDataService.class);
     }
 
-    @NotNull List<ProjectMetadata> getAppMapProjects();
+    /**
+     * @param updateMetadata If the metadata should be updated before retuning the cached projects.
+     *                       If {@code true}, then this method MUST NOT be invoked in a ReadAction.
+     * @return The available AppMap projects
+     */
+    @NotNull List<ProjectMetadata> getAppMapProjects(boolean updateMetadata);
 }
