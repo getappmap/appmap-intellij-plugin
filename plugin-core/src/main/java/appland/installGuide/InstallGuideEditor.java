@@ -8,11 +8,9 @@ import appland.index.IndexedFileListenerUtil;
 import appland.installGuide.projectData.ProjectDataService;
 import appland.installGuide.projectData.ProjectMetadata;
 import appland.oauth.AppMapLoginAction;
-import appland.problemsView.FindingsViewTab;
 import appland.settings.AppMapApplicationSettingsService;
 import appland.settings.AppMapProjectSettingsService;
 import appland.settings.AppMapSettingsListener;
-import appland.telemetry.TelemetryService;
 import appland.webviews.WebviewEditor;
 import appland.webviews.findings.FindingsOverviewEditorProvider;
 import com.google.gson.Gson;
@@ -68,14 +66,23 @@ public class InstallGuideEditor extends WebviewEditor<List<ProjectMetadata>> {
         this.currentPage = page;
     }
 
-    public void navigateTo(@NotNull InstallGuideViewPage page, boolean postWebviewMessage) {
+    /**
+     * Navigate to the given page.
+     *
+     * @param page               Target page
+     * @param postWebviewMessage If the webview should be instructed to navigate to the given page.
+     * @param fromWebview        If the navigation originated from the webview
+     */
+    public void navigateTo(@NotNull InstallGuideViewPage page, boolean postWebviewMessage, boolean fromWebview) {
         this.currentPage = page;
 
-        if (page == InstallGuideViewPage.RuntimeAnalysis) {
-            AppMapProjectSettingsService.getState(project).setInvestigatedFindings(true);
+        var projectSettings = AppMapProjectSettingsService.getState(project);
+        if (fromWebview && page == InstallGuideViewPage.RuntimeAnalysis && projectSettings.isOpenedAppMapEditor()) {
+            projectSettings.setInvestigatedFindings(true);
         }
 
         if (postWebviewMessage) {
+            assert !fromWebview;
             postMessage(createPageNavigationJSON(page));
         }
     }
@@ -217,7 +224,7 @@ public class InstallGuideEditor extends WebviewEditor<List<ProjectMetadata>> {
 
     @NotNull
     private List<ProjectMetadata> findProjects() {
-        return ProjectDataService.getInstance(project).getAppMapProjects();
+        return ProjectDataService.getInstance(project).getAppMapProjects(true);
     }
 
     /**
@@ -275,7 +282,7 @@ public class InstallGuideEditor extends WebviewEditor<List<ProjectMetadata>> {
     private void handleMessageOpenPage(@NotNull JsonObject message) {
         // update state, which is based on the new page
         var viewId = message.getAsJsonPrimitive("page").getAsString();
-        navigateTo(InstallGuideViewPage.findByPageId(viewId), false);
+        navigateTo(InstallGuideViewPage.findByPageId(viewId), false, true);
     }
 
     private void executeInstallCommand(String path, String language) {

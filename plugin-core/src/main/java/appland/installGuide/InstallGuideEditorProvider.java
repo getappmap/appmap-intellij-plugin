@@ -35,7 +35,7 @@ public class InstallGuideEditorProvider implements FileEditorProvider, DumbAware
                     assert editor instanceof InstallGuideEditor;
 
                     FileEditorManagerEx.getInstanceEx(project).openFile(file, true, true);
-                    ((InstallGuideEditor) editor).navigateTo(page, true);
+                    ((InstallGuideEditor) editor).navigateTo(page, true, false);
                     return;
                 }
             }
@@ -45,7 +45,7 @@ public class InstallGuideEditorProvider implements FileEditorProvider, DumbAware
             var newEditors = editorManager.openFile(file, true);
             if (newEditors.length == 1) {
                 // don't post webview message because the init message of the new editor was just sent
-                ((InstallGuideEditor) newEditors[0]).navigateTo(page, false);
+                ((InstallGuideEditor) newEditors[0]).navigateTo(page, false, false);
             }
         } finally {
             // notify in a background thread because we don't want to delay opening the editor
