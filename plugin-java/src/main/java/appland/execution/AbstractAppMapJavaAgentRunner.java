@@ -11,6 +11,7 @@ import com.intellij.execution.runners.ExecutionEnvironment;
 import com.intellij.execution.runners.JavaProgramPatcher;
 import com.intellij.openapi.application.ReadAction;
 import com.intellij.openapi.progress.ProgressIndicator;
+import com.intellij.openapi.progress.ProgressManager;
 import com.intellij.openapi.progress.Task;
 import com.intellij.openapi.project.DumbService;
 import org.jetbrains.annotations.NonNls;
@@ -70,24 +71,26 @@ public abstract class AbstractAppMapJavaAgentRunner extends DefaultJavaProgramRu
         var task = new Task.WithResult<Void, ExecutionException>(environment.getProject(), AppMapBundle.get("appMapExecutor.verifyingJDK"), false) {
             @Override
             protected Void compute(@NotNull ProgressIndicator indicator) throws ExecutionException {
-                var javaParameters = ((JavaCommandLineState) state).getJavaParameters();
-                if (javaParameters == null) {
-                    return null;
-                }
-
-                var jdk = javaParameters.getJdk();
-                if (jdk == null) {
-                    return null;
-                }
-
                 return ReadAction.compute(() -> {
+                    // https://github.com/getappmap/appmap-intellij-plugin/issues/486,
+                    // some run configurations, e.g. with configured macros, need a ReadAction here
+                    var javaParameters = ((JavaCommandLineState) state).getJavaParameters();
+                    if (javaParameters == null) {
+                        return null;
+                    }
+
+                    var jdk = javaParameters.getJdk();
+                    if (jdk == null) {
+                        return null;
+                    }
+
                     AppMapJvmExecutor.verifyJDK(environment.getProject(), jdk);
                     return null;
                 });
             }
         };
 
-        task.queue();
-        task.getResult();
+        // overloaded run, which takes Task.WithResult
+        ProgressManager.getInstance().run(task);
     }
 }
