@@ -114,6 +114,11 @@ public class AppMapWindowPanel extends SimpleToolWindowPanel implements DataProv
 
     @Override
     public @Nullable Object getData(@NotNull @NonNls String dataId) {
+        // don't provide PsiFile on the EDT, but delegate to the slow providers
+        if (CommonDataKeys.PSI_FILE.is(dataId) || CommonDataKeys.NAVIGATABLE.is(dataId)) {
+            return null;
+        }
+
         if (PlatformCoreDataKeys.SLOW_DATA_PROVIDERS.is(dataId)) {
             return List.of((DataProvider) this::getDataImpl);
         }
