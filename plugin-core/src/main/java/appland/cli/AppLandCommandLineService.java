@@ -38,8 +38,9 @@ public interface AppLandCommandLineService extends Disposable {
      *
      * @param directory          Directory path
      * @param waitForTermination Waits until the process has been terminated. This is mostly useful for test cases.
+     * @return {@code true} if there were processes registered for the directory
      */
-    void stop(@NotNull VirtualFile directory, boolean waitForTermination);
+    boolean stop(@NotNull VirtualFile directory, boolean waitForTermination);
 
     /**
      * Refreshes the processes for the currently open projects.

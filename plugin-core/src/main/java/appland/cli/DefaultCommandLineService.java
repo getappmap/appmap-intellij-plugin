@@ -13,6 +13,7 @@ import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.project.ProjectManager;
 import com.intellij.openapi.roots.ProjectRootManager;
+import com.intellij.openapi.util.Disposer;
 import com.intellij.openapi.util.Key;
 import com.intellij.openapi.util.SystemInfo;
 import com.intellij.openapi.vfs.VfsUtil;
@@ -38,6 +39,8 @@ import java.util.Map;
 
 public class DefaultCommandLineService implements AppLandCommandLineService {
     private static final Logger LOG = Logger.getInstance(DefaultCommandLineService.class);
+    private static final Key<Integer> KEY_SERVICE_RESTARTS = Key.create("appland.serviceRestart");
+    public static final int MAX_RESTARTS = 2;
 
     @GuardedBy("this")
     protected final Map<VirtualFile, CliProcesses> processes = new HashMap<>();
@@ -85,12 +88,14 @@ public class DefaultCommandLineService implements AppLandCommandLineService {
             }
         }
 
-        // start new services
+        // register, attach listeners, activate
         var newProcesses = startProcesses(directory);
         if (newProcesses != null) {
             processes.put(directory, newProcesses);
-            newProcesses.addProcessListener(LoggingProcessAdapter.INSTANCE, this);
-            attachIndexEventsListener(newProcesses.indexer);
+
+            newProcesses.addProcessListener(LoggingProcessAdapter.INSTANCE);
+            newProcesses.addProcessListener(new AppLandProcessRestartListener(directory, waitForProcessTermination));
+            newProcesses.indexer.addProcessListener(new IndexEventsProcessListener(), newProcesses);
 
             newProcesses.startNotify();
         }
@@ -106,11 +111,12 @@ public class DefaultCommandLineService implements AppLandCommandLineService {
     }
 
     @Override
-    public synchronized void stop(@NotNull VirtualFile directory, boolean waitForTermination) {
+    public synchronized boolean stop(@NotNull VirtualFile directory, boolean waitForTermination) {
         var entry = processes.remove(directory);
         if (entry != null) {
             stopLocked(entry, waitForTermination);
         }
+        return entry != null;
     }
 
     @Override
@@ -199,15 +205,19 @@ public class DefaultCommandLineService implements AppLandCommandLineService {
 
     private void stopLocked(@NotNull CliProcesses value, boolean waitForTermination) {
         try {
-            shutdownInBackground(value.indexer, waitForTermination);
-        } catch (Exception e) {
-            LOG.warn("Error shutting down indexer", e);
-        }
+            try {
+                shutdownInBackground(value.indexer, waitForTermination);
+            } catch (Exception e) {
+                LOG.warn("Error shutting down indexer", e);
+            }
 
-        try {
-            shutdownInBackground(value.scanner, waitForTermination);
-        } catch (Exception e) {
-            LOG.warn("Error shutting down scanner", e);
+            try {
+                shutdownInBackground(value.scanner, waitForTermination);
+            } catch (Exception e) {
+                LOG.warn("Error shutting down scanner", e);
+            }
+        } finally {
+            Disposer.dispose(value);
         }
     }
 
@@ -216,42 +226,7 @@ public class DefaultCommandLineService implements AppLandCommandLineService {
         stopAll(false);
     }
 
-    /**
-     * Listen to index events of the indexer.
-     *
-     * @param processHandler Indexer process
-     */
-    private void attachIndexEventsListener(@NotNull ProcessHandler processHandler) {
-        processHandler.addProcessListener(new ProcessAdapter() {
-            @Override
-            public void onTextAvailable(@NotNull ProcessEvent event, @NotNull Key outputType) {
-                if (LOG.isTraceEnabled()) {
-                    LOG.trace("Indexer output: " + event.getText());
-                }
-
-                if (outputType == ProcessOutputType.STDOUT && IndexerEventUtil.isIndexedEvent(event.getText())) {
-                    var filePath = IndexerEventUtil.extractIndexedFilePath(event.getText());
-                    if (filePath != null) {
-                        try {
-                            if (LOG.isDebugEnabled()) {
-                                LOG.debug("Refreshing local filesystem for indexed file: " + filePath);
-                            }
-
-                            // Refresh parent directory of the indexed AppMap, because it contains both
-                            // myAppMap.appmap.json file and the corresponding metadata directory myAppMap/
-                            requestVirtualFileRefresh(Path.of(filePath).getParent());
-                        } catch (InvalidPathException e) {
-                            if (LOG.isDebugEnabled()) {
-                                LOG.debug("Error parsing indexed file path: " + filePath, e);
-                            }
-                        }
-                    }
-                }
-            }
-        }, this);
-    }
-
-    // extracted as method to allow testing it
+    // extracted as method to allow overriding and testing it
     protected void requestVirtualFileRefresh(@NotNull Path path) {
         VfsUtil.markDirtyAndRefresh(true, false, false, path.toFile());
     }
@@ -434,10 +409,13 @@ public class DefaultCommandLineService implements AppLandCommandLineService {
         return cmd;
     }
 
+    /**
+     * It's used as disposable to control the lifecycle of listeners attached to the linked processes.
+     */
     @ToString
     @EqualsAndHashCode
     @AllArgsConstructor
-    protected static final class CliProcesses {
+    protected static final class CliProcesses implements Disposable {
         @NotNull KillableProcessHandler indexer;
         @NotNull KillableProcessHandler scanner;
 
@@ -446,9 +424,78 @@ public class DefaultCommandLineService implements AppLandCommandLineService {
             scanner.startNotify();
         }
 
-        private void addProcessListener(@NotNull ProcessListener listener, @NotNull Disposable disposable) {
-            indexer.addProcessListener(listener, disposable);
-            scanner.addProcessListener(listener, disposable);
+        private void addProcessListener(@NotNull ProcessListener listener) {
+            indexer.addProcessListener(listener, this);
+            scanner.addProcessListener(listener, this);
+        }
+
+        @Override
+        public void dispose() {
+            // empty
+        }
+    }
+
+    /**
+     * Listen to index events of the indexer.
+     */
+    private class IndexEventsProcessListener extends ProcessAdapter {
+        @Override
+        public void onTextAvailable(@NotNull ProcessEvent event, @NotNull Key outputType) {
+            if (LOG.isTraceEnabled()) {
+                LOG.trace("Indexer output: " + event.getText());
+            }
+
+            if (outputType == ProcessOutputType.STDOUT && IndexerEventUtil.isIndexedEvent(event.getText())) {
+                var filePath = IndexerEventUtil.extractIndexedFilePath(event.getText());
+                if (filePath != null) {
+                    try {
+                        if (LOG.isDebugEnabled()) {
+                            LOG.debug("Refreshing local filesystem for indexed file: " + filePath);
+                        }
+
+                        // Refresh parent directory of the indexed AppMap, because it contains both
+                        // myAppMap.appmap.json file and the corresponding metadata directory myAppMap/
+                        requestVirtualFileRefresh(Path.of(filePath).getParent());
+                    } catch (InvalidPathException e) {
+                        if (LOG.isDebugEnabled()) {
+                            LOG.debug("Error parsing indexed file path: " + filePath, e);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * Listener to restart AppLand services until the maximum number of allowed restarts is reached.
+     */
+    private class AppLandProcessRestartListener extends ProcessAdapter {
+        private final VirtualFile directory;
+        private final boolean waitForProcessTermination;
+
+        public AppLandProcessRestartListener(@NotNull VirtualFile directory, boolean waitForProcessTermination) {
+            this.directory = directory;
+            this.waitForProcessTermination = waitForProcessTermination;
+        }
+
+        @Override
+        public void processTerminated(@NotNull ProcessEvent event) {
+            // Ensure that both processes are terminated, e.g. after one of the two crashed.
+            // stop removes process listeners, so this restart listener is not called again.
+            stop(directory, waitForProcessTermination);
+
+            int previousRestarts = KEY_SERVICE_RESTARTS.get(directory, 0);
+            if (previousRestarts >= MAX_RESTARTS) {
+                LOG.debug("Maximum number of AppLand service restarts reached for directory: " + directory);
+                return;
+            }
+
+            KEY_SERVICE_RESTARTS.set(directory, previousRestarts + 1);
+            try {
+                start(directory, false);
+            } catch (ExecutionException e) {
+                LOG.debug("Error restarting AppLand services for directory: " + directory, e);
+            }
         }
     }
 }
