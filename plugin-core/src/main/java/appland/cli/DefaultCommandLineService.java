@@ -20,6 +20,7 @@ import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.openapi.vfs.ex.temp.TempFileSystem;
 import com.intellij.util.io.BaseOutputReader;
 import com.intellij.util.system.CpuArch;
+import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
 import org.jetbrains.annotations.NotNull;
@@ -42,7 +43,7 @@ public class DefaultCommandLineService implements AppLandCommandLineService {
 
     public DefaultCommandLineService() {
         var connection = ApplicationManager.getApplication().getMessageBus().connect(this);
-        connection.subscribe(AppMapConfigFileListener.TOPIC, (AppMapConfigFileListener) this::refreshForOpenProjectsInBackground);
+        connection.subscribe(AppMapConfigFileListener.TOPIC, this::refreshForOpenProjectsInBackground);
     }
 
     @Override
@@ -200,12 +201,10 @@ public class DefaultCommandLineService implements AppLandCommandLineService {
             LOG.warn("Error shutting down indexer", e);
         }
 
-        if (value.scanner != null) {
-            try {
-                shutdownInBackground(value.scanner, waitForTermination);
-            } catch (Exception e) {
-                LOG.warn("Error shutting down scanner", e);
-            }
+        try {
+            shutdownInBackground(value.scanner, waitForTermination);
+        } catch (Exception e) {
+            LOG.warn("Error shutting down scanner", e);
         }
     }
 
@@ -287,7 +286,6 @@ public class DefaultCommandLineService implements AppLandCommandLineService {
         }
 
         var indexer = startProcess(workingDir, indexerPath.toString(), "index", "--verbose", "--watch", "--appmap-dir", watchedDir.toString());
-
         try {
             var scanner = startProcess(workingDir, scannerPath.toString(), "scan", "--watch", "--appmap-dir", watchedDir.toString());
             return new CliProcesses(indexer, scanner);
@@ -457,14 +455,9 @@ public class DefaultCommandLineService implements AppLandCommandLineService {
 
     @ToString
     @EqualsAndHashCode
+    @AllArgsConstructor
     protected static final class CliProcesses {
         @NotNull KillableProcessHandler indexer;
-        // only launched if the enableFindings flags is set
-        @Nullable KillableProcessHandler scanner;
-
-        CliProcesses(@NotNull KillableProcessHandler indexer, @Nullable KillableProcessHandler scanner) {
-            this.indexer = indexer;
-            this.scanner = scanner;
-        }
+        @NotNull KillableProcessHandler scanner;
     }
 }
