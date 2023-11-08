@@ -8,6 +8,7 @@ import com.intellij.execution.ExecutionException;
 import com.intellij.execution.configurations.GeneralCommandLine;
 import com.intellij.execution.configurations.PtyCommandLine;
 import com.intellij.execution.process.*;
+import com.intellij.openapi.Disposable;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.project.ProjectManager;
@@ -88,8 +89,10 @@ public class DefaultCommandLineService implements AppLandCommandLineService {
         var newProcesses = startProcesses(directory);
         if (newProcesses != null) {
             processes.put(directory, newProcesses);
-
+            newProcesses.addProcessListener(LoggingProcessAdapter.INSTANCE, this);
             attachIndexEventsListener(newProcesses.indexer);
+
+            newProcesses.startNotify();
         }
     }
 
@@ -373,34 +376,12 @@ public class DefaultCommandLineService implements AppLandCommandLineService {
         command.withWorkDirectory(workingDir.toString());
         command.withParentEnvironmentType(GeneralCommandLine.ParentEnvironmentType.SYSTEM);
 
-        var processHandler = new KillableProcessHandler(command) {
-            {
-                addProcessListener(new ProcessAdapter() {
-                    @Override
-                    public void processTerminated(@NotNull ProcessEvent event) {
-                        if (LOG.isDebugEnabled()) {
-                            LOG.debug("CLI tool terminated: " + command + ", exit code: " + event.getExitCode());
-                        }
-                    }
-
-                    @Override
-                    public void onTextAvailable(@NotNull ProcessEvent event, @NotNull Key outputType) {
-                        if (LOG.isDebugEnabled()) {
-                            LOG.debug(event.getText());
-                        }
-                    }
-                });
-            }
-
+        return new KillableProcessHandler(command) {
             @Override
             protected BaseOutputReader.@NotNull Options readerOptions() {
                 return BaseOutputReader.Options.BLOCKING;
             }
         };
-
-        processHandler.startNotify();
-
-        return processHandler;
     }
 
     private static void shutdownInBackground(@NotNull KillableProcessHandler process, boolean waitForTermination) throws Exception {
@@ -459,5 +440,15 @@ public class DefaultCommandLineService implements AppLandCommandLineService {
     protected static final class CliProcesses {
         @NotNull KillableProcessHandler indexer;
         @NotNull KillableProcessHandler scanner;
+
+        private void startNotify() {
+            indexer.startNotify();
+            scanner.startNotify();
+        }
+
+        private void addProcessListener(@NotNull ProcessListener listener, @NotNull Disposable disposable) {
+            indexer.addProcessListener(listener, disposable);
+            scanner.addProcessListener(listener, disposable);
+        }
     }
 }
