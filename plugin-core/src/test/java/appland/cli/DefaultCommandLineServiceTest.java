@@ -4,6 +4,7 @@ import appland.AppMapBaseTest;
 import appland.settings.AppMapApplicationSettingsService;
 import com.intellij.execution.ExecutionException;
 import com.intellij.execution.configurations.PtyCommandLine;
+import com.intellij.execution.process.KillableProcessHandler;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.application.WriteAction;
 import com.intellij.openapi.roots.ModuleRootModificationUtil;
@@ -27,6 +28,8 @@ import java.nio.file.Paths;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
+import java.util.function.Supplier;
 
 public class DefaultCommandLineServiceTest extends AppMapBaseTest {
     @Override
@@ -184,6 +187,48 @@ public class DefaultCommandLineServiceTest extends AppMapBaseTest {
     }
 
     @Test
+    public void indexerProcessRestart() throws Exception {
+        setupAndAssertProcessRestart(newRoot -> {
+            var processes = ((DefaultCommandLineService) AppLandCommandLineService.getInstance()).getProcesses(newRoot);
+            assertNotNull(processes);
+            return processes.getIndexer();
+        });
+    }
+
+    @Test
+    public void scannerProcessRestart() throws Exception {
+        setupAndAssertProcessRestart(newRoot -> {
+            var processes = ((DefaultCommandLineService) AppLandCommandLineService.getInstance()).getProcesses(newRoot);
+            assertNotNull(processes);
+            return processes.getScanner();
+        });
+    }
+
+    private void setupAndAssertProcessRestart(@NotNull Function<VirtualFile, KillableProcessHandler> processFunction) throws InterruptedException {
+        var newRoot = myFixture.addFileToProject("parentA/file.txt", "").getParent().getVirtualFile();
+        createAppMapYaml(newRoot);
+
+        // add new roots and assert that the new processes are launched
+        var condition = ProjectRefreshUtil.newProjectRefreshCondition(getTestRootDisposable());
+        ModuleRootModificationUtil.updateModel(getModule(), model -> model.addContentEntry(newRoot));
+        assertTrue(condition.await(30, TimeUnit.SECONDS));
+        assertActiveRoots(newRoot);
+
+        var processSupplier = new Supplier<KillableProcessHandler>() {
+            @Override
+            public KillableProcessHandler get() {
+                return processFunction.apply(newRoot);
+            }
+        };
+
+        // if one of the two processes is killed, it has to restart
+        assertProcessRestart(processSupplier);
+
+        // the restarted process must be restarted again when terminated
+        assertProcessRestart(processSupplier);
+    }
+
+    @Test
     @Ignore("unstable test")
     public void appmapYamlTrigger() throws InterruptedException, IOException {
         var newRootA = myFixture.addFileToProject("parentA/file.txt", "").getParent().getVirtualFile();
@@ -262,5 +307,26 @@ public class DefaultCommandLineServiceTest extends AppMapBaseTest {
         var activeRootsString = StringUtil.join(activeRoots, VirtualFile::toString, ", ");
 
         assertEquals("Roots don't match. Expected: " + expectedString + ", actual: " + activeRootsString, expectedRoots, activeRoots);
+    }
+
+    private static void assertProcessRestart(@NotNull Supplier<KillableProcessHandler> processSupplier) throws InterruptedException {
+        var oldProcess = processSupplier.get();
+        assertNotNull(oldProcess);
+        terminateProcess(oldProcess);
+
+        // wait up to 10s for restart of the indexer process
+        boolean restarted = false;
+        for (var i = 0; i < 100 && !restarted; i++) {
+            restarted = !oldProcess.equals(processSupplier.get());
+            Thread.sleep(100);
+        }
+
+        assertTrue("Process must restart", restarted);
+    }
+
+    private static void terminateProcess(@NotNull KillableProcessHandler process) {
+        process.destroyProcess();
+        process.killProcess();
+        assertTrue("Process must terminate", process.waitFor(5_000));
     }
 }
