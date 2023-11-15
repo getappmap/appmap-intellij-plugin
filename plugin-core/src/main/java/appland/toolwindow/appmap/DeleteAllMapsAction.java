@@ -3,9 +3,11 @@ package appland.toolwindow.appmap;
 import appland.AppMapBundle;
 import com.intellij.icons.AllIcons;
 import com.intellij.ide.DeleteProvider;
-import com.intellij.openapi.actionSystem.*;
+import com.intellij.openapi.actionSystem.AnAction;
+import com.intellij.openapi.actionSystem.AnActionEvent;
+import com.intellij.openapi.actionSystem.CommonDataKeys;
+import com.intellij.openapi.actionSystem.DataContext;
 import com.intellij.openapi.fileChooser.actions.VirtualFileDeleteProvider;
-import org.jetbrains.annotations.NonNls;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -21,31 +23,26 @@ final class DeleteAllMapsAction extends AnAction {
 
     @Override
     public void update(@NotNull AnActionEvent e) {
-        var enabled = deleteHandler.canDeleteElement(new CustomizedDataContext(e.getDataContext()));
+        var enabled = deleteHandler.canDeleteElement(createDataContext(e));
         e.getPresentation().setEnabled(enabled);
     }
 
     @Override
     public void actionPerformed(@NotNull AnActionEvent e) {
-        // Pass a customized context to the delete handler to delete all Appand not just the array of selected AppMaps
-        deleteHandler.deleteElement(new CustomizedDataContext(e.getDataContext()));
+        // Pass a customized context to the delete handler to delete all AppMaps, not just the array of selected AppMaps
+        deleteHandler.deleteElement(createDataContext(e));
     }
 
-    /**
-     * Customized context to provide the value of {@link AppMapWindowPanel#KEY_ALL_APPMAPS}
-     * when the delete implementation requests files to delete via {@link CommonDataKeys#VIRTUAL_FILE_ARRAY}.
-     */
-    private static class CustomizedDataContext extends DataContextWrapper {
-        public CustomizedDataContext(@NotNull DataContext delegate) {
-            super(delegate);
-        }
-
-        @Override
-        public @Nullable Object getData(@NotNull @NonNls String dataId) {
-            if (CommonDataKeys.VIRTUAL_FILE_ARRAY.is(dataId)) {
-                return super.getData(AppMapWindowPanel.KEY_ALL_APPMAPS);
+    private static @NotNull DataContext createDataContext(@NotNull AnActionEvent e) {
+        var parentContext = e.getDataContext();
+        return new DataContext() {
+            @Override
+            public @Nullable Object getData(@NotNull String dataId) {
+                if (CommonDataKeys.VIRTUAL_FILE_ARRAY.is(dataId)) {
+                    return parentContext.getData(AppMapWindowPanel.KEY_ALL_APPMAPS);
+                }
+                return parentContext.getData(dataId);
             }
-            return super.getData(dataId);
-        }
+        };
     }
 }
