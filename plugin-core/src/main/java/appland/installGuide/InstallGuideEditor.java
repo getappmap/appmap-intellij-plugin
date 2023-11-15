@@ -26,7 +26,7 @@ import com.intellij.execution.runners.ExecutionEnvironmentBuilder;
 import com.intellij.ide.ClipboardSynchronizer;
 import com.intellij.ide.actions.runAnything.execution.RunAnythingRunProfile;
 import com.intellij.openapi.actionSystem.CommonDataKeys;
-import com.intellij.openapi.actionSystem.impl.AsyncDataContext;
+import com.intellij.openapi.actionSystem.DataContext;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.fileEditor.FileEditorManager;
@@ -301,11 +301,11 @@ public class InstallGuideEditor extends WebviewEditor<List<ProjectMetadata>> {
                 }
             };
 
-            var dataContext = (AsyncDataContext) dataId -> {
-                if (CommonDataKeys.PROJECT.is(dataId)) {
-                    return project;
+            var dataContext = new DataContext() {
+                @Override
+                public @Nullable Object getData(@NotNull String dataId) {
+                    return CommonDataKeys.PROJECT.is(dataId) ? project : null;
                 }
-                return null;
             };
 
             try {
