@@ -5,17 +5,16 @@ import com.intellij.openapi.application.ReadAction;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.roots.ContentIterator;
 import com.intellij.openapi.util.NlsContexts;
+import com.intellij.openapi.vfs.VfsUtilCore;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.openapi.vfs.VirtualFileFilter;
-import com.intellij.util.indexing.roots.IndexableFilesIterationMethods;
+import com.intellij.openapi.vfs.VirtualFileWithId;
 import com.intellij.util.indexing.roots.IndexableFilesIterator;
 import com.intellij.util.indexing.roots.kind.IndexableSetOrigin;
 import com.intellij.util.indexing.roots.kind.ProjectFileOrDirOrigin;
 import org.jetbrains.annotations.NonNls;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Collections;
-import java.util.List;
 import java.util.Set;
 
 @SuppressWarnings("UnstableApiUsage")
@@ -51,21 +50,24 @@ class AppMapFilesIterator implements IndexableFilesIterator {
                                 @NotNull ContentIterator fileIterator,
                                 @NotNull VirtualFileFilter fileFilter) {
 
-        var roots = ReadAction.compute(() -> {
-            return excludedRoot.isValid()
-                    ? List.of(excludedRoot)
-                    : Collections.<VirtualFile>emptyList();
-        });
+        if (!ReadAction.compute(excludedRoot::isValid)) {
+            return false;
+        }
 
-        return IndexableFilesIterationMethods.INSTANCE.iterateRoots(project, roots, fileIterator, fileFilter, false);
+        var finalFileFilter = fileFilter.and(file -> {
+            return file instanceof VirtualFileWithId && ((VirtualFileWithId) file).getId() > 0;
+        });
+        return VfsUtilCore.iterateChildrenRecursively(excludedRoot, finalFileFilter, fileIterator);
     }
 
     // needed for older SDKs
+    @SuppressWarnings("unused")
     public @NotNull Set<String> getRootUrls() {
         return Set.of(excludedRoot.getUrl());
     }
 
     // needed for 2022.2
+    @SuppressWarnings("unused")
     public @NotNull Set<String> getRootUrls(@NotNull Project project) {
         return getRootUrls();
     }
