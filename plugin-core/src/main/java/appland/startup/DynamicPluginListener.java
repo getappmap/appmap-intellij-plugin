@@ -2,6 +2,8 @@ package appland.startup;
 
 import appland.AppMapPlugin;
 import com.intellij.ide.plugins.IdeaPluginDescriptor;
+import com.intellij.openapi.application.ApplicationManager;
+import com.intellij.openapi.application.ModalityState;
 import com.intellij.openapi.project.Project;
 import org.jetbrains.annotations.NotNull;
 
@@ -19,7 +21,9 @@ public class DynamicPluginListener implements com.intellij.ide.plugins.DynamicPl
         }
 
         if (AppMapPlugin.getDescriptor().equals(pluginDescriptor)) {
-            FirstAppMapLaunchStartupActivity.handleFirstStart(project);
+            ApplicationManager.getApplication().invokeLater(() -> {
+                FirstAppMapLaunchStartupActivity.handleFirstStart(project);
+            }, ModalityState.defaultModalityState());
         }
     }
 }
