@@ -7,7 +7,10 @@ import com.intellij.execution.CantRunException;
 import com.intellij.execution.ExecutionException;
 import com.intellij.execution.configurations.GeneralCommandLine;
 import com.intellij.execution.configurations.PtyCommandLine;
-import com.intellij.execution.process.*;
+import com.intellij.execution.process.KillableProcessHandler;
+import com.intellij.execution.process.ProcessAdapter;
+import com.intellij.execution.process.ProcessEvent;
+import com.intellij.execution.process.ProcessOutputType;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.project.ProjectManager;
@@ -42,7 +45,7 @@ public class DefaultCommandLineService implements AppLandCommandLineService {
 
     public DefaultCommandLineService() {
         var connection = ApplicationManager.getApplication().getMessageBus().connect(this);
-        connection.subscribe(AppMapConfigFileListener.TOPIC, (AppMapConfigFileListener) this::refreshForOpenProjectsInBackground);
+        connection.subscribe(AppMapConfigFileListener.TOPIC, this::refreshForOpenProjectsInBackground);
     }
 
     @Override
@@ -88,7 +91,7 @@ public class DefaultCommandLineService implements AppLandCommandLineService {
         if (newProcesses != null) {
             processes.put(directory, newProcesses);
 
-            attachIndexEventsListener(newProcesses.indexer);
+            newProcesses.indexer.addProcessListener(new IndexEventsProcessListener(), this);
         }
     }
 
@@ -200,12 +203,10 @@ public class DefaultCommandLineService implements AppLandCommandLineService {
             LOG.warn("Error shutting down indexer", e);
         }
 
-        if (value.scanner != null) {
-            try {
-                shutdownInBackground(value.scanner, waitForTermination);
-            } catch (Exception e) {
-                LOG.warn("Error shutting down scanner", e);
-            }
+        try {
+            shutdownInBackground(value.scanner, waitForTermination);
+        } catch (Exception e) {
+            LOG.warn("Error shutting down scanner", e);
         }
     }
 
@@ -214,42 +215,7 @@ public class DefaultCommandLineService implements AppLandCommandLineService {
         stopAll(false);
     }
 
-    /**
-     * Listen to index events of the indexer.
-     *
-     * @param processHandler Indexer process
-     */
-    private void attachIndexEventsListener(@NotNull ProcessHandler processHandler) {
-        processHandler.addProcessListener(new ProcessAdapter() {
-            @Override
-            public void onTextAvailable(@NotNull ProcessEvent event, @NotNull Key outputType) {
-                if (LOG.isTraceEnabled()) {
-                    LOG.trace("Indexer output: " + event.getText());
-                }
-
-                if (outputType == ProcessOutputType.STDOUT && IndexerEventUtil.isIndexedEvent(event.getText())) {
-                    var filePath = IndexerEventUtil.extractIndexedFilePath(event.getText());
-                    if (filePath != null) {
-                        try {
-                            if (LOG.isDebugEnabled()) {
-                                LOG.debug("Refreshing local filesystem for indexed file: " + filePath);
-                            }
-
-                            // Refresh parent directory of the indexed AppMap, because it contains both
-                            // myAppMap.appmap.json file and the corresponding metadata directory myAppMap/
-                            requestVirtualFileRefresh(Path.of(filePath).getParent());
-                        } catch (InvalidPathException e) {
-                            if (LOG.isDebugEnabled()) {
-                                LOG.debug("Error parsing indexed file path: " + filePath, e);
-                            }
-                        }
-                    }
-                }
-            }
-        }, this);
-    }
-
-    // extracted as method to allow testing it
+    // extracted as method to allow overriding and testing it
     protected void requestVirtualFileRefresh(@NotNull Path path) {
         VfsUtil.markDirtyAndRefresh(true, false, false, path.toFile());
     }
@@ -376,30 +342,12 @@ public class DefaultCommandLineService implements AppLandCommandLineService {
         command.withParentEnvironmentType(GeneralCommandLine.ParentEnvironmentType.SYSTEM);
 
         var processHandler = new KillableProcessHandler(command) {
-            {
-                addProcessListener(new ProcessAdapter() {
-                    @Override
-                    public void processTerminated(@NotNull ProcessEvent event) {
-                        if (LOG.isDebugEnabled()) {
-                            LOG.debug("CLI tool terminated: " + command + ", exit code: " + event.getExitCode());
-                        }
-                    }
-
-                    @Override
-                    public void onTextAvailable(@NotNull ProcessEvent event, @NotNull Key outputType) {
-                        if (LOG.isDebugEnabled()) {
-                            LOG.debug(event.getText());
-                        }
-                    }
-                });
-            }
-
             @Override
             protected BaseOutputReader.@NotNull Options readerOptions() {
                 return BaseOutputReader.Options.BLOCKING;
             }
         };
-
+        processHandler.addProcessListener(LoggingProcessAdapter.INSTANCE);
         processHandler.startNotify();
 
         return processHandler;
@@ -458,13 +406,43 @@ public class DefaultCommandLineService implements AppLandCommandLineService {
     @ToString
     @EqualsAndHashCode
     protected static final class CliProcesses {
-        @NotNull KillableProcessHandler indexer;
-        // only launched if the enableFindings flags is set
-        @Nullable KillableProcessHandler scanner;
+        private final @NotNull KillableProcessHandler indexer;
+        private final @NotNull KillableProcessHandler scanner;
 
-        CliProcesses(@NotNull KillableProcessHandler indexer, @Nullable KillableProcessHandler scanner) {
+        CliProcesses(@NotNull KillableProcessHandler indexer, @NotNull KillableProcessHandler scanner) {
             this.indexer = indexer;
             this.scanner = scanner;
+        }
+    }
+
+    /**
+     * Listen to index events of the indexer.
+     */
+    private class IndexEventsProcessListener extends ProcessAdapter {
+        @Override
+        public void onTextAvailable(@NotNull ProcessEvent event, @NotNull Key outputType) {
+            if (LOG.isTraceEnabled()) {
+                LOG.trace("Indexer output: " + event.getText());
+            }
+
+            if (outputType == ProcessOutputType.STDOUT && IndexerEventUtil.isIndexedEvent(event.getText())) {
+                var filePath = IndexerEventUtil.extractIndexedFilePath(event.getText());
+                if (filePath != null) {
+                    try {
+                        if (LOG.isDebugEnabled()) {
+                            LOG.debug("Refreshing local filesystem for indexed file: " + filePath);
+                        }
+
+                        // Refresh parent directory of the indexed AppMap, because it contains both
+                        // myAppMap.appmap.json file and the corresponding metadata directory myAppMap/
+                        requestVirtualFileRefresh(Path.of(filePath).getParent());
+                    } catch (InvalidPathException e) {
+                        if (LOG.isDebugEnabled()) {
+                            LOG.debug("Error parsing indexed file path: " + filePath, e);
+                        }
+                    }
+                }
+            }
         }
     }
 }
