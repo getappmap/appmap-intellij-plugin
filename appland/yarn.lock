@@ -10,10 +10,10 @@
     "@jridgewell/gen-mapping" "^0.3.0"
     "@jridgewell/trace-mapping" "^0.3.9"
 
-"@appland/components@^3.9.0":
-  version "3.9.0"
-  resolved "https://registry.yarnpkg.com/@appland/components/-/components-3.9.0.tgz#fe2e1712e5179ba5c0e3369a97c3be608367d355"
-  integrity sha512-EqHydCldCxVpBNYsnF1SrSZ5uB/2SBNFy8J5RrCFqqrHblLkwoIT/ejKbNfOUcao2dHO483JaNON6UzoNmT7QQ==
+"@appland/components@^3.13.2":
+  version "3.13.2"
+  resolved "https://registry.yarnpkg.com/@appland/components/-/components-3.13.2.tgz#4dce19ae50f7818c9d73ccd30577e5cf8b33db86"
+  integrity sha512-QHIBnBzAZtODOUlREH1PhCyYkXSiAP1WQoChI4CKM/7s9NMOScTKRox0E4jPURaP7p8HsRp0f9R4foXP3331ZQ==
   dependencies:
     "@appland/diagrams" "^1.7.0"
     "@appland/models" "^2.7.0"
