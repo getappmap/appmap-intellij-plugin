@@ -1,5 +1,16 @@
 AppMap Plugin Changelog
 
+## [0.53.0](https://github.com/getappmap/appmap-intellij-plugin/compare/v0.52.0...v0.53.0) (2023-11-29)
+
+
+### Features
+
+-  Better check for status of the "Runtime Anaylysis" step ([7e5b29e]())-  Update @appland/components to 3.13.2 for the appmap viewer ([0d3fcce]())
+
+### Bug Fixes
+
+-  reject that PsiFile is fetched on the EDT thread ([a61a9ee]())
+
 ## [0.52.0](https://github.com/getappmap/appmap-intellij-plugin/compare/v0.51.0...v0.52.0) (2023-10-31)
 
 
