@@ -19,7 +19,6 @@ import com.intellij.openapi.progress.ProgressManager;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VfsUtilCore;
 import com.intellij.openapi.vfs.VirtualFile;
-import com.intellij.psi.search.FilenameIndex;
 import com.intellij.psi.search.GlobalSearchScopes;
 import com.intellij.util.concurrency.annotations.RequiresReadLock;
 import it.unimi.dsi.fastutil.ints.IntSet;
@@ -47,10 +46,11 @@ public class DefaultProjectDataService implements ProjectDataService {
 
     @SuppressWarnings("UnstableApiUsage")
     @Override
-    public @NotNull List<ProjectMetadata> getAppMapProjects() {
-        ApplicationManager.getApplication().assertReadAccessNotAllowed();
-
-        updateMetadata();
+    public @NotNull List<ProjectMetadata> getAppMapProjects(boolean updateMetadata) {
+        if (updateMetadata) {
+            ApplicationManager.getApplication().assertReadAccessNotAllowed();
+            updateMetadata();
+        }
         return cachedProjects.get();
     }
 
@@ -203,7 +203,7 @@ public class DefaultProjectDataService implements ProjectDataService {
     @RequiresReadLock
     private boolean isAnalysisPerformed(@NotNull VirtualFile root) {
         var searchScope = GlobalSearchScopes.directoryScope(project, root, true);
-        return !FilenameIndex.getVirtualFilesByName(AppMapFindingsUtil.FINDINGS_FILE_NAME, searchScope).isEmpty();
+        return AppMapFindingsUtil.isAnalysisPerformed(searchScope);
     }
 
     private boolean isNodeSupported(@Nullable NodeVersion nodeVersion) {

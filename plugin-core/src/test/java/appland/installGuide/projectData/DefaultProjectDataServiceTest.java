@@ -14,7 +14,7 @@ public class DefaultProjectDataServiceTest extends AppMapBaseTest {
     public void selectedSampleObjects() {
         WriteAction.runAndWait(() -> myFixture.copyDirectoryToProject("appmap-scanner/with_findings", "root"));
 
-        var projects = ProjectDataService.getInstance(getProject()).getAppMapProjects();
+        var projects = ProjectDataService.getInstance(getProject()).getAppMapProjects(true);
         assertEquals(1, projects.size());
 
         var samples = projects.get(0).sampleCodeObjects;
@@ -43,7 +43,7 @@ public class DefaultProjectDataServiceTest extends AppMapBaseTest {
     public void truncatedSampleObjects() {
         WriteAction.runAndWait(() -> myFixture.copyDirectoryToProject("appmap-scanner/untruncated_findings", "root"));
 
-        var projects = ProjectDataService.getInstance(getProject()).getAppMapProjects();
+        var projects = ProjectDataService.getInstance(getProject()).getAppMapProjects(true);
         assertEquals(1, projects.size());
 
         var samples = projects.get(0).sampleCodeObjects;

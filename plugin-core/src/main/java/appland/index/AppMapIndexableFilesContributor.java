@@ -13,9 +13,12 @@ import java.util.List;
 import java.util.function.Predicate;
 
 /**
+ * Only used in 2023.1 and earlier.
+ * <p>
  * Adds excluded "appmap" folders and excluded AppMap files for indexing.
+ * <p>
  * We can't use an {@link com.intellij.util.indexing.AdditionalIndexedRootsScope}, because it's only called at startup.
- * We also have to update indexed files after the Install Guide wizard steps,
+ * We also have to update indexed files after the "Install Guide" wizard steps,
  * which add new roots after the project was opened.
  */
 @SuppressWarnings("UnstableApiUsage")

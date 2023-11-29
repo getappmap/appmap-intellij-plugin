@@ -3,6 +3,7 @@ package appland.upload;
 import appland.AppMapBundle;
 import appland.Icons;
 import appland.settings.AppMapProjectSettingsService;
+import com.google.common.html.HtmlEscapers;
 import com.google.gson.GsonBuilder;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.diagnostic.Logger;
@@ -19,7 +20,6 @@ import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.util.Urls;
 import com.intellij.util.io.HttpRequests;
-import org.apache.commons.lang.StringEscapeUtils;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
@@ -102,7 +102,9 @@ public class AppMapUploader {
                     LOG.warn("Uploading AppMap failed", e);
                     ApplicationManager.getApplication().invokeLater(() -> {
                         Messages.showErrorDialog(project,
-                                AppMapBundle.get("upload.uploadFailed.message", file.getName(), StringEscapeUtils.escapeHtml(e.getMessage())),
+                                AppMapBundle.get("upload.uploadFailed.message",
+                                        file.getName(),
+                                        HtmlEscapers.htmlEscaper().escape(e.getMessage())),
                                 AppMapBundle.get("upload.uploadFailed.title"));
                     });
                 }

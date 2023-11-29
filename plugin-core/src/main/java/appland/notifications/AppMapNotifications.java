@@ -6,8 +6,6 @@ import appland.actions.StopAppMapRecordingAction;
 import appland.installGuide.InstallGuideEditorProvider;
 import appland.installGuide.InstallGuideViewPage;
 import appland.startup.FirstAppMapLaunchStartupActivity;
-import appland.toolwindow.AppMapToolWindowFactory;
-import appland.webviews.findings.FindingsOverviewEditorProvider;
 import com.intellij.ide.BrowserUtil;
 import com.intellij.notification.Notification;
 import com.intellij.notification.NotificationAction;
@@ -15,14 +13,12 @@ import com.intellij.notification.NotificationListener;
 import com.intellij.notification.NotificationType;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.application.ModalityState;
-import com.intellij.openapi.fileEditor.FileEditorManager;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.util.ui.EdtInvocationManager;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import javax.swing.*;
 import java.util.function.Consumer;
 
 import static appland.AppMapBundle.lazy;
@@ -40,7 +36,7 @@ public final class AppMapNotifications {
 
         ApplicationManager.getApplication().invokeLater(() -> {
             // cast to Icon to avoid an ambiguity with 2021.2
-            var notification = new Notification(REMOTE_RECORDING_ID, (Icon) null, type);
+            var notification = new Notification(REMOTE_RECORDING_ID, "", type);
             if (title != null) {
                 notification.setTitle(title);
             }
