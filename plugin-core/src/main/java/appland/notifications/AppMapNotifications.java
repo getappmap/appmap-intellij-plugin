@@ -138,4 +138,15 @@ public final class AppMapNotifications {
             notification.notify(project);
         });
     }
+
+    public static void showSignInNotification(@NotNull Project project) {
+        EdtInvocationManager.invokeLaterIfNeeded(() -> {
+            var notification = new AppMapFullContentNotification(
+                    GENERIC_NOTIFICATIONS_ID, null,
+                    null, null, AppMapBundle.get("notification.appMapSignIn.content"),
+                    NotificationType.INFORMATION, null
+            );
+            notification.notify(project);
+        });
+    }
 }

@@ -133,6 +133,7 @@
 
     <actions>
         <action id="appMapLogin" class="appland.oauth.AppMapLoginAction"/>
+        <action id="appMapLoginByKey" class="appland.oauth.AppMapLoginByKeyAction"/>
         <action id="appMapLogout" class="appland.oauth.AppMapLogoutAction"/>
 
         <action id="showRecentAppmap" class="appland.actions.OpenRecentAppMapAction"/>
@@ -158,6 +159,7 @@
             <separator/>
             <reference ref="appMapLogin"/>
             <reference ref="appMapLogout"/>
+            <reference ref="appMapLoginByKey"/>
 
             <add-to-group group-id="ToolsMenu" anchor="last"/>
         </group>
