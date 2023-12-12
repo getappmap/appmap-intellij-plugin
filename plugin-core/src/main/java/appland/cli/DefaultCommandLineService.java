@@ -3,11 +3,14 @@ package appland.cli;
 import appland.config.AppMapConfigFile;
 import appland.config.AppMapConfigFileListener;
 import appland.files.AppMapVfsUtils;
-import com.intellij.execution.CantRunException;
 import com.intellij.execution.ExecutionException;
 import com.intellij.execution.configurations.GeneralCommandLine;
 import com.intellij.execution.configurations.PtyCommandLine;
-import com.intellij.execution.process.*;
+import com.intellij.execution.process.KillableProcessHandler;
+import com.intellij.execution.process.ProcessAdapter;
+import com.intellij.execution.process.ProcessEvent;
+import com.intellij.execution.process.ProcessOutputType;
+import com.intellij.openapi.Disposable;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.project.ProjectManager;
@@ -18,12 +21,16 @@ import com.intellij.openapi.vfs.VfsUtil;
 import com.intellij.openapi.vfs.VfsUtilCore;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.openapi.vfs.ex.temp.TempFileSystem;
+import com.intellij.util.Alarm;
+import com.intellij.util.AlarmFactory;
 import com.intellij.util.io.BaseOutputReader;
 import com.intellij.util.system.CpuArch;
+import lombok.AllArgsConstructor;
+import lombok.Data;
 import lombok.EqualsAndHashCode;
-import lombok.ToString;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.TestOnly;
 
 import javax.annotation.concurrent.GuardedBy;
 import java.nio.file.Files;
@@ -36,6 +43,14 @@ import java.util.Map;
 
 public class DefaultCommandLineService implements AppLandCommandLineService {
     private static final Logger LOG = Logger.getInstance(DefaultCommandLineService.class);
+    // initial delay for the first restart attempt
+    private static final long INITIAL_RESTART_DELAY_MILLIS = 5_000;
+    // factor to calculate the next restart delay based on the previous delay
+    private static final double NEXT_RESTART_FACTOR = 1.5;
+    // two restarts at most (1.5^3 > 3)
+    private static final long MAX_RESTART_DELAY_MILLIS = INITIAL_RESTART_DELAY_MILLIS * 3;
+    // a value of "0" indicates that process restart is disabled
+    private static final Key<Long> NEXT_RESTART_DELAY = Key.create("appmap.processRestartDelay");
 
     @GuardedBy("this")
     protected final Map<VirtualFile, CliProcesses> processes = new HashMap<>();
@@ -85,10 +100,17 @@ public class DefaultCommandLineService implements AppLandCommandLineService {
 
         // start new services
         var newProcesses = startProcesses(directory);
-        if (newProcesses != null) {
-            processes.put(directory, newProcesses);
+        if (newProcesses != null && !newProcesses.isEmpty()) {
+            var scanner = newProcesses.scanner;
+            var indexer = newProcesses.indexer;
 
-            attachIndexEventsListener(newProcesses.indexer);
+            processes.put(directory, newProcesses);
+            if (scanner != null) {
+                scanner.startNotify();
+            }
+            if (indexer != null) {
+                indexer.startNotify();
+            }
         }
     }
 
@@ -193,20 +215,15 @@ public class DefaultCommandLineService implements AppLandCommandLineService {
                 '}';
     }
 
-    private void stopLocked(@NotNull CliProcesses value, boolean waitForTermination) {
-        try {
-            shutdownInBackground(value.indexer, waitForTermination);
-        } catch (Exception e) {
-            LOG.warn("Error shutting down indexer", e);
-        }
-
-        if (value.scanner != null) {
-            try {
-                shutdownInBackground(value.scanner, waitForTermination);
-            } catch (Exception e) {
-                LOG.warn("Error shutting down scanner", e);
-            }
-        }
+    /**
+     * Stops processes, but does not modify {@link #processes}. It's the responsibility of the caller to update it.
+     *
+     * @param processes          Processes to stop
+     * @param waitForTermination If this method should wait until the processes are terminated
+     */
+    private void stopLocked(@NotNull CliProcesses processes, boolean waitForTermination) {
+        stopProcess(processes.indexer, waitForTermination);
+        stopProcess(processes.scanner, waitForTermination);
     }
 
     @Override
@@ -214,47 +231,42 @@ public class DefaultCommandLineService implements AppLandCommandLineService {
         stopAll(false);
     }
 
-    /**
-     * Listen to index events of the indexer.
-     *
-     * @param processHandler Indexer process
-     */
-    private void attachIndexEventsListener(@NotNull ProcessHandler processHandler) {
-        processHandler.addProcessListener(new ProcessAdapter() {
-            @Override
-            public void onTextAvailable(@NotNull ProcessEvent event, @NotNull Key outputType) {
-                if (LOG.isTraceEnabled()) {
-                    LOG.trace("Indexer output: " + event.getText());
-                }
-
-                if (outputType == ProcessOutputType.STDOUT && IndexerEventUtil.isIndexedEvent(event.getText())) {
-                    var filePath = IndexerEventUtil.extractIndexedFilePath(event.getText());
-                    if (filePath != null) {
-                        try {
-                            if (LOG.isDebugEnabled()) {
-                                LOG.debug("Refreshing local filesystem for indexed file: " + filePath);
-                            }
-
-                            // Refresh parent directory of the indexed AppMap, because it contains both
-                            // myAppMap.appmap.json file and the corresponding metadata directory myAppMap/
-                            requestVirtualFileRefresh(Path.of(filePath).getParent());
-                        } catch (InvalidPathException e) {
-                            if (LOG.isDebugEnabled()) {
-                                LOG.debug("Error parsing indexed file path: " + filePath, e);
-                            }
-                        }
-                    }
-                }
-            }
-        }, this);
-    }
-
-    // extracted as method to allow testing it
+    // extracted as method to allow overriding and testing it
     protected void requestVirtualFileRefresh(@NotNull Path path) {
         VfsUtil.markDirtyAndRefresh(true, false, false, path.toFile());
     }
 
-    private static @Nullable CliProcesses startProcesses(@NotNull VirtualFile directory) throws ExecutionException {
+    @TestOnly
+    synchronized @Nullable CliProcesses getProcesses(@NotNull VirtualFile directory) {
+        return processes.get(directory);
+    }
+
+    /**
+     * Launch processes for the given directory.
+     *
+     * @param directory Directory
+     * @return Reference to the launched processes if the operation was successful.
+     */
+    private @Nullable CliProcesses startProcesses(@NotNull VirtualFile directory) throws ExecutionException {
+        var indexer = startIndexerProcess(directory);
+        try {
+            var scanner = startScannerProcesses(directory);
+            return new CliProcesses(indexer, scanner);
+        } catch (ExecutionException e) {
+            LOG.debug("Error starting scanner process", e);
+            if (indexer != null) {
+                stopProcess(indexer, false);
+            }
+            return null;
+        }
+    }
+
+    /**
+     * Launch a new indexer process for the given directory.
+     *
+     * @param directory Directory
+     */
+    private @Nullable KillableProcessHandler startIndexerProcess(@NotNull VirtualFile directory) throws ExecutionException {
         if (!isSupported()) {
             return null;
         }
@@ -269,6 +281,32 @@ public class DefaultCommandLineService implements AppLandCommandLineService {
             return null;
         }
 
+        var workingDir = AppMapVfsUtils.asNativePath(directory);
+        var watchedDir = findWatchedAppMapDirectory(workingDir);
+        prepareWatchedDirectory(watchedDir);
+
+        var process = startProcess(workingDir, indexerPath.toString(), "index", "--verbose", "--watch", "--appmap-dir", watchedDir.toString());
+        process.addProcessListener(LoggingProcessAdapter.INSTANCE);
+        process.addProcessListener(new RestartProcessListener(directory, process, ProcessType.Indexer, this), this);
+        process.addProcessListener(new IndexEventsProcessListener(), this);
+        return process;
+    }
+
+    /**
+     * Launch a new scanner process for the given directory.
+     *
+     * @param directory Directory
+     */
+    private @Nullable KillableProcessHandler startScannerProcesses(@NotNull VirtualFile directory) throws ExecutionException {
+        if (!isSupported()) {
+            return null;
+        }
+
+        // don't launch for in-memory directories in unit test mode
+        if (ApplicationManager.getApplication().isUnitTestMode() && directory.getFileSystem() instanceof TempFileSystem) {
+            return null;
+        }
+
         var scannerPath = AppLandDownloadService.getInstance().getDownloadFilePath(CliTool.Scanner);
         if (scannerPath == null || Files.notExists(scannerPath)) {
             return null;
@@ -276,30 +314,12 @@ public class DefaultCommandLineService implements AppLandCommandLineService {
 
         var workingDir = AppMapVfsUtils.asNativePath(directory);
         var watchedDir = findWatchedAppMapDirectory(workingDir);
+        prepareWatchedDirectory(watchedDir);
 
-        // create AppMap directory if it does not exist yet
-        if (Files.notExists(watchedDir)) {
-            try {
-                Files.createDirectories(watchedDir);
-            } catch (Exception e) {
-                LOG.debug("Failed to create AppMap directory: " + watchedDir, e);
-            }
-        }
-
-        var indexer = startProcess(workingDir, indexerPath.toString(), "index", "--verbose", "--watch", "--appmap-dir", watchedDir.toString());
-
-        try {
-            var scanner = startProcess(workingDir, scannerPath.toString(), "scan", "--watch", "--appmap-dir", watchedDir.toString());
-            return new CliProcesses(indexer, scanner);
-        } catch (ExecutionException e) {
-            LOG.debug("Error executing scanner process. Attempting to terminate indexer process.");
-            try {
-                indexer.killProcess();
-            } catch (Exception ex) {
-                LOG.debug("Error terminating scanner process", ex);
-            }
-            throw new CantRunException("Failed to execute AppMap scanner process", e);
-        }
+        var process = startProcess(workingDir, scannerPath.toString(), "scan", "--watch", "--appmap-dir", watchedDir.toString());
+        process.addProcessListener(LoggingProcessAdapter.INSTANCE);
+        process.addProcessListener(new RestartProcessListener(directory, process, ProcessType.Scanner, this), this);
+        return process;
     }
 
     private void doRefreshForOpenProjectsLocked() {
@@ -358,6 +378,19 @@ public class DefaultCommandLineService implements AppLandCommandLineService {
         }
     }
 
+    /**
+     * Create AppMap directory if it does not exist yet.
+     */
+    private static void prepareWatchedDirectory(Path watchedDir) {
+        if (Files.notExists(watchedDir)) {
+            try {
+                Files.createDirectories(watchedDir);
+            } catch (Exception e) {
+                LOG.debug("Failed to create AppMap directory: " + watchedDir, e);
+            }
+        }
+    }
+
     private static boolean isSupported() {
         return SystemInfo.isMac && (CpuArch.isIntel64() || CpuArch.isArm64())
                 || SystemInfo.isLinux && CpuArch.isIntel64()
@@ -375,52 +408,44 @@ public class DefaultCommandLineService implements AppLandCommandLineService {
         command.withWorkDirectory(workingDir.toString());
         command.withParentEnvironmentType(GeneralCommandLine.ParentEnvironmentType.SYSTEM);
 
-        var processHandler = new KillableProcessHandler(command) {
-            {
-                addProcessListener(new ProcessAdapter() {
-                    @Override
-                    public void processTerminated(@NotNull ProcessEvent event) {
-                        if (LOG.isDebugEnabled()) {
-                            LOG.debug("CLI tool terminated: " + command + ", exit code: " + event.getExitCode());
-                        }
-                    }
-
-                    @Override
-                    public void onTextAvailable(@NotNull ProcessEvent event, @NotNull Key outputType) {
-                        if (LOG.isDebugEnabled()) {
-                            LOG.debug(event.getText());
-                        }
-                    }
-                });
-            }
-
+        return new KillableProcessHandler(command) {
             @Override
             protected BaseOutputReader.@NotNull Options readerOptions() {
                 return BaseOutputReader.Options.BLOCKING;
             }
         };
-
-        processHandler.startNotify();
-
-        return processHandler;
     }
 
-    private static void shutdownInBackground(@NotNull KillableProcessHandler process, boolean waitForTermination) throws Exception {
-        var future = ApplicationManager.getApplication().executeOnPooledThread(() -> {
-            process.destroyProcess();
-            process.waitFor(500);
+    private static void stopProcess(@Nullable KillableProcessHandler process, boolean waitForTermination) {
+        if (process == null) {
+            return;
+        }
 
-            if (!process.isProcessTerminated()) {
-                process.killProcess();
-            }
+        NEXT_RESTART_DELAY.set(process, 0L);
+        try {
+            var shutdownRunnable = new Runnable() {
+                @Override
+                public void run() {
+                    process.destroyProcess();
+                    process.waitFor(500);
+
+                    if (!process.isProcessTerminated()) {
+                        process.killProcess();
+                    }
+
+                    if (waitForTermination) {
+                        process.waitFor(1_000);
+                    }
+                }
+            };
 
             if (waitForTermination) {
-                process.waitFor();
+                ApplicationManager.getApplication().executeOnPooledThread(shutdownRunnable).get();
+            } else {
+                shutdownRunnable.run();
             }
-        });
-
-        if (waitForTermination) {
-            future.get();
+        } catch (Exception e) {
+            LOG.warn("Error shutting down process: " + process, e);
         }
     }
 
@@ -455,16 +480,135 @@ public class DefaultCommandLineService implements AppLandCommandLineService {
         return cmd;
     }
 
-    @ToString
-    @EqualsAndHashCode
+    /**
+     * Indexer and scanner processes which are active for a single base directory.
+     * It's possible that a reference is {@code null}, e.g. due to a crash and too many restart attempts.
+     */
+    @Data
+    @AllArgsConstructor
     protected static final class CliProcesses {
-        @NotNull KillableProcessHandler indexer;
-        // only launched if the enableFindings flags is set
-        @Nullable KillableProcessHandler scanner;
+        private volatile @Nullable KillableProcessHandler indexer;
+        private volatile @Nullable KillableProcessHandler scanner;
 
-        CliProcesses(@NotNull KillableProcessHandler indexer, @Nullable KillableProcessHandler scanner) {
-            this.indexer = indexer;
-            this.scanner = scanner;
+        boolean isEmpty() {
+            return indexer == null && scanner == null;
         }
+    }
+
+    /**
+     * Listen to index events of the indexer.
+     */
+    private class IndexEventsProcessListener extends ProcessAdapter {
+        @Override
+        public void onTextAvailable(@NotNull ProcessEvent event, @NotNull Key outputType) {
+            if (LOG.isTraceEnabled()) {
+                LOG.trace("Indexer output: " + event.getText());
+            }
+
+            if (outputType == ProcessOutputType.STDOUT && IndexerEventUtil.isIndexedEvent(event.getText())) {
+                var filePath = IndexerEventUtil.extractIndexedFilePath(event.getText());
+                if (filePath != null) {
+                    try {
+                        if (LOG.isDebugEnabled()) {
+                            LOG.debug("Refreshing local filesystem for indexed file: " + filePath);
+                        }
+
+                        // Refresh parent directory of the indexed AppMap, because it contains both
+                        // myAppMap.appmap.json file and the corresponding metadata directory myAppMap/
+                        requestVirtualFileRefresh(Path.of(filePath).getParent());
+                    } catch (InvalidPathException e) {
+                        if (LOG.isDebugEnabled()) {
+                            LOG.debug("Error parsing indexed file path: " + filePath, e);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * Process listener to handle restarts when the given process terminates unexpectedly.
+     */
+    @Data
+    @EqualsAndHashCode(callSuper = true)
+    private class RestartProcessListener extends ProcessAdapter {
+        private final @NotNull VirtualFile directory;
+        private final @NotNull KillableProcessHandler process;
+        private final @NotNull ProcessType type;
+        private final @NotNull Disposable parentDisposable;
+        private final Alarm alarm;
+
+        public RestartProcessListener(@NotNull VirtualFile directory,
+                                      @NotNull KillableProcessHandler process,
+                                      @NotNull ProcessType type,
+                                      @NotNull Disposable parentDisposable) {
+            this.directory = directory;
+            this.process = process;
+            this.type = type;
+            this.parentDisposable = parentDisposable;
+            this.alarm = AlarmFactory.getInstance().create(Alarm.ThreadToUse.POOLED_THREAD, this.parentDisposable);
+        }
+
+        @Override
+        public void processTerminated(@NotNull ProcessEvent event) {
+            long nextRestartDelay = NEXT_RESTART_DELAY.get(process, INITIAL_RESTART_DELAY_MILLIS);
+
+            // don't restart if max attempts were reached or if restarts were disabled
+            if (nextRestartDelay <= 0 || nextRestartDelay > MAX_RESTART_DELAY_MILLIS) {
+                synchronized (DefaultCommandLineService.this) {
+                    var entry = processes.get(directory);
+                    if (entry != null) {
+                        switch (type) {
+                            case Indexer:
+                                entry.indexer = null;
+                                break;
+                            case Scanner:
+                                entry.scanner = null;
+                                break;
+                        }
+
+                        if (entry.isEmpty()) {
+                            processes.remove(directory);
+                        }
+                    }
+                }
+                return;
+            }
+
+            // schedule next restart
+            NEXT_RESTART_DELAY.set(process, (long) ((double) nextRestartDelay * NEXT_RESTART_FACTOR));
+            alarm.cancelAllRequests();
+            alarm.addRequest(() -> {
+                try {
+                    synchronized (DefaultCommandLineService.this) {
+                        var directoryProcesses = processes.get(directory);
+                        if (directoryProcesses != null) {
+                            switch (type) {
+                                case Indexer:
+                                    var indexer = startIndexerProcess(directory);
+                                    directoryProcesses.indexer = indexer;
+                                    if (indexer != null) {
+                                        indexer.startNotify();
+                                    }
+                                    break;
+                                case Scanner:
+                                    var scanner = startScannerProcesses(directory);
+                                    directoryProcesses.scanner = scanner;
+                                    if (scanner != null) {
+                                        scanner.startNotify();
+                                    }
+                                    break;
+                            }
+                        }
+                    }
+                } catch (ExecutionException e) {
+                    LOG.debug("Error restarting process. Type: " + type + ", command line: " + process.getCommandLine(), e);
+                }
+            }, nextRestartDelay);
+        }
+    }
+
+    private enum ProcessType {
+        Indexer, Scanner
     }
 }

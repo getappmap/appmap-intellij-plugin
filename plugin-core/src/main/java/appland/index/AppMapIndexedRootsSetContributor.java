@@ -1,5 +1,7 @@
 package appland.index;
 
+import com.intellij.openapi.application.ApplicationManager;
+import com.intellij.openapi.application.ReadAction;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.util.indexing.IndexableSetContributor;
@@ -22,7 +24,10 @@ public class AppMapIndexedRootsSetContributor extends IndexableSetContributor {
 
     @Override
     public @NotNull Set<VirtualFile> getAdditionalProjectRootsToIndex(@NotNull Project project) {
-        // in 2023.2, getAdditionalProjectRootsToIndex is executed in a com.intellij.openapi.application.NonBlockingReadAction
-        return IndexUtil.findAppMapIndexDirectories(project);
+        // in 2023.2, getAdditionalProjectRootsToIndex is executed in a NonBlockingReadAction.
+        // in 2023.3, the ReadAction doesn't seem always available.
+        return ApplicationManager.getApplication().isReadAccessAllowed()
+                ? IndexUtil.findAppMapIndexDirectories(project)
+                : ReadAction.compute(() -> IndexUtil.findAppMapIndexDirectories(project));
     }
 }
