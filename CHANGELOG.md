@@ -1,5 +1,16 @@
 AppMap Plugin Changelog
 
+## [0.54.0](https://github.com/getappmap/appmap-intellij-plugin/compare/v0.53.0...v0.54.0) (2023-12-13)
+
+
+### Features
+
+-  Action to sign in with a text API key ([3199ed2]())
+
+### Bug Fixes
+
+-  Exception 'Read access is allowed from inside read-action' with 2023.3 ([2f412f6]())-  restart AppMap CLI processes when they terminate unexpectedly ([ab91c81]())
+
 ## [0.53.0](https://github.com/getappmap/appmap-intellij-plugin/compare/v0.52.0...v0.53.0) (2023-11-29)
 
 
