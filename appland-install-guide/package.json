@@ -18,10 +18,9 @@
     "webpack-cli": "^4.6"
   },
   "dependencies": {
-    "@appland/components": "^3.5.0",
+    "@appland/components": "^3.27.0",
     "vue": "^2.7",
     "vue-template-compiler": "^2.7",
     "url": "^0.11"
-  },
-  "packageManager": "yarn@2.4.2"
+  }
 }
