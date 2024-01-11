@@ -202,6 +202,7 @@ project(":") {
             inputs.dir("${project.rootDir}/appland-install-guide")
             inputs.dir("${project.rootDir}/appland-findings")
             inputs.dir("${project.rootDir}/appland-signin")
+            inputs.dir("${project.rootDir}/appland-ai-help")
 
             destinationDir = project.buildDir
             from("${project.rootDir}/appland") {
@@ -221,6 +222,11 @@ project(":") {
             }
             from("${project.rootDir}/appland-signin") {
                 into("appmap-assets/appland-signin")
+                include("index.html")
+                include("dist/**")
+            }
+            from("${project.rootDir}/appland-ai-help") {
+                into("appmap-assets/appland-ai-help")
                 include("index.html")
                 include("dist/**")
             }

@@ -56,6 +56,8 @@
         <fileEditorProvider implementation="appland.webviews.findings.FindingsOverviewEditorProvider"/>
         <fileEditorProvider implementation="appland.webviews.findingDetails.FindingDetailsEditorProvider"/>
 
+        <fileEditorProvider implementation="appland.webviews.aihelp.AiHelpOverviewEditorProvider"/>
+
         <fileIconProvider implementation="appland.webviews.WebviewEditorIconProvider"/>
 
         <projectService serviceImplementation="appland.index.AppMapMetadataService"/>
