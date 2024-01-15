@@ -15,6 +15,8 @@ module.exports = (env, argv) => {
     resolve: {
       extensions: ['.js', '.mjs'],
       alias: {
+        messagePublisher: path.resolve('../appland-shared/messagePublisher.js'),
+        vsCodeBridge: path.resolve('../appland-shared/vsCodeBridge.js'),
         vue: path.resolve('./node_modules/vue'),
         vuex: path.resolve('./node_modules/vuex'),
       },
