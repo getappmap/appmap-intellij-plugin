@@ -1,8 +1,8 @@
 import Vue from 'vue';
 import '@appland/diagrams/dist/style.css';
 import {VVsCodeExtension} from '@appland/components';
-import MessagePublisher from './messagePublisher';
-import vscode from './vsCodeBridge';
+import MessagePublisher from 'messagePublisher';
+import vscode from 'vsCodeBridge';
 
 export function mountWebview() {
   const messages = new MessagePublisher(vscode);
