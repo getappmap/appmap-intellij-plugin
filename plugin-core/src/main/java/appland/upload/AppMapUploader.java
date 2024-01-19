@@ -5,6 +5,7 @@ import appland.Icons;
 import appland.settings.AppMapProjectSettingsService;
 import com.google.common.html.HtmlEscapers;
 import com.google.gson.GsonBuilder;
+import com.intellij.openapi.application.ApplicationInfo;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.editor.Document;
@@ -18,6 +19,7 @@ import com.intellij.openapi.ui.Messages;
 import com.intellij.openapi.util.Computable;
 import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.openapi.vfs.VirtualFile;
+import com.intellij.util.Url;
 import com.intellij.util.Urls;
 import com.intellij.util.io.HttpRequests;
 import org.jetbrains.annotations.NotNull;
@@ -119,7 +121,7 @@ public class AppMapUploader {
         if (parsed == null) {
             throw new IllegalArgumentException("invalid URL: " + url);
         }
-        return parsed.resolve("/api/appmaps/create_upload").toExternalForm();
+        return resolveSubPath(parsed, "/api/appmaps/create_upload").toExternalForm();
     }
 
     private static @NotNull String confirmationURL(@NotNull Project project, UploadResponse response) {
@@ -129,9 +131,24 @@ public class AppMapUploader {
             throw new IllegalArgumentException("invalid URL: " + url);
         }
 
-        return parsed.resolve("/scenario_uploads")
+        return resolveSubPath(parsed, "/scenario_uploads")
                 .resolve(String.valueOf(response.id))
                 .addParameters(Map.of("token", response.token))
                 .toExternalForm();
+    }
+
+    /**
+     * Helper method to resolve sub paths of Urls.
+     * Newer SDKs insert a double-slash if a path leading with '/' is resolved, but older SDKs
+     * don't properly resolve a path without a leading '/' if the current path is empty.
+     */
+    private static Url resolveSubPath(@NotNull Url url, @NotNull String subPath) {
+        // Versions earlier than 2023.3 always need a leading /,
+        // but 2023.3 resolves to two leading slashes if a leading slash is passed.
+        var needsLeadingSlash = ApplicationInfo.getInstance().getBuild().getBaselineVersion() < 233;
+        var fixedPath = needsLeadingSlash
+                ? "/" + StringUtil.trimStart(subPath, "/")
+                : StringUtil.trimStart(subPath, "/");
+        return url.resolve(fixedPath);
     }
 }
