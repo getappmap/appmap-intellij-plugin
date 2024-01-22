@@ -24,6 +24,7 @@ export function mountWebview() {
             featureFlags: new Set(['disable-record-pending']),
             disabledPages: new Set(this.disabledPages),
             findingsEnabled: this.findingsEnabled,
+            displayAiHelp: true,
           },
         });
       },
@@ -102,6 +103,10 @@ export function mountWebview() {
 
     app.$on('perform-auth', () => {
       vscode.postMessage({command: 'perform-auth'});
+    });
+
+    app.$on('ai-help', () => {
+      vscode.postMessage({command: 'ai-help'});
     });
 
     // listeners for messages sent by the plugin

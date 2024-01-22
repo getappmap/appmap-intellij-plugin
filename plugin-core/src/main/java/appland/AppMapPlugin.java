@@ -43,6 +43,10 @@ public final class AppMapPlugin {
         return getPluginPath().resolve("appland-signin").resolve("index.html");
     }
 
+    public static Path getAiHelpHTMLPath() {
+        return getPluginPath().resolve("appland-ai-help").resolve("index.html");
+    }
+
     @NotNull
     public static PluginDescriptor getDescriptor() {
         var plugin = PluginManagerCore.getPlugin(PluginId.getId(PLUGIN_ID));

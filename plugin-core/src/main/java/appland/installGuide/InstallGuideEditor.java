@@ -12,6 +12,7 @@ import appland.settings.AppMapApplicationSettingsService;
 import appland.settings.AppMapProjectSettingsService;
 import appland.settings.AppMapSettingsListener;
 import appland.webviews.WebviewEditor;
+import appland.webviews.aihelp.AiHelpOverviewEditorProvider;
 import appland.webviews.findings.FindingsOverviewEditorProvider;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -62,7 +63,7 @@ public class InstallGuideEditor extends WebviewEditor<List<ProjectMetadata>> {
                               @NotNull VirtualFile file,
                               @NotNull InstallGuideViewPage page) {
         super(project, file, Set.of("click-link", "open-file", "open-page", "open-findings-overview", "clipboard",
-                "perform-install", "perform-auth", "generate-openapi"));
+                "perform-install", "perform-auth", "generate-openapi", "ai-help"));
         this.currentPage = page;
     }
 
@@ -196,6 +197,10 @@ public class InstallGuideEditor extends WebviewEditor<List<ProjectMetadata>> {
                 break;
             }
 
+            case "ai-help":
+                handleMessageAiHelp();
+                break;
+
             default:
                 LOG.warn("Unhandled message type: " + messageId);
         }
@@ -283,6 +288,10 @@ public class InstallGuideEditor extends WebviewEditor<List<ProjectMetadata>> {
         // update state, which is based on the new page
         var viewId = message.getAsJsonPrimitive("page").getAsString();
         navigateTo(InstallGuideViewPage.findByPageId(viewId), false, true);
+    }
+
+    private void handleMessageAiHelp() {
+        ApplicationManager.getApplication().invokeLater(() -> AiHelpOverviewEditorProvider.openEditor(project));
     }
 
     private void executeInstallCommand(String path, String language) {
