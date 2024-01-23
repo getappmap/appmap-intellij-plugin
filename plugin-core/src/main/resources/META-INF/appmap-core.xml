@@ -55,6 +55,7 @@
 
         <fileEditorProvider implementation="appland.webviews.findings.FindingsOverviewEditorProvider"/>
         <fileEditorProvider implementation="appland.webviews.findingDetails.FindingDetailsEditorProvider"/>
+        <fileEditorProvider implementation="appland.webviews.navie.NavieEditorProvider"/>
 
         <fileIconProvider implementation="appland.webviews.WebviewEditorIconProvider"/>
 
@@ -149,6 +150,9 @@
         <action id="stopAppMapRemoteRecording" class="appland.actions.StopAppMapRecordingAction"/>
 
         <action id="appmap.generateOpenAPI" class="appland.actions.GenerateOpenApiAction"/>
+
+        <action id="appmap.openNavie" class="appland.actions.OpenAppMapNavieAction"/>
+
         <action id="appmapDocs" class="appland.actions.AppMapDocumentationAction">
             <add-to-group group-id="HelpMenu" anchor="before" relative-to-action="CheckForUpdate"/>
         </action>
@@ -161,6 +165,7 @@
             <reference ref="stopAppMapRemoteRecording"/>
             <separator/>
             <reference ref="appmap.generateOpenAPI"/>
+            <reference ref="appmap.openNavie"/>
             <separator/>
             <reference ref="appMapLogin"/>
             <reference ref="appMapLogout"/>
