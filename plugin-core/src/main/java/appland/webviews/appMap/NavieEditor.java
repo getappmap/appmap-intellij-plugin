@@ -1,11 +1,8 @@
-package appland.webviews.navie;
+package appland.webviews.appMap;
 
 import appland.AppMapBundle;
 import appland.settings.AppMapApplicationSettingsService;
 import appland.settings.AppMapProjectSettingsService;
-import appland.settings.AppMapSettingsListener;
-import appland.utils.GsonUtils;
-import appland.webviews.WebviewEditor;
 import appland.webviews.webserver.AppMapWebview;
 import com.google.gson.JsonObject;
 import com.intellij.openapi.project.Project;
@@ -15,11 +12,13 @@ import org.jetbrains.annotations.Nls;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Set;
-
-public class NavieEditor extends WebviewEditor<Void> {
+/**
+ * Navie is a split view of AI and AppMap rendering.
+ * To support the AppMap view, we're extending from the base class supporting AppMap viewers.
+ */
+public class NavieEditor extends AbstractAppMapFileView<Void> {
     public NavieEditor(@NotNull Project project, @NotNull VirtualFile file) {
-        super(project, AppMapWebview.Navie, file, Set.of());
+        super(project, AppMapWebview.Navie, file);
     }
 
     @Override
@@ -43,33 +42,11 @@ public class NavieEditor extends WebviewEditor<Void> {
     }
 
     @Override
-    protected void afterInit(@Nullable Void initData) {
-        openDevTools();
-
-        project.getMessageBus().connect(this).subscribe(AppMapSettingsListener.TOPIC, new AppMapSettingsListener() {
-            @Override
-            public void appMapWebViewFiltersChanged() {
-                applyWebViewFilters();
-            }
-        });
-    }
-
-    @Override
-    protected void handleMessage(@NotNull String messageId, @Nullable JsonObject message) {
+    protected void handleMessage(@NotNull String messageId, @Nullable JsonObject message) throws Exception {
+        handleAppMapBaseMessage(messageId, message);
     }
 
     protected @Nullable Void createInitData() {
         return null;
-    }
-
-    /**
-     * Update the AppMap filters in the AppLand JS application.
-     */
-    private void applyWebViewFilters() {
-        var savedFilters = AppMapProjectSettingsService.getState(project).getAppMapFilters().values();
-        var message = createMessageObject("updateSavedFilters");
-        message.add("data", GsonUtils.GSON.toJsonTree(savedFilters));
-
-        postMessage(message);
     }
 }

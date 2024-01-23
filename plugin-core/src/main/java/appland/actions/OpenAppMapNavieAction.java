@@ -1,6 +1,6 @@
 package appland.actions;
 
-import appland.webviews.navie.NavieEditorProvider;
+import appland.webviews.appMap.NavieEditorProvider;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.project.DumbAware;

@@ -1,4 +1,4 @@
-package appland.webviews.navie;
+package appland.webviews.appMap;
 
 import appland.AppMapBundle;
 import appland.Icons;

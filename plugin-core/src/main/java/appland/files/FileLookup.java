@@ -38,12 +38,14 @@ public class FileLookup {
             return LocalFileSystem.getInstance().findFileByPath(relativePath);
         }
 
+        // For LightVirtualFiles, the parent could become null
         var baseDir = base.isDirectory() ? base : base.getParent();
-
-        // 1st, try to locate relative to the base path
-        var file = baseDir.findFileByRelativePath(relativePath);
-        if (file != null) {
-            return file;
+        if (baseDir != null) {
+            // 1st, try to locate relative to the base path
+            var file = baseDir.findFileByRelativePath(relativePath);
+            if (file != null) {
+                return file;
+            }
         }
 
         if (DumbService.isDumb(project)) {
