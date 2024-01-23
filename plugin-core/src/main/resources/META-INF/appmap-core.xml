@@ -55,6 +55,7 @@
 
         <fileEditorProvider implementation="appland.webviews.findings.FindingsOverviewEditorProvider"/>
         <fileEditorProvider implementation="appland.webviews.findingDetails.FindingDetailsEditorProvider"/>
+        <fileEditorProvider implementation="appland.webviews.navie.NavieEditorProvider"/>
 
         <fileIconProvider implementation="appland.webviews.WebviewEditorIconProvider"/>
 
@@ -129,6 +130,8 @@
         <!-- OAuth authentication -->
         <httpRequestHandler implementation="appland.oauth.AppMapOAuthRequestHandler"/>
         <applicationService serviceImplementation="appland.oauth.AppMapOAuthService"/>
+
+        <httpRequestHandler implementation="appland.webviews.webserver.AppMapWebviewRequestHandler"/>
     </extensions>
 
     <actions>
@@ -141,6 +144,8 @@
         <action id="stopAppMapRemoteRecording" class="appland.actions.StopAppMapRecordingAction"/>
 
         <action id="appmap.generateOpenAPI" class="appland.actions.GenerateOpenApiAction"/>
+
+        <action id="appmap.openNavie" class="appland.actions.OpenAppMapNavieAction"/>
         <!--
         <action id="uploadAppMap" class="appland.actions.UploadAppMapAction"/>
         -->
@@ -156,6 +161,7 @@
             <reference ref="stopAppMapRemoteRecording"/>
             <separator/>
             <reference ref="appmap.generateOpenAPI"/>
+            <reference ref="appmap.openNavie"/>
             <separator/>
             <reference ref="appMapLogin"/>
             <reference ref="appMapLogout"/>
