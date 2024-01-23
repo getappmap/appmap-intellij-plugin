@@ -13,6 +13,9 @@ module.exports = {
   resolve: {
     extensions: ['.js', '.mjs'],
     alias: {
+      messagePublisher: path.resolve('../appland-shared/messagePublisher.js'),
+      vsCodeBridge: path.resolve('../appland-shared/vsCodeBridge.js'),
+      handleAppMapMessages: path.resolve('../appland-shared/handleAppMapMessages.js'),
       vue: path.resolve('./node_modules/vue/dist/vue.esm.browser.min.js'),
       vuex: path.resolve('./node_modules/vuex'),
       'socket.io-client': path.resolve('./node_modules/socket.io-client/dist/socket.io.min.js'),

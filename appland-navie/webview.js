@@ -2,7 +2,7 @@ import Vue from 'vue';
 import MessagePublisher from './messagePublisher';
 import vscode from './vsCodeBridge';
 import {VChatSearch} from '@appland/components';
-import handleAppMapMessages from "./handleAppMapMessages";
+import handleAppMapMessages from "handleAppMapMessages";
 
 export function mountWebview() {
   const messages = new MessagePublisher(vscode);
