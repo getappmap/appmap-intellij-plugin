@@ -1,14 +1,12 @@
 package appland.webviews.appMap;
 
 import appland.AppMapBundle;
-import appland.AppMapPlugin;
 import appland.files.AppMapFiles;
 import appland.files.FileLocation;
 import appland.files.FileLookup;
 import appland.problemsView.FindingsManager;
 import appland.problemsView.FindingsUtil;
 import appland.problemsView.ResolvedStackLocation;
-import appland.settings.AppMapApplicationSettingsService;
 import appland.settings.AppMapProjectSettingsService;
 import appland.settings.AppMapSettingsListener;
 import appland.settings.AppMapWebViewFilter;
@@ -16,6 +14,7 @@ import appland.telemetry.TelemetryService;
 import appland.upload.AppMapUploader;
 import appland.utils.GsonUtils;
 import appland.webviews.WebviewEditor;
+import appland.webviews.webserver.AppMapWebview;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
@@ -37,7 +36,6 @@ import org.jetbrains.annotations.Nls;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.nio.file.Path;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
@@ -60,7 +58,7 @@ public class AppMapFileEditor extends WebviewEditor<JsonObject> {
     private final AtomicBoolean isModified = new AtomicBoolean(false);
 
     public AppMapFileEditor(@NotNull Project project, @NotNull VirtualFile file) {
-        super(project, file, Set.of("webviewMounted", "uploadAppMap", "clearSelection", "viewSource",
+        super(project, AppMapWebview.AppMap, file, Set.of("webviewMounted", "uploadAppMap", "clearSelection", "viewSource",
                 "sidebarSearchFocused", "clickFilterButton", "clickTab", "selectObjectInSidebar", "resetDiagram",
                 "exportSVG", "saveFilter", "defaultFilter", "deleteFilter"));
         setupVfsListener(file);
@@ -136,11 +134,6 @@ public class AppMapFileEditor extends WebviewEditor<JsonObject> {
                 applyWebViewFilters();
             }
         });
-    }
-
-    @Override
-    protected @NotNull Path getApplicationFile() {
-        return AppMapPlugin.getAppMapHTMLPath();
     }
 
     @Override

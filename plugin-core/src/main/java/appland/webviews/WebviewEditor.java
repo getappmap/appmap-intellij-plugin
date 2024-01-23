@@ -2,6 +2,8 @@ package appland.webviews;
 
 import appland.AppMapBundle;
 import appland.utils.GsonUtils;
+import appland.webviews.webserver.AppMapWebview;
+import appland.webviews.webserver.AppMapWebviewRequestHandler;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -31,9 +33,6 @@ import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
 import java.beans.PropertyChangeListener;
-import java.io.IOException;
-import java.net.MalformedURLException;
-import java.nio.file.Path;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -46,6 +45,7 @@ public abstract class WebviewEditor<T> extends UserDataHolderBase implements Fil
     private static final Logger LOG = Logger.getInstance(WebviewEditor.class);
 
     protected final @NotNull Project project;
+    protected final @NotNull AppMapWebview webview;
     protected final @NotNull VirtualFile file;
     private final @NotNull Set<String> supportedMessages;
     protected final @NotNull Gson gson;
@@ -56,8 +56,12 @@ public abstract class WebviewEditor<T> extends UserDataHolderBase implements Fil
     // queries must be created before the webview is initialized
     private final @NotNull JBCefJSQuery postMessageQuery = JBCefJSQuery.create((JBCefBrowserBase) contentPanel);
 
-    public WebviewEditor(@NotNull Project project, @NotNull VirtualFile file, @NotNull Set<String> supportedMessages) {
+    public WebviewEditor(@NotNull Project project,
+                         @NotNull AppMapWebview webview,
+                         @NotNull VirtualFile file,
+                         @NotNull Set<String> supportedMessages) {
         this.project = project;
+        this.webview = webview;
         this.file = file;
         this.supportedMessages = supportedMessages;
         this.gson = Objects.requireNonNullElse(createCustomizedGson(), GsonUtils.GSON);
@@ -93,11 +97,6 @@ public abstract class WebviewEditor<T> extends UserDataHolderBase implements Fil
      */
     @RequiresBackgroundThread
     protected abstract void afterInit(@Nullable T initData);
-
-    /**
-     * @return {@code java.nio.file.Path} to the HTML file to load into the webview.
-     */
-    protected abstract @NotNull Path getApplicationFile();
 
     /**
      * @throws Exception If an error occurred while handling the message
@@ -191,14 +190,6 @@ public abstract class WebviewEditor<T> extends UserDataHolderBase implements Fil
         return false;
     }
 
-    protected String getBaseUrl() {
-        try {
-            return getApplicationFile().toUri().toURL().toString();
-        } catch (MalformedURLException e) {
-            return "";
-        }
-    }
-
     protected boolean isWebViewReady() {
         return isWebViewReady.get();
     }
@@ -212,11 +203,7 @@ public abstract class WebviewEditor<T> extends UserDataHolderBase implements Fil
     }
 
     private void loadApplication() {
-        try {
-            contentPanel.loadURL(getApplicationFile().toUri().toURL().toString());
-        } catch (IOException e) {
-            LOG.error(e);
-        }
+        contentPanel.loadURL(AppMapWebviewRequestHandler.getWebviewUrl(webview, "index.html").toExternalForm());
     }
 
     private void initWebviewApplication() {

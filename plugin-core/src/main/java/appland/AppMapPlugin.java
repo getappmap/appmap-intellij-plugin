@@ -27,18 +27,6 @@ public final class AppMapPlugin {
         return basePath;
     }
 
-    public static Path getAppMapHTMLPath() {
-        return getPluginPath().resolve("appmap").resolve("index.html");
-    }
-
-    public static Path getInstallGuideHTMLPath() {
-        return getPluginPath().resolve("appland-install-guide").resolve("index.html");
-    }
-
-    public static Path getFindingsAppHTMLPath() {
-        return getPluginPath().resolve("appland-findings").resolve("index.html");
-    }
-
     public static Path getSignInHTMLPath() {
         return getPluginPath().resolve("appland-signin").resolve("index.html");
     }
