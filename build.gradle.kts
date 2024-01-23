@@ -225,6 +225,11 @@ project(":") {
                 include("index.html")
                 include("dist/**")
             }
+            from("${project.rootDir}/appland-navie") {
+                into("appmap-assets/appland-navie")
+                include("index.html")
+                include("dist/**")
+            }
 
             processResources {
                 dependsOn("copyPluginAssets")
