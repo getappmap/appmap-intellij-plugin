@@ -7,7 +7,6 @@ import appland.webviews.WebviewEditor;
 import appland.webviews.WebviewEditorProvider;
 import com.intellij.openapi.fileEditor.FileEditor;
 import com.intellij.openapi.fileEditor.FileEditorManager;
-import com.intellij.openapi.fileEditor.ex.FileEditorManagerEx;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.Key;
 import com.intellij.openapi.vfs.VirtualFile;
@@ -40,7 +39,8 @@ public class FindingDetailsEditorProvider extends WebviewEditorProvider {
         var provider = WebviewEditorProvider.findEditorProvider(TYPE_ID);
         assert provider != null;
 
-        if (reuseExistingEditor(project, findings, provider)) {
+        // we only want to reuse for the same list of findings
+        if (provider.focusOpenEditor(project, webviewEditor -> isEditorWithFindings(webviewEditor, findings))) {
             return;
         }
 
@@ -48,7 +48,6 @@ public class FindingDetailsEditorProvider extends WebviewEditorProvider {
         KEY_FINDING_HASH.set(file, findingHash);
         KEY_FINDINGS.set(file, findings);
         FileEditorManager.getInstance(project).openFile(file, true);
-
     }
 
     @Override
@@ -61,24 +60,8 @@ public class FindingDetailsEditorProvider extends WebviewEditorProvider {
         return Icons.APPMAP_FILE;
     }
 
-    /**
-     * Try to re-use an already open editor, we can't use the logic of {@link WebviewEditorProvider}
-     * because we only want to reuse for the same list of findings.
-     */
-    private static boolean reuseExistingEditor(@NotNull Project project,
-                                               @NotNull List<ScannerFinding> findings,
-                                               @NotNull WebviewEditorProvider provider) {
-        for (var editor : FileEditorManager.getInstance(project).getAllEditors()) {
-            var file = editor.getFile();
-            if (file != null && provider.isWebViewFile(file)) {
-                assert editor instanceof WebviewEditor;
-                if (Objects.equals(findings, KEY_FINDINGS.get(file))) {
-                    FileEditorManagerEx.getInstanceEx(project).openFile(file, true, true);
-                    return true;
-                }
-            }
-        }
-        return false;
+    private static boolean isEditorWithFindings(@NotNull WebviewEditor<?> webview, @NotNull List<ScannerFinding> findings) {
+        return Objects.equals(findings, KEY_FINDINGS.get(webview.getFile()));
     }
 
     private static String findEditorTitle(@NotNull List<ScannerFinding> findings) {
