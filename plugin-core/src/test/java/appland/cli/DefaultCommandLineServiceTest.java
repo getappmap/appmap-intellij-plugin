@@ -15,6 +15,7 @@ import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.testFramework.VfsTestUtil;
 import com.intellij.testFramework.fixtures.TempDirTestFixture;
 import com.intellij.testFramework.fixtures.impl.TempDirTestFixtureImpl;
+import com.intellij.util.ThrowableRunnable;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.junit.Assume;
@@ -204,6 +205,16 @@ public class DefaultCommandLineServiceTest extends AppMapBaseTest {
         });
     }
 
+    @Test
+    public void indexerJsonRpcPort() throws Exception {
+        var tempDir = myFixture.createFile("test.txt", "").getParent();
+        assertIndexerJsonRpcAvailable(tempDir, () -> {
+            createAppMapYaml(tempDir, "tmp/appmaps");
+            addContentRootAndLaunchService(tempDir);
+            assertActiveRoots(tempDir);
+        });
+    }
+
     private void setupAndAssertProcessRestart(@NotNull Function<VirtualFile, KillableProcessHandler> processFunction) throws InterruptedException {
         var newRoot = myFixture.addFileToProject("parentA/file.txt", "").getParent().getVirtualFile();
         createAppMapYaml(newRoot);
@@ -263,12 +274,7 @@ public class DefaultCommandLineServiceTest extends AppMapBaseTest {
     private @NotNull VirtualFile createAppMapYaml(@NotNull VirtualFile directory, @Nullable String appMapPath) throws InterruptedException {
         var refreshLatch = new CountDownLatch(1);
         var bus = ApplicationManager.getApplication().getMessageBus().connect(getTestRootDisposable());
-        bus.subscribe(AppLandCommandLineListener.TOPIC, new AppLandCommandLineListener() {
-            @Override
-            public void afterRefreshForProjects() {
-                refreshLatch.countDown();
-            }
-        });
+        bus.subscribe(AppLandCommandLineListener.TOPIC, refreshLatch::countDown);
 
         try {
             var content = appMapPath != null ? "appmap_dir: " + appMapPath + "\n" : "";
@@ -277,6 +283,26 @@ public class DefaultCommandLineServiceTest extends AppMapBaseTest {
             // creating a new appmap.yml file triggers the start of the CLI processes,
             // we have to wait for them to avoid launch in the background to interact with the further tests
             assertTrue(refreshLatch.await(10, TimeUnit.SECONDS));
+        }
+    }
+
+    /**
+     * Installs a listener for the indexer JSON-RPC service, executes the runnable and then asserts that the service is available.
+     */
+    private void assertIndexerJsonRpcAvailable(@NotNull VirtualFile directory,
+                                               @NotNull ThrowableRunnable<Exception> runnable) throws Exception {
+        var latch = new CountDownLatch(1);
+        var bus = ApplicationManager.getApplication().getMessageBus().connect(getTestRootDisposable());
+        bus.subscribe(AppLandIndexerJsonRpcListener.TOPIC, serviceDirectory -> {
+            if (directory.equals(serviceDirectory)) {
+                latch.countDown();
+            }
+        });
+
+        try {
+            runnable.run();
+        } finally {
+            assertTrue("The indexer service must provide a port for its JSON-RPC service", latch.await(10, TimeUnit.SECONDS));
         }
     }
 
