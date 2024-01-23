@@ -68,14 +68,12 @@ public abstract class WebviewEditorProvider implements FileEditorProvider, DumbA
     }
 
     public void open(@NotNull Project project, @NotNull String title) {
-        // try to re-use an already open editor
-        for (var editor : FileEditorManager.getInstance(project).getAllEditors()) {
-            var file = editor.getFile();
-            if (file != null && isWebViewFile(file)) {
-                assert editor instanceof WebviewEditor;
-                FileEditorManagerEx.getInstanceEx(project).openFile(file, true, true);
-                return;
-            }
+        open(project, title, true);
+    }
+
+    public void open(@NotNull Project project, @NotNull String title, boolean reuseOpenEditor) {
+        if (reuseOpenEditor && focusOpenEditor(project)) {
+            return;
         }
 
         openNewFile(project, title);
@@ -94,5 +92,18 @@ public abstract class WebviewEditorProvider implements FileEditorProvider, DumbA
         var file = new LightVirtualFile(title);
         WEBVIEW_EDITOR_KEY.set(file, webviewTypeId);
         return file;
+    }
+
+    public boolean focusOpenEditor(@NotNull Project project) {
+        for (var editor : FileEditorManager.getInstance(project).getAllEditors()) {
+            var file = editor.getFile();
+            if (file != null && isWebViewFile(file)) {
+                assert editor instanceof WebviewEditor;
+                FileEditorManagerEx.getInstanceEx(project).openFile(file, true, true);
+                return true;
+            }
+        }
+
+        return false;
     }
 }
