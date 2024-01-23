@@ -59,6 +59,13 @@ public interface AppLandCommandLineService extends Disposable {
     @NotNull List<VirtualFile> getActiveRoots();
 
     /**
+     * @param contextFile Context file to locate the matching indexer service.
+     * @return The port, where the indexer process is serving for JSON-RPC requests.
+     * {@code null} is returned if there's no matching indexer process or if the indexer did not yet launch its JSON-RPC server.
+     */
+    @Nullable Integer getIndexerRpcPort(@NotNull VirtualFile contextFile);
+
+    /**
      * Stop all processes.
      *
      * @param waitForTermination Wait for process termination. This is mostly useful for test cases.
