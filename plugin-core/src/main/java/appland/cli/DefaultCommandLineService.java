@@ -3,6 +3,7 @@ package appland.cli;
 import appland.config.AppMapConfigFile;
 import appland.config.AppMapConfigFileListener;
 import appland.files.AppMapVfsUtils;
+import appland.settings.AppMapApplicationSettingsService;
 import com.intellij.execution.ExecutionException;
 import com.intellij.execution.configurations.GeneralCommandLine;
 import com.intellij.execution.configurations.PtyCommandLine;
@@ -17,6 +18,7 @@ import com.intellij.openapi.project.ProjectManager;
 import com.intellij.openapi.roots.ProjectRootManager;
 import com.intellij.openapi.util.Key;
 import com.intellij.openapi.util.SystemInfo;
+import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.openapi.vfs.VfsUtil;
 import com.intellij.openapi.vfs.VfsUtilCore;
 import com.intellij.openapi.vfs.VirtualFile;
@@ -25,9 +27,9 @@ import com.intellij.util.Alarm;
 import com.intellij.util.AlarmFactory;
 import com.intellij.util.io.BaseOutputReader;
 import com.intellij.util.system.CpuArch;
-import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.RequiredArgsConstructor;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.TestOnly;
@@ -40,6 +42,7 @@ import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 public class DefaultCommandLineService implements AppLandCommandLineService {
     private static final Logger LOG = Logger.getInstance(DefaultCommandLineService.class);
@@ -154,6 +157,12 @@ public class DefaultCommandLineService implements AppLandCommandLineService {
     }
 
     @Override
+    public @Nullable Integer getIndexerRpcPort(@NotNull VirtualFile contextFile) {
+        var processes = findProcessForContext(contextFile);
+        return processes != null ? processes.indexerJsonRpcPort : null;
+    }
+
+    @Override
     public void stopAll(boolean waitForTermination) {
         List<CliProcesses> activeProcesses;
         synchronized (this) {
@@ -241,6 +250,14 @@ public class DefaultCommandLineService implements AppLandCommandLineService {
         return processes.get(directory);
     }
 
+    synchronized private @Nullable CliProcesses findProcessForContext(@NotNull VirtualFile contextFile) {
+        return processes.entrySet()
+                .stream()
+                .filter(root -> VfsUtilCore.isAncestor(root.getKey(), contextFile, false))
+                .findFirst()
+                .map(Map.Entry::getValue).orElse(null);
+    }
+
     /**
      * Launch processes for the given directory.
      *
@@ -285,10 +302,15 @@ public class DefaultCommandLineService implements AppLandCommandLineService {
         var watchedDir = findWatchedAppMapDirectory(workingDir);
         prepareWatchedDirectory(watchedDir);
 
-        var process = startProcess(workingDir, indexerPath.toString(), "index", "--verbose", "--watch", "--appmap-dir", watchedDir.toString());
+        var process = startProcess(workingDir, indexerPath.toString(), "index",
+                "--verbose",
+                "--watch",
+                "--port", "0",
+                "--appmap-dir", watchedDir.toString());
         process.addProcessListener(LoggingProcessAdapter.INSTANCE);
         process.addProcessListener(new RestartProcessListener(directory, process, ProcessType.Indexer, this), this);
         process.addProcessListener(new IndexEventsProcessListener(), this);
+        process.addProcessListener(new IndexerRpcPortListener(directory), this);
         return process;
     }
 
@@ -406,7 +428,12 @@ public class DefaultCommandLineService implements AppLandCommandLineService {
 
         var command = new GeneralCommandLine(commandLine);
         command.withWorkDirectory(workingDir.toString());
-        command.withParentEnvironmentType(GeneralCommandLine.ParentEnvironmentType.SYSTEM);
+        command.withParentEnvironmentType(GeneralCommandLine.ParentEnvironmentType.CONSOLE);
+
+        var apiKey = AppMapApplicationSettingsService.getInstance().getApiKey();
+        if (apiKey != null && !apiKey.isEmpty()) {
+            command.withEnvironment("APPMAP_API_KEY", apiKey);
+        }
 
         return new KillableProcessHandler(command) {
             @Override
@@ -485,10 +512,15 @@ public class DefaultCommandLineService implements AppLandCommandLineService {
      * It's possible that a reference is {@code null}, e.g. due to a crash and too many restart attempts.
      */
     @Data
-    @AllArgsConstructor
     protected static final class CliProcesses {
         private volatile @Nullable KillableProcessHandler indexer;
         private volatile @Nullable KillableProcessHandler scanner;
+        private volatile @Nullable Integer indexerJsonRpcPort = null;
+
+        private CliProcesses(@Nullable KillableProcessHandler indexer, @Nullable KillableProcessHandler scanner) {
+            this.indexer = indexer;
+            this.scanner = scanner;
+        }
 
         boolean isEmpty() {
             return indexer == null && scanner == null;
@@ -520,6 +552,38 @@ public class DefaultCommandLineService implements AppLandCommandLineService {
                         if (LOG.isDebugEnabled()) {
                             LOG.debug("Error parsing indexed file path: " + filePath, e);
                         }
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * Listen for the port, where the indexer is serving for RPC requests, and update the process settings for served directory.
+     */
+    @RequiredArgsConstructor
+    private final class IndexerRpcPortListener extends ProcessAdapter {
+        private final @NotNull Pattern PORT_PATTERN = Pattern.compile("^Running JSON-RPC server on port: (\\d+)$");
+        private final @NotNull VirtualFile directory;
+
+        @Override
+        public void onTextAvailable(@NotNull ProcessEvent event, @NotNull Key outputType) {
+            if (outputType != ProcessOutputType.STDOUT) {
+                return;
+            }
+
+            var match = PORT_PATTERN.matcher(event.getText().trim());
+            if (match.matches()) {
+                var port = StringUtil.parseInt(match.group(1), -1);
+                if (port > 0) {
+                    var cliProcesses = processes.get(directory);
+                    if (cliProcesses != null) {
+                        cliProcesses.indexerJsonRpcPort = port;
+
+                        var application = ApplicationManager.getApplication();
+                        application.executeOnPooledThread(() -> application.getMessageBus()
+                                .syncPublisher(AppLandIndexerJsonRpcListener.TOPIC)
+                                .indexerServiceAvailable(directory));
                     }
                 }
             }
