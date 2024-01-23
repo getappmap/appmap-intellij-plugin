@@ -19,7 +19,8 @@ public enum AppMapWebview {
     AppMap("appmap"),
     InstallGuide("appland-install-guide"),
     Findings("appland-findings"),
-    SignIn("appland-signin");
+    SignIn("appland-signin"),
+    Navie("appland-navie");
 
     public static @NotNull String getBaseUrl() {
         return "http://localhost:" + BuiltInServerOptions.getInstance().getEffectiveBuiltInServerPort();
