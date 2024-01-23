@@ -1,48 +1,45 @@
 package appland.installGuide;
 
 import appland.AppMapBundle;
+import appland.Icons;
+import appland.webviews.WebviewEditorProvider;
+import com.google.common.base.Predicates;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.fileEditor.FileEditor;
 import com.intellij.openapi.fileEditor.FileEditorManager;
-import com.intellij.openapi.fileEditor.FileEditorPolicy;
-import com.intellij.openapi.fileEditor.FileEditorProvider;
-import com.intellij.openapi.fileEditor.ex.FileEditorManagerEx;
-import com.intellij.openapi.project.DumbAware;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.Key;
 import com.intellij.openapi.vfs.VirtualFile;
-import com.intellij.testFramework.LightVirtualFile;
-import com.intellij.ui.jcef.JBCefApp;
-import org.jetbrains.annotations.NonNls;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
-public class InstallGuideEditorProvider implements FileEditorProvider, DumbAware {
+import javax.swing.*;
+
+public class InstallGuideEditorProvider extends WebviewEditorProvider {
+    private static final String TYPE_ID = "appland.installGuide";
+
     // defines the install-guide view type, i.e. the install-guide page to show in a particular editor
     private static final Key<InstallGuideViewPage> INSTALL_GUIDE_PAGE_KEY = Key.create("appland.installGuideFile");
-    private static final String EDITOR_ID = "appland.installGuide";
 
-    public static boolean isSupported() {
-        return JBCefApp.isSupported();
-    }
-
+    /**
+     * Open a new Install Guide webview at the given page.
+     * An existing Install Guide webview is updated to navigate to the requested page.
+     */
     public static void open(@NotNull Project project, @NotNull InstallGuideViewPage page) {
         try {
-            var editorManager = FileEditorManager.getInstance(project);
-            // try to re-use an already open editor for "Install Guide"
-            for (var editor : editorManager.getAllEditors()) {
-                var file = editor.getFile();
-                if (file != null && isInstallGuideFile(file)) {
-                    assert editor instanceof InstallGuideEditor;
+            var provider = WebviewEditorProvider.findEditorProvider(TYPE_ID);
+            assert provider != null;
 
-                    FileEditorManagerEx.getInstanceEx(project).openFile(file, true, true);
-                    ((InstallGuideEditor) editor).navigateTo(page, true, false);
-                    return;
-                }
+            // an open Install Guide webview must navigate to the new page
+            var openEditor = provider.findOpenEditor(project, Predicates.alwaysTrue());
+            if (openEditor != null) {
+                ((InstallGuideEditor) openEditor).navigateTo(page, true, false);
+                return;
             }
 
-            var file = new LightVirtualFile(AppMapBundle.get("installGuide.editor.title"));
+            var file = provider.createVirtualFile(AppMapBundle.get("installGuide.editor.title"));
             INSTALL_GUIDE_PAGE_KEY.set(file, page);
-            var newEditors = editorManager.openFile(file, true);
+            var newEditors = FileEditorManager.getInstance(project).openFile(file, true);
             if (newEditors.length == 1) {
                 // don't post webview message because the init message of the new editor was just sent
                 ((InstallGuideEditor) newEditors[0]).navigateTo(page, false, false);
@@ -55,28 +52,18 @@ public class InstallGuideEditorProvider implements FileEditorProvider, DumbAware
         }
     }
 
-    @NotNull
-    public static Boolean isInstallGuideFile(@NotNull VirtualFile file) {
-        return INSTALL_GUIDE_PAGE_KEY.isIn(file);
+    public InstallGuideEditorProvider() {
+        super(TYPE_ID);
     }
 
     @Override
-    public boolean accept(@NotNull Project project, @NotNull VirtualFile file) {
-        return JBCefApp.isSupported() && isInstallGuideFile(file);
+    public @Nullable Icon getEditorIcon() {
+        return Icons.APPMAP_FILE_SMALL;
     }
 
     @Override
     public @NotNull FileEditor createEditor(@NotNull Project project, @NotNull VirtualFile file) {
-        return new InstallGuideEditor(project, file, INSTALL_GUIDE_PAGE_KEY.getRequired(file));
-    }
-
-    @Override
-    public @NotNull @NonNls String getEditorTypeId() {
-        return EDITOR_ID;
-    }
-
-    @Override
-    public @NotNull FileEditorPolicy getPolicy() {
-        return FileEditorPolicy.HIDE_DEFAULT_EDITOR;
+        var page = INSTALL_GUIDE_PAGE_KEY.get(file);
+        return new InstallGuideEditor(project, file, page);
     }
 }
