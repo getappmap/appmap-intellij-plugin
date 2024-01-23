@@ -129,6 +129,9 @@
         <!-- OAuth authentication -->
         <httpRequestHandler implementation="appland.oauth.AppMapOAuthRequestHandler"/>
         <applicationService serviceImplementation="appland.oauth.AppMapOAuthService"/>
+
+        <!-- webview requests -->
+        <httpRequestHandler implementation="appland.webviews.webserver.AppMapWebviewRequestHandler"/>
     </extensions>
 
     <actions>

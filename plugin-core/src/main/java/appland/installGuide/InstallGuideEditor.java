@@ -1,7 +1,6 @@
 package appland.installGuide;
 
 import appland.AppMapBundle;
-import appland.AppMapPlugin;
 import appland.cli.AppLandCommandLineService;
 import appland.index.AppMapMetadata;
 import appland.index.IndexedFileListenerUtil;
@@ -13,6 +12,7 @@ import appland.settings.AppMapProjectSettingsService;
 import appland.settings.AppMapSettingsListener;
 import appland.webviews.WebviewEditor;
 import appland.webviews.findings.FindingsOverviewEditorProvider;
+import appland.webviews.webserver.AppMapWebview;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
@@ -40,7 +40,6 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.awt.datatransfer.StringSelection;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 import java.util.Set;
@@ -61,7 +60,7 @@ public class InstallGuideEditor extends WebviewEditor<List<ProjectMetadata>> {
     public InstallGuideEditor(@NotNull Project project,
                               @NotNull VirtualFile file,
                               @NotNull InstallGuideViewPage page) {
-        super(project, file, Set.of("click-link", "open-file", "open-page", "open-findings-overview", "clipboard",
+        super(project, AppMapWebview.InstallGuide, file, Set.of("click-link", "open-file", "open-page", "open-findings-overview", "clipboard",
                 "perform-install", "perform-auth", "generate-openapi"));
         this.currentPage = page;
     }
@@ -126,11 +125,6 @@ public class InstallGuideEditor extends WebviewEditor<List<ProjectMetadata>> {
     @Override
     public @Nls(capitalization = Nls.Capitalization.Title) @NotNull String getName() {
         return AppMapBundle.get("installGuide.editor.title");
-    }
-
-    @Override
-    protected @NotNull Path getApplicationFile() {
-        return AppMapPlugin.getInstallGuideHTMLPath();
     }
 
     @Override

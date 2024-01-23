@@ -1,13 +1,13 @@
 package appland.webviews.findings;
 
 import appland.AppMapBundle;
-import appland.AppMapPlugin;
 import appland.problemsView.FindingsManager;
 import appland.problemsView.FindingsViewTab;
 import appland.problemsView.model.ScannerFinding;
 import appland.utils.GsonUtils;
 import appland.webviews.WebviewEditor;
 import appland.webviews.findingDetails.FindingDetailsEditorProvider;
+import appland.webviews.webserver.AppMapWebview;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.intellij.openapi.application.ApplicationManager;
@@ -18,18 +18,12 @@ import org.jetbrains.annotations.Nls;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.nio.file.Path;
 import java.util.List;
 import java.util.Set;
 
 public class FindingsOverviewEditor extends WebviewEditor<List<ScannerFinding>> {
     public FindingsOverviewEditor(@NotNull Project project, @NotNull VirtualFile file) {
-        super(project, file, Set.of("open-problems-tab", "open-finding-info"));
-    }
-
-    @Override
-    protected @NotNull Path getApplicationFile() {
-        return AppMapPlugin.getFindingsAppHTMLPath();
+        super(project, AppMapWebview.Findings, file, Set.of("open-problems-tab", "open-finding-info"));
     }
 
     @Override
