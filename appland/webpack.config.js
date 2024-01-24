@@ -16,6 +16,7 @@ module.exports = (env, argv) => {
       alias: {
         messagePublisher: path.resolve('../appland-shared/messagePublisher.js'),
         vsCodeBridge: path.resolve('../appland-shared/vsCodeBridge.js'),
+        handleAppMapMessages: path.resolve('../appland-shared/handleAppMapMessages.js'),
         vue: path.resolve('./node_modules/vue'),
         vuex: path.resolve('./node_modules/vuex'),
       },
