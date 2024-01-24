@@ -144,9 +144,6 @@
         <action id="stopAppMapRemoteRecording" class="appland.actions.StopAppMapRecordingAction"/>
 
         <action id="appmap.generateOpenAPI" class="appland.actions.GenerateOpenApiAction"/>
-        <!--
-        <action id="uploadAppMap" class="appland.actions.UploadAppMapAction"/>
-        -->
         <action id="appmapDocs" class="appland.actions.AppMapDocumentationAction">
             <add-to-group group-id="HelpMenu" anchor="before" relative-to-action="CheckForUpdate"/>
         </action>
