@@ -132,6 +132,11 @@
 
         <!-- webview requests -->
         <httpRequestHandler implementation="appland.webviews.webserver.AppMapWebviewRequestHandler"/>
+
+        <!-- Registry keys -->
+        <registryKey key="appmap.webview.open.dev.tools"
+                     defaultValue="false"
+                     description="Open the developer console for AppMap webviews."/>
     </extensions>
 
     <actions>

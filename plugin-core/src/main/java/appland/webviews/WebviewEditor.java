@@ -18,6 +18,7 @@ import com.intellij.openapi.progress.Task;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.Disposer;
 import com.intellij.openapi.util.UserDataHolderBase;
+import com.intellij.openapi.util.registry.Registry;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.ui.jcef.JBCefBrowserBase;
 import com.intellij.ui.jcef.JBCefJSQuery;
@@ -203,6 +204,10 @@ public abstract class WebviewEditor<T> extends UserDataHolderBase implements Fil
 
     private void loadApplication() {
         contentPanel.loadURL(webview.getIndexHtmlUrl());
+
+        if (Registry.is("appmap.webview.open.dev.tools", false)) {
+            ApplicationManager.getApplication().invokeLater(this::openDevTools);
+        }
     }
 
     private void initWebviewApplication() {
