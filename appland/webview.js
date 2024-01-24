@@ -50,7 +50,6 @@ export function mountWebview() {
     // messages emitted by the webview
     app.$on('viewSource', (location) => vscode.postMessage({command: 'viewSource', location}))
     app.$on('clearSelection', () => vscode.postMessage({command: 'clearSelection'}))
-    app.$on('uploadAppmap', () => vscode.postMessage({command: 'uploadAppMap'}))
     app.$on('sidebarSearchFocused', () => vscode.postMessage({command: 'sidebarSearchFocused'}))
     app.$on('clickFilterButton', () => vscode.postMessage({command: 'clickFilterButton'}))
     app.$on('clickTab', (tabId) => vscode.postMessage({command: 'clickTab', tabId}))
