@@ -2,6 +2,7 @@ package appland.cli;
 
 import appland.AppMapBaseTest;
 import appland.settings.AppMapApplicationSettingsService;
+import appland.settings.AppMapSettingsListener;
 import com.intellij.execution.ExecutionException;
 import com.intellij.execution.configurations.PtyCommandLine;
 import com.intellij.execution.process.KillableProcessHandler;
@@ -194,11 +195,38 @@ public class DefaultCommandLineServiceTest extends AppMapBaseTest {
     @Test
     public void indexerJsonRpcPort() throws Exception {
         var tempDir = myFixture.createFile("test.txt", "").getParent();
+
         assertIndexerJsonRpcAvailable(tempDir, () -> {
             createAppMapYaml(tempDir, "tmp/appmaps");
             addContentRootAndLaunchService(tempDir);
             assertActiveRoots(tempDir);
         });
+    }
+
+    @Test
+    public void restartAfterApiKeyChange() throws Exception {
+        // we're installing the listener for api key changes just for this test to avoid side effects inside the test
+        // setup and in our other tests
+        ApplicationManager.getApplication().getMessageBus()
+                .connect(getTestRootDisposable())
+                .subscribe(AppMapSettingsListener.TOPIC, new RestartServicesAfterApiChangeListener());
+
+        var tempDir = myFixture.createFile("test.txt", "").getParent();
+        createAppMapYaml(tempDir);
+        addContentRootAndLaunchService(tempDir);
+        assertActiveRoots(tempDir);
+
+        // restart after change
+        waitForProcessRestart(tempDir, getIndexerFunction, processHandler -> {
+            AppMapApplicationSettingsService.getInstance().setApiKeyNotifying("new-api-key");
+        });
+        assertActiveRoots(tempDir);
+
+        // restart after sign out
+        waitForProcessRestart(tempDir, getIndexerFunction, processHandler -> {
+            AppMapApplicationSettingsService.getInstance().setApiKeyNotifying(null);
+        });
+        assertActiveRoots(tempDir);
     }
 
     @Test
@@ -336,14 +364,15 @@ public class DefaultCommandLineServiceTest extends AppMapBaseTest {
                                               @NotNull Function<VirtualFile, KillableProcessHandler> processForRoot,
                                               @NotNull ThrowableConsumer<KillableProcessHandler, Exception> restartTrigger) throws Exception {
         var oldProcess = processForRoot.apply(root);
-        assertNotNull(oldProcess);
+        assertNotNull("Process must be available before triggering the restart", oldProcess);
 
         restartTrigger.consume(oldProcess);
 
         // wait up to 10s for restart of the indexer process
         boolean restarted = false;
         for (var i = 0; i < 100 && !restarted; i++) {
-            restarted = !oldProcess.equals(processForRoot.apply(root));
+            var newProcess = processForRoot.apply(root);
+            restarted = newProcess != null && !oldProcess.equals(newProcess);
             Thread.sleep(100);
         }
 
@@ -356,15 +385,13 @@ public class DefaultCommandLineServiceTest extends AppMapBaseTest {
         assertTrue("Process must terminate", process.waitFor(5_000));
     }
 
-    private static Function<VirtualFile, KillableProcessHandler> getIndexerFunction = root -> {
+    private static final Function<VirtualFile, KillableProcessHandler> getIndexerFunction = root -> {
         var processes = ((DefaultCommandLineService) AppLandCommandLineService.getInstance()).getProcesses(root);
-        assertNotNull(processes);
-        return processes.getIndexer();
+        return processes == null ? null : processes.getIndexer();
     };
 
-    private static Function<VirtualFile, KillableProcessHandler> getScannerFunction = root -> {
+    private static final Function<VirtualFile, KillableProcessHandler> getScannerFunction = root -> {
         var processes = ((DefaultCommandLineService) AppLandCommandLineService.getInstance()).getProcesses(root);
-        assertNotNull(processes);
-        return processes.getScanner();
+        return processes == null ? null : processes.getScanner();
     };
 }
