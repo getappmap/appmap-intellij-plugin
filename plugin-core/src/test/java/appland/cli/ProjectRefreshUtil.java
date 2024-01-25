@@ -6,18 +6,16 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.concurrent.CountDownLatch;
 
-public class ProjectRefreshUtil {
+public final class ProjectRefreshUtil {
     private ProjectRefreshUtil() {
     }
 
     public static CountDownLatch newProjectRefreshCondition(@NotNull Disposable disposable) {
         var latch = new CountDownLatch(1);
-        ApplicationManager.getApplication().getMessageBus().connect(disposable).subscribe(AppLandCommandLineListener.TOPIC, new AppLandCommandLineListener() {
-            @Override
-            public void afterRefreshForProjects() {
-                latch.countDown();
-            }
-        });
+        ApplicationManager.getApplication()
+                .getMessageBus()
+                .connect(disposable)
+                .subscribe(AppLandCommandLineListener.TOPIC, latch::countDown);
         return latch;
     }
 }
