@@ -15,6 +15,7 @@ import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.testFramework.VfsTestUtil;
 import com.intellij.testFramework.fixtures.TempDirTestFixture;
 import com.intellij.testFramework.fixtures.impl.TempDirTestFixtureImpl;
+import com.intellij.util.ThrowableConsumer;
 import com.intellij.util.ThrowableRunnable;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -30,17 +31,11 @@ import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
-import java.util.function.Supplier;
 
 public class DefaultCommandLineServiceTest extends AppMapBaseTest {
     @Override
     protected TempDirTestFixture createTempDirTestFixture() {
         return new TempDirTestFixtureImpl();
-    }
-
-    @Override
-    protected boolean runInDispatchThread() {
-        return true;
     }
 
     @Before
@@ -188,20 +183,12 @@ public class DefaultCommandLineServiceTest extends AppMapBaseTest {
 
     @Test
     public void indexerProcessRestart() throws Exception {
-        setupAndAssertProcessRestart(newRoot -> {
-            var processes = ((DefaultCommandLineService) AppLandCommandLineService.getInstance()).getProcesses(newRoot);
-            assertNotNull(processes);
-            return processes.getIndexer();
-        });
+        setupAndAssertProcessRestart(getIndexerFunction);
     }
 
     @Test
     public void scannerProcessRestart() throws Exception {
-        setupAndAssertProcessRestart(newRoot -> {
-            var processes = ((DefaultCommandLineService) AppLandCommandLineService.getInstance()).getProcesses(newRoot);
-            assertNotNull(processes);
-            return processes.getScanner();
-        });
+        setupAndAssertProcessRestart(getScannerFunction);
     }
 
     @Test
@@ -212,30 +199,6 @@ public class DefaultCommandLineServiceTest extends AppMapBaseTest {
             addContentRootAndLaunchService(tempDir);
             assertActiveRoots(tempDir);
         });
-    }
-
-    private void setupAndAssertProcessRestart(@NotNull Function<VirtualFile, KillableProcessHandler> processFunction) throws InterruptedException {
-        var newRoot = myFixture.addFileToProject("parentA/file.txt", "").getParent().getVirtualFile();
-        createAppMapYaml(newRoot);
-
-        // add new roots and assert that the new processes are launched
-        var condition = ProjectRefreshUtil.newProjectRefreshCondition(getTestRootDisposable());
-        ModuleRootModificationUtil.updateModel(getModule(), model -> model.addContentEntry(newRoot));
-        assertTrue(condition.await(30, TimeUnit.SECONDS));
-        assertActiveRoots(newRoot);
-
-        var processSupplier = new Supplier<KillableProcessHandler>() {
-            @Override
-            public KillableProcessHandler get() {
-                return processFunction.apply(newRoot);
-            }
-        };
-
-        // if one of the two processes is killed, it has to restart
-        assertProcessRestart(processSupplier);
-
-        // the restarted process must be restarted again when terminated
-        assertProcessRestart(processSupplier);
     }
 
     @Test
@@ -266,6 +229,23 @@ public class DefaultCommandLineServiceTest extends AppMapBaseTest {
         assertEmptyRoots();
     }
 
+    private void setupAndAssertProcessRestart(@NotNull Function<VirtualFile, KillableProcessHandler> processForRoot) throws Exception {
+        var root = myFixture.addFileToProject("parentA/file.txt", "").getParent().getVirtualFile();
+        createAppMapYaml(root);
+
+        // add new roots and assert that the new processes are launched
+        var condition = ProjectRefreshUtil.newProjectRefreshCondition(getTestRootDisposable());
+        ModuleRootModificationUtil.updateModel(getModule(), model -> model.addContentEntry(root));
+        assertTrue(condition.await(30, TimeUnit.SECONDS));
+        assertActiveRoots(root);
+
+        // if one of the two processes is killed, it has to restart
+        waitForProcessRestart(root, processForRoot, DefaultCommandLineServiceTest::terminateProcess);
+
+        // the restarted process must be restarted again when terminated
+        waitForProcessRestart(root, processForRoot, DefaultCommandLineServiceTest::terminateProcess);
+    }
+
     private @NotNull VirtualFile createAppMapYaml(@NotNull VirtualFile directory) throws InterruptedException {
         return createAppMapYaml(directory, null);
     }
@@ -278,8 +258,8 @@ public class DefaultCommandLineServiceTest extends AppMapBaseTest {
             var content = appMapPath != null ? "appmap_dir: " + appMapPath + "\n" : "";
             return VfsTestUtil.createFile(directory, "appmap.yml", content);
         } finally {
-            // creating a new appmap.yml file triggers the start of the CLI processes,
-            // we have to wait for them to avoid launch in the background to interact with the further tests
+            // Creating a new appmap.yml file triggers the start of the CLI processes,
+            // we have to wait for them to before executing the following tests.
             assertTrue(refreshLatch.await(10, TimeUnit.SECONDS));
         }
     }
@@ -352,15 +332,18 @@ public class DefaultCommandLineServiceTest extends AppMapBaseTest {
         assertEquals("Unexpected process status for directory " + directory + ": " + service, expectedIsRunning, service.isRunning(directory, strict));
     }
 
-    private static void assertProcessRestart(@NotNull Supplier<KillableProcessHandler> processSupplier) throws InterruptedException {
-        var oldProcess = processSupplier.get();
+    private static void waitForProcessRestart(@NotNull VirtualFile root,
+                                              @NotNull Function<VirtualFile, KillableProcessHandler> processForRoot,
+                                              @NotNull ThrowableConsumer<KillableProcessHandler, Exception> restartTrigger) throws Exception {
+        var oldProcess = processForRoot.apply(root);
         assertNotNull(oldProcess);
-        terminateProcess(oldProcess);
+
+        restartTrigger.consume(oldProcess);
 
         // wait up to 10s for restart of the indexer process
         boolean restarted = false;
         for (var i = 0; i < 100 && !restarted; i++) {
-            restarted = !oldProcess.equals(processSupplier.get());
+            restarted = !oldProcess.equals(processForRoot.apply(root));
             Thread.sleep(100);
         }
 
@@ -372,4 +355,16 @@ public class DefaultCommandLineServiceTest extends AppMapBaseTest {
         process.killProcess();
         assertTrue("Process must terminate", process.waitFor(5_000));
     }
+
+    private static Function<VirtualFile, KillableProcessHandler> getIndexerFunction = root -> {
+        var processes = ((DefaultCommandLineService) AppLandCommandLineService.getInstance()).getProcesses(root);
+        assertNotNull(processes);
+        return processes.getIndexer();
+    };
+
+    private static Function<VirtualFile, KillableProcessHandler> getScannerFunction = root -> {
+        var processes = ((DefaultCommandLineService) AppLandCommandLineService.getInstance()).getProcesses(root);
+        assertNotNull(processes);
+        return processes.getScanner();
+    };
 }
