@@ -130,6 +130,14 @@ public class DefaultCommandLineService implements AppLandCommandLineService {
     }
 
     @Override
+    public void restartProcessesInBackground() {
+        ApplicationManager.getApplication().executeOnPooledThread(() -> {
+            stopAll(true);
+            refreshForOpenProjects();
+        });
+    }
+
+    @Override
     public synchronized @NotNull List<VirtualFile> getActiveRoots() {
         return List.copyOf(processes.keySet());
     }
