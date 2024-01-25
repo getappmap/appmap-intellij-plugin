@@ -53,6 +53,11 @@ public interface AppLandCommandLineService extends Disposable {
     void refreshForOpenProjectsInBackground();
 
     /**
+     * Stops running processes and then starts processes for the enabled roots.
+     */
+    void restartProcessesInBackground();
+
+    /**
      * @return List of directories, which are handled by active CLI processes.
      */
     @NotNull List<VirtualFile> getActiveRoots();
