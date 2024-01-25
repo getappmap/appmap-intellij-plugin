@@ -22,6 +22,9 @@
                   class="appland.cli.AppLandProjectManagerListener"/>
         <listener topic="appland.files.AppMapFileChangeListener"
                   class="appland.telemetry.AppMapRecordListener"/>
+        <listener topic="appland.settings.AppMapSettingsListener"
+                  class="appland.cli.RestartServicesAfterApiChangeListener"
+                  activeInTestMode="false"/>
     </applicationListeners>
 
     <projectListeners>
