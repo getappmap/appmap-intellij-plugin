@@ -26,6 +26,10 @@ public enum AppMapWebview {
         return "http://localhost:" + BuiltInServerOptions.getInstance().getEffectiveBuiltInServerPort();
     }
 
+    public static @NotNull String getBaseUrlWithPath() {
+        return getBaseUrl() + APPMAP_SERVER_BASE_PATH;
+    }
+
     private final @NotNull String webviewAssetsDirectoryName;
 
     /**
@@ -39,6 +43,6 @@ public enum AppMapWebview {
      * @return HTTP URL of the IDE's built-in webserver for this webview's index.html file.
      */
     public @NotNull String getIndexHtmlUrl() {
-        return getBaseUrl() + APPMAP_SERVER_BASE_PATH + "/" + webviewAssetsDirectoryName + "/index.html";
+        return getBaseUrlWithPath() + "/" + webviewAssetsDirectoryName + "/index.html";
     }
 }

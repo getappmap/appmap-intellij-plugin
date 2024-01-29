@@ -3,10 +3,10 @@ package appland.webviews;
 import appland.AppMapBundle;
 import appland.utils.GsonUtils;
 import appland.webviews.webserver.AppMapWebview;
+import appland.webviews.webserver.WebviewAuthTokenRequestHandler;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import com.intellij.ide.BrowserUtil;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.fileEditor.FileEditor;
@@ -178,6 +178,8 @@ public abstract class WebviewEditor<T> extends UserDataHolderBase implements Fil
     private void setupJCEF() {
         // open links to https://appmap.io in the external browser
         contentPanel.getJBCefClient().addRequestHandler(new OpenExternalLinksHandler(), contentPanel.getCefBrowser());
+        // add auth tokens to our localhost requests
+        contentPanel.getJBCefClient().addRequestHandler(new WebviewAuthTokenRequestHandler(), contentPanel.getCefBrowser());
 
         contentPanel.setErrorPage(new DefaultWebviewErrorPage(navigating));
         contentPanel.getJBCefClient().addDisplayHandler(new ConsoleInitMessageHandler(this::initWebviewApplication), contentPanel.getCefBrowser());
