@@ -10,6 +10,7 @@ import appland.oauth.AppMapLoginAction;
 import appland.settings.AppMapApplicationSettingsService;
 import appland.settings.AppMapProjectSettingsService;
 import appland.settings.AppMapSettingsListener;
+import appland.webviews.OpenExternalLinksHandler;
 import appland.webviews.WebviewEditor;
 import appland.webviews.findings.FindingsOverviewEditorProvider;
 import appland.webviews.webserver.AppMapWebview;
@@ -236,7 +237,7 @@ public class InstallGuideEditor extends WebviewEditor<List<ProjectMetadata>> {
 
     private void handleMessageClickLink(@NotNull JsonObject message) {
         if (message.has("uri")) {
-            openExternalLink(message.getAsJsonPrimitive("uri").getAsString());
+            OpenExternalLinksHandler.openExternalLink(message.getAsJsonPrimitive("uri").getAsString());
         }
     }
 

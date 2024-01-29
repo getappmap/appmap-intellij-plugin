@@ -4,6 +4,7 @@ import appland.oauth.AppMapLoginAction;
 import appland.toolwindow.AppMapToolWindowContent;
 import appland.utils.GsonUtils;
 import appland.webviews.ConsoleInitMessageHandler;
+import appland.webviews.OpenExternalLinksHandler;
 import appland.webviews.webserver.AppMapWebview;
 import com.google.gson.JsonObject;
 import com.intellij.ide.BrowserUtil;
@@ -60,22 +61,13 @@ public class SignInViewPanel extends SimpleToolWindowPanel implements Disposable
     }
 
     private void loadWebView() throws MalformedURLException {
+        htmlPanel.getJBCefClient().addRequestHandler(new OpenExternalLinksHandler(), htmlPanel.getCefBrowser());
+
+        // Disable navigation to / of the built-in webserver, which is used by the webview when "Sign in" is clicked.
         htmlPanel.getJBCefClient().addRequestHandler(new CefRequestHandlerAdapter() {
             @Override
             public boolean onBeforeBrowse(CefBrowser browser, CefFrame frame, CefRequest request, boolean user_gesture, boolean is_redirect) {
-                // Disable navigation to / of the built-in webserver,
-                // which is used by the webview when "Sign in" is clicked.
-                if (AppMapWebview.getBaseUrl().equals(StringUtil.trimEnd(request.getURL(), "/"))) {
-                    return true;
-                }
-
-                // open link in the external browser
-                if (user_gesture) {
-                    BrowserUtil.browse(request.getURL());
-                    return true;
-                }
-
-                return false;
+                return AppMapWebview.getBaseUrl().equals(StringUtil.trimEnd(request.getURL(), "/"));
             }
         }, htmlPanel.getCefBrowser());
 

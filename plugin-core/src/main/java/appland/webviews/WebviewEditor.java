@@ -24,10 +24,6 @@ import com.intellij.ui.jcef.JBCefBrowserBase;
 import com.intellij.ui.jcef.JBCefJSQuery;
 import com.intellij.ui.jcef.JCEFHtmlPanel;
 import com.intellij.util.concurrency.annotations.RequiresBackgroundThread;
-import org.cef.browser.CefBrowser;
-import org.cef.browser.CefFrame;
-import org.cef.handler.CefRequestHandlerAdapter;
-import org.cef.network.CefRequest;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -175,21 +171,6 @@ public abstract class WebviewEditor<T> extends UserDataHolderBase implements Fil
         contentPanel.getCefBrowser().executeJavaScript("window.postMessage(" + gson.toJson(json) + ")", "", 0);
     }
 
-    /**
-     * Open the given URL in an external browser if it's a http:// or https:// link.
-     *
-     * @param url URL to open
-     * @return {@code true} if the link was opened in an external window.
-     */
-    protected boolean openExternalLink(@Nullable String url) {
-        if (url != null && (url.startsWith("http://") || url.startsWith("https://") || url.startsWith("mailto:"))) {
-            navigating.set(true);
-            BrowserUtil.browse(url);
-            return true;
-        }
-        return false;
-    }
-
     protected boolean isWebViewReady() {
         return isWebViewReady.get();
     }
@@ -265,16 +246,5 @@ public abstract class WebviewEditor<T> extends UserDataHolderBase implements Fil
     private String createCallbackJS(JBCefJSQuery query, @NotNull String functionName) {
         return "if (!window.AppLand) window.AppLand={}; window.AppLand." + functionName + "=function(name) {" +
                 query.inject("name") + "};";
-    }
-
-    private class OpenExternalLinksHandler extends CefRequestHandlerAdapter {
-        @Override
-        public boolean onBeforeBrowse(CefBrowser browser,
-                                      CefFrame frame,
-                                      CefRequest request,
-                                      boolean user_gesture,
-                                      boolean is_redirect) {
-            return user_gesture && openExternalLink(request.getURL());
-        }
     }
 }
