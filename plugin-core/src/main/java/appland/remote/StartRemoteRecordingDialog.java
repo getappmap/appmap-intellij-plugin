@@ -43,14 +43,14 @@ public class StartRemoteRecordingDialog extends DialogWrapper {
             return null;
         }
 
-        var url = dialog.form.getURL();
+        var url = dialog.form.getUrl();
         AppMapProjectSettingsService.getState(project).addRecentRemoteRecordingURLs(url);
         return url;
     }
 
     @Override
     protected @Nullable ValidationInfo doValidate() {
-        var urlError = UrlInputValidator.INSTANCE.getErrorText(form.getURL());
+        var urlError = UrlInputValidator.INSTANCE.getErrorText(form.getUrl());
         if (urlError != null) {
             return new ValidationInfo(urlError, form.getUrlComboBox());
         }
