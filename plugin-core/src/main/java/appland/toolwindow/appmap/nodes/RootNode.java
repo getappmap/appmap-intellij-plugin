@@ -12,6 +12,7 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.ui.tree.LeafState;
 import com.intellij.util.concurrency.annotations.RequiresBackgroundThread;
+import com.intellij.util.concurrency.annotations.RequiresReadLock;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
@@ -46,11 +47,10 @@ public class RootNode extends Node {
 
     @Override
     public List<? extends Node> getChildren() {
-        var byProjectName = ReadAction.compute(() -> {
-            return getCachedAppMaps().stream()
-                    .filter(appMap -> appMap.getAppMapFile() != null)
-                    .collect(Collectors.groupingBy(this::getAppMapProjectName));
-        });
+        var appMaps = getCachedAppMaps();
+        var byProjectName = ReadAction.compute(() -> appMaps.stream()
+                .filter(appMap -> appMap.getAppMapFile() != null)
+                .collect(Collectors.groupingBy(this::getAppMapProjectName)));
 
         return byProjectName.entrySet()
                 .stream()
@@ -72,11 +72,15 @@ public class RootNode extends Node {
                 .collect(Collectors.toList());
     }
 
+    @RequiresReadLock
     private @NotNull String getAppMapProjectName(@NotNull AppMapMetadata appMapMetadata) {
         assert appMapMetadata.getAppMapFile() != null;
         return AppMapProjectUtil.getAppMapProjectName(myProject, appMapMetadata.getAppMapFile());
     }
 
+    /**
+     * @return Available AppMaps, fetched in a {@code com.intellij.openapi.application.ReadAction}.
+     */
     @RequiresBackgroundThread
     private @NotNull List<AppMapMetadata> getCachedAppMaps() {
         // If we're on the EDT, we're unable to load the AppMaps because it involves slow operations. Also, we're unable
