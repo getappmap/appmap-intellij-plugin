@@ -25,7 +25,7 @@ import javax.swing.*;
 public class AppMapJvmExecutor extends Executor {
     public static final String EXECUTOR_ID = "AppMap";
     // latest version of Java, which is supported by the AppMap JVM agent
-    private static final int LATEST_SUPPORTED_JAVA_VERSION = 17;
+    private static final int LATEST_SUPPORTED_JAVA_VERSION = 21;
 
     public static @NotNull Executor getInstance() {
         var executor = ExecutorRegistry.getInstance().getExecutorById(EXECUTOR_ID);
