@@ -47,7 +47,7 @@ public class StopRemoteRecordingDialog extends DialogWrapper {
 
     @Override
     protected @Nullable ValidationInfo doValidate() {
-        var urlError = UrlInputValidator.INSTANCE.getErrorText(form.getURL());
+        var urlError = UrlInputValidator.INSTANCE.getErrorText(form.getUrl());
         if (urlError != null) {
             return new ValidationInfo(urlError, form.getUrlComboBox());
         }
