@@ -77,11 +77,14 @@ public class RootNode extends Node {
     }
 
     @RequiresBackgroundThread
-    private List<AppMapMetadata> getCachedAppMaps() {
+    private @NotNull List<AppMapMetadata> getCachedAppMaps() {
         if (needAppMapRefresh.compareAndSet(true, false)) {
             cachedAppMaps.set(loadAppMaps());
         }
-        return cachedAppMaps.get();
+
+        // a null value is possible for concurrent calls to this method
+        var result = cachedAppMaps.get();
+        return result == null ? Collections.emptyList() : result;
     }
 
     private List<AppMapMetadata> loadAppMaps() {
