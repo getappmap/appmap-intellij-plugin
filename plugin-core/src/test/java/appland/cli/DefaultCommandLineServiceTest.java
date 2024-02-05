@@ -70,7 +70,6 @@ public class DefaultCommandLineServiceTest extends AppMapBaseTest {
         assertFalse("Service must not execute for a directory without appmap.yaml", service.isRunning(parentDir, false));
 
         createAppMapYaml(parentDir);
-        addContentRootAndLaunchService(parentDir);
         assertTrue("Service must launch with appmap.yaml present", service.isRunning(parentDir, true));
         assertTrue("Service must launch with appmap.yaml present", service.isRunning(parentDir, false));
         assertActiveRoots(parentDir, nestedDir);
@@ -82,11 +81,10 @@ public class DefaultCommandLineServiceTest extends AppMapBaseTest {
         service.stop(parentDir, true);
         service.stop(nestedDir, true);
 
-        var debugInfo = service.toString();
-        assertFalse("Expected not to be running for " + parentDir + ": " + debugInfo, service.isRunning(parentDir, true));
-        assertFalse("Expected not to be running for " + parentDir + ": " + debugInfo, service.isRunning(parentDir, false));
-        assertFalse("Expected not to be running for " + nestedDir + ": " + debugInfo, service.isRunning(nestedDir, true));
-        assertFalse("Expected not to be running for " + nestedDir + ": " + debugInfo, service.isRunning(nestedDir, false));
+        waitForProcessStatus(false, parentDir, true);
+        waitForProcessStatus(false, parentDir, false);
+        waitForProcessStatus(false, nestedDir, true);
+        waitForProcessStatus(false, nestedDir, false);
     }
 
     @Test
@@ -271,7 +269,6 @@ public class DefaultCommandLineServiceTest extends AppMapBaseTest {
         var refreshLatch = new CountDownLatch(1);
         var bus = ApplicationManager.getApplication().getMessageBus().connect(getTestRootDisposable());
         bus.subscribe(AppLandCommandLineListener.TOPIC, refreshLatch::countDown);
-
         try {
             var content = appMapPath != null ? "appmap_dir: " + appMapPath + "\n" : "";
             return VfsTestUtil.createFile(directory, "appmap.yml", content);
@@ -329,6 +326,25 @@ public class DefaultCommandLineServiceTest extends AppMapBaseTest {
         var activeRootsString = StringUtil.join(activeRoots, VirtualFile::toString, ", ");
 
         assertEquals("Roots don't match. Expected: " + expectedString + ", actual: " + activeRootsString, expectedRoots, activeRoots);
+    }
+
+    /**
+     * Wait and retry for 30s until the process status of the directory is matching the expected value.
+     *
+     * @param expectedIsRunning Expected process status
+     * @param directory         Directory to check
+     * @param strict            If a strict check should be performed
+     */
+    private void waitForProcessStatus(boolean expectedIsRunning, @NotNull VirtualFile directory, boolean strict) throws Exception {
+        var service = AppLandCommandLineService.getInstance();
+        var deadline = System.currentTimeMillis() + TimeUnit.SECONDS.toMillis(30);
+        while (System.currentTimeMillis() < deadline) {
+            if (expectedIsRunning == service.isRunning(directory, strict)) {
+                break;
+            }
+            Thread.sleep(100);
+        }
+        assertEquals("Unexpected process status for directory " + directory + ": " + service, expectedIsRunning, service.isRunning(directory, strict));
     }
 
     private static void assertProcessRestart(@NotNull Supplier<KillableProcessHandler> processSupplier) throws InterruptedException {

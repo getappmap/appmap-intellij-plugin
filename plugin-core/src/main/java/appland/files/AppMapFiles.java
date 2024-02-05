@@ -54,8 +54,12 @@ public final class AppMapFiles {
     }
 
     /**
+     * Locate the appmap.yml files located in the project.
+     * This method must be invoked in a {@link ReadAction}.
+     * The appmap.yml files are not searched inside excluded folders, libraries or dependencies of the project.
+     *
      * @return The appmap.yaml files available in the current project.
-     * appmap.yml files are not searched inside excluded folders, libraries or dependencies of the project.
+     * @throws com.intellij.openapi.project.IndexNotReadyException If the filename index it unavailable
      */
     @RequiresReadLock
     public static @NotNull Collection<VirtualFile> findAppMapConfigFiles(@NotNull Project project) {
@@ -63,7 +67,11 @@ public final class AppMapFiles {
     }
 
     /**
+     * Locate the appmap.yml files located in the project and scope.
+     * This method must be invoked in a {@link ReadAction}.
+     *
      * @return The appmap.yaml files available in the current project and search scope.
+     * @throws com.intellij.openapi.project.IndexNotReadyException If the filename index it unavailable
      */
     @RequiresReadLock
     public static @NotNull Collection<VirtualFile> findAppMapConfigFiles(@NotNull Project project, @NotNull GlobalSearchScope scope) {
@@ -258,6 +266,15 @@ public final class AppMapFiles {
         }
 
         return roots.toArray(VirtualFile.EMPTY_ARRAY);
+    }
+
+    /**
+     * File appmap.yml is a marker file to tell that CLI processes may be launched for a directory.
+     *
+     * @return {@code true} if the directory contains a appmap.yml file and may have CLI processes watching it.
+     */
+    public static boolean isDirectoryEnabled(@NotNull VirtualFile directory) {
+        return directory.isValid() && directory.findChild(APPMAP_YML) != null;
     }
 
     /**

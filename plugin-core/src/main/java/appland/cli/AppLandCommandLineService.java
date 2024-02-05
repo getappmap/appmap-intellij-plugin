@@ -26,7 +26,6 @@ public interface AppLandCommandLineService extends Disposable {
 
     /**
      * Launches the AppLand CLI tools for the given directory.
-     * It'll stop any running service, which is serving a subdirectory the given path.
      *
      * @param directory                 Directory, where the service should be launched.
      * @param waitForProcessTermination Wait for termination of processes, which are no longer needed. This is mostly useful for test cases.
