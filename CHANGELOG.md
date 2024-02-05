@@ -1,5 +1,16 @@
 AppMap Plugin Changelog
 
+## [0.55.0](https://github.com/getappmap/appmap-intellij-plugin/compare/v0.54.0...v0.55.0) (2024-02-05)
+
+
+### Features
+
+-  enable JSON-RPC of AppMap indexer and pass API key ([aeb279d]())-  Support Java 21 in the plugin ([08ab253]())
+
+### Bug Fixes
+
+-  add auth token query parameter to HTTP requests of webview assets ([d8ee3e0]())-  don't open links to a localhost URL in the external browser ([989dc3c]())-  exception about slow operations when the AppMaps of the AppMap tool window are loaded ([aba4917]())-  NPE when the AppMap is displayed for the first time ([9ae8a8e]())
+
 ## [0.54.0](https://github.com/getappmap/appmap-intellij-plugin/compare/v0.53.0...v0.54.0) (2023-12-13)
 
 
