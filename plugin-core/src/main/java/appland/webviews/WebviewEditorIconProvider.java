@@ -19,14 +19,9 @@ public class WebviewEditorIconProvider implements FileIconProvider {
             return Icons.APPMAP_FILE_SMALL;
         }
 
-        // special handling for the install guide webview until we've migrated it to WebviewEditorProvider
-        if (InstallGuideEditorProvider.isInstallGuideFile(file)) {
-            return Icons.APPMAP_FILE_SMALL;
-        }
-
         var editorProviderId = WebviewEditorProvider.WEBVIEW_EDITOR_KEY.get(file);
         if (editorProviderId != null) {
-            // we can't use FileEditorProviderManager.getInstance().getProvider(editorProviderId)
+            // We can't use FileEditorProviderManager.getInstance().getProvider(editorProviderId)
             // because it turned from class to interface in 2023.1.
             // Using it would raise an error with plugin verifier.
 

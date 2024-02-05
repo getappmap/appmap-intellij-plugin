@@ -1,16 +1,18 @@
 package appland.toolwindow.signInView;
 
-import appland.AppMapPlugin;
 import appland.oauth.AppMapLoginAction;
 import appland.toolwindow.AppMapToolWindowContent;
 import appland.utils.GsonUtils;
 import appland.webviews.ConsoleInitMessageHandler;
+import appland.webviews.OpenExternalLinksHandler;
+import appland.webviews.webserver.AppMapWebview;
 import com.google.gson.JsonObject;
 import com.intellij.ide.BrowserUtil;
 import com.intellij.openapi.Disposable;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.ui.SimpleToolWindowPanel;
 import com.intellij.openapi.util.Disposer;
+import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.ui.jcef.JBCefBrowserBase;
 import com.intellij.ui.jcef.JBCefJSQuery;
 import com.intellij.ui.jcef.JCEFHtmlPanel;
@@ -59,21 +61,13 @@ public class SignInViewPanel extends SimpleToolWindowPanel implements Disposable
     }
 
     private void loadWebView() throws MalformedURLException {
+        htmlPanel.getJBCefClient().addRequestHandler(new OpenExternalLinksHandler(), htmlPanel.getCefBrowser());
+
+        // Disable navigation to / of the built-in webserver, which is used by the webview when "Sign in" is clicked.
         htmlPanel.getJBCefClient().addRequestHandler(new CefRequestHandlerAdapter() {
             @Override
             public boolean onBeforeBrowse(CefBrowser browser, CefFrame frame, CefRequest request, boolean user_gesture, boolean is_redirect) {
-                // disable navigation to / on the file system, which is used by the webview as fallback link
-                if ("file:///".equals(request.getURL())) {
-                    return true;
-                }
-
-                // open link in the external browser
-                if (user_gesture) {
-                    BrowserUtil.browse(request.getURL());
-                    return true;
-                }
-
-                return false;
+                return AppMapWebview.getBaseUrl().equals(StringUtil.trimEnd(request.getURL(), "/"));
             }
         }, htmlPanel.getCefBrowser());
 
@@ -90,11 +84,11 @@ public class SignInViewPanel extends SimpleToolWindowPanel implements Disposable
         }, htmlPanel.getCefBrowser());
 
         htmlPanel.getJBCefClient().addDisplayHandler(new ConsoleInitMessageHandler(this::initWebView), htmlPanel.getCefBrowser());
-        htmlPanel.loadURL(AppMapPlugin.getSignInHTMLPath().toUri().toURL().toString());
+
+        htmlPanel.loadURL(AppMapWebview.SignIn.getIndexHtmlUrl());
     }
 
     private void initWebView() {
-
         // add handler for messages sent by the JS application
         postMessageQuery.addHandler(request -> {
             try {

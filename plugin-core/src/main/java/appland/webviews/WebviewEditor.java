@@ -2,10 +2,11 @@ package appland.webviews;
 
 import appland.AppMapBundle;
 import appland.utils.GsonUtils;
+import appland.webviews.webserver.AppMapWebview;
+import appland.webviews.webserver.WebviewAuthTokenRequestHandler;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import com.intellij.ide.BrowserUtil;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.fileEditor.FileEditor;
@@ -17,23 +18,17 @@ import com.intellij.openapi.progress.Task;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.Disposer;
 import com.intellij.openapi.util.UserDataHolderBase;
+import com.intellij.openapi.util.registry.Registry;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.ui.jcef.JBCefBrowserBase;
 import com.intellij.ui.jcef.JBCefJSQuery;
 import com.intellij.ui.jcef.JCEFHtmlPanel;
 import com.intellij.util.concurrency.annotations.RequiresBackgroundThread;
-import org.cef.browser.CefBrowser;
-import org.cef.browser.CefFrame;
-import org.cef.handler.CefRequestHandlerAdapter;
-import org.cef.network.CefRequest;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
 import java.beans.PropertyChangeListener;
-import java.io.IOException;
-import java.net.MalformedURLException;
-import java.nio.file.Path;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -46,6 +41,7 @@ public abstract class WebviewEditor<T> extends UserDataHolderBase implements Fil
     private static final Logger LOG = Logger.getInstance(WebviewEditor.class);
 
     protected final @NotNull Project project;
+    protected final @NotNull AppMapWebview webview;
     protected final @NotNull VirtualFile file;
     private final @NotNull Set<String> supportedMessages;
     protected final @NotNull Gson gson;
@@ -56,8 +52,12 @@ public abstract class WebviewEditor<T> extends UserDataHolderBase implements Fil
     // queries must be created before the webview is initialized
     private final @NotNull JBCefJSQuery postMessageQuery = JBCefJSQuery.create((JBCefBrowserBase) contentPanel);
 
-    public WebviewEditor(@NotNull Project project, @NotNull VirtualFile file, @NotNull Set<String> supportedMessages) {
+    public WebviewEditor(@NotNull Project project,
+                         @NotNull AppMapWebview webview,
+                         @NotNull VirtualFile file,
+                         @NotNull Set<String> supportedMessages) {
         this.project = project;
+        this.webview = webview;
         this.file = file;
         this.supportedMessages = supportedMessages;
         this.gson = Objects.requireNonNullElse(createCustomizedGson(), GsonUtils.GSON);
@@ -93,11 +93,6 @@ public abstract class WebviewEditor<T> extends UserDataHolderBase implements Fil
      */
     @RequiresBackgroundThread
     protected abstract void afterInit(@Nullable T initData);
-
-    /**
-     * @return {@code java.nio.file.Path} to the HTML file to load into the webview.
-     */
-    protected abstract @NotNull Path getApplicationFile();
 
     /**
      * @throws Exception If an error occurred while handling the message
@@ -176,29 +171,6 @@ public abstract class WebviewEditor<T> extends UserDataHolderBase implements Fil
         contentPanel.getCefBrowser().executeJavaScript("window.postMessage(" + gson.toJson(json) + ")", "", 0);
     }
 
-    /**
-     * Open the given URL in an external browser if it's a http:// or https:// link.
-     *
-     * @param url URL to open
-     * @return {@code true} if the link was opened in an external window.
-     */
-    protected boolean openExternalLink(@Nullable String url) {
-        if (url != null && (url.startsWith("http://") || url.startsWith("https://") || url.startsWith("mailto:"))) {
-            navigating.set(true);
-            BrowserUtil.browse(url);
-            return true;
-        }
-        return false;
-    }
-
-    protected String getBaseUrl() {
-        try {
-            return getApplicationFile().toUri().toURL().toString();
-        } catch (MalformedURLException e) {
-            return "";
-        }
-    }
-
     protected boolean isWebViewReady() {
         return isWebViewReady.get();
     }
@@ -206,16 +178,18 @@ public abstract class WebviewEditor<T> extends UserDataHolderBase implements Fil
     private void setupJCEF() {
         // open links to https://appmap.io in the external browser
         contentPanel.getJBCefClient().addRequestHandler(new OpenExternalLinksHandler(), contentPanel.getCefBrowser());
+        // add auth tokens to our localhost requests
+        contentPanel.getJBCefClient().addRequestHandler(new WebviewAuthTokenRequestHandler(), contentPanel.getCefBrowser());
 
         contentPanel.setErrorPage(new DefaultWebviewErrorPage(navigating));
         contentPanel.getJBCefClient().addDisplayHandler(new ConsoleInitMessageHandler(this::initWebviewApplication), contentPanel.getCefBrowser());
     }
 
     private void loadApplication() {
-        try {
-            contentPanel.loadURL(getApplicationFile().toUri().toURL().toString());
-        } catch (IOException e) {
-            LOG.error(e);
+        contentPanel.loadURL(webview.getIndexHtmlUrl());
+
+        if (Registry.is("appmap.webview.open.dev.tools", false)) {
+            ApplicationManager.getApplication().invokeLater(this::openDevTools);
         }
     }
 
@@ -274,16 +248,5 @@ public abstract class WebviewEditor<T> extends UserDataHolderBase implements Fil
     private String createCallbackJS(JBCefJSQuery query, @NotNull String functionName) {
         return "if (!window.AppLand) window.AppLand={}; window.AppLand." + functionName + "=function(name) {" +
                 query.inject("name") + "};";
-    }
-
-    private class OpenExternalLinksHandler extends CefRequestHandlerAdapter {
-        @Override
-        public boolean onBeforeBrowse(CefBrowser browser,
-                                      CefFrame frame,
-                                      CefRequest request,
-                                      boolean user_gesture,
-                                      boolean is_redirect) {
-            return user_gesture && openExternalLink(request.getURL());
-        }
     }
 }

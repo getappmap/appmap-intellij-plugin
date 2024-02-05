@@ -2,6 +2,7 @@ package appland.cli;
 
 import com.intellij.util.messages.Topic;
 
+@FunctionalInterface
 public interface AppLandCommandLineListener {
     Topic<AppLandCommandLineListener> TOPIC = Topic.create("appland.cli", AppLandCommandLineListener.class);
 

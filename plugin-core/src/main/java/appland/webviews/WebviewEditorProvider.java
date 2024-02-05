@@ -1,5 +1,6 @@
 package appland.webviews;
 
+import com.google.common.base.Predicates;
 import com.intellij.openapi.fileEditor.FileEditor;
 import com.intellij.openapi.fileEditor.FileEditorManager;
 import com.intellij.openapi.fileEditor.FileEditorPolicy;
@@ -16,6 +17,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
+import java.util.function.Predicate;
 
 /**
  * Base class for editor providers based on a JCEF webview.
@@ -67,15 +69,26 @@ public abstract class WebviewEditorProvider implements FileEditorProvider, DumbA
         return FileEditorPolicy.HIDE_DEFAULT_EDITOR;
     }
 
+    /**
+     * Open a new webview editor. It reuses an already visible webview editor of this provider's type.
+     *
+     * @param project Current project
+     * @param title   Title to show in the editor tab
+     */
     public void open(@NotNull Project project, @NotNull String title) {
-        // try to re-use an already open editor
-        for (var editor : FileEditorManager.getInstance(project).getAllEditors()) {
-            var file = editor.getFile();
-            if (file != null && isWebViewFile(file)) {
-                assert editor instanceof WebviewEditor;
-                FileEditorManagerEx.getInstanceEx(project).openFile(file, true, true);
-                return;
-            }
+        open(project, title, true);
+    }
+
+    /**
+     * Open a new webview editor. It reuses an already visible webview editor of this provider's type.
+     *
+     * @param project         Current project
+     * @param title           Title to show in the editor tab
+     * @param reuseOpenEditor If {@code true}, then an already available webview editor is focused instead of creating a new one.
+     */
+    public void open(@NotNull Project project, @NotNull String title, boolean reuseOpenEditor) {
+        if (reuseOpenEditor && focusOpenEditor(project, Predicates.alwaysTrue())) {
+            return;
         }
 
         openNewFile(project, title);
@@ -94,5 +107,31 @@ public abstract class WebviewEditorProvider implements FileEditorProvider, DumbA
         var file = new LightVirtualFile(title);
         WEBVIEW_EDITOR_KEY.set(file, webviewTypeId);
         return file;
+    }
+
+    public boolean focusOpenEditor(@NotNull Project project, @NotNull Predicate<WebviewEditor<?>> editorPredicate) {
+        var openEditor = findOpenEditor(project, editorPredicate);
+        if (openEditor != null) {
+            FileEditorManagerEx.getInstanceEx(project).openFile(openEditor.file, true, true);
+            return true;
+        }
+
+        return false;
+    }
+
+    public @Nullable WebviewEditor<?> findOpenEditor(@NotNull Project project,
+                                                     @NotNull Predicate<WebviewEditor<?>> editorPredicate) {
+        for (var editor : FileEditorManager.getInstance(project).getAllEditors()) {
+            var file = editor.getFile();
+            if (file != null && isWebViewFile(file)) {
+                assert editor instanceof WebviewEditor;
+
+                if (editorPredicate.test((WebviewEditor<?>) editor)) {
+                    return (WebviewEditor<?>) editor;
+                }
+            }
+        }
+
+        return null;
     }
 }

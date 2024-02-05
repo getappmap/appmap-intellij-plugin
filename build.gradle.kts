@@ -165,6 +165,7 @@ allprojects {
             // attach AppMap agent, but only if Gradle is online
             jvmArgs("-javaagent:$agentOutputPath",
                     "-Dappmap.config.file=${rootProject.file("appmap.yml")}",
+                    "-Dappmap.debug.file=${project.buildDir.resolve("appmap-agent-${System.currentTimeMillis()}.log")}",
                     "-Dappmap.output.directory=${rootProject.file("tmp/appmap")}")
             systemProperty("appmap.test.withAgent", "true")
 
@@ -221,6 +222,11 @@ project(":") {
             }
             from("${project.rootDir}/appland-signin") {
                 into("appmap-assets/appland-signin")
+                include("index.html")
+                include("dist/**")
+            }
+            from("${project.rootDir}/appland-navie") {
+                into("appmap-assets/appland-navie")
                 include("index.html")
                 include("dist/**")
             }

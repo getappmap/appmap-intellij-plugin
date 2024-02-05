@@ -1,26 +1,23 @@
 package appland.webviews.appMap;
 
 import appland.AppMapBundle;
-import appland.AppMapPlugin;
 import appland.files.AppMapFiles;
 import appland.files.FileLocation;
 import appland.files.FileLookup;
 import appland.problemsView.FindingsManager;
 import appland.problemsView.FindingsUtil;
 import appland.problemsView.ResolvedStackLocation;
-import appland.settings.AppMapApplicationSettingsService;
 import appland.settings.AppMapProjectSettingsService;
 import appland.settings.AppMapSettingsListener;
 import appland.settings.AppMapWebViewFilter;
 import appland.telemetry.TelemetryService;
-import appland.upload.AppMapUploader;
 import appland.utils.GsonUtils;
 import appland.webviews.WebviewEditor;
+import appland.webviews.webserver.AppMapWebview;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
-import com.intellij.ide.BrowserUtil;
 import com.intellij.ide.actions.OpenInRightSplitAction;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.application.ModalityState;
@@ -37,7 +34,6 @@ import org.jetbrains.annotations.Nls;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.nio.file.Path;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
@@ -60,7 +56,7 @@ public class AppMapFileEditor extends WebviewEditor<JsonObject> {
     private final AtomicBoolean isModified = new AtomicBoolean(false);
 
     public AppMapFileEditor(@NotNull Project project, @NotNull VirtualFile file) {
-        super(project, file, Set.of("webviewMounted", "uploadAppMap", "clearSelection", "viewSource",
+        super(project, AppMapWebview.AppMap, file, Set.of("webviewMounted", "clearSelection", "viewSource",
                 "sidebarSearchFocused", "clickFilterButton", "clickTab", "selectObjectInSidebar", "resetDiagram",
                 "exportSVG", "saveFilter", "defaultFilter", "deleteFilter"));
         setupVfsListener(file);
@@ -139,11 +135,6 @@ public class AppMapFileEditor extends WebviewEditor<JsonObject> {
     }
 
     @Override
-    protected @NotNull Path getApplicationFile() {
-        return AppMapPlugin.getAppMapHTMLPath();
-    }
-
-    @Override
     public @Nls(capitalization = Nls.Capitalization.Title) @NotNull String getName() {
         return AppMapBundle.get("appmap.editor.name");
     }
@@ -187,10 +178,6 @@ public class AppMapFileEditor extends WebviewEditor<JsonObject> {
                 if (state != null) {
                     applyWebViewState(state);
                 }
-                break;
-
-            case "uploadAppMap":
-                uploadAppMap();
                 break;
 
             case "clearSelection":
@@ -332,16 +319,6 @@ public class AppMapFileEditor extends WebviewEditor<JsonObject> {
         var message = createMessageObject("updateSavedFilters");
         message.add("data", GsonUtils.GSON.toJsonTree(savedFilters));
         postMessage(message);
-    }
-
-    private void uploadAppMap() {
-        ApplicationManager.getApplication().invokeLater(() -> {
-            AppMapUploader.uploadAppMap(project, file, url -> {
-                ApplicationManager.getApplication().invokeLater(() -> {
-                    BrowserUtil.browse(url);
-                });
-            });
-        }, ModalityState.defaultModalityState());
     }
 
     private static void showShowSourceError(@NotNull String relativePath) {

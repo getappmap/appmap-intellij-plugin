@@ -129,6 +129,14 @@
         <!-- OAuth authentication -->
         <httpRequestHandler implementation="appland.oauth.AppMapOAuthRequestHandler"/>
         <applicationService serviceImplementation="appland.oauth.AppMapOAuthService"/>
+
+        <!-- webview requests -->
+        <httpRequestHandler implementation="appland.webviews.webserver.AppMapWebviewRequestHandler"/>
+
+        <!-- Registry keys -->
+        <registryKey key="appmap.webview.open.dev.tools"
+                     defaultValue="false"
+                     description="Open the developer console for AppMap webviews."/>
     </extensions>
 
     <actions>
@@ -141,9 +149,6 @@
         <action id="stopAppMapRemoteRecording" class="appland.actions.StopAppMapRecordingAction"/>
 
         <action id="appmap.generateOpenAPI" class="appland.actions.GenerateOpenApiAction"/>
-        <!--
-        <action id="uploadAppMap" class="appland.actions.UploadAppMapAction"/>
-        -->
         <action id="appmapDocs" class="appland.actions.AppMapDocumentationAction">
             <add-to-group group-id="HelpMenu" anchor="before" relative-to-action="CheckForUpdate"/>
         </action>

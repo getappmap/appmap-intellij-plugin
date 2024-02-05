@@ -1,7 +1,6 @@
 package appland.webviews.findingDetails;
 
 import appland.AppMapBundle;
-import appland.AppMapPlugin;
 import appland.files.FileLocation;
 import appland.problemsView.FindingsUtil;
 import appland.problemsView.ResolvedStackLocation;
@@ -10,6 +9,7 @@ import appland.webviews.WebviewEditor;
 import appland.webviews.appMap.AppMapFileEditor;
 import appland.webviews.appMap.AppMapFileEditorState;
 import appland.webviews.findings.FindingsOverviewEditorProvider;
+import appland.webviews.webserver.AppMapWebview;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
@@ -26,24 +26,18 @@ import org.jetbrains.annotations.Nls;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.nio.file.Path;
 import java.util.Set;
 
 import static appland.utils.GsonUtils.singlePropertyObject;
 
 public class FindingDetailsEditor extends WebviewEditor<Void> {
     public FindingDetailsEditor(@NotNull Project project, @NotNull VirtualFile file) {
-        super(project, file, Set.of("open-findings-overview", "open-in-source-code", "open-map"));
+        super(project, AppMapWebview.Findings, file, Set.of("open-findings-overview", "open-in-source-code", "open-map"));
     }
 
     @Override
     public @Nls(capitalization = Nls.Capitalization.Title) @NotNull String getName() {
         return AppMapBundle.get("webview.findingDetails.title");
-    }
-
-    @Override
-    protected @NotNull Path getApplicationFile() {
-        return AppMapPlugin.getFindingsAppHTMLPath();
     }
 
     @Override
