@@ -52,45 +52,41 @@ public class DefaultCommandLineServiceTest extends AppMapBaseTest {
     }
 
     @Test
-    @Ignore("flaky test")
     public void directoryTree() throws Exception {
-        var tempFile = myFixture.createFile("test.txt", "");
-        var tempDir = tempFile.getParent();
+        var service = AppLandCommandLineService.getInstance();
 
-        var nestedFile = myFixture.addFileToProject("parent/child/file.txt", "");
-        assertNotNull(nestedFile.getParent());
+        var parentDir = myFixture.createFile("test.txt", "").getParent();
+        assertNotNull(parentDir);
 
-        var nestedDir = nestedFile.getParent().getVirtualFile();
+        var nestedDir = myFixture.addFileToProject("parent/child/file.txt", "").getParent().getVirtualFile();
         assertNotNull(nestedDir);
 
-        var service = AppLandCommandLineService.getInstance();
-        addContentRootAndLaunchService(nestedDir);
-        assertEmptyRoots();
-
+        // creating an appmap.yml file must trigger the launch of the matching AppMap processes
         createAppMapYaml(nestedDir);
         addContentRootAndLaunchService(nestedDir);
         assertActiveRoots(nestedDir);
 
-        addContentRootAndLaunchService(tempDir);
-        assertFalse(service.isRunning(tempDir, false));
+        addContentRootAndLaunchService(parentDir);
+        assertFalse("Service must not execute for a directory without appmap.yaml", service.isRunning(parentDir, false));
 
-        createAppMapYaml(tempDir);
-        addContentRootAndLaunchService(tempDir);
-        assertTrue(service.isRunning(tempDir, true));
-        assertTrue(service.isRunning(tempDir, false));
+        createAppMapYaml(parentDir);
+        addContentRootAndLaunchService(parentDir);
+        assertTrue("Service must launch with appmap.yaml present", service.isRunning(parentDir, true));
+        assertTrue("Service must launch with appmap.yaml present", service.isRunning(parentDir, false));
+        assertActiveRoots(parentDir, nestedDir);
 
-        assertFalse(service.isRunning(nestedDir, true));
+        assertTrue("Processes of child directories must keep running", service.isRunning(nestedDir, true));
         assertTrue(service.isRunning(nestedDir, false));
+        assertActiveRoots(parentDir, nestedDir);
 
-        assertActiveRoots(tempDir);
-
-        service.stop(tempDir, true);
+        service.stop(parentDir, true);
+        service.stop(nestedDir, true);
 
         var debugInfo = service.toString();
-        assertFalse("Expected not to be running: " + debugInfo, service.isRunning(tempDir, true));
-        assertFalse("Expected not to be running: " + debugInfo, service.isRunning(tempDir, false));
-        assertFalse("Expected not to be running: " + debugInfo, service.isRunning(nestedDir, true));
-        assertFalse("Expected not to be running: " + debugInfo, service.isRunning(nestedDir, false));
+        assertFalse("Expected not to be running for " + parentDir + ": " + debugInfo, service.isRunning(parentDir, true));
+        assertFalse("Expected not to be running for " + parentDir + ": " + debugInfo, service.isRunning(parentDir, false));
+        assertFalse("Expected not to be running for " + nestedDir + ": " + debugInfo, service.isRunning(nestedDir, true));
+        assertFalse("Expected not to be running for " + nestedDir + ": " + debugInfo, service.isRunning(nestedDir, false));
     }
 
     @Test
