@@ -29,9 +29,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@appland/components@npm:^3.29.0":
-  version: 3.29.0
-  resolution: "@appland/components@npm:3.29.0"
+"@appland/components@npm:^3.33.0":
+  version: 3.33.0
+  resolution: "@appland/components@npm:3.33.0"
   dependencies:
     "@appland/client": ^1.12.0
     "@appland/diagrams": ^1.7.0
@@ -52,7 +52,7 @@ __metadata:
     sql-formatter: ^4.0.2
     vue: ^2.7.14
     vuex: ^3.6.0
-  checksum: 991825b485cc071a7680a3e6c1fae1a8cb2fda78a77b04f025316f2b867f0d8c820f39076b5133bf328b5b91362e7c906073e5af95b7a70bbb6f8655c2c0db32
+  checksum: 91a60e953181f3cb68bb82a0bb9135aaccd24af37b22c2193229447fb27c2231dd626894912c1d8dcacc562b86d49daef4b0036be34a34eb2e9d69c060a36f5e
   languageName: node
   linkType: hard
 
@@ -1947,7 +1947,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "appmap-intellij-navie@workspace:."
   dependencies:
-    "@appland/components": ^3.29.0
+    "@appland/components": ^3.33.0
     "@babel/core": ^7.12
     "@babel/preset-env": ^7.12
     "@babel/preset-typescript": ^7.12
