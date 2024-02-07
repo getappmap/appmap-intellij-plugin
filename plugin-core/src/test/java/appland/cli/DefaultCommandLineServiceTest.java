@@ -81,6 +81,11 @@ public class DefaultCommandLineServiceTest extends AppMapBaseTest {
         service.stop(parentDir, true);
         service.stop(nestedDir, true);
 
+        // forced sleep on CI until we find the cause breaking this test
+        if (System.getenv("CI") != null) {
+            Thread.sleep(4_000);
+        }
+
         waitForProcessStatus(false, parentDir, true);
         waitForProcessStatus(false, parentDir, false);
         waitForProcessStatus(false, nestedDir, true);
