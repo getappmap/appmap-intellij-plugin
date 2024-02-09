@@ -5,6 +5,7 @@ import appland.javaAgent.AppMapJavaAgentDownloadService;
 import com.intellij.execution.ProgramRunnerUtil;
 import com.intellij.execution.actions.ConfigurationContext;
 import com.intellij.execution.application.ApplicationConfiguration;
+import com.intellij.execution.process.ProcessHandler;
 import com.intellij.execution.runners.ExecutionEnvironmentBuilder;
 import com.intellij.execution.runners.ProgramRunner;
 import com.intellij.execution.ui.RunContentDescriptor;
@@ -21,6 +22,24 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class AppMapJavaAgentRunnerTest extends BaseAppMapJavaTest {
+    private ProcessHandler processHandler = null;
+
+    @Override
+    protected void tearDown() throws Exception {
+        try {
+            if (processHandler != null) {
+                LOG.info("Terminating down run configuration process...");
+                processHandler.destroyProcess();
+                processHandler.waitFor(5_000);
+                processHandler = null;
+            }
+        } catch (Exception e) {
+            addSuppressedException(e);
+        } finally {
+            super.tearDown();
+        }
+    }
+
     @Test
     public void testJavaRunConfiguration() throws Exception {
         var javaPath = Paths.get(AppLandTestExecutionPolicy.findAppMapHomePath()).resolve("appmap-java/simpleProject").toString();
@@ -60,7 +79,7 @@ public class AppMapJavaAgentRunnerTest extends BaseAppMapJavaTest {
         var descriptor = runConfigDescriptor.get();
         assertNotNull(descriptor);
 
-        var processHandler = descriptor.getProcessHandler();
+        processHandler = descriptor.getProcessHandler();
         assertNotNull(processHandler);
         var cmdline = processHandler.toString();
 
