@@ -2,8 +2,10 @@ import Vue from 'vue';
 import MessagePublisher from 'messagePublisher';
 import vscode from 'vsCodeBridge';
 import handleAppMapMessages from "handleAppMapMessages";
-import '@appland/diagrams/dist/style.css';
-import {VChatSearch} from '@appland/components';
+import { VChatSearch } from "@appland/components";
+
+import "@appland/diagrams/dist/style.css";
+import "highlight.js/styles/base16/snazzy.css";
 
 export function mountWebview() {
   const messages = new MessagePublisher(vscode);
