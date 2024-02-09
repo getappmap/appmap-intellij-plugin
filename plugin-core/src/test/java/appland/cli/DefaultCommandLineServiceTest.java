@@ -47,6 +47,17 @@ public class DefaultCommandLineServiceTest extends AppMapBaseTest {
         AppMapApplicationSettingsService.getInstance().setApiKey("api-key");
     }
 
+    @Override
+    protected void tearDown() throws Exception {
+        try {
+            AppLandCommandLineService.getInstance().stopAll(true);
+        } catch (Exception e) {
+            addSuppressedException(e);
+        } finally {
+            super.tearDown();
+        }
+    }
+
     @Test
     public void directoryTree() throws Exception {
         // fixme this test is failing oddly on Windows CI, remove when we made a proper fix
