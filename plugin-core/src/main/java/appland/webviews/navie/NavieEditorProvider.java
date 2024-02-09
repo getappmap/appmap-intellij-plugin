@@ -9,10 +9,12 @@ import com.intellij.openapi.actionSystem.CommonDataKeys;
 import com.intellij.openapi.actionSystem.DataContext;
 import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.editor.ex.EditorEx;
+import com.intellij.openapi.fileEditor.FileDocumentManager;
 import com.intellij.openapi.fileEditor.FileEditor;
 import com.intellij.openapi.fileEditor.FileEditorManager;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.project.ProjectUtil;
+import com.intellij.openapi.roots.ProjectFileIndex;
 import com.intellij.openapi.ui.popup.JBPopupFactory;
 import com.intellij.openapi.ui.popup.PopupStep;
 import com.intellij.openapi.ui.popup.util.BaseListPopupStep;
@@ -20,6 +22,8 @@ import com.intellij.openapi.util.Key;
 import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.openapi.vfs.VfsUtil;
 import com.intellij.openapi.vfs.VirtualFile;
+import com.intellij.psi.PsiManager;
+
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -34,7 +38,7 @@ public final class NavieEditorProvider extends WebviewEditorProvider {
     /**
      * Default text for the question text input box.
      */
-    static final Key<String> KEY_QUESTION_TEXT = Key.create("appland.navie.text");
+    static final Key<NavieCodeSelection> KEY_CODE_SELECTION = Key.create("appland.navie.codeSelection");
     /**
      * The port of the matching indexer's JSON-RPC service.
      */
@@ -56,7 +60,7 @@ public final class NavieEditorProvider extends WebviewEditorProvider {
         assert provider != null;
 
         var editor = CommonDataKeys.EDITOR_EVEN_IF_INACTIVE.getData(context);
-        chooseIndexerJsonRpcPort(project, context, editor, (indexerPort, selectedText) -> {
+        chooseIndexerJsonRpcPort(project, context, editor, (indexerPort, codeSelection) -> {
             if (indexerPort == null) {
                 AppMapNotifications.showNavieUnavailableNotification(project);
                 return;
@@ -64,10 +68,34 @@ public final class NavieEditorProvider extends WebviewEditorProvider {
 
             var file = provider.createVirtualFile(AppMapBundle.get("webview.navie.title"));
             KEY_INDEXER_RPC_PORT.set(file, indexerPort);
-            KEY_QUESTION_TEXT.set(file, selectedText);
+            KEY_CODE_SELECTION.set(file, codeSelection);
 
             FileEditorManager.getInstance(project).openFile(file, true);
         });
+    }
+
+    private static @Nullable NavieCodeSelection buildCodeSelection(@NotNull Project project, @Nullable Editor editor) {
+        var selection = editor != null ? editor.getSelectionModel() : null;
+        if (selection == null || !selection.hasSelection()) {
+            return null;
+        }
+
+        var document = selection.getEditor().getDocument();
+        var fileIndex = ProjectFileIndex.getInstance(project);
+        var virtualFile = FileDocumentManager.getInstance().getFile(selection.getEditor().getDocument());
+        var rootFile = virtualFile != null ? fileIndex.getContentRootForFile(virtualFile) : null;
+        var psiFile = virtualFile != null ? PsiManager.getInstance(project).findFile(virtualFile) : null;
+
+        String relativePath = null;
+        if (rootFile != null && virtualFile != null) {
+            relativePath = VfsUtil.getRelativePath(virtualFile, rootFile);
+        }
+
+        return new NavieCodeSelection(selection.getSelectedText(),
+                relativePath,
+                document.getLineNumber(selection.getSelectionStart()) + 1,
+                document.getLineNumber(selection.getSelectionEnd()) + 1,
+                psiFile != null ? psiFile.getLanguage().getID() : null);
     }
 
     private static void chooseIndexerJsonRpcPort(@NotNull Project project,
@@ -75,13 +103,13 @@ public final class NavieEditorProvider extends WebviewEditorProvider {
                                                  @Nullable Editor editor,
                                                  @NotNull ShowNavieConsumer consumer) {
         var service = AppLandCommandLineService.getInstance();
-        var selectedText = editor != null ? editor.getSelectionModel().getSelectedText() : null;
+        var codeSelection = buildCodeSelection(project, editor);
 
         var contextFile = editor instanceof EditorEx ? ((EditorEx) editor).getVirtualFile() : null;
         if (contextFile != null) {
             var port = service.getIndexerRpcPort(contextFile);
             if (port != null) {
-                consumer.openNavie(port, selectedText);
+                consumer.openNavie(port, codeSelection);
                 return;
             }
         }
@@ -94,7 +122,7 @@ public final class NavieEditorProvider extends WebviewEditorProvider {
 
         // without a context file, fallback to the only available indexer port if there's exactly one active root
         if (activeRoots.size() == 1) {
-            consumer.openNavie(service.getIndexerRpcPort(activeRoots.get(0)), selectedText);
+            consumer.openNavie(service.getIndexerRpcPort(activeRoots.get(0)), codeSelection);
             return;
         }
 
@@ -110,7 +138,7 @@ public final class NavieEditorProvider extends WebviewEditorProvider {
             @Override
             public @Nullable PopupStep<?> onChosen(VirtualFile selectedValue, boolean finalChoice) {
                 var port = selectedValue != null ? service.getIndexerRpcPort(selectedValue) : null;
-                consumer.openNavie(port, selectedText);
+                consumer.openNavie(port, codeSelection);
                 return FINAL_CHOICE;
             }
         };
@@ -130,6 +158,6 @@ public final class NavieEditorProvider extends WebviewEditorProvider {
 
     @FunctionalInterface
     private interface ShowNavieConsumer {
-        void openNavie(@Nullable Integer indexerPort, @Nullable String selectedText);
+        void openNavie(@Nullable Integer indexerPort, @Nullable NavieCodeSelection codeSelection);
     }
 }

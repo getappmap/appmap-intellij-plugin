@@ -31,14 +31,18 @@ public class NavieEditor extends WebviewEditor<Void> {
     protected void setupInitMessage(@Nullable Void initData, @NotNull JsonObject payload) {
         var apiKey = AppMapApplicationSettingsService.getInstance().getApiKey();
         var filters = AppMapProjectSettingsService.getState(project).getAppMapFilters().values();
-        var question = NavieEditorProvider.KEY_QUESTION_TEXT.get(file);
+        var codeSelection = NavieEditorProvider.KEY_CODE_SELECTION.get(file);
 
         var port = NavieEditorProvider.KEY_INDEXER_RPC_PORT.get(file);
         assert port != null;
 
         payload.addProperty("appmapRpcPort", port);
         payload.addProperty("apiKey", StringUtil.defaultIfEmpty(apiKey, ""));
-        payload.addProperty("question", StringUtil.defaultIfEmpty(question, ""));
+
+        if (codeSelection != null) {
+            payload.add("codeSelection", gson.toJsonTree(codeSelection));
+        }
+
         payload.add("savedFilters", gson.toJsonTree(filters));
     }
 
