@@ -246,33 +246,27 @@ public class DefaultCommandLineServiceTest extends AppMapBaseTest {
     }
 
     @Test
-    @Ignore("unstable test")
-    public void appmapYamlTrigger() throws InterruptedException, IOException {
+    public void appmapYamlTrigger() throws Exception {
         var newRootA = myFixture.addFileToProject("parentA/file.txt", "").getParent().getVirtualFile();
 
-        var condition = ProjectRefreshUtil.newProjectRefreshCondition(getTestRootDisposable());
-        ModuleRootModificationUtil.updateModel(getModule(), model -> {
-            model.addContentEntry(newRootA);
-        });
-        assertTrue(condition.await(30, TimeUnit.SECONDS));
-        // no watched roots because there's no appmap.yml
-        assertEmptyRoots();
+        final var rootRefreshCondition = ProjectRefreshUtil.newProjectRefreshCondition(getTestRootDisposable());
+        withContentRoot(getModule(), newRootA, () -> {
+            assertTrue(rootRefreshCondition.await(30, TimeUnit.SECONDS));
 
-        // creating an appmap.yml file in a content root must trigger a refresh and the start of the CLI binaries
-        condition = ProjectRefreshUtil.newProjectRefreshCondition(getTestRootDisposable());
-        var appMapYaml = createAppMapYaml(newRootA);
-        assertTrue(condition.await(30, TimeUnit.SECONDS));
-        assertActiveRoots(newRootA);
+            // no watched roots because there's no appmap.yml
+            assertEmptyRoots();
 
-        // removing the appmap.yml again must stop the service
-        condition = ProjectRefreshUtil.newProjectRefreshCondition(getTestRootDisposable());
-        WriteAction.runAndWait(() -> {
-            appMapYaml.delete(this);
+            // creating an appmap.yml file in a content root must trigger a refresh and the start of the CLI binaries
+            var appMapYaml = createAppMapYaml(newRootA);
+            waitForProcessStatus(true, newRootA, true);
+            assertActiveRoots(newRootA);
+
+            // removing the appmap.yml again must stop the service
+            WriteAction.runAndWait(() -> appMapYaml.delete(this));
+            waitForProcessStatus(false, newRootA, true);
+            assertEmptyRoots();
         });
-        assertTrue(condition.await(30, TimeUnit.SECONDS));
-        assertEmptyRoots();
     }
-
     private void setupAndAssertProcessRestart(@NotNull Function<VirtualFile, KillableProcessHandler> processForRoot) throws Exception {
         var root = myFixture.addFileToProject("parentA/file.txt", "").getParent().getVirtualFile();
         createAppMapYaml(root);
