@@ -105,15 +105,6 @@ public final class NavieEditorProvider extends WebviewEditorProvider {
         var service = AppLandCommandLineService.getInstance();
         var codeSelection = buildCodeSelection(project, editor);
 
-        var contextFile = editor instanceof EditorEx ? ((EditorEx) editor).getVirtualFile() : null;
-        if (contextFile != null) {
-            var port = service.getIndexerRpcPort(contextFile);
-            if (port != null) {
-                consumer.openNavie(port, codeSelection);
-                return;
-            }
-        }
-
         var activeRoots = service.getActiveRoots();
         if (activeRoots.isEmpty()) {
             consumer.openNavie(null, null);
