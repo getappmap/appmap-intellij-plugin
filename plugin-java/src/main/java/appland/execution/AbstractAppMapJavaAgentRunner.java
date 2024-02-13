@@ -10,6 +10,7 @@ import com.intellij.execution.impl.DefaultJavaProgramRunner;
 import com.intellij.execution.runners.ExecutionEnvironment;
 import com.intellij.execution.runners.JavaProgramPatcher;
 import com.intellij.openapi.application.ReadAction;
+import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.progress.ProgressIndicator;
 import com.intellij.openapi.progress.Task;
 import com.intellij.openapi.project.DumbService;
@@ -18,6 +19,8 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public abstract class AbstractAppMapJavaAgentRunner extends DefaultJavaProgramRunner {
+    private static final Logger LOG = Logger.getInstance(AbstractAppMapJavaAgentRunner.class);
+
     @Override
     public abstract @NotNull @NonNls String getRunnerId();
 
@@ -70,7 +73,25 @@ public abstract class AbstractAppMapJavaAgentRunner extends DefaultJavaProgramRu
         var task = new Task.WithResult<Void, ExecutionException>(environment.getProject(), AppMapBundle.get("appMapExecutor.verifyingJDK"), false) {
             @Override
             protected Void compute(@NotNull ProgressIndicator indicator) throws ExecutionException {
-                var javaParameters = ((JavaCommandLineState) state).getJavaParameters();
+                // getJavaParameters() is already executing a ReadAction if it's configured to do so.
+                // But some exceptions indicate that clients expect read access even when getJavaParameters()
+                // is not expecting this. For example: https://github.com/getappmap/appmap-intellij-plugin/issues/565.
+                // We're falling back to a ReadAction if a
+                JavaParameters javaParameters;
+                try {
+                    javaParameters = ((JavaCommandLineState) state).getJavaParameters();
+                } catch (Exception e) {
+                    if (LOG.isDebugEnabled()) {
+                        LOG.debug("Calling getJavaParameters() again in a ReadAction", e);
+                    }
+
+                    // Unfortunately, the exception about missing read access is very generic, so we can't use the
+                    // exception type to decide if it's an exception about a missing ReadAction.
+                    // Because getJavaParameters() only assigns its "myParams" after the parameters were successfully
+                    // fetched, calling it here again should be safe to assign with a ReadAction.
+                    javaParameters = ReadAction.compute(() -> ((JavaCommandLineState) state).getJavaParameters());
+                }
+
                 if (javaParameters == null) {
                     return null;
                 }
