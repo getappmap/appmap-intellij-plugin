@@ -21,10 +21,13 @@ buildscript {
 
 plugins {
     idea
-    id("org.jetbrains.intellij") version "1.13.2"
+    id("org.jetbrains.kotlin.jvm") version "1.9.22"
+    id("org.jetbrains.intellij") version "1.17.1"
     id("org.jetbrains.changelog") version "1.3.1"
     id("com.adarshr.test-logger") version "3.2.0"
     id("de.undercouch.download") version "5.4.0"
+
+    kotlin("plugin.lombok") version "1.8.10"
 }
 
 val pluginVersion = prop("pluginVersion")
@@ -44,6 +47,8 @@ allprojects {
     }
 
     apply {
+        plugin("org.jetbrains.kotlin.jvm")
+        plugin("org.jetbrains.kotlin.plugin.lombok")
         plugin("idea")
         plugin("org.jetbrains.intellij")
         plugin("com.adarshr.test-logger")
@@ -57,6 +62,7 @@ allprojects {
         // Jackson JSON is missing from 2023.1+
         implementation("com.fasterxml.jackson.core:jackson-core:2.14.2")
         implementation("com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.14.2")
+        implementation("org.yaml:snakeyaml:1.33")
 
         // http://wiremock.org, Apache 2 license
         testImplementation("com.github.tomakehurst:wiremock-jre8:2.33.1")
@@ -76,7 +82,7 @@ allprojects {
         version.set(prop("ideVersion"))
         downloadSources.set(!isCI)
         updateSinceUntilBuild.set(true)
-        instrumentCode.set(true)
+        instrumentCode.set(false)
     }
 
     configure<JavaPluginExtension> {
@@ -85,6 +91,14 @@ allprojects {
     }
 
     tasks {
+        compileKotlin {
+            kotlinOptions.jvmTarget = "11"
+        }
+
+        compileTestKotlin {
+            kotlinOptions.jvmTarget = "11"
+        }
+
         buildSearchableOptions.get().enabled = false
 
         buildPlugin {
@@ -187,10 +201,10 @@ allprojects {
 
 project(":") {
     dependencies {
-        implementation(project(":plugin-core", "instrumentedJar"))
-        implementation(project(":plugin-gradle", "instrumentedJar"))
-        implementation(project(":plugin-java", "instrumentedJar"))
-        implementation(project(":plugin-maven", "instrumentedJar"))
+        implementation(project(":plugin-core"))
+        implementation(project(":plugin-gradle"))
+        implementation(project(":plugin-java"))
+        implementation(project(":plugin-maven"))
     }
 
     changelog {
@@ -235,15 +249,7 @@ project(":") {
                 dependsOn("copyPluginAssets")
             }
 
-            instrumentCode {
-                dependsOn("copyPluginAssets")
-            }
-
             jar {
-                dependsOn("copyPluginAssets")
-            }
-
-            instrumentedJar {
                 dependsOn("copyPluginAssets")
             }
         }
@@ -296,7 +302,7 @@ project(":") {
 
 project(":plugin-java") {
     dependencies {
-        implementation(project(":plugin-core", "instrumentedJar"))
+        implementation(project(":plugin-core"))
     }
 
     intellij {
@@ -306,8 +312,8 @@ project(":plugin-java") {
 
 project(":plugin-gradle") {
     dependencies {
-        implementation(project(":plugin-core", "instrumentedJar"))
-        implementation(project(":plugin-java", "instrumentedJar"))
+        implementation(project(":plugin-core"))
+        implementation(project(":plugin-java"))
     }
 
     intellij {
@@ -317,8 +323,8 @@ project(":plugin-gradle") {
 
 project(":plugin-maven") {
     dependencies {
-        implementation(project(":plugin-core", "instrumentedJar"))
-        implementation(project(":plugin-java", "instrumentedJar"))
+        implementation(project(":plugin-core"))
+        implementation(project(":plugin-java"))
     }
 
     intellij {

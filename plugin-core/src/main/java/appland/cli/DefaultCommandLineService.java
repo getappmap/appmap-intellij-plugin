@@ -2,6 +2,7 @@ package appland.cli;
 
 import appland.config.AppMapConfigFile;
 import appland.config.AppMapConfigFileListener;
+import appland.files.AppMapFiles;
 import appland.files.AppMapVfsUtils;
 import appland.settings.AppMapApplicationSettingsService;
 import com.intellij.execution.ExecutionException;
@@ -14,8 +15,8 @@ import com.intellij.execution.process.ProcessOutputType;
 import com.intellij.openapi.Disposable;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.diagnostic.Logger;
+import com.intellij.openapi.project.DumbService;
 import com.intellij.openapi.project.ProjectManager;
-import com.intellij.openapi.roots.ProjectRootManager;
 import com.intellij.openapi.util.Key;
 import com.intellij.openapi.util.SystemInfo;
 import com.intellij.openapi.util.text.StringUtil;
@@ -39,10 +40,11 @@ import java.nio.file.Files;
 import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 public class DefaultCommandLineService implements AppLandCommandLineService {
     private static final Logger LOG = Logger.getInstance(DefaultCommandLineService.class);
@@ -55,12 +57,13 @@ public class DefaultCommandLineService implements AppLandCommandLineService {
     // a value of "0" indicates that process restart is disabled
     private static final Key<Long> NEXT_RESTART_DELAY = Key.create("appmap.processRestartDelay");
 
+    // toString() uses unguarded access, synchronizing it could create deadlocks
     @GuardedBy("this")
-    protected final Map<VirtualFile, CliProcesses> processes = new HashMap<>();
+    protected final Map<VirtualFile, CliProcesses> processes = new ConcurrentHashMap<>();
 
     public DefaultCommandLineService() {
         var connection = ApplicationManager.getApplication().getMessageBus().connect(this);
-        connection.subscribe(AppMapConfigFileListener.TOPIC, (AppMapConfigFileListener) this::refreshForOpenProjectsInBackground);
+        connection.subscribe(AppMapConfigFileListener.TOPIC, this::refreshForOpenProjectsInBackground);
     }
 
     @Override
@@ -74,29 +77,13 @@ public class DefaultCommandLineService implements AppLandCommandLineService {
 
     @Override
     public synchronized void start(@NotNull VirtualFile directory, boolean waitForProcessTermination) throws ExecutionException {
-        if (!isDirectoryEnabled(directory)) {
+        if (!AppMapFiles.isDirectoryEnabled(directory)) {
             return;
         }
 
-        for (var it = processes.entrySet().iterator(); it.hasNext(); ) {
-            var dirAndProcesses = it.next();
-
-            // stop early, if there are already processes for exactly the directory.
-            if (directory.equals(dirAndProcesses.getKey())) {
-                return;
-            }
-
-            // stop processes serving for subdirectories of the new directory
-            if (VfsUtilCore.isAncestor(directory, dirAndProcesses.getKey(), false)) {
-                it.remove();
-                stopLocked(dirAndProcesses.getValue(), waitForProcessTermination);
-            }
-        }
-
-        // verify that no other process is serving a parent directory
+        // stop early, if there are already processes for exactly this directory.
         for (var entry : processes.entrySet()) {
-            if (VfsUtilCore.isAncestor(entry.getKey(), directory, true)) {
-                LOG.error("Attempted to launch a new service for a directory, which is already being processed");
+            if (directory.equals(entry.getKey())) {
                 return;
             }
         }
@@ -115,15 +102,6 @@ public class DefaultCommandLineService implements AppLandCommandLineService {
                 indexer.startNotify();
             }
         }
-    }
-
-    /**
-     * File appmap.yml is a marker file to tell that CLI processes may be launched for a directory.
-     *
-     * @return {@code true} if the directory may have CLI processes watching it
-     */
-    private boolean isDirectoryEnabled(@NotNull VirtualFile directory) {
-        return directory.findChild("appmap.yml") != null;
     }
 
     @Override
@@ -149,6 +127,14 @@ public class DefaultCommandLineService implements AppLandCommandLineService {
     @Override
     public void refreshForOpenProjectsInBackground() {
         ApplicationManager.getApplication().executeOnPooledThread(this::refreshForOpenProjects);
+    }
+
+    @Override
+    public void restartProcessesInBackground() {
+        ApplicationManager.getApplication().executeOnPooledThread(() -> {
+            stopAll(true);
+            refreshForOpenProjects();
+        });
     }
 
     @Override
@@ -217,9 +203,12 @@ public class DefaultCommandLineService implements AppLandCommandLineService {
         return createAppMapCommand("stats", "--appmap-file", localPath.toString(), "--limit", String.valueOf(Long.MAX_VALUE), "--format", "json");
     }
 
+    // We're not synchronizing, because some IDE threads display or use the result of toString
+    // and this must not create deadlocks.
     @Override
-    public synchronized String toString() {
+    public /*synchronized*/ String toString() {
         return "DefaultCommandLineService{" +
+                "processes size=" + processes.size() + ", " +
                 "processes=" + processes +
                 '}';
     }
@@ -345,23 +334,24 @@ public class DefaultCommandLineService implements AppLandCommandLineService {
     }
 
     private void doRefreshForOpenProjectsLocked() {
-        var topLevelRoots = new VfsUtilCore.DistinctVFilesRootsCollection(VirtualFile.EMPTY_ARRAY);
+        var enabledRoots = VfsUtilCore.createCompactVirtualFileSet();
         for (var project : ProjectManager.getInstance().getOpenProjects()) {
-            if (!project.isDefault() && !project.isDisposed()) {
-                for (var contentRoot : ProjectRootManager.getInstance(project).getContentRoots()) {
-                    if (isDirectoryEnabled(contentRoot)) {
-                        topLevelRoots.add(contentRoot);
-                    }
-                }
-            }
+            var projectRoots = DumbService.getInstance(project).runReadActionInSmartMode(() -> {
+                return AppMapFiles.findAppMapConfigFiles(project).stream()
+                        .map(VirtualFile::getParent)
+                        .filter(VirtualFile::isValid)
+                        .collect(Collectors.toSet());
+            });
+            enabledRoots.addAll(projectRoots);
         }
 
-        // remove processes of roots, which no longer have a matching content root in a project
-        // or which don't match the settings anymore. We need to launch the scanner when "enableFindings" changes.
-        // We're iterating on a copy, because stop() is called inside the loop and modifies "processes"
+        // Remove processes of roots, which no longer have a matching content root in a project or which don't match the
+        // settings anymore.
+        // We need to launch the scanner when "enableFindings" changes. We're iterating on a copy, because stop() is
+        // called inside the loop and modifies "processes"
         for (var entry : List.copyOf(processes.entrySet())) {
             var activeRoot = entry.getKey();
-            if (!topLevelRoots.contains(activeRoot)) {
+            if (!enabledRoots.contains(activeRoot)) {
                 try {
                     stop(activeRoot, false);
                 } catch (Exception e) {
@@ -371,7 +361,7 @@ public class DefaultCommandLineService implements AppLandCommandLineService {
         }
 
         // launch missing cli processes
-        for (var root : topLevelRoots) {
+        for (var root : enabledRoots) {
             try {
                 start(root, false);
             } catch (ExecutionException e) {
@@ -385,7 +375,7 @@ public class DefaultCommandLineService implements AppLandCommandLineService {
      * This is either the directory configured in appmap.yml or the base directory itself.
      */
     private static @NotNull Path findWatchedAppMapDirectory(@NotNull Path baseDirectory) {
-        var appMapConfig = AppMapConfigFile.parseConfigFile(baseDirectory.resolve("appmap.yml"));
+        var appMapConfig = AppMapConfigFile.parseConfigFile(baseDirectory.resolve(AppMapFiles.APPMAP_YML));
         if (appMapConfig == null || appMapConfig.getAppMapDir() == null) {
             return baseDirectory;
         }

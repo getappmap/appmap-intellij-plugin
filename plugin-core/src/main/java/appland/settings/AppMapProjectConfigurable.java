@@ -11,7 +11,7 @@ import org.jetbrains.annotations.Nullable;
 import javax.swing.*;
 
 public class AppMapProjectConfigurable implements Configurable {
-    private final AppMapProjectSettingsForm form = new AppMapProjectSettingsForm();
+    private final AppMapProjectSettingsPanel form = new AppMapProjectSettingsPanel();
     private final Project project;
 
     public AppMapProjectConfigurable(@NotNull Project project) {
@@ -30,9 +30,7 @@ public class AppMapProjectConfigurable implements Configurable {
 
     @Override
     public void reset() {
-        var projectSettings = AppMapProjectSettingsService.getState(project);
-        var applicationSettings = AppMapApplicationSettingsService.getInstance();
-        form.loadSettingsFrom(projectSettings, applicationSettings);
+        form.loadSettingsFrom(AppMapApplicationSettingsService.getInstance());
     }
 
     @Override
@@ -42,15 +40,13 @@ public class AppMapProjectConfigurable implements Configurable {
 
         var newSettings = new AppMapProjectSettings(settings);
         var newApplicationSettings = new AppMapApplicationSettings(applicationSettings);
-        form.applySettingsTo(newSettings, newApplicationSettings, false);
+        form.applySettingsTo(newApplicationSettings);
 
         return !settings.equals(newSettings) || !applicationSettings.equals(newApplicationSettings);
     }
 
     @Override
     public void apply() throws ConfigurationException {
-        var projectSettings = AppMapProjectSettingsService.getState(project);
-        var applicationSettings = AppMapApplicationSettingsService.getInstance();
-        form.applySettingsTo(projectSettings, applicationSettings, true);
+        form.applySettingsTo(AppMapApplicationSettingsService.getInstance());
     }
 }

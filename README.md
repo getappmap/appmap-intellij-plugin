@@ -1,7 +1,7 @@
 # AppMap for JetBrains IDEs
 
 ## System Requirements
-**IntelliJ IDEA 2021.3 or later** is required to use this plugin.
+**IntelliJ IDEA 2022.1 or later** is required to use this plugin.
 
 Only installations, which use the bundled JetBrains Java runtime, support the JCEF engine for rendering.
 

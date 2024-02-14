@@ -5,10 +5,7 @@ import appland.Icons;
 import appland.files.AppMapFiles;
 import appland.files.AppMapVfsUtils;
 import appland.notifications.AppMapNotifications;
-import appland.remote.RemoteRecordingService;
-import appland.remote.RemoteRecordingStatusService;
-import appland.remote.StopRemoteRecordingDialog;
-import appland.remote.StopRemoteRecordingForm;
+import appland.remote.*;
 import appland.settings.AppMapProjectSettingsService;
 import com.intellij.notification.NotificationType;
 import com.intellij.openapi.actionSystem.AnAction;
@@ -104,8 +101,8 @@ public class StopAppMapRecordingAction extends AnAction implements DumbAware {
         new Task.Backgroundable(project, AppMapBundle.get("action.stopAppMapRemoteRecording.progressTitle"), false) {
             @Override
             public void run(@NotNull ProgressIndicator indicator) {
-                var newFile = RemoteRecordingService.getInstance().stopRecording(form.getURL(), storageLocation, form.getName());
-                RemoteRecordingStatusService.getInstance(project).recordingStopped(form.getURL());
+                var newFile = RemoteRecordingService.getInstance().stopRecording(form.getUrl(), storageLocation, form.getName());
+                RemoteRecordingStatusService.getInstance(project).recordingStopped(form.getUrl());
 
                 if (newFile != null && Files.exists(newFile)) {
                     var newVfsFile = LocalFileSystem.getInstance().refreshAndFindFileByNioFile(newFile);
@@ -116,7 +113,7 @@ public class StopAppMapRecordingAction extends AnAction implements DumbAware {
                         }, ModalityState.defaultModalityState());
                     }
                 } else {
-                    showStopRecordingFailedError(project, form.getURL());
+                    showStopRecordingFailedError(project, form.getUrl());
                 }
             }
         }.queue();

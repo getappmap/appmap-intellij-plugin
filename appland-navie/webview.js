@@ -1,22 +1,24 @@
-import Vue from 'vue';
-import MessagePublisher from 'messagePublisher';
-import vscode from 'vsCodeBridge';
+import Vue from "vue";
+import MessagePublisher from "messagePublisher";
+import vscode from "vsCodeBridge";
 import handleAppMapMessages from "handleAppMapMessages";
-import {VChatSearch} from '@appland/components';
+import { VChatSearch } from "@appland/components";
+
+import "@appland/diagrams/dist/style.css";
+import "highlight.js/styles/base16/snazzy.css";
 
 export function mountWebview() {
   const messages = new MessagePublisher(vscode);
 
-  messages.on('init', (initialData) => {
+  messages.on("init", (initialData) => {
     const app = new Vue({
-      el: '#app',
+      el: "#app",
       render(h) {
         return h(VChatSearch, {
-          ref: 'ui',
+          ref: "ui",
           props: {
             apiKey: initialData.apiKey,
             appmapRpcPort: initialData.appmapRpcPort,
-            question: initialData.question,
             savedFilters: initialData.savedFilters,
           },
         });
@@ -32,10 +34,15 @@ export function mountWebview() {
           this.$refs.ui.updateFilters(updatedSavedFilters);
         },
       },
+      mounted() {
+        if (initialData.codeSelection) {
+          this.$refs.ui.includeCodeSelection(initialData.codeSelection);
+        }
+      },
     });
 
     handleAppMapMessages(app, vscode, messages);
   });
 
-  vscode.postMessage({command: 'ready'});
+  vscode.postMessage({ command: "ready" });
 }
