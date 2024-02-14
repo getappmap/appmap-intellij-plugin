@@ -1,5 +1,16 @@
 AppMap Plugin Changelog
 
+## [0.56.0](https://github.com/getappmap/appmap-intellij-plugin/compare/v0.55.0...v0.56.0) (2024-02-14)
+
+
+### Features
+
+-  drop support for JetBrains 2021.3 IDEs ([037c29e]())-  Integrate with AppMap Navie ([efec7db]())-  support AppMap CLI processes for nested AppMap directories ([e0a1bf7]())-  support JetBrains 2024.1 EAP releases ([ae517a8]())
+
+### Bug Fixes
+
+-  Add missing import so that dependency map is not blank ([57bae45]())-  Avoid 404 when loading an AppMap ([94760bd]())-  Don't locate indexer port based on open editor ([c434196]())-  retrieve Gradle JDK in a background thread ([15b9bd1]())-  workaround for exception "Read access is allowed from inside read-action or Event Dispatch Thread" ([a8a26c8]())
+
 ## [0.55.0](https://github.com/getappmap/appmap-intellij-plugin/compare/v0.54.0...v0.55.0) (2024-02-05)
 
 
