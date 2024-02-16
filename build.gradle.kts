@@ -7,6 +7,7 @@ import org.gradle.api.JavaVersion.VERSION_11
 import org.gradle.api.tasks.testing.logging.TestLogEvent
 import org.jetbrains.intellij.tasks.PrepareSandboxTask
 import org.jetbrains.intellij.tasks.RunPluginVerifierTask
+import org.jetbrains.intellij.tasks.RunPluginVerifierTask.FailureLevel
 
 buildscript {
     dependencies {
@@ -190,7 +191,15 @@ allprojects {
 
         withType<RunPluginVerifierTask> {
             onlyIf { this.project == rootProject }
+            mustRunAfter("check")
+
             ideVersions.set(prop("ideVersionVerifier").split(","))
+            failureLevel.set(listOf(
+                FailureLevel.INTERNAL_API_USAGES,
+                FailureLevel.COMPATIBILITY_PROBLEMS,
+                FailureLevel.OVERRIDE_ONLY_API_USAGES,
+                FailureLevel.NON_EXTENDABLE_API_USAGES,
+                FailureLevel.PLUGIN_STRUCTURE_WARNINGS,))
         }
 
         withType<Zip> {
