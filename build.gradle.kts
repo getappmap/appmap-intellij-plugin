@@ -222,12 +222,17 @@ project(":") {
 
     tasks {
         task<Copy>("copyPluginAssets") {
+            inputs.file("${project.rootDir}/NOTICE.txt")
             inputs.dir("${project.rootDir}/appland")
             inputs.dir("${project.rootDir}/appland-install-guide")
             inputs.dir("${project.rootDir}/appland-findings")
             inputs.dir("${project.rootDir}/appland-signin")
 
             destinationDir = project.buildDir
+            from(project.rootDir) {
+                into("appmap-assets")
+                include("NOTICE.txt")
+            }
             from("${project.rootDir}/appland") {
                 into("appmap-assets/appmap")
                 include("index.html")
