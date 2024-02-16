@@ -34,9 +34,6 @@
         <listener topic="appland.cli.AppLandDownloadListener"
                   class="appland.cli.StartServicesAfterDownloadListener"/>
 
-        <listener topic="com.intellij.execution.ExecutionListener"
-                  class="appland.execution.AppMapExecutionListener"/>
-
         <listener topic="appland.files.AppMapFileChangeListener"
                   class="appland.notifications.FirstAppMapListener"/>
     </projectListeners>
@@ -126,9 +123,6 @@
         <problemsViewPanelProvider implementation="appland.problemsView.FindingsPanelProvider"/>
         <vfs.asyncListener implementation="appland.problemsView.listener.ScannerFilesAsyncListener"/>
         <annotator implementationClass="appland.problemsView.AppMapFindingsAnnotator" language="" order="last"/>
-
-        <!-- run configurations -->
-        <executor implementation="appland.execution.AppMapJvmExecutor"/>
 
         <!-- OAuth authentication -->
         <httpRequestHandler implementation="appland.oauth.AppMapOAuthRequestHandler"/>
