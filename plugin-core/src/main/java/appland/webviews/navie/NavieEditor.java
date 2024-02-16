@@ -5,6 +5,7 @@ import appland.settings.AppMapApplicationSettingsService;
 import appland.settings.AppMapProjectSettingsService;
 import appland.settings.AppMapSettingsListener;
 import appland.utils.GsonUtils;
+import appland.webviews.SharedAppMapWebViewMessages;
 import appland.webviews.WebviewEditor;
 import appland.webviews.webserver.AppMapWebview;
 import com.google.gson.JsonObject;
@@ -15,11 +16,9 @@ import org.jetbrains.annotations.Nls;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Set;
-
 public class NavieEditor extends WebviewEditor<Void> {
     public NavieEditor(@NotNull Project project, @NotNull VirtualFile file) {
-        super(project, AppMapWebview.Navie, file, Set.of());
+        super(project, AppMapWebview.Navie, file, SharedAppMapWebViewMessages.withBaseMessages());
     }
 
     @Override
@@ -58,6 +57,7 @@ public class NavieEditor extends WebviewEditor<Void> {
 
     @Override
     protected void handleMessage(@NotNull String messageId, @Nullable JsonObject message) {
+        SharedAppMapWebViewMessages.handleMessage(project, this, messageId, message);
     }
 
     protected @Nullable Void createInitData() {

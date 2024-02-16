@@ -32,7 +32,7 @@ import java.nio.file.Path;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
-class ExportSvgUtil {
+public class ExportSvgUtil {
     /**
      * @param project          Current project
      * @param defaultFileName  The default file name to suggest in the path selector
