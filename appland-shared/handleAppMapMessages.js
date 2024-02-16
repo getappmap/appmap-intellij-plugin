@@ -13,6 +13,7 @@ export default function handleAppMapMessages(app, vscode, messages) {
   app.$on('selectObjectInSidebar', (category) => vscode.postMessage({command: 'selectObjectInSidebar', category}))
   app.$on('resetDiagram', () => vscode.postMessage({command: 'resetDiagram'}))
   app.$on('exportSVG', (svgString) => vscode.postMessage({command: 'exportSVG', svgString}))
+  app.$on('exportJSON', (appmapData) => vscode.postMessage({command: 'exportJSON', appmapData}))
   app.$on('request-resolve-location', (location) => {
     app.$emit('response-resolve-location', {location, externalUrl: location});
   });
