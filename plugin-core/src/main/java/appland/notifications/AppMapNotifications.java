@@ -160,4 +160,15 @@ public final class AppMapNotifications {
             notification.notify(project);
         });
     }
+
+    public static void showAppMapJsonExportFailedNotification(@NotNull Project project, @NotNull String error) {
+        EdtInvocationManager.invokeLaterIfNeeded(() -> {
+            var notification = new AppMapFullContentNotification(
+                    GENERIC_NOTIFICATIONS_ID, null,
+                    null, null, AppMapBundle.get("notification.exportAppMapJson.content", error),
+                    NotificationType.ERROR, null
+            );
+            notification.notify(project);
+        });
+    }
 }
