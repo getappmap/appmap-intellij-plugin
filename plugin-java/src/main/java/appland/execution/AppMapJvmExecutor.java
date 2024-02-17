@@ -2,6 +2,7 @@ package appland.execution;
 
 import appland.AppMapBundle;
 import appland.Icons;
+import appland.jetbrains.JavaVersion;
 import appland.telemetry.TelemetryService;
 import com.intellij.execution.ExecutionException;
 import com.intellij.execution.Executor;
@@ -12,7 +13,6 @@ import com.intellij.openapi.util.IconLoader;
 import com.intellij.openapi.util.NlsActions;
 import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.openapi.wm.ToolWindowId;
-import com.intellij.util.lang.JavaVersion;
 import org.jetbrains.annotations.Nls;
 import org.jetbrains.annotations.NonNls;
 import org.jetbrains.annotations.NotNull;

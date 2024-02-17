@@ -9,10 +9,17 @@
         <programPatcher implementation="appland.execution.AppMapJavaProgramPatcher"/>
     </extensions>
 
+    <projectListeners>
+        <listener topic="com.intellij.execution.ExecutionListener"
+                  class="appland.execution.AppMapExecutionListener"/>
+    </projectListeners>
+
     <extensions defaultExtensionNs="com.intellij">
         <applicationService serviceImplementation="appland.javaAgent.AppMapJavaAgentDownloadService"/>
         <postStartupActivity implementation="appland.javaAgent.AppMapJavaAgentDownloadActivity"/>
 
+        <!-- run configurations -->
+        <executor implementation="appland.execution.AppMapJvmExecutor"/>
         <programRunner implementation="appland.execution.AppMapJavaAgentRunner"/>
     </extensions>
 </idea-plugin>

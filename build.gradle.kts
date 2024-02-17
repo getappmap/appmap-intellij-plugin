@@ -7,6 +7,7 @@ import org.gradle.api.JavaVersion.VERSION_11
 import org.gradle.api.tasks.testing.logging.TestLogEvent
 import org.jetbrains.intellij.tasks.PrepareSandboxTask
 import org.jetbrains.intellij.tasks.RunPluginVerifierTask
+import org.jetbrains.intellij.tasks.RunPluginVerifierTask.FailureLevel
 
 buildscript {
     dependencies {
@@ -190,7 +191,15 @@ allprojects {
 
         withType<RunPluginVerifierTask> {
             onlyIf { this.project == rootProject }
+            mustRunAfter("check")
+
             ideVersions.set(prop("ideVersionVerifier").split(","))
+            failureLevel.set(listOf(
+                FailureLevel.INTERNAL_API_USAGES,
+                FailureLevel.COMPATIBILITY_PROBLEMS,
+                FailureLevel.OVERRIDE_ONLY_API_USAGES,
+                FailureLevel.NON_EXTENDABLE_API_USAGES,
+                FailureLevel.PLUGIN_STRUCTURE_WARNINGS,))
         }
 
         withType<Zip> {
@@ -213,12 +222,17 @@ project(":") {
 
     tasks {
         task<Copy>("copyPluginAssets") {
+            inputs.file("${project.rootDir}/NOTICE.txt")
             inputs.dir("${project.rootDir}/appland")
             inputs.dir("${project.rootDir}/appland-install-guide")
             inputs.dir("${project.rootDir}/appland-findings")
             inputs.dir("${project.rootDir}/appland-signin")
 
             destinationDir = project.buildDir
+            from(project.rootDir) {
+                into("appmap-assets")
+                include("NOTICE.txt")
+            }
             from("${project.rootDir}/appland") {
                 into("appmap-assets/appmap")
                 include("index.html")

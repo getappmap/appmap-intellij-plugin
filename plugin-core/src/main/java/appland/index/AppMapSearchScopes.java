@@ -56,7 +56,7 @@ public final class AppMapSearchScopes {
                 }
             }
 
-            return file.isValid() && fileIndex.isExcludedFile(file) || fileIndex.isInProjectScope(file);
+            return file.isValid() && fileIndex.isExcludedFile(file) || isInProjectScope(file);
         }
 
         @Override
@@ -96,6 +96,16 @@ public final class AppMapSearchScopes {
                 return this;
             }
             return super.intersectWith(scope);
+        }
+
+        // Follows com.intellij.openapi.roots.FileIndexFacade.isInProjectScope,
+        // which was made internal in 2024.1 eap
+        private boolean isInProjectScope(@NotNull VirtualFile file) {
+            if (fileIndex.isInLibraryClasses(file) && !fileIndex.isInSourceContent(file)) {
+                return false;
+            }
+
+            return fileIndex.isInContent(file);
         }
     }
 }
