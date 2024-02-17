@@ -1,5 +1,16 @@
 AppMap Plugin Changelog
 
+## [0.57.0](https://github.com/getappmap/appmap-intellij-plugin/compare/v0.56.0...v0.57.0) (2024-02-17)
+
+
+### Features
+
+-  terminate plugin verifier with failure if internal API is used ([a6794f6]())
+
+### Bug Fixes
+
+-  drop internal API usage of FileIndexFacade.isInProjectScope ([a0ef8b7]())-  internal API usage of JavaVersion. ([922b80d]())
+
 ## [0.56.0](https://github.com/getappmap/appmap-intellij-plugin/compare/v0.55.0...v0.56.0) (2024-02-14)
 
 
