@@ -5,7 +5,6 @@ import com.intellij.openapi.roots.ProjectFileIndex;
 import com.intellij.openapi.vcs.changes.ChangeListManager;
 import com.intellij.openapi.vfs.VirtualFile;
 import it.unimi.dsi.fastutil.objects.Object2DoubleMap;
-import it.unimi.dsi.fastutil.objects.Object2DoubleMaps;
 import it.unimi.dsi.fastutil.objects.Object2DoubleOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import org.jetbrains.annotations.NotNull;
@@ -48,7 +47,8 @@ public class LanguageResolver {
      */
     private @NotNull Object2DoubleMap<Languages.Language> getLanguageDistribution(@NotNull VirtualFile directory) {
         if (isIgnored(directory)) {
-            return Object2DoubleMaps.emptyMap();
+            // 2024.1 eap5 uses a customized FastUtil library and trimmed Object2DoubleMaps.emptyMap() from the SDK
+            return new Object2DoubleOpenHashMap<>(0);
         }
 
         var languageCounts = new Object2IntOpenHashMap<Languages.Language>();
