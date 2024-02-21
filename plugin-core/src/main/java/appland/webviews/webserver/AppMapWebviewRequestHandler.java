@@ -22,7 +22,14 @@ public class AppMapWebviewRequestHandler extends HttpRequestHandler {
     public boolean process(@NotNull QueryStringDecoder queryStringDecoder,
                            @NotNull FullHttpRequest fullHttpRequest,
                            @NotNull ChannelHandlerContext channelHandlerContext) throws IOException {
-        var requestPath = queryStringDecoder.path();
+        String requestPath;
+        try {
+            requestPath = queryStringDecoder.path();
+        } catch (IllegalArgumentException e) {
+            // https://github.com/getappmap/appmap-intellij-plugin/issues/579, for example
+            return false;
+        }
+
         if (!requestPath.startsWith(APPMAP_SERVER_BASE_PATH + "/")) {
             return false;
         }
