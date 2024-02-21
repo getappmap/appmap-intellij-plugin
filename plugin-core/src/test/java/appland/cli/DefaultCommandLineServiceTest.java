@@ -32,6 +32,7 @@ import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 public class DefaultCommandLineServiceTest extends AppMapBaseTest {
     @Override
@@ -170,6 +171,7 @@ public class DefaultCommandLineServiceTest extends AppMapBaseTest {
             model.addContentEntry(newRootB);
         });
         assertTrue(condition.await(30, TimeUnit.SECONDS));
+
         assertActiveRoots(newRootA, newRootB);
     }
 
@@ -326,7 +328,7 @@ public class DefaultCommandLineServiceTest extends AppMapBaseTest {
         }
     }
 
-    private void assertEmptyRoots() {
+    private void assertEmptyRoots() throws InterruptedException {
         assertActiveRoots();
     }
 
@@ -345,14 +347,34 @@ public class DefaultCommandLineServiceTest extends AppMapBaseTest {
     /**
      * Asserts that the detected AppLand content roots match the parameters
      */
-    private void assertActiveRoots(@NotNull VirtualFile... roots) {
+    private void assertActiveRoots(@NotNull VirtualFile... roots) throws InterruptedException {
         var expectedRoots = Set.of(roots);
         var expectedString = StringUtil.join(expectedRoots, VirtualFile::toString, ", ");
 
-        var activeRoots = Set.copyOf(AppLandCommandLineService.getInstance().getActiveRoots());
-        var activeRootsString = StringUtil.join(activeRoots, VirtualFile::toString, ", ");
+        var errorMessageSupplier = new Supplier<String>() {
+            @Override
+            public String get() {
+                var activeRoots = Set.copyOf(AppLandCommandLineService.getInstance().getActiveRoots());
+                var activeRootsString = StringUtil.join(activeRoots, VirtualFile::toString, ", ");
+                return expectedRoots.equals(activeRoots)
+                        ? null
+                        : "Roots don't match. Expected: " + expectedString + ", actual: " + activeRootsString;
+            }
+        };
 
-        assertEquals("Roots don't match. Expected: " + expectedString + ", actual: " + activeRootsString, expectedRoots, activeRoots);
+        // wait up to 30s for the active roots
+        var deadline = System.currentTimeMillis() + TimeUnit.SECONDS.toMillis(30);
+        while (System.currentTimeMillis() < deadline) {
+            if (errorMessageSupplier.get() == null) {
+                break;
+            }
+            Thread.sleep(100);
+        }
+
+        var errorMessage = errorMessageSupplier.get();
+        if (errorMessage != null) {
+            fail(errorMessage);
+        }
     }
 
     /**
