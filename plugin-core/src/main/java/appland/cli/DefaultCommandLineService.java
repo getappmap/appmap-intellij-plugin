@@ -59,7 +59,7 @@ public class DefaultCommandLineService implements AppLandCommandLineService {
 
     // toString() uses unguarded access, synchronizing it could create deadlocks
     @GuardedBy("this")
-    protected final Map<VirtualFile, CliProcesses> processes = new ConcurrentHashMap<>();
+    protected final ConcurrentHashMap<VirtualFile, CliProcesses> processes = new ConcurrentHashMap<>();
 
     public DefaultCommandLineService() {
         var connection = ApplicationManager.getApplication().getMessageBus().connect(this);
@@ -138,7 +138,10 @@ public class DefaultCommandLineService implements AppLandCommandLineService {
     }
 
     @Override
-    public synchronized @NotNull List<VirtualFile> getActiveRoots() {
+    public @NotNull List<VirtualFile> getActiveRoots() {
+        // We're not using "synchronized" because the ConcurrentHashMap does not require it,
+        // and we must avoid possible deadlocks.
+        // Refer to https://github.com/getappmap/appmap-intellij-plugin/issues/586.
         return List.copyOf(processes.keySet());
     }
 
