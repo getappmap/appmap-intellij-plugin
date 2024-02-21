@@ -13,6 +13,7 @@ import com.intellij.openapi.ui.DialogWrapper;
 import com.intellij.openapi.ui.Messages;
 import com.intellij.openapi.ui.TextBrowseFolderListener;
 import com.intellij.openapi.ui.TextFieldWithBrowseButton;
+import com.intellij.openapi.util.Comparing;
 import com.intellij.openapi.util.io.FileUtilRt;
 import com.intellij.openapi.vfs.LocalFileSystem;
 import com.intellij.openapi.vfs.VirtualFile;
@@ -46,7 +47,9 @@ public class ExportSvgUtil {
                                     @Nullable VirtualFile contextFile,
                                     @NotNull Supplier<String> fileContent,
                                     @NotNull Consumer<VirtualFile> afterFileWritten) {
-        var contextFileOrDir = contextFile == null ? ProjectUtil.guessProjectDir(project) : contextFile;
+        var contextFileOrDir = contextFile == null || !contextFile.isInLocalFileSystem()
+                ? ProjectUtil.guessProjectDir(project)
+                : contextFile;
         if (contextFileOrDir != null && !contextFileOrDir.isDirectory()) {
             contextFileOrDir = contextFileOrDir.getParent();
         }
