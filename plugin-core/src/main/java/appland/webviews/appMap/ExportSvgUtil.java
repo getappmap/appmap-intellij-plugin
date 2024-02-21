@@ -110,7 +110,11 @@ public class ExportSvgUtil {
             if (context != null) {
                 fileTextField.setText(createSystemDependantFilePath(context, defaultFileName));
             }
-            fileTextField.addBrowseFolderListener(new TextBrowseFolderListener(FileChooserDescriptorFactory.createSingleFileDescriptor(extension)) {
+
+            var fileOrFolder = FileChooserDescriptorFactory.createSingleFileOrFolderDescriptor()
+                    .withFileFilter(file -> Comparing.equal(file.getExtension(), extension, file.isCaseSensitive()));
+
+            fileTextField.addBrowseFolderListener(new TextBrowseFolderListener(fileOrFolder) {
                 @Override
                 protected @NotNull String chosenFileToResultingText(@NotNull VirtualFile chosenFile) {
                     return createSystemDependantFilePath(chosenFile, defaultFileName);
@@ -122,14 +126,11 @@ public class ExportSvgUtil {
             init();
         }
 
-        private static @NotNull String createSystemDependantFilePath(@NotNull VirtualFile context, @NotNull String defaultFileName) {
+        private static @NotNull String createSystemDependantFilePath(@NotNull VirtualFile context,
+                                                                     @NotNull String defaultFileName) {
             return context.isDirectory()
                     ? FileUtilRt.toSystemDependentName(context.getPath()) + File.separatorChar + defaultFileName
                     : FileUtilRt.toSystemDependentName(context.getPath());
-        }
-
-        public @Nullable VirtualFile getSelectedFile() {
-            return LocalFileSystem.getInstance().refreshAndFindFileByPath(fileTextField.getText());
         }
 
         public @Nullable Path getSelectedFilePath() {
