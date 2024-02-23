@@ -120,6 +120,9 @@ public abstract class WebviewEditor<T> extends UserDataHolderBase implements Fil
     public void setState(@NotNull FileEditorState state) {
     }
 
+    public void clearState() {
+    }
+
     @Override
     public boolean isModified() {
         return false;

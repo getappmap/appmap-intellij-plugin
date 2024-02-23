@@ -3,42 +3,32 @@ package appland.webviews.appMap;
 import appland.AppMapBundle;
 import appland.files.AppMapFiles;
 import appland.files.FileLocation;
-import appland.files.FileLookup;
 import appland.problemsView.FindingsManager;
 import appland.problemsView.FindingsUtil;
 import appland.problemsView.ResolvedStackLocation;
 import appland.settings.AppMapProjectSettingsService;
 import appland.settings.AppMapSettingsListener;
-import appland.settings.AppMapWebViewFilter;
-import appland.telemetry.TelemetryService;
 import appland.utils.GsonUtils;
+import appland.webviews.SharedAppMapWebViewMessages;
 import appland.webviews.WebviewEditor;
 import appland.webviews.webserver.AppMapWebview;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
-import com.intellij.ide.actions.OpenInRightSplitAction;
 import com.intellij.openapi.application.ApplicationManager;
-import com.intellij.openapi.application.ModalityState;
 import com.intellij.openapi.application.ReadAction;
 import com.intellij.openapi.diagnostic.Logger;
-import com.intellij.openapi.fileEditor.OpenFileDescriptor;
 import com.intellij.openapi.project.Project;
-import com.intellij.openapi.util.io.FileUtil;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.openapi.vfs.VirtualFileEvent;
 import com.intellij.openapi.vfs.VirtualFileListener;
-import com.intellij.util.concurrency.annotations.RequiresBackgroundThread;
 import org.jetbrains.annotations.Nls;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
-
-import static com.intellij.openapi.ui.Messages.showErrorDialog;
 
 /**
  * This is similar to JetBrains' com.intellij.openapi.fileEditor.impl.HTMLFileEditor,
@@ -56,9 +46,7 @@ public class AppMapFileEditor extends WebviewEditor<JsonObject> {
     private final AtomicBoolean isModified = new AtomicBoolean(false);
 
     public AppMapFileEditor(@NotNull Project project, @NotNull VirtualFile file) {
-        super(project, AppMapWebview.AppMap, file, Set.of("webviewMounted", "clearSelection", "viewSource",
-                "sidebarSearchFocused", "clickFilterButton", "clickTab", "selectObjectInSidebar", "resetDiagram",
-                "exportSVG", "saveFilter", "defaultFilter", "deleteFilter"));
+        super(project, AppMapWebview.AppMap, file, SharedAppMapWebViewMessages.withBaseMessages("webviewMounted"));
         setupVfsListener(file);
     }
 
@@ -160,6 +148,11 @@ public class AppMapFileEditor extends WebviewEditor<JsonObject> {
         isSelected.set(false);
     }
 
+    @Override
+    public void clearState() {
+        setWebViewState(AppMapFileEditorState.EMPTY);
+    }
+
     public void setWebViewState(@NotNull AppMapFileEditorState state) {
         this.webviewState = state;
 
@@ -169,91 +162,16 @@ public class AppMapFileEditor extends WebviewEditor<JsonObject> {
     }
 
     @Override
-    protected void handleMessage(@NotNull String messageId, @Nullable JsonObject message) throws Exception {
-        TelemetryService telemetryService = TelemetryService.getInstance();
+    protected void handleMessage(@NotNull String messageId, @Nullable JsonObject message) {
+        if (SharedAppMapWebViewMessages.handleMessage(project, this, messageId, message)) {
+            return;
+        }
 
-        switch (messageId) {
-            case "webviewMounted":
-                var state = webviewState;
-                if (state != null) {
-                    applyWebViewState(state);
-                }
-                break;
-
-            case "clearSelection":
-                // set empty state to the editor to restore with cleared selection
-                setWebViewState(AppMapFileEditorState.EMPTY);
-                break;
-
-            case "viewSource":
-                // message is {..., location: {location:"path/file.java", externalSource="path/file.java"}}
-                assert message != null;
-                assert message.has("location");
-                showSource(message.getAsJsonObject("location").getAsJsonPrimitive("location").getAsString());
-                break;
-
-            // known message, but not handled
-            case "sidebarSearchFocused":
-                break;
-
-            // known message, but not handled
-            case "clickFilterButton":
-                break;
-
-            case "clickTab":
-                if (message != null) {
-                    var tabId = message.getAsJsonPrimitive("tabId");
-                    if (tabId.isString()) {
-                        telemetryService.sendEvent("click_tab", eventData -> {
-                            eventData.property("appmap.click_tab.tabId", tabId.getAsString());
-                            return eventData;
-                        });
-                    }
-                }
-                break;
-
-            // known message, but not handled
-            case "selectObjectInSidebar":
-                break;
-
-            // known message, but not handled
-            case "resetDiagram":
-                break;
-
-            case "exportSVG":
-                if (message != null) {
-                    var svgString = message.getAsJsonPrimitive("svgString");
-                    assert svgString.isString();
-                    // choose new or existing file, write content, then open editor with the new file
-                    ApplicationManager.getApplication().invokeLater(() -> {
-                        ExportSvgUtil.exportToFile(project, "appMap.svg", file, svgString::getAsString, file -> {
-                            new OpenFileDescriptor(project, file).navigate(true);
-                        });
-                    }, ModalityState.defaultModalityState());
-                }
-                break;
-
-            // filters
-            case "saveFilter":
-                if (message != null && message.has("filter")) {
-                    var filter = gson.fromJson(message.getAsJsonObject("filter"), AppMapWebViewFilter.class);
-                    AppMapProjectSettingsService.getState(project).saveAppMapWebViewFilter(filter);
-                }
-                break;
-
-            case "defaultFilter":
-                if (message != null && message.has("filter")) {
-                    var filter = gson.fromJson(message.getAsJsonObject("filter"), AppMapWebViewFilter.class);
-                    AppMapProjectSettingsService.getState(project).saveDefaultFilter(filter);
-                }
-                break;
-
-            case "deleteFilter":
-                if (message != null && message.has("filter")) {
-                    var filter = gson.fromJson(message.getAsJsonObject("filter"), AppMapWebViewFilter.class);
-                    AppMapProjectSettingsService.getState(project).removeAppMapWebViewFilter(filter);
-                }
-                break;
+        if ("webviewMounted".equals(messageId)) {
+            var state = webviewState;
+            if (state != null) {
+                applyWebViewState(state);
+            }
         }
     }
 
@@ -319,36 +237,5 @@ public class AppMapFileEditor extends WebviewEditor<JsonObject> {
         var message = createMessageObject("updateSavedFilters");
         message.add("data", GsonUtils.GSON.toJsonTree(savedFilters));
         postMessage(message);
-    }
-
-    private static void showShowSourceError(@NotNull String relativePath) {
-        ApplicationManager.getApplication().invokeLater(() -> {
-            var title = AppMapBundle.get("appmap.editor.showSourceFileMissing.title");
-            var message = AppMapBundle.get("appmap.editor.showSourceFileMissing.text", relativePath);
-            showErrorDialog(message, title);
-        }, ModalityState.defaultModalityState());
-    }
-
-    @RequiresBackgroundThread
-    private void showSource(@NotNull String relativePath) {
-        var location = FileLocation.parse(relativePath);
-        if (location == null) {
-            showShowSourceError(relativePath);
-            return;
-        }
-
-        var referencedFile = ReadAction.compute(() -> {
-            return FileLookup.findRelativeFile(project, file, FileUtil.toSystemIndependentName(location.filePath));
-        });
-        if (referencedFile == null) {
-            showShowSourceError(relativePath);
-            return;
-        }
-
-        ApplicationManager.getApplication().invokeLater(() -> {
-            // IntelliJ's lines are 0-based, AppMap lines seem to be 1-based
-            var descriptor = new OpenFileDescriptor(project, referencedFile, location.getZeroBasedLine(-1), -1);
-            OpenInRightSplitAction.Companion.openInRightSplit(project, referencedFile, descriptor, true);
-        }, ModalityState.defaultModalityState());
     }
 }

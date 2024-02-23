@@ -15,6 +15,7 @@ import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.roots.ProjectRootManager;
 import com.intellij.openapi.util.io.FileUtil;
+import com.intellij.openapi.util.io.FileUtilRt;
 import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.openapi.vfs.VfsUtil;
 import com.intellij.openapi.vfs.VfsUtilCore;
@@ -50,7 +51,7 @@ public final class AppMapFiles {
     }
 
     public static boolean isAppMapConfigFileName(@NotNull String fileName) {
-        return FileUtil.fileNameEquals(fileName, APPMAP_YML);
+        return FileUtilRt.fileNameEquals(fileName, APPMAP_YML);
     }
 
     /**
