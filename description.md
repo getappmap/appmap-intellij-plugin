@@ -1,16 +1,23 @@
-AppMap is a free and open-source runtime code analysis tool.
+AppMap is a runtime code analysis platform and runtime data-enhanced AI coding assistant.
 
-AppMap records your running code in your development environment, collecting information about how your code works and what it does.
+AppMap will automatically generate and visualize code-linked runtime data and traces about your Java, Python, Node.js, or Ruby application without needing to add custom instrumentation or OTEL spans.
 
-Then it uses this information to create AppMaps—interactive diagrams that describe your code’s behavior in sequence diagrams, dependency maps, trace views and flame graphs.
+Code traces and visualizations from AppMap show how your code really works, including APIs, database queries, web service request flows, security architecture, and more.
 
-Once you've created AppMaps, you can chat with AppMap new AI assistant, Navie to understand your code. Navie uses your local AppMaps files to provide you with explanations and better code suggestions.
+AppMap’s AI coding assistant, Navie, will use data and visualizations to co-develop new features, fix complex bugs, optimize code performance and keep your code secure.
 
-Navie is the AI Coding Assistant for Senior Developers. Navie’s suggestions are better for complex code changes compared to other AI code assistants because Navie includes runtime context. Navie’s code recommendations span files, functions, APIs, databases and more.
+AppMap and Navie will help you:
+
+-   Understand and reverse engineer complex codebases.
+-   Troubleshoot and debug issues that are observed when the app is running.
+-   Design and refactor features that span many internal files, APIs, services, and databases.
+-   Find and fix performance issues like N+1 queries.
+-   Detect and fix insecure code such as missing or faulty permissions, data leakage, mishandling of secrets, etc.
 
 ## Requirements and Use
 
-**2021.3** and newer JetBrains IDEs are required to use this plugin.
+**2021.3** and newer JetBrains IDEs are required to use this plugin.  
+**2023+** is recommended.
 
 Supported web applications and API frameworks: Ruby on Rails, Django, Flask, Express, Nest.js, Next.js, and Spring, Kotlin, and Scala
 
