@@ -1,5 +1,16 @@
 AppMap Plugin Changelog
 
+## [0.58.0](https://github.com/getappmap/appmap-intellij-plugin/compare/v0.57.0...v0.58.0) (2024-02-23)
+
+
+### Features
+
+-  Support the "Export JSON" feature and handle webview messages in Navie view. ([2b2dae2]())
+
+### Bug Fixes
+
+-  allow to choose a file or directory for "Export to SVG" ([a9645f2]())-  compatibility with 2024.1 eap5 ([b6e89a0]())-  Exception "java.lang.IllegalArgumentException: invalid hex byte" ([96b07fe]())-  polish "Export to SVG" ([0f1a05e]())-  possible freeze of UI if "Explain with Navie" is invoked during indexing ([e23775e]())-  show local file paths when exporting SVG from "Explain with Navie" ([3e9e2cb]())-  Update description ([e77b46a]())
+
 ## [0.57.0](https://github.com/getappmap/appmap-intellij-plugin/compare/v0.56.0...v0.57.0) (2024-02-17)
 
 
