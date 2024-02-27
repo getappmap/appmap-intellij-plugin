@@ -42,6 +42,8 @@ export function mountWebview() {
     });
 
     handleAppMapMessages(app, vscode, messages);
+
+    app.$on('show-appmap-tree', () => vscode.postMessage({command: 'show-appmap-tree'}));
   });
 
   vscode.postMessage({ command: "ready" });
