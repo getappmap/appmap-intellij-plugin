@@ -51,7 +51,7 @@ public class CollapsiblePanel extends JPanel {
         return isCollapsed;
     }
 
-    protected void setCollapsed(boolean collapse) {
+    public void setCollapsed(boolean collapse) {
         if (collapse) {
             remove(content);
         } else {

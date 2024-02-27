@@ -4,11 +4,14 @@ import appland.AppMapBundle;
 import appland.settings.AppMapApplicationSettingsService;
 import appland.settings.AppMapProjectSettingsService;
 import appland.settings.AppMapSettingsListener;
+import appland.toolwindow.AppMapToolWindowFactory;
 import appland.utils.GsonUtils;
 import appland.webviews.SharedAppMapWebViewMessages;
 import appland.webviews.WebviewEditor;
 import appland.webviews.webserver.AppMapWebview;
 import com.google.gson.JsonObject;
+import com.intellij.openapi.application.ApplicationManager;
+import com.intellij.openapi.application.ModalityState;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.openapi.vfs.VirtualFile;
@@ -18,7 +21,7 @@ import org.jetbrains.annotations.Nullable;
 
 public class NavieEditor extends WebviewEditor<Void> {
     public NavieEditor(@NotNull Project project, @NotNull VirtualFile file) {
-        super(project, AppMapWebview.Navie, file, SharedAppMapWebViewMessages.withBaseMessages());
+        super(project, AppMapWebview.Navie, file, SharedAppMapWebViewMessages.withBaseMessages("show-appmap-tree"));
     }
 
     @Override
@@ -57,7 +60,15 @@ public class NavieEditor extends WebviewEditor<Void> {
 
     @Override
     protected void handleMessage(@NotNull String messageId, @Nullable JsonObject message) {
-        SharedAppMapWebViewMessages.handleMessage(project, this, messageId, message);
+        if (SharedAppMapWebViewMessages.handleMessage(project, this, messageId, message)) {
+            return;
+        }
+
+        if ("show-appmap-tree".equals(messageId)) {
+            ApplicationManager.getApplication().invokeLater(() -> {
+                AppMapToolWindowFactory.showAppMapTreePanel(project);
+            }, ModalityState.defaultModalityState());
+        }
     }
 
     protected @Nullable Void createInitData() {

@@ -14,6 +14,7 @@ import com.intellij.openapi.wm.ToolWindowManager;
 import com.intellij.openapi.wm.ex.ToolWindowManagerListener;
 import com.intellij.ui.content.ContentFactory;
 import com.intellij.ui.jcef.JBCefApp;
+import com.intellij.util.concurrency.annotations.RequiresEdt;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
@@ -27,6 +28,24 @@ import javax.swing.*;
 public class AppMapToolWindowFactory implements ToolWindowFactory, DumbAware {
     // must match the value in plugin.xml
     public static final String TOOLWINDOW_ID = "applandToolWindow";
+
+    /**
+     * Open the AppMap tool window and put focus in the AppMap section.
+     *
+     * @param project Current project
+     */
+    @RequiresEdt
+    public static void showAppMapTreePanel(@NotNull Project project) {
+        var toolWindow = ToolWindowManager.getInstance(project).getToolWindow(TOOLWINDOW_ID);
+        if (toolWindow != null) {
+            toolWindow.activate(() -> {
+                var content = toolWindow.getContentManager().getContent(0);
+                if (content != null && content.getComponent() instanceof AppMapWindowPanel) {
+                    ((AppMapWindowPanel) content.getComponent()).showAppMapTreePanel();
+                }
+            }, true, true);
+        }
+    }
 
     @Override
     public void createToolWindowContent(@NotNull Project project, @NotNull ToolWindow toolWindow) {
