@@ -80,6 +80,10 @@ export function mountWebview() {
       currentProject = project;
     });
 
+    app.$on('open-navie', () => {
+      vscode.postMessage({command: 'open-navie'});
+    });
+
     app.$on('open-findings-overview', () => {
       vscode.postMessage({command: 'open-findings-overview'});
     });
