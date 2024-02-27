@@ -22,6 +22,7 @@ public class AppMapProjectSettings {
     private boolean openedAppMapEditor = false;
     private boolean createdOpenAPI = false;
     private boolean investigatedFindings = false;
+    private boolean explainWithNavieOpened = false;
 
     /**
      * Maps filter name to the actual filter.
@@ -44,6 +45,7 @@ public class AppMapProjectSettings {
         this.createdOpenAPI = settings.createdOpenAPI;
         this.investigatedFindings = settings.investigatedFindings;
         this.appMapFilters = new HashMap<>(settings.appMapFilters);
+        this.explainWithNavieOpened = settings.explainWithNavieOpened;
     }
 
     @NotNull
@@ -146,15 +148,15 @@ public class AppMapProjectSettings {
         }
     }
 
-    public void setInvestigatedFindings(boolean investigatedFindings) {
+    public void setExplainWithNavieOpened(boolean explainWithNavieOpened) {
         boolean changed;
         synchronized (this) {
-            changed = this.investigatedFindings != investigatedFindings;
-            this.investigatedFindings = investigatedFindings;
+            changed = this.explainWithNavieOpened != explainWithNavieOpened;
+            this.explainWithNavieOpened = explainWithNavieOpened;
         }
 
         if (changed) {
-            settingsPublisher().investigatedFindingsChanged();
+            settingsPublisher().explainWithNavieOpenedChanged();
         }
     }
 

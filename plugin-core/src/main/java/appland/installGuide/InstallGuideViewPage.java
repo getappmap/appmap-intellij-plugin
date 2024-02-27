@@ -1,6 +1,9 @@
 package appland.installGuide;
 
 import appland.AppMapBundle;
+import appland.webviews.navie.NavieEditorProvider;
+import com.intellij.openapi.actionSystem.DataContext;
+import com.intellij.openapi.project.Project;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.jetbrains.annotations.NotNull;
@@ -10,8 +13,7 @@ import org.jetbrains.annotations.NotNull;
 public enum InstallGuideViewPage {
     InstallAgent("project-picker"),
     RecordAppMaps("record-appmaps"),
-    OpenAppMaps("open-appmaps"),
-    RuntimeAnalysis("investigate-findings");
+    AskNavieAI("ask-navie-ai");
 
     // value used by the JS application as "page" values
     private final String pageId;
@@ -32,12 +34,18 @@ public enum InstallGuideViewPage {
                 return AppMapBundle.get("installGuide.pageInstallAgent.title");
             case RecordAppMaps:
                 return AppMapBundle.get("installGuide.pageRecordAppMaps.title");
-            case OpenAppMaps:
-                return AppMapBundle.get("installGuide.pageOpenAppMaps.title");
-            case RuntimeAnalysis:
-                return AppMapBundle.get("installGuide.pageRuntimeAnalysis.title");
+            case AskNavieAI:
+                return AppMapBundle.get("installGuide.pageAskNavie.title");
             default:
                 throw new IllegalStateException("Unsupported type: " + this);
+        }
+    }
+
+    public void open(@NotNull Project project) {
+        if (this == InstallGuideViewPage.AskNavieAI) {
+            NavieEditorProvider.openEditor(project, DataContext.EMPTY_CONTEXT);
+        } else {
+            InstallGuideEditorProvider.open(project, this);
         }
     }
 }
