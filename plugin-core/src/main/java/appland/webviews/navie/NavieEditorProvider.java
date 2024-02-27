@@ -4,6 +4,7 @@ import appland.AppMapBundle;
 import appland.Icons;
 import appland.cli.AppLandCommandLineService;
 import appland.notifications.AppMapNotifications;
+import appland.settings.AppMapProjectSettingsService;
 import appland.webviews.WebviewEditorProvider;
 import com.intellij.ide.util.PropertiesComponent;
 import com.intellij.openapi.actionSystem.CommonDataKeys;
@@ -80,6 +81,7 @@ public final class NavieEditorProvider extends WebviewEditorProvider {
             KEY_INDEXER_RPC_PORT.set(file, indexerPort);
             KEY_CODE_SELECTION.set(file, codeSelection);
 
+            AppMapProjectSettingsService.getState(project).setExplainWithNavieOpened(true);
             FileEditorManager.getInstance(project).openFile(file, true);
 
             var hideMessagePropertyKey = "appmap.navie.hideIsBrokenMessage";
