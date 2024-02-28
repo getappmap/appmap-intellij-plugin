@@ -181,6 +181,8 @@ public abstract class WebviewEditor<T> extends UserDataHolderBase implements Fil
     private void setupJCEF() {
         // open links to https://appmap.io in the external browser
         contentPanel.getJBCefClient().addRequestHandler(new OpenExternalLinksHandler(), contentPanel.getCefBrowser());
+        // open new webview windows, which are opened via <a href="..." target="_blank", in the external browser
+        contentPanel.getJBCefClient().addLifeSpanHandler(new OpenExternalTargetLinksHandler(), contentPanel.getCefBrowser());
         // add auth tokens to our localhost requests
         contentPanel.getJBCefClient().addRequestHandler(new WebviewAuthTokenRequestHandler(), contentPanel.getCefBrowser());
 

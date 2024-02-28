@@ -178,15 +178,10 @@ public class AppMapWindowPanel extends SimpleToolWindowPanel implements DataProv
 
             if (c instanceof CollapsiblePanel) {
                 ((CollapsiblePanel) c).setCollapsed(false);
-            } else if (c instanceof Splitter) {
-                if (previous != null) {
-                    var splitter = (Splitter) c;
-                    if (previous.equals(splitter.getFirstComponent())) {
-                        splitter.setProportion(1.0f);
-                    } else if (previous.equals(splitter.getSecondComponent())) {
-                        splitter.setProportion(0.0f);
-                    }
-                }
+            } else if (c instanceof Splitter && previous != null) {
+                var splitter = (Splitter) c;
+                // 1.0 to display the first component, 0.0 to display the other component
+                splitter.setProportion(previous.equals(splitter.getFirstComponent()) ? 1.0f : 0.0f);
             }
 
             previous = c;
