@@ -1,5 +1,6 @@
 package appland.toolwindow.signInView;
 
+import appland.webviews.OpenExternalTargetLinksHandler;
 import appland.oauth.AppMapLoginAction;
 import appland.toolwindow.AppMapToolWindowContent;
 import appland.utils.GsonUtils;
@@ -7,7 +8,6 @@ import appland.webviews.ConsoleInitMessageHandler;
 import appland.webviews.OpenExternalLinksHandler;
 import appland.webviews.webserver.AppMapWebview;
 import com.google.gson.JsonObject;
-import com.intellij.ide.BrowserUtil;
 import com.intellij.openapi.Disposable;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.ui.SimpleToolWindowPanel;
@@ -18,7 +18,6 @@ import com.intellij.ui.jcef.JBCefJSQuery;
 import com.intellij.ui.jcef.JCEFHtmlPanel;
 import org.cef.browser.CefBrowser;
 import org.cef.browser.CefFrame;
-import org.cef.handler.CefLifeSpanHandlerAdapter;
 import org.cef.handler.CefRequestHandlerAdapter;
 import org.cef.network.CefRequest;
 import org.jetbrains.annotations.NotNull;
@@ -72,16 +71,7 @@ public class SignInViewPanel extends SimpleToolWindowPanel implements Disposable
         }, htmlPanel.getCefBrowser());
 
         // open new webview windows, which are opened via <a href="..." target="_blank", in the external browser
-        htmlPanel.getJBCefClient().addLifeSpanHandler(new CefLifeSpanHandlerAdapter() {
-            @Override
-            public boolean onBeforePopup(CefBrowser browser, CefFrame frame, String target_url, String target_frame_name) {
-                if (target_url.startsWith("http://") || target_url.startsWith("https://")) {
-                    BrowserUtil.browse(target_url);
-                    return true;
-                }
-                return false;
-            }
-        }, htmlPanel.getCefBrowser());
+        htmlPanel.getJBCefClient().addLifeSpanHandler(new OpenExternalTargetLinksHandler(), htmlPanel.getCefBrowser());
 
         htmlPanel.getJBCefClient().addDisplayHandler(new ConsoleInitMessageHandler(this::initWebView), htmlPanel.getCefBrowser());
 
