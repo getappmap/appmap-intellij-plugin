@@ -43,6 +43,7 @@ import java.nio.file.Paths;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -108,7 +109,7 @@ public class DefaultCommandLineService implements AppLandCommandLineService {
     public synchronized void stop(@NotNull VirtualFile directory, boolean waitForTermination) {
         var entry = processes.remove(directory);
         if (entry != null) {
-            stopLocked(entry, waitForTermination);
+            stopLocked(entry, waitForTermination ? 1_000 : 0, TimeUnit.MILLISECONDS);
         }
     }
 
@@ -153,6 +154,11 @@ public class DefaultCommandLineService implements AppLandCommandLineService {
 
     @Override
     public void stopAll(boolean waitForTermination) {
+        stopAll(waitForTermination ? 1_000 : 0, TimeUnit.MILLISECONDS);
+    }
+
+    @Override
+    public void stopAll(int timeout, @NotNull TimeUnit timeUnit) {
         List<CliProcesses> activeProcesses;
         synchronized (this) {
             activeProcesses = List.copyOf(processes.values());
@@ -161,7 +167,7 @@ public class DefaultCommandLineService implements AppLandCommandLineService {
 
         for (var processes : activeProcesses) {
             try {
-                stopLocked(processes, waitForTermination);
+                stopLocked(processes, timeout, timeUnit);
             } catch (Exception e) {
                 LOG.warn("Error shutting down processes on disposal", e);
             }
@@ -219,12 +225,13 @@ public class DefaultCommandLineService implements AppLandCommandLineService {
     /**
      * Stops processes, but does not modify {@link #processes}. It's the responsibility of the caller to update it.
      *
-     * @param processes          Processes to stop
-     * @param waitForTermination If this method should wait until the processes are terminated
+     * @param processes Processes to stop
+     * @param timeout   Timeout to wait for process termination.
+     * @param timeUnit  Unit of timeout.
      */
-    private void stopLocked(@NotNull CliProcesses processes, boolean waitForTermination) {
-        stopProcess(processes.indexer, waitForTermination);
-        stopProcess(processes.scanner, waitForTermination);
+    private void stopLocked(@NotNull CliProcesses processes, int timeout, @NotNull TimeUnit timeUnit) {
+        stopProcess(processes.indexer, timeout, timeUnit);
+        stopProcess(processes.scanner, timeout, timeUnit);
     }
 
     @Override
@@ -264,7 +271,7 @@ public class DefaultCommandLineService implements AppLandCommandLineService {
         } catch (ExecutionException e) {
             LOG.debug("Error starting scanner process", e);
             if (indexer != null) {
-                stopProcess(indexer, false);
+                stopProcess(indexer, 0, TimeUnit.MILLISECONDS);
             }
             return null;
         }
@@ -436,7 +443,7 @@ public class DefaultCommandLineService implements AppLandCommandLineService {
         };
     }
 
-    private static void stopProcess(@Nullable KillableProcessHandler process, boolean waitForTermination) {
+    private static void stopProcess(@Nullable KillableProcessHandler process, int timeout, @NotNull TimeUnit timeUnit) {
         if (process == null) {
             return;
         }
@@ -453,13 +460,13 @@ public class DefaultCommandLineService implements AppLandCommandLineService {
                         process.killProcess();
                     }
 
-                    if (waitForTermination) {
-                        process.waitFor(1_000);
+                    if (timeout > 0) {
+                        process.waitFor(timeUnit.toMillis(timeout));
                     }
                 }
             };
 
-            if (waitForTermination) {
+            if (timeout > 0) {
                 ApplicationManager.getApplication().executeOnPooledThread(shutdownRunnable).get();
             } else {
                 shutdownRunnable.run();

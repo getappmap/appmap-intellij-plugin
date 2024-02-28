@@ -11,6 +11,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.nio.file.Path;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 public interface AppLandCommandLineService extends Disposable {
     static @NotNull AppLandCommandLineService getInstance() {
@@ -75,6 +76,14 @@ public interface AppLandCommandLineService extends Disposable {
      * @param waitForTermination Wait for process termination. This is mostly useful for test cases.
      */
     void stopAll(boolean waitForTermination);
+
+    /**
+     * Stop all processes.
+     *
+     * @param timeout Length of timeout to wait for process termination. 0 disables the waiting for termination.
+     * @param timeUnit Unit of timeout.
+     */
+    void stopAll(int timeout, @NotNull TimeUnit timeUnit);
 
     /**
      * Creates the command line to install AppMap in the given directory.

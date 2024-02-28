@@ -12,6 +12,8 @@ import com.intellij.openapi.util.Disposer;
 import com.intellij.testFramework.EdtTestUtil;
 import com.intellij.testFramework.JavaPsiTestCase;
 
+import java.util.concurrent.TimeUnit;
+
 public abstract class BaseAppMapJavaTest extends JavaPsiTestCase {
     @Override
     protected void setUp() throws Exception {
@@ -29,7 +31,7 @@ public abstract class BaseAppMapJavaTest extends JavaPsiTestCase {
     @Override
     protected void tearDown() throws Exception {
         try {
-            AppLandCommandLineService.getInstance().stopAll(true);
+            AppLandCommandLineService.getInstance().stopAll(10_000, TimeUnit.MILLISECONDS);
         } catch (Exception e) {
             addSuppressedException(e);
         } finally {
