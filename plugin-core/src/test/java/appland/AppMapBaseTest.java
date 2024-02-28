@@ -20,16 +20,24 @@ import com.intellij.testFramework.fixtures.LightPlatformCodeInsightFixture4TestC
 import com.intellij.util.ThrowableRunnable;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.junit.After;
 import org.junit.Assert;
-import org.junit.Before;
 
 import java.util.Collections;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
 public abstract class AppMapBaseTest extends LightPlatformCodeInsightFixture4TestCase {
-    @Before
-    public void cleanupTempFilesystem() {
+    @Override
+    protected LightProjectDescriptor getProjectDescriptor() {
+        // we're returning a new instance, because we don't want to share the project setup between light tests.
+        // many of our tests require a clean filesystem.
+        return new LightProjectDescriptor();
+    }
+
+    @Override
+    protected void setUp() throws Exception {
+        super.setUp();
+
         if (ApplicationManager.getApplication().isDispatchThread()) {
             TempFileSystem.getInstance().cleanupForNextTest();
         } else {
@@ -38,42 +46,21 @@ public abstract class AppMapBaseTest extends LightPlatformCodeInsightFixture4Tes
     }
 
     @Override
-    protected LightProjectDescriptor getProjectDescriptor() {
-        // we're returning a new instance, because we don't want to share the project setup between light tests.
-        // many of our tests require a clean filesystem.
-        return new LightProjectDescriptor();
-    }
-
-    @After
-    public void resetState() {
-        TestCommandLineService.getInstance().reset();
-    }
-
-    @After
-    public void shutdownAppMapProcesses() {
-        var commandLineService = AppLandCommandLineService.getInstance();
+    protected void tearDown() throws Exception {
         try {
-            // multiple shutdown attempts because Windows CI is constantly failing
-            var attempts = 5;
-            for (var i = 1; i <= attempts; i++) {
-                if (commandLineService.getActiveRoots().isEmpty()) {
-                    break;
-                }
-
-                LOG.debug(String.format("Attempting to terminate AppMap processes: %d/%d", i, attempts));
-                if (i > 1) {
-                    Thread.sleep(5_000);
-                }
-                commandLineService.stopAll(true);
+            try {
+                resetState();
+            } catch (Throwable e) {
+                addSuppressedException(e);
             }
-        } catch (Throwable t) {
-            addSuppressedException(t);
-        } finally {
-            // reset to default settings
-            ApplicationManager.getApplication().getService(AppMapApplicationSettingsService.class).loadState(new AppMapApplicationSettings());
 
-            var activeRoots = commandLineService.getActiveRoots();
-            Assert.assertTrue("All AppMap CLIs must be terminated: " + activeRoots, activeRoots.isEmpty());
+            try {
+                shutdownAppMapProcesses();
+            } catch (Throwable e) {
+                addSuppressedException(e);
+            }
+        } finally {
+            super.tearDown();
         }
     }
 
@@ -222,5 +209,21 @@ public abstract class AppMapBaseTest extends LightPlatformCodeInsightFixture4Tes
 
         json.append("]");
         return json.toString();
+    }
+
+    private void resetState() {
+        TestCommandLineService.getInstance().reset();
+    }
+
+    private void shutdownAppMapProcesses() {
+        try {
+            AppLandCommandLineService.getInstance().stopAll(10_000, TimeUnit.MILLISECONDS);
+        } finally {
+            // reset to default settings
+            ApplicationManager.getApplication().getService(AppMapApplicationSettingsService.class).loadState(new AppMapApplicationSettings());
+
+            var activeRoots = AppLandCommandLineService.getInstance().getActiveRoots();
+            Assert.assertTrue("All AppMap CLIs must be terminated: " + activeRoots, activeRoots.isEmpty());
+        }
     }
 }
