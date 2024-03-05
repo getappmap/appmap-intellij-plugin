@@ -4,11 +4,13 @@ import appland.installGuide.InstallGuideEditorProvider;
 import appland.installGuide.InstallGuideViewPage;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
+import com.intellij.openapi.actionSystem.UpdateInBackground;
+import com.intellij.openapi.project.DumbAware;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
 
-public class OpenInstallGuideAction extends AnAction {
+public class OpenInstallGuideAction extends AnAction implements DumbAware, UpdateInBackground {
     @Override
     public void update(@NotNull AnActionEvent e) {
         e.getPresentation().setEnabled(InstallGuideEditorProvider.isSupported());

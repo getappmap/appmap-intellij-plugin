@@ -3,10 +3,7 @@ package appland.toolwindow.appmap;
 import appland.AppMapBundle;
 import com.intellij.icons.AllIcons;
 import com.intellij.ide.DeleteProvider;
-import com.intellij.openapi.actionSystem.AnAction;
-import com.intellij.openapi.actionSystem.AnActionEvent;
-import com.intellij.openapi.actionSystem.CommonDataKeys;
-import com.intellij.openapi.actionSystem.DataContext;
+import com.intellij.openapi.actionSystem.*;
 import com.intellij.openapi.fileChooser.actions.VirtualFileDeleteProvider;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -14,7 +11,7 @@ import org.jetbrains.annotations.Nullable;
 /**
  * Action to delete all AppMaps displayed in the AppMap panel.
  */
-final class DeleteAllMapsAction extends AnAction {
+final class DeleteAllMapsAction extends AnAction implements UpdateInBackground {
     private final DeleteProvider deleteHandler = new VirtualFileDeleteProvider();
 
     public DeleteAllMapsAction() {
