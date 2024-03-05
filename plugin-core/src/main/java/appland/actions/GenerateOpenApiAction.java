@@ -9,6 +9,7 @@ import com.intellij.execution.process.CapturingProcessHandler;
 import com.intellij.ide.actions.OpenInRightSplitAction;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
+import com.intellij.openapi.actionSystem.UpdateInBackground;
 import com.intellij.openapi.application.WriteAction;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.fileEditor.FileEditorManager;
@@ -32,7 +33,7 @@ import java.util.concurrent.TimeUnit;
 /**
  * Generates an OpenAPI file using the CLI tool.
  */
-public class GenerateOpenApiAction extends AnAction implements DumbAware {
+public class GenerateOpenApiAction extends AnAction implements DumbAware, UpdateInBackground {
     private static final Logger LOG = Logger.getInstance(GenerateOpenApiAction.class);
     private static final String APPMAP_OPENAPI_FILENAME = "appmap-openapi.yml";
 
