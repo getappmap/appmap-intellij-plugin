@@ -51,7 +51,7 @@ public class DefaultCommandLineServiceTest extends AppMapBaseTest {
     @Override
     protected void tearDown() throws Exception {
         try {
-            AppLandCommandLineService.getInstance().stopAll(true);
+            AppLandCommandLineService.getInstance().stopAll(10_000, TimeUnit.MILLISECONDS);
         } catch (Exception e) {
             addSuppressedException(e);
         } finally {
@@ -147,7 +147,7 @@ public class DefaultCommandLineServiceTest extends AppMapBaseTest {
 
         assertActiveRoots(dirA, dirB);
 
-        service.stopAll(true);
+        service.stopAll(10_000, TimeUnit.MILLISECONDS);
 
         var debugInfo = service.toString();
         assertFalse("No services expected for parentA: " + debugInfo, service.isRunning(dirA, true));
