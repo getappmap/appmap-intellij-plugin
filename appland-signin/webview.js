@@ -27,6 +27,9 @@ export function mountWebview() {
     app.$on('click-sign-in-link', (linkType) => {
       vscode.postMessage({command: 'click-sign-in-link', linkType})
     });
+    app.$on('activate', (apiKey) => {
+      vscode.postMessage({command: 'activate', apiKey})
+    });
   });
 
   vscode.postMessage({command: 'ready'});
