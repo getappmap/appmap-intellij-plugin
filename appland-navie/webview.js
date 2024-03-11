@@ -12,16 +12,22 @@ export function mountWebview() {
 
   messages.on("init", (initialData) => {
     const app = new Vue({
-      el: "#app",
+      el: '#app',
       render(h) {
         return h(VChatSearch, {
-          ref: "ui",
+          ref: 'ui',
           props: {
-            apiKey: initialData.apiKey,
             appmapRpcPort: initialData.appmapRpcPort,
             savedFilters: initialData.savedFilters,
+            apiKey: initialData.apiKey,
+            mostRecentAppMaps: this.mostRecentAppMaps,
+            appmapYmlPresent: this.appmapYmlPresent,
           },
         });
+      },
+      data: {
+        mostRecentAppMaps: initialData.mostRecentAppMaps || [],
+        appmapYmlPresent: initialData.appmapYmlPresent,
       },
       methods: {
         getAppMapState() {
@@ -43,6 +49,19 @@ export function mountWebview() {
 
     handleAppMapMessages(app, vscode, messages);
 
+    messages.on('update', (props) => {
+      Object.entries(props)
+        .filter(([key]) => key !== 'type')
+        .forEach(([key, value]) => {
+          if (key in app.$data && app[key] !== value) {
+            app[key] = value;
+          }
+        });
+    });
+
+    app.$on('open-install-instructions', () => vscode.postMessage({command: 'open-install-instructions'}))
+    app.$on('open-record-instructions', () => vscode.postMessage({command: 'open-record-instructions'}))
+    app.$on('open-appmap', (path) => vscode.postMessage({command: 'open-appmap', path}))
     app.$on('show-appmap-tree', () => vscode.postMessage({command: 'show-appmap-tree'}));
   });
 
