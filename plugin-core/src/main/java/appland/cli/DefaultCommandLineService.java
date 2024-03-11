@@ -40,6 +40,7 @@ import java.nio.file.Files;
 import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -144,6 +145,15 @@ public class DefaultCommandLineService implements AppLandCommandLineService {
         // and we must avoid possible deadlocks.
         // Refer to https://github.com/getappmap/appmap-intellij-plugin/issues/586.
         return List.copyOf(processes.keySet());
+    }
+
+    @Override
+    public @Nullable VirtualFile getActiveRoot(@NotNull VirtualFile appMapFile) {
+        return getActiveRoots().stream()
+                .sorted(Comparator.<VirtualFile>comparingInt(root -> root.getPath().length()).reversed())
+                .filter(root -> VfsUtilCore.isAncestor(root, appMapFile, false))
+                .findFirst()
+                .orElse(null);
     }
 
     @Override

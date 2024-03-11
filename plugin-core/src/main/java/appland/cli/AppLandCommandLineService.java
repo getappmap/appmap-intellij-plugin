@@ -64,6 +64,11 @@ public interface AppLandCommandLineService extends Disposable {
     @NotNull List<VirtualFile> getActiveRoots();
 
     /**
+     * @return The closest parent directory, which is configured with an appmap.yml file for the given AppMap file.
+     */
+    @Nullable VirtualFile getActiveRoot(@NotNull VirtualFile appMapFile);
+
+    /**
      * @param contextFile Context file to locate the matching indexer service.
      * @return The port, where the indexer process is serving for JSON-RPC requests.
      * {@code null} is returned if there's no matching indexer process or if the indexer did not yet launch its JSON-RPC server.
