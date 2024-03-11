@@ -55,6 +55,10 @@ jobs:
                 uses: peter-evans/create-pull-request@v6
                 if: inputs.webview_appmap == true || inputs.webview_findings == true || inputs.webview_install_guide == true || inputs.webview_navie == true
                 with:
-                    path: ./appland*
                     title: "Update Webviews"
                     commit-message: "Update webviews to latest versions"
+                    add-paths: |
+                        appland
+                        appland-findings
+                        appland-install-guide
+                        appland-navie
