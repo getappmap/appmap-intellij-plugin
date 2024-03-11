@@ -2,26 +2,16 @@ name: "Update Webviews"
 on:
     workflow_dispatch:
         inputs:
-            webview_appmap:
-                description: 'Update the AppMap webview'
-                default: false
-                required: false
-                type: boolean
-            webview_findings:
-                description: 'Update the Findings webview'
-                default: false
-                required: false
-                type: boolean
-            webview_install_guide:
-                description: 'Update the Installation Guide webview'
-                default: false
-                required: false
-                type: boolean
-            webview_navie:
-                description: 'Update the Navie webview'
-                default: false
-                required: false
-                type: boolean
+            webview:
+                description: 'Webview to update to the latest version'
+                default: 'appmap'
+                required: true
+                type: choice
+                options:
+                    - appmap
+                    - findings
+                    - install-guide
+                    - navie
 
 jobs:
     update_webviews:
@@ -32,29 +22,34 @@ jobs:
                 name: "Checkout Repository"
 
             -   name: "Update AppMap WebView"
-                if: inputs.webview_appmap == true
+                if: inputs.webview == 'appmap'
                 shell: bash
                 run: ./appland/rebuild.bash
 
             -   name: "Update Findings WebView"
-                if: inputs.webview_findings == true
+                if: inputs.webview == 'findings'
                 shell: bash
                 run: ./appland-findings/rebuild.bash
 
             -   name: "Update Installation Guide WebView"
-                if: inputs.webview_install_guide == true
+                if: inputs.webview == 'install-guide'
                 shell: bash
                 run: ./appland-install-guide/rebuild.bash
 
             -   name: "Update Navie WebView"
-                if: inputs.webview_navie == true
+                if: inputs.webview == 'navie'
                 shell: bash
                 run: ./appland-navie/rebuild.bash
 
             -   name: Create Pull Request
                 uses: peter-evans/create-pull-request@v6
-                if: inputs.webview_appmap == true || inputs.webview_findings == true || inputs.webview_install_guide == true || inputs.webview_navie == true
                 with:
-                    path: ./appland*
-                    title: "Update Webviews"
-                    commit-message: "Update webviews to latest versions"
+                    title: "Update Webview ${{ inputs.webview }}"
+                    commit-message: "feat: update webview ${{ inputs.webview }} to the latest version"
+                    body: "Automated pull request to update webview ${{ inputs.webview }}."
+                    branch: "webview-pull-request/${{ inputs.webview }}"
+                    add-paths: |
+                        appland
+                        appland-findings
+                        appland-install-guide
+                        appland-navie
