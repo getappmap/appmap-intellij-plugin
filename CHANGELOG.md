@@ -1,5 +1,16 @@
 AppMap Plugin Changelog
 
+## [0.59.0](https://github.com/getappmap/appmap-intellij-plugin/compare/v0.58.0...v0.59.0) (2024-03-11)
+
+
+### Features
+
+-  notify user if Navie isn't fully functional ([#595](https://github.com/getappmap/appmap-intellij-plugin/issues/595)) ([9b5f184]())-  support to display the AppMap tool window from the Navie webview ([bb25a8b]())-  Update install guide to include new node instructions ([d7815d7]())
+
+### Bug Fixes
+
+-  compatibility with 2024.1 eap's backwards incompatible API of OAuthRequestHandlerBase ([5fc79c2]())-  open external links with a target attribute like plain external links ([4494a4b]())-  update actions to avoid exception "ActionUpdateThread.OLD_EDT is deprecated and going to be removed soon." with 2024.1 eap ([d6d18ca]())
+
 ## [0.58.0](https://github.com/getappmap/appmap-intellij-plugin/compare/v0.57.0...v0.58.0) (2024-02-23)
 
 
