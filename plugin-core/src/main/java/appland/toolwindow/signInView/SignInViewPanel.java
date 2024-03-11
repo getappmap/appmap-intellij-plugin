@@ -1,11 +1,12 @@
 package appland.toolwindow.signInView;
 
-import appland.webviews.OpenExternalTargetLinksHandler;
 import appland.oauth.AppMapLoginAction;
+import appland.settings.AppMapApplicationSettingsService;
 import appland.toolwindow.AppMapToolWindowContent;
 import appland.utils.GsonUtils;
 import appland.webviews.ConsoleInitMessageHandler;
 import appland.webviews.OpenExternalLinksHandler;
+import appland.webviews.OpenExternalTargetLinksHandler;
 import appland.webviews.webserver.AppMapWebview;
 import com.google.gson.JsonObject;
 import com.intellij.openapi.Disposable;
@@ -100,8 +101,17 @@ public class SignInViewPanel extends SimpleToolWindowPanel implements Disposable
 
     private boolean handleWebviewMessage(@NotNull String id, @NotNull JsonObject message) {
         switch (id) {
+            // OAuth
             case "sign-in":
                 AppMapLoginAction.authenticate();
+                return true;
+
+            // email authentication
+            case "activate":
+                var apiKeyProperty = message.getAsJsonPrimitive("apiKey");
+                if (apiKeyProperty != null && apiKeyProperty.isString()) {
+                    AppMapApplicationSettingsService.getInstance().setApiKeyNotifying(apiKeyProperty.getAsString());
+                }
                 return true;
 
             // known message, but not handled
