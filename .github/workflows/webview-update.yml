@@ -1,4 +1,5 @@
 name: "Update Webview"
+run-name: "Update Webview ${{ inputs.webview }}"
 on:
     workflow_dispatch:
         inputs:
