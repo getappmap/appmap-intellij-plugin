@@ -10,6 +10,7 @@ import appland.settings.AppMapProjectSettingsService;
 import com.intellij.notification.NotificationType;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
+import com.intellij.openapi.actionSystem.UpdateInBackground;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.application.ModalityState;
 import com.intellij.openapi.application.ReadAction;
@@ -33,7 +34,7 @@ import java.nio.file.Paths;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicReference;
 
-public class StopAppMapRecordingAction extends AnAction implements DumbAware {
+public class StopAppMapRecordingAction extends AnAction implements DumbAware, UpdateInBackground {
     private static final Logger LOG = Logger.getInstance(StopAppMapRecordingAction.class);
 
     public StopAppMapRecordingAction() {

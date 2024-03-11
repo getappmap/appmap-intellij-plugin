@@ -3,7 +3,15 @@ package appland.oauth;
 import appland.telemetry.TelemetryService;
 import com.intellij.collaboration.auth.OAuthCallbackHandlerBase;
 import com.intellij.collaboration.auth.services.OAuthService;
+import io.netty.buffer.Unpooled;
+import io.netty.channel.ChannelHandlerContext;
+import io.netty.handler.codec.http.FullHttpRequest;
+import io.netty.handler.codec.http.QueryStringDecoder;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+import org.jetbrains.io.Responses;
+
+import java.nio.charset.StandardCharsets;
 
 public class AppMapOAuthRequestHandler extends OAuthCallbackHandlerBase {
     @NotNull
@@ -12,9 +20,29 @@ public class AppMapOAuthRequestHandler extends OAuthCallbackHandlerBase {
         return AppMapOAuthService.getInstance();
     }
 
-    @NotNull
+    /**
+     * We're overriding this method because <a href="https://youtrack.jetbrains.com/issue/IDEA-346395">IDEA-346395</a>
+     * is breaking backwards compatibility of 2024.1 and there's no other way to fix this
+     * which is compatible with all our supported platform versions.
+     * We're losing improvements of 2024.1, e.g. async request handling.
+     * The implementation follows super.execute() of 2022.1.
+     */
+    @Nullable
     @Override
-    protected AcceptCodeHandleResult handleAcceptCode(boolean isAccepted) {
+    public String execute(@NotNull QueryStringDecoder urlDecoder, @NotNull FullHttpRequest request, @NotNull ChannelHandlerContext context) {
+        var service = oauthService();
+        var isCodeAccepted = service.handleServerCallback(urlDecoder.path(), urlDecoder.parameters());
+        var handleResult = handleAcceptCode(isCodeAccepted);
+
+        var response = Responses.response("text/html", Unpooled.wrappedBuffer(handleResult.getHtml().getBytes(StandardCharsets.UTF_8)));
+        Responses.send(response, context.channel(), request);
+
+        return null;
+    }
+
+    @NotNull
+    //@Override // commented, because of https://youtrack.jetbrains.com/issue/IDEA-346395
+    protected AcceptCodeHandleResult.Page handleAcceptCode(boolean isAccepted) {
         if (!isAccepted) {
             // we're unable to send appland.appmap/debug/exception because we don't have context about the error.
             TelemetryService.getInstance().sendEvent("authentication:failed");

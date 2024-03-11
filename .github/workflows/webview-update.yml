@@ -1,0 +1,60 @@
+name: "Update Webviews"
+on:
+    workflow_dispatch:
+        inputs:
+            webview_appmap:
+                description: 'Update the AppMap webview'
+                default: false
+                required: false
+                type: boolean
+            webview_findings:
+                description: 'Update the Findings webview'
+                default: false
+                required: false
+                type: boolean
+            webview_install_guide:
+                description: 'Update the Installation Guide webview'
+                default: false
+                required: false
+                type: boolean
+            webview_navie:
+                description: 'Update the Navie webview'
+                default: false
+                required: false
+                type: boolean
+
+jobs:
+    update_webviews:
+        name: "Update Webviews"
+        runs-on: ubuntu-latest
+        steps:
+            -   uses: actions/checkout@v4
+                name: "Checkout Repository"
+
+            -   name: "Update AppMap WebView"
+                if: inputs.webview_appmap == true
+                shell: bash
+                run: ./appland/rebuild.bash
+
+            -   name: "Update Findings WebView"
+                if: inputs.webview_findings == true
+                shell: bash
+                run: ./appland-findings/rebuild.bash
+
+            -   name: "Update Installation Guide WebView"
+                if: inputs.webview_install_guide == true
+                shell: bash
+                run: ./appland-install-guide/rebuild.bash
+
+            -   name: "Update Navie WebView"
+                if: inputs.webview_navie == true
+                shell: bash
+                run: ./appland-navie/rebuild.bash
+
+            -   name: Create Pull Request
+                uses: peter-evans/create-pull-request@v6
+                if: inputs.webview_appmap == true || inputs.webview_findings == true || inputs.webview_install_guide == true || inputs.webview_navie == true
+                with:
+                    path: ./appland*
+                    title: "Update Webviews"
+                    commit-message: "Update webviews to latest versions"

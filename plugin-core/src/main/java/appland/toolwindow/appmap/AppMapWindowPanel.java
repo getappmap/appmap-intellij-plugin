@@ -27,6 +27,7 @@ import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.fileChooser.actions.VirtualFileDeleteProvider;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.SimpleToolWindowPanel;
+import com.intellij.openapi.ui.Splitter;
 import com.intellij.openapi.util.Disposer;
 import com.intellij.openapi.util.NlsActions;
 import com.intellij.openapi.vfs.VirtualFile;
@@ -75,6 +76,11 @@ public class AppMapWindowPanel extends SimpleToolWindowPanel implements DataProv
     private volatile boolean isToolWindowVisible;
     private volatile boolean hasPendingTreeRefresh;
 
+    // Hierarchy of components, which are expanded to make the focus component visible.
+    // We're storing the path instead of iterating the parents of the tree component,
+    // because CollapsiblePanel doese not keep invisible subcomponents as children.
+    private @NotNull List<Component> appMapTreePanelPath;
+
     public AppMapWindowPanel(@NotNull Project project, @NotNull Disposable parent) {
         super(true);
         Disposer.register(parent, this);
@@ -84,9 +90,20 @@ public class AppMapWindowPanel extends SimpleToolWindowPanel implements DataProv
         this.tree = createTree(project, this, appMapModel);
         this.treeRefreshAlarm = new SingleAlarm(() -> refreshAndExpand(appMapModel), TREE_REFRESH_DELAY_MILLIS, this, Alarm.ThreadToUse.POOLED_THREAD);
 
-        setContent(createContentPanel(project, tree, this, appMapModel));
-
         IndexedFileListenerUtil.registerListeners(project, this, true, false, () -> rebuild(false));
+
+        // create the content panel
+        var appMapPanel = createAppMapPanel(project, tree, appMapModel);
+        var splitter = createSplitter();
+        splitter.setFirstComponent(appMapPanel);
+        splitter.setSecondComponent(createSouthPanel(project, this));
+
+        var panel = new JPanel(new BorderLayout());
+        panel.add(createInstallGuidePanel(project, this), BorderLayout.NORTH);
+        panel.add(splitter, BorderLayout.CENTER);
+        setContent(panel);
+
+        this.appMapTreePanelPath = List.of(panel, splitter, appMapPanel, tree);
     }
 
     @Override
@@ -140,6 +157,38 @@ public class AppMapWindowPanel extends SimpleToolWindowPanel implements DataProv
     public void onToolWindowHidden() {
         LOG.debug("onToolWindowHidden");
         this.isToolWindowVisible = false;
+    }
+
+    /**
+     * Make the tree of AppMaps visible and make it the focused component.
+     */
+    public void showAppMapTreePanel() {
+        var componentPath = appMapTreePanelPath;
+        if (componentPath.isEmpty()) {
+            return;
+        }
+
+        // collapse all collapsible panels to reset the view
+        collapseChildren(getContent());
+
+        // make the hierarchy visible
+        Component previous = null;
+        for (var c : componentPath) {
+            c.setVisible(true);
+
+            if (c instanceof CollapsiblePanel) {
+                ((CollapsiblePanel) c).setCollapsed(false);
+            } else if (c instanceof Splitter && previous != null) {
+                var splitter = (Splitter) c;
+                // 1.0 to display the first component, 0.0 to display the other component
+                splitter.setProportion(previous.equals(splitter.getFirstComponent()) ? 1.0f : 0.0f);
+            }
+
+            previous = c;
+        }
+
+        // focus on the last component in the path, i.e. the tree of AppMaps
+        appMapTreePanelPath.get(appMapTreePanelPath.size() - 1).requestFocusInWindow();
     }
 
     private @Nullable Object getDataImpl(@NotNull @NonNls String dataId) {
@@ -243,13 +292,17 @@ public class AppMapWindowPanel extends SimpleToolWindowPanel implements DataProv
                                                    @NotNull JComponent viewport,
                                                    @NotNull Disposable parent,
                                                    @NotNull AppMapModel appMapModel) {
+        var appMapPanel = createAppMapPanel(project, viewport, appMapModel);
         var splitter = createSplitter();
-        splitter.setFirstComponent(createAppMapPanel(project, viewport, appMapModel));
+        splitter.setFirstComponent(appMapPanel);
         splitter.setSecondComponent(createSouthPanel(project, parent));
 
         var panel = new JPanel(new BorderLayout());
         panel.add(createInstallGuidePanel(project, parent), BorderLayout.NORTH);
         panel.add(splitter, BorderLayout.CENTER);
+
+        this.appMapTreePanelPath = List.of(panel, splitter, appMapPanel, viewport);
+
         return panel;
     }
 
@@ -382,6 +435,20 @@ public class AppMapWindowPanel extends SimpleToolWindowPanel implements DataProv
                 "appmap.toolWindow.appMaps.collapsed",
                 true,
                 panelWithFilter);
+    }
+
+    private void collapseChildren(@Nullable Container container) {
+        if (container == null) {
+            return;
+        }
+
+        for (var childComponent : container.getComponents()) {
+            if (childComponent instanceof CollapsiblePanel) {
+                ((CollapsiblePanel) childComponent).setCollapsed(true);
+            } else if (childComponent instanceof Container) {
+                collapseChildren((Container) childComponent);
+            }
+        }
     }
 
     private static @NotNull JComponent createSouthPanel(@NotNull Project project, @NotNull Disposable parent) {
