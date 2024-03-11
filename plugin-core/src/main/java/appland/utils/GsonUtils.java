@@ -46,6 +46,12 @@ public class GsonUtils {
         return json;
     }
 
+    public static @NotNull JsonObject singlePropertyObject(@NotNull String name, boolean value) {
+        var json = new JsonObject();
+        json.addProperty(name, value);
+        return json;
+    }
+
     public static @NotNull JsonArray createArray(@NotNull JsonObject... values) {
         var array = new JsonArray();
         for (var value : values) {

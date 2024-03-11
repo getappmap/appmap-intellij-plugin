@@ -69,4 +69,8 @@ public final class AppMapMetadata {
     public int getSortCount() {
         return requestCount * 100 + queryCount * 100 + functionsCount * 100;
     }
+
+    public long getModificationTimestamp() {
+        return appMapFile != null ? appMapFile.getTimeStamp() : Long.MAX_VALUE;
+    }
 }
