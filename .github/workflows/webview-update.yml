@@ -1,4 +1,4 @@
-name: "Update Webviews"
+name: "Update Webview"
 on:
     workflow_dispatch:
         inputs:
