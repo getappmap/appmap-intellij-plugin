@@ -1,7 +1,6 @@
 package appland.toolwindow.installGuide;
 
 import appland.config.AppMapConfigFileListener;
-import appland.index.AppMapFindingsUtil;
 import appland.index.AppMapNameIndex;
 import appland.index.AppMapSearchScopes;
 import appland.installGuide.InstallGuideViewPage;
@@ -25,10 +24,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Arrays;
 import java.util.List;
 import java.util.function.Function;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
-
-import static appland.installGuide.InstallGuideEditorProvider.open;
 
 /**
  * Manages a list of collapsible user milestone panels.
@@ -45,7 +41,7 @@ public class InstallGuidePanel extends AppMapContentPanel implements Disposable 
 
         this.project = project;
         this.statusLabels = Arrays.stream(InstallGuideViewPage.values())
-                .map(page -> new StatusLabel(page, () -> open(project, page)))
+                .map(page -> new StatusLabel(page, () -> page.open(project)))
                 .collect(Collectors.toList());
         setupPanel();
     }
@@ -99,10 +95,8 @@ public class InstallGuidePanel extends AppMapContentPanel implements Disposable 
                 return updateInstallAgentLabel(project);
             case RecordAppMaps:
                 return updateRecordAppMapsLabel(project);
-            case OpenAppMaps:
-                return updateOpenAppMapsLabel(project);
-            case RuntimeAnalysis:
-                return updateRuntimeAnalysisLabel(project);
+            case AskNavieAI:
+                return updateAskNavieAiLabel(project);
             default:
                 throw new IllegalStateException("unexpected label: " + label);
         }
@@ -130,25 +124,10 @@ public class InstallGuidePanel extends AppMapContentPanel implements Disposable 
     }
 
     /**
-     * If the AppMap webview was at least shown once
+     * Presence of at least one .appmap.json file.
      */
-    private static @NotNull InstallGuideStatus updateOpenAppMapsLabel(@NotNull Project project) {
-        return AppMapProjectSettingsService.getState(project).isOpenedAppMapEditor()
-                ? InstallGuideStatus.Completed
-                : InstallGuideStatus.Incomplete;
-    }
-
-    /**
-     * The label is updated under the following conditions:
-     * - The user navigated to the "Runtime Analysis" step in the installation guide webview
-     * - AppMaps have been opened
-     * - There are AppMaps in the project, and they have been scanned, regardless if findings were detected
-     */
-    private static @NotNull InstallGuideStatus updateRuntimeAnalysisLabel(@NotNull Project project) {
-        var navigated = AppMapProjectSettingsService.getState(project).isInvestigatedFindings();
-        var openedAppMaps = AppMapProjectSettingsService.getState(project).isOpenedAppMapEditor();
-        var scannedAppMaps = AppMapFindingsUtil.isAnalysisPerformed(AppMapSearchScopes.projectFilesWithExcluded(project));
-        return navigated && openedAppMaps && scannedAppMaps
+    private static @NotNull InstallGuideStatus updateAskNavieAiLabel(@NotNull Project project) {
+        return AppMapProjectSettingsService.getState(project).isExplainWithNavieOpened()
                 ? InstallGuideStatus.Completed
                 : InstallGuideStatus.Incomplete;
     }
@@ -192,22 +171,13 @@ public class InstallGuidePanel extends AppMapContentPanel implements Disposable 
             public void investigatedFindingsChanged() {
                 triggerLabelStatusUpdate();
             }
+
+            @Override
+            public void explainWithNavieOpenedChanged() {
+                triggerLabelStatusUpdate();
+            }
         });
 
         connection.subscribe(AppMapConfigFileListener.TOPIC, this::triggerLabelStatusUpdate);
-    }
-
-    /**
-     * Executes the supplied under a non-blocking read action and updates the label on the EDT.
-     */
-    private static void findIndexedStatus(@NotNull Project project,
-                                          @NotNull StatusLabel label,
-                                          @NotNull Supplier<Boolean> statusSupplier) {
-        ReadAction.nonBlocking(statusSupplier::get)
-                .inSmartMode(project)
-                .finishOnUiThread(ModalityState.defaultModalityState(), found -> {
-                    label.setStatus(found ? InstallGuideStatus.Completed : InstallGuideStatus.Incomplete);
-                })
-                .submit(AppExecutorUtil.getAppExecutorService());
     }
 }

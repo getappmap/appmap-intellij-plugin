@@ -3,14 +3,14 @@ package appland.notifications;
 import appland.AppMapBundle;
 import appland.AppMapPlugin;
 import appland.actions.StopAppMapRecordingAction;
-import appland.installGuide.InstallGuideEditorProvider;
-import appland.installGuide.InstallGuideViewPage;
 import appland.startup.FirstAppMapLaunchStartupActivity;
+import appland.webviews.navie.NavieEditorProvider;
 import com.intellij.ide.BrowserUtil;
 import com.intellij.notification.Notification;
 import com.intellij.notification.NotificationAction;
 import com.intellij.notification.NotificationListener;
 import com.intellij.notification.NotificationType;
+import com.intellij.openapi.actionSystem.DataContext;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.application.ModalityState;
 import com.intellij.openapi.project.Project;
@@ -129,7 +129,7 @@ public final class AppMapNotifications {
             );
 
             var openAction = NotificationAction.create(lazy("notification.firstAppMap.openAction"), (e, n) -> {
-                InstallGuideEditorProvider.open(project, InstallGuideViewPage.OpenAppMaps);
+                NavieEditorProvider.openEditor(project, DataContext.EMPTY_CONTEXT);
                 FirstAppMapLaunchStartupActivity.showAppMapToolWindow(project);
                 n.expire();
             });

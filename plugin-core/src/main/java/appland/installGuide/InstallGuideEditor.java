@@ -8,11 +8,11 @@ import appland.installGuide.projectData.ProjectDataService;
 import appland.installGuide.projectData.ProjectMetadata;
 import appland.oauth.AppMapLoginAction;
 import appland.settings.AppMapApplicationSettingsService;
-import appland.settings.AppMapProjectSettingsService;
 import appland.settings.AppMapSettingsListener;
 import appland.webviews.OpenExternalLinksHandler;
 import appland.webviews.WebviewEditor;
 import appland.webviews.findings.FindingsOverviewEditorProvider;
+import appland.webviews.navie.NavieEditorProvider;
 import appland.webviews.webserver.AppMapWebview;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -29,6 +29,7 @@ import com.intellij.ide.actions.runAnything.execution.RunAnythingRunProfile;
 import com.intellij.openapi.actionSystem.CommonDataKeys;
 import com.intellij.openapi.actionSystem.DataContext;
 import com.intellij.openapi.application.ApplicationManager;
+import com.intellij.openapi.application.ModalityState;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.fileEditor.FileEditorManager;
 import com.intellij.openapi.project.Project;
@@ -61,8 +62,17 @@ public class InstallGuideEditor extends WebviewEditor<List<ProjectMetadata>> {
     public InstallGuideEditor(@NotNull Project project,
                               @NotNull VirtualFile file,
                               @NotNull InstallGuideViewPage page) {
-        super(project, AppMapWebview.InstallGuide, file, Set.of("click-link", "open-file", "open-page", "open-findings-overview", "clipboard",
-                "perform-install", "perform-auth", "generate-openapi"));
+        super(project, AppMapWebview.InstallGuide, file, Set.of(
+                "click-link",
+                "clipboard",
+                "generate-openapi",
+                "open-file",
+                "open-findings-overview",
+                "open-navie",
+                "open-page",
+                "perform-auth",
+                "perform-install"
+        ));
         this.currentPage = page;
     }
 
@@ -75,11 +85,6 @@ public class InstallGuideEditor extends WebviewEditor<List<ProjectMetadata>> {
      */
     public void navigateTo(@NotNull InstallGuideViewPage page, boolean postWebviewMessage, boolean fromWebview) {
         this.currentPage = page;
-
-        var projectSettings = AppMapProjectSettingsService.getState(project);
-        if (fromWebview && page == InstallGuideViewPage.RuntimeAnalysis && projectSettings.isOpenedAppMapEditor()) {
-            projectSettings.setInvestigatedFindings(true);
-        }
 
         if (postWebviewMessage) {
             assert !fromWebview;
@@ -160,25 +165,28 @@ public class InstallGuideEditor extends WebviewEditor<List<ProjectMetadata>> {
                 handleMessageClickLink(message);
                 break;
 
+            case "clipboard":
+                assert message != null;
+                handleMessageClipboard(message);
+                break;
+
             case "open-file":
                 assert message != null;
                 handleMessageOpenFile(message);
-                break;
-
-            case "open-page":
-                assert message != null;
-                handleMessageOpenPage(message);
                 break;
 
             case "open-findings-overview":
                 handleMessageViewProblems();
                 break;
 
-            case "clipboard": {
-                assert message != null;
-                handleMessageClipboard(message);
+            case "open-navie":
+                handleOpenNavie();
                 break;
-            }
+
+            case "open-page":
+                assert message != null;
+                handleMessageOpenPage(message);
+                break;
 
             case "perform-install": {
                 assert message != null;
@@ -278,6 +286,12 @@ public class InstallGuideEditor extends WebviewEditor<List<ProjectMetadata>> {
         // update state, which is based on the new page
         var viewId = message.getAsJsonPrimitive("page").getAsString();
         navigateTo(InstallGuideViewPage.findByPageId(viewId), false, true);
+    }
+
+    private void handleOpenNavie() {
+        ApplicationManager.getApplication().invokeLater(() -> {
+            NavieEditorProvider.openEditor(project, DataContext.EMPTY_CONTEXT);
+        }, ModalityState.defaultModalityState());
     }
 
     private void executeInstallCommand(String path, String language) {

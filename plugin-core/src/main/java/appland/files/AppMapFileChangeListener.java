@@ -13,7 +13,7 @@ public interface AppMapFileChangeListener {
     Topic<AppMapFileChangeListener> TOPIC = Topic.create("AppMap file change", AppMapFileChangeListener.class);
 
     /**
-     * Posts an application-wide notification about changed appmaps.
+     * Posts an application-wide notification about changed AppMaps.
      */
     static void sendNotification(Set<AppMapFileEventType> changeTypes) {
         ApplicationManager.getApplication().getMessageBus()

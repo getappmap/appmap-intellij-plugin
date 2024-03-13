@@ -19,11 +19,7 @@ class AppMapGroupNode extends Node {
     private final boolean sortItemsByModificationDate;
     private final @NotNull List<AppMapMetadata> appMaps;
     private final Comparator<AppMapMetadata> nameComparator = Comparator.comparing(AppMapMetadata::getName);
-    private final Comparator<AppMapMetadata> modificationDateComparator = Comparator.comparingLong(data -> {
-        var file = data.getAppMapFile();
-        // sort the newest items to the top and items without AppMap file to the end
-        return file != null ? -file.getTimeStamp() : Long.MAX_VALUE;
-    });
+    private final Comparator<AppMapMetadata> modificationDateComparator = Comparator.comparingLong(AppMapMetadata::getModificationTimestamp).reversed();
 
     AppMapGroupNode(@NotNull Project project,
                     @NotNull NodeDescriptor parentDescriptor,
