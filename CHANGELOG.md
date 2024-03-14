@@ -1,5 +1,12 @@
 AppMap Plugin Changelog
 
+## [0.60.0](https://github.com/getappmap/appmap-intellij-plugin/compare/v0.59.0...v0.60.0) (2024-03-14)
+
+
+### Features
+
+-  show most recent AppMaps in Navie webview ([70c4ef2]())-  support email sign-up ([82e271b]())-  update the instructions panel to allow opening Navie AI ([56687a8]())
+
 ## [0.59.0](https://github.com/getappmap/appmap-intellij-plugin/compare/v0.58.0...v0.59.0) (2024-03-11)
 
 
