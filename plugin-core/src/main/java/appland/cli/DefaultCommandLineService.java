@@ -636,12 +636,19 @@ public class DefaultCommandLineService implements AppLandCommandLineService {
                 synchronized (DefaultCommandLineService.this) {
                     var entry = processes.get(directory);
                     if (entry != null) {
+                        // We're only resetting the process entry if it was referencing the terminated process
+                        // For example, if process shutdown takes a long time, then closing and reopening a project
+                        // must not reset the processes incorrectly.
                         switch (type) {
                             case Indexer:
-                                entry.indexer = null;
+                                if (process.equals(entry.indexer)) {
+                                    entry.indexer = null;
+                                }
                                 break;
                             case Scanner:
-                                entry.scanner = null;
+                                if (process.equals(entry.scanner)) {
+                                    entry.scanner = null;
+                                }
                                 break;
                         }
 
