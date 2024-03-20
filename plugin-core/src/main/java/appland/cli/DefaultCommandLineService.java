@@ -121,8 +121,10 @@ public class DefaultCommandLineService implements AppLandCommandLineService {
         try {
             doRefreshForOpenProjectsLocked();
         } finally {
-            var messageBus = ApplicationManager.getApplication().getMessageBus();
-            messageBus.syncPublisher(AppLandCommandLineListener.TOPIC).afterRefreshForProjects();
+            if (!ApplicationManager.getApplication().isDisposed()) {
+                var messageBus = ApplicationManager.getApplication().getMessageBus();
+                messageBus.syncPublisher(AppLandCommandLineListener.TOPIC).afterRefreshForProjects();
+            }
         }
     }
 
@@ -246,7 +248,18 @@ public class DefaultCommandLineService implements AppLandCommandLineService {
 
     @Override
     public void dispose() {
-        stopAll(false);
+        var application = ApplicationManager.getApplication();
+        if (application.isDisposed()) {
+            // application shutdown in progress
+            stopAll(false);
+        } else if (!application.isDispatchThread()) {
+            // dispose not called on EDT
+            stopAll(false);
+        } else {
+            // Dispose called on EDT, e.g. when the AppMap plugin is unloaded.
+            // We must not call stopAll on the EDT to avoid deadlocks, see #597.
+            application.executeOnPooledThread(() -> stopAll(false));
+        }
     }
 
     // extracted as method to allow overriding and testing it
