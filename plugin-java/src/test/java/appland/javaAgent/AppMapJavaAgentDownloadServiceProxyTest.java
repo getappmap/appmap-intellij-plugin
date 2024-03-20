@@ -1,0 +1,54 @@
+package appland.javaAgent;
+
+import appland.AppMapBaseTest;
+import appland.testRules.MockServerSettingsRule;
+import appland.testRules.OverrideIdeHttpProxyRule;
+import com.intellij.openapi.progress.EmptyProgressIndicator;
+import com.intellij.testFramework.fixtures.TempDirTestFixture;
+import com.intellij.testFramework.fixtures.impl.TempDirTestFixtureImpl;
+import org.junit.Assert;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.TestRule;
+import org.mockserver.junit.MockServerRule;
+
+import java.util.Arrays;
+
+public class AppMapJavaAgentDownloadServiceProxyTest extends AppMapBaseTest {
+    @Rule
+    public TestRule agentDownloadRule = new OverrideJavaAgentLocationRule(() -> this.myFixture);
+    @Rule
+    public MockServerRule mockServerRule = new MockServerRule(this);
+    @Rule
+    public MockServerSettingsRule mockServerSettingsRule = new MockServerSettingsRule();
+    @Rule
+    public OverrideIdeHttpProxyRule ideHttpProxyRule = new OverrideIdeHttpProxyRule(mockServerRule);
+
+    @Override
+    protected TempDirTestFixture createTempDirTestFixture() {
+        // the override of the download location needs real files on disk
+        return new TempDirTestFixtureImpl();
+    }
+
+    @Test
+    public void httpProxyConnection() throws Throwable {
+        var service = AppMapJavaAgentDownloadService.getInstance();
+
+        Assert.assertNull("Java agent must not yet be downloaded", service.getJavaAgentPathIfExists());
+
+        var wasDownloaded = service.downloadJavaAgentSync(new EmptyProgressIndicator());
+        Assert.assertTrue("The Agent JAR must download using a proxy", wasDownloaded);
+
+        var proxyRequests = mockServerRule.getClient().retrieveRecordedRequests(null);
+        Assert.assertTrue(proxyRequests.length > 0);
+
+        var hasJarDownloadRequest = Arrays.stream(proxyRequests).anyMatch(request -> {
+            var path = request.getPath().getValue();
+            return request.containsHeader("host", "github.com")
+                    && path.startsWith("/getappmap/appmap-java/releases/download/v")
+                    && path.endsWith(".jar");
+        });
+        Assert.assertTrue("The JAR of the AppMap agent must be downloaded using the configured HTTP proxy",
+                hasJarDownloadRequest);
+    }
+}
