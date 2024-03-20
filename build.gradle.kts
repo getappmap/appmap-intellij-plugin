@@ -77,6 +77,11 @@ allprojects {
         if (project.name != "plugin-core") {
             testImplementation(project(":plugin-core", "testOutput"))
         }
+
+        // https://mvnrepository.com/artifact/org.mock-server/mockserver-netty
+        testImplementation("org.mock-server:mockserver-netty:5.15.0")
+        // https://mvnrepository.com/artifact/org.mock-server/mockserver-junit-rule
+        testImplementation("org.mock-server:mockserver-junit-rule:5.15.0")
     }
 
     intellij {

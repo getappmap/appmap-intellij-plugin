@@ -1,9 +1,6 @@
 package appland.cli;
 
 import appland.AppMapBaseTest;
-import com.intellij.openapi.application.ApplicationManager;
-import com.intellij.openapi.progress.ProgressIndicator;
-import com.intellij.openapi.progress.Task;
 import com.intellij.testFramework.VfsTestUtil;
 import com.intellij.testFramework.fixtures.TempDirTestFixture;
 import com.intellij.testFramework.fixtures.impl.TempDirTestFixtureImpl;
@@ -12,8 +9,6 @@ import org.junit.Test;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 
 public class DefaultAppLandDownloadServiceTest extends AppMapBaseTest {
@@ -40,38 +35,10 @@ public class DefaultAppLandDownloadServiceTest extends AppMapBaseTest {
     }
 
     @Test
-    public void downloadBinary() throws IOException, InterruptedException {
-        var type = CliTool.AppMap;
-        var service = AppLandDownloadService.getInstance();
-
-        var latestVersion = service.fetchLatestRemoteVersion(type);
-        assertNotNull(latestVersion);
-
-        var latch = new CountDownLatch(1);
-        ApplicationManager.getApplication().getMessageBus().connect(getTestRootDisposable())
-                .subscribe(AppLandDownloadListener.TOPIC, (cliTool, success) -> {
-                    if (!success) {
-                        addSuppressedException(new IllegalStateException("CLI download failed: " + cliTool));
-                    }
-                    latch.countDown();
-                });
-
-        new Task.Backgroundable(getProject(), "Downloading", true) {
-            @Override
-            public void run(@NotNull ProgressIndicator indicator) {
-                try {
-                    service.download(type, latestVersion, indicator);
-                } catch (Exception e) {
-                    addSuppressedException(e);
-                }
-            }
-        }.queue();
-
-        var ok = latch.await(5, TimeUnit.MINUTES);
-        assertTrue("Download must succeed", ok);
-
-        assertTrue(service.isDownloaded(type, latestVersion, ApplicationManager.getApplication().isUnitTestMode()));
-        assertTrue(service.isDownloaded(type));
+    public void downloadAppMapBinary() throws Exception {
+        // We're only testing the download of the AppMap tool and not of the scanner
+        // because they work in the same way, and we don't want to extend the test duration unnecessarily.
+        AppLandDownloadServiceTestUtil.downloadLatestCliVersions(getProject(), CliTool.AppMap, getTestRootDisposable());
     }
 
     @Test
