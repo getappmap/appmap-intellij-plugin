@@ -24,8 +24,7 @@ import com.intellij.openapi.vfs.VfsUtil;
 import com.intellij.openapi.vfs.VfsUtilCore;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.openapi.vfs.ex.temp.TempFileSystem;
-import com.intellij.util.Alarm;
-import com.intellij.util.AlarmFactory;
+import com.intellij.util.concurrency.AppExecutorUtil;
 import com.intellij.util.io.BaseOutputReader;
 import com.intellij.util.system.CpuArch;
 import lombok.Data;
@@ -54,7 +53,7 @@ public class DefaultCommandLineService implements AppLandCommandLineService {
     private static final long INITIAL_RESTART_DELAY_MILLIS = 5_000;
     // factor to calculate the next restart delay based on the previous delay
     private static final double NEXT_RESTART_FACTOR = 1.5;
-    // two restarts at most (1.5^3 > 3)
+    // three restarts at most (5_000 * 1.5^3 > 15_000)
     private static final long MAX_RESTART_DELAY_MILLIS = INITIAL_RESTART_DELAY_MILLIS * 3;
     // a value of "0" indicates that process restart is disabled
     private static final Key<Long> NEXT_RESTART_DELAY = Key.create("appmap.processRestartDelay");
@@ -297,6 +296,45 @@ public class DefaultCommandLineService implements AppLandCommandLineService {
                 stopProcess(indexer, 0, TimeUnit.MILLISECONDS);
             }
             return null;
+        }
+    }
+
+    /**
+     * Starts a new process for an already managed directory.
+     * This is used to restart a crashed process.
+     *
+     * @param type             Type of the process to restart
+     * @param directory        Directory of the restarted process
+     * @param nextRestartDelay The next restart delay to attach to the new process
+     * @throws ExecutionException If the process could not be started
+     */
+    private synchronized void restartDirectoryProcess(@NotNull ProcessType type,
+                                                      @NotNull VirtualFile directory,
+                                                      long nextRestartDelay) throws ExecutionException {
+        var directoryProcesses = processes.get(directory);
+        if (directoryProcesses != null) {
+            switch (type) {
+                case Indexer:
+                    assert directoryProcesses.indexer == null || directoryProcesses.indexer.isProcessTerminated();
+
+                    var indexer = startIndexerProcess(directory);
+                    directoryProcesses.indexer = indexer;
+                    if (indexer != null) {
+                        NEXT_RESTART_DELAY.set(indexer, nextRestartDelay);
+                        indexer.startNotify();
+                    }
+                    break;
+                case Scanner:
+                    assert directoryProcesses.scanner == null || directoryProcesses.scanner.isProcessTerminated();
+
+                    var scanner = startScannerProcesses(directory);
+                    directoryProcesses.scanner = scanner;
+                    if (scanner != null) {
+                        NEXT_RESTART_DELAY.set(scanner, nextRestartDelay);
+                        scanner.startNotify();
+                    }
+                    break;
+            }
         }
     }
 
@@ -623,7 +661,6 @@ public class DefaultCommandLineService implements AppLandCommandLineService {
         private final @NotNull KillableProcessHandler process;
         private final @NotNull ProcessType type;
         private final @NotNull Disposable parentDisposable;
-        private final Alarm alarm;
 
         public RestartProcessListener(@NotNull VirtualFile directory,
                                       @NotNull KillableProcessHandler process,
@@ -633,15 +670,17 @@ public class DefaultCommandLineService implements AppLandCommandLineService {
             this.process = process;
             this.type = type;
             this.parentDisposable = parentDisposable;
-            this.alarm = AlarmFactory.getInstance().create(Alarm.ThreadToUse.POOLED_THREAD, this.parentDisposable);
         }
 
         @Override
         public void processTerminated(@NotNull ProcessEvent event) {
-            long nextRestartDelay = NEXT_RESTART_DELAY.get(process, INITIAL_RESTART_DELAY_MILLIS);
+            // NEXT_RESTART_DELAY is stored in the process's user data.
+            // It's set to 0 when the process is stopped by this service.
+            long currentRestartDelay = NEXT_RESTART_DELAY.get(process, INITIAL_RESTART_DELAY_MILLIS);
 
             // don't restart if max attempts were reached or if restarts were disabled
-            if (nextRestartDelay <= 0 || nextRestartDelay > MAX_RESTART_DELAY_MILLIS) {
+            var noRestartNeeded = currentRestartDelay <= 0 || currentRestartDelay > MAX_RESTART_DELAY_MILLIS;
+            if (noRestartNeeded) {
                 synchronized (DefaultCommandLineService.this) {
                     var entry = processes.get(directory);
                     if (entry != null) {
@@ -663,35 +702,14 @@ public class DefaultCommandLineService implements AppLandCommandLineService {
             }
 
             // schedule next restart
-            NEXT_RESTART_DELAY.set(process, (long) ((double) nextRestartDelay * NEXT_RESTART_FACTOR));
-            alarm.cancelAllRequests();
-            alarm.addRequest(() -> {
+            AppExecutorUtil.getAppScheduledExecutorService().schedule(() -> {
                 try {
-                    synchronized (DefaultCommandLineService.this) {
-                        var directoryProcesses = processes.get(directory);
-                        if (directoryProcesses != null) {
-                            switch (type) {
-                                case Indexer:
-                                    var indexer = startIndexerProcess(directory);
-                                    directoryProcesses.indexer = indexer;
-                                    if (indexer != null) {
-                                        indexer.startNotify();
-                                    }
-                                    break;
-                                case Scanner:
-                                    var scanner = startScannerProcesses(directory);
-                                    directoryProcesses.scanner = scanner;
-                                    if (scanner != null) {
-                                        scanner.startNotify();
-                                    }
-                                    break;
-                            }
-                        }
-                    }
-                } catch (ExecutionException e) {
+                    var nextRestartDelay = (long) ((double) currentRestartDelay * NEXT_RESTART_FACTOR);
+                    DefaultCommandLineService.this.restartDirectoryProcess(type, directory, nextRestartDelay);
+                } catch (Exception e) {
                     LOG.debug("Error restarting process. Type: " + type + ", command line: " + process.getCommandLine(), e);
                 }
-            }, nextRestartDelay);
+            }, currentRestartDelay, TimeUnit.MILLISECONDS);
         }
     }
 
