@@ -193,6 +193,9 @@ allprojects {
             onlyIf { this.project == rootProject }
             mustRunAfter("check")
 
+            // 1.365 is broken,
+            // remove this version as soon as https://youtrack.jetbrains.com/issue/MP-6438 is fixed.
+            verifierVersion.set("1.364")
             ideVersions.set(prop("ideVersionVerifier").split(","))
             failureLevel.set(listOf(
                 FailureLevel.INTERNAL_API_USAGES,
