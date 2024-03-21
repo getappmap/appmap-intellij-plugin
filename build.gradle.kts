@@ -38,7 +38,7 @@ group = "appland.appmap"
 version = pluginVersion
 
 val isCI = System.getenv("CI") == "true"
-val agentOutputPath = rootProject.buildDir.resolve("appmap-agent.jar")
+val agentOutputPath = rootProject.buildDir.resolve("appmap-java-agent").resolve("appmap-agent.jar")
 val githubToken = System.getenv("GITHUB_TOKEN").takeUnless { it.isNullOrEmpty() }
 
 allprojects {
@@ -225,7 +225,10 @@ project(":") {
 
     tasks {
         task<Copy>("copyPluginAssets") {
+            dependsOn(":downloadAppMapAgent")
+
             inputs.file("${project.rootDir}/NOTICE.txt")
+            inputs.file(agentOutputPath)
             inputs.dir("${project.rootDir}/appland")
             inputs.dir("${project.rootDir}/appland-install-guide")
             inputs.dir("${project.rootDir}/appland-findings")
@@ -235,6 +238,10 @@ project(":") {
             from(project.rootDir) {
                 into("appmap-assets")
                 include("NOTICE.txt")
+            }
+            from(agentOutputPath.parentFile) {
+                into("appmap-assets/appmap-java-agent")
+                include("*.jar")
             }
             from("${project.rootDir}/appland") {
                 into("appmap-assets/appmap")

@@ -11,4 +11,10 @@ public class AppMapPluginTest extends LightPlatformCodeInsightFixture4TestCase {
         assertNotNull(AppMapPlugin.getPluginPath());
         assertTrue(Files.exists(AppMapPlugin.getPluginPath()));
     }
+
+    @Test
+    public void appMapAgentPath() {
+        assertNotNull(AppMapPlugin.getAppMapJavaAgentPath());
+        assertTrue(Files.isRegularFile(AppMapPlugin.getAppMapJavaAgentPath()));
+    }
 }

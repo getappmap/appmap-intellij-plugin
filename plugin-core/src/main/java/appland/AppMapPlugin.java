@@ -18,8 +18,7 @@ public final class AppMapPlugin {
     private AppMapPlugin() {
     }
 
-    @NotNull
-    public static Path getPluginPath() {
+    public static @NotNull Path getPluginPath() {
         var plugin = getDescriptor();
         var basePath = plugin.getPluginPath();
         assert basePath != null;
@@ -27,10 +26,13 @@ public final class AppMapPlugin {
         return basePath;
     }
 
-    @NotNull
-    public static PluginDescriptor getDescriptor() {
+    public static @NotNull PluginDescriptor getDescriptor() {
         var plugin = PluginManagerCore.getPlugin(PluginId.getId(PLUGIN_ID));
         assert plugin != null;
         return plugin;
+    }
+
+    public static @NotNull Path getAppMapJavaAgentPath() {
+        return getPluginPath().resolve("appmap-java-agent").resolve("appmap-agent.jar");
     }
 }
