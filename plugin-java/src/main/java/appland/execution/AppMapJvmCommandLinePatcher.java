@@ -1,11 +1,13 @@
 package appland.execution;
 
 import appland.AppMapBundle;
+import appland.AppMapPlugin;
 import appland.javaAgent.AppMapJavaAgentDownloadService;
 import com.intellij.execution.CantRunException;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.LinkedList;
 import java.util.List;
@@ -25,7 +27,10 @@ public final class AppMapJvmCommandLinePatcher {
 
         var agentJarPath = AppMapJavaAgentDownloadService.getInstance().getJavaAgentPathIfExists();
         if (agentJarPath == null) {
-            throw new CantRunException(AppMapBundle.get("javaAgent.run.missingJar"));
+            agentJarPath = AppMapPlugin.getAppMapJavaAgentPath();
+        }
+        if (!Files.isReadable(agentJarPath)) {
+            throw new CantRunException(AppMapBundle.get("javaAgent.run.unavailableJar"));
         }
 
         var jvmParams = new LinkedList<String>();

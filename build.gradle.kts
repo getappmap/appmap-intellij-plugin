@@ -38,7 +38,7 @@ group = "appland.appmap"
 version = pluginVersion
 
 val isCI = System.getenv("CI") == "true"
-val agentOutputPath = rootProject.buildDir.resolve("appmap-agent.jar")
+val agentOutputPath = rootProject.buildDir.resolve("appmap-java-agent").resolve("appmap-agent.jar")
 val githubToken = System.getenv("GITHUB_TOKEN").takeUnless { it.isNullOrEmpty() }
 
 allprojects {
@@ -193,6 +193,9 @@ allprojects {
             onlyIf { this.project == rootProject }
             mustRunAfter("check")
 
+            // 1.365 is broken,
+            // remove this version as soon as https://youtrack.jetbrains.com/issue/MP-6438 is fixed.
+            verifierVersion.set("1.364")
             ideVersions.set(prop("ideVersionVerifier").split(","))
             failureLevel.set(listOf(
                 FailureLevel.INTERNAL_API_USAGES,
@@ -222,7 +225,10 @@ project(":") {
 
     tasks {
         task<Copy>("copyPluginAssets") {
+            dependsOn(":downloadAppMapAgent")
+
             inputs.file("${project.rootDir}/NOTICE.txt")
+            inputs.file(agentOutputPath)
             inputs.dir("${project.rootDir}/appland")
             inputs.dir("${project.rootDir}/appland-install-guide")
             inputs.dir("${project.rootDir}/appland-findings")
@@ -232,6 +238,10 @@ project(":") {
             from(project.rootDir) {
                 into("appmap-assets")
                 include("NOTICE.txt")
+            }
+            from(agentOutputPath.parentFile) {
+                into("appmap-assets/appmap-java-agent")
+                include("*.jar")
             }
             from("${project.rootDir}/appland") {
                 into("appmap-assets/appmap")

@@ -22,6 +22,5 @@
     "url": "^0.11",
     "vue": "^2.7",
     "vue-template-compiler": "^2.7"
-  },
-  "packageManager": "yarn@2.4.2"
+  }
 }
