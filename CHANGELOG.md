@@ -1,5 +1,16 @@
 AppMap Plugin Changelog
 
+## [0.61.0](https://github.com/getappmap/appmap-intellij-plugin/compare/v0.60.0...v0.61.0) (2024-03-22)
+
+
+### Features
+
+-  bundle the AppMap Java agent with plugin ([8206a39]())
+
+### Bug Fixes
+
+-  Bring back Travis for semantic release ([9a276ea]())-  don't terminate AppMap processes on the EDT, [#597](https://github.com/getappmap/appmap-intellij-plugin/issues/597) ([6bf9cb2]())-  properly restart crashed AppMap processes with a longer delay ([3964aa1]())-  Update @appland/components to v4.10.0 ([4d752cc]())
+
 ## [0.60.0](https://github.com/getappmap/appmap-intellij-plugin/compare/v0.59.0...v0.60.0) (2024-03-14)
 
 
