@@ -49,7 +49,8 @@ public final class AppMapJavaAgentDownloadService {
                 try {
                     downloadJavaAgentSync(indicator);
                 } catch (IOException e) {
-                    LOG.warn("failed to download AppMap Java agent", e);
+                    // User should have been warned already, so log at DEBUG
+                    LOG.debug(String.format("failed to download AppMap Java agent: %s (%s)", e, e.getCause()));
                 }
             }
         }.queue();
@@ -62,14 +63,8 @@ public final class AppMapJavaAgentDownloadService {
             return false;
         }
 
-        var latestAsset = GitHubRelease.getLatestRelease(indicator, "getappmap", "appmap-java")
-                .stream()
-                .filter(asset -> "application/java-archive".equals(asset.getContentType()))
-                .findFirst()
-                .orElse(null);
-
+        var latestAsset = getLatestAsset(indicator);
         if (latestAsset == null) {
-            LOG.warn("JAR assets not found in latest GitHub release of getappmap/appmap-java");
             return false;
         }
 
@@ -78,6 +73,7 @@ public final class AppMapJavaAgentDownloadService {
 
         // don't download if the asset file does already exist
         if (Files.exists(assetDownloadPath)) {
+            LOG.info(String.format("%s already exists, not downloading", assetDownloadPath));
             return false;
         }
 
@@ -100,6 +96,30 @@ public final class AppMapJavaAgentDownloadService {
         }
 
         return true;
+    }
+
+    @Nullable
+    private static Release.Asset getLatestAsset(@NotNull ProgressIndicator indicator) {
+        final Release[] releases = {MavenRelease.INSTANCE, GitHubRelease.INSTANCE};
+        for (Release release : releases) {
+            try {
+                var latestAsset = release.getLatest(indicator)
+                        .stream()
+                        .filter(asset -> "application/java-archive".equals(asset.getContentType()))
+                        .findFirst()
+                        .orElse(null);
+
+                if (latestAsset != null) {
+                    LOG.info("Got latest asset URL: " + latestAsset.getDownloadUrl());
+                    return latestAsset;
+                }
+            } catch (IOException e) {
+                LOG.info(String.format("Failed to query release, %s: %s", release, e));
+            }
+        }
+
+        LOG.warn("Couldn't query any source for latest release.");
+        return null;
     }
 
     /**
@@ -142,14 +162,22 @@ public final class AppMapJavaAgentDownloadService {
      * @throws IOException Thrown if the download failed to complete
      */
     private static void downloadAgentJarFile(@NotNull ProgressIndicator indicator,
-                                             @NotNull GitHubReleaseAsset agentReleaseAsset,
+                                             @NotNull Release.Asset agentReleaseAsset,
                                              @NotNull Path assetDownloadPath) throws IOException {
         try {
             agentReleaseAsset.download(indicator, assetDownloadPath);
+            LOG.info(String.format("Downloaded %s", agentReleaseAsset.getDownloadUrl()));
+
         } catch (IOException e) {
             // remove partial download and throw IOException
             Files.deleteIfExists(assetDownloadPath);
-            throw new IOException("Failed to download agent JAR: " + agentReleaseAsset.getDownloadUrl(), e);
+
+            // Getting here means that we were able to determine that there's a
+            // new version of the release available, but we couldn't download
+            // it. Warn the user that this happened.
+            LOG.warn("Failed to download agent JAR " + e);
+            LOG.debug(e);
+            throw new IOException("Failed to download agent JAR", e);
         }
     }
 

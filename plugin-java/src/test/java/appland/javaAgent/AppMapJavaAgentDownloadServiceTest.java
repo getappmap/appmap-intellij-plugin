@@ -56,7 +56,7 @@ public class AppMapJavaAgentDownloadServiceTest extends AppMapBaseTest {
     public void lockFileGuard() throws IOException {
         var service = AppMapJavaAgentDownloadService.getInstance();
 
-        var jarAsset = GitHubRelease.getLatestRelease(new EmptyProgressIndicator(), "getappmap", "appmap-java")
+        var jarAsset = MavenRelease.INSTANCE.getLatest(new EmptyProgressIndicator())
                 .stream()
                 .filter(asset -> asset.getFileName().endsWith(".jar"))
                 .findFirst().orElse(null);
