@@ -11,8 +11,10 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TestRule;
 import org.mockserver.junit.MockServerRule;
+import org.mockserver.verify.VerificationTimes;
 
-import java.util.Arrays;
+import static org.mockserver.model.HttpRequest.request;
+import static org.mockserver.model.HttpResponse.response;
 
 public class AppMapJavaAgentDownloadServiceProxyTest extends AppMapBaseTest {
     @Rule
@@ -35,20 +37,38 @@ public class AppMapJavaAgentDownloadServiceProxyTest extends AppMapBaseTest {
         var service = AppMapJavaAgentDownloadService.getInstance();
 
         Assert.assertNull("Java agent must not yet be downloaded", service.getJavaAgentPathIfExists());
-
         var wasDownloaded = service.downloadJavaAgentSync(new EmptyProgressIndicator());
         Assert.assertTrue("The Agent JAR must download using a proxy", wasDownloaded);
 
-        var proxyRequests = mockServerRule.getClient().retrieveRecordedRequests(null);
-        Assert.assertTrue(proxyRequests.length > 0);
+        mockServerRule.getClient().verify(
+                request()
+                    .withHeader("Host", MavenRelease.INSTANCE.getDownloadHost())
+                    .withPath(".*/(appmap.*?.jar)"),
+                VerificationTimes.once()
+        );
+    }
 
-        var hasJarDownloadRequest = Arrays.stream(proxyRequests).anyMatch(request -> {
-            var path = request.getPath().getValue();
-            return request.containsHeader("host", "github.com")
-                    && path.startsWith("/getappmap/appmap-java/releases/download/v")
-                    && path.endsWith(".jar");
-        });
-        Assert.assertTrue("The JAR of the AppMap agent must be downloaded using the configured HTTP proxy",
-                hasJarDownloadRequest);
+    @Test
+    public void fallsBackToGitHub() throws Throwable {
+        var service = AppMapJavaAgentDownloadService.getInstance();
+
+        var client = mockServerRule.getClient();
+        client.when(
+            request()
+                .withHeader("Host", MavenRelease.INSTANCE.getDownloadHost())
+        ).respond(
+            response().withStatusCode(403)
+        );
+
+        Assert.assertNull("Java agent must not yet be downloaded", service.getJavaAgentPathIfExists());
+        var wasDownloaded = service.downloadJavaAgentSync(new EmptyProgressIndicator());
+        Assert.assertTrue("The Agent JAR must download using a proxy", wasDownloaded);
+
+        client.verify(
+                request()
+                    .withHeader("Host", GitHubRelease.INSTANCE.getDownloadHost())
+                    .withPath(".*/(appmap.*?.jar)"),
+                VerificationTimes.once()
+        );
     }
 }
