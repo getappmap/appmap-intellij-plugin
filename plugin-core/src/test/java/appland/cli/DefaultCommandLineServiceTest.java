@@ -51,7 +51,7 @@ public class DefaultCommandLineServiceTest extends AppMapBaseTest {
     @Override
     protected void tearDown() throws Exception {
         try {
-            AppLandCommandLineService.getInstance().stopAll(10_000, TimeUnit.MILLISECONDS);
+            AppLandCommandLineService.getInstance().stopAll(30_000, TimeUnit.MILLISECONDS);
         } catch (Exception e) {
             addSuppressedException(e);
         } finally {
