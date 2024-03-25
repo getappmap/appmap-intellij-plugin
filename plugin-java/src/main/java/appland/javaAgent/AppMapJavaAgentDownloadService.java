@@ -62,14 +62,8 @@ public final class AppMapJavaAgentDownloadService {
             return false;
         }
 
-        var latestAsset = GitHubRelease.getLatestRelease(indicator, "getappmap", "appmap-java")
-                .stream()
-                .filter(asset -> "application/java-archive".equals(asset.getContentType()))
-                .findFirst()
-                .orElse(null);
-
+        var latestAsset = getLatestAsset(indicator);
         if (latestAsset == null) {
-            LOG.warn("JAR assets not found in latest GitHub release of getappmap/appmap-java");
             return false;
         }
 
@@ -100,6 +94,27 @@ public final class AppMapJavaAgentDownloadService {
         }
 
         return true;
+    }
+
+    @Nullable
+    private static ReleaseAsset getLatestAsset(@NotNull ProgressIndicator indicator) throws IOException {
+        final Release[] releases = {MavenRelease.INSTANCE, GitHubRelease.INSTANCE};
+        for (Release release : releases) {
+            try {
+                var latestAsset = release.getLatest(indicator)
+                        .stream()
+                        .filter(asset -> "application/java-archive".equals(asset.getContentType()))
+                        .findFirst()
+                        .orElse(null);
+
+                if (latestAsset != null) {
+                    return latestAsset;
+                }
+            } catch (IOException e) {
+                LOG.warn(String.format("Failed to download release, %s: %s", release, e.getMessage()));
+            }
+        }
+        return null;
     }
 
     /**
@@ -142,7 +157,7 @@ public final class AppMapJavaAgentDownloadService {
      * @throws IOException Thrown if the download failed to complete
      */
     private static void downloadAgentJarFile(@NotNull ProgressIndicator indicator,
-                                             @NotNull GitHubReleaseAsset agentReleaseAsset,
+                                             @NotNull ReleaseAsset agentReleaseAsset,
                                              @NotNull Path assetDownloadPath) throws IOException {
         try {
             agentReleaseAsset.download(indicator, assetDownloadPath);
