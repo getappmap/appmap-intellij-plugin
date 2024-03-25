@@ -245,7 +245,8 @@ public class DefaultAppLandDownloadService implements AppLandDownloadService {
         ApplicationManager.getApplication().getMessageBus().syncPublisher(AppLandDownloadListener.TOPIC).downloadFinished(type, success);
     }
 
-    private static @NotNull String currentPlatform() {
+    // package-visible for our tests
+    static @NotNull String currentPlatform() {
         if (SystemInfo.isLinux) {
             return "linux";
         }
@@ -261,7 +262,8 @@ public class DefaultAppLandDownloadService implements AppLandDownloadService {
         throw new IllegalStateException("Unsupported platform: " + SystemInfo.getOsNameAndVersion());
     }
 
-    private static @NotNull String currentArch() {
+    // package-visible for our tests
+    static @NotNull String currentArch() {
         return CpuArch.isArm64() ? "arm64" : "x64";
     }
 }
