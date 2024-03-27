@@ -1,5 +1,6 @@
 package appland.javaAgent;
 
+import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.startup.StartupActivity;
@@ -13,6 +14,10 @@ public class AppMapJavaAgentDownloadActivity implements StartupActivity.Backgrou
 
     @Override
     public void runActivity(@NotNull Project project) {
+        if (ApplicationManager.getApplication().isUnitTestMode()) {
+            return;
+        }
+
         if (ACTIVE.compareAndSet(false, true)) {
             try {
                 LOG.debug("Downloading AppMap Java agent");

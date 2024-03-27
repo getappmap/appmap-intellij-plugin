@@ -271,6 +271,7 @@ public class DefaultCommandLineServiceTest extends AppMapBaseTest {
             assertEmptyRoots();
         });
     }
+
     private void setupAndAssertProcessRestart(@NotNull Function<VirtualFile, KillableProcessHandler> processForRoot) throws Exception {
         var root = myFixture.addFileToProject("parentA/file.txt", "").getParent().getVirtualFile();
         createAppMapYaml(root);
