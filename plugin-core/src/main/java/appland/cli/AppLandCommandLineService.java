@@ -123,4 +123,11 @@ public interface AppLandCommandLineService extends Disposable {
      * @return The command line or {@code null} if the CLI is unavailable
      */
     @Nullable GeneralCommandLine createAppMapStatsCommand(@NotNull VirtualFile appMapFile);
+
+    /**
+     * Creates the command line to launch the AppMap JSON-RPC server.
+     *
+     * @return The command line or {@code null} if the CLI is unavailable
+     */
+    @Nullable GeneralCommandLine createAppMapJsonRpcCommand();
 }

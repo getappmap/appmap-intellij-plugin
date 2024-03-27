@@ -223,6 +223,21 @@ public class DefaultCommandLineService implements AppLandCommandLineService {
         return createAppMapCommand("stats", "--appmap-file", localPath.toString(), "--limit", String.valueOf(Long.MAX_VALUE), "--format", "json");
     }
 
+    @Override
+    public @Nullable GeneralCommandLine createAppMapJsonRpcCommand() {
+        var cmd = createAppMapCommand("rpc", "--port", "0");
+        if (cmd == null) {
+            return null;
+        }
+
+        var apiKey = AppMapApplicationSettingsService.getInstance().getApiKey();
+        if (StringUtil.isNotEmpty(apiKey)) {
+            cmd = cmd.withEnvironment("APPMAP_API_KEY", apiKey);
+        }
+
+        return cmd;
+    }
+
     // We're not synchronizing, because some IDE threads display or use the result of toString
     // and this must not create deadlocks.
     @Override
