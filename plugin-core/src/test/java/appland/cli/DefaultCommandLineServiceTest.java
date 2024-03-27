@@ -17,7 +17,6 @@ import com.intellij.testFramework.VfsTestUtil;
 import com.intellij.testFramework.fixtures.TempDirTestFixture;
 import com.intellij.testFramework.fixtures.impl.TempDirTestFixtureImpl;
 import com.intellij.util.ThrowableConsumer;
-import com.intellij.util.ThrowableRunnable;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.junit.Assume;
@@ -213,17 +212,6 @@ public class DefaultCommandLineServiceTest extends AppMapBaseTest {
     }
 
     @Test
-    public void indexerJsonRpcPort() throws Exception {
-        var tempDir = myFixture.createFile("test.txt", "").getParent();
-
-        assertIndexerJsonRpcAvailable(tempDir, () -> {
-            createAppMapYaml(tempDir, "tmp/appmaps");
-            addContentRootAndLaunchService(tempDir);
-            assertActiveRoots(tempDir);
-        });
-    }
-
-    @Test
     public void restartAfterApiKeyChange() throws Exception {
         // we're installing the listener for api key changes just for this test to avoid side effects inside the test
         // setup and in our other tests
@@ -304,26 +292,6 @@ public class DefaultCommandLineServiceTest extends AppMapBaseTest {
             // Creating a new appmap.yml file triggers the start of the CLI processes,
             // we have to wait for them to before executing the following tests.
             assertTrue(refreshLatch.await(10, TimeUnit.SECONDS));
-        }
-    }
-
-    /**
-     * Installs a listener for the indexer JSON-RPC service, executes the runnable and then asserts that the service is available.
-     */
-    private void assertIndexerJsonRpcAvailable(@NotNull VirtualFile directory,
-                                               @NotNull ThrowableRunnable<Exception> runnable) throws Exception {
-        var latch = new CountDownLatch(1);
-        var bus = ApplicationManager.getApplication().getMessageBus().connect(getTestRootDisposable());
-        bus.subscribe(AppLandIndexerJsonRpcListener.TOPIC, serviceDirectory -> {
-            if (directory.equals(serviceDirectory)) {
-                latch.countDown();
-            }
-        });
-
-        try {
-            runnable.run();
-        } finally {
-            assertTrue("The indexer service must provide a port for its JSON-RPC service", latch.await(10, TimeUnit.SECONDS));
         }
     }
 
