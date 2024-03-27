@@ -47,6 +47,7 @@
         <postStartupActivity implementation="appland.startup.FirstAppMapLaunchStartupActivity"/>
         <postStartupActivity implementation="appland.cli.RegisterContentRootsActivity"/>
         <postStartupActivity implementation="appland.cli.DownloadToolsStartupActivity"/>
+        <postStartupActivity implementation="appland.rpcService.AppMapJsonRpcServerStartupActivity"/>
 
         <fileEditorProvider implementation="appland.webviews.appMap.AppMapFileEditorProvider"/>
         <editorNotificationProvider implementation="appland.webviews.appMap.AppMapNotificationProvider"/>
@@ -94,6 +95,10 @@
                         serviceImplementation="appland.remote.DefaultRemoteRecordingStatusService"/>
         <projectService serviceInterface="appland.installGuide.projectData.ProjectDataService"
                         serviceImplementation="appland.installGuide.projectData.DefaultProjectDataService"/>
+
+        <projectService serviceInterface="appland.rpcService.AppLandJsonRpcService"
+                        serviceImplementation="appland.rpcService.DefaultAppLandJsonRpcService"
+                        testServiceImplementation="appland.rpcService.TestAppLandJsonRpcService"/>
 
         <notificationGroup id="appmap.remoteRecording" displayType="BALLOON"
                            key="notification.remoteRecording.displayName"/>
