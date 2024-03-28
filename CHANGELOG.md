@@ -1,5 +1,122 @@
 AppMap Plugin Changelog
 
+## [0.61.0](https://github.com/getappmap/appmap-intellij-plugin/compare/v0.60.0...v0.61.0) (2024-03-22)
+
+
+### Features
+
+-  bundle the AppMap Java agent with plugin ([8206a39]())
+
+### Bug Fixes
+
+-  Bring back Travis for semantic release ([9a276ea]())-  don't terminate AppMap processes on the EDT, [#597](https://github.com/getappmap/appmap-intellij-plugin/issues/597) ([6bf9cb2]())-  properly restart crashed AppMap processes with a longer delay ([3964aa1]())-  Update @appland/components to v4.10.0 ([4d752cc]())
+
+## [0.60.0](https://github.com/getappmap/appmap-intellij-plugin/compare/v0.59.0...v0.60.0) (2024-03-14)
+
+
+### Features
+
+-  show most recent AppMaps in Navie webview ([70c4ef2]())-  support email sign-up ([82e271b]())-  update the instructions panel to allow opening Navie AI ([56687a8]())
+
+## [0.59.0](https://github.com/getappmap/appmap-intellij-plugin/compare/v0.58.0...v0.59.0) (2024-03-11)
+
+
+### Features
+
+-  notify user if Navie isn't fully functional ([#595](https://github.com/getappmap/appmap-intellij-plugin/issues/595)) ([9b5f184]())-  support to display the AppMap tool window from the Navie webview ([bb25a8b]())-  Update install guide to include new node instructions ([d7815d7]())
+
+### Bug Fixes
+
+-  compatibility with 2024.1 eap's backwards incompatible API of OAuthRequestHandlerBase ([5fc79c2]())-  open external links with a target attribute like plain external links ([4494a4b]())-  update actions to avoid exception "ActionUpdateThread.OLD_EDT is deprecated and going to be removed soon." with 2024.1 eap ([d6d18ca]())
+
+## [0.58.0](https://github.com/getappmap/appmap-intellij-plugin/compare/v0.57.0...v0.58.0) (2024-02-23)
+
+
+### Features
+
+-  Support the "Export JSON" feature and handle webview messages in Navie view. ([2b2dae2]())
+
+### Bug Fixes
+
+-  allow to choose a file or directory for "Export to SVG" ([a9645f2]())-  compatibility with 2024.1 eap5 ([b6e89a0]())-  Exception "java.lang.IllegalArgumentException: invalid hex byte" ([96b07fe]())-  polish "Export to SVG" ([0f1a05e]())-  possible freeze of UI if "Explain with Navie" is invoked during indexing ([e23775e]())-  show local file paths when exporting SVG from "Explain with Navie" ([3e9e2cb]())-  Update description ([e77b46a]())
+
+## [0.57.0](https://github.com/getappmap/appmap-intellij-plugin/compare/v0.56.0...v0.57.0) (2024-02-17)
+
+
+### Features
+
+-  terminate plugin verifier with failure if internal API is used ([a6794f6]())
+
+### Bug Fixes
+
+-  drop internal API usage of FileIndexFacade.isInProjectScope ([a0ef8b7]())-  internal API usage of JavaVersion. ([922b80d]())
+
+## [0.56.0](https://github.com/getappmap/appmap-intellij-plugin/compare/v0.55.0...v0.56.0) (2024-02-14)
+
+
+### Features
+
+-  drop support for JetBrains 2021.3 IDEs ([037c29e]())-  Integrate with AppMap Navie ([efec7db]())-  support AppMap CLI processes for nested AppMap directories ([e0a1bf7]())-  support JetBrains 2024.1 EAP releases ([ae517a8]())
+
+### Bug Fixes
+
+-  Add missing import so that dependency map is not blank ([57bae45]())-  Avoid 404 when loading an AppMap ([94760bd]())-  Don't locate indexer port based on open editor ([c434196]())-  retrieve Gradle JDK in a background thread ([15b9bd1]())-  workaround for exception "Read access is allowed from inside read-action or Event Dispatch Thread" ([a8a26c8]())
+
+## [0.55.0](https://github.com/getappmap/appmap-intellij-plugin/compare/v0.54.0...v0.55.0) (2024-02-05)
+
+
+### Features
+
+-  enable JSON-RPC of AppMap indexer and pass API key ([aeb279d]())-  Support Java 21 in the plugin ([08ab253]())
+
+### Bug Fixes
+
+-  add auth token query parameter to HTTP requests of webview assets ([d8ee3e0]())-  don't open links to a localhost URL in the external browser ([989dc3c]())-  exception about slow operations when the AppMaps of the AppMap tool window are loaded ([aba4917]())-  NPE when the AppMap is displayed for the first time ([9ae8a8e]())
+
+## [0.54.0](https://github.com/getappmap/appmap-intellij-plugin/compare/v0.53.0...v0.54.0) (2023-12-13)
+
+
+### Features
+
+-  Action to sign in with a text API key ([3199ed2]())
+
+### Bug Fixes
+
+-  Exception 'Read access is allowed from inside read-action' with 2023.3 ([2f412f6]())-  restart AppMap CLI processes when they terminate unexpectedly ([ab91c81]())
+
+## [0.53.0](https://github.com/getappmap/appmap-intellij-plugin/compare/v0.52.0...v0.53.0) (2023-11-29)
+
+
+### Features
+
+-  Better check for status of the "Runtime Anaylysis" step ([7e5b29e]())-  Update @appland/components to 3.13.2 for the appmap viewer ([0d3fcce]())
+
+### Bug Fixes
+
+-  reject that PsiFile is fetched on the EDT thread ([a61a9ee]())
+
+## [0.52.0](https://github.com/getappmap/appmap-intellij-plugin/compare/v0.51.0...v0.52.0) (2023-10-31)
+
+
+### Features
+
+-  remove corresponding AppMap index data directory when an AppMap JSON file is deleted ([c030e16]())-  sort AppMaps of request or remote recording by modification date ([7154a12]())-  support "Delete AppMaps" and "Delete all AppMaps" in the AppMap tool window ([7361a26]())-  Update @appland/components to 3.9.0 ([5667237]())-  when opening an AppMap for a finding, center on the source finding ([fc1602c]())
+
+### Bug Fixes
+
+-  open findings from overview, which don't have an attached source file ([26c318b]())-  remote recordings now always display the name given by the user ([e7970e6]())-  rendering of findings were different compared to VSCode ([a2ebf7a]())
+
+## [0.51.0](https://github.com/getappmap/appmap-intellij-plugin/compare/v0.50.0...v0.51.0) (2023-10-11)
+
+
+### Features
+
+-  remove telemetry except of messages, which may indicate a bug in our code ([19ac6b6]())-  show hierarchy of AppMaps in the AppMap tool window ([c477d4b]())-  support 2023.3 eap ([#461](https://github.com/getappmap/appmap-intellij-plugin/issues/461)) ([2fecbac]())-  Update @appland/components to 3.8.0 ([f0ba300]())-  update to latest AppLand JS components ([#463](https://github.com/getappmap/appmap-intellij-plugin/issues/463)) ([f911c59]())
+
+### Bug Fixes
+
+-  don't override properties of an existing appmap.yml file ([cefd915]())-  navigating to a query or request code object didn't show it in the AppMap view ([e4eef31]())-  properly unescape indexer file paths ([d4b106e]())-  refresh parent directory of new AppMap to enforce indexing of the AppMap metadata directory ([dcfe030]())-  show progress spinner when loading AppMaps ([147b334]())
+
 ## [0.50.0](https://github.com/getappmap/appmap-intellij-plugin/compare/v0.49.0...v0.50.0) (2023-09-19)
 
 

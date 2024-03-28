@@ -9,17 +9,21 @@ import lombok.Value;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
-import java.nio.file.Path;
 import java.util.List;
 
-final class GitHubRelease {
-    @SuppressWarnings("SameParameterValue")
-    static List<GitHubReleaseAsset> getLatestRelease(@NotNull ProgressIndicator progressIndicator,
-                                                     @NotNull String repoOwner,
-                                                     @NotNull String repoName) throws IOException {
-        var url = String.format("https://api.github.com/repos/%s/%s/releases/latest", repoOwner, repoName);
+enum GitHubRelease implements Release {
+    INSTANCE;
+    private static final String DOWNLOAD_HOST = "github.com";
+    private static final String URL = "https://api.github.com/repos/getappmap/appmap-java/releases/latest";
+
+    @Override
+    public String getDownloadHost() {
+        return DOWNLOAD_HOST;
+    }
+
+    public List<Asset> getLatest(@NotNull ProgressIndicator progressIndicator) throws IOException {
         var response = HttpRequests
-                .request(url)
+                .request(URL)
                 .tuner(connection -> {
                     // Accessing api.github.com via GitHub actions often returns a 403,
                     // we're using the token to get a higher request rate limit.
@@ -33,24 +37,16 @@ final class GitHubRelease {
                 .readString(progressIndicator);
         return List.of(GsonUtils.GSON.fromJson(response, GitHubReleaseResponse.class).getAssets());
     }
+
+    @Override
+    public String toString() {
+        return "{GitHubRelease: " + URL + "}";
+    }
 }
 
 @Value
 class GitHubReleaseResponse {
     @SerializedName("assets")
-    GitHubReleaseAsset[] assets;
+    Release.Asset[] assets;
 }
 
-@Value
-class GitHubReleaseAsset {
-    @SerializedName("name")
-    String fileName;
-    @SerializedName("content_type")
-    String contentType;
-    @SerializedName("browser_download_url")
-    String downloadUrl;
-
-    void download(@NotNull ProgressIndicator progressIndicator, @NotNull Path targetFilePath) throws IOException {
-        HttpRequests.request(this.downloadUrl).saveToFile(targetFilePath, progressIndicator);
-    }
-}
