@@ -22,6 +22,8 @@ export function mountWebview() {
             apiKey: initialData.apiKey,
             mostRecentAppMaps: this.mostRecentAppMaps,
             appmapYmlPresent: this.appmapYmlPresent,
+            targetAppmapData: initialData.targetAppmapData,
+            targetAppmapFsPath: initialData.targetAppmapFsPath,
           },
         });
       },

@@ -9,6 +9,7 @@ import appland.webviews.WebviewEditorProvider;
 import com.intellij.ide.util.PropertiesComponent;
 import com.intellij.openapi.actionSystem.CommonDataKeys;
 import com.intellij.openapi.actionSystem.DataContext;
+import com.intellij.openapi.actionSystem.DataKey;
 import com.intellij.openapi.application.ApplicationInfo;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.application.ModalityState;
@@ -25,6 +26,7 @@ import com.intellij.openapi.util.SystemInfo;
 import com.intellij.openapi.vfs.VfsUtil;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiManager;
+import com.intellij.util.concurrency.annotations.RequiresEdt;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -48,9 +50,33 @@ public final class NavieEditorProvider extends WebviewEditorProvider {
      * The port of the matching indexer's JSON-RPC service.
      */
     static final Key<Integer> KEY_INDEXER_RPC_PORT = Key.create("appland.navie.rpcPort");
+    /**
+     * Optional AppMap context passed to the Navie webview.
+     */
+    static final Key<VirtualFile> KEY_APPMAP_CONTEXT_FILE = Key.create("appland.navie.appmap");
+    /**
+     * Optional AppMap context in the context passed to @link{{@link #openEditor(Project, DataContext)}}.
+     */
+    static final DataKey<VirtualFile> DATA_KEY_APPMAP = DataKey.create("appland.navie.appmap");
 
     public NavieEditorProvider() {
         super(TYPE_ID);
+    }
+
+    /**
+     * Opens the Navie webview with the given AppMap as context.
+     *
+     * @param project Current project
+     * @param appMap  AppMap to use as context
+     */
+    @RequiresEdt
+    public static void openEditorForAppMap(@NotNull Project project, @NotNull VirtualFile appMap) {
+        openEditor(project, dataId -> {
+            if (DATA_KEY_APPMAP.is(dataId)) {
+                return appMap;
+            }
+            return null;
+        });
     }
 
     /**
@@ -60,6 +86,7 @@ public final class NavieEditorProvider extends WebviewEditorProvider {
      * @param project Current project
      * @param context Data context to locate matching indexer and selected text, if available.
      */
+    @RequiresEdt
     public static void openEditor(@NotNull Project project, @NotNull DataContext context) {
         var provider = WebviewEditorProvider.findEditorProvider(TYPE_ID);
         assert provider != null;
@@ -74,6 +101,7 @@ public final class NavieEditorProvider extends WebviewEditorProvider {
             var file = provider.createVirtualFile(AppMapBundle.get("webview.navie.title"));
             KEY_INDEXER_RPC_PORT.set(file, indexerPort);
             KEY_CODE_SELECTION.set(file, codeSelection);
+            KEY_APPMAP_CONTEXT_FILE.set(file, context.getData(DATA_KEY_APPMAP));
 
             AppMapProjectSettingsService.getState(project).setExplainWithNavieOpened(true);
             FileEditorManager.getInstance(project).openFile(file, true);

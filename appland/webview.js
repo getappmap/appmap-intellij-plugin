@@ -50,6 +50,8 @@ export function mountWebview() {
 
     handleAppMapMessages(app, vscode, messages);
 
+    app.$on('ask-navie-about-map', filePath => vscode.postMessage({command: 'ask-navie-about-map', mapFsPath: filePath}))
+
     if (appMapContent) {
       // queue loadAppMap to avoid applying it immediately (which would turn off the progress spinner)
       setTimeout(() => {
