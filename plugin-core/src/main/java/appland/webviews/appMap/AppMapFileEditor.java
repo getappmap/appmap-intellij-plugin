@@ -11,15 +11,18 @@ import appland.settings.AppMapSettingsListener;
 import appland.utils.GsonUtils;
 import appland.webviews.SharedAppMapWebViewMessages;
 import appland.webviews.WebviewEditor;
+import appland.webviews.navie.NavieEditorProvider;
 import appland.webviews.webserver.AppMapWebview;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.intellij.openapi.application.ApplicationManager;
+import com.intellij.openapi.application.ModalityState;
 import com.intellij.openapi.application.ReadAction;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.vfs.LocalFileSystem;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.openapi.vfs.VirtualFileEvent;
 import com.intellij.openapi.vfs.VirtualFileListener;
@@ -27,6 +30,7 @@ import org.jetbrains.annotations.Nls;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.nio.file.Path;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
@@ -46,7 +50,10 @@ public class AppMapFileEditor extends WebviewEditor<JsonObject> {
     private final AtomicBoolean isModified = new AtomicBoolean(false);
 
     public AppMapFileEditor(@NotNull Project project, @NotNull VirtualFile file) {
-        super(project, AppMapWebview.AppMap, file, SharedAppMapWebViewMessages.withBaseMessages("webviewMounted"));
+        super(project, AppMapWebview.AppMap, file, SharedAppMapWebViewMessages.withBaseMessages(
+                "ask-navie-about-map",
+                "webviewMounted")
+        );
         setupVfsListener(file);
     }
 
@@ -101,12 +108,15 @@ public class AppMapFileEditor extends WebviewEditor<JsonObject> {
 
     @Override
     protected void setupInitMessage(@Nullable JsonObject initData, @NotNull JsonObject payload) {
+        var fileNioPath = file.getFileSystem().getNioPath(file);
         var filters = AppMapProjectSettingsService.getState(project).getAppMapFilters().values();
+
         var props = new JsonObject();
         props.addProperty("appMapUploadable", false);
         props.addProperty("flamegraphEnabled", true);
         props.addProperty("defaultView", "viewSequence");
         props.add("savedFilters", gson.toJsonTree(filters));
+        props.addProperty("appmapFsPath", fileNioPath != null ? fileNioPath.normalize().toString() : null);
 
         payload.add("data", initData);
         payload.add("props", props);
@@ -167,11 +177,29 @@ public class AppMapFileEditor extends WebviewEditor<JsonObject> {
             return;
         }
 
-        if ("webviewMounted".equals(messageId)) {
-            var state = webviewState;
-            if (state != null) {
-                applyWebViewState(state);
-            }
+        switch (messageId) {
+            case "ask-navie-about-map":
+                var nativeAppMapPath = message != null && message.has("mapFsPath")
+                        ? message.getAsJsonPrimitive("mapFsPath").getAsString()
+                        : null;
+                if (nativeAppMapPath != null) {
+                    var appMapFile = LocalFileSystem.getInstance().findFileByNioFile(Path.of(nativeAppMapPath));
+                    if (appMapFile != null) {
+                        ApplicationManager.getApplication().invokeLater(() -> {
+                            NavieEditorProvider.openEditorForAppMap(project, appMapFile);
+                        }, ModalityState.defaultModalityState());
+                        return;
+                    }
+                }
+                // fallback if mapFsPath was null or the file wasn't found
+                LOG.debug("Unable to locate AppMap file for message " + messageId + ": " + message);
+                break;
+            case "webviewMounted":
+                var state = webviewState;
+                if (state != null) {
+                    applyWebViewState(state);
+                }
+                break;
         }
     }
 
