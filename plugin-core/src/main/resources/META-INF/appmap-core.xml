@@ -149,6 +149,9 @@
         <registryKey key="appmap.agent.debug"
                      defaultValue="false"
                      description="Enable debug logging of the AppMap Java agent"/>
+
+        <applicationService serviceImplementation="appland.javaAgent.AppMapJavaAgentDownloadService"/>
+        <postStartupActivity implementation="appland.javaAgent.AppMapJavaAgentDownloadActivity"/>
     </extensions>
 
     <actions>
@@ -163,6 +166,8 @@
         <action id="appmap.generateOpenAPI" class="appland.actions.GenerateOpenApiAction"/>
 
         <action id="appmap.openNavie" class="appland.actions.OpenAppMapNavieAction"/>
+
+        <action id="appmap.pluginStatus" class="appland.actions.PluginStatus"/>
 
         <action id="appmapDocs" class="appland.actions.AppMapDocumentationAction">
             <add-to-group group-id="HelpMenu" anchor="before" relative-to-action="CheckForUpdate"/>
@@ -181,6 +186,8 @@
             <reference ref="appMapLogin"/>
             <reference ref="appMapLogout"/>
             <reference ref="appMapLoginByKey"/>
+            <separator/>
+            <reference ref="appmap.pluginStatus"/>
 
             <add-to-group group-id="ToolsMenu" anchor="last"/>
         </group>

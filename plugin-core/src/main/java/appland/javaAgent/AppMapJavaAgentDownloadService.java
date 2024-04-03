@@ -65,7 +65,7 @@ public final class AppMapJavaAgentDownloadService {
             return false;
         }
 
-        var latestAsset = getLatestAsset(indicator);
+        var latestAsset = JavaAgentStatus.getLatestAsset(indicator);
         if (latestAsset == null) {
             return false;
         }
@@ -100,28 +100,12 @@ public final class AppMapJavaAgentDownloadService {
         return true;
     }
 
-    @Nullable
-    private static Release.Asset getLatestAsset(@NotNull ProgressIndicator indicator) {
-        final Release[] releases = {MavenRelease.INSTANCE, GitHubRelease.INSTANCE};
-        for (Release release : releases) {
-            try {
-                var latestAsset = release.getLatest(indicator)
-                        .stream()
-                        .filter(asset -> "application/java-archive".equals(asset.getContentType()))
-                        .findFirst()
-                        .orElse(null);
+    public @NotNull Path agentDirPath() {
+        return Paths.get(SystemProperties.getUserHome()).resolve(Paths.get(".appmap", "lib", "java"));
+    }
 
-                if (latestAsset != null) {
-                    LOG.info("Got latest asset URL: " + latestAsset.getDownloadUrl());
-                    return latestAsset;
-                }
-            } catch (IOException e) {
-                LOG.info(String.format("Failed to query release, %s: %s", release, e));
-            }
-        }
-
-        LOG.warn("Couldn't query any source for latest release.");
-        return null;
+    public @NotNull Path agentFilePath() {
+        return agentDirPath().resolve(AGENT_LINK_FILENAME);
     }
 
     /**
@@ -185,14 +169,14 @@ public final class AppMapJavaAgentDownloadService {
 
     private @Nullable Path getJavaAgentPath() {
         var agentDir = getOrCreateAgentDir();
-        return agentDir == null ? null : agentDir.resolve(AGENT_LINK_FILENAME);
+        return agentDir == null ? null : agentFilePath();
     }
 
     /**
      * @return The path of the directory, where the AppMap Java agent should be stored (~/.appmap/lib/java).
      */
     @Nullable Path getOrCreateAgentDir() {
-        var agentDirPath = Paths.get(SystemProperties.getUserHome()).resolve(Paths.get(".appmap", "lib", "java"));
+        var agentDirPath = agentDirPath();
         try {
             Files.createDirectories(agentDirPath);
             return agentDirPath;

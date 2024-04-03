@@ -146,7 +146,7 @@ public class DefaultAppLandDownloadService implements AppLandDownloadService {
         downloadTool(project, CliTool.Scanner);
     }
 
-    private @Nullable String findLatestDownloadedVersion(@NotNull CliTool type) {
+    public @Nullable String findLatestDownloadedVersion(@NotNull CliTool type) {
         var directory = getToolDownloadDirectory(type, ApplicationManager.getApplication().isUnitTestMode());
         if (!Files.isDirectory(directory)) {
             return null;
