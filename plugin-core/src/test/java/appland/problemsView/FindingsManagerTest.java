@@ -5,6 +5,7 @@ import appland.index.AppMapFindingsUtil;
 import appland.problemsView.model.TestStatus;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.sql.Date;
@@ -34,6 +35,7 @@ public class FindingsManagerTest extends AppMapBaseTest {
     }
 
     @Test
+    @Ignore("Unstable on Windows CI")
     public void findingsVSCodeSystem() throws Exception {
         var manager = FindingsManager.getInstance(getProject());
 

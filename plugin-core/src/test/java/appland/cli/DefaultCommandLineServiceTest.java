@@ -159,6 +159,8 @@ public class DefaultCommandLineServiceTest extends AppMapBaseTest {
 
     @Test
     public void contentRootUpdates() throws InterruptedException {
+        Assume.assumeFalse("On windows, it fails with java.io.IOException: Cannot delete ...", SystemInfo.isWindows);
+
         var newRootA = myFixture.addFileToProject("parentA/file.txt", "").getParent().getVirtualFile();
         var nestedRootA = myFixture.addFileToProject("parentA/subDir/file.txt", "").getParent().getVirtualFile();
         var newRootB = myFixture.addFileToProject("parentB/file.txt", "").getParent().getVirtualFile();
