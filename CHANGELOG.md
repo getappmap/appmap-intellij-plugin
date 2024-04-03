@@ -1,5 +1,12 @@
 AppMap Plugin Changelog
 
+## [0.62.0](https://github.com/getappmap/appmap-intellij-plugin/compare/v0.61.0...v0.62.0) (2024-04-03)
+
+
+### Features
+
+-  download Java agent from Maven Central ([bb622c0]())-  launch AppMap JSON-RPC server and use it for Navie ([7673926]())
+
 ## [0.61.0](https://github.com/getappmap/appmap-intellij-plugin/compare/v0.60.0...v0.61.0) (2024-03-22)
 
 
