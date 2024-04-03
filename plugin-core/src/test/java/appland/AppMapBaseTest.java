@@ -217,7 +217,8 @@ public abstract class AppMapBaseTest extends LightPlatformCodeInsightFixture4Tes
 
     private void shutdownAppMapProcesses() {
         try {
-            AppLandCommandLineService.getInstance().stopAll(10_000, TimeUnit.MILLISECONDS);
+            AppLandCommandLineService.getInstance().stopAll(60_000, TimeUnit.MILLISECONDS);
+            assertEmpty(AppLandCommandLineService.getInstance().getActiveRoots());
         } finally {
             // reset to default settings
             ApplicationManager.getApplication().getService(AppMapApplicationSettingsService.class).loadState(new AppMapApplicationSettings());

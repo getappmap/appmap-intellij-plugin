@@ -29,7 +29,6 @@ import com.intellij.util.io.BaseOutputReader;
 import com.intellij.util.system.CpuArch;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import lombok.RequiredArgsConstructor;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.TestOnly;
@@ -41,10 +40,8 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 public class DefaultCommandLineService implements AppLandCommandLineService {
@@ -158,12 +155,6 @@ public class DefaultCommandLineService implements AppLandCommandLineService {
     }
 
     @Override
-    public @Nullable Integer getIndexerRpcPort(@NotNull VirtualFile contextFile) {
-        var processes = findProcessForContext(contextFile);
-        return processes != null ? processes.indexerJsonRpcPort : null;
-    }
-
-    @Override
     public void stopAll(boolean waitForTermination) {
         stopAll(waitForTermination ? 1_000 : 0, TimeUnit.MILLISECONDS);
     }
@@ -223,6 +214,21 @@ public class DefaultCommandLineService implements AppLandCommandLineService {
         return createAppMapCommand("stats", "--appmap-file", localPath.toString(), "--limit", String.valueOf(Long.MAX_VALUE), "--format", "json");
     }
 
+    @Override
+    public @Nullable GeneralCommandLine createAppMapJsonRpcCommand() {
+        var cmd = createAppMapCommand("rpc", "--port", "0");
+        if (cmd == null) {
+            return null;
+        }
+
+        var apiKey = AppMapApplicationSettingsService.getInstance().getApiKey();
+        if (StringUtil.isNotEmpty(apiKey)) {
+            cmd = cmd.withEnvironment("APPMAP_API_KEY", apiKey);
+        }
+
+        return cmd;
+    }
+
     // We're not synchronizing, because some IDE threads display or use the result of toString
     // and this must not create deadlocks.
     @Override
@@ -269,14 +275,6 @@ public class DefaultCommandLineService implements AppLandCommandLineService {
     @TestOnly
     synchronized @Nullable CliProcesses getProcesses(@NotNull VirtualFile directory) {
         return processes.get(directory);
-    }
-
-    synchronized private @Nullable CliProcesses findProcessForContext(@NotNull VirtualFile contextFile) {
-        return processes.entrySet()
-                .stream()
-                .filter(root -> VfsUtilCore.isAncestor(root.getKey(), contextFile, false))
-                .findFirst()
-                .map(Map.Entry::getValue).orElse(null);
     }
 
     /**
@@ -365,12 +363,10 @@ public class DefaultCommandLineService implements AppLandCommandLineService {
         var process = startProcess(workingDir, indexerPath.toString(), "index",
                 "--verbose",
                 "--watch",
-                "--port", "0",
                 "--appmap-dir", watchedDir.toString());
         process.addProcessListener(LoggingProcessAdapter.INSTANCE);
         process.addProcessListener(new RestartProcessListener(directory, process, ProcessType.Indexer, this), this);
         process.addProcessListener(new IndexEventsProcessListener(), this);
-        process.addProcessListener(new IndexerRpcPortListener(directory), this);
         return process;
     }
 
@@ -576,7 +572,6 @@ public class DefaultCommandLineService implements AppLandCommandLineService {
     protected static final class CliProcesses {
         private volatile @Nullable KillableProcessHandler indexer;
         private volatile @Nullable KillableProcessHandler scanner;
-        private volatile @Nullable Integer indexerJsonRpcPort = null;
 
         private CliProcesses(@Nullable KillableProcessHandler indexer, @Nullable KillableProcessHandler scanner) {
             this.indexer = indexer;
@@ -613,38 +608,6 @@ public class DefaultCommandLineService implements AppLandCommandLineService {
                         if (LOG.isDebugEnabled()) {
                             LOG.debug("Error parsing indexed file path: " + filePath, e);
                         }
-                    }
-                }
-            }
-        }
-    }
-
-    /**
-     * Listen for the port, where the indexer is serving for RPC requests, and update the process settings for served directory.
-     */
-    @RequiredArgsConstructor
-    private final class IndexerRpcPortListener extends ProcessAdapter {
-        private final @NotNull Pattern PORT_PATTERN = Pattern.compile("^Running JSON-RPC server on port: (\\d+)$");
-        private final @NotNull VirtualFile directory;
-
-        @Override
-        public void onTextAvailable(@NotNull ProcessEvent event, @NotNull Key outputType) {
-            if (outputType != ProcessOutputType.STDOUT) {
-                return;
-            }
-
-            var match = PORT_PATTERN.matcher(event.getText().trim());
-            if (match.matches()) {
-                var port = StringUtil.parseInt(match.group(1), -1);
-                if (port > 0) {
-                    var cliProcesses = processes.get(directory);
-                    if (cliProcesses != null) {
-                        cliProcesses.indexerJsonRpcPort = port;
-
-                        var application = ApplicationManager.getApplication();
-                        application.executeOnPooledThread(() -> application.getMessageBus()
-                                .syncPublisher(AppLandIndexerJsonRpcListener.TOPIC)
-                                .indexerServiceAvailable(directory));
                     }
                 }
             }

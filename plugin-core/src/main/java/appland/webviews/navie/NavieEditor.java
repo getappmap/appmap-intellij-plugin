@@ -1,7 +1,6 @@
 package appland.webviews.navie;
 
 import appland.AppMapBundle;
-import appland.cli.AppLandCommandLineService;
 import appland.files.AppMapFileChangeListener;
 import appland.files.OpenAppMapFileNavigatable;
 import appland.index.AppMapMetadata;
@@ -42,7 +41,6 @@ import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Objects;
 import java.util.concurrent.Executor;
 import java.util.stream.Collectors;
 
@@ -75,13 +73,10 @@ public class NavieEditor extends WebviewEditor<Void> {
         var filters = AppMapProjectSettingsService.getState(project).getAppMapFilters().values();
         var codeSelection = NavieEditorProvider.KEY_CODE_SELECTION.get(file);
 
-        var appMapDirectory = NavieEditorProvider.KEY_APPMAP_DIRECTORY.get(file);
-        assert appMapDirectory != null;
-
         var port = NavieEditorProvider.KEY_INDEXER_RPC_PORT.get(file);
         assert port != null;
 
-        var mostRecentAppMaps = ReadAction.compute(() -> findMostRecentAppMaps(project, appMapDirectory));
+        var mostRecentAppMaps = ReadAction.compute(() -> findMostRecentAppMaps(project));
 
         payload.addProperty("appmapRpcPort", port);
         payload.addProperty("apiKey", StringUtil.defaultIfEmpty(apiKey, ""));
@@ -105,7 +100,7 @@ public class NavieEditor extends WebviewEditor<Void> {
                 applyWebViewFilters();
             }
         });
-        busConnection.subscribe(AppMapFileChangeListener.TOPIC, changeTypes -> {
+        busConnection.subscribe(AppMapFileChangeListener.TOPIC, (AppMapFileChangeListener) changeTypes -> {
             refreshMostRecentAppMapsAlarm.cancelAndRequest();
         });
     }
@@ -166,17 +161,17 @@ public class NavieEditor extends WebviewEditor<Void> {
      */
     private void updateMostRecentAppMaps() {
         assert (!ApplicationManager.getApplication().isDispatchThread());
+        var appMapDirectory = NavieEditorProvider.KEY_APPMAP_DIRECTORY.get(file);
+        if (appMapDirectory == null) {
+            return;
+        }
 
         // We need to fetch the AppMaps after indexing finished, therefore we're launching a non-blocking ReadAction in
         // a background task.
         new Task.Backgroundable(project, AppMapBundle.get("webview.navie.updatingMostRecentAppMaps"), false) {
             @Override
             public void run(@NotNull ProgressIndicator indicator) {
-                ReadAction.nonBlocking(() -> {
-                            var appMapDirectory = NavieEditorProvider.KEY_APPMAP_DIRECTORY.get(file);
-                            assert appMapDirectory != null;
-                            return findMostRecentAppMaps(project, appMapDirectory);
-                        })
+                ReadAction.nonBlocking(() -> findMostRecentAppMaps(project))
                         .inSmartMode(project)
                         .wrapProgress(indicator)
                         .expireWith(NavieEditor.this)
@@ -196,24 +191,15 @@ public class NavieEditor extends WebviewEditor<Void> {
      * The data is passed to the Navie webview as the most recent AppMaps.
      */
     @RequiresReadLock
-    private static @NotNull List<AppMapListItem> findMostRecentAppMaps(@NotNull Project project,
-                                                                       @NotNull VirtualFile appMapDirectory) {
+    private static @NotNull List<AppMapListItem> findMostRecentAppMaps(@NotNull Project project) {
         ApplicationManager.getApplication().assertReadAccessAllowed();
 
-        var commandLineService = AppLandCommandLineService.getInstance();
         var timestampFormatter = DateTimeFormatter.ISO_LOCAL_DATE_TIME.withZone(ZoneId.systemDefault());
 
         return AppMapMetadataService.getInstance(project)
                 .findAppMaps()
                 .stream()
-                .filter(appMap -> {
-                    var appMapFile = appMap.getAppMapFile();
-                    if (appMapFile == null) {
-                        return false;
-                    }
-                    // this is handling nested AppMap directories
-                    return Objects.equals(commandLineService.getActiveRoot(appMapFile), appMapDirectory);
-                })
+                .filter(appMap -> appMap.getAppMapFile() != null)
                 .sorted(Comparator.comparingLong(AppMapMetadata::getModificationTimestamp).reversed())
                 .limit(10)
                 .map(appMap -> createListItem(appMap, timestampFormatter))

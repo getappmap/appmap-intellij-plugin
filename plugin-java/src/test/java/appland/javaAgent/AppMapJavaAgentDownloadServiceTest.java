@@ -4,13 +4,11 @@ import appland.AppMapBaseTest;
 import appland.utils.SystemProperties;
 import com.intellij.openapi.progress.EmptyProgressIndicator;
 import com.intellij.openapi.util.SystemInfo;
-import com.intellij.openapi.util.io.NioFiles;
 import com.intellij.testFramework.fixtures.TempDirTestFixture;
 import com.intellij.testFramework.fixtures.impl.TempDirTestFixtureImpl;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TestRule;
-import org.junit.runners.model.Statement;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -21,14 +19,7 @@ import java.time.temporal.ChronoUnit;
 
 public class AppMapJavaAgentDownloadServiceTest extends AppMapBaseTest {
     @Rule
-    public final TestRule systemPropertyUpdate = (statement, description) -> new Statement() {
-        @Override
-        public void evaluate() throws Throwable {
-            var path = Paths.get(myFixture.getTempDirFixture().getTempDirPath()).resolve("appmap-agent");
-            NioFiles.deleteRecursively(path);
-            SystemProperties.withPropertyValue(SystemProperties.USER_HOME, path.toString(), statement::evaluate);
-        }
-    };
+    public TestRule agentDownloadRule = new OverrideJavaAgentLocationRule(() -> this.myFixture);
 
     @Override
     protected TempDirTestFixture createTempDirTestFixture() {
@@ -65,7 +56,7 @@ public class AppMapJavaAgentDownloadServiceTest extends AppMapBaseTest {
     public void lockFileGuard() throws IOException {
         var service = AppMapJavaAgentDownloadService.getInstance();
 
-        var jarAsset = GitHubRelease.getLatestRelease(new EmptyProgressIndicator(), "getappmap", "appmap-java")
+        var jarAsset = MavenRelease.INSTANCE.getLatest(new EmptyProgressIndicator())
                 .stream()
                 .filter(asset -> asset.getFileName().endsWith(".jar"))
                 .findFirst().orElse(null);

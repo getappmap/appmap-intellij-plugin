@@ -2,8 +2,8 @@ package appland.webviews.navie;
 
 import appland.AppMapBundle;
 import appland.Icons;
-import appland.cli.AppLandCommandLineService;
 import appland.notifications.AppMapNotifications;
+import appland.rpcService.AppLandJsonRpcService;
 import appland.settings.AppMapProjectSettingsService;
 import appland.webviews.WebviewEditorProvider;
 import com.intellij.ide.util.PropertiesComponent;
@@ -17,16 +17,11 @@ import com.intellij.openapi.fileEditor.FileDocumentManager;
 import com.intellij.openapi.fileEditor.FileEditor;
 import com.intellij.openapi.fileEditor.FileEditorManager;
 import com.intellij.openapi.project.Project;
-import com.intellij.openapi.project.ProjectUtil;
 import com.intellij.openapi.roots.ProjectFileIndex;
 import com.intellij.openapi.ui.DialogWrapper;
 import com.intellij.openapi.ui.Messages;
-import com.intellij.openapi.ui.popup.JBPopupFactory;
-import com.intellij.openapi.ui.popup.PopupStep;
-import com.intellij.openapi.ui.popup.util.BaseListPopupStep;
 import com.intellij.openapi.util.Key;
 import com.intellij.openapi.util.SystemInfo;
-import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.openapi.vfs.VfsUtil;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiManager;
@@ -70,14 +65,13 @@ public final class NavieEditorProvider extends WebviewEditorProvider {
         assert provider != null;
 
         var editor = CommonDataKeys.EDITOR_EVEN_IF_INACTIVE.getData(context);
-        chooseIndexerJsonRpcPort(project, context, editor, (appMapDirectory, indexerPort, codeSelection) -> {
+        chooseIndexerJsonRpcPort(project, editor, (indexerPort, codeSelection) -> {
             if (indexerPort == null) {
                 AppMapNotifications.showNavieUnavailableNotification(project);
                 return;
             }
 
             var file = provider.createVirtualFile(AppMapBundle.get("webview.navie.title"));
-            KEY_APPMAP_DIRECTORY.set(file, appMapDirectory);
             KEY_INDEXER_RPC_PORT.set(file, indexerPort);
             KEY_CODE_SELECTION.set(file, codeSelection);
 
@@ -117,43 +111,10 @@ public final class NavieEditorProvider extends WebviewEditorProvider {
     }
 
     private static void chooseIndexerJsonRpcPort(@NotNull Project project,
-                                                 @NotNull DataContext context,
                                                  @Nullable Editor editor,
                                                  @NotNull ShowNavieConsumer consumer) {
-        var service = AppLandCommandLineService.getInstance();
         var codeSelection = buildCodeSelection(project, editor);
-
-        var activeRoots = service.getActiveRoots();
-        if (activeRoots.isEmpty()) {
-            consumer.openNavie(null, null, null);
-            return;
-        }
-
-        // without a context file, fallback to the only available indexer port if there's exactly one active root
-        if (activeRoots.size() == 1) {
-            var appMapRoot = activeRoots.get(0);
-            consumer.openNavie(appMapRoot, service.getIndexerRpcPort(appMapRoot), codeSelection);
-            return;
-        }
-
-        // for multiple active roots, let the user choose one
-        var selectPortStep = new BaseListPopupStep<>(AppMapBundle.get("webview.navie.chooseAppMapModule.title"), activeRoots) {
-            @Override
-            public @NotNull String getTextFor(VirtualFile file) {
-                var projectDir = ProjectUtil.guessProjectDir(project);
-                var relativePath = projectDir != null ? VfsUtil.getRelativePath(file, projectDir) : null;
-                return StringUtil.defaultIfEmpty(relativePath, file.getPresentableUrl());
-            }
-
-            @Override
-            public @Nullable PopupStep<?> onChosen(@Nullable VirtualFile selectedValue, boolean finalChoice) {
-                var port = selectedValue != null ? service.getIndexerRpcPort(selectedValue) : null;
-                consumer.openNavie(selectedValue, port, codeSelection);
-                return FINAL_CHOICE;
-            }
-        };
-
-        JBPopupFactory.getInstance().createListPopup(selectPortStep).showCenteredInCurrentWindow(project);
+        consumer.openNavie(AppLandJsonRpcService.getInstance(project).getServerPort(), codeSelection);
     }
 
     @Override
@@ -168,9 +129,7 @@ public final class NavieEditorProvider extends WebviewEditorProvider {
 
     @FunctionalInterface
     private interface ShowNavieConsumer {
-        void openNavie(@Nullable VirtualFile appMapDirectory,
-                       @Nullable Integer indexerPort,
-                       @Nullable NavieCodeSelection codeSelection);
+        void openNavie(@Nullable Integer indexerPort, @Nullable NavieCodeSelection codeSelection);
     }
 
     private static boolean isNavieWebviewSupportBroken() {
