@@ -476,18 +476,23 @@ public class DefaultCommandLineService implements AppLandCommandLineService {
                 || SystemInfo.isWindows && CpuArch.isIntel64();
     }
 
-    private static @NotNull KillableProcessHandler startProcess(@NotNull Path workingDir,
+    public static @NotNull KillableProcessHandler startProcess(@NotNull Path workingDir,
                                                                 @NotNull String... commandLine) throws ExecutionException {
+
+        final var settings = AppMapApplicationSettingsService.getInstance();
 
         if (!Files.isDirectory(workingDir)) {
             throw new IllegalStateException("Directory does not exist: " + workingDir);
         }
 
-        var command = new GeneralCommandLine(commandLine);
-        command.withWorkDirectory(workingDir.toString());
-        command.withParentEnvironmentType(GeneralCommandLine.ParentEnvironmentType.CONSOLE);
+        var command = new GeneralCommandLine(commandLine)
+                .withWorkDirectory(workingDir.toString())
+                .withParentEnvironmentType(settings.isCliPassParentEnv()
+                        ? GeneralCommandLine.ParentEnvironmentType.CONSOLE
+                        : GeneralCommandLine.ParentEnvironmentType.NONE)
+                .withEnvironment(settings.getCliEnvironment());
 
-        var apiKey = AppMapApplicationSettingsService.getInstance().getApiKey();
+        var apiKey = settings.getApiKey();
         if (apiKey != null && !apiKey.isEmpty()) {
             command.withEnvironment("APPMAP_API_KEY", apiKey);
         }

@@ -8,6 +8,8 @@ import lombok.ToString;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 
 /**
@@ -31,6 +33,13 @@ public class AppMapApplicationSettings {
      */
     private volatile boolean showFirstAppMapNotification = false;
 
+    /**
+     * Map of environment variables to be set when starting AppMap services
+     * The key is the name of the environment variable and the value is the value of the environment variable.
+     */
+    private volatile Map<String, String> cliEnvironment = new HashMap<>();
+    private volatile boolean cliPassParentEnv = true;
+
     public AppMapApplicationSettings() {
     }
 
@@ -40,6 +49,8 @@ public class AppMapApplicationSettings {
         this.apiKey = settings.apiKey;
         this.installInstructionsViewed = settings.installInstructionsViewed;
         this.showFirstAppMapNotification = settings.showFirstAppMapNotification;
+        this.cliEnvironment.putAll(settings.cliEnvironment);
+        this.cliPassParentEnv = settings.cliPassParentEnv;
     }
 
     public void setApiKeyNotifying(@Nullable String apiKey) {
