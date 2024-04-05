@@ -1,5 +1,12 @@
 AppMap Plugin Changelog
 
+## [0.63.0](https://github.com/getappmap/appmap-intellij-plugin/compare/v0.62.0...v0.63.0) (2024-04-05)
+
+
+### Features
+
+-  Allow configuring environment for AppMap services ([#648](https://github.com/getappmap/appmap-intellij-plugin/issues/648)) ([a0b5a31]()), closes [#646]()
+
 ## [0.62.0](https://github.com/getappmap/appmap-intellij-plugin/compare/v0.61.0...v0.62.0) (2024-04-03)
 
 
