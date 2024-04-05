@@ -26,7 +26,9 @@ import org.junit.Test;
 
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -121,6 +123,27 @@ public class DefaultCommandLineServiceTest extends AppMapBaseTest {
         assertNotNull(tempDirNioPath);
         var appMapDirNioPath = tempDirNioPath.resolve("tmp/appmaps");
         assertTrue("Configured AppMap dir must be created: " + appMapDirNioPath, Files.isDirectory(appMapDirNioPath));
+    }
+
+    @Test
+    public void environmentPassing() throws ExecutionException, InterruptedException, IOException {
+        final var settings = AppMapApplicationSettingsService.getInstance();
+        settings.setCliEnvironment(Map.of("FOO", "BAR", "BAZ", "QUX"));
+        // use "cmd /c set" on windows, "env" on unix
+        Path workingDir = Path.of(".");
+        final var process = (SystemInfo.isWindows
+                ? DefaultCommandLineService.startProcess(workingDir, "cmd", "/c", "set")
+                : DefaultCommandLineService.startProcess(workingDir, "env")
+        ).getProcess();
+
+        process.waitFor(5, TimeUnit.SECONDS);
+
+        // read the output of the process
+        final var output = new String(process.getInputStream().readAllBytes());
+
+        // check that the environment variables are passed to the process
+        assertTrue(output.contains("FOO=BAR"));
+        assertTrue(output.contains("BAZ=QUX"));
     }
 
     @Test
