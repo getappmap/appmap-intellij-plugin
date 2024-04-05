@@ -476,7 +476,7 @@ public class DefaultCommandLineService implements AppLandCommandLineService {
                 || SystemInfo.isWindows && CpuArch.isIntel64();
     }
 
-    public static @NotNull KillableProcessHandler startProcess(@NotNull Path workingDir,
+    static @NotNull KillableProcessHandler startProcess(@NotNull Path workingDir,
                                                                 @NotNull String... commandLine) throws ExecutionException {
 
         final var settings = AppMapApplicationSettingsService.getInstance();

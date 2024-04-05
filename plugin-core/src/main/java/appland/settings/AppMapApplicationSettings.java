@@ -53,6 +53,10 @@ public class AppMapApplicationSettings {
         this.cliPassParentEnv = settings.cliPassParentEnv;
     }
 
+    public void setCliEnvironment(@NotNull Map<String, String> environment) {
+        this.cliEnvironment = Map.copyOf(environment);
+    }
+
     public void setApiKeyNotifying(@Nullable String apiKey) {
         var changed = !Objects.equals(apiKey, this.apiKey);
         this.apiKey = apiKey;
