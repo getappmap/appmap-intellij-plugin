@@ -1,5 +1,6 @@
 package appland.settings;
 
+import com.intellij.execution.configurations.GeneralCommandLine;
 import com.intellij.openapi.application.ApplicationManager;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -11,6 +12,8 @@ import org.jetbrains.annotations.Nullable;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+
+import static com.intellij.openapi.util.text.StringUtil.isNotEmpty;
 
 /**
  * Persistent application state of the AppMap plugin.
@@ -55,6 +58,19 @@ public class AppMapApplicationSettings {
 
     public void setCliEnvironment(@NotNull Map<String, String> environment) {
         this.cliEnvironment = Map.copyOf(environment);
+    }
+
+    /**
+     * Apply environment variables and API key to the command line.
+     */
+    public GeneralCommandLine applyServiceEnvironment(@NotNull GeneralCommandLine commandLine) {
+        var key = apiKey;
+        var environmentType = cliPassParentEnv
+                ? GeneralCommandLine.ParentEnvironmentType.CONSOLE
+                : GeneralCommandLine.ParentEnvironmentType.NONE;
+        return commandLine.withParentEnvironmentType(environmentType)
+                .withEnvironment(cliEnvironment)
+                .withEnvironment(isNotEmpty(key) ? Map.of("APPMAP_API_KEY", key) : Map.of());
     }
 
     public void setApiKeyNotifying(@Nullable String apiKey) {

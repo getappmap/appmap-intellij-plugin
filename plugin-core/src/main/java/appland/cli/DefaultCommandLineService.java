@@ -19,7 +19,6 @@ import com.intellij.openapi.project.DumbService;
 import com.intellij.openapi.project.ProjectManager;
 import com.intellij.openapi.util.Key;
 import com.intellij.openapi.util.SystemInfo;
-import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.openapi.vfs.VfsUtil;
 import com.intellij.openapi.vfs.VfsUtilCore;
 import com.intellij.openapi.vfs.VirtualFile;
@@ -221,12 +220,7 @@ public class DefaultCommandLineService implements AppLandCommandLineService {
             return null;
         }
 
-        var apiKey = AppMapApplicationSettingsService.getInstance().getApiKey();
-        if (StringUtil.isNotEmpty(apiKey)) {
-            cmd = cmd.withEnvironment("APPMAP_API_KEY", apiKey);
-        }
-
-        return cmd;
+        return AppMapApplicationSettingsService.getInstance().applyServiceEnvironment(cmd);
     }
 
     // We're not synchronizing, because some IDE threads display or use the result of toString
@@ -479,25 +473,15 @@ public class DefaultCommandLineService implements AppLandCommandLineService {
     static @NotNull KillableProcessHandler startProcess(@NotNull Path workingDir,
                                                                 @NotNull String... commandLine) throws ExecutionException {
 
-        final var settings = AppMapApplicationSettingsService.getInstance();
-
         if (!Files.isDirectory(workingDir)) {
             throw new IllegalStateException("Directory does not exist: " + workingDir);
         }
 
         var command = new GeneralCommandLine(commandLine)
-                .withWorkDirectory(workingDir.toString())
-                .withParentEnvironmentType(settings.isCliPassParentEnv()
-                        ? GeneralCommandLine.ParentEnvironmentType.CONSOLE
-                        : GeneralCommandLine.ParentEnvironmentType.NONE)
-                .withEnvironment(settings.getCliEnvironment());
+                .withWorkDirectory(workingDir.toString());
 
-        var apiKey = settings.getApiKey();
-        if (apiKey != null && !apiKey.isEmpty()) {
-            command.withEnvironment("APPMAP_API_KEY", apiKey);
-        }
-
-        return new KillableProcessHandler(command) {
+        return new KillableProcessHandler(AppMapApplicationSettingsService.getInstance()
+                .applyServiceEnvironment(command)) {
             @Override
             protected BaseOutputReader.@NotNull Options readerOptions() {
                 return BaseOutputReader.Options.BLOCKING;
