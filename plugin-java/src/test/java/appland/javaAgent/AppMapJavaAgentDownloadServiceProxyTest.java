@@ -42,8 +42,8 @@ public class AppMapJavaAgentDownloadServiceProxyTest extends AppMapBaseTest {
 
         mockServerRule.getClient().verify(
                 request()
-                    .withHeader("Host", MavenRelease.INSTANCE.getDownloadHost())
-                    .withPath(".*/(appmap.*?.jar)"),
+                        .withHeader("Host", MavenRelease.INSTANCE.getDownloadHost())
+                        .withPath(".*/(appmap.*?.jar)"),
                 VerificationTimes.once()
         );
     }
@@ -54,10 +54,10 @@ public class AppMapJavaAgentDownloadServiceProxyTest extends AppMapBaseTest {
 
         var client = mockServerRule.getClient();
         client.when(
-            request()
-                .withHeader("Host", MavenRelease.INSTANCE.getDownloadHost())
+                request()
+                        .withHeader("Host", MavenRelease.INSTANCE.getDownloadHost())
         ).respond(
-            response().withStatusCode(403)
+                response().withStatusCode(403)
         );
 
         Assert.assertNull("Java agent must not yet be downloaded", service.getJavaAgentPathIfExists());
@@ -66,8 +66,8 @@ public class AppMapJavaAgentDownloadServiceProxyTest extends AppMapBaseTest {
 
         client.verify(
                 request()
-                    .withHeader("Host", GitHubRelease.INSTANCE.getDownloadHost())
-                    .withPath(".*/(appmap.*?.jar)"),
+                        .withHeader("Host", GitHubRelease.INSTANCE.getDownloadHost())
+                        .withPath(".*/(appmap.*?.jar)"),
                 VerificationTimes.once()
         );
     }

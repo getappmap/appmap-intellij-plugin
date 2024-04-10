@@ -3,6 +3,7 @@ package appland.javaAgent;
 import appland.AppMapBundle;
 import appland.utils.SystemProperties;
 import com.intellij.openapi.application.ApplicationManager;
+import com.intellij.openapi.components.Service;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.progress.PerformInBackgroundOption;
 import com.intellij.openapi.progress.ProgressIndicator;
@@ -23,6 +24,7 @@ import java.time.temporal.ChronoUnit;
 /**
  * Application service to manage the download of the AppMap Java agent.
  */
+@Service(Service.Level.APP)
 public final class AppMapJavaAgentDownloadService {
     private static final Logger LOG = Logger.getInstance(AppMapJavaAgentDownloadService.class);
     private static final String AGENT_LINK_FILENAME = "appmap.jar";

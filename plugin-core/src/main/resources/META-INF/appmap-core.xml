@@ -90,7 +90,6 @@
 
         <applicationService id="appmap.settings"
                             serviceImplementation="appland.settings.AppMapApplicationSettingsService"/>
-        <projectService serviceImplementation="appland.settings.AppMapProjectSettingsService"/>
         <projectService serviceInterface="appland.remote.RemoteRecordingStatusService"
                         serviceImplementation="appland.remote.DefaultRemoteRecordingStatusService"/>
         <projectService serviceInterface="appland.installGuide.projectData.ProjectDataService"
@@ -111,6 +110,7 @@
                            key="notification.groupGeneric.title"/>
 
         <projectConfigurable groupId="tools" nonDefaultProject="true" order="first"
+                             key="projectSettings.displayName"
                              instance="appland.settings.AppMapProjectConfigurable"/>
 
         <errorHandler implementation="appland.GitHubErrorHandler"/>

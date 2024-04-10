@@ -2,9 +2,7 @@ package appland.webviews;
 
 import appland.Icons;
 import appland.files.AppMapFiles;
-import appland.installGuide.InstallGuideEditorProvider;
 import com.intellij.ide.FileIconProvider;
-import com.intellij.openapi.fileEditor.ex.FileEditorProviderManager;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
 import org.jetbrains.annotations.NotNull;

@@ -355,7 +355,7 @@ public class FindingsManager implements ProblemsProvider {
     @RequiresReadLock
     private @NotNull Collection<VirtualFile> findFindingsFiles() {
         var scope = AppMapSearchScopes.projectFilesWithExcluded(project);
-        return FilenameIndex.getVirtualFilesByName(project, AppMapFindingsUtil.FINDINGS_FILE_NAME, true, scope);
+        return FilenameIndex.getVirtualFilesByName(AppMapFindingsUtil.FINDINGS_FILE_NAME, true, scope);
     }
 
     private @Nullable FindingsFileData loadFindingsFile(@NotNull VirtualFile file) {

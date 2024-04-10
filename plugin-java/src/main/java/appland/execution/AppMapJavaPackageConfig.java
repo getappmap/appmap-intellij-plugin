@@ -5,7 +5,6 @@ import appland.files.AppMapFiles;
 import com.intellij.openapi.application.ReadAction;
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.module.ModuleUtil;
-import com.intellij.openapi.project.Project;
 import com.intellij.openapi.roots.ModuleRootManager;
 import com.intellij.openapi.roots.ProjectRootManager;
 import com.intellij.openapi.vfs.LocalFileSystem;
@@ -47,7 +46,7 @@ public final class AppMapJavaPackageConfig {
                                                            @NotNull Path appMapOutputDirectory) throws IOException {
 
         // attempt to find an existing appmap.yml file in the module
-        var existingConfig = findAppMapConfig(module.getProject(), module.getModuleContentScope());
+        var existingConfig = findAppMapConfig(module.getModuleContentScope());
 
         if (existingConfig != null) {
             var relativeOutputPath = appMapOutputDirectory.isAbsolute()
@@ -111,10 +110,9 @@ public final class AppMapJavaPackageConfig {
     }
 
     // executed under progress
-    private static @Nullable VirtualFile findAppMapConfig(@NotNull Project project,
-                                                          @NotNull GlobalSearchScope searchScope) {
+    private static @Nullable VirtualFile findAppMapConfig(@NotNull GlobalSearchScope searchScope) {
         return ReadAction.compute(() -> {
-            var files = AppMapFiles.findAppMapConfigFiles(project, searchScope);
+            var files = AppMapFiles.findAppMapConfigFiles(searchScope);
             return files.size() == 1 ? files.iterator().next() : null;
         });
     }

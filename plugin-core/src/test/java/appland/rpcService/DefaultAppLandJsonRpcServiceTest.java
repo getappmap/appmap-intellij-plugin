@@ -2,18 +2,20 @@ package appland.rpcService;
 
 import appland.AppMapBaseTest;
 import appland.cli.AppLandCommandLineService;
-import appland.settings.AppMapApplicationSettings;
 import appland.settings.AppMapApplicationSettingsService;
-import appland.toolwindow.runtimeAnalysis.RuntimeAnalysisModel;
 import com.intellij.openapi.vfs.VirtualFile;
 import org.jetbrains.annotations.NotNull;
 import org.junit.Test;
 
 import java.util.Collection;
+import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.allOf;
+import static org.hamcrest.Matchers.hasEntry;
 import static org.junit.Assert.assertArrayEquals;
 
 public class DefaultAppLandJsonRpcServiceTest extends AppMapBaseTest {
@@ -60,13 +62,20 @@ public class DefaultAppLandJsonRpcServiceTest extends AppMapBaseTest {
     }
 
     @Test
-    public void serverApiKey() {
-        AppMapApplicationSettingsService.getInstance().setApiKey("dummy");
+    public void serverEnvironment() {
+        final var settings = AppMapApplicationSettingsService.getInstance();
+        settings.setApiKey("dummy");
+        settings.setCliEnvironment(Map.of("FOO", "BAR", "BAZ", "QUX"));
         try {
             var commandLine = AppLandCommandLineService.getInstance().createAppMapJsonRpcCommand();
-            assertEquals("dummy", commandLine.getEffectiveEnvironment().get("APPMAP_API_KEY"));
+            assert commandLine != null;
+            assertThat(commandLine.getEffectiveEnvironment(), allOf(
+                    hasEntry("APPMAP_API_KEY", "dummy"),
+                    hasEntry("FOO", "BAR"),
+                    hasEntry("BAZ", "QUX")));
         } finally {
-            AppMapApplicationSettingsService.getInstance().setApiKey(null);
+            settings.setApiKey(null);
+            settings.setCliEnvironment(Map.of());
         }
     }
 

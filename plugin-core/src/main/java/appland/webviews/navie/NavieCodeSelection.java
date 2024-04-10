@@ -7,13 +7,13 @@ public class NavieCodeSelection {
     public @NotNull  final String code;
     public @Nullable final String language;
     public @Nullable final String path;
-    public @Nullable final int lineStart;
-    public @Nullable final int lineEnd;
+    public final int lineStart;
+    public final int lineEnd;
 
     public NavieCodeSelection(@NotNull String code,
                               @Nullable String path,
-                              @Nullable int lineStart,
-                              @Nullable int lineEnd,
+                              int lineStart,
+                              int lineEnd,
                               @Nullable String language) {
         this.code = code;
         this.language = language;

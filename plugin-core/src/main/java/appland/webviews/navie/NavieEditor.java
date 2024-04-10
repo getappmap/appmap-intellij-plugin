@@ -2,6 +2,7 @@ package appland.webviews.navie;
 
 import appland.AppMapBundle;
 import appland.files.AppMapFileChangeListener;
+import appland.files.AppMapFiles;
 import appland.files.OpenAppMapFileNavigatable;
 import appland.index.AppMapMetadata;
 import appland.index.AppMapMetadataService;
@@ -77,6 +78,16 @@ public class NavieEditor extends WebviewEditor<Void> {
         assert port != null;
 
         var mostRecentAppMaps = ReadAction.compute(() -> findMostRecentAppMaps(project));
+
+        var appMapContextFile = NavieEditorProvider.KEY_APPMAP_CONTEXT_FILE.get(file);
+        if (appMapContextFile != null) {
+            var fileNioPath = appMapContextFile.getFileSystem().getNioPath(appMapContextFile);
+            assert fileNioPath != null;
+            payload.addProperty("targetAppmapFsPath", fileNioPath.toString());
+
+            var fileContent = AppMapFiles.loadAppMapFile(appMapContextFile);
+            payload.add("targetAppmapData", gson.fromJson(fileContent, JsonObject.class));
+        }
 
         payload.addProperty("appmapRpcPort", port);
         payload.addProperty("apiKey", StringUtil.defaultIfEmpty(apiKey, ""));
