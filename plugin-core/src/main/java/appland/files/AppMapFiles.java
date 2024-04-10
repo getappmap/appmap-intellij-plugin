@@ -218,7 +218,7 @@ public final class AppMapFiles {
             try {
                 return VfsUtilCore.loadText(file);
             } catch (IOException e) {
-                LOG.error("unable to load AppMap file content: " + file.getPath());
+                LOG.error("unable to load AppMap file content: " + file.getPath(), e);
                 return null;
             }
         });
