@@ -52,7 +52,7 @@ public final class AppMapPatcherUtil {
     private static List<String> prepareUnderProgress(@NotNull Project project,
                                                      @NotNull RunProfile configuration,
                                                      @NotNull SimpleJavaParameters javaParameters) throws CantRunException, IOException {
-        var workingDir = ProgramParameterUtils.findWorkingDir(project, javaParameters);
+        var workingDir = ProgramParameterUtils.findWorkingDir(project, javaParameters, configuration);
         if (workingDir == null) {
             throw new CantRunException("Unable to locate working directory to store AppMap files");
         }
