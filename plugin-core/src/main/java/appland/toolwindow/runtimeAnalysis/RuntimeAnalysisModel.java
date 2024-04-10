@@ -1,7 +1,5 @@
 package appland.toolwindow.runtimeAnalysis;
 
-import appland.settings.AppMapApplicationSettingsService;
-import appland.settings.AppMapSettingsListener;
 import appland.toolwindow.runtimeAnalysis.nodes.Node;
 import appland.toolwindow.runtimeAnalysis.nodes.RootNode;
 import com.intellij.openapi.Disposable;

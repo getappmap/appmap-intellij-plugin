@@ -8,8 +8,6 @@ import com.intellij.openapi.actionSystem.UpdateInBackground;
 import com.intellij.openapi.project.DumbAware;
 import org.jetbrains.annotations.NotNull;
 
-import javax.swing.*;
-
 public class AppMapDocumentationAction extends AnAction implements DumbAware, UpdateInBackground {
     public AppMapDocumentationAction() {
         super(Icons.APPMAP_DOCS);
