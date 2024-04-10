@@ -51,7 +51,7 @@ public class FileLookup {
             return null;
         }
 
-        for (var candidate : FilenameIndex.getVirtualFilesByName(project, filename(relativePath), true, AppMapSearchScopes.projectFilesWithExcluded(project))) {
+        for (var candidate : FilenameIndex.getVirtualFilesByName(filename(relativePath), true, AppMapSearchScopes.projectFilesWithExcluded(project))) {
             var parent = candidate.getParent();
             for (String expectedParentName : parentsReversed(relativePath)) {
                 if (parent == null || !FileUtil.namesEqual(expectedParentName, parent.getName())) {

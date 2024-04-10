@@ -64,7 +64,7 @@ public final class AppMapFiles {
      */
     @RequiresReadLock
     public static @NotNull Collection<VirtualFile> findAppMapConfigFiles(@NotNull Project project) {
-        return findAppMapConfigFiles(project, AppMapSearchScopes.appMapConfigSearchScope(project));
+        return findAppMapConfigFiles(AppMapSearchScopes.appMapConfigSearchScope(project));
     }
 
     /**
@@ -75,8 +75,8 @@ public final class AppMapFiles {
      * @throws com.intellij.openapi.project.IndexNotReadyException If the filename index it unavailable
      */
     @RequiresReadLock
-    public static @NotNull Collection<VirtualFile> findAppMapConfigFiles(@NotNull Project project, @NotNull GlobalSearchScope scope) {
-        return FilenameIndex.getVirtualFilesByName(project, APPMAP_YML, false, scope);
+    public static @NotNull Collection<VirtualFile> findAppMapConfigFiles(@NotNull GlobalSearchScope scope) {
+        return FilenameIndex.getVirtualFilesByName(APPMAP_YML, false, scope);
     }
 
     /**
