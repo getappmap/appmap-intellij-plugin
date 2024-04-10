@@ -110,6 +110,7 @@
                            key="notification.groupGeneric.title"/>
 
         <projectConfigurable groupId="tools" nonDefaultProject="true" order="first"
+                             key="projectSettings.displayName"
                              instance="appland.settings.AppMapProjectConfigurable"/>
 
         <errorHandler implementation="appland.GitHubErrorHandler"/>
