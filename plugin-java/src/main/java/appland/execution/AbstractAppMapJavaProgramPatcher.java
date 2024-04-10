@@ -9,9 +9,7 @@ import com.intellij.execution.configurations.RunProfile;
 import com.intellij.notification.NotificationType;
 import com.intellij.openapi.diagnostic.Logger;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
-import java.nio.file.Path;
 import java.util.List;
 
 public abstract class AbstractAppMapJavaProgramPatcher implements AppMapProgramPatcher {
