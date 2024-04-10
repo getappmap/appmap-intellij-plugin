@@ -1,5 +1,16 @@
 AppMap Plugin Changelog
 
+## [0.64.0](https://github.com/getappmap/appmap-intellij-plugin/compare/v0.63.0...v0.64.0) (2024-04-10)
+
+
+### Features
+
+-  Support to open Navie from AppMap webview ([e2fac4b]())
+
+### Bug Fixes
+
+-  create appmap.yml in the correct directory when used with Gradle ([253852a]())-  log cause when AppMap failed to load ([7047f39]())-  Use configured AppMap service environment for RPC service ([190cbff]())
+
 ## [0.63.0](https://github.com/getappmap/appmap-intellij-plugin/compare/v0.62.0...v0.63.0) (2024-04-05)
 
 
