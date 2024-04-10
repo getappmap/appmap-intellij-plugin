@@ -15,7 +15,6 @@
     </projectListeners>
 
     <extensions defaultExtensionNs="com.intellij">
-        <applicationService serviceImplementation="appland.javaAgent.AppMapJavaAgentDownloadService"/>
         <postStartupActivity implementation="appland.javaAgent.AppMapJavaAgentDownloadActivity"/>
 
         <!-- run configurations -->

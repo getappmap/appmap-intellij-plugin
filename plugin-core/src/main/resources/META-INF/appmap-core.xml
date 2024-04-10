@@ -90,7 +90,6 @@
 
         <applicationService id="appmap.settings"
                             serviceImplementation="appland.settings.AppMapApplicationSettingsService"/>
-        <projectService serviceImplementation="appland.settings.AppMapProjectSettingsService"/>
         <projectService serviceInterface="appland.remote.RemoteRecordingStatusService"
                         serviceImplementation="appland.remote.DefaultRemoteRecordingStatusService"/>
         <projectService serviceInterface="appland.installGuide.projectData.ProjectDataService"
