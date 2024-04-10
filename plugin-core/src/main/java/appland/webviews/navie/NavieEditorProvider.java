@@ -137,11 +137,7 @@ public final class NavieEditorProvider extends WebviewEditorProvider {
 
         // Linux <= 2023.1 is broken,
         // https://youtrack.jetbrains.com/issue/JBR-5348/JCEF-OSR-Keyboard-doesnt-work-on-Linux
-        if (SystemInfo.isLinux && buildBaseline <= 231) {
-            return true;
-        }
-
-        return false;
+        return SystemInfo.isLinux && buildBaseline <= 231;
     }
 
     @SuppressWarnings("removal")
