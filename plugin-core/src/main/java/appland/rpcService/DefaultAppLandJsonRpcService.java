@@ -65,6 +65,8 @@ public class DefaultAppLandJsonRpcService implements AppLandJsonRpcService, AppL
             this,
             Alarm.ThreadToUse.POOLED_THREAD);
 
+    // flag to help avoid starting the server if we're already disposed
+    private volatile boolean isDisposed;
     // a value of "0" indicates that process restart is disabled
     private volatile long nextRestartDelayMillis = INITIAL_RESTART_DELAY_MILLIS;
     @GuardedBy("this")
@@ -93,6 +95,8 @@ public class DefaultAppLandJsonRpcService implements AppLandJsonRpcService, AppL
 
     @Override
     public void dispose() {
+        this.isDisposed = true;
+
         // disable restarts
         this.nextRestartDelayMillis = 0L;
 
@@ -115,6 +119,11 @@ public class DefaultAppLandJsonRpcService implements AppLandJsonRpcService, AppL
     public void startServer() {
         if (isServerRunning()) {
             LOG.debug("AppMap JSON-RPC server is already running.");
+            return;
+        }
+
+        if (isDisposed || project.isDisposed()) {
+            LOG.debug("Unable to start JSON-RPC server, because the service is already disposed.");
             return;
         }
 
@@ -148,7 +157,7 @@ public class DefaultAppLandJsonRpcService implements AppLandJsonRpcService, AppL
             } catch (ExecutionException e) {
                 LOG.debug("Failed to launch AppMap JSON-RPC server, command: " + commandLine.getCommandLineString(), e);
             } finally {
-                if (!project.isDisposed()) {
+                if (!isDisposed) {
                     project.getMessageBus().syncPublisher(AppLandJsonRpcListener.TOPIC).serverStarted();
                 }
             }
@@ -178,6 +187,10 @@ public class DefaultAppLandJsonRpcService implements AppLandJsonRpcService, AppL
 
     @RequiresBackgroundThread
     private void restartServerAsync() {
+        if (isDisposed || project.isDisposed()) {
+            return;
+        }
+
         var application = ApplicationManager.getApplication();
         if (application.isDispatchThread()) {
             application.executeOnPooledThread(this::restartServerSync);
@@ -189,10 +202,6 @@ public class DefaultAppLandJsonRpcService implements AppLandJsonRpcService, AppL
     @RequiresBackgroundThread
     private void restartServerSync() {
         ApplicationManager.getApplication().assertIsNonDispatchThread();
-        if (project.isDisposed()) {
-            return;
-        }
-
         try {
             stopServerSync(this.jsonRpcServer);
         } finally {
@@ -221,7 +230,7 @@ public class DefaultAppLandJsonRpcService implements AppLandJsonRpcService, AppL
                 process.killProcess();
             }
         } finally {
-            if (!project.isDisposed()) {
+            if (!isDisposed) {
                 project.getMessageBus().syncPublisher(AppLandJsonRpcListener.TOPIC).serverStopped();
             }
         }
@@ -289,7 +298,7 @@ public class DefaultAppLandJsonRpcService implements AppLandJsonRpcService, AppL
                 LOG.debug("Error sending request v1.configuration.set", e);
             }
         } finally {
-            if (!project.isDisposed()) {
+            if (!isDisposed) {
                 project.getMessageBus().syncPublisher(AppLandJsonRpcListener.TOPIC).serverConfigurationUpdated(configFiles);
             }
         }
@@ -338,12 +347,12 @@ public class DefaultAppLandJsonRpcService implements AppLandJsonRpcService, AppL
             var currentRestartDelay = nextRestartDelayMillis;
             var restartNeeded = currentRestartDelay >= 0L
                     && currentRestartDelay <= MAX_RESTART_DELAY_MILLIS
-                    && !project.isDisposed();
+                    && !isDisposed;
 
             if (restartNeeded) {
                 nextRestartDelayMillis = (long) ((double) currentRestartDelay * NEXT_RESTART_FACTOR);
                 AppExecutorUtil.getAppScheduledExecutorService().schedule(() -> {
-                            if (!project.isDisposed()) {
+                            if (!isDisposed) {
                                 try {
                                     DefaultAppLandJsonRpcService.this.startServer();
                                 } finally {
