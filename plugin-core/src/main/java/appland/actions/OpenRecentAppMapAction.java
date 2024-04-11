@@ -2,9 +2,9 @@ package appland.actions;
 
 import appland.AppMapBundle;
 import appland.index.AppMapSearchScopes;
+import com.intellij.openapi.actionSystem.ActionUpdateThread;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
-import com.intellij.openapi.actionSystem.UpdateInBackground;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.fileEditor.FileEditorManager;
 import com.intellij.openapi.ui.Messages;
@@ -19,7 +19,7 @@ import org.jetbrains.annotations.NotNull;
  * If two files have the same modification timestamp, then the returned file is randomly chosen,
  * depending on the order in the index.
  */
-public class OpenRecentAppMapAction extends AnAction implements UpdateInBackground {
+public class OpenRecentAppMapAction extends AnAction {
     private static final Logger LOG = Logger.getInstance("#appmap.action");
 
     static VirtualFile findMostRecentlyModifiedAppMap(com.intellij.openapi.project.Project project) {
@@ -33,6 +33,11 @@ public class OpenRecentAppMapAction extends AnAction implements UpdateInBackgrou
             if (delta > 0) return 1;
             return 0;
         }).orElse(null);
+    }
+
+    @Override
+    public @NotNull ActionUpdateThread getActionUpdateThread() {
+        return ActionUpdateThread.BGT;
     }
 
     @Override

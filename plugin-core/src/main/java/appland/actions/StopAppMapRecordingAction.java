@@ -5,12 +5,15 @@ import appland.Icons;
 import appland.files.AppMapFiles;
 import appland.files.AppMapVfsUtils;
 import appland.notifications.AppMapNotifications;
-import appland.remote.*;
+import appland.remote.RemoteRecordingService;
+import appland.remote.RemoteRecordingStatusService;
+import appland.remote.StopRemoteRecordingDialog;
+import appland.remote.StopRemoteRecordingForm;
 import appland.settings.AppMapProjectSettingsService;
 import com.intellij.notification.NotificationType;
+import com.intellij.openapi.actionSystem.ActionUpdateThread;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
-import com.intellij.openapi.actionSystem.UpdateInBackground;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.application.ModalityState;
 import com.intellij.openapi.application.ReadAction;
@@ -34,11 +37,16 @@ import java.nio.file.Paths;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicReference;
 
-public class StopAppMapRecordingAction extends AnAction implements DumbAware, UpdateInBackground {
+public class StopAppMapRecordingAction extends AnAction implements DumbAware {
     private static final Logger LOG = Logger.getInstance(StopAppMapRecordingAction.class);
 
     public StopAppMapRecordingAction() {
         super(Icons.STOP_RECORDING_ACTION);
+    }
+
+    @Override
+    public @NotNull ActionUpdateThread getActionUpdateThread() {
+        return ActionUpdateThread.BGT;
     }
 
     @Override
