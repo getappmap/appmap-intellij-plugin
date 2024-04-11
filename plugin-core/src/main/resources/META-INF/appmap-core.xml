@@ -48,6 +48,7 @@
         <postStartupActivity implementation="appland.cli.RegisterContentRootsActivity"/>
         <postStartupActivity implementation="appland.cli.DownloadToolsStartupActivity"/>
         <postStartupActivity implementation="appland.rpcService.AppMapJsonRpcServerStartupActivity"/>
+        <postStartupActivity implementation="appland.cli.AppLandProjectOpenActivity"/>
 
         <fileEditorProvider implementation="appland.webviews.appMap.AppMapFileEditorProvider"/>
         <editorNotificationProvider implementation="appland.webviews.appMap.AppMapNotificationProvider"/>

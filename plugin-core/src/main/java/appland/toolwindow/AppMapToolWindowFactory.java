@@ -78,7 +78,7 @@ public class AppMapToolWindowFactory implements ToolWindowFactory, DumbAware {
             }
         });
 
-        var content = ContentFactory.SERVICE.getInstance().createContent(null, null, false);
+        var content = ContentFactory.getInstance().createContent(null, null, false);
         content.setComponent(panel);
         toolWindow.getContentManager().addContent(content);
 
