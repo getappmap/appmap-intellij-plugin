@@ -16,8 +16,7 @@ AppMap and Navie will help you:
 
 ## Requirements and Use
 
-**2021.3** and newer JetBrains IDEs are required to use this plugin.  
-**2023+** is recommended.
+**2023.2** and newer JetBrains IDEs are required to use this plugin.  
 
 Supported web applications and API frameworks: Ruby on Rails, Django, Flask, Express, Nest.js, Next.js, and Spring, Kotlin, and Scala
 
