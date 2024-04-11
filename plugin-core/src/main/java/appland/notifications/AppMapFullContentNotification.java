@@ -14,6 +14,7 @@ import javax.swing.*;
  * Notification, which implements {@link NotificationFullContent} to show all of its content.
  */
 class AppMapFullContentNotification extends Notification implements NotificationFullContent {
+    @SuppressWarnings("deprecation")
     public AppMapFullContentNotification(@NotNull @NonNls String groupId,
                                          @Nullable Icon icon,
                                          @Nullable String title,
@@ -26,6 +27,7 @@ class AppMapFullContentNotification extends Notification implements Notification
         setSubtitle(subtitle);
         setIcon(icon);
         if (listener != null) {
+            // There's currently no alternative to handle clickable URL links in html content.
             setListener(listener);
         }
     }

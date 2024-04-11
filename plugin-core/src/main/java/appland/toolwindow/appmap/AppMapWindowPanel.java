@@ -136,8 +136,8 @@ public class AppMapWindowPanel extends SimpleToolWindowPanel implements DataProv
             return null;
         }
 
-        if (PlatformCoreDataKeys.SLOW_DATA_PROVIDERS.is(dataId)) {
-            return List.of((DataProvider) this::getDataImpl);
+        if (PlatformCoreDataKeys.BGT_DATA_PROVIDER.is(dataId)) {
+            return (DataProvider) this::getDataImpl;
         }
         return getDataImpl(dataId);
     }

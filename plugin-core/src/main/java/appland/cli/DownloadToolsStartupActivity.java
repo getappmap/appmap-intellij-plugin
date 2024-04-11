@@ -2,6 +2,7 @@ package appland.cli;
 
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.diagnostic.Logger;
+import com.intellij.openapi.project.DumbAware;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.startup.StartupActivity;
 import org.jetbrains.annotations.NotNull;
@@ -13,7 +14,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * Executed in a background thread.
  * The download is only performed on the first opened project.
  */
-public class DownloadToolsStartupActivity implements StartupActivity.Background {
+public class DownloadToolsStartupActivity implements StartupActivity, DumbAware {
     private static final Logger LOG = Logger.getInstance(DownloadToolsStartupActivity.class);
     private static final AtomicBoolean ACTIVE = new AtomicBoolean(false);
 
