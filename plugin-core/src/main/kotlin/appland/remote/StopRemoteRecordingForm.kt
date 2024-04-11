@@ -3,10 +3,9 @@ package appland.remote
 import appland.AppMapBundle
 import com.intellij.ui.TextFieldWithHistory
 import com.intellij.ui.components.JBTextField
+import com.intellij.ui.dsl.builder.AlignX
 import com.intellij.ui.dsl.builder.panel
-import com.intellij.ui.dsl.gridLayout.HorizontalAlign
 
-@Suppress("UnstableApiUsage")
 class StopRemoteRecordingForm(activeRecordingUrl: String?, recentUrls: List<String>) {
     lateinit var urlComboBox: TextFieldWithHistory
         private set
@@ -15,14 +14,14 @@ class StopRemoteRecordingForm(activeRecordingUrl: String?, recentUrls: List<Stri
 
     val mainPanel = panel {
         row(AppMapBundle.get("appMapRemoteRecording.urlLabel")) {
-            urlComboBox = textFieldWithHistory(recentUrls).horizontalAlign(HorizontalAlign.FILL).component
+            urlComboBox = textFieldWithHistory(recentUrls).align(AlignX.FILL).component
             if (!activeRecordingUrl.isNullOrEmpty()) {
                 urlComboBox.text = activeRecordingUrl
             }
         }
 
         row(AppMapBundle.get("appMapRemoteRecording.appMapNameLabel")) {
-            appMapNameInput = textField().horizontalAlign(HorizontalAlign.FILL).component
+            appMapNameInput = textField().align(AlignX.FILL).component
         }
     }
 

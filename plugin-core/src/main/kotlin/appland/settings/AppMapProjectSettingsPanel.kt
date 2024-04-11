@@ -2,8 +2,8 @@ package appland.settings
 
 import appland.AppMapBundle
 import com.intellij.execution.configuration.EnvironmentVariablesComponent
+import com.intellij.ui.dsl.builder.AlignX
 import com.intellij.ui.dsl.builder.panel
-import com.intellij.ui.dsl.gridLayout.HorizontalAlign
 import java.awt.BorderLayout
 import javax.swing.JCheckBox
 import javax.swing.JPanel
@@ -33,7 +33,7 @@ class AppMapProjectSettingsPanel {
             }
             group(AppMapBundle.get("projectSettings.appMapServices")) {
                 row {
-                    cell(cliEnvironment).horizontalAlign(HorizontalAlign.FILL)
+                    cell(cliEnvironment).align(AlignX.FILL)
                 }
             }
         }
