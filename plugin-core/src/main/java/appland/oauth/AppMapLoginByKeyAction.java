@@ -3,9 +3,9 @@ package appland.oauth;
 import appland.AppMapBundle;
 import appland.notifications.AppMapNotifications;
 import appland.settings.AppMapApplicationSettingsService;
+import com.intellij.openapi.actionSystem.ActionUpdateThread;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
-import com.intellij.openapi.actionSystem.UpdateInBackground;
 import com.intellij.openapi.project.DumbAware;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.InputValidator;
@@ -26,7 +26,12 @@ import static com.intellij.openapi.ui.Messages.getOkButton;
 /**
  * Action to sign in to AppMap by providing a license key.
  */
-public class AppMapLoginByKeyAction extends AnAction implements DumbAware, UpdateInBackground {
+public class AppMapLoginByKeyAction extends AnAction implements DumbAware {
+    @Override
+    public @NotNull ActionUpdateThread getActionUpdateThread() {
+        return ActionUpdateThread.BGT;
+    }
+
     @Override
     public void actionPerformed(@NotNull AnActionEvent e) {
         var project = Objects.requireNonNull(e.getProject());
