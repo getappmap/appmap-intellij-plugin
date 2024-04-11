@@ -148,7 +148,9 @@ public class DefaultAppLandJsonRpcService implements AppLandJsonRpcService, AppL
             } catch (ExecutionException e) {
                 LOG.debug("Failed to launch AppMap JSON-RPC server, command: " + commandLine.getCommandLineString(), e);
             } finally {
-                project.getMessageBus().syncPublisher(AppLandJsonRpcListener.TOPIC).serverStarted();
+                if (!project.isDisposed()) {
+                    project.getMessageBus().syncPublisher(AppLandJsonRpcListener.TOPIC).serverStarted();
+                }
             }
         }
     }
@@ -187,6 +189,9 @@ public class DefaultAppLandJsonRpcService implements AppLandJsonRpcService, AppL
     @RequiresBackgroundThread
     private void restartServerSync() {
         ApplicationManager.getApplication().assertIsNonDispatchThread();
+        if (project.isDisposed()) {
+            return;
+        }
 
         try {
             stopServerSync(this.jsonRpcServer);
@@ -284,7 +289,9 @@ public class DefaultAppLandJsonRpcService implements AppLandJsonRpcService, AppL
                 LOG.debug("Error sending request v1.configuration.set", e);
             }
         } finally {
-            project.getMessageBus().syncPublisher(AppLandJsonRpcListener.TOPIC).serverConfigurationUpdated(configFiles);
+            if (!project.isDisposed()) {
+                project.getMessageBus().syncPublisher(AppLandJsonRpcListener.TOPIC).serverConfigurationUpdated(configFiles);
+            }
         }
     }
 
@@ -329,14 +336,19 @@ public class DefaultAppLandJsonRpcService implements AppLandJsonRpcService, AppL
             }
 
             var currentRestartDelay = nextRestartDelayMillis;
-            var restartNeeded = currentRestartDelay >= 0L && currentRestartDelay <= MAX_RESTART_DELAY_MILLIS;
+            var restartNeeded = currentRestartDelay >= 0L
+                    && currentRestartDelay <= MAX_RESTART_DELAY_MILLIS
+                    && !project.isDisposed();
+
             if (restartNeeded) {
                 nextRestartDelayMillis = (long) ((double) currentRestartDelay * NEXT_RESTART_FACTOR);
                 AppExecutorUtil.getAppScheduledExecutorService().schedule(() -> {
-                            try {
-                                DefaultAppLandJsonRpcService.this.startServer();
-                            } finally {
-                                project.getMessageBus().syncPublisher(AppLandJsonRpcListener.TOPIC).serverRestarted();
+                            if (!project.isDisposed()) {
+                                try {
+                                    DefaultAppLandJsonRpcService.this.startServer();
+                                } finally {
+                                    project.getMessageBus().syncPublisher(AppLandJsonRpcListener.TOPIC).serverRestarted();
+                                }
                             }
                         },
                         nextRestartDelayMillis,
