@@ -1,6 +1,7 @@
 package appland.index;
 
 import appland.AppMapBaseTest;
+import appland.utils.ModuleTestUtils;
 import com.intellij.openapi.application.WriteAction;
 import org.junit.Test;
 
@@ -19,7 +20,7 @@ public class AppMapSearchScopesTest extends AppMapBaseTest {
         try {
             assertFalse("scope must not contain folders, which are outside content roots", scope.contains(topLevelDir));
 
-            withContentRoot(getModule(), topLevelDir, () -> {
+            ModuleTestUtils.withContentRoot(getModule(), topLevelDir, () -> {
                 assertTrue("scope must contain content roots", scope.contains(topLevelDir));
 
                 withExcludedFolder(topLevelDir, () -> {

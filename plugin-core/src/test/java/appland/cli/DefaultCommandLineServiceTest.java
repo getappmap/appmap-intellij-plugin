@@ -3,6 +3,7 @@ package appland.cli;
 import appland.AppMapBaseTest;
 import appland.settings.AppMapApplicationSettingsService;
 import appland.settings.AppMapSettingsListener;
+import appland.utils.ModuleTestUtils;
 import com.intellij.execution.ExecutionException;
 import com.intellij.execution.configurations.PtyCommandLine;
 import com.intellij.execution.process.KillableProcessHandler;
@@ -216,7 +217,7 @@ public class DefaultCommandLineServiceTest extends AppMapBaseTest {
         var projectDir = myFixture.copyDirectoryToProject("projects/without_existing_index", "test-project");
 
         var refreshCondition = TestCommandLineService.newVfsRefreshCondition(getProject(), getTestRootDisposable());
-        withContentRoot(getModule(), projectDir, () -> {
+        ModuleTestUtils.withContentRoot(getModule(), projectDir, () -> {
             assertTrue(refreshCondition.await(30, TimeUnit.SECONDS));
 
             var refreshedFiles = TestCommandLineService.getInstance().getRefreshedFiles();
@@ -267,7 +268,7 @@ public class DefaultCommandLineServiceTest extends AppMapBaseTest {
         var newRootA = myFixture.addFileToProject("parentA/file.txt", "").getParent().getVirtualFile();
 
         final var rootRefreshCondition = ProjectRefreshUtil.newProjectRefreshCondition(getTestRootDisposable());
-        withContentRoot(getModule(), newRootA, () -> {
+        ModuleTestUtils.withContentRoot(getModule(), newRootA, () -> {
             assertTrue(rootRefreshCondition.await(30, TimeUnit.SECONDS));
 
             // no watched roots because there's no appmap.yml

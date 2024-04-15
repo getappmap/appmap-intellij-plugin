@@ -3,6 +3,7 @@ package appland.problemsView.listener;
 import appland.AppMapBaseTest;
 import appland.problemsView.FindingsManager;
 import appland.problemsView.TestFindingsManager;
+import appland.utils.ModuleTestUtils;
 import com.intellij.testFramework.fixtures.TempDirTestFixture;
 import com.intellij.testFramework.fixtures.impl.TempDirTestFixtureImpl;
 import org.junit.Test;
@@ -29,7 +30,7 @@ public class ScannerFilesAsyncListenerContentRootTest extends AppMapBaseTest {
         // create src/root to add it as content root to the current module
         // the file listener is using a project scope, which needs a properly set up content root
         var rootDir = myFixture.getTempDirFixture().findOrCreateDir("root");
-        withContentRoot(getModule(), rootDir, () -> {
+        ModuleTestUtils.withContentRoot(getModule(), rootDir, () -> {
             var condition = TestFindingsManager.createFindingsCondition(getProject(), getTestRootDisposable());
             // adding an appmap-findings.json file must trigger a refresh via the file watcher
             myFixture.copyDirectoryToProject("vscode/workspaces/project-system", "root");
