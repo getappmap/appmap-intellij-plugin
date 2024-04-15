@@ -1,6 +1,7 @@
 package appland.execution;
 
 import appland.AppMapBundle;
+import appland.index.AppMapSearchScopes;
 import appland.utils.RunConfigurationUtil;
 import com.intellij.execution.CantRunException;
 import com.intellij.execution.configurations.RunProfile;
@@ -13,10 +14,11 @@ import com.intellij.openapi.project.Project;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.List;
 
 @SuppressWarnings({"UnstableApiUsage", "DialogTitleCapitalization"})
-public final class AppMapPatcherUtil {
+final class AppMapPatcherUtil {
     private AppMapPatcherUtil() {
     }
 
@@ -41,7 +43,7 @@ public final class AppMapPatcherUtil {
         var task = new Task.WithResult<List<String>, Exception>(project, AppMapBundle.get("appMapConfig.creatingConfig"), true) {
             @Override
             protected List<String> compute(@NotNull ProgressIndicator indicator) throws Exception {
-                return prepareUnderProgress(project, configuration, javaParameters);
+                return prepareJavaParametersUnderProgress(project, configuration, javaParameters);
             }
         };
         task.queue();
@@ -49,25 +51,22 @@ public final class AppMapPatcherUtil {
     }
 
     @NotNull
-    private static List<String> prepareUnderProgress(@NotNull Project project,
-                                                     @NotNull RunProfile configuration,
-                                                     @NotNull SimpleJavaParameters javaParameters) throws CantRunException, IOException {
+    private static List<String> prepareJavaParametersUnderProgress(@NotNull Project project,
+                                                                   @NotNull RunProfile configuration,
+                                                                   @NotNull SimpleJavaParameters javaParameters) throws CantRunException, IOException {
         var workingDir = ProgramParameterUtils.findWorkingDir(project, javaParameters, configuration);
         if (workingDir == null) {
             throw new CantRunException("Unable to locate working directory to store AppMap files");
         }
 
-        var module = RunConfigurationUtil.getRunConfigurationModule(project, configuration, workingDir);
-
-        var appMapOutputDirectory = ReadAction.compute(() -> AppMapJavaConfigUtil.findAppMapOutputDirectory(module, workingDir));
-        if (appMapOutputDirectory == null) {
-            throw new CantRunException("Unable to locate directory to store AppMap files");
+        var config = AppMapJavaPackageConfig.findAndUpdateAppMapConfig(workingDir, AppMapSearchScopes.appMapConfigSearchScope(project));
+        if (config == null) {
+            var module = RunConfigurationUtil.getRunConfigurationModule(project, configuration, workingDir);
+            var bestAppMapDirectory = ReadAction.compute(() -> {
+                return AppMapJavaConfigUtil.findBestAppMapContentRootDirectory(module, workingDir);
+            });
+            config = AppMapJavaPackageConfig.createAppMapConfig(module, bestAppMapDirectory, Path.of("tmp", "appmap"));
         }
-
-        // launches its own ReadAction
-        var config = AppMapJavaPackageConfig.createOrUpdateAppMapConfig(module,
-                workingDir,
-                appMapOutputDirectory);
 
         return AppMapJvmCommandLinePatcher.createJvmParams(config);
     }

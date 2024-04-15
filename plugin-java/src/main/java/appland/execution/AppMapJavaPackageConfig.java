@@ -7,6 +7,7 @@ import com.intellij.openapi.module.Module;
 import com.intellij.openapi.module.ModuleUtil;
 import com.intellij.openapi.roots.ModuleRootManager;
 import com.intellij.openapi.roots.ProjectRootManager;
+import com.intellij.openapi.util.text.Strings;
 import com.intellij.openapi.vfs.LocalFileSystem;
 import com.intellij.openapi.vfs.VfsUtilCore;
 import com.intellij.openapi.vfs.VirtualFile;
@@ -27,45 +28,34 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 /**
- * Generates the content for an appmap.yml file, based on the current project.
+ * Manages the content of appmap.yml files for Java projects.
  */
-public final class AppMapJavaPackageConfig {
+final class AppMapJavaPackageConfig {
     private AppMapJavaPackageConfig() {
     }
 
     /**
-     * Attempts to locate a suitable appmap.yml file and creates a new one if none could be found.
-     * If an existing appmap.yml does not contain an appmap_dir property, then the file is updated.
-     *
-     * @param module  Current module
-     * @param context Context to help locate the parent directory for a newly create appmap.yml
-     * @return The path to the appmap.yml file to pass to the AppMap agent. {@code null} if no file exists and creating the new file failed.
+     * Locate an existing AppMap based on the given context and search scope.
+     * If it exists, it adds the appmap_dir property with value "tmp/appmap" to the configuration if this property is not yet in the file.
+     * This method must be called outside a read action.
      */
-    public static @NotNull Path createOrUpdateAppMapConfig(@NotNull Module module,
-                                                           @NotNull VirtualFile context,
-                                                           @NotNull Path appMapOutputDirectory) throws IOException {
-
-        // attempt to find an existing appmap.yml file in the module
-        var existingConfig = findAppMapConfig(module.getModuleContentScope());
-
-        if (existingConfig != null) {
-            var relativeOutputPath = appMapOutputDirectory.isAbsolute()
-                    ? existingConfig.getParent().toNioPath().relativize(appMapOutputDirectory)
-                    : appMapOutputDirectory;
-            var configNioPath = existingConfig.toNioPath();
-            updateAppMapConfig(configNioPath, relativeOutputPath);
-            return configNioPath;
+    public static @Nullable Path findAndUpdateAppMapConfig(@NotNull VirtualFile context,
+                                                           @NotNull GlobalSearchScope searchScope) throws IOException {
+        var configFile = ReadAction.compute(() -> AppMapFiles.findAppMapConfigFile(context, searchScope));
+        if (configFile == null) {
+            return null;
         }
 
-        var configParentDirectory = ReadAction.compute(() -> {
-            return AppMapJavaConfigUtil.findBestAppMapContentRootDirectory(module, context);
-        });
-        return createAppMapConfig(module, configParentDirectory, appMapOutputDirectory);
+        var configFilePath = configFile.toNioPath();
+        AppMapJavaPackageConfig.addAppMapDirIfMissing(configFilePath, Path.of("tmp", "appmap"));
+        return configFilePath;
     }
 
     public static @NotNull Path createAppMapConfig(@NotNull Module module,
                                                    @NotNull VirtualFile configParentDirectory,
                                                    @NotNull Path appMapOutputDirectory) throws IOException {
+        assert (configParentDirectory.isDirectory());
+
         var configParentPath = configParentDirectory.toNioPath();
         if (appMapOutputDirectory.isAbsolute() && !appMapOutputDirectory.startsWith(configParentPath)) {
             throw new IllegalStateException(String.format("AppMap output directory is not inside the working directory: %s, %s",
@@ -98,23 +88,15 @@ public final class AppMapJavaPackageConfig {
      * @param relativeAppMapOutputPath The new AppMap output path
      * @throws IOException Thrown if the file update failed
      */
-    private static void updateAppMapConfig(@NotNull Path appMapConfig,
-                                           @NotNull Path relativeAppMapOutputPath) throws IOException {
+    private static void addAppMapDirIfMissing(@NotNull Path appMapConfig,
+                                              @NotNull Path relativeAppMapOutputPath) throws IOException {
         var config = AppMapConfigFile.parseConfigFile(appMapConfig);
-        if (config != null) {
-            // appmap_dir should be "dir/subdir" even on Windows
+        if (config != null && Strings.isEmpty(config.getAppMapDir())) {
+            // appmap_dir should be "tmp/appmap" even on Windows
             var agnosticOutputPath = PathUtil.toSystemIndependentName(relativeAppMapOutputPath.toString());
             config.setAppMapDir(agnosticOutputPath);
             config.writeTo(appMapConfig);
         }
-    }
-
-    // executed under progress
-    private static @Nullable VirtualFile findAppMapConfig(@NotNull GlobalSearchScope searchScope) {
-        return ReadAction.compute(() -> {
-            var files = AppMapFiles.findAppMapConfigFiles(searchScope);
-            return files.size() == 1 ? files.iterator().next() : null;
-        });
     }
 
     /**

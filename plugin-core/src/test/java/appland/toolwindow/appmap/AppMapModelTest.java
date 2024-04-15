@@ -1,6 +1,7 @@
 package appland.toolwindow.appmap;
 
 import appland.AppMapBaseTest;
+import appland.utils.ModuleTestUtils;
 import com.intellij.openapi.application.WriteAction;
 import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.testFramework.fixtures.TempDirTestFixture;
@@ -41,7 +42,7 @@ public class AppMapModelTest extends AppMapBaseTest {
                 "request_recording1.appmap.json",
                 "request_recording2.appmap.json");
 
-        withContentRoot(getModule(), rootOne, () -> {
+        ModuleTestUtils.withContentRoot(getModule(), rootOne, () -> {
             var model = new AppMapModel(getProject());
             var expected = "-AppMaps\n" +
                     " -root_one\n" +
@@ -56,7 +57,7 @@ public class AppMapModelTest extends AppMapBaseTest {
                 "request_recording2.appmap.json",
                 "request_recording1.appmap.json");
 
-        withContentRoot(getModule(), rootOne, () -> {
+        ModuleTestUtils.withContentRoot(getModule(), rootOne, () -> {
             var model = new AppMapModel(getProject());
             var expected = "-AppMaps\n" +
                     " -root_one\n" +
@@ -72,7 +73,7 @@ public class AppMapModelTest extends AppMapBaseTest {
         // copy into parent dir, because the default location is "src/", which already is a content root
         var rootOne = WriteAction.computeAndWait(() -> myFixture.copyDirectoryToProject("projects/runtime_analysis_tree", "../root_one"));
 
-        withContentRoot(getModule(), rootOne, () -> {
+        ModuleTestUtils.withContentRoot(getModule(), rootOne, () -> {
             var model = new AppMapModel(getProject());
             var expected = "-AppMaps\n" +
                     " -root_one\n" +
@@ -91,8 +92,8 @@ public class AppMapModelTest extends AppMapBaseTest {
         var rootOne = WriteAction.computeAndWait(() -> myFixture.copyDirectoryToProject("projects/runtime_analysis_tree", "../root_one"));
         var rootTwo = WriteAction.computeAndWait(() -> myFixture.copyDirectoryToProject("projects/runtime_analysis_tree", "../root_two"));
 
-        withContentRoot(getModule(), rootOne, () -> {
-            withContentRoot(getModule(), rootTwo, () -> {
+        ModuleTestUtils.withContentRoot(getModule(), rootOne, () -> {
+            ModuleTestUtils.withContentRoot(getModule(), rootTwo, () -> {
                 var model = new AppMapModel(getProject());
                 var expected = "-AppMaps\n" +
                         " -root_one\n" +
