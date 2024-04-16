@@ -141,6 +141,9 @@
         <registryKey key="appmap.webview.open.dev.tools"
                      defaultValue="false"
                      description="Open the developer console for AppMap webviews."/>
+        <registryKey key="appmap.agent.debug"
+                     defaultValue="false"
+                     description="Enable debug logging of the AppMap Java agent"/>
     </extensions>
 
     <actions>
