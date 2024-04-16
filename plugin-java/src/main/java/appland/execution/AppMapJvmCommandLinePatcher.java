@@ -4,6 +4,7 @@ import appland.AppMapBundle;
 import appland.AppMapPlugin;
 import appland.javaAgent.AppMapJavaAgentDownloadService;
 import com.intellij.execution.CantRunException;
+import com.intellij.openapi.util.registry.Registry;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -36,6 +37,9 @@ public final class AppMapJvmCommandLinePatcher {
         var jvmParams = new LinkedList<String>();
         jvmParams.add("-Dappmap.config.file=" + appMapConfig);
         jvmParams.add("-javaagent:" + agentJarPath);
+        if (Registry.is("appmap.agent.debug")) {
+            jvmParams.add("-Dappmap.disableLogFile=false");
+        }
         return jvmParams;
     }
 }
