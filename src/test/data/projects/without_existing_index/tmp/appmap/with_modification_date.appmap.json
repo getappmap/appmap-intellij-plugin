@@ -12021,9 +12021,6 @@
       "repository": "https://github.com/land-of-apps/rails_tutorial_sample_app_7th_ed",
       "branch": "HEAD",
       "commit": "616e02ca5e41731c0fe11f0424ed5ec92acfcbb0",
-      "status": [
-        "M .gitignore"
-      ],
       "git_last_annotated_tag": null,
       "git_last_tag": null,
       "git_commits_since_last_annotated_tag": null,

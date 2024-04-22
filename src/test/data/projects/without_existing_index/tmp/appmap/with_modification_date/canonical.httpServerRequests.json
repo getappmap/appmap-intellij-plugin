@@ -1,0 +1,17 @@
+[
+  {
+    "route": "GET /account_activations/{id}/edit",
+    "parameters": "(email)",
+    "status": 302
+  },
+  {
+    "route": "GET /users/{id}",
+    "parameters": "()",
+    "status": 200
+  },
+  {
+    "route": "POST /users",
+    "parameters": "(user)",
+    "status": 302
+  }
+]
