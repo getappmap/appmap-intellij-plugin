@@ -14,6 +14,7 @@ import appland.toolwindow.appmap.nodes.Node;
 import appland.toolwindow.codeObjects.CodeObjectsPanel;
 import appland.toolwindow.installGuide.InstallGuidePanel;
 import appland.toolwindow.installGuide.UrlLabel;
+import appland.toolwindow.navie.NaviePanel;
 import appland.toolwindow.runtimeAnalysis.RuntimeAnalysisPanel;
 import com.intellij.ide.CommonActionsManager;
 import com.intellij.ide.DefaultTreeExpander;
@@ -78,7 +79,7 @@ public class AppMapWindowPanel extends SimpleToolWindowPanel implements DataProv
 
     // Hierarchy of components, which are expanded to make the focus component visible.
     // We're storing the path instead of iterating the parents of the tree component,
-    // because CollapsiblePanel doese not keep invisible subcomponents as children.
+    // because CollapsiblePanel does not keep invisible subcomponents as children.
     private @NotNull List<Component> appMapTreePanelPath;
 
     public AppMapWindowPanel(@NotNull Project project, @NotNull Disposable parent) {
@@ -98,8 +99,13 @@ public class AppMapWindowPanel extends SimpleToolWindowPanel implements DataProv
         splitter.setFirstComponent(appMapPanel);
         splitter.setSecondComponent(createSouthPanel(project, this));
 
+        var topPanels = new VerticalBox();
+        topPanels.add(createNaviePanel(project, this));
+        topPanels.add(createInstallGuidePanel(project, this));
+
         var panel = new JPanel(new BorderLayout());
-        panel.add(createInstallGuidePanel(project, this), BorderLayout.NORTH);
+        panel.setMinimumSize(new JBDimension(200, 200));
+        panel.add(topPanels, BorderLayout.NORTH);
         panel.add(splitter, BorderLayout.CENTER);
         setContent(panel);
 
@@ -367,14 +373,16 @@ public class AppMapWindowPanel extends SimpleToolWindowPanel implements DataProv
         };
     }
 
+    @SuppressWarnings("DialogTitleCapitalization")
     private static @NotNull SimpleTree createTree(@NotNull Project project,
                                                   @NotNull Disposable disposable,
                                                   @NotNull TreeModel treeModel) {
         var tree = new SimpleTree(new AsyncTreeModel(treeModel, disposable));
         tree.getEmptyText().appendLine(AppMapBundle.get("toolwindow.appmap.emptyText.line1"));
         tree.getEmptyText().appendLine(AppMapBundle.get("toolwindow.appmap.emptyText.line2"));
+        tree.getEmptyText().appendLine(AppMapBundle.get("toolwindow.appmap.emptyText.line3"));
         tree.getEmptyText().appendLine(
-                AppMapBundle.get("toolwindow.appmap.installAgentEmptyText"),
+                AppMapBundle.get("toolwindow.appmap.emptyText.actionLink"),
                 SimpleTextAttributes.LINK_ATTRIBUTES,
                 e -> InstallGuideEditorProvider.open(project, InstallGuideViewPage.InstallAgent));
         tree.setRootVisible(false);
@@ -420,6 +428,15 @@ public class AppMapWindowPanel extends SimpleToolWindowPanel implements DataProv
         return action;
     }
 
+    @NotNull
+    private JPanel createNaviePanel(@NotNull Project project, @NotNull Disposable parent) {
+        return new appland.toolwindow.CollapsiblePanel(project,
+                AppMapBundle.get("toolwindow.appmap.navie"),
+                "appmap.toolWindow.navie.collapsed",
+                false,
+                new NaviePanel(project, parent));
+    }
+
     private JPanel createAppMapPanel(@NotNull Project project,
                                      @NotNull JComponent viewport,
                                      @NotNull AppMapModel appMapModel) {
@@ -430,25 +447,11 @@ public class AppMapWindowPanel extends SimpleToolWindowPanel implements DataProv
         panelWithFilter.add(createToolBar(appMapModel), BorderLayout.NORTH);
         panelWithFilter.add(appMapListPanel, BorderLayout.CENTER);
 
-        return new appland.toolwindow.CollapsiblePanel(project,
+        return new CollapsiblePanel(project,
                 AppMapBundle.get("toolwindow.appmap.appMaps"),
                 "appmap.toolWindow.appMaps.collapsed",
-                true,
+                false,
                 panelWithFilter);
-    }
-
-    private void collapseChildren(@Nullable Container container) {
-        if (container == null) {
-            return;
-        }
-
-        for (var childComponent : container.getComponents()) {
-            if (childComponent instanceof CollapsiblePanel) {
-                ((CollapsiblePanel) childComponent).setCollapsed(true);
-            } else if (childComponent instanceof Container) {
-                collapseChildren((Container) childComponent);
-            }
-        }
     }
 
     private static @NotNull JComponent createSouthPanel(@NotNull Project project, @NotNull Disposable parent) {
@@ -464,7 +467,7 @@ public class AppMapWindowPanel extends SimpleToolWindowPanel implements DataProv
         return new appland.toolwindow.CollapsiblePanel(project,
                 AppMapBundle.get("toolwindow.appmap.instructions"),
                 "appmap.toolWindow.installGuide.collapsed",
-                false,
+                true,
                 new InstallGuidePanel(project, parent));
     }
 
@@ -514,11 +517,30 @@ public class AppMapWindowPanel extends SimpleToolWindowPanel implements DataProv
                 });
     }
 
+    private void collapseChildren(@Nullable Container container) {
+        if (container == null) {
+            return;
+        }
+
+        for (var childComponent : container.getComponents()) {
+            if (childComponent instanceof CollapsiblePanel) {
+                ((CollapsiblePanel) childComponent).setCollapsed(true);
+            } else if (childComponent instanceof Container) {
+                collapseChildren((Container) childComponent);
+            }
+        }
+    }
+
     /**
      * Delete handler to override the Action title shown in the popup of the AppMap tree and in the edit menu of the IDE.
      */
     private static final class AppMapDeleteProvider implements DeleteProvider, TitledHandler {
         private final DeleteProvider delegate = new VirtualFileDeleteProvider();
+
+        @Override
+        public @NotNull ActionUpdateThread getActionUpdateThread() {
+            return ActionUpdateThread.EDT;
+        }
 
         @Override
         public @NlsActions.ActionText String getActionTitle() {
