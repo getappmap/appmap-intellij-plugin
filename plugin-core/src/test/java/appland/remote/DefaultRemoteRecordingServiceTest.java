@@ -27,12 +27,6 @@ public class DefaultRemoteRecordingServiceTest extends AppMapBaseTest {
     public final WireMockRule serverRule = new WireMockRule(WireMockConfiguration.options().dynamicPort());
 
     @Override
-    protected TempDirTestFixture createTempDirTestFixture() {
-        // create temp files on disk
-        return new TempDirTestFixtureImpl();
-    }
-
-    @Override
     protected boolean runInDispatchThread() {
         return false;
     }

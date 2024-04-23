@@ -24,12 +24,6 @@ import java.nio.file.Path;
 import java.util.List;
 
 public class AppMapJavaPackageConfigTest extends AppMapBaseTest {
-    @Override
-    protected TempDirTestFixture createTempDirTestFixture() {
-        // create temp files on disk
-        return new TempDirTestFixtureImpl();
-    }
-
     @Test
     public void systemIndependentAppMapDir() {
         var config = AppMapJavaPackageConfig.generateAppMapConfig(getProject(), createTempDir("appmap-root"), "tmp\\appmap");

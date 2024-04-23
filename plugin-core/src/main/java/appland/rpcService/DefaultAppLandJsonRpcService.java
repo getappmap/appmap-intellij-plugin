@@ -6,6 +6,7 @@ import appland.cli.CliTool;
 import appland.config.AppMapConfigFileListener;
 import appland.files.AppMapFiles;
 import appland.settings.AppMapSettingsListener;
+import appland.utils.AppMapProcessUtil;
 import appland.utils.GsonUtils;
 import com.google.gson.JsonObject;
 import com.intellij.ProjectTopics;
@@ -166,6 +167,10 @@ public class DefaultAppLandJsonRpcService implements AppLandJsonRpcService, AppL
             }
 
             try {
+                if (nextRestartDelayMillis <= 0) {
+                    nextRestartDelayMillis = INITIAL_RESTART_DELAY_MILLIS;
+                }
+
                 var process = new KillableProcessHandler(commandLine) {
                     @NotNull
                     @Override
@@ -202,6 +207,16 @@ public class DefaultAppLandJsonRpcService implements AppLandJsonRpcService, AppL
     }
 
     @Override
+    public void stopServerSync(int timeout, @NotNull TimeUnit timeUnit) {
+        var server = jsonRpcServer;
+        if (server != null) {
+            this.jsonRpcServer = null;
+
+            stopServerSync(server, timeout, timeUnit);
+        }
+    }
+
+    @Override
     public synchronized @Nullable Integer getServerPort() {
         var server = jsonRpcServer;
         return server != null ? server.jsonRpcPort : null;
@@ -232,8 +247,16 @@ public class DefaultAppLandJsonRpcService implements AppLandJsonRpcService, AppL
         try {
             stopServerSync(this.jsonRpcServer);
         } finally {
-            startServer();
+            try {
+                startServer();
+            } finally {
+                project.getMessageBus().syncPublisher(AppLandJsonRpcListener.TOPIC).serverRestarted();
+            }
         }
+    }
+
+    private void stopServerSync(@Nullable JsonRpcServer server) {
+        stopServerSync(server, 0, TimeUnit.MILLISECONDS);
     }
 
     /**
@@ -242,22 +265,21 @@ public class DefaultAppLandJsonRpcService implements AppLandJsonRpcService, AppL
      * @param server The server to stop, a {@code null} value is ignored.
      */
     @RequiresBackgroundThread
-    private void stopServerSync(@Nullable JsonRpcServer server) {
-        ApplicationManager.getApplication().assertIsNonDispatchThread();
+    private void stopServerSync(@Nullable JsonRpcServer server, int timeout, @NotNull TimeUnit timeUnit) {
+        if (!ApplicationManager.getApplication().isUnitTestMode()) {
+            ApplicationManager.getApplication().assertIsNonDispatchThread();
+        }
 
         if (server == null) {
             return;
         }
 
         try {
-            var process = server.processHandler;
-            process.destroyProcess();
-            process.waitFor(500);
-            if (!process.isProcessTerminated()) {
-                process.killProcess();
-            }
+            nextRestartDelayMillis = 0;
+
+            AppMapProcessUtil.terminateProcess(server.processHandler, timeout, timeUnit);
         } finally {
-            if (!isDisposed) {
+            if (!isDisposed && !project.isDisposed()) {
                 project.getMessageBus().syncPublisher(AppLandJsonRpcListener.TOPIC).serverStopped();
             }
         }
@@ -420,7 +442,7 @@ public class DefaultAppLandJsonRpcService implements AppLandJsonRpcService, AppL
             }
 
             var currentRestartDelay = nextRestartDelayMillis;
-            var restartNeeded = currentRestartDelay >= 0L
+            var restartNeeded = currentRestartDelay > 0L
                     && currentRestartDelay <= MAX_RESTART_DELAY_MILLIS
                     && !isDisposed;
 

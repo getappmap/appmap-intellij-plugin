@@ -2,8 +2,6 @@ package appland.cli;
 
 import appland.AppMapBaseTest;
 import com.intellij.testFramework.VfsTestUtil;
-import com.intellij.testFramework.fixtures.TempDirTestFixture;
-import com.intellij.testFramework.fixtures.impl.TempDirTestFixtureImpl;
 import org.jetbrains.annotations.NotNull;
 import org.junit.Test;
 
@@ -15,11 +13,6 @@ public class DefaultAppLandDownloadServiceTest extends AppMapBaseTest {
     @Override
     protected boolean runInDispatchThread() {
         return false;
-    }
-
-    @Override
-    protected TempDirTestFixture createTempDirTestFixture() {
-        return new TempDirTestFixtureImpl();
     }
 
     @Test

@@ -20,17 +20,11 @@ public class AppMapJavaAgentDownloadServiceProxyTest extends AppMapBaseTest {
     @Rule
     public TestRule agentDownloadRule = new OverrideJavaAgentLocationRule(() -> this.myFixture);
     @Rule
-    public MockServerRule mockServerRule = new MockServerRule(this);
+    public MockServerRule mockServerRule = new MockServerRule(this, false);
     @Rule
     public MockServerSettingsRule mockServerSettingsRule = new MockServerSettingsRule();
     @Rule
     public OverrideIdeHttpProxyRule ideHttpProxyRule = new OverrideIdeHttpProxyRule(mockServerRule);
-
-    @Override
-    protected TempDirTestFixture createTempDirTestFixture() {
-        // the override of the download location needs real files on disk
-        return new TempDirTestFixtureImpl();
-    }
 
     @Test
     public void httpProxyConnection() throws Throwable {

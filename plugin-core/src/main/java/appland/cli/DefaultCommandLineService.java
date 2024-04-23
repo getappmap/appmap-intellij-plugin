@@ -1,10 +1,10 @@
 package appland.cli;
 
 import appland.config.AppMapConfigFile;
-import appland.config.AppMapConfigFileListener;
 import appland.files.AppMapFiles;
 import appland.files.AppMapVfsUtils;
 import appland.settings.AppMapApplicationSettingsService;
+import appland.utils.AppMapProcessUtil;
 import appland.settings.AppMapSecureApplicationSettingsService;
 import com.intellij.execution.ExecutionException;
 import com.intellij.execution.configurations.GeneralCommandLine;
@@ -68,8 +68,8 @@ public class DefaultCommandLineService implements AppLandCommandLineService {
     protected final ConcurrentHashMap<VirtualFile, CliProcesses> processes = new ConcurrentHashMap<>();
 
     public DefaultCommandLineService() {
-        var connection = ApplicationManager.getApplication().getMessageBus().connect(this);
-        connection.subscribe(AppMapConfigFileListener.TOPIC, this::refreshForOpenProjectsInBackground);
+        // AppLandCommandLineListener is registering the listener for appmap.yml changes,
+        // it's active even in test mode.
     }
 
     @Override
@@ -111,10 +111,10 @@ public class DefaultCommandLineService implements AppLandCommandLineService {
     }
 
     @Override
-    public synchronized void stop(@NotNull VirtualFile directory, boolean waitForTermination) {
+    public synchronized void stop(@NotNull VirtualFile directory, int timeout, @NotNull TimeUnit timeUnit) {
         var entry = processes.remove(directory);
         if (entry != null) {
-            stopLocked(entry, waitForTermination ? 1_000 : 0, TimeUnit.MILLISECONDS);
+            stopLocked(entry, timeout, timeUnit);
         }
     }
 
@@ -507,24 +507,14 @@ public class DefaultCommandLineService implements AppLandCommandLineService {
             var shutdownRunnable = new Runnable() {
                 @Override
                 public void run() {
-                    process.setShouldKillProcessSoftly(false);
-                    process.destroyProcess();
-                    process.waitFor(500);
-
-                    if (!process.isProcessTerminated()) {
-                        process.killProcess();
-                    }
-
-                    if (timeout > 0) {
-                        process.waitFor(timeUnit.toMillis(timeout));
-                    }
+                    AppMapProcessUtil.terminateProcess(process, timeout, timeUnit);
                 }
             };
 
-            if (timeout > 0) {
-                ApplicationManager.getApplication().executeOnPooledThread(shutdownRunnable).get();
-            } else {
+            if (ApplicationManager.getApplication().isUnitTestMode() || timeout <= 0) {
                 shutdownRunnable.run();
+            } else {
+                ApplicationManager.getApplication().executeOnPooledThread(shutdownRunnable).get();
             }
         } catch (Exception e) {
             LOG.warn("Error shutting down process: " + process, e);

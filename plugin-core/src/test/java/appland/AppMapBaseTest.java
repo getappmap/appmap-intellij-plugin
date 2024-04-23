@@ -1,63 +1,73 @@
 package appland;
 
+import appland.cli.AppLandCommandLineListener;
 import appland.cli.AppLandCommandLineService;
 import appland.cli.TestCommandLineService;
-import appland.settings.AppMapApplicationSettings;
-import appland.settings.AppMapApplicationSettingsService;
+import appland.files.AppMapFiles;
+import appland.problemsView.TestFindingsManager;
+import appland.rpcService.AppLandJsonRpcService;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.application.ReadAction;
 import com.intellij.openapi.application.WriteAction;
+import com.intellij.openapi.application.ex.ApplicationEx;
+import com.intellij.openapi.module.Module;
 import com.intellij.openapi.roots.ModuleRootModificationUtil;
 import com.intellij.openapi.util.ThrowableComputable;
 import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.openapi.vfs.VfsUtil;
 import com.intellij.openapi.vfs.VirtualFile;
-import com.intellij.openapi.vfs.ex.temp.TempFileSystem;
-import com.intellij.testFramework.LightProjectDescriptor;
-import com.intellij.testFramework.fixtures.LightPlatformCodeInsightFixture4TestCase;
+import com.intellij.testFramework.EdtTestUtil;
+import com.intellij.testFramework.HeavyPlatformTestCase;
+import com.intellij.testFramework.VfsTestUtil;
+import com.intellij.testFramework.builders.EmptyModuleFixtureBuilder;
+import com.intellij.testFramework.fixtures.CodeInsightFixtureTestCase;
+import com.intellij.testFramework.fixtures.ModuleFixture;
+import com.intellij.util.ThrowableRunnable;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.junit.Assert;
+import org.junit.Before;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
 
 import java.util.Collections;
+import java.util.List;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
-public abstract class AppMapBaseTest extends LightPlatformCodeInsightFixture4TestCase {
-    @Override
-    protected LightProjectDescriptor getProjectDescriptor() {
-        // we're returning a new instance, because we don't want to share the project setup between light tests.
-        // many of our tests require a clean filesystem.
-        return new LightProjectDescriptor();
-    }
+@RunWith(JUnit4.class)
+public abstract class AppMapBaseTest extends CodeInsightFixtureTestCase<EmptyModuleFixtureBuilder<ModuleFixture>> {
+    @Before
+    public void setupAppMapTest() {
+        TestFindingsManager.reset(getProject());
 
-    @Override
-    protected void setUp() throws Exception {
-        super.setUp();
-
-        if (ApplicationManager.getApplication().isDispatchThread()) {
-            TempFileSystem.getInstance().cleanupForNextTest();
-        } else {
-            edt(() -> TempFileSystem.getInstance().cleanupForNextTest());
-        }
+        // init services to register its listeners
+        AppLandJsonRpcService.getInstance(getProject());
     }
 
     @Override
     protected void tearDown() throws Exception {
-        try {
-            try {
-                resetState();
-            } catch (Throwable e) {
-                addSuppressedException(e);
-            }
+        // Even though the processes are stopped when the service is disposed,
+        // the timeout in dispose() may not be enough to prevent the "leaked thread" detection.
+        runSafe(() -> AppLandCommandLineService.getInstance().stopAll(60, TimeUnit.SECONDS));
 
-            try {
-                shutdownAppMapProcesses();
-            } catch (Throwable e) {
-                addSuppressedException(e);
+        runSafe(() -> AppLandJsonRpcService.getInstance(getProject()).stopServerSync(60, TimeUnit.SECONDS));
+
+        // runSafe(AppMapBaseTest::waitForAppMapThreadTermination);
+
+        runSafe(this::resetState);
+
+        runSafe(() -> {
+            if (ApplicationManager.getApplication() instanceof ApplicationEx) {
+                EdtTestUtil.runInEdtAndWait(() -> HeavyPlatformTestCase.cleanupApplicationCaches(getProject()));
             }
-        } finally {
-            super.tearDown();
-        }
+        });
+
+        EdtTestUtil.runInEdtAndWait(super::tearDown);
+    }
+
+    public @NotNull Module getModule() {
+        return myModule;
     }
 
     public @NotNull VirtualFile createAppMapWithIndexes(@NotNull String appMapName) throws Throwable {
@@ -105,19 +115,6 @@ public abstract class AppMapBaseTest extends LightPlatformCodeInsightFixture4Tes
         });
     }
 
-    /**
-     * Creates a minimal version of AppMap JSON, which contains the metadata with a name.
-     */
-    public String createAppMapMetadataJSON(@NotNull String name) {
-        return String.format("{\"metadata\": { \"name\": \"%s\", \"source_location\": \"/src/%s.java\" }}", name, name);
-    }
-
-    public String createAppMapMetadataJSON(@NotNull String name, int requestCount, int queryCount, int functionCount) {
-        var events = createAppMapEvents(requestCount, queryCount);
-        var classMap = createClassMap(functionCount);
-        return String.format("{\n\"metadata\": { \"name\": \"%s\" },\n \"events\": %s\n,\n \"classMap\": %s\n}", name, events, classMap);
-    }
-
     @NotNull
     public VirtualFile createTempDir(@NotNull String name) {
         var psiFile = myFixture.addFileToProject(name + "/file.txt", "");
@@ -139,66 +136,65 @@ public abstract class AppMapBaseTest extends LightPlatformCodeInsightFixture4Tes
         }
     }
 
-    private String createAppMapEvents(int requestCount, int queryCount) {
-        var json = new StringBuilder();
-        json.append("[");
-
-        for (var i = 0; i < requestCount; i++) {
-            json.append("{\"http_server_request\": {}}\n");
-            if (i < requestCount - 1) {
-                json.append(",");
-            }
-        }
-
-        if (requestCount > 0 && queryCount > 0) {
-            json.append(",");
-        }
-
-        for (var i = 0; i < queryCount; i++) {
-            json.append("{\"sql_query\": {}}\n");
-            if (i < queryCount - 1) {
-                json.append(",");
-            }
-        }
-
-        json.append("]");
-        return json.toString();
+    protected @NotNull VirtualFile createAppMapYaml(@NotNull VirtualFile directory) throws InterruptedException {
+        return createAppMapYaml(directory, null);
     }
 
-    private String createClassMap(int functionCount) {
-        var json = new StringBuilder();
-        json.append("[");
+    protected @NotNull VirtualFile createAppMapYaml(@NotNull VirtualFile directory, @Nullable String appMapPath) throws InterruptedException {
+        // a change to an appmap.yml is only applied if it's located in a content root
+        assertNotNull("appmap.yml must be located in a content root", ReadAction.compute(() -> {
+            return AppMapFiles.findTopLevelContentRoot(getProject(), directory);
+        }));
 
-        for (var i = 0; i < functionCount; i++) {
-            if (i % 2 == 0) {
-                json.append("{\"type\": \"function\"}\n");
-            } else {
-                // nesting for odd numbers to test the recursive parsing
-                json.append("{\"type\": \"package\", \"children\": [ {\"type\": \"function\"} ]}\n");
-            }
-            if (i < functionCount - 1) {
-                json.append(",");
-            }
+        var refreshLatch = new CountDownLatch(1);
+        var bus = ApplicationManager.getApplication().getMessageBus().connect(getTestRootDisposable());
+        bus.subscribe(AppLandCommandLineListener.TOPIC, refreshLatch::countDown);
+        try {
+            var content = appMapPath != null ? "appmap_dir: " + appMapPath + "\n" : "";
+            return VfsTestUtil.createFile(directory, "appmap.yml", content);
+        } finally {
+            // Creating a new appmap.yml file triggers the start of the CLI processes,
+            // we have to wait for them to before executing the following tests.
+            assertTrue("The AppLand services must launch when a new appmap.yaml is created", refreshLatch.await(30, TimeUnit.SECONDS));
         }
-
-        json.append("]");
-        return json.toString();
     }
 
     private void resetState() {
         TestCommandLineService.getInstance().reset();
     }
 
-    private void shutdownAppMapProcesses() {
+    private void runSafe(@NotNull ThrowableRunnable<Exception> runnable) {
         try {
-            AppLandCommandLineService.getInstance().stopAll(60_000, TimeUnit.MILLISECONDS);
-            assertEmpty(AppLandCommandLineService.getInstance().getActiveRoots());
-        } finally {
-            // reset to default settings
-            ApplicationManager.getApplication().getService(AppMapApplicationSettingsService.class).loadState(new AppMapApplicationSettings());
-
-            var activeRoots = AppLandCommandLineService.getInstance().getActiveRoots();
-            Assert.assertTrue("All AppMap CLIs must be terminated: " + activeRoots, activeRoots.isEmpty());
+            runnable.run();
+        } catch (Exception e) {
+            addSuppressedException(e);
         }
+    }
+
+    private static void waitForAppMapThreadTermination() throws Exception {
+        var deadline = System.currentTimeMillis() + TimeUnit.SECONDS.toMillis(30);
+        while (System.currentTimeMillis() < deadline) {
+            var appMapThreads = findAliveAppMapThreads();
+            if (appMapThreads.isEmpty()) {
+                return;
+            }
+
+            for (var thread : appMapThreads) {
+                LOG.debug("Waiting for AppMap thread to terminate: " + thread.getName());
+                thread.join(500);
+            }
+        }
+
+        var appMapThreads = findAliveAppMapThreads();
+        if (!appMapThreads.isEmpty()) {
+            throw new RuntimeException("Leaked AppMap threads: " + appMapThreads);
+        }
+    }
+
+    private static List<Thread> findAliveAppMapThreads() {
+        return Thread.getAllStackTraces().keySet()
+                .stream()
+                .filter(thread -> thread.getName().toLowerCase().contains("appmap") && thread.isAlive())
+                .collect(Collectors.toList());
     }
 }

@@ -5,6 +5,7 @@ import com.intellij.openapi.project.Project;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.concurrent.TimeUnit;
 import java.util.Set;
 
 /**
@@ -44,6 +45,13 @@ public interface AppLandJsonRpcService extends Disposable {
      * The calling thread is not blocked.
      */
     void stopServerAsync();
+
+    /**
+     * Stops the server on the current thread.
+     * @param timeout The timeout to wait for process termination. 0 disables the waiting.
+     * @param timeUnit Unit of the timeout value
+     */
+    void stopServerSync(int timeout, @NotNull TimeUnit timeUnit);
 
     /**
      * @return The port, as returned by the launched JSON-RPC server.
