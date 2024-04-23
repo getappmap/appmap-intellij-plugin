@@ -38,7 +38,8 @@ public class DefaultAppLandJsonRpcServiceTest extends AppMapBaseTest {
                 .subscribe(AppLandJsonRpcListener.TOPIC,
                         new AppLandJsonRpcListenerAdapter() {
                             @Override
-                            public void serverConfigurationUpdated(Collection<VirtualFile> appMapConfigFiles) {
+                            public void serverConfigurationUpdated(@NotNull Collection<VirtualFile> contentRoots,
+                                                                   @NotNull Collection<VirtualFile> appMapConfigFiles) {
                                 serverConfigFiles.set(appMapConfigFiles);
                                 latch.countDown();
                             }
@@ -47,7 +48,9 @@ public class DefaultAppLandJsonRpcServiceTest extends AppMapBaseTest {
         var appMapConfig = myFixture.copyFileToProject("appmap-config/appmap.yml");
 
         assertTrue("An AppMap config update must be sent to the JSON-RPC server", latch.await(30, TimeUnit.SECONDS));
-        assertArrayEquals("The updated config file path must be sent", new VirtualFile[]{appMapConfig}, serverConfigFiles.get().toArray());
+        assertArrayEquals("The updated config file path must be sent",
+                new VirtualFile[]{appMapConfig},
+                serverConfigFiles.get().toArray());
     }
 
     @Test
