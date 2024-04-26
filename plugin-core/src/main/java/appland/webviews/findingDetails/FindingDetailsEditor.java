@@ -6,7 +6,7 @@ import appland.problemsView.FindingsUtil;
 import appland.problemsView.ResolvedStackLocation;
 import appland.utils.GsonUtils;
 import appland.webviews.WebviewEditor;
-import appland.webviews.appMap.AppMapFileEditor;
+import appland.webviews.appMap.AppMapFileEditorProvider;
 import appland.webviews.appMap.AppMapFileEditorState;
 import appland.webviews.findings.FindingsOverviewEditorProvider;
 import appland.webviews.webserver.AppMapWebview;
@@ -15,7 +15,6 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.application.ModalityState;
-import com.intellij.openapi.fileEditor.FileEditorManager;
 import com.intellij.openapi.fileEditor.OpenFileDescriptor;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.Messages;
@@ -114,10 +113,7 @@ public class FindingDetailsEditor extends WebviewEditor<Void> {
         var file = LocalFileSystem.getInstance().findFileByPath(StringUtil.split(appMapUri, "#").get(0));
         if (file != null) {
             ApplicationManager.getApplication().invokeLater(() -> {
-                var appMapEditors = FileEditorManager.getInstance(project).openFile(file, true);
-                if (appMapEditors.length == 1 && appMapEditors[0] instanceof AppMapFileEditor) {
-                    ((AppMapFileEditor) appMapEditors[0]).setWebViewState(editorState);
-                }
+                AppMapFileEditorProvider.openAppMap(project, file, editorState);
             }, ModalityState.defaultModalityState());
         } else {
             ApplicationManager.getApplication().invokeLater(() -> {
