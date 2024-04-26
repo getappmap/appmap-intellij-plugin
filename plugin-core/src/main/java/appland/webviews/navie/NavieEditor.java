@@ -3,6 +3,7 @@ package appland.webviews.navie;
 import appland.AppMapBundle;
 import appland.files.AppMapFileChangeListener;
 import appland.files.AppMapFiles;
+import appland.files.FileLookup;
 import appland.files.OpenAppMapFileNavigatable;
 import appland.index.AppMapMetadata;
 import appland.index.AppMapMetadataService;
@@ -15,12 +16,15 @@ import appland.toolwindow.AppMapToolWindowFactory;
 import appland.utils.GsonUtils;
 import appland.webviews.SharedAppMapWebViewMessages;
 import appland.webviews.WebviewEditor;
+import appland.webviews.appMap.AppMapFileEditorProvider;
+import appland.webviews.appMap.AppMapFileEditorState;
 import appland.webviews.webserver.AppMapWebview;
 import com.google.gson.JsonObject;
 import com.google.gson.annotations.SerializedName;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.application.ModalityState;
 import com.intellij.openapi.application.ReadAction;
+import com.intellij.openapi.fileEditor.OpenFileDescriptor;
 import com.intellij.openapi.progress.ProgressIndicator;
 import com.intellij.openapi.progress.Task;
 import com.intellij.openapi.project.Project;
@@ -59,6 +63,7 @@ public class NavieEditor extends WebviewEditor<Void> {
         super(project, AppMapWebview.Navie, file, SharedAppMapWebViewMessages.withBaseMessages(
                 "open-appmap",
                 "open-install-instructions",
+                "open-location",
                 "open-record-instructions",
                 "show-appmap-tree"));
     }
@@ -123,7 +128,7 @@ public class NavieEditor extends WebviewEditor<Void> {
         }
 
         switch (messageId) {
-            case "open-appmap":
+            case "open-appmap": {
                 var path = message != null ? message.getAsJsonPrimitive("path") : null;
                 if (path != null) {
                     var appMapFile = LocalFileSystem.getInstance().findFileByNioFile(Path.of(path.getAsString()));
@@ -134,11 +139,19 @@ public class NavieEditor extends WebviewEditor<Void> {
                     }
                 }
                 break;
+            }
             case "open-install-instructions":
                 ApplicationManager.getApplication().invokeLater(() -> {
                     InstallGuideEditorProvider.open(project, InstallGuideViewPage.InstallAgent);
                 }, ModalityState.defaultModalityState());
                 break;
+            case "open-location": {
+                var path = message != null ? message.getAsJsonPrimitive("path") : null;
+                if (path != null) {
+                    handleOpenLocation(path.getAsString());
+                }
+                break;
+            }
             case "open-record-instructions":
                 ApplicationManager.getApplication().invokeLater(() -> {
                     InstallGuideEditorProvider.open(project, InstallGuideViewPage.RecordAppMaps);
@@ -194,6 +207,57 @@ public class NavieEditor extends WebviewEditor<Void> {
                         .submit(updateAppMapsThread);
             }
         }.queue();
+    }
+
+    private void handleOpenLocation(@NotNull String pathWithLineRange) {
+        var colonIndex = pathWithLineRange.lastIndexOf(':');
+        var filePath = colonIndex > 0 ? pathWithLineRange.substring(0, colonIndex) : pathWithLineRange;
+        var lineRangeOrEventId = colonIndex > 0 ? pathWithLineRange.substring(colonIndex + 1) : null;
+
+        var virtualFile = ReadAction.compute(() -> FileLookup.findRelativeFile(project, null, filePath));
+        if (virtualFile == null) {
+            // fixme show error?
+            return;
+        }
+
+        if (AppMapFiles.isAppMapFileName(filePath)) {
+            // If the path is an appmap.json, the starting line is actually an event ID.
+            var state = AppMapFileEditorState.createViewSequence(lineRangeOrEventId);
+            ApplicationManager.getApplication().invokeLater(() -> {
+                AppMapFileEditorProvider.openAppMap(project, virtualFile, state);
+            }, ModalityState.defaultModalityState());
+        } else {
+            // Other files should be opened as text files.
+            // Lines:
+            // null: no line,
+            // size 1: just the start line,
+            // size 2: start and end line,
+            // other sizes are not possible.
+            var lineRange = lineRangeOrEventId != null ? mapToLineRange(lineRangeOrEventId) : null;
+            ApplicationManager.getApplication().invokeLater(() -> {
+                var startLine = lineRange != null ? lineRange[0] : 0;
+                // scrolls to the start line, the API does not support scrolling to a range
+                new OpenFileDescriptor(project, virtualFile, startLine, 0).navigate(true);
+            }, ModalityState.defaultModalityState());
+        }
+    }
+
+    /**
+     * Maps a string with "n" or "n-m" to an int array containing the available numbers.
+     *
+     * @param lineRange A single number or range of numbers "n-m"
+     * @return Array of start and end line, just the start line or {@code null} if the input is invalid.
+     * The lines are adjusted from 1-based to 0-based to match the JetBrains API.
+     */
+    private static int @Nullable [] mapToLineRange(@NotNull String lineRange) {
+        var parts = lineRange.split("-");
+        if (parts.length == 2) {
+            return new int[]{Integer.parseInt(parts[0]) - 1, Integer.parseInt(parts[1]) - 1};
+        }
+        if (parts.length == 1) {
+            return new int[]{Integer.parseInt(parts[0]) - 1};
+        }
+        return null;
     }
 
     /**

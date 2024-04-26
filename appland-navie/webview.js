@@ -62,6 +62,7 @@ export function mountWebview() {
     });
 
     app.$on('open-install-instructions', () => vscode.postMessage({command: 'open-install-instructions'}))
+    app.$on('open-location', (path) => vscode.postMessage({command: 'open-location', path}))
     app.$on('open-record-instructions', () => vscode.postMessage({command: 'open-record-instructions'}))
     app.$on('open-appmap', (path) => vscode.postMessage({command: 'open-appmap', path}))
     app.$on('show-appmap-tree', () => vscode.postMessage({command: 'show-appmap-tree'}));
