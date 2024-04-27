@@ -60,19 +60,6 @@ public class AppMapApplicationSettings {
         this.cliEnvironment = Map.copyOf(environment);
     }
 
-    /**
-     * Apply environment variables and API key to the command line.
-     */
-    public GeneralCommandLine applyServiceEnvironment(@NotNull GeneralCommandLine commandLine) {
-        var key = apiKey;
-        var environmentType = cliPassParentEnv
-                ? GeneralCommandLine.ParentEnvironmentType.CONSOLE
-                : GeneralCommandLine.ParentEnvironmentType.NONE;
-        return commandLine.withParentEnvironmentType(environmentType)
-                .withEnvironment(cliEnvironment)
-                .withEnvironment(isNotEmpty(key) ? Map.of("APPMAP_API_KEY", key) : Map.of());
-    }
-
     public void setApiKeyNotifying(@Nullable String apiKey) {
         var changed = !Objects.equals(apiKey, this.apiKey);
         this.apiKey = apiKey;

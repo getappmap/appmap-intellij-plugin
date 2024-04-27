@@ -25,6 +25,9 @@
         <listener topic="appland.settings.AppMapSettingsListener"
                   class="appland.cli.RestartServicesAfterApiChangeListener"
                   activeInTestMode="false"/>
+        <listener topic="appland.settings.AppMapSettingsListener"
+                  class="appland.settings.OpenAIReloadProjectListener"
+                  activeInTestMode="false"/>
     </applicationListeners>
 
     <projectListeners>
@@ -109,6 +112,8 @@
                            key="telemetry.permission.title"/>
         <notificationGroup id="appmap.generic" displayType="BALLOON"
                            key="notification.groupGeneric.title"/>
+        <notificationGroup id="appmap.settings" displayType="STICKY_BALLOON"
+                           key="notification.groupSettings.title"/>
 
         <projectConfigurable groupId="tools" nonDefaultProject="true" order="first"
                              key="projectSettings.displayName"
