@@ -64,6 +64,11 @@ public class DefaultAppLandJsonRpcService implements AppLandJsonRpcService, AppL
             1_000,
             this,
             Alarm.ThreadToUse.POOLED_THREAD);
+    // debounce requests to restart the JSON-RPC server process
+    private final SingleAlarm restartServerAlarm = new SingleAlarm(this::restartServerAsync,
+            1_000,
+            this,
+            Alarm.ThreadToUse.POOLED_THREAD);
 
     // flag to help avoid starting the server if we're already disposed
     private volatile boolean isDisposed;
@@ -245,11 +250,15 @@ public class DefaultAppLandJsonRpcService implements AppLandJsonRpcService, AppL
 
     @Override
     public void apiKeyChanged() {
-        restartServerAsync();
+        triggerRestartServer();
     }
 
     private void triggerSendConfigurationSet() {
         sendConfigurationAlarm.cancelAndRequest();
+    }
+
+    private void triggerRestartServer() {
+        restartServerAlarm.cancelAndRequest();
     }
 
     /**

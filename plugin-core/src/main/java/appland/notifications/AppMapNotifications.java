@@ -14,6 +14,7 @@ import com.intellij.openapi.actionSystem.DataContext;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.application.ModalityState;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.project.ProjectManager;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.util.ui.EdtInvocationManager;
 import org.jetbrains.annotations.NotNull;
@@ -27,6 +28,7 @@ public final class AppMapNotifications {
     public static final String REMOTE_RECORDING_ID = "appmap.remoteRecording";
     public static final String TELEMETRY_ID = "appmap.telemetry";
     public static final String GENERIC_NOTIFICATIONS_ID = "appmap.generic";
+    public static final String SETTINGS_NOTIFICATIONS_ID = "appmap.settings";
 
     public static void showExpiringRecordingNotification(@NotNull Project project,
                                                          @Nullable String title,
@@ -167,6 +169,18 @@ public final class AppMapNotifications {
                     GENERIC_NOTIFICATIONS_ID, null,
                     null, null, AppMapBundle.get("notification.exportAppMapJson.content", error),
                     NotificationType.ERROR, null
+            );
+            notification.notify(project);
+        });
+    }
+
+    public static void showReloadProjectNotification(@NotNull Project project) {
+        EdtInvocationManager.invokeLaterIfNeeded(() -> {
+            var notification = new AppMapFullContentNotification(
+                    SETTINGS_NOTIFICATIONS_ID, null,
+                    null, null,
+                    AppMapBundle.get("notification.reloadProject.content"),
+                    NotificationType.INFORMATION, null
             );
             notification.notify(project);
         });
