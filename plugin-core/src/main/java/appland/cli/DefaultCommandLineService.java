@@ -471,7 +471,7 @@ public class DefaultCommandLineService implements AppLandCommandLineService {
     }
 
     static @NotNull KillableProcessHandler startProcess(@NotNull Path workingDir,
-                                                                @NotNull String... commandLine) throws ExecutionException {
+                                                        @NotNull String... commandLine) throws ExecutionException {
 
         if (!Files.isDirectory(workingDir)) {
             throw new IllegalStateException("Directory does not exist: " + workingDir);
@@ -499,6 +499,7 @@ public class DefaultCommandLineService implements AppLandCommandLineService {
             var shutdownRunnable = new Runnable() {
                 @Override
                 public void run() {
+                    process.setShouldKillProcessSoftly(false);
                     process.destroyProcess();
                     process.waitFor(500);
 
@@ -661,6 +662,7 @@ public class DefaultCommandLineService implements AppLandCommandLineService {
             }
 
             // schedule next restart
+            LOG.debug("Scheduling AppMap process restart. Type: " + type + ", command line: " + process.getCommandLine());
             AppExecutorUtil.getAppScheduledExecutorService().schedule(() -> {
                 try {
                     var nextRestartDelay = (long) ((double) currentRestartDelay * NEXT_RESTART_FACTOR);
