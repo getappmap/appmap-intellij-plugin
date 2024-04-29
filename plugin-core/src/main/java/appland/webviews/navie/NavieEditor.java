@@ -28,6 +28,7 @@ import com.intellij.openapi.fileEditor.OpenFileDescriptor;
 import com.intellij.openapi.progress.ProgressIndicator;
 import com.intellij.openapi.progress.Task;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.ui.Messages;
 import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.openapi.vfs.LocalFileSystem;
 import com.intellij.openapi.vfs.VirtualFile;
@@ -221,7 +222,12 @@ public class NavieEditor extends WebviewEditor<Void> {
 
         var virtualFile = ReadAction.compute(() -> FileLookup.findRelativeFile(project, searchScope, null, filePath));
         if (virtualFile == null) {
-            // fixme show error?
+            ApplicationManager.getApplication().invokeLater(() -> {
+                Messages.showErrorDialog(
+                        project,
+                        AppMapBundle.get("notification.genericFileNotFound.message"),
+                        AppMapBundle.get("notification.genericFileNotFound.title"));
+            });
             return;
         }
 
