@@ -31,6 +31,8 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.openapi.vfs.LocalFileSystem;
 import com.intellij.openapi.vfs.VirtualFile;
+import com.intellij.psi.search.GlobalSearchScope;
+import com.intellij.psi.search.GlobalSearchScopes;
 import com.intellij.util.Alarm;
 import com.intellij.util.SingleAlarm;
 import com.intellij.util.concurrency.AppExecutorUtil;
@@ -40,6 +42,7 @@ import org.jetbrains.annotations.Nls;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
 import java.time.Instant;
 import java.time.ZoneId;
@@ -147,8 +150,9 @@ public class NavieEditor extends WebviewEditor<Void> {
                 break;
             case "open-location": {
                 var path = message != null ? message.getAsJsonPrimitive("path") : null;
+                var directory = message != null ? message.getAsJsonPrimitive("directory") : null;
                 if (path != null) {
-                    handleOpenLocation(path.getAsString());
+                    handleOpenLocation(path.getAsString(), directory != null ? directory.getAsString() : null);
                 }
                 break;
             }
@@ -209,12 +213,13 @@ public class NavieEditor extends WebviewEditor<Void> {
         }.queue();
     }
 
-    private void handleOpenLocation(@NotNull String pathWithLineRange) {
+    private void handleOpenLocation(@NotNull String pathWithLineRange, @Nullable String directory) {
         var colonIndex = pathWithLineRange.lastIndexOf(':');
         var filePath = colonIndex > 0 ? pathWithLineRange.substring(0, colonIndex) : pathWithLineRange;
         var lineRangeOrEventId = colonIndex > 0 ? pathWithLineRange.substring(colonIndex + 1) : null;
+        var searchScope = directory != null ? createDirectorySearchScope(project, directory) : null;
 
-        var virtualFile = ReadAction.compute(() -> FileLookup.findRelativeFile(project, null, filePath));
+        var virtualFile = ReadAction.compute(() -> FileLookup.findRelativeFile(project, searchScope, null, filePath));
         if (virtualFile == null) {
             // fixme show error?
             return;
@@ -240,6 +245,23 @@ public class NavieEditor extends WebviewEditor<Void> {
                 new OpenFileDescriptor(project, virtualFile, startLine, 0).navigate(true);
             }, ModalityState.defaultModalityState());
         }
+    }
+
+    /**
+     * @param directoryPath Native OS directory path as a string.
+     * @return A search scope which is restricted to the given directory. {@code null} is returned if the path could not be found.
+     */
+    private static @Nullable GlobalSearchScope createDirectorySearchScope(@NotNull Project project,
+                                                                          @NotNull String directoryPath) {
+        try {
+            var directory = LocalFileSystem.getInstance().findFileByNioFile(Path.of(directoryPath));
+            if (directory != null) {
+                return GlobalSearchScopes.directoryScope(project, directory, true);
+            }
+        } catch (InvalidPathException e) {
+            // ignore
+        }
+        return null;
     }
 
     /**
