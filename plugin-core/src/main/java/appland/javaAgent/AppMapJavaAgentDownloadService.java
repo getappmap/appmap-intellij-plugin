@@ -59,8 +59,8 @@ public final class AppMapJavaAgentDownloadService {
     }
 
     public boolean downloadJavaAgentSync(@NotNull ProgressIndicator indicator) throws IOException {
-        var agentFilePath = getJavaAgentPath();
-        if (agentFilePath == null) {
+        var getAgentFilePath = getJavaAgentPath();
+        if (getAgentFilePath == null) {
             LOG.warn("unable to locate target file path for AppMap Java agent");
             return false;
         }
@@ -71,7 +71,7 @@ public final class AppMapJavaAgentDownloadService {
         }
 
         // e.g. ~/.appmap/lib/java/appmap-1.7.2.jar
-        var assetDownloadPath = agentFilePath.resolveSibling(latestAsset.getFileName());
+        var assetDownloadPath = getAgentFilePath.resolveSibling(latestAsset.getFileName());
 
         // don't download if the asset file does already exist
         if (Files.exists(assetDownloadPath)) {
@@ -89,23 +89,23 @@ public final class AppMapJavaAgentDownloadService {
 
         // create a relative symbolic appmap.jar pointing to the downloaded JAR file
         try {
-            Files.deleteIfExists(agentFilePath);
-            Files.createSymbolicLink(agentFilePath, agentFilePath.getParent().relativize(assetDownloadPath));
+            Files.deleteIfExists(getAgentFilePath);
+            Files.createSymbolicLink(getAgentFilePath, getAgentFilePath.getParent().relativize(assetDownloadPath));
         } catch (IOException e) {
             // copy the downloaded file to "agent.jar" as a fallback,
             // e.g. on system where symbolic links are unsupported
-            Files.copy(assetDownloadPath, agentFilePath);
+            Files.copy(assetDownloadPath, getAgentFilePath);
         }
 
         return true;
     }
 
-    public @NotNull Path agentDirPath() {
+    public @NotNull Path getAgentDirPath() {
         return Paths.get(SystemProperties.getUserHome()).resolve(Paths.get(".appmap", "lib", "java"));
     }
 
-    public @NotNull Path agentFilePath() {
-        return agentDirPath().resolve(AGENT_LINK_FILENAME);
+    public @NotNull Path getAgentFilePath() {
+        return getAgentDirPath().resolve(AGENT_LINK_FILENAME);
     }
 
     /**
@@ -169,19 +169,19 @@ public final class AppMapJavaAgentDownloadService {
 
     private @Nullable Path getJavaAgentPath() {
         var agentDir = getOrCreateAgentDir();
-        return agentDir == null ? null : agentFilePath();
+        return agentDir == null ? null : getAgentFilePath();
     }
 
     /**
      * @return The path of the directory, where the AppMap Java agent should be stored (~/.appmap/lib/java).
      */
     @Nullable Path getOrCreateAgentDir() {
-        var agentDirPath = agentDirPath();
+        var getAgentDirPath = getAgentDirPath();
         try {
-            Files.createDirectories(agentDirPath);
-            return agentDirPath;
+            Files.createDirectories(getAgentDirPath);
+            return getAgentDirPath;
         } catch (IOException e) {
-            LOG.warn("error creating AppMap agent directory: " + agentDirPath, e);
+            LOG.warn("error creating AppMap agent directory: " + getAgentDirPath, e);
             return null;
         }
     }

@@ -1,12 +1,11 @@
 package appland.actions;
 
+import appland.AppMapBundle;
 import appland.cli.AppLandDownloadService;
 import appland.cli.CliTool;
 import appland.javaAgent.JavaAgentStatus;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
-import com.intellij.openapi.actionSystem.UpdateInBackground;
-import com.intellij.openapi.application.WriteAction;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.fileEditor.FileEditorManager;
 import com.intellij.openapi.progress.PerformInBackgroundOption;
@@ -15,8 +14,8 @@ import com.intellij.openapi.progress.Task;
 import com.intellij.openapi.project.DumbAware;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.project.ProjectUtil;
-import com.intellij.openapi.vfs.VfsUtil;
 import com.intellij.openapi.vfs.VirtualFile;
+import com.intellij.testFramework.LightVirtualFile;
 import com.intellij.util.concurrency.annotations.RequiresBackgroundThread;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -25,38 +24,27 @@ import java.io.IOException;
 import java.util.Objects;
 
 
-public class PluginStatus extends AnAction implements UpdateInBackground, DumbAware {
+public class PluginStatus extends AnAction implements  DumbAware {
     private static final Logger LOG = Logger.getInstance(PluginStatus.class);
     private static final String STATUS_REPORT_FILENAME = "appmap_status_report.md";
 
     @Override
-    public void actionPerformed(@NotNull AnActionEvent event) {
-        createStatusReport(Objects.requireNonNull(event.getProject()));
-    }
-
     @RequiresBackgroundThread
-    public static void createStatusReport(@NotNull Project project) {
+    public void actionPerformed(@NotNull AnActionEvent event) {
+        Project project = Objects.requireNonNull(event.getProject());
         VirtualFile projectDir = ProjectUtil.guessProjectDir(project);
         if (projectDir == null) return;
 
-        new Task.Backgroundable(project, "Generating AppMap Plugin status report...",  true, PerformInBackgroundOption.ALWAYS_BACKGROUND) {
+        new Task.Backgroundable(project,
+                AppMapBundle.get("action.appmap.pluginStatus.generatingReport"),
+                true,
+                PerformInBackgroundOption.ALWAYS_BACKGROUND) {
 
             private volatile VirtualFile statusReportFile;
 
             @Override
             public void run(@NotNull ProgressIndicator indicator) {
-                String reportText = statusReportText(indicator);
-
-                statusReportFile = WriteAction.computeAndWait(() -> {
-                    try {
-                        var file = projectDir.createChildData(this, STATUS_REPORT_FILENAME);
-                        VfsUtil.saveText(file, reportText);
-                        return file;
-                    } catch (IOException e) {
-                        LOG.error(e);
-                        return null;
-                    }
-                });
+                statusReportFile = new LightVirtualFile(STATUS_REPORT_FILENAME, statusReportText(indicator));
             }
 
             @Override
@@ -95,20 +83,21 @@ public class PluginStatus extends AnAction implements UpdateInBackground, DumbAw
         var downloadPath = service.getDownloadFilePath(type);
 
         String downloadedVersionText = "Your version: ";
-        downloadedVersionText += downloadedVersion == null ? "" : downloadedVersion;
-        downloadedVersionText += downloadPath == null ? "" : String.format("\n\nDownload location: %s", downloadPath);
+        downloadedVersionText += downloadedVersion == null ? "<unavailable>" : downloadedVersion;
+        downloadedVersionText += downloadPath == null ? "<unavailable>" : String.format("\n\nDownload location: %s", downloadPath);
 
-        return getBinaryReportHeader(type) + downloadedVersionText + "\n\n\n" + latestVersionText + "\n\n";
+        return getBinaryReportHeader(type) + latestVersionText + "\n\n" + downloadedVersionText + "\n\n\n";
     }
 
     @Nullable
     private static String getBinaryReportHeader(CliTool type) {
-        if (type == CliTool.AppMap) {
-            return "### AppMap CLI Status\n\n";
-        } else if (type == CliTool.Scanner) {
-            return "### AppMap Scanner Status\n\n";
+        switch (type) {
+            case AppMap:
+                return "### AppMap CLI Status\n\n";
+            case Scanner:
+                return "### AppMap Scanner Status\n\n";
+            default:
+                return null;
         }
-
-        return null;
     }
 }

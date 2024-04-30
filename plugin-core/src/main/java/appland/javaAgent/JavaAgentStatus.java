@@ -51,7 +51,7 @@ public class JavaAgentStatus {
         String latestVersionText = String.format("Latest version: %s",
                 latestAssetVersion == null ? "Failed to check for the latest version" : latestAssetVersion);
 
-        return "### AppMap Java Agent Status\n\n" + downloadedVersionText + "\n\n\n" + latestVersionText + "\n\n";
+        return "### AppMap Java Agent Status\n\n" + latestVersionText + "\n\n\n" + downloadedVersionText + "\n\n";
     }
 
     private static @Nullable SemVer getDownloadedVersion() {
@@ -67,7 +67,7 @@ public class JavaAgentStatus {
 
     private static @Nullable Path getResolvedAgentFilePath() {
         var downloadService = AppMapJavaAgentDownloadService.getInstance();
-        var agentFilePath = downloadService.agentFilePath();
+        var agentFilePath = downloadService.getAgentFilePath();
 
         if (!Files.exists(agentFilePath)) {
             return null;
@@ -81,7 +81,7 @@ public class JavaAgentStatus {
         try {
             // e.g. ~/.appmap/lib/java/appmap-1.7.2.jar
             Path resolvedSymbolicLink = Files.readSymbolicLink(agentFilePath);
-            return downloadService.agentDirPath().resolve(resolvedSymbolicLink);
+            return downloadService.getAgentDirPath().resolve(resolvedSymbolicLink);
         } catch (IOException e) {
             LOG.warn("unable to locate file path for AppMap Java agent");
             return null;
