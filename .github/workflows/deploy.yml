@@ -1,0 +1,53 @@
+name: Deploy
+on:
+    workflow_dispatch:
+    push:
+        branches:
+            - main
+
+jobs:
+    deploy:
+        runs-on: ubuntu-latest
+        steps:
+            -   name: Fetch Sources
+                uses: actions/checkout@v4
+
+            -   name: Gradle Wrapper Validation
+                uses: gradle/actions/wrapper-validation@v3
+
+            -   name: Setup Java
+                uses: actions/setup-java@v4
+                with:
+                    distribution: temurin
+                    java-version: 17
+
+            -   name: Run Linters and Tests
+                env:
+                    GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+                shell: bash
+                run: ./gradlew check
+
+            -   name: Verify plugin
+                shell: bash
+                run: ./gradlew verifyPlugin
+
+            -   name: Run Plugin Verifier
+                shell: bash
+                run: ./gradlew runPluginVerifier
+
+            -   name: "Install Dependencies"
+                shell: bash
+                run: |
+                    nvm install --lts \
+                        && nvm use --lts \
+                        && npm i -g \
+                          semantic-release \
+                          @semantic-release/exec \
+                          @semantic-release/git \
+                          @semantic-release/changelog \
+                          @google/semantic-release-replace-plugin \
+                          conventional-changelog-conventionalcommits
+
+            -   name: "Deploy"
+                shell: bash
+                run: semantic-release --debug
