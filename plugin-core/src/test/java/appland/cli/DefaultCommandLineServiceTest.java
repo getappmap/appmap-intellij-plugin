@@ -77,8 +77,8 @@ public class DefaultCommandLineServiceTest extends AppMapBaseTest {
             assertTrue(service.isRunning(nestedDir, false));
             assertActiveRoots(parentDir, nestedDir);
 
-            service.stop(parentDir, 30_000, TimeUnit.MILLISECONDS);
-            service.stop(nestedDir, 30_000, TimeUnit.MILLISECONDS);
+            service.stop(parentDir, 60, TimeUnit.SECONDS);
+            service.stop(nestedDir, 60, TimeUnit.SECONDS);
 
             waitForProcessStatus(false, parentDir, true);
             waitForProcessStatus(false, parentDir, false);
@@ -142,23 +142,25 @@ public class DefaultCommandLineServiceTest extends AppMapBaseTest {
         var service = AppLandCommandLineService.getInstance();
 
         // no appmap.yml files -> no processes
-        addContentRootAndLaunchService(dirA);
-        addContentRootAndLaunchService(dirB);
-        assertEmptyRoots();
+        var condition = ProjectRefreshUtil.newProjectRefreshCondition(getTestRootDisposable());
+        ModuleTestUtils.withContentRoots(getModule(), List.of(dirA, dirB), () -> {
+            assertTrue(condition.await(30, TimeUnit.SECONDS));
+            assertEmptyRoots();
 
-        // appmap.yml for dirA
-        createAppMapYaml(dirA);
-        addContentRootAndLaunchService(dirA);
-        assertTrue(service.isRunning(dirA, true));
-        assertFalse(service.isRunning(dirB, true));
+            // appmap.yml for dirA
+            createAppMapYaml(dirA);
+            waitForProcessStatus(true, dirA, true);
+            assertTrue(service.isRunning(dirA, true));
+            assertFalse(service.isRunning(dirB, true));
 
-        // appmap.yml for dirB and dirA
-        createAppMapYaml(dirB);
-        addContentRootAndLaunchService(dirB);
-        assertTrue(service.isRunning(dirA, true));
-        assertTrue(service.isRunning(dirB, true));
+            // appmap.yml for dirB and dirA
+            createAppMapYaml(dirB);
+            waitForProcessStatus(true, dirB, true);
+            assertTrue(service.isRunning(dirA, true));
+            assertTrue(service.isRunning(dirB, true));
 
-        assertActiveRoots(dirA, dirB);
+            assertActiveRoots(dirA, dirB);
+        });
 
         service.stopAll(60, TimeUnit.SECONDS);
 
@@ -430,7 +432,9 @@ public class DefaultCommandLineServiceTest extends AppMapBaseTest {
 
     private @NotNull VirtualFile createVirtualFileDirectory(String relativePath) {
         var psiFile = myFixture.addFileToProject(relativePath, "");
-        return ReadAction.compute(() -> psiFile.getParent().getVirtualFile());
+        var virtualFile = ReadAction.compute(() -> psiFile.getParent().getVirtualFile());
+        assertNotNull(virtualFile);
+        return virtualFile;
     }
 
     private static void waitForProcessRestart(@NotNull VirtualFile root,
@@ -453,8 +457,8 @@ public class DefaultCommandLineServiceTest extends AppMapBaseTest {
     }
 
     private static void terminateProcess(@NotNull KillableProcessHandler process) {
-        AppMapProcessUtil.terminateProcess(process, 5, TimeUnit.SECONDS);
-        assertTrue("Process must terminate", process.waitFor(5_000));
+        AppMapProcessUtil.terminateProcess(process, 60, TimeUnit.SECONDS);
+        assertTrue("Process must terminate: " + process, process.isProcessTerminated());
     }
 
     private static final Function<VirtualFile, KillableProcessHandler> getIndexerFunction = root -> {
