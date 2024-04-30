@@ -38,7 +38,7 @@ public class JavaAgentStatus {
         return null;
     }
 
-    public static @NotNull String generateStatusReport(ProgressIndicator indicator) {
+    public static @NotNull String generateStatusReport(@NotNull ProgressIndicator indicator) {
         SemVer downloadedVersion = getDownloadedVersion();
         SemVer latestAssetVersion = getLatestAssetVersion(indicator);
 
@@ -51,7 +51,7 @@ public class JavaAgentStatus {
         String latestVersionText = String.format("Latest version: %s",
                 latestAssetVersion == null ? "Failed to check for the latest version" : latestAssetVersion);
 
-        return "### AppMap Java Agent Status\n\n" + latestVersionText + "\n\n\n" + downloadedVersionText + "\n\n";
+        return "### AppMap Java Agent Status\n\n" + latestVersionText + "\n\n" + downloadedVersionText + "\n\n";
     }
 
     private static @Nullable SemVer getDownloadedVersion() {
