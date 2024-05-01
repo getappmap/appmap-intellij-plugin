@@ -24,6 +24,7 @@ export function mountWebview() {
             appmapYmlPresent: this.appmapYmlPresent,
             targetAppmapData: initialData.targetAppmapData,
             targetAppmapFsPath: initialData.targetAppmapFsPath,
+            disableLlmConfig: true,
           },
         });
       },
