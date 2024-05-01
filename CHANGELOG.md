@@ -1,5 +1,16 @@
 AppMap Plugin Changelog
 
+## [0.65.0](https://github.com/getappmap/appmap-intellij-plugin/compare/v0.64.0...v0.65.0) (2024-05-01)
+
+
+### Features
+
+-  Add appmap status report ([#644](https://github.com/getappmap/appmap-intellij-plugin/issues/644)) ([35bf0c6]())-  Allow users to specify their own OpenAI key in the settings ([19a4230]())-  drop support for 2022.1, 2022.2, 2022.3 and 2023.1 ([4c756aa]())-  new Navie section in the AppMap toolwindow ([6240f56]())-  send project content roots to local AppLand JSON-RPC service ([8fb5d83]())-  support Navie webview message "open-location" ([bd35245]())-  Update Navie @appland/components to 4.22.0 ([2b71585]())
+
+### Bug Fixes
+
+-  append AppMap argline to an existing argline ([5f4c443]())-  do not remove the process reference if it's not the terminated process ([c760d1a]())-  don't show installation guide after first sign-in ([faa9fd5]())-  error "Project is already disposed" ([f6feb2e]())-  fix exceptions "already disposed" ([53e001b]())-  improve support for projects with multiple modules ([3ff6d6f]())
+
 ## [0.64.0](https://github.com/getappmap/appmap-intellij-plugin/compare/v0.63.0...v0.64.0) (2024-04-10)
 
 
