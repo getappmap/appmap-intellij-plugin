@@ -146,7 +146,6 @@
                      defaultValue="false"
                      description="Enable debug logging of the AppMap Java agent"/>
 
-        <applicationService serviceImplementation="appland.javaAgent.AppMapJavaAgentDownloadService"/>
         <postStartupActivity implementation="appland.javaAgent.AppMapJavaAgentDownloadActivity"/>
     </extensions>
 
