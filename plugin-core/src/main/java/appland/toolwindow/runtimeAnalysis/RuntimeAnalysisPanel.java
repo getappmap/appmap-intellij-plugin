@@ -9,7 +9,7 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.Disposer;
 import com.intellij.pom.Navigatable;
 import com.intellij.ui.ScrollPaneFactory;
-import com.intellij.ui.TreeSpeedSearch;
+import com.intellij.ui.TreeUIHelper;
 import com.intellij.ui.tree.AsyncTreeModel;
 import com.intellij.ui.tree.RestoreSelectionListener;
 import com.intellij.ui.treeStructure.Tree;
@@ -83,7 +83,7 @@ public class RuntimeAnalysisPanel extends JPanel implements Disposable, DataProv
         tree.setVisibleRowCount(8);
         tree.getSelectionModel().setSelectionMode(SINGLE_TREE_SELECTION);
         tree.addTreeSelectionListener(new RestoreSelectionListener());
-        new TreeSpeedSearch(tree);
+        TreeUIHelper.getInstance().installTreeSpeedSearch(tree);
         EditSourceOnDoubleClickHandler.install(tree);
         EditSourceOnEnterKeyHandler.install(tree);
 

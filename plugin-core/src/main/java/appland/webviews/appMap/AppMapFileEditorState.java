@@ -57,4 +57,18 @@ public class AppMapFileEditorState {
         state.addProperty("selectedObject", String.format("analysis-finding:%s", findingHash));
         return new AppMapFileEditorState(GsonUtils.GSON.toJson(state));
     }
+
+    /**
+     * Creates a state to open a given event in the "viewSequence" view.
+     *
+     * @param selectedEventId The ID of the event to select or {@code null} if no event should be selected.
+     */
+    public static @NotNull AppMapFileEditorState createViewSequence(@Nullable String selectedEventId) {
+        var state = new JsonObject();
+        state.addProperty("currentView", "viewSequence");
+        if (selectedEventId != null) {
+            state.addProperty("selectedObject", String.format("event:%s", selectedEventId));
+        }
+        return new AppMapFileEditorState(GsonUtils.GSON.toJson(state));
+    }
 }

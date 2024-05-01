@@ -5,6 +5,7 @@ import appland.config.AppMapConfigFileListener;
 import appland.files.AppMapFiles;
 import appland.files.AppMapVfsUtils;
 import appland.settings.AppMapApplicationSettingsService;
+import appland.settings.AppMapSecureApplicationSettingsService;
 import com.intellij.execution.ExecutionException;
 import com.intellij.execution.configurations.GeneralCommandLine;
 import com.intellij.execution.configurations.PtyCommandLine;
@@ -39,9 +40,12 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
+
+import static com.intellij.openapi.util.text.StringUtil.isNotEmpty;
 
 public class DefaultCommandLineService implements AppLandCommandLineService {
     private static final Logger LOG = Logger.getInstance(DefaultCommandLineService.class);
@@ -220,7 +224,7 @@ public class DefaultCommandLineService implements AppLandCommandLineService {
             return null;
         }
 
-        return AppMapApplicationSettingsService.getInstance().applyServiceEnvironment(cmd);
+        return applyServiceEnvironment(cmd);
     }
 
     // We're not synchronizing, because some IDE threads display or use the result of toString
@@ -471,7 +475,7 @@ public class DefaultCommandLineService implements AppLandCommandLineService {
     }
 
     static @NotNull KillableProcessHandler startProcess(@NotNull Path workingDir,
-                                                                @NotNull String... commandLine) throws ExecutionException {
+                                                        @NotNull String... commandLine) throws ExecutionException {
 
         if (!Files.isDirectory(workingDir)) {
             throw new IllegalStateException("Directory does not exist: " + workingDir);
@@ -480,8 +484,7 @@ public class DefaultCommandLineService implements AppLandCommandLineService {
         var command = new GeneralCommandLine(commandLine)
                 .withWorkDirectory(workingDir.toString());
 
-        return new KillableProcessHandler(AppMapApplicationSettingsService.getInstance()
-                .applyServiceEnvironment(command)) {
+        return new KillableProcessHandler(applyServiceEnvironment(command)) {
             @Override
             protected BaseOutputReader.@NotNull Options readerOptions() {
                 return BaseOutputReader.Options.BLOCKING;
@@ -499,6 +502,7 @@ public class DefaultCommandLineService implements AppLandCommandLineService {
             var shutdownRunnable = new Runnable() {
                 @Override
                 public void run() {
+                    process.setShouldKillProcessSoftly(false);
                     process.destroyProcess();
                     process.waitFor(500);
 
@@ -551,6 +555,24 @@ public class DefaultCommandLineService implements AppLandCommandLineService {
 
         LOG.debug("AppMap CLI command line " + cmd.getCommandLineString());
         return cmd;
+    }
+
+    /**
+     * Configure the environment settings of the command line with the user-defined settings.
+     */
+    private static GeneralCommandLine applyServiceEnvironment(@NotNull GeneralCommandLine commandLine) {
+        var settings = AppMapApplicationSettingsService.getInstance();
+        var appMapKey = settings.getApiKey();
+        var openAIKey = AppMapSecureApplicationSettingsService.getInstance().getOpenAIKey();
+
+        var environmentType = settings.isCliPassParentEnv()
+                ? GeneralCommandLine.ParentEnvironmentType.CONSOLE
+                : GeneralCommandLine.ParentEnvironmentType.NONE;
+
+        return commandLine.withParentEnvironmentType(environmentType)
+                .withEnvironment(settings.getCliEnvironment())
+                .withEnvironment(isNotEmpty(appMapKey) ? Map.of("APPMAP_API_KEY", appMapKey) : Map.of())
+                .withEnvironment(isNotEmpty(openAIKey) ? Map.of("OPENAI_API_KEY", openAIKey) : Map.of());
     }
 
     /**
@@ -636,12 +658,19 @@ public class DefaultCommandLineService implements AppLandCommandLineService {
                 synchronized (DefaultCommandLineService.this) {
                     var entry = processes.get(directory);
                     if (entry != null) {
+                        // We're only resetting the process entry if it was referencing the terminated process
+                        // For example, if process shutdown takes a long time, then closing and reopening a project
+                        // must not reset the processes incorrectly.
                         switch (type) {
                             case Indexer:
-                                entry.indexer = null;
+                                if (process.equals(entry.indexer)) {
+                                    entry.indexer = null;
+                                }
                                 break;
                             case Scanner:
-                                entry.scanner = null;
+                                if (process.equals(entry.scanner)) {
+                                    entry.scanner = null;
+                                }
                                 break;
                         }
 
@@ -654,6 +683,7 @@ public class DefaultCommandLineService implements AppLandCommandLineService {
             }
 
             // schedule next restart
+            LOG.debug("Scheduling AppMap process restart. Type: " + type + ", command line: " + process.getCommandLine());
             AppExecutorUtil.getAppScheduledExecutorService().schedule(() -> {
                 try {
                     var nextRestartDelay = (long) ((double) currentRestartDelay * NEXT_RESTART_FACTOR);

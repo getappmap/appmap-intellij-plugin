@@ -11,11 +11,16 @@ import org.jetbrains.annotations.Nullable;
 /**
  * Action to delete all AppMaps displayed in the AppMap panel.
  */
-final class DeleteAllMapsAction extends AnAction implements UpdateInBackground {
+final class DeleteAllMapsAction extends AnAction {
     private final DeleteProvider deleteHandler = new VirtualFileDeleteProvider();
 
     public DeleteAllMapsAction() {
         super(AppMapBundle.get("toolwindow.appmap.actions.deleteAllAppMaps.title"), null, AllIcons.General.Remove);
+    }
+
+    @Override
+    public @NotNull ActionUpdateThread getActionUpdateThread() {
+        return ActionUpdateThread.BGT;
     }
 
     @Override

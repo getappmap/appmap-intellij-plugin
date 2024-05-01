@@ -23,4 +23,7 @@ public interface AppMapSettingsListener {
 
     default void appMapWebViewFiltersChanged() {
     }
+
+    default void openAIKeyChange() {
+    }
 }

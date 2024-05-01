@@ -2,10 +2,15 @@ package appland.execution;
 
 import appland.AppMapBaseTest;
 import appland.config.AppMapConfigFile;
+import appland.files.AppMapFiles;
+import appland.index.AppMapSearchScopes;
+import appland.utils.ModuleTestUtils;
 import com.intellij.execution.RunManager;
 import com.intellij.execution.jar.JarApplicationConfiguration;
 import com.intellij.execution.jar.JarApplicationConfigurationType;
+import com.intellij.openapi.application.WriteAction;
 import com.intellij.openapi.vfs.VirtualFile;
+import com.intellij.psi.search.GlobalSearchScopes;
 import com.intellij.testFramework.fixtures.TempDirTestFixture;
 import com.intellij.testFramework.fixtures.impl.TempDirTestFixtureImpl;
 import org.jetbrains.annotations.NotNull;
@@ -33,7 +38,7 @@ public class AppMapJavaPackageConfigTest extends AppMapBaseTest {
         var contextFile = myFixture.configureByText("a.java", "").getVirtualFile();
 
         // wrap with withContentRoot, because the scope to locate an existing appmap.yml is based on content roots
-        withContentRoot(getModule(), contextFile.getParent(), () -> assertConfigUpdate(contextFile, Path.of("tmp/appmap"), "tmp/appmap"));
+        ModuleTestUtils.withContentRoot(getModule(), contextFile.getParent(), () -> assertConfigUpdate(contextFile, Path.of("tmp/appmap"), "tmp/appmap"));
     }
 
     @Test
@@ -42,7 +47,22 @@ public class AppMapJavaPackageConfigTest extends AppMapBaseTest {
 
         // wrap with withContentRoot, because the scope to locate an existing appmap.yml is based on content roots
         var absoluteConfigPath = contextFile.toNioPath().resolveSibling("tmp/appmap").toAbsolutePath();
-        withContentRoot(getModule(), contextFile.getParent(), () -> assertConfigUpdate(contextFile, absoluteConfigPath, "tmp/appmap"));
+        ModuleTestUtils.withContentRoot(getModule(), contextFile.getParent(), () -> assertConfigUpdate(contextFile, absoluteConfigPath, "tmp/appmap"));
+    }
+
+    @Test
+    public void ignoreAppMapConfigOutsideSearchScope() throws Exception {
+        var contextFile = myFixture.configureByText("a.java", "").getVirtualFile();
+        var contextDir = contextFile.getParent();
+
+        // config file out of scope, must not be found
+        WriteAction.runAndWait(() -> contextDir.getParent().createChildData(this, AppMapFiles.APPMAP_YML));
+
+        ModuleTestUtils.withContentRoot(getModule(), contextFile.getParent(), () -> {
+            var scope = GlobalSearchScopes.directoryScope(getProject(), contextDir, true);
+            var locatedConfigFile = AppMapJavaPackageConfig.findAndUpdateAppMapConfig(contextFile, scope);
+            assertNull("Update must not write to a file outside the project", locatedConfigFile);
+        });
     }
 
     private void assertConfigUpdate(@NotNull VirtualFile contextFile,
@@ -53,9 +73,7 @@ public class AppMapJavaPackageConfigTest extends AppMapBaseTest {
         // update module to enforce a search scope of the run configuration
         runConfig.setModule(getModule());
 
-        var configFilePath = AppMapJavaPackageConfig.createOrUpdateAppMapConfig(getModule(),
-                contextFile,
-                appMapOutputDirPath);
+        var configFilePath = AppMapJavaPackageConfig.createAppMapConfig(getModule(), contextFile.getParent(), appMapOutputDirPath);
 
         var config = AppMapConfigFile.parseConfigFile(configFilePath);
         assertNotNull(config);
@@ -65,14 +83,12 @@ public class AppMapJavaPackageConfigTest extends AppMapBaseTest {
         config.setPackages(List.of("appmap.a", "appmap.b"));
         config.writeTo(configFilePath);
 
-        var updatedConfigFilePath = AppMapJavaPackageConfig.createOrUpdateAppMapConfig(getModule(),
-                contextFile,
-                Path.of(appMapOutputDirPath + "-updated"));
+        var updatedConfigFilePath = AppMapJavaPackageConfig.findAndUpdateAppMapConfig(contextFile, AppMapSearchScopes.appMapConfigSearchScope(getProject()));
         assertEquals("Update must write to the same file again", configFilePath, updatedConfigFilePath);
 
         var updatedConfig = AppMapConfigFile.parseConfigFile(configFilePath);
         assertNotNull(updatedConfig);
-        assertEquals(expectedAppMapDir + "-updated", updatedConfig.getAppMapDir());
+        assertEquals(expectedAppMapDir, updatedConfig.getAppMapDir());
         assertEquals(config.getName(), updatedConfig.getName());
         assertEquals(config.getPackages(), updatedConfig.getPackages());
     }

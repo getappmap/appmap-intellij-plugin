@@ -7,8 +7,6 @@ import appland.settings.AppMapApplicationSettingsService;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.application.ReadAction;
 import com.intellij.openapi.application.WriteAction;
-import com.intellij.openapi.module.Module;
-import com.intellij.openapi.roots.ContentEntry;
 import com.intellij.openapi.roots.ModuleRootModificationUtil;
 import com.intellij.openapi.util.ThrowableComputable;
 import com.intellij.openapi.util.text.StringUtil;
@@ -17,14 +15,12 @@ import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.openapi.vfs.ex.temp.TempFileSystem;
 import com.intellij.testFramework.LightProjectDescriptor;
 import com.intellij.testFramework.fixtures.LightPlatformCodeInsightFixture4TestCase;
-import com.intellij.util.ThrowableRunnable;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.junit.Assert;
 
 import java.util.Collections;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicReference;
 
 public abstract class AppMapBaseTest extends LightPlatformCodeInsightFixture4TestCase {
     @Override
@@ -140,28 +136,6 @@ public abstract class AppMapBaseTest extends LightPlatformCodeInsightFixture4Tes
             ModuleRootModificationUtil.updateExcludedFolders(getModule(), excludedFolder.getParent(),
                     Collections.singletonList(excludedFolder.getUrl()),
                     Collections.emptyList());
-        }
-    }
-
-    protected void withContentRoot(@NotNull Module module, @NotNull VirtualFile contentRoot, @NotNull ThrowableRunnable<Exception> runnable) throws Exception {
-        assertTrue(contentRoot.isDirectory());
-
-        var contentEntryRef = new AtomicReference<ContentEntry>();
-        try {
-            // hack to use ModuleRootModificationUtil and to keep a reference to the new entry
-            ModuleRootModificationUtil.updateModel(module, modifiableRootModel -> {
-                contentEntryRef.set(modifiableRootModel.addContentEntry(contentRoot));
-            });
-
-            runnable.run();
-        } finally {
-            // remove again to avoid breaking follow-up tests
-            var newEntry = contentEntryRef.get();
-            assertNotNull(newEntry);
-
-            ModuleRootModificationUtil.updateModel(module, modifiableRootModel -> {
-                modifiableRootModel.removeContentEntry(newEntry);
-            });
         }
     }
 

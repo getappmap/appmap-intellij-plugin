@@ -7,9 +7,9 @@ import appland.telemetry.TelemetryService;
 import com.intellij.execution.ExecutionException;
 import com.intellij.execution.process.CapturingProcessHandler;
 import com.intellij.ide.actions.OpenInRightSplitAction;
+import com.intellij.openapi.actionSystem.ActionUpdateThread;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
-import com.intellij.openapi.actionSystem.UpdateInBackground;
 import com.intellij.openapi.application.WriteAction;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.fileEditor.FileEditorManager;
@@ -33,9 +33,14 @@ import java.util.concurrent.TimeUnit;
 /**
  * Generates an OpenAPI file using the CLI tool.
  */
-public class GenerateOpenApiAction extends AnAction implements DumbAware, UpdateInBackground {
+public class GenerateOpenApiAction extends AnAction implements DumbAware {
     private static final Logger LOG = Logger.getInstance(GenerateOpenApiAction.class);
     private static final String APPMAP_OPENAPI_FILENAME = "appmap-openapi.yml";
+
+    @Override
+    public @NotNull ActionUpdateThread getActionUpdateThread() {
+        return ActionUpdateThread.BGT;
+    }
 
     @Override
     public void actionPerformed(@NotNull AnActionEvent e) {

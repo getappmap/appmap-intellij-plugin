@@ -146,7 +146,7 @@ public class DefaultAppLandDownloadService implements AppLandDownloadService {
         downloadTool(project, CliTool.Scanner);
     }
 
-    private @Nullable String findLatestDownloadedVersion(@NotNull CliTool type) {
+    public @Nullable String findLatestDownloadedVersion(@NotNull CliTool type) {
         var directory = getToolDownloadDirectory(type, ApplicationManager.getApplication().isUnitTestMode());
         if (!Files.isDirectory(directory)) {
             return null;
@@ -242,7 +242,12 @@ public class DefaultAppLandDownloadService implements AppLandDownloadService {
     }
 
     private static void notifyDownloadFinished(@NotNull CliTool type, boolean success) {
-        ApplicationManager.getApplication().getMessageBus().syncPublisher(AppLandDownloadListener.TOPIC).downloadFinished(type, success);
+        var application = ApplicationManager.getApplication();
+        if (!application.isDisposed()) {
+            application.getMessageBus()
+                    .syncPublisher(AppLandDownloadListener.TOPIC)
+                    .downloadFinished(type, success);
+        }
     }
 
     // package-visible for our tests

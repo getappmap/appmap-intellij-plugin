@@ -2,9 +2,9 @@ package appland.settings;
 
 import appland.AppMapBundle;
 import com.intellij.openapi.options.Configurable;
-import com.intellij.openapi.options.ConfigurationException;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.NlsContexts;
+import lombok.Data;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -30,23 +30,43 @@ public class AppMapProjectConfigurable implements Configurable {
 
     @Override
     public void reset() {
-        form.loadSettingsFrom(AppMapApplicationSettingsService.getInstance());
+        form.loadSettingsFrom(AppMapApplicationSettingsService.getInstance(), AppMapSecureApplicationSettingsService.getInstance());
     }
 
     @Override
     public boolean isModified() {
         var settings = AppMapProjectSettingsService.getState(project);
         var applicationSettings = AppMapApplicationSettingsService.getInstance();
+        var secureApplicationSettings = new InlineSecureApplicationSettings(AppMapSecureApplicationSettingsService.getInstance());
 
         var newSettings = new AppMapProjectSettings(settings);
         var newApplicationSettings = new AppMapApplicationSettings(applicationSettings);
-        form.applySettingsTo(newApplicationSettings);
+        var newSecureApplicationSettings = new InlineSecureApplicationSettings();
+        form.applySettingsTo(newApplicationSettings, newSecureApplicationSettings);
 
-        return !settings.equals(newSettings) || !applicationSettings.equals(newApplicationSettings);
+        return !settings.equals(newSettings)
+                || !applicationSettings.equals(newApplicationSettings)
+                || !secureApplicationSettings.equals(newSecureApplicationSettings);
     }
 
     @Override
-    public void apply() throws ConfigurationException {
-        form.applySettingsTo(AppMapApplicationSettingsService.getInstance());
+    public void apply() {
+        form.applySettingsTo(AppMapApplicationSettingsService.getInstance(), AppMapSecureApplicationSettingsService.getInstance());
+    }
+
+    /**
+     * Secure settings which are not persisted to implement {@link #isModified()}.
+     */
+    @Data
+    private static class InlineSecureApplicationSettings implements AppMapSecureApplicationSettings {
+        String openAIKey;
+
+        public InlineSecureApplicationSettings() {
+        }
+
+        // copy constructor
+        public InlineSecureApplicationSettings(@NotNull AppMapSecureApplicationSettings settings) {
+            this.openAIKey = settings.getOpenAIKey();
+        }
     }
 }

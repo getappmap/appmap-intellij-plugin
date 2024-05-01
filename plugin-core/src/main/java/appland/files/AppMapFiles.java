@@ -80,6 +80,33 @@ public final class AppMapFiles {
     }
 
     /**
+     * Locate an existing appmap.yml file, searching in context and all its parent directories.
+     * This method does not use indexes, but needs to be invoked in a {@link ReadAction}.
+     * Only files on the local filesystem are considered.
+     *
+     * @param context     The file or directory to search from
+     * @param searchScope Scope to restrict the search for the appmap configuration file
+     * @return The appmap.yml file in the directory or its ancestors, if available
+     */
+    @RequiresReadLock
+    public static @Nullable VirtualFile findAppMapConfigFile(@NotNull VirtualFile context,
+                                                             @NotNull GlobalSearchScope searchScope) {
+        if (!context.isInLocalFileSystem()) {
+            return null;
+        }
+
+        var directory = context.isDirectory() ? context : context.getParent();
+        while (directory != null && directory.isValid() && searchScope.contains(directory)) {
+            var configFile = directory.findChild(APPMAP_YML);
+            if (configFile != null && !configFile.isDirectory()) {
+                return configFile;
+            }
+            directory = directory.getParent();
+        }
+        return null;
+    }
+
+    /**
      * @param appMapConfigFile appmap.yml file
      * @return The "appmap_dir" property value, if it's configured in the file
      */

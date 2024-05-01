@@ -10,11 +10,15 @@ import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.openapi.vfs.LocalFileSystem;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.search.FilenameIndex;
+import com.intellij.psi.search.GlobalSearchScope;
+import com.intellij.util.concurrency.annotations.RequiresReadLock;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * This class locates files by relative paths.
@@ -27,23 +31,46 @@ import java.util.List;
 public class FileLookup {
     /**
      * @param project      Current project
-     * @param base         The base file or directory. This usually is the currently opened appmap file.
+     * @param base         The base file or directory. This usually is the currently opened appmap file. {@code null} indicates that no context is available.
      * @param relativePath A relative path, it has to use / as delimiter.
      * @return The target file, if it was found
      */
-    @Nullable
-    public static VirtualFile findRelativeFile(@NotNull Project project, @NotNull VirtualFile base, @NotNull String relativePath) {
+    @RequiresReadLock
+    public static @Nullable VirtualFile findRelativeFile(@NotNull Project project,
+                                                         @Nullable VirtualFile base,
+                                                         @NotNull String relativePath) {
+        return findRelativeFile(project, null, base, relativePath);
+    }
+
+    /**
+     * @param project      Current project
+     * @param searchScope  Search scope to restrict the search if it's a relative path
+     * @param base         The base file or directory. This usually is the currently opened appmap file. {@code null} indicates that no context is available.
+     * @param relativePath A relative path, it has to use / as delimiter.
+     * @return The target file, if it was found
+     */
+    @RequiresReadLock
+    public static @Nullable VirtualFile findRelativeFile(@NotNull Project project,
+                                                         @Nullable GlobalSearchScope searchScope,
+                                                         @Nullable VirtualFile base,
+                                                         @NotNull String relativePath) {
+        var appliedSearchScope = AppMapSearchScopes.projectFilesWithExcluded(project);
+        if (searchScope != null) {
+            appliedSearchScope = appliedSearchScope.intersectWith(searchScope);
+        }
+
         // support the rare case of absolute paths
         if (isAbsolutePath(relativePath)) {
             return LocalFileSystem.getInstance().findFileByPath(relativePath);
         }
 
-        var baseDir = base.isDirectory() ? base : base.getParent();
-
         // 1st, try to locate relative to the base path
-        var file = baseDir.findFileByRelativePath(relativePath);
-        if (file != null) {
-            return file;
+        if (base != null) {
+            var baseDir = base.isDirectory() ? base : base.getParent();
+            var file = baseDir.findFileByRelativePath(relativePath);
+            if (file != null) {
+                return file;
+            }
         }
 
         if (DumbService.isDumb(project)) {
@@ -51,7 +78,11 @@ public class FileLookup {
             return null;
         }
 
-        for (var candidate : FilenameIndex.getVirtualFilesByName(filename(relativePath), true, AppMapSearchScopes.projectFilesWithExcluded(project))) {
+        // Candidates need to be sorted by length to make sure "a/searched/file" is returned and not "a/a/searched/file".
+        var candidates = FilenameIndex.getVirtualFilesByName(filename(relativePath), true, appliedSearchScope)
+                .stream()
+                .sorted(Comparator.comparingInt(o -> o.getPath().length()));
+        for (var candidate : candidates.collect(Collectors.toList())) {
             var parent = candidate.getParent();
             for (String expectedParentName : parentsReversed(relativePath)) {
                 if (parent == null || !FileUtil.namesEqual(expectedParentName, parent.getName())) {

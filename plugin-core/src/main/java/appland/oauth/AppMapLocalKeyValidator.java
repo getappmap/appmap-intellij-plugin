@@ -2,11 +2,11 @@ package appland.oauth;
 
 import appland.AppMapBundle;
 import com.intellij.openapi.ui.InputValidatorEx;
-import com.intellij.util.Base64;
 import org.jetbrains.annotations.NonNls;
 import org.jetbrains.annotations.Nullable;
 
 import java.nio.charset.StandardCharsets;
+import java.util.Base64;
 import java.util.regex.Pattern;
 
 class AppMapLocalKeyValidator implements InputValidatorEx {
@@ -31,7 +31,7 @@ class AppMapLocalKeyValidator implements InputValidatorEx {
     public @Nullable String getErrorText(@NonNls String inputString) {
         byte[] decoded;
         try {
-            decoded = Base64.decode(inputString.trim());
+            decoded = Base64.getDecoder().decode(inputString.trim());
         } catch (IllegalArgumentException e) {
             decoded = null;
         }

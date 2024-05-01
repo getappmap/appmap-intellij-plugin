@@ -64,4 +64,12 @@ public interface AppLandDownloadService {
      * Starts tasks to download the latest available versions of the needed CLI binaries.
      */
     void queueDownloadTasks(@NotNull Project project) throws IOException;
+
+    /**
+     * Fetch metadata about the downloaded version
+     *
+     * @param type Type of command line tool
+     * @return Available version or {@code null} if the retrieval was unsuccessful
+     */
+   @Nullable String findLatestDownloadedVersion(@NotNull CliTool type);
 }

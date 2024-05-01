@@ -1,6 +1,7 @@
 package appland.rpcService;
 
 import com.intellij.openapi.vfs.VirtualFile;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
 
@@ -21,6 +22,7 @@ public abstract class AppLandJsonRpcListenerAdapter implements AppLandJsonRpcLis
     }
 
     @Override
-    public void serverConfigurationUpdated(Collection<VirtualFile> appMapConfigFiles) {
+    public void serverConfigurationUpdated(@NotNull Collection<VirtualFile> contentRoots,
+                                           @NotNull Collection<VirtualFile> appMapConfigFiles) {
     }
 }

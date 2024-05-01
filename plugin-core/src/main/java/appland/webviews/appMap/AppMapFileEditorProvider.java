@@ -5,8 +5,10 @@ import appland.files.AppMapFiles;
 import appland.settings.AppMapProjectSettingsService;
 import appland.webviews.WebviewEditorProvider;
 import com.intellij.openapi.fileEditor.FileEditor;
+import com.intellij.openapi.fileEditor.FileEditorManager;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
+import com.intellij.util.concurrency.annotations.RequiresEdt;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -20,6 +22,24 @@ public class AppMapFileEditorProvider extends WebviewEditorProvider {
 
     public AppMapFileEditorProvider() {
         super(TYPE_ID);
+    }
+
+    /**
+     * Opens the given file in the AppMap editor.
+     * If {@code editorState} is given, then this state will be applied to the editor.
+     *
+     * @param project     Current project
+     * @param virtualFile AppMap file to open
+     * @param editorState Optional state to apply to the new editor
+     */
+    @RequiresEdt
+    public static void openAppMap(@NotNull Project project,
+                                  @NotNull VirtualFile virtualFile,
+                                  @Nullable AppMapFileEditorState editorState) {
+        var appMapEditors = FileEditorManager.getInstance(project).openFile(virtualFile, true);
+        if (appMapEditors.length == 1 && appMapEditors[0] instanceof AppMapFileEditor && editorState != null) {
+            ((AppMapFileEditor) appMapEditors[0]).setWebViewState(editorState);
+        }
     }
 
     @Override

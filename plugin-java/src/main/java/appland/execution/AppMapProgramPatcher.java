@@ -9,7 +9,7 @@ import org.jetbrains.annotations.NotNull;
 /**
  * Our own extension to patch Java program parameters.
  * We can't use {@link com.intellij.execution.runners.JavaProgramPatcher}, because its patch method
- * is always executed in a ReadAction. Our own patching must outside a ReadAction, because we need to run
+ * is always executed in a ReadAction. Our own patching must happen outside a ReadAction, because we need to run
  * tasks.
  */
 public interface AppMapProgramPatcher {

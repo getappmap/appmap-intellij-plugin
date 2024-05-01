@@ -2,6 +2,7 @@ package appland.rpcService;
 
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.util.messages.Topic;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
 
@@ -14,5 +15,6 @@ public interface AppLandJsonRpcListener {
 
     void serverRestarted();
 
-    void serverConfigurationUpdated(Collection<VirtualFile> appMapConfigFiles);
+    void serverConfigurationUpdated(@NotNull Collection<VirtualFile> contentRoots,
+                                    @NotNull Collection<VirtualFile> appMapConfigFiles);
 }
