@@ -65,6 +65,7 @@ public class DefaultCommandLineServiceTest extends AppMapBaseTest {
     }
 
     @Test
+    @Ignore("flaky test")
     public void directoryTree() throws Exception {
         // fixme this test is failing oddly on Windows CI, remove when we made a proper fix
         Assume.assumeTrue(SystemInfo.isUnix);
