@@ -6,9 +6,10 @@ import appland.webviews.navie.NavieEditorProvider;
 import com.intellij.ide.plugins.newui.ColorButton;
 import com.intellij.openapi.Disposable;
 import com.intellij.openapi.actionSystem.DataContext;
+import com.intellij.openapi.editor.ex.util.EditorUtil;
+import com.intellij.openapi.fileEditor.FileEditorManager;
 import com.intellij.openapi.project.Project;
 import com.intellij.ui.components.JBLabel;
-import com.intellij.util.ui.JBInsets;
 import com.intellij.util.ui.JBUI;
 import com.intellij.util.ui.UIUtil;
 import org.jetbrains.annotations.NotNull;
@@ -16,7 +17,7 @@ import org.jetbrains.annotations.NotNull;
 import javax.swing.*;
 
 public class NaviePanel extends AppMapContentPanel {
-    private final Project project;
+    private final @NotNull Project project;
 
     public NaviePanel(@NotNull Project project, @NotNull Disposable parent) {
         super(true);
@@ -36,7 +37,16 @@ public class NaviePanel extends AppMapContentPanel {
             {
                 setText(AppMapBundle.get("toolwindow.appmap.navie.newNavieChat"));
 
-                addActionListener(e -> NavieEditorProvider.openEditor(project, DataContext.EMPTY_CONTEXT));
+                addActionListener(e -> {
+                    // Provide context of current editor, even if it's not in focus.
+                    // We want to provide the selection of the editor to Navie.
+                    var currentEditor = FileEditorManager.getInstance(project).getSelectedTextEditor();
+                    var editorContext = currentEditor != null
+                            ? EditorUtil.getEditorDataContext(currentEditor)
+                            : DataContext.EMPTY_CONTEXT;
+
+                    NavieEditorProvider.openEditor(project, editorContext);
+                });
 
                 // We're using theme colors of similar UI to choose matching colors
                 setBgColor(JBUI.CurrentTheme.GotItTooltip.background(true));
