@@ -6,20 +6,17 @@ import appland.actions.StopAppMapRecordingAction;
 import appland.startup.FirstAppMapLaunchStartupActivity;
 import appland.webviews.navie.NavieEditorProvider;
 import com.intellij.ide.BrowserUtil;
-import com.intellij.notification.Notification;
-import com.intellij.notification.NotificationAction;
-import com.intellij.notification.NotificationListener;
-import com.intellij.notification.NotificationType;
+import com.intellij.notification.*;
 import com.intellij.openapi.actionSystem.DataContext;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.application.ModalityState;
 import com.intellij.openapi.project.Project;
-import com.intellij.openapi.project.ProjectManager;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.util.ui.EdtInvocationManager;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Arrays;
 import java.util.function.Consumer;
 
 import static appland.AppMapBundle.lazy;
@@ -175,11 +172,25 @@ public final class AppMapNotifications {
     }
 
     public static void showReloadProjectNotification(@NotNull Project project) {
+        var content = AppMapBundle.get("notification.reloadProject.content");
+
+        // don't show again if the reload notification is already displayed
+        var manager = NotificationsManager.getNotificationsManager();
+        var appMapNotifications = manager.getNotificationsOfType(AppMapFullContentNotification.class, project);
+        var isReloadNotificationShown = Arrays.stream(appMapNotifications).anyMatch(notification -> {
+            return content.equals(notification.getContent())
+                    && !notification.isExpired()
+                    && notification.getBalloon() != null;
+        });
+        if (isReloadNotificationShown) {
+            return;
+        }
+
         EdtInvocationManager.invokeLaterIfNeeded(() -> {
             var notification = new AppMapFullContentNotification(
                     SETTINGS_NOTIFICATIONS_ID, null,
                     null, null,
-                    AppMapBundle.get("notification.reloadProject.content"),
+                    content,
                     NotificationType.INFORMATION, null
             );
             notification.notify(project);
