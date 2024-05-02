@@ -24,7 +24,6 @@ export function mountWebview() {
             appmapYmlPresent: this.appmapYmlPresent,
             targetAppmapData: initialData.targetAppmapData,
             targetAppmapFsPath: initialData.targetAppmapFsPath,
-            disableLlmConfig: true,
           },
         });
       },
@@ -65,10 +64,9 @@ export function mountWebview() {
     app.$on('open-install-instructions', () => vscode.postMessage({command: 'open-install-instructions'}))
     app.$on('open-record-instructions', () => vscode.postMessage({command: 'open-record-instructions'}))
     app.$on('open-appmap', (path) => vscode.postMessage({command: 'open-appmap', path}))
+    app.$on('open-location', (path, directory) => vscode.postMessage({command: 'open-location', path, directory}))
+    app.$on('select-llm-option', (choice) => vscode.postMessage({command: 'select-llm-option', choice}));
     app.$on('show-appmap-tree', () => vscode.postMessage({command: 'show-appmap-tree'}));
-    app.$on('open-location', (path, directory) => {
-      return vscode.postMessage({command: 'open-location', path, directory});
-    })
   });
 
   vscode.postMessage({ command: "ready" });

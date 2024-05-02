@@ -26,7 +26,7 @@
                   class="appland.cli.RestartServicesAfterApiChangeListener"
                   activeInTestMode="false"/>
         <listener topic="appland.settings.AppMapSettingsListener"
-                  class="appland.settings.OpenAIReloadProjectListener"
+                  class="appland.settings.AppMapNavieSettingsReloadProjectListener"
                   activeInTestMode="false"/>
     </applicationListeners>
 
@@ -161,6 +161,7 @@
         <action id="appmap.generateOpenAPI" class="appland.actions.GenerateOpenApiAction"/>
 
         <action id="appmap.openNavie" class="appland.actions.OpenAppMapNavieAction"/>
+        <action id="appmap.navie.openAIKey" class="appland.actions.SetNavieOpenAiKeyAction"/>
 
         <action id="appmap.pluginStatus" class="appland.actions.PluginStatus"/>
 
@@ -181,6 +182,7 @@
             <reference ref="appMapLogin"/>
             <reference ref="appMapLogout"/>
             <reference ref="appMapLoginByKey"/>
+            <reference ref="appmap.navie.openAIKey"/>
             <separator/>
             <reference ref="appmap.pluginStatus"/>
 

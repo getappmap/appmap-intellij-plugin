@@ -42,7 +42,7 @@ public class AppMapProjectConfigurable implements Configurable {
         var newSettings = new AppMapProjectSettings(settings);
         var newApplicationSettings = new AppMapApplicationSettings(applicationSettings);
         var newSecureApplicationSettings = new InlineSecureApplicationSettings();
-        form.applySettingsTo(newApplicationSettings, newSecureApplicationSettings);
+        form.applySettingsTo(newApplicationSettings, newSecureApplicationSettings, false);
 
         return !settings.equals(newSettings)
                 || !applicationSettings.equals(newApplicationSettings)
@@ -51,7 +51,10 @@ public class AppMapProjectConfigurable implements Configurable {
 
     @Override
     public void apply() {
-        form.applySettingsTo(AppMapApplicationSettingsService.getInstance(), AppMapSecureApplicationSettingsService.getInstance());
+        form.applySettingsTo(
+                AppMapApplicationSettingsService.getInstance(),
+                AppMapSecureApplicationSettingsService.getInstance(),
+                true);
     }
 
     /**

@@ -1,6 +1,7 @@
 package appland.webviews.navie;
 
 import appland.AppMapBundle;
+import appland.actions.SetNavieOpenAiKeyAction;
 import appland.files.AppMapFileChangeListener;
 import appland.files.AppMapFiles;
 import appland.files.FileLookup;
@@ -9,8 +10,10 @@ import appland.index.AppMapMetadata;
 import appland.index.AppMapMetadataService;
 import appland.installGuide.InstallGuideEditorProvider;
 import appland.installGuide.InstallGuideViewPage;
+import appland.rpcService.AppLandJsonRpcService;
 import appland.settings.AppMapApplicationSettingsService;
 import appland.settings.AppMapProjectSettingsService;
+import appland.settings.AppMapSecureApplicationSettingsService;
 import appland.settings.AppMapSettingsListener;
 import appland.toolwindow.AppMapToolWindowFactory;
 import appland.utils.GsonUtils;
@@ -24,6 +27,7 @@ import com.google.gson.annotations.SerializedName;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.application.ModalityState;
 import com.intellij.openapi.application.ReadAction;
+import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.fileEditor.OpenFileDescriptor;
 import com.intellij.openapi.progress.ProgressIndicator;
 import com.intellij.openapi.progress.Task;
@@ -49,11 +53,14 @@ import java.time.Instant;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.Executor;
 import java.util.stream.Collectors;
 
 public class NavieEditor extends WebviewEditor<Void> {
+    private static final Logger LOG = Logger.getInstance(NavieEditor.class);
+
     // debounce requests to update the most recent updates by 1s
     private final SingleAlarm refreshMostRecentAppMapsAlarm = new SingleAlarm(
             this::updateMostRecentAppMaps,
@@ -69,6 +76,7 @@ public class NavieEditor extends WebviewEditor<Void> {
                 "open-install-instructions",
                 "open-location",
                 "open-record-instructions",
+                "select-llm-option",
                 "show-appmap-tree"));
     }
 
@@ -162,6 +170,12 @@ public class NavieEditor extends WebviewEditor<Void> {
                     InstallGuideEditorProvider.open(project, InstallGuideViewPage.RecordAppMaps);
                 }, ModalityState.defaultModalityState());
                 break;
+            case "select-llm-option":
+                var choice = message != null ? message.get("choice") : null;
+                if (choice != null) {
+                    handleSelectLlmOption(choice.getAsString());
+                }
+                break;
             case "show-appmap-tree":
                 ApplicationManager.getApplication().invokeLater(() -> {
                     AppMapToolWindowFactory.showAppMapTreePanel(project);
@@ -250,6 +264,33 @@ public class NavieEditor extends WebviewEditor<Void> {
                 // scrolls to the start line, the API does not support scrolling to a range
                 new OpenFileDescriptor(project, virtualFile, startLine, 0).navigate(true);
             }, ModalityState.defaultModalityState());
+        }
+    }
+
+    private void handleSelectLlmOption(@NotNull String choice) {
+        switch (choice) {
+            // Clear LLM environment settings and remove OpenAPI key
+            case "default": {
+                var environment = new HashMap<>(AppMapApplicationSettingsService.getInstance().getCliEnvironment());
+                for (var dropped : AppLandJsonRpcService.LLM_ENV_VARIABLES) {
+                    environment.remove(dropped);
+                }
+                AppMapApplicationSettingsService.getInstance().setCliEnvironment(environment);
+                AppMapSecureApplicationSettingsService.getInstance().setOpenAIKey(null);
+                return;
+            }
+            // Ask user for OpenAI API key
+            case "own-key": {
+                ApplicationManager.getApplication().invokeLater(() -> {
+                    SetNavieOpenAiKeyAction.showInputDialog(project);
+                }, ModalityState.defaultModalityState());
+                return;
+            }
+            // Unused, the webview opens a browser windowK
+            case "own-model":
+                return;
+            default:
+                LOG.warn("Unknown type passed to select-llm-option: " + choice);
         }
     }
 
