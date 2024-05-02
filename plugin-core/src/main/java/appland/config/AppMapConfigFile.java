@@ -31,11 +31,14 @@ public class AppMapConfigFile {
     private static final String NAME_PROPERTY = "name";
     private static final String APPMAP_DIR_PROPERTY = "appmap_dir";
     private static final String PACKAGES_PROPERTY = "packages";
+    private static final String LANGUAGE_PROPERTY = "language";
+    private static final String LANGUAGE_VALUE = "java";
 
     private final @NotNull ObjectNode yamlData;
 
     public AppMapConfigFile() {
         this(new ObjectNode(JsonNodeFactory.instance));
+        yamlData.set(LANGUAGE_PROPERTY, new TextNode(LANGUAGE_VALUE));
     }
 
     public @Nullable String getName() {
@@ -102,6 +105,13 @@ public class AppMapConfigFile {
                 .map(Package::new)
                 .collect(Collectors.toList());
         yamlData.set(PACKAGES_PROPERTY, YamlUtils.YAML.valueToTree(packageNodes));
+    }
+
+    public @Nullable String getLanguage() {
+        if (yamlData.hasNonNull(LANGUAGE_PROPERTY)) {
+            return yamlData.get(LANGUAGE_PROPERTY).asText();
+        }
+        return null;
     }
 
     public void writeTo(@NotNull Path filePath) throws IOException {
