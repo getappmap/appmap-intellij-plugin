@@ -160,7 +160,12 @@
 
         <action id="appmap.generateOpenAPI" class="appland.actions.GenerateOpenApiAction"/>
 
-        <action id="appmap.openNavie" class="appland.actions.OpenAppMapNavieAction"/>
+        <action id="appmap.openNavie" class="appland.actions.OpenAppMapNavieAction">
+            <keyboard-shortcut keymap="$default"
+                               first-keystroke="alt A" second-keystroke="N"/>
+            <keyboard-shortcut replace-all="true"
+                               keymap="Mac OS X" first-keystroke="meta A" second-keystroke="N"/>
+        </action>
         <action id="appmap.navie.openAIKey" class="appland.actions.SetNavieOpenAiKeyAction"/>
 
         <action id="appmap.pluginStatus" class="appland.actions.PluginStatus"/>
