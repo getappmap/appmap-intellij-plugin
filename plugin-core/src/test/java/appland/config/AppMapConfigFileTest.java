@@ -111,4 +111,10 @@ public class AppMapConfigFileTest extends AppMapBaseTest {
         config.setName("my AppMap name");
         assertEquals("my AppMap name", config.getName());
     }
+
+    @Test
+    public void languageProperty() {
+        var config = new AppMapConfigFile();
+        assertEquals(config.getLanguage(), "java");
+    }
 }

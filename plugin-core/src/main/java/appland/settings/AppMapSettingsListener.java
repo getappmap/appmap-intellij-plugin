@@ -1,6 +1,9 @@
 package appland.settings;
 
 import com.intellij.util.messages.Topic;
+import org.jetbrains.annotations.NotNull;
+
+import java.util.Set;
 
 public interface AppMapSettingsListener {
     @Topic.AppLevel
@@ -25,5 +28,8 @@ public interface AppMapSettingsListener {
     }
 
     default void openAIKeyChange() {
+    }
+
+    default void cliEnvironmentChanged(@NotNull Set<String> modifiedKeys) {
     }
 }

@@ -29,11 +29,16 @@ class AppMapProjectSettingsPanel {
 
     fun applySettingsTo(
         applicationSettings: AppMapApplicationSettings,
-        secureApplicationSettings: AppMapSecureApplicationSettings
+        secureApplicationSettings: AppMapSecureApplicationSettings,
+        notify: Boolean,
     ) {
         applicationSettings.isEnableTelemetry = enableTelemetry.isSelected
-        applicationSettings.cliEnvironment = cliEnvironment.envs
         applicationSettings.isCliPassParentEnv = cliEnvironment.isPassParentEnvs
+        if (notify) {
+            applicationSettings.setCliEnvironmentNotifying(cliEnvironment.envs)
+        } else {
+            applicationSettings.cliEnvironment = cliEnvironment.envs
+        }
 
         secureApplicationSettings.openAIKey = Strings.nullize(openAIKey.text)
     }

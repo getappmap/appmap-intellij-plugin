@@ -1,4 +1,6 @@
 name: Build
+env:
+    GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 on:
     pull_request:
     push:
@@ -39,16 +41,12 @@ jobs:
 
             - name: Run Linters and Test (Linux and macOS)
               if: runner.os != 'Windows'
-              env:
-                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
               shell: bash
               run: ./gradlew check
 
             # Termination of AppMap CLI processes is failing with IC-2021.3 for unknown reasons (process.destroy() etc.)
             - name: Run Linters and Test with 2023.2 (Windows)
               if: runner.os == 'Windows'
-              env:
-                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
               shell: bash
               run: ./gradlew check -PideVersion=IC-2023.2.1
 
