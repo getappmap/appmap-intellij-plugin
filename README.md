@@ -43,11 +43,9 @@ Navie provides different modes of interaction to assist you with your code and p
 **Via the JetBrains Tools menu option**
 You can open Navie by clicking on the JetBrains menu option *Tools -> AppMap*. From there you can select *Explain with AppMap Navie*.
 
-![image](https://github.com/getappmap/appmap-intellij-plugin/assets/1229326/deab1c3e-6154-41c4-aa3e-3d3393bbd264)
+![image](https://github.com/getappmap/appmap-intellij-plugin/assets/1229326/923faf79-39ba-4412-ade0-8125d13604b2)
 
 **Ask Navie about a specific AppMap visualization**: You can target your question more specifically to an AppMap, representing a test case, API call, or other interaction by clicking the “Ask Navie” box on any AppMap you open.
-
-![image](https://github.com/getappmap/appmap-intellij-plugin/assets/1229326/96d37a05-a4e1-470f-a604-bd666f46dcfd)
 
 ## Bring your own key or model for Navie
 
