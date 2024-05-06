@@ -47,6 +47,8 @@ You can open Navie by clicking on the JetBrains menu option *Tools -> AppMap*. F
 
 **Ask Navie about a specific AppMap visualization**: You can target your question more specifically to an AppMap, representing a test case, API call, or other interaction by clicking the “Ask Navie” box on any AppMap you open.
 
+![image](https://github.com/getappmap/appmap-intellij-plugin/assets/1229326/b8199e03-32f0-4e38-a14e-624db7b7ac9e)
+
 ## Bring your own key or model for Navie
 
 In order to configure Navie for your own LLM, certain environment variables need to be set for AppMap services. Refer to the [AppMap documentation](https://appmap.io/docs/navie/bring-your-own-model.html) for details on how to do that.
