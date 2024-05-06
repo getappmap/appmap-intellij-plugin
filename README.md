@@ -11,6 +11,7 @@ AppMap is a developer tools platform powered by runtime analysis and AI. It's co
 
 By using AppMap data, Navie is the first AI code architect with the context to understand how your app works when it runs, like a principal engineer or software architect. AppMap data provides Navie with accurate information about application behavior, APIs, database queries, and more, providing valuable context so you can ask more challenging questions and get better answers.
 
+![image](https://github.com/getappmap/appmap-intellij-plugin/assets/1229326/ed36497e-d21d-4b79-be18-5fe4756f4649)
 
 ## Get started
 1. **Install [the AppMap Plugin](https://plugins.jetbrains.com/plugin/16701-appmap)** from within the code editor or from the marketplace.  
@@ -42,8 +43,11 @@ Navie provides different modes of interaction to assist you with your code and p
 **Via the JetBrains Tools menu option**
 You can open Navie by clicking on the JetBrains menu option *Tools -> AppMap*. From there you can select *Explain with AppMap Navie*.
 
+![image](https://github.com/getappmap/appmap-intellij-plugin/assets/1229326/deab1c3e-6154-41c4-aa3e-3d3393bbd264)
+
 **Ask Navie about a specific AppMap visualization**: You can target your question more specifically to an AppMap, representing a test case, API call, or other interaction by clicking the “Ask Navie” box on any AppMap you open.
 
+![image](https://github.com/getappmap/appmap-intellij-plugin/assets/1229326/96d37a05-a4e1-470f-a604-bd666f46dcfd)
 
 ## Bring your own key or model for Navie
 
