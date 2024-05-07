@@ -9,7 +9,6 @@ import com.intellij.openapi.roots.ModuleRootManager;
 import com.intellij.openapi.roots.ProjectRootManager;
 import com.intellij.openapi.util.text.Strings;
 import com.intellij.openapi.vfs.LocalFileSystem;
-import com.intellij.openapi.vfs.VfsUtilCore;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.JavaDirectoryService;
 import com.intellij.psi.PsiDirectory;
@@ -21,6 +20,7 @@ import com.intellij.util.PathUtil;
 import com.intellij.util.concurrency.annotations.RequiresReadLock;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.jetbrains.jps.model.java.JavaModuleSourceRootTypes;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -220,8 +220,13 @@ final class AppMapJavaPackageConfig {
                 .flatMap(m -> Arrays.stream(ModuleRootManager.getInstance(m).getContentRoots()))
                 .collect(Collectors.toUnmodifiableSet());
 
-        return Arrays.stream(ProjectRootManager.getInstance(module.getProject()).getContentSourceRoots())
-                .filter(sourceRoot -> VfsUtilCore.isUnder(sourceRoot, contentRoots))
+        ProjectRootManager rootManager = ProjectRootManager.getInstance(module.getProject());
+        var fileIndex = rootManager.getFileIndex();
+        VirtualFile[] contentSourceRoots = rootManager.getContentSourceRoots();
+        return Arrays.stream(contentSourceRoots)
+                .filter(sourceRoot -> {
+                    return fileIndex.isUnderSourceRootOfType(sourceRoot, JavaModuleSourceRootTypes.SOURCES);
+                })
                 .toArray(VirtualFile[]::new);
     }
 }

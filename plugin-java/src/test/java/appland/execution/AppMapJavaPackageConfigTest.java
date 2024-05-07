@@ -11,9 +11,11 @@ import com.intellij.execution.jar.JarApplicationConfigurationType;
 import com.intellij.openapi.application.WriteAction;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.search.GlobalSearchScopes;
+import com.intellij.testFramework.PsiTestUtil;
 import com.intellij.testFramework.fixtures.TempDirTestFixture;
 import com.intellij.testFramework.fixtures.impl.TempDirTestFixtureImpl;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.jps.model.java.JavaResourceRootType;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -62,6 +64,26 @@ public class AppMapJavaPackageConfigTest extends AppMapBaseTest {
             var scope = GlobalSearchScopes.directoryScope(getProject(), contextDir, true);
             var locatedConfigFile = AppMapJavaPackageConfig.findAndUpdateAppMapConfig(contextFile, scope);
             assertNull("Update must not write to a file outside the project", locatedConfigFile);
+        });
+    }
+
+    @Test
+    public void ignoreResources() throws Exception {
+        var rootDir = myFixture.copyDirectoryToProject("projects/with_resources", "project");
+        var myModule = getModule();
+        PsiTestUtil.addSourceRoot(myModule, rootDir.findFileByRelativePath("mod1/src/main/java"));
+        PsiTestUtil.addSourceRoot(myModule, rootDir.findFileByRelativePath("mod2/src/main/java"));
+        PsiTestUtil.addSourceRoot(myModule, rootDir.findFileByRelativePath("mod1/src/main/resources"), JavaResourceRootType.RESOURCE);
+
+        var expectedConfig = new AppMapConfigFile();
+        expectedConfig.setName("ignoreResources");
+        expectedConfig.setPackages(List.of("com.example.application", "com.example.controllers", "com.example.models"));
+        expectedConfig.setAppMapDir("tmp/appmap");
+
+        ModuleTestUtils.withContentRoot(getModule(), rootDir, () -> {
+            var configFilePath = AppMapJavaPackageConfig.createAppMapConfig(getModule(), rootDir, Path.of("tmp/appmap"));
+            var config = AppMapConfigFile.parseConfigFile(configFilePath);
+            assertEquals(expectedConfig, config);
         });
     }
 
