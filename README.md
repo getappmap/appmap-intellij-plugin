@@ -24,7 +24,7 @@ By using AppMap data, Navie is the first AI code architect with the context to u
 ## Examples
 Here are some examples of Navie making context-aware suggestions, providing tactical solutions, and reasoning about the larger context of the specific code being worked on.
 
-1. [Understand Complex Data Flows and add a new feature in Java Spring](https://appmap.io/navie/how-to/understand-complex-data-flows-and-add-new-features-in-java-spring/)
+1. [Understand complex data flows and add a new feature in Java Spring](https://appmap.io/navie/how-to/understand-complex-data-flows-and-add-new-features-in-java-spring/)
 2. [Find and fix slow API endpoints in a FastAPI app](https://appmap.io/navie/how-to/fix-slow-api-endpoints-in-a-fastapi-app-with-navie/)
 3. [Find and fix a database performance issue in Ruby on Rails](https://appmap.io/navie/how-to/find-and-fix-a-database-performance-issue-in-ruby-on-rails/)
 4. [Quickly add a new feature to a complex Python app](https://appmap.io/navie/how-to/adding-a-new-feature-to-a-complex-python-application/)
