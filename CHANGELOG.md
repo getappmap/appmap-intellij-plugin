@@ -1,5 +1,16 @@
 AppMap Plugin Changelog
 
+## [0.66.0](https://github.com/getappmap/appmap-intellij-plugin/compare/v0.65.0...v0.66.0) (2024-05-09)
+
+
+### Features
+
+-  provide selection of current editor to Navie if it's opened from the tool window ([93a0969]())-  support to configure the model used by Navie ([e8c8374]())
+
+### Bug Fixes
+
+-  set language property in default config ([dab9b54]())
+
 ## [0.65.0](https://github.com/getappmap/appmap-intellij-plugin/compare/v0.64.0...v0.65.0) (2024-05-01)
 
 
