@@ -4,6 +4,7 @@ import appland.config.AppMapConfigFile;
 import appland.files.AppMapFiles;
 import com.intellij.openapi.application.ReadAction;
 import com.intellij.openapi.module.Module;
+import com.intellij.openapi.module.ModuleManager;
 import com.intellij.openapi.module.ModuleUtil;
 import com.intellij.openapi.roots.ModuleRootManager;
 import com.intellij.openapi.roots.ProjectRootManager;
@@ -26,6 +27,9 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.util.*;
 import java.util.stream.Collectors;
+
+import com.intellij.openapi.project.Project;
+import com.intellij.openapi.vfs.VfsUtilCore;
 
 /**
  * Manages the content of appmap.yml files for Java projects.
@@ -220,13 +224,10 @@ final class AppMapJavaPackageConfig {
                 .flatMap(m -> Arrays.stream(ModuleRootManager.getInstance(m).getContentRoots()))
                 .collect(Collectors.toUnmodifiableSet());
 
-        ProjectRootManager rootManager = ProjectRootManager.getInstance(module.getProject());
-        var fileIndex = rootManager.getFileIndex();
-        VirtualFile[] contentSourceRoots = rootManager.getContentSourceRoots();
-        return Arrays.stream(contentSourceRoots)
-                .filter(sourceRoot -> {
-                    return fileIndex.isUnderSourceRootOfType(sourceRoot, JavaModuleSourceRootTypes.SOURCES);
-                })
+        return ProjectRootManager.getInstance(module.getProject())
+                .getModuleSourceRoots(JavaModuleSourceRootTypes.SOURCES)
+                .stream()
+                .filter(sourceRoot -> VfsUtilCore.isUnder(sourceRoot, contentRoots))
                 .toArray(VirtualFile[]::new);
     }
 }
