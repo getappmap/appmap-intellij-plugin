@@ -32,7 +32,7 @@ public class AppMapJavaPackageConfigTest extends AppMapBaseTest {
 
     @Test
     public void systemIndependentAppMapDir() {
-        var config = AppMapJavaPackageConfig.generateAppMapConfig(getModule(), "tmp\\appmap");
+        var config = AppMapJavaPackageConfig.generateAppMapConfig(getProject(), createTempDir("appmap-root"), "tmp\\appmap");
         assertEquals("tmp/appmap", config.getAppMapDir());
     }
 
