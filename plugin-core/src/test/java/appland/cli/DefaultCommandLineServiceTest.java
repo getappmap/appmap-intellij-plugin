@@ -321,7 +321,7 @@ public class DefaultCommandLineServiceTest extends AppMapBaseTest {
 
         var refreshLatch = new CountDownLatch(1);
         var bus = ApplicationManager.getApplication().getMessageBus().connect(getTestRootDisposable());
-        bus.subscribe(AppLandCommandLineListener.TOPIC, refreshLatch::countDown);
+        bus.subscribe(AppLandCommandLineListener.TOPIC, (AppLandCommandLineListener) refreshLatch::countDown);
         try {
             var content = appMapPath != null ? "appmap_dir: " + appMapPath + "\n" : "";
             return VfsTestUtil.createFile(directory, "appmap.yml", content);
