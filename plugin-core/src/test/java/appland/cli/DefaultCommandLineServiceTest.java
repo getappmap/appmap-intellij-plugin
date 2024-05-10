@@ -4,6 +4,7 @@ import appland.AppMapBaseTest;
 import appland.files.AppMapFiles;
 import appland.settings.AppMapApplicationSettingsService;
 import appland.settings.AppMapSettingsListener;
+import appland.testRules.ResetIdeHttpProxyRule;
 import appland.utils.ModuleTestUtils;
 import com.intellij.execution.ExecutionException;
 import com.intellij.execution.configurations.PtyCommandLine;
@@ -20,12 +21,11 @@ import com.intellij.testFramework.VfsTestUtil;
 import com.intellij.testFramework.fixtures.TempDirTestFixture;
 import com.intellij.testFramework.fixtures.impl.TempDirTestFixtureImpl;
 import com.intellij.util.ThrowableConsumer;
+import com.intellij.util.net.HttpConfigurable;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.junit.Assume;
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.*;
+import org.junit.rules.TestRule;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -40,6 +40,9 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 
 public class DefaultCommandLineServiceTest extends AppMapBaseTest {
+    @Rule
+    public final TestRule resetProxyRule = new ResetIdeHttpProxyRule();
+
     @Override
     protected TempDirTestFixture createTempDirTestFixture() {
         return new TempDirTestFixtureImpl();
@@ -291,6 +294,74 @@ public class DefaultCommandLineServiceTest extends AppMapBaseTest {
             waitForProcessStatus(false, newRootA, true);
             assertEmptyRoots();
         });
+    }
+
+    @Test
+    public void noProxySettings() {
+        HttpConfigurable.getInstance().USE_HTTP_PROXY = false;
+        HttpConfigurable.getInstance().PROXY_HOST = "my.proxy.host";
+        HttpConfigurable.getInstance().PROXY_PORT = 8080;
+        HttpConfigurable.getInstance().PROXY_EXCEPTIONS = "localhost*,127.*,*.example.com";
+
+        assertEquals(Map.of(), DefaultCommandLineService.createProxyEnvironment());
+    }
+
+    @Test
+    public void proxySettingsSocksIsUnsupported() {
+        HttpConfigurable.getInstance().USE_HTTP_PROXY = true;
+        HttpConfigurable.getInstance().PROXY_TYPE_IS_SOCKS = true;
+        HttpConfigurable.getInstance().PROXY_HOST = "my.proxy.host";
+        HttpConfigurable.getInstance().PROXY_PORT = 8080;
+
+        assertEquals(Map.of(), DefaultCommandLineService.createProxyEnvironment());
+    }
+
+    @Test
+    public void proxySettingsEnvironmentNoAuthentication() {
+        HttpConfigurable.getInstance().USE_HTTP_PROXY = true;
+        HttpConfigurable.getInstance().PROXY_HOST = "my.proxy.host";
+        HttpConfigurable.getInstance().PROXY_PORT = 8080;
+        HttpConfigurable.getInstance().PROXY_EXCEPTIONS = "localhost*,127.*,*.example.com";
+
+        assertEquals(Map.of(
+                "http_proxy", "http://my.proxy.host:8080",
+                "https_proxy", "http://my.proxy.host:8080",
+                "no_proxy", "localhost*,127.*,*.example.com"
+        ), DefaultCommandLineService.createProxyEnvironment());
+    }
+
+    @Test
+    public void proxySettingsEnvironmentWithAuthentication() {
+        HttpConfigurable.getInstance().USE_HTTP_PROXY = true;
+        HttpConfigurable.getInstance().PROXY_HOST = "my.proxy.host";
+        HttpConfigurable.getInstance().PROXY_PORT = 8080;
+        HttpConfigurable.getInstance().KEEP_PROXY_PASSWORD = true;
+        HttpConfigurable.getInstance().setProxyLogin("username");
+        HttpConfigurable.getInstance().setPlainProxyPassword("secure_password");
+        HttpConfigurable.getInstance().PROXY_EXCEPTIONS = "localhost*,127.*,*.example.com";
+
+        assertEquals(Map.of(
+                "http_proxy", "http://username:secure_password@my.proxy.host:8080",
+                "https_proxy", "http://username:secure_password@my.proxy.host:8080",
+                "no_proxy", "localhost*,127.*,*.example.com"
+        ), DefaultCommandLineService.createProxyEnvironment());
+    }
+
+    @Test
+    public void proxySettingsEnvironmentWithEmptyPasswordAuthentication() {
+        HttpConfigurable.getInstance().USE_HTTP_PROXY = true;
+        HttpConfigurable.getInstance().PROXY_HOST = "my.proxy.host";
+        HttpConfigurable.getInstance().PROXY_PORT = 8080;
+        HttpConfigurable.getInstance().KEEP_PROXY_PASSWORD = true;
+        HttpConfigurable.getInstance().setProxyLogin("username");
+        HttpConfigurable.getInstance().setPlainProxyPassword(null);
+        HttpConfigurable.getInstance().PROXY_EXCEPTIONS = "localhost*,127.*,*.example.com";
+
+        assertEquals(Map.of(
+                "http_proxy", "http://username:@my.proxy.host:8080",
+                "https_proxy", "http://username:@my.proxy.host:8080",
+                "no_proxy", "localhost*,127.*,*.example.com"
+        ), DefaultCommandLineService.createProxyEnvironment());
     }
 
     private void setupAndAssertProcessRestart(@NotNull Function<VirtualFile, KillableProcessHandler> processForRoot) throws Exception {
