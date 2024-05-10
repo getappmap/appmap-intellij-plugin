@@ -244,9 +244,13 @@ public class DefaultAppLandDownloadService implements AppLandDownloadService {
     private static void notifyDownloadFinished(@NotNull CliTool type, boolean success) {
         var application = ApplicationManager.getApplication();
         if (!application.isDisposed()) {
-            application.getMessageBus()
-                    .syncPublisher(AppLandDownloadListener.TOPIC)
-                    .downloadFinished(type, success);
+            application.executeOnPooledThread(() -> {
+                if (!application.isDisposed()) {
+                    application.getMessageBus()
+                            .syncPublisher(AppLandDownloadListener.TOPIC)
+                            .downloadFinished(type, success);
+                }
+            });
         }
     }
 
