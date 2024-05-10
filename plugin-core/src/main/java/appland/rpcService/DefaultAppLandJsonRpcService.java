@@ -97,7 +97,7 @@ public class DefaultAppLandJsonRpcService implements AppLandJsonRpcService, AppL
         var applicationBus = application.getMessageBus().connect(this);
         applicationBus.subscribe(AppLandDownloadListener.TOPIC, this);
         applicationBus.subscribe(AppMapSettingsListener.TOPIC, this);
-        applicationBus.subscribe(AppMapConfigFileListener.TOPIC, this::triggerSendConfigurationSet);
+        applicationBus.subscribe(AppMapConfigFileListener.TOPIC, (AppMapConfigFileListener) this::triggerSendConfigurationSet);
 
         var projectBus = project.getMessageBus().connect(this);
         projectBus.subscribe(ProjectTopics.PROJECT_ROOTS, new ModuleRootListener() {

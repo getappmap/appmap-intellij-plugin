@@ -25,7 +25,7 @@ public class TestCommandLineService extends DefaultCommandLineService {
     public static @NotNull CountDownLatch newVfsRefreshCondition(@NotNull Project project,
                                                                  @NotNull Disposable parentDisposable) {
         var latch = new CountDownLatch(1);
-        project.getMessageBus().connect(parentDisposable).subscribe(VFS_REFRESH_TOPIC, latch::countDown);
+        project.getMessageBus().connect(parentDisposable).subscribe(VFS_REFRESH_TOPIC, (Runnable) latch::countDown);
         return latch;
     }
 
