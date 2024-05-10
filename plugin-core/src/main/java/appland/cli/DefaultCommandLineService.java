@@ -20,12 +20,14 @@ import com.intellij.openapi.project.DumbService;
 import com.intellij.openapi.project.ProjectManager;
 import com.intellij.openapi.util.Key;
 import com.intellij.openapi.util.SystemInfo;
+import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.openapi.vfs.VfsUtil;
 import com.intellij.openapi.vfs.VfsUtilCore;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.openapi.vfs.ex.temp.TempFileSystem;
 import com.intellij.util.concurrency.AppExecutorUtil;
 import com.intellij.util.io.BaseOutputReader;
+import com.intellij.util.net.HttpConfigurable;
 import com.intellij.util.system.CpuArch;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -34,6 +36,9 @@ import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.TestOnly;
 
 import javax.annotation.concurrent.GuardedBy;
+import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
@@ -572,7 +577,50 @@ public class DefaultCommandLineService implements AppLandCommandLineService {
         return commandLine.withParentEnvironmentType(environmentType)
                 .withEnvironment(settings.getCliEnvironment())
                 .withEnvironment(isNotEmpty(appMapKey) ? Map.of("APPMAP_API_KEY", appMapKey) : Map.of())
-                .withEnvironment(isNotEmpty(openAIKey) ? Map.of("OPENAI_API_KEY", openAIKey) : Map.of());
+                .withEnvironment(isNotEmpty(openAIKey) ? Map.of("OPENAI_API_KEY", openAIKey) : Map.of())
+                .withEnvironment(createProxyEnvironment());
+    }
+
+    /**
+     * Creates a map of proxy environment variable settings.
+     * The following variables are supported:
+     * - http_proxy
+     * - https_proxy
+     * - no_proxy
+     * <p>
+     * SOCKS proxy settings of the IDE are not supported. In this case, an empty map is returned.
+     * <p>
+     * Autoconfigured PAC proxy settings are not supported. In this case, an empty map is returned.
+     * <p>
+     * If the settings define proxy authentication settings, then username and password are part of the proxy URLs.
+     *
+     * @return Map of UNIX-style proxy environment variables, based on the IDE's settings.
+     * If the IDE does not define proxy settings, then an empty map is returned.
+     */
+    static @NotNull Map<String, String> createProxyEnvironment() {
+        var settings = HttpConfigurable.getInstance();
+        if (!settings.USE_HTTP_PROXY || settings.PROXY_TYPE_IS_SOCKS) {
+            return Map.of();
+        }
+
+        // we're following the SDK's com.intellij.util.net.HttpConfigurable.getJvmProperties
+        var proxyLogin = settings.getProxyLogin();
+        var userAndPassword = settings.KEEP_PROXY_PASSWORD && StringUtil.isNotEmpty(proxyLogin)
+                ? proxyLogin + ":" + StringUtil.defaultIfEmpty(settings.getPlainProxyPassword(), "")
+                : null;
+
+        try {
+            var proxyURL = new URI("http", userAndPassword, settings.PROXY_HOST, settings.PROXY_PORT, null, null, null)
+                    .toURL()
+                    .toExternalForm();
+            return Map.of(
+                    "http_proxy", proxyURL,
+                    "https_proxy", proxyURL,
+                    "no_proxy", settings.PROXY_EXCEPTIONS);
+        } catch (MalformedURLException | URISyntaxException e) {
+            LOG.debug("Unable to create proxy settings for AppMap command line", e);
+            return Map.of();
+        }
     }
 
     /**
