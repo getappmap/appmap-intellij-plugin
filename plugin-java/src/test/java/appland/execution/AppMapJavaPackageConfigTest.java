@@ -10,10 +10,13 @@ import com.intellij.execution.jar.JarApplicationConfiguration;
 import com.intellij.execution.jar.JarApplicationConfigurationType;
 import com.intellij.openapi.application.WriteAction;
 import com.intellij.openapi.vfs.VirtualFile;
+import com.intellij.openapi.vfs.VirtualFileManager;
 import com.intellij.psi.search.GlobalSearchScopes;
+import com.intellij.testFramework.PsiTestUtil;
 import com.intellij.testFramework.fixtures.TempDirTestFixture;
 import com.intellij.testFramework.fixtures.impl.TempDirTestFixtureImpl;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.jps.model.java.JavaResourceRootType;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -29,7 +32,7 @@ public class AppMapJavaPackageConfigTest extends AppMapBaseTest {
 
     @Test
     public void systemIndependentAppMapDir() {
-        var config = AppMapJavaPackageConfig.generateAppMapConfig(getModule(), "tmp\\appmap");
+        var config = AppMapJavaPackageConfig.generateAppMapConfig(getProject(), createTempDir("appmap-root"), "tmp\\appmap");
         assertEquals("tmp/appmap", config.getAppMapDir());
     }
 
@@ -65,6 +68,33 @@ public class AppMapJavaPackageConfigTest extends AppMapBaseTest {
         });
     }
 
+    @Test
+    public void ignoreResources() throws Exception {
+        var rootDir = createMultiMod();
+
+        var expectedConfig = new AppMapConfigFile();
+        expectedConfig.setName("ignoreResources");
+        expectedConfig.setPackages(List.of("com.example.application", "com.example.controllers", "com.example.models"));
+        expectedConfig.setAppMapDir("tmp/appmap");
+
+        ModuleTestUtils.withContentRoot(getModule(), rootDir, () -> {
+            var configFilePath = AppMapJavaPackageConfig.createAppMapConfig(getModule(), rootDir, Path.of("tmp/appmap"));
+            var config = AppMapConfigFile.parseConfigFile(configFilePath);
+            assertEquals(expectedConfig, config);
+        });
+    }
+
+    @Test
+    public void configCreatedInRoot() throws Exception {
+        var rootDir = createMultiMod();
+
+        var mod = getModule();
+        ModuleTestUtils.withContentRoot(mod, rootDir, () -> {
+            var configPath = AppMapJavaConfigUtil.findBestAppMapContentRootDirectory(mod, rootDir.findChild("mod1"));
+            var found = rootDir.findChild("appmap.yml");
+            assertEquals(rootDir, configPath);
+        });
+    }
     private void assertConfigUpdate(@NotNull VirtualFile contextFile,
                                     @NotNull Path appMapOutputDirPath,
                                     @NotNull String expectedAppMapDir) throws IOException {
@@ -91,5 +121,16 @@ public class AppMapJavaPackageConfigTest extends AppMapBaseTest {
         assertEquals(expectedAppMapDir, updatedConfig.getAppMapDir());
         assertEquals(config.getName(), updatedConfig.getName());
         assertEquals(config.getPackages(), updatedConfig.getPackages());
+    }
+
+    @NotNull
+    private VirtualFile createMultiMod() {
+        var rootDir = myFixture.copyDirectoryToProject("projects/with_resources", "project");
+        var myModule = getModule();
+        PsiTestUtil.removeContentEntry(myModule, VirtualFileManager.getInstance().findFileByUrl("temp:///src"));
+        PsiTestUtil.addSourceRoot(myModule, rootDir.findFileByRelativePath("mod1/src/main/java"));
+        PsiTestUtil.addSourceRoot(myModule, rootDir.findFileByRelativePath("mod2/src/main/java"));
+        PsiTestUtil.addSourceRoot(myModule, rootDir.findFileByRelativePath("mod1/src/main/resources"), JavaResourceRootType.RESOURCE);
+        return rootDir;
     }
 }

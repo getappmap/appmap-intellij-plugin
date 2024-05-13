@@ -4,8 +4,7 @@ import appland.config.AppMapConfigFile;
 import appland.files.AppMapFiles;
 import com.intellij.openapi.application.ReadAction;
 import com.intellij.openapi.module.Module;
-import com.intellij.openapi.module.ModuleUtil;
-import com.intellij.openapi.roots.ModuleRootManager;
+import com.intellij.openapi.project.Project;
 import com.intellij.openapi.roots.ProjectRootManager;
 import com.intellij.openapi.util.text.Strings;
 import com.intellij.openapi.vfs.LocalFileSystem;
@@ -21,6 +20,7 @@ import com.intellij.util.PathUtil;
 import com.intellij.util.concurrency.annotations.RequiresReadLock;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.jetbrains.jps.model.java.JavaModuleSourceRootTypes;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -52,11 +52,11 @@ final class AppMapJavaPackageConfig {
     }
 
     public static @NotNull Path createAppMapConfig(@NotNull Module module,
-                                                   @NotNull VirtualFile configParentDirectory,
+                                                   @NotNull VirtualFile appMapContentRootDirectory,
                                                    @NotNull Path appMapOutputDirectory) throws IOException {
-        assert (configParentDirectory.isDirectory());
+        assert (appMapContentRootDirectory.isDirectory());
 
-        var configParentPath = configParentDirectory.toNioPath();
+        var configParentPath = appMapContentRootDirectory.toNioPath();
         if (appMapOutputDirectory.isAbsolute() && !appMapOutputDirectory.startsWith(configParentPath)) {
             throw new IllegalStateException(String.format("AppMap output directory is not inside the working directory: %s, %s",
                     configParentPath,
@@ -66,7 +66,7 @@ final class AppMapJavaPackageConfig {
         var relativeAppMapOutputPath = appMapOutputDirectory.isAbsolute()
                 ? configParentPath.relativize(appMapOutputDirectory)
                 : appMapOutputDirectory;
-        var appMapConfig = generateAppMapConfig(module, relativeAppMapOutputPath.toString());
+        var appMapConfig = generateAppMapConfig(module.getProject(), appMapContentRootDirectory, relativeAppMapOutputPath.toString());
 
         // create outside a read action, because JavaProgramPatcher is always called with a ReadAction
         // and we can't execute a WriteAction inside a read action
@@ -107,17 +107,21 @@ final class AppMapJavaPackageConfig {
      * - path: com.mycorp.myproject # Each configured source package can go here, sub-packages will be included automatically so don't list them individuallyn
      * </pre>
      *
-     * @param appMapOutputPath Relative path value for the `appmap_dir` property, if available.
-     *                         If this is {@code null} or empty, then the "build_dir" property will not be set.
+     * @param project                    Current project
+     * @param appMapContentRootDirectory The AppMap content root directory, where appmap.yml is created
+     * @param appMapOutputPath           Relative path value for the `appmap_dir` property, if available.
+     *                                   If this is {@code null} or empty, then the "build_dir" property will not be set.
      */
-    static AppMapConfigFile generateAppMapConfig(@NotNull Module module, @Nullable String appMapOutputPath) {
+    static AppMapConfigFile generateAppMapConfig(@NotNull Project project,
+                                                 @NotNull VirtualFile appMapContentRootDirectory,
+                                                 @Nullable String appMapOutputPath) {
         // appmap_dir should be "dir/subdir" even on Windows
         var agnosticOutputPath = PathUtil.toSystemIndependentName(appMapOutputPath);
 
         var config = new AppMapConfigFile();
-        config.setName(module.getProject().getName());
+        config.setName(project.getName());
         config.setAppMapDir(agnosticOutputPath);
-        config.setPackages(ReadAction.compute(() -> findTopLevelPackages(module)));
+        config.setPackages(ReadAction.compute(() -> findTopLevelPackages(project, appMapContentRootDirectory)));
         return config;
     }
 
@@ -125,22 +129,24 @@ final class AppMapJavaPackageConfig {
      * Top-level java packages located in the module or modules reachable from it (i.e. in dependency modules).
      * Only packages located in the current project are returned.
      *
-     * @param module Starting point
+     * @param project                    Current project
+     * @param appMapContentRootDirectory Selected AppMap content root directory
      * @return List of Java package names
      */
     @NotNull
     @RequiresReadLock
-    private static List<String> findTopLevelPackages(@NotNull Module module) {
-        var roots = collectSourceRootsWithDependencies(module);
+    private static List<String> findTopLevelPackages(@NotNull Project project,
+                                                     @NotNull VirtualFile appMapContentRootDirectory) {
+        var roots = collectSourceRootsWithDependencies(project, appMapContentRootDirectory);
         if (roots.length == 0) {
             return Collections.emptyList();
         }
 
         // directoriesScope allows to search in libraries, and we must not add library Java packages to appmap.yml
-        var sourcesWithoutLibrariesScope = GlobalSearchScopesCore.directoriesScope(module.getProject(), true, roots)
-                .intersectWith(GlobalSearchScope.projectScope(module.getProject()));
+        var sourcesWithoutLibrariesScope = GlobalSearchScopesCore.directoriesScope(project, true, roots)
+                .intersectWith(GlobalSearchScope.projectScope(project));
 
-        var psiManager = PsiManager.getInstance(module.getProject());
+        var psiManager = PsiManager.getInstance(project);
         var result = new HashSet<String>();
         for (var sourceRoot : roots) {
             var directory = psiManager.findDirectory(sourceRoot);
@@ -203,25 +209,23 @@ final class AppMapJavaPackageConfig {
     }
 
     /**
-     * @param module Starting point
+     * @param project                    Current project
+     * @param appMapContentRootDirectory AppMap content root directory
      * @return All source roots (sources and resources), which may contain packages for appmap.yml
      */
     @NotNull
-    private static VirtualFile[] collectSourceRootsWithDependencies(@NotNull Module module) {
-        var moduleWithRecursiveDependencies = new HashSet<Module>();
-        ModuleUtil.getDependencies(module, moduleWithRecursiveDependencies);
+    private static VirtualFile[] collectSourceRootsWithDependencies(@NotNull Project project,
+                                                                    @NotNull VirtualFile appMapContentRootDirectory) {
+        var projectRootManager = ProjectRootManager.getInstance(project);
 
-        // because "module" may not contain source roots, but only a content roots
-        // (for example, the top-level module of Gradle-based projects), we need to collect content roots first and
-        // then all source roots, which are below any of these content roots.
+        // All source roots of the project, which are below the AppMap content root may contain Java packages to be
+        // included in the new appmap.yml file.
         // We need source roots to avoid loading packages from build output directories,
         // as seen with spring-petclinic classes at build/classes/java/aotTest.
-        var contentRoots = moduleWithRecursiveDependencies.stream()
-                .flatMap(m -> Arrays.stream(ModuleRootManager.getInstance(m).getContentRoots()))
-                .collect(Collectors.toUnmodifiableSet());
-
-        return Arrays.stream(ProjectRootManager.getInstance(module.getProject()).getContentSourceRoots())
-                .filter(sourceRoot -> VfsUtilCore.isUnder(sourceRoot, contentRoots))
+        return projectRootManager
+                .getModuleSourceRoots(JavaModuleSourceRootTypes.SOURCES)
+                .stream()
+                .filter(sourceRoot -> VfsUtilCore.isAncestor(appMapContentRootDirectory, sourceRoot, false))
                 .toArray(VirtualFile[]::new);
     }
 }
