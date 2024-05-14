@@ -3,7 +3,7 @@ import de.undercouch.gradle.tasks.download.Download
 import groovy.json.JsonSlurper
 import org.commonmark.parser.Parser
 import org.commonmark.renderer.html.HtmlRenderer
-import org.gradle.api.JavaVersion.VERSION_11
+import org.gradle.api.JavaVersion.VERSION_17
 import org.gradle.api.tasks.testing.logging.TestLogEvent
 import org.jetbrains.intellij.tasks.PrepareSandboxTask
 import org.jetbrains.intellij.tasks.RunPluginVerifierTask
@@ -11,7 +11,7 @@ import org.jetbrains.intellij.tasks.RunPluginVerifierTask.FailureLevel
 
 buildscript {
     dependencies {
-        classpath("org.commonmark:commonmark:0.17.2")
+        classpath("org.commonmark:commonmark:0.22.0")
     }
 
     repositories {
@@ -22,13 +22,13 @@ buildscript {
 
 plugins {
     idea
-    id("org.jetbrains.kotlin.jvm") version "1.9.22"
-    id("org.jetbrains.intellij") version "1.17.1"
+    id("org.jetbrains.kotlin.jvm") version "1.9.24"
+    id("org.jetbrains.intellij") version "1.17.3"
     id("org.jetbrains.changelog") version "1.3.1"
     id("com.adarshr.test-logger") version "3.2.0"
-    id("de.undercouch.download") version "5.4.0"
+    id("de.undercouch.download") version "5.6.0"
 
-    kotlin("plugin.lombok") version "1.8.10"
+    kotlin("plugin.lombok") version "1.9.24"
 }
 
 val pluginVersion = prop("pluginVersion")
@@ -57,7 +57,6 @@ allprojects {
 
     val testOutput = configurations.create("testOutput")
     dependencies {
-        // for compatibility with IntelliJ Ultimate, IU-2021.3.3 doesn't include this for unknown reasons
         compileOnly("com.google.code.findbugs:jsr305:3.0.2")
 
         // Jackson JSON is missing from 2023.1+
@@ -66,7 +65,7 @@ allprojects {
         implementation("org.yaml:snakeyaml:1.33")
 
         // http://wiremock.org, Apache 2 license
-        testImplementation("com.github.tomakehurst:wiremock-jre8:2.33.1")
+        testImplementation("org.wiremock:wiremock:3.5.4")
 
         // Project Lombok, only for compilation
         compileOnly("org.projectlombok:lombok:$lombokVersion")
@@ -92,17 +91,17 @@ allprojects {
     }
 
     configure<JavaPluginExtension> {
-        sourceCompatibility = VERSION_11
-        targetCompatibility = VERSION_11
+        sourceCompatibility = VERSION_17
+        targetCompatibility = VERSION_17
     }
 
     tasks {
         compileKotlin {
-            kotlinOptions.jvmTarget = "11"
+            kotlinOptions.jvmTarget = "17"
         }
 
         compileTestKotlin {
-            kotlinOptions.jvmTarget = "11"
+            kotlinOptions.jvmTarget = "17"
         }
 
         buildSearchableOptions.get().enabled = false
@@ -204,12 +203,15 @@ allprojects {
             // remove this version as soon as https://youtrack.jetbrains.com/issue/MP-6438 is fixed.
             verifierVersion.set("1.364")
             ideVersions.set(prop("ideVersionVerifier").split(","))
-            failureLevel.set(listOf(
-                FailureLevel.INTERNAL_API_USAGES,
-                FailureLevel.COMPATIBILITY_PROBLEMS,
-                FailureLevel.OVERRIDE_ONLY_API_USAGES,
-                FailureLevel.NON_EXTENDABLE_API_USAGES,
-                FailureLevel.PLUGIN_STRUCTURE_WARNINGS,))
+            failureLevel.set(
+                listOf(
+                    FailureLevel.INTERNAL_API_USAGES,
+                    FailureLevel.COMPATIBILITY_PROBLEMS,
+                    FailureLevel.OVERRIDE_ONLY_API_USAGES,
+                    FailureLevel.NON_EXTENDABLE_API_USAGES,
+                    FailureLevel.PLUGIN_STRUCTURE_WARNINGS,
+                )
+            )
         }
 
         withType<Zip> {
@@ -314,9 +316,9 @@ project(":") {
             doLast {
                 val json = JsonSlurper().parseText(dest.readText()) as Map<*, *>
                 val jarAsset = (json["assets"] as List<Map<*, *>>)
-                        .filter { (it["name"] as? String)?.endsWith(".jar") == true }
-                        .map { it["browser_download_url"]!! }
-                        .firstOrNull()
+                    .filter { (it["name"] as? String)?.endsWith(".jar") == true }
+                    .map { it["browser_download_url"]!! }
+                    .firstOrNull()
 
                 download.run {
                     src(jarAsset)
