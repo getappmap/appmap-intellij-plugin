@@ -2,6 +2,7 @@ package appland.webviews.navie;
 
 import appland.AppMapBundle;
 import appland.actions.SetNavieOpenAiKeyAction;
+import appland.config.AppMapConfigFileListener;
 import appland.files.AppMapFileChangeListener;
 import appland.files.AppMapFiles;
 import appland.files.FileLookup;
@@ -31,6 +32,7 @@ import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.fileEditor.OpenFileDescriptor;
 import com.intellij.openapi.progress.ProgressIndicator;
 import com.intellij.openapi.progress.Task;
+import com.intellij.openapi.project.DumbService;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.Messages;
 import com.intellij.openapi.util.text.StringUtil;
@@ -62,8 +64,8 @@ public class NavieEditor extends WebviewEditor<Void> {
     private static final Logger LOG = Logger.getInstance(NavieEditor.class);
 
     // debounce requests to update the most recent updates by 1s
-    private final SingleAlarm refreshMostRecentAppMapsAlarm = new SingleAlarm(
-            this::updateMostRecentAppMaps,
+    private final SingleAlarm updateNaviePropertiesAlarm = new SingleAlarm(
+            this::updateNavieProperties,
             1_000,
             this,
             Alarm.ThreadToUse.POOLED_THREAD);
@@ -94,7 +96,9 @@ public class NavieEditor extends WebviewEditor<Void> {
         var port = NavieEditorProvider.KEY_INDEXER_RPC_PORT.get(file);
         assert port != null;
 
-        var mostRecentAppMaps = ReadAction.compute(() -> findMostRecentAppMaps(project));
+        var updatableNavieData = DumbService.getInstance(project).runReadActionInSmartMode(() -> {
+            return createUpdatableNavieData(project);
+        });
 
         var appMapContextFile = NavieEditorProvider.KEY_APPMAP_CONTEXT_FILE.get(file);
         if (appMapContextFile != null) {
@@ -108,12 +112,9 @@ public class NavieEditor extends WebviewEditor<Void> {
 
         payload.addProperty("appmapRpcPort", port);
         payload.addProperty("apiKey", StringUtil.defaultIfEmpty(apiKey, ""));
-
-        // At this time, the Navie editor can only be opened after selecting an available AppMap directory,
-        // which contains an appmap.yml file.
-        payload.addProperty("appmapYmlPresent", true);
+        payload.addProperty("appmapYmlPresent", updatableNavieData.isAppMapConfigPresent);
         payload.add("savedFilters", gson.toJsonTree(filters));
-        payload.add("mostRecentAppMaps", gson.toJsonTree(mostRecentAppMaps));
+        payload.add("mostRecentAppMaps", gson.toJsonTree(updatableNavieData.mostRecentAppMaps));
         if (codeSelection != null) {
             payload.add("codeSelection", gson.toJsonTree(codeSelection));
         }
@@ -129,8 +130,9 @@ public class NavieEditor extends WebviewEditor<Void> {
             }
         });
         busConnection.subscribe(AppMapFileChangeListener.TOPIC, (AppMapFileChangeListener) changeTypes -> {
-            refreshMostRecentAppMapsAlarm.cancelAndRequest();
+            updateNaviePropertiesAlarm.cancelAndRequest();
         });
+        busConnection.subscribe(AppMapConfigFileListener.TOPIC, (AppMapConfigFileListener) updateNaviePropertiesAlarm::cancelAndRequest);
     }
 
     @Override
@@ -200,27 +202,25 @@ public class NavieEditor extends WebviewEditor<Void> {
     }
 
     /**
-     * Sends the "update" notification message to the Navie webview.
+     * Sends the "update" notification message to the Navie webview
+     * with properties 'appmapYmlPresent' and 'mostRecentAppMaps'.
      */
-    private void updateMostRecentAppMaps() {
+    private void updateNavieProperties() {
         assert (!ApplicationManager.getApplication().isDispatchThread());
-        var appMapDirectory = NavieEditorProvider.KEY_APPMAP_DIRECTORY.get(file);
-        if (appMapDirectory == null) {
-            return;
-        }
 
         // We need to fetch the AppMaps after indexing finished, therefore we're launching a non-blocking ReadAction in
         // a background task.
         new Task.Backgroundable(project, AppMapBundle.get("webview.navie.updatingMostRecentAppMaps"), false) {
             @Override
             public void run(@NotNull ProgressIndicator indicator) {
-                ReadAction.nonBlocking(() -> findMostRecentAppMaps(project))
+                ReadAction.nonBlocking(() -> createUpdatableNavieData(project))
                         .inSmartMode(project)
                         .wrapProgress(indicator)
                         .expireWith(NavieEditor.this)
-                        .finishOnUiThread(ModalityState.defaultModalityState(), mostRecentAppMaps -> {
+                        .finishOnUiThread(ModalityState.defaultModalityState(), navieData -> {
                             var message = createMessageObject("update");
-                            message.add("mostRecentAppMaps", gson.toJsonTree(mostRecentAppMaps));
+                            message.add("appmapYmlPresent", gson.toJsonTree(navieData.isAppMapConfigPresent));
+                            message.add("mostRecentAppMaps", gson.toJsonTree(navieData.mostRecentAppMaps));
                             postMessage(message);
                         })
                         .submit(updateAppMapsThread);
@@ -359,6 +359,19 @@ public class NavieEditor extends WebviewEditor<Void> {
     }
 
     /**
+     * Creates the updatable Navie data in a single read-action.
+     *
+     * @param project Project
+     * @return Data, which can change while the Navie editor is open.
+     */
+    @RequiresReadLock
+    private static @NotNull UpdatableNavieData createUpdatableNavieData(@NotNull Project project) {
+        var isAppMapYamlPresent = !AppMapFiles.findAppMapConfigFiles(project).isEmpty();
+        var mostRecentAppMaps = findMostRecentAppMaps(project);
+        return new UpdatableNavieData(isAppMapYamlPresent, mostRecentAppMaps);
+    }
+
+    /**
      * JSON used by the Navie webview to take the most recent AppMaps.
      */
     @Value
@@ -371,5 +384,11 @@ public class NavieEditor extends WebviewEditor<Void> {
         @NotNull String createdAt;
         @SerializedName("path")
         @Nullable String path;
+    }
+
+    @Value
+    private static class UpdatableNavieData {
+        boolean isAppMapConfigPresent;
+        List<AppMapListItem> mostRecentAppMaps;
     }
 }
