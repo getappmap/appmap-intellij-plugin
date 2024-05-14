@@ -3,8 +3,10 @@ package appland.rpcService;
 import appland.AppMapBaseTest;
 import appland.cli.AppLandCommandLineService;
 import appland.settings.AppMapApplicationSettingsService;
+import com.intellij.openapi.application.ApplicationInfo;
 import com.intellij.openapi.vfs.VirtualFile;
 import org.jetbrains.annotations.NotNull;
+import org.junit.Assume;
 import org.junit.Test;
 
 import java.util.Collection;
@@ -98,6 +100,18 @@ public class DefaultAppLandJsonRpcServiceTest extends AppMapBaseTest {
         } finally {
             appMapSettings.setApiKey(null);
         }
+    }
+
+    @Test
+    public void codeEditorInfo() {
+        // only run with IntelliJ Community
+        Assume.assumeTrue("IC".equals(ApplicationInfo.getInstance().getBuild().getProductCode()));
+        var editorInfo = DefaultAppLandJsonRpcService.createCodeEditorInfo();
+
+        // For example:
+        // IntelliJ IDEA 2023.2 by JetBrains s.r.o.
+        var matches = editorInfo.matches("IntelliJ IDEA [0-9.]+ by JetBrains s\\.r\\.o\\.");
+        assertTrue("Code editor info must match: " + editorInfo, matches);
     }
 
     private void waitForJsonRpcServer() {
