@@ -1,5 +1,3 @@
-# AppMap for JetBrains IDEs
-
 Free developer tools platform powered by runtime analysis and AI. It's composed of three components:
 
 * Navie - AI code architect.
