@@ -38,7 +38,7 @@ group = "appland.appmap"
 version = pluginVersion
 
 val isCI = System.getenv("CI") == "true"
-val agentOutputPath = rootProject.buildDir.resolve("appmap-java-agent").resolve("appmap-agent.jar")
+val agentOutputPath = rootProject.layout.buildDirectory.asFile.get().resolve("appmap-java-agent").resolve("appmap-agent.jar")
 val githubToken = System.getenv("GITHUB_TOKEN").takeUnless { it.isNullOrEmpty() }
 
 allprojects {
@@ -109,7 +109,7 @@ allprojects {
 
         buildPlugin {
             dependsOn(":copyPluginAssets")
-            from("${rootProject.buildDir}/appmap-assets") {
+            from(rootProject.layout.buildDirectory.dir("appmap-assets")) {
                 into("")
                 include("**/*")
             }
@@ -117,7 +117,7 @@ allprojects {
 
         processTestResources {
             dependsOn(":copyPluginAssets")
-            from("${rootProject.buildDir}/appmap-assets") {
+            from(rootProject.layout.buildDirectory.dir("appmap-assets")) {
                 into("")
                 include("**/*")
             }
@@ -136,7 +136,7 @@ allprojects {
 
         withType<PrepareSandboxTask> {
             dependsOn(":copyPluginAssets")
-            from("${rootProject.buildDir}/appmap-assets") {
+            from(rootProject.layout.buildDirectory.dir("appmap-assets")) {
                 into(intellij.pluginName.get())
                 include("**/*")
             }
@@ -183,10 +183,12 @@ allprojects {
         // only run the default test target with the AppMap agent
         named<Test>("test") {
             // attach AppMap agent, but only if Gradle is online
-            jvmArgs("-javaagent:$agentOutputPath",
-                    "-Dappmap.config.file=${rootProject.file("appmap.yml")}",
-                    "-Dappmap.debug.file=${project.buildDir.resolve("appmap-agent-${System.currentTimeMillis()}.log")}",
-                    "-Dappmap.output.directory=${rootProject.file("tmp/appmap")}")
+            jvmArgs(
+                "-javaagent:$agentOutputPath",
+                "-Dappmap.config.file=${rootProject.file("appmap.yml")}",
+                "-Dappmap.debug.file=${project.layout.buildDirectory.asFile.get().resolve("appmap-agent-${System.currentTimeMillis()}.log")}",
+                "-Dappmap.output.directory=${rootProject.file("tmp/appmap")}"
+            )
             systemProperty("appmap.test.withAgent", "true")
 
             useJUnit {
@@ -239,7 +241,7 @@ project(":") {
             inputs.dir("${project.rootDir}/appland-findings")
             inputs.dir("${project.rootDir}/appland-signin")
 
-            destinationDir = project.buildDir
+            destinationDir = project.layout.buildDirectory.asFile.get()
             from(project.rootDir) {
                 into("appmap-assets")
                 include("NOTICE.txt")
@@ -302,7 +304,7 @@ project(":") {
         @Suppress("UNCHECKED_CAST")
         task<Download>("downloadAppMapAgent") {
             src("https://api.github.com/repos/getappmap/appmap-java/releases/latest")
-            dest(project.buildDir.resolve("appmap-java.json"))
+            dest(project.layout.buildDirectory.file("appmap-java.json"))
             overwrite(true)
             quiet(true)
             if (isCI && githubToken != null) {
