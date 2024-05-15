@@ -1,6 +1,4 @@
-# AppMap for JetBrains IDEs
-
-AppMap is a developer tools platform powered by runtime analysis and AI. It's composed of three components:
+AppMap is a free developer tools platform powered by runtime analysis and AI. It's composed of three components:
 
 * Navie - AI code architect.
 * AppMap data - Runtime traces of your application runtime.

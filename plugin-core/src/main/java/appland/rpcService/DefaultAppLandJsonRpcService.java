@@ -14,6 +14,7 @@ import com.intellij.execution.process.KillableProcessHandler;
 import com.intellij.execution.process.ProcessAdapter;
 import com.intellij.execution.process.ProcessEvent;
 import com.intellij.execution.process.ProcessOutputTypes;
+import com.intellij.openapi.application.ApplicationInfo;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.project.DumbService;
@@ -156,6 +157,8 @@ public class DefaultAppLandJsonRpcService implements AppLandJsonRpcService, AppL
             LOG.debug("Unable to launch JSON-RPC server, because CLI command is unavailable.");
             return;
         }
+
+        commandLine = commandLine.withEnvironment("APPMAP_CODE_EDITOR", createCodeEditorInfo());
 
         synchronized (this) {
             if (isServerRunning()) {
@@ -369,6 +372,11 @@ public class DefaultAppLandJsonRpcService implements AppLandJsonRpcService, AppL
                 .filter(Objects::nonNull)
                 .map(path -> path.normalize().toString())
                 .collect(Collectors.toList());
+    }
+
+    protected static @NotNull String createCodeEditorInfo() {
+        var info = ApplicationInfo.getInstance();
+        return info.getFullApplicationName() + " by " + info.getCompanyName();
     }
 
     @Data

@@ -36,10 +36,6 @@ public final class NavieEditorProvider extends WebviewEditorProvider {
      */
     static final Key<NavieCodeSelection> KEY_CODE_SELECTION = Key.create("appland.navie.codeSelection");
     /**
-     * The AppMap directory selected to open this Navie editor.
-     */
-    static final Key<VirtualFile> KEY_APPMAP_DIRECTORY = Key.create("appland.navie.appMapDir");
-    /**
      * The port of the matching indexer's JSON-RPC service.
      */
     static final Key<Integer> KEY_INDEXER_RPC_PORT = Key.create("appland.navie.rpcPort");
