@@ -38,15 +38,13 @@ jobs:
             - name: "Install Dependencies"
               shell: bash
               run: |
-                  nvm install --lts \
-                      && nvm use --lts \
-                      && npm i -g \
-                        semantic-release \
-                        @semantic-release/exec \
-                        @semantic-release/git \
-                        @semantic-release/changelog \
-                        @google/semantic-release-replace-plugin \
-                        conventional-changelog-conventionalcommits
+                  npm i -g \
+                    semantic-release \
+                    @semantic-release/exec \
+                    @semantic-release/git \
+                    @semantic-release/changelog \
+                    @google/semantic-release-replace-plugin \
+                    conventional-changelog-conventionalcommits
 
             - name: "Deploy"
               shell: bash
