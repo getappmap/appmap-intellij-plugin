@@ -21,12 +21,6 @@ jobs:
                   distribution: temurin
                   java-version: 17
 
-            - name: Setup Node
-              uses: actions/setup-node@v4
-              with:
-                  node-version: 20
-                  cache: "npm"
-
             - name: Run Linters and Tests
               env:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
