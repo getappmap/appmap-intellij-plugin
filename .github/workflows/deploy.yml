@@ -11,6 +11,8 @@ jobs:
         steps:
             - name: Fetch Sources
               uses: actions/checkout@v4
+              with:
+                  persist-credentials: false
 
             - name: Gradle Wrapper Validation
               uses: gradle/actions/wrapper-validation@v3
@@ -53,4 +55,10 @@ jobs:
 
             - name: "Deploy"
               shell: bash
+              env:
+                  GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+                  GIT_AUTHOR_NAME: appland-release
+                  GIT_AUTHOR_EMAIL: release@app.land
+                  GIT_COMMITTER_NAME: appland-release
+                  GIT_COMMITTER_EMAIL: release@app.land
               run: semantic-release --debug
