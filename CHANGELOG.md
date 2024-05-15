@@ -1,5 +1,16 @@
 AppMap Plugin Changelog
 
+## [0.67.0](https://github.com/getappmap/appmap-intellij-plugin/compare/v0.66.0...v0.67.0) (2024-05-15)
+
+
+### Features
+
+-  pass IDE proxy settings to the AppMap CLI tools ([98c9954]())
+
+### Bug Fixes
+
+-  Drop mode buttons ([4900876]())-  only include source directories in config ([d5ba6c7]())-  pass code editor to Navie JSON-RPC server ([d3e9939]())-  update an opened Navie view when appmap.yml or new AppMap are created ([825134d]())
+
 ## [0.66.0](https://github.com/getappmap/appmap-intellij-plugin/compare/v0.65.0...v0.66.0) (2024-05-09)
 
 
