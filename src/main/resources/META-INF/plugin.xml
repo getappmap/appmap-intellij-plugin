@@ -1,6 +1,6 @@
 <idea-plugin xmlns:xi="http://www.w3.org/2001/XInclude">
     <id>appland.appmap</id>
-    <name>AppMap</name>
+    <name>AppMap: Free AI Architect</name>
     <vendor>AppLand</vendor>
 
     <!-- these are updated by the gradle build -->
