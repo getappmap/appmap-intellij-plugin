@@ -1,5 +1,12 @@
 AppMap Plugin Changelog
 
+## [0.67.1](https://github.com/getappmap/appmap-intellij-plugin/compare/v0.67.0...v0.67.1) (2024-05-15)
+
+
+### Bug Fixes
+
+-  Update the context view on subsequent requests ([56ec416]())
+
 ## [0.67.0](https://github.com/getappmap/appmap-intellij-plugin/compare/v0.66.0...v0.67.0) (2024-05-15)
 
 
