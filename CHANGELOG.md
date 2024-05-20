@@ -1,5 +1,12 @@
 AppMap Plugin Changelog
 
+## [0.67.2](https://github.com/getappmap/appmap-intellij-plugin/compare/v0.67.1...v0.67.2) (2024-05-20)
+
+
+### Bug Fixes
+
+-  Drop token interpolation ([b380d79]())
+
 ## [0.67.1](https://github.com/getappmap/appmap-intellij-plugin/compare/v0.67.0...v0.67.1) (2024-05-15)
 
 
