@@ -22,10 +22,10 @@
     rxjs "^7.8.1"
     socket.io-client "^4.7.2"
 
-"@appland/components@^4.24.3":
-  version "4.24.3"
-  resolved "https://registry.yarnpkg.com/@appland/components/-/components-4.24.3.tgz#0e825e59ba5ee169d8ae455c5598a9283ebb8a78"
-  integrity sha512-gBZ80dJOIvcnkqE27WkI+TblXx0RGR7p6J0XO+0OgllovasOEGbkdK0CdUHwTl+Z/B+wknGRaxxVVgjft0kBrw==
+"@appland/components@^4.24.4":
+  version "4.24.4"
+  resolved "https://registry.yarnpkg.com/@appland/components/-/components-4.24.4.tgz#ed0846fc746d027137a4694538c36d9622e363cc"
+  integrity sha512-xpCPlB7qj6kpWD2v+l72/fYYf3/9RUTZSVrSgNs+c+/8ok+VFOdK7WWKPK3mE3PEIUWyFZgehBImzHWDMsb7Tw==
   dependencies:
     "@appland/client" "^1.12.0"
     "@appland/diagrams" "^1.7.0"
