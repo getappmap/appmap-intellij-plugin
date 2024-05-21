@@ -21,12 +21,6 @@ public class AppMapJavaAgentDownloadServiceTest extends AppMapBaseTest {
     @Rule
     public TestRule agentDownloadRule = new OverrideJavaAgentLocationRule(() -> this.myFixture);
 
-    @Override
-    protected TempDirTestFixture createTempDirTestFixture() {
-        // create temp files on disk
-        return new TempDirTestFixtureImpl();
-    }
-
     @Test
     public void agentDirPath() {
         var service = AppMapJavaAgentDownloadService.getInstance();

@@ -39,7 +39,18 @@ public interface AppLandCommandLineService extends Disposable {
      * @param directory          Directory path
      * @param waitForTermination Waits until the process has been terminated. This is mostly useful for test cases.
      */
-    void stop(@NotNull VirtualFile directory, boolean waitForTermination);
+    default void stop(@NotNull VirtualFile directory, boolean waitForTermination) {
+        stop(directory, waitForTermination ? 1_000 : 0, TimeUnit.MILLISECONDS);
+    }
+
+    /**
+     * Stops any running service, which is being executed for the given directory.
+     *
+     * @param directory Directory path
+     * @param timeout   Length of timeout to wait for process termination. 0 disables the waiting for termination.
+     * @param timeUnit  Unit of timeout.
+     */
+    void stop(@NotNull VirtualFile directory, int timeout, @NotNull TimeUnit timeUnit);
 
     /**
      * Refreshes the processes for the currently open projects.
@@ -78,7 +89,7 @@ public interface AppLandCommandLineService extends Disposable {
     /**
      * Stop all processes.
      *
-     * @param timeout Length of timeout to wait for process termination. 0 disables the waiting for termination.
+     * @param timeout  Length of timeout to wait for process termination. 0 disables the waiting for termination.
      * @param timeUnit Unit of timeout.
      */
     void stopAll(int timeout, @NotNull TimeUnit timeUnit);

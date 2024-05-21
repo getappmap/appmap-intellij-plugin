@@ -5,7 +5,6 @@ import appland.index.AppMapFindingsUtil;
 import appland.problemsView.model.TestStatus;
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import java.sql.Date;
@@ -15,9 +14,14 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 public class FindingsManagerTest extends AppMapBaseTest {
+    @Override
+    protected boolean runInDispatchThread() {
+        return false;
+    }
+
     @Before
     @After
-    public void resetFindings() {
+    public void setupAppMapTest() {
         TestFindingsManager.getInstance(getProject()).reset();
 
         var manager = FindingsManager.getInstance(getProject());
@@ -35,7 +39,6 @@ public class FindingsManagerTest extends AppMapBaseTest {
     }
 
     @Test
-    @Ignore("Unstable on Windows CI")
     public void findingsVSCodeSystem() throws Exception {
         var manager = FindingsManager.getInstance(getProject());
 

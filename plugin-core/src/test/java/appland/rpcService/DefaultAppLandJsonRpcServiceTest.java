@@ -4,6 +4,7 @@ import appland.AppMapBaseTest;
 import appland.cli.AppLandCommandLineService;
 import appland.settings.AppMapApplicationSettingsService;
 import com.intellij.openapi.application.ApplicationInfo;
+import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.vfs.VirtualFile;
 import org.jetbrains.annotations.NotNull;
 import org.junit.Assume;
@@ -117,17 +118,32 @@ public class DefaultAppLandJsonRpcServiceTest extends AppMapBaseTest {
     private void waitForJsonRpcServer() {
         var service = AppLandJsonRpcService.getInstance(getProject());
 
-        var latch = createWaitForRestartCondition();
-
+        var latch = createWaitForStartCondition();
         if (service.isServerRunning()) {
             return;
         }
 
+        ApplicationManager.getApplication().executeOnPooledThread(() -> {
+            service.startServer();
+        });
         try {
             assertTrue("The AppMap JSON-RPC server must launch", latch.await(30, TimeUnit.SECONDS));
         } catch (InterruptedException e) {
             addSuppressedException(e);
         }
+    }
+
+    private @NotNull CountDownLatch createWaitForStartCondition() {
+        var latch = new CountDownLatch(1);
+        getProject().getMessageBus()
+                .connect(getTestRootDisposable())
+                .subscribe(AppLandJsonRpcListener.TOPIC, new AppLandJsonRpcListenerAdapter() {
+                    @Override
+                    public void serverStarted() {
+                        latch.countDown();
+                    }
+                });
+        return latch;
     }
 
     private @NotNull CountDownLatch createWaitForRestartCondition() {

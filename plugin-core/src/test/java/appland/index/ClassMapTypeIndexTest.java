@@ -1,6 +1,7 @@
 package appland.index;
 
 import appland.AppMapBaseTest;
+import com.intellij.openapi.application.ReadAction;
 import com.intellij.openapi.vfs.VirtualFile;
 import org.jetbrains.annotations.NotNull;
 import org.junit.Test;
@@ -9,11 +10,16 @@ import java.util.List;
 import java.util.Map;
 
 public class ClassMapTypeIndexTest extends AppMapBaseTest {
+    @Override
+    protected boolean runInDispatchThread() {
+        return false;
+    }
+
     @Test
     public void emptyResult() {
-        assertEmpty(ClassMapTypeIndex.findItems(getProject(), ClassMapItemType.Package));
-        assertEmpty(ClassMapTypeIndex.findItems(getProject(), ClassMapItemType.Query));
-        assertEmpty(ClassMapTypeIndex.findItems(getProject(), ClassMapItemType.HTTP));
+        assertItemCount(ClassMapItemType.Package, 0);
+        assertItemCount(ClassMapItemType.Query, 0);
+        assertItemCount(ClassMapItemType.HTTP, 0);
     }
 
     @Test
@@ -22,14 +28,14 @@ public class ClassMapTypeIndexTest extends AppMapBaseTest {
         myFixture.copyDirectoryToProject("classMaps/projectSingleFile", "root");
 
         // root items
-        assertSize(1, ClassMapTypeIndex.findItems(getProject(), ClassMapItemType.Database));
-        assertSize(1, ClassMapTypeIndex.findItems(getProject(), ClassMapItemType.HTTP));
+        assertItemCount(ClassMapItemType.Database, 1);
+        assertItemCount(ClassMapItemType.HTTP, 1);
 
         // leafs
-        assertSize(22 + 2, ClassMapTypeIndex.findItems(getProject(), ClassMapItemType.Package));
-        assertSize(80, ClassMapTypeIndex.findItems(getProject(), ClassMapItemType.Class));
-        assertSize(23, ClassMapTypeIndex.findItems(getProject(), ClassMapItemType.Query));
-        assertSize(1, ClassMapTypeIndex.findItems(getProject(), ClassMapItemType.Route));
+        assertItemCount(ClassMapItemType.Package, 22 + 2);
+        assertItemCount(ClassMapItemType.Class, 80);
+        assertItemCount(ClassMapItemType.Query, 23);
+        assertItemCount(ClassMapItemType.Route, 1);
 
         // each of the leaf item results must have two files attached, because the project contains a duplicate classMap
         assertItemsFileCount("One associated AppMap file expected",
@@ -43,8 +49,8 @@ public class ClassMapTypeIndexTest extends AppMapBaseTest {
         myFixture.copyDirectoryToProject("classMaps/unexpectedClassMapType", "root");
 
         // items must still be found even if one of the items has an unknown class map type
-        assertSize(1, ClassMapTypeIndex.findItems(getProject(), ClassMapItemType.Database));
-        assertSize(1, ClassMapTypeIndex.findItems(getProject(), ClassMapItemType.HTTP));
+        assertItemCount(ClassMapItemType.Database, 1);
+        assertItemCount(ClassMapItemType.HTTP, 1);
     }
 
     @Test
@@ -53,8 +59,8 @@ public class ClassMapTypeIndexTest extends AppMapBaseTest {
         myFixture.copyDirectoryToProject("classMaps/projectDuplicateIds", "root");
 
         // root items
-        assertSize(1, ClassMapTypeIndex.findItems(getProject(), ClassMapItemType.Database));
-        assertSize(1, ClassMapTypeIndex.findItems(getProject(), ClassMapItemType.HTTP));
+        assertItemCount(ClassMapItemType.Database, 1);
+        assertItemCount(ClassMapItemType.HTTP, 1);
 
         // each of the leaf item results must have two files attached, because the project contains a duplicate classMap
         assertItemsFileCount("Two associated AppMap files expected",
@@ -63,18 +69,26 @@ public class ClassMapTypeIndexTest extends AppMapBaseTest {
     }
 
     @Test
-    public void insideExcluded() {
+    public void insideExcluded() throws Exception {
         var root = myFixture.copyDirectoryToProject("classMaps/projectDuplicateIds", "root");
+
+        // AppMapIndexedRootsSetContributor only un-excludes directories in a content root with appmap.yml
+        createAppMapYaml(root.getParent(), root.getName());
+
         withExcludedFolder(root, () -> {
             // root items, classMap files in excluded folders must be processed by the query
-            assertSize(1, ClassMapTypeIndex.findItems(getProject(), ClassMapItemType.Database));
-            assertSize(1, ClassMapTypeIndex.findItems(getProject(), ClassMapItemType.HTTP));
+            assertItemCount(ClassMapItemType.Database, 1);
+            assertItemCount(ClassMapItemType.HTTP, 1);
         });
+    }
+
+    private void assertItemCount(@NotNull ClassMapItemType itemType, int expectedSize) {
+        assertSize(expectedSize, ReadAction.compute(() -> ClassMapTypeIndex.findItems(getProject(), itemType)));
     }
 
     private void assertItemsFileCount(String message, int expected, List<ClassMapItemType> types) {
         for (var type : types) {
-            var result = ClassMapTypeIndex.findItems(getProject(), type);
+            var result = ReadAction.compute(() -> ClassMapTypeIndex.findItems(getProject(), type));
             assertFalse(result.isEmpty());
 
             for (var value : result.values()) {

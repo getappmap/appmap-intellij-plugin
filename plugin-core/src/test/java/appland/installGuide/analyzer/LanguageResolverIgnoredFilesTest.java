@@ -30,11 +30,6 @@ public class LanguageResolverIgnoredFilesTest extends AppMapBaseTest {
     private LocalFileSystem myLFS;
 
     @Override
-    protected TempDirTestFixture createTempDirTestFixture() {
-        return new TempDirTestFixtureImpl();
-    }
-
-    @Override
     protected String getBasePath() {
         return "installGuide/language-resolver";
     }

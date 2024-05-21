@@ -18,7 +18,7 @@ import static appland.cli.DefaultAppLandDownloadService.currentPlatform;
 
 public class DefaultAppLandDownloadServiceProxyTest extends AppMapBaseTest {
     @Rule
-    public MockServerRule mockServerRule = new MockServerRule(this);
+    public MockServerRule mockServerRule = new MockServerRule(this, false);
     @Rule
     public MockServerSettingsRule mockServerSettingsRule = new MockServerSettingsRule();
     @Rule

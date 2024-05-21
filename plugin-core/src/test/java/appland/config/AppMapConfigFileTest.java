@@ -1,8 +1,6 @@
 package appland.config;
 
 import appland.AppMapBaseTest;
-import com.intellij.testFramework.fixtures.TempDirTestFixture;
-import com.intellij.testFramework.fixtures.impl.TempDirTestFixtureImpl;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -10,11 +8,6 @@ import java.util.Collections;
 import java.util.List;
 
 public class AppMapConfigFileTest extends AppMapBaseTest {
-    @Override
-    protected TempDirTestFixture createTempDirTestFixture() {
-        return new TempDirTestFixtureImpl();
-    }
-
     @Test
     public void readConfigWithPath() {
         var appMapFile = myFixture.copyFileToProject("appmap-config/appmap.yml");

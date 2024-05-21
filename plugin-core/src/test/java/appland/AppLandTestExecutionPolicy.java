@@ -19,6 +19,7 @@ public class AppLandTestExecutionPolicy extends IdeaTestExecutionPolicy {
     }
 
     public static @NotNull String findAppMapHomePath() {
-        return System.getProperty("appland.testDataPath");
+        var path = System.getProperty("appland.testDataPath");
+        return path.endsWith("/") ? path : path + "/";
     }
 }

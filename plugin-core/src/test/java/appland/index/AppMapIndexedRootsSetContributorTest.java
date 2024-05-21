@@ -2,20 +2,21 @@ package appland.index;
 
 import appland.AppMapBaseTest;
 import com.intellij.openapi.application.WriteAction;
-import com.intellij.psi.PsiFile;
-import org.jetbrains.annotations.NotNull;
 import org.junit.Test;
 
 import java.io.IOException;
 
 public class AppMapIndexedRootsSetContributorTest extends AppMapBaseTest {
     @Test
-    public void index() throws IOException {
+    public void index() throws IOException, InterruptedException {
         var excludedFolder = myFixture.getTempDirFixture().findOrCreateDir("excluded");
         WriteAction.runAndWait(() -> {
             excludedFolder.createChildDirectory(this, "appmap");
             excludedFolder.createChildDirectory(this, "appmap-not-indexed");
         });
+
+        // AppMapIndexedRootsSetContributor only un-excludes directories in a content root with appmap.yml
+        createAppMapYaml(excludedFolder.getParent(), excludedFolder.getName());
 
         withExcludedFolder(excludedFolder, () -> {
             myFixture.copyFileToProject("appmap-files/Create_Owner.appmap.json", "excluded/appmap/Create_Owner.appmap.json");
@@ -28,9 +29,5 @@ public class AppMapIndexedRootsSetContributorTest extends AppMapBaseTest {
             var foundMaps = AppMapMetadataService.getInstance(getProject()).findAppMaps("Create Owner");
             assertNotEmpty(foundMaps);
         });
-    }
-
-    private @NotNull PsiFile createFile(@NotNull String fileName) {
-        return myFixture.configureByText(fileName, "");
     }
 }

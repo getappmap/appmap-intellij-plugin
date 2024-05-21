@@ -5,8 +5,6 @@ import appland.utils.ModuleTestUtils;
 import com.intellij.openapi.application.WriteAction;
 import org.junit.Test;
 
-import java.io.IOException;
-
 public class AppMapSearchScopesTest extends AppMapBaseTest {
     @Test
     public void contentRoots() throws Exception {
@@ -33,19 +31,22 @@ public class AppMapSearchScopesTest extends AppMapBaseTest {
     }
 
     @Test
-    public void appMapConfigScope() throws IOException {
+    public void appMapConfigScope() throws Exception {
         var scope = AppMapSearchScopes.appMapConfigSearchScope(getProject());
 
-        var topLevelConfig = myFixture.configureByText("appmap.yml", "content").getVirtualFile();
+        var subDir = myFixture.getTempDirFixture().findOrCreateDir("subdir");
+        var root = subDir.getParent();
+
+        var topLevelConfig = createAppMapYaml(root, "tmp/appmap");
         assertTrue(scope.contains(topLevelConfig));
         assertTrue(scope.contains(topLevelConfig.getParent()));
 
-        var subLevelConfig = myFixture.addFileToProject("sub-dir/appmap.yml", "content").getVirtualFile();
+        var subLevelConfig = createAppMapYaml(subDir, "tmp/appmap");
         assertTrue(scope.contains(subLevelConfig));
 
         // appmap.yml must not be found in non-content folders, e.g. in excluded folders
         var excludedDir = myFixture.getTempDirFixture().findOrCreateDir("appmap-excluded-dir");
-        var excludedConfig = WriteAction.computeAndWait(() -> excludedDir.createChildData(this, "appmap.yml"));
+        var excludedConfig = createAppMapYaml(excludedDir, "tmp/appmap");
         withExcludedFolder(excludedDir, () -> {
             assertFalse(scope.contains(excludedDir));
             assertFalse(scope.contains(excludedConfig));

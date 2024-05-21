@@ -28,6 +28,9 @@
         <listener topic="appland.settings.AppMapSettingsListener"
                   class="appland.settings.AppMapNavieSettingsReloadProjectListener"
                   activeInTestMode="false"/>
+        <listener topic="appland.config.AppMapConfigFileListener"
+                  class="appland.cli.AppMapCommandLineConfigListener"
+                  activeInTestMode="true"/>
     </applicationListeners>
 
     <projectListeners>
