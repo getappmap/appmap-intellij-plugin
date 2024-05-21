@@ -8,7 +8,11 @@ import appland.utils.ModuleTestUtils;
 import com.intellij.execution.RunManager;
 import com.intellij.execution.jar.JarApplicationConfiguration;
 import com.intellij.execution.jar.JarApplicationConfigurationType;
+import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.application.WriteAction;
+import com.intellij.openapi.projectRoots.ProjectJdkTable;
+import com.intellij.openapi.roots.ModifiableRootModel;
+import com.intellij.openapi.roots.ModuleRootModificationUtil;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.openapi.vfs.VirtualFileManager;
 import com.intellij.psi.search.GlobalSearchScopes;
@@ -67,7 +71,7 @@ public class AppMapJavaPackageConfigTest extends AppMapBaseTest {
         var rootDir = createMultiMod();
 
         var expectedConfig = new AppMapConfigFile();
-        expectedConfig.setName("ignoreResources");
+        expectedConfig.setName("appland_execution_AppMapJavaPackageConfigTest_ignoreResources");
         expectedConfig.setPackages(List.of("com.example.application", "com.example.controllers", "com.example.models"));
         expectedConfig.setAppMapDir("tmp/appmap");
 
@@ -84,9 +88,7 @@ public class AppMapJavaPackageConfigTest extends AppMapBaseTest {
 
         var mod = getModule();
         ModuleTestUtils.withContentRoot(mod, rootDir, () -> {
-            var configPath = AppMapJavaConfigUtil.findBestAppMapContentRootDirectory(mod, rootDir.findChild("mod1"));
-            var found = rootDir.findChild("appmap.yml");
-            assertEquals(rootDir, configPath);
+            assertEquals(rootDir, AppMapJavaConfigUtil.findBestAppMapContentRootDirectory(mod, rootDir.findChild("mod1")));
         });
     }
     private void assertConfigUpdate(@NotNull VirtualFile contextFile,
@@ -121,7 +123,10 @@ public class AppMapJavaPackageConfigTest extends AppMapBaseTest {
     private VirtualFile createMultiMod() {
         var rootDir = myFixture.copyDirectoryToProject("projects/with_resources", "project");
         var myModule = getModule();
-        PsiTestUtil.removeContentEntry(myModule, VirtualFileManager.getInstance().findFileByUrl("temp:///src"));
+
+        // remove all existing content roots
+        ModuleRootModificationUtil.updateModel(myModule, ModifiableRootModel::clear);
+
         PsiTestUtil.addSourceRoot(myModule, rootDir.findFileByRelativePath("mod1/src/main/java"));
         PsiTestUtil.addSourceRoot(myModule, rootDir.findFileByRelativePath("mod2/src/main/java"));
         PsiTestUtil.addSourceRoot(myModule, rootDir.findFileByRelativePath("mod1/src/main/resources"), JavaResourceRootType.RESOURCE);
