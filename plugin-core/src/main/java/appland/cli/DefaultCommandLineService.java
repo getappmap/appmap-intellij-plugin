@@ -616,7 +616,7 @@ public class DefaultCommandLineService implements AppLandCommandLineService {
             return Map.of(
                     "http_proxy", proxyURL,
                     "https_proxy", proxyURL,
-                    "no_proxy", settings.PROXY_EXCEPTIONS);
+                    "no_proxy", StringUtil.defaultIfEmpty(settings.PROXY_EXCEPTIONS, ""));
         } catch (MalformedURLException | URISyntaxException e) {
             LOG.debug("Unable to create proxy settings for AppMap command line", e);
             return Map.of();
