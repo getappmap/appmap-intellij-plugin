@@ -16,6 +16,7 @@ public class UnknownLanguageAnalyzer implements LanguageAnalyzer {
     @Override
     public @NotNull ProjectAnalysis analyze(@NotNull VirtualFile directory) {
         var lang = new FeatureEx();
+        lang.title = "Unknown";
         lang.score = Score.Bad;
         lang.text = "This project looks like it's written in a language not currently supported by AppMap.";
 
