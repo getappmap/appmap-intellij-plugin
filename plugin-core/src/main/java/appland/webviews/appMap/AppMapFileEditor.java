@@ -69,7 +69,7 @@ public class AppMapFileEditor extends WebviewEditor<JsonObject> {
     protected @Nullable JsonObject createInitData() {
         var fileContent = AppMapFiles.loadAppMapFile(file);
 
-        // return early in case of error
+        // return early in case of error, for example if the CLI binary is unavailable
         if (fileContent == null) {
             return null;
         }
@@ -79,24 +79,19 @@ public class AppMapFileEditor extends WebviewEditor<JsonObject> {
             var appMapJson = gson.fromJson(fileContent, JsonObject.class);
 
             // retrieve stats from CLI and attach to the parsed AppMap
-            try {
-                var appMapStats = AppMapFiles.loadAppMapStats(file);
-                if (appMapStats != null) {
-                    var stats = GsonUtils.singlePropertyObject("functions", gson.fromJson(appMapStats, JsonArray.class));
-                    appMapJson.add("stats", stats);
-                }
-            } catch (Exception e) {
-                LOG.debug("error parsing AppMap stats", e);
-            }
+            appMapJson.add("stats", AppMapFiles.loadAppMapStats(file));
 
-            // attach findings, which belong to this AppMap, as property "findings" (same as in VSCode)
-            var findingsFile = ReadAction.compute(() -> AppMapFiles.findRelatedFindingsFile(file));
-            if (findingsFile != null) {
-                var matchingFindings = FindingsManager.getInstance(project).getAllFindings()
-                        .stream()
-                        .filter(problem -> findingsFile.equals(problem.getFindingsFile()))
-                        .collect(Collectors.toList());
-                appMapJson.add("findings", FindingsUtil.createFindingsArray(gson, project, matchingFindings, "rule"));
+            // attach findings for regular or large, pruned AppMaps but not for giant AppMaps
+            if (!AppMapFiles.isGiantAppMap(file)) {
+                // attach findings, which belong to this AppMap, as property "findings" (same as in VSCode)
+                var findingsFile = ReadAction.compute(() -> AppMapFiles.findRelatedFindingsFile(file));
+                if (findingsFile != null) {
+                    var matchingFindings = FindingsManager.getInstance(project).getAllFindings()
+                            .stream()
+                            .filter(problem -> findingsFile.equals(problem.getFindingsFile()))
+                            .collect(Collectors.toList());
+                    appMapJson.add("findings", FindingsUtil.createFindingsArray(gson, project, matchingFindings, "rule"));
+                }
             }
 
             return appMapJson;
