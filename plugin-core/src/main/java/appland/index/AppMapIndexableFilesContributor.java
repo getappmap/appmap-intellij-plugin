@@ -21,7 +21,7 @@ import java.util.function.Predicate;
  * We also have to update indexed files after the "Install Guide" wizard steps,
  * which add new roots after the project was opened.
  */
-@SuppressWarnings("UnstableApiUsage")
+@SuppressWarnings({"UnstableApiUsage", "removal"})
 public class AppMapIndexableFilesContributor implements IndexableFilesContributor {
     @Override
     public @NotNull List<IndexableFilesIterator> getIndexableFiles(@NotNull Project project) {

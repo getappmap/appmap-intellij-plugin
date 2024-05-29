@@ -53,6 +53,7 @@ import java.util.stream.Collectors;
 
 import static com.intellij.openapi.util.text.StringUtil.isNotEmpty;
 
+@SuppressWarnings("removal")
 public class DefaultCommandLineService implements AppLandCommandLineService {
     private static final Logger LOG = Logger.getInstance(DefaultCommandLineService.class);
     // initial delay for the first restart attempt

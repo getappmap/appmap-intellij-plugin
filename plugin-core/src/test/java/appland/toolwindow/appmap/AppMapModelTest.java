@@ -42,7 +42,7 @@ public class AppMapModelTest extends AppMapBaseTest {
                 "request_recording1.appmap.json",
                 "request_recording2.appmap.json");
 
-        ModuleTestUtils.withContentRoot(getModule(), rootOne, () -> {
+        withContentRoot(rootOne, () -> {
             var model = new AppMapModel(getProject());
             var expected = "-AppMaps\n" +
                     " -root_one\n" +
@@ -57,7 +57,7 @@ public class AppMapModelTest extends AppMapBaseTest {
                 "request_recording2.appmap.json",
                 "request_recording1.appmap.json");
 
-        ModuleTestUtils.withContentRoot(getModule(), rootOne, () -> {
+        withContentRoot(rootOne, () -> {
             var model = new AppMapModel(getProject());
             var expected = "-AppMaps\n" +
                     " -root_one\n" +
@@ -73,7 +73,7 @@ public class AppMapModelTest extends AppMapBaseTest {
         // copy into parent dir, because the default location is "src/", which already is a content root
         var rootOne = WriteAction.computeAndWait(() -> myFixture.copyDirectoryToProject("projects/runtime_analysis_tree", "../root_one"));
 
-        ModuleTestUtils.withContentRoot(getModule(), rootOne, () -> {
+        withContentRoot(rootOne, () -> {
             var model = new AppMapModel(getProject());
             var expected = "-AppMaps\n" +
                     " -root_one\n" +
@@ -92,24 +92,22 @@ public class AppMapModelTest extends AppMapBaseTest {
         var rootOne = WriteAction.computeAndWait(() -> myFixture.copyDirectoryToProject("projects/runtime_analysis_tree", "../root_one"));
         var rootTwo = WriteAction.computeAndWait(() -> myFixture.copyDirectoryToProject("projects/runtime_analysis_tree", "../root_two"));
 
-        ModuleTestUtils.withContentRoot(getModule(), rootOne, () -> {
-            ModuleTestUtils.withContentRoot(getModule(), rootTwo, () -> {
-                var model = new AppMapModel(getProject());
-                var expected = "-AppMaps\n" +
-                        " -root_one\n" +
-                        "  -Tests (ruby + minitest)\n" +
-                        "   Failed test 1\n" +
-                        "   Failed test 2\n" +
-                        "   Successful Test 1\n" +
-                        "   Successful Test 2\n" +
-                        " -root_two\n" +
-                        "  -Tests (ruby + minitest)\n" +
-                        "   Failed test 1\n" +
-                        "   Failed test 2\n" +
-                        "   Successful Test 1\n" +
-                        "   Successful Test 2\n";
-                assertTreeHierarchy(model, expected, getTestRootDisposable());
-            });
+        withContentRoots(List.of(rootOne, rootTwo), () -> {
+            var model = new AppMapModel(getProject());
+            var expected = "-AppMaps\n" +
+                    " -root_one\n" +
+                    "  -Tests (ruby + minitest)\n" +
+                    "   Failed test 1\n" +
+                    "   Failed test 2\n" +
+                    "   Successful Test 1\n" +
+                    "   Successful Test 2\n" +
+                    " -root_two\n" +
+                    "  -Tests (ruby + minitest)\n" +
+                    "   Failed test 1\n" +
+                    "   Failed test 2\n" +
+                    "   Successful Test 1\n" +
+                    "   Successful Test 2\n";
+            assertTreeHierarchy(model, expected, getTestRootDisposable());
         });
     }
 

@@ -44,6 +44,7 @@ public abstract class BaseAppMapJavaTest extends JavaPsiTestCase {
         return false;
     }
 
+    @SuppressWarnings("removal")
     @Override
     protected Sdk getTestProjectJdk() {
         // we need Java 11 for our AppMap tests, but CI has Java 17 to build and compile the plugin
@@ -60,7 +61,6 @@ public abstract class BaseAppMapJavaTest extends JavaPsiTestCase {
             return sdk;
         }
 
-        //noinspection UnstableApiUsage,deprecation
         return JavaAwareProjectJdkTableImpl.getInstanceEx().getInternalJdk();
     }
 }
