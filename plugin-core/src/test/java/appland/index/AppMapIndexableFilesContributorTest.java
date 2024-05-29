@@ -15,12 +15,12 @@ import java.io.IOException;
 
 public class AppMapIndexableFilesContributorTest extends AppMapBaseTest {
     @Before
-    public void verifyVersions(){
+    public void verifyVersions() {
         Assume.assumeTrue(ApplicationInfo.getInstance().getBuild().getBaselineVersion() <= 231);
     }
 
     @Test
-    public void index() throws IOException {
+    public void index() throws Exception {
         var excludedFolder = myFixture.getTempDirFixture().findOrCreateDir("excluded");
         WriteAction.runAndWait(() -> {
             excludedFolder.createChildDirectory(this, "appmap");
