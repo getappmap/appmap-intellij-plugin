@@ -383,6 +383,10 @@ public class DefaultCommandLineService implements AppLandCommandLineService {
             return null;
         }
 
+        if (!AppMapApplicationSettingsService.getInstance().isEnableScanner()) {
+            return null;
+        }
+
         // don't launch for in-memory directories in unit test mode
         if (ApplicationManager.getApplication().isUnitTestMode() && directory.getFileSystem() instanceof TempFileSystem) {
             return null;

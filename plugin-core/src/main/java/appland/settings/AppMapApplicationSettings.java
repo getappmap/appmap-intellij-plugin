@@ -22,6 +22,7 @@ import java.util.*;
 public class AppMapApplicationSettings {
     private volatile boolean firstStart = true;
     private volatile boolean enableTelemetry = true;
+    private volatile boolean enableScanner = false;
     private volatile @Nullable String apiKey = null;
     /**
      * {@code true} if page "Install AppMap Agent" of the installation guide webview was at least shown once.
@@ -49,6 +50,7 @@ public class AppMapApplicationSettings {
     public AppMapApplicationSettings(@NotNull AppMapApplicationSettings settings) {
         this.firstStart = settings.firstStart;
         this.enableTelemetry = settings.enableTelemetry;
+        this.enableScanner = settings.enableScanner;
         this.apiKey = settings.apiKey;
         this.installInstructionsViewed = settings.installInstructionsViewed;
         this.showFirstAppMapNotification = settings.showFirstAppMapNotification;

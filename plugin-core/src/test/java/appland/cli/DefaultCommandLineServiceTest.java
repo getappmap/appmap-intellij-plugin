@@ -2,6 +2,7 @@ package appland.cli;
 
 import appland.AppMapBaseTest;
 import appland.files.AppMapFiles;
+import appland.settings.AppMapApplicationSettings;
 import appland.settings.AppMapApplicationSettingsService;
 import appland.settings.AppMapSettingsListener;
 import appland.testRules.ResetIdeHttpProxyRule;
@@ -242,7 +243,13 @@ public class DefaultCommandLineServiceTest extends AppMapBaseTest {
 
     @Test
     public void scannerProcessRestart() throws Exception {
-        setupAndAssertProcessRestart(getScannerFunction);
+        try {
+            AppMapApplicationSettingsService.getInstance().setEnableScanner(true);
+
+            setupAndAssertProcessRestart(getScannerFunction);
+        } finally {
+            AppMapApplicationSettingsService.getInstance().setEnableScanner(false);
+        }
     }
 
     @Test
@@ -270,6 +277,25 @@ public class DefaultCommandLineServiceTest extends AppMapBaseTest {
                 AppMapApplicationSettingsService.getInstance().setApiKeyNotifying(null);
             });
             assertActiveRoots(tempDir);
+        });
+    }
+
+    @Test
+    public void scannerSettingDefault() throws Exception {
+        var settings = AppMapApplicationSettingsService.getInstance();
+        assertFalse("Scanner must be turned off by default", settings.isEnableScanner());
+
+        var tempDir = myFixture.createFile("test.txt", "").getParent();
+        ModuleTestUtils.withContentRoot(getModule(), tempDir, () -> {
+            createAppMapYaml(tempDir, "tmp/appmap");
+            waitForProcessStatus(true, tempDir, true);
+            assertActiveRoots(tempDir);
+
+            for (var processes : TestCommandLineService.getInstance().processes.values()) {
+                assertNull("Scanner must not be launched if the setting is off", processes.getScanner());
+
+                assertNotNull("Indexer must not be controlled by scanner setting", processes.getIndexer());
+            }
         });
     }
 

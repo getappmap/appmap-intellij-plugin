@@ -13,6 +13,7 @@ import javax.swing.JPanel
 
 class AppMapProjectSettingsPanel {
     private lateinit var enableTelemetry: JCheckBox
+    private lateinit var enableScanner: JCheckBox
     private lateinit var cliEnvironment: EnvironmentVariablesComponent
     private lateinit var openAIKey: JBTextField
 
@@ -21,6 +22,7 @@ class AppMapProjectSettingsPanel {
         secureApplicationSettings: AppMapSecureApplicationSettings
     ) {
         enableTelemetry.isSelected = applicationSettings.isEnableTelemetry
+        enableScanner.isSelected = applicationSettings.isEnableScanner
         cliEnvironment.envs = applicationSettings.cliEnvironment
         cliEnvironment.isPassParentEnvs = applicationSettings.isCliPassParentEnv
 
@@ -33,6 +35,7 @@ class AppMapProjectSettingsPanel {
         notify: Boolean,
     ) {
         applicationSettings.isEnableTelemetry = enableTelemetry.isSelected
+        applicationSettings.isEnableScanner = enableScanner.isSelected
         applicationSettings.isCliPassParentEnv = cliEnvironment.isPassParentEnvs
         if (notify) {
             applicationSettings.setCliEnvironmentNotifying(cliEnvironment.envs)
@@ -52,6 +55,9 @@ class AppMapProjectSettingsPanel {
                 enableTelemetry = checkBox(AppMapBundle.get("projectSettings.enableTelemetry.title")).component
             }
             group(AppMapBundle.get("projectSettings.appMapServices")) {
+                row {
+                    enableScanner = checkBox(AppMapBundle.get("projectSettings.enableScanner.title")).component
+                }
                 row(AppMapBundle.get("projectSettings.openAIKey.title")) {
                     openAIKey = textField().align(AlignX.FILL).component
                 }.layout(RowLayout.INDEPENDENT)
