@@ -1,6 +1,7 @@
 package appland.javaAgent;
 
 import appland.AppMapBundle;
+import appland.AppMapPlugin;
 import appland.utils.SystemProperties;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.components.Service;
@@ -17,6 +18,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.nio.file.attribute.FileTime;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
@@ -38,7 +40,7 @@ public final class AppMapJavaAgentDownloadService {
      * {@code null} is returned if the agent has not been downloaded yet.
      */
     public @Nullable Path getJavaAgentPathIfExists() {
-        var jarFilePath = getJavaAgentPath();
+        var jarFilePath = getOrCreateAgentFilePath();
         return jarFilePath == null || Files.notExists(jarFilePath) ? null : jarFilePath;
     }
 
@@ -48,19 +50,50 @@ public final class AppMapJavaAgentDownloadService {
         new Task.Backgroundable(project, title, false, PerformInBackgroundOption.ALWAYS_BACKGROUND) {
             @Override
             public void run(@NotNull ProgressIndicator indicator) {
-                try {
-                    downloadJavaAgentSync(indicator);
-                } catch (IOException e) {
-                    // User should have been warned already, so log at DEBUG
-                    LOG.debug(String.format("failed to download AppMap Java agent: %s (%s)", e, e.getCause()));
-                }
+                downloadJavaAgentSyncWithBundledFallback(indicator);
             }
         }.queue();
     }
 
+    /**
+     * Attempts to download the latest version of the Java agent
+     * and copies the bundled agent JAR to the target location if the download failed.
+     *
+     * @return {@code true} if the file was successfully downloaded from the remote location
+     */
+    public boolean downloadJavaAgentSyncWithBundledFallback(@NotNull ProgressIndicator indicator) {
+        try {
+            if (downloadJavaAgentSync(indicator)) {
+                return true;
+            }
+        } catch (IOException e) {
+            // ignore, because fallback is applied below
+        }
+
+        // fallback handling if the download failed or if an exception occurred
+        var agentFilePath = getAgentFilePath();
+        if (Files.notExists(agentFilePath)) { // by default, symbolic links are followed
+            try {
+                Files.copy(AppMapPlugin.getAppMapJavaAgentPath(), agentFilePath, StandardCopyOption.REPLACE_EXISTING);
+            } catch (IOException e) {
+                LOG.debug(String.format("failed to download AppMap Java agent: %s (%s)", e, e.getCause()));
+
+                // There's nothing we can do if the fallback failed, too.
+                // To avoid partially copied agent jars, we're attempting to delete the target file.
+                try {
+                    Files.deleteIfExists(agentFilePath);
+                } catch (IOException ex) {
+                    // ignore
+                }
+            }
+        }
+
+        return false;
+    }
+
     public boolean downloadJavaAgentSync(@NotNull ProgressIndicator indicator) throws IOException {
-        var getAgentFilePath = getJavaAgentPath();
-        if (getAgentFilePath == null) {
+        var agentFilePath = getOrCreateAgentFilePath();
+        if (agentFilePath == null) {
             LOG.warn("unable to locate target file path for AppMap Java agent");
             return false;
         }
@@ -71,7 +104,7 @@ public final class AppMapJavaAgentDownloadService {
         }
 
         // e.g. ~/.appmap/lib/java/appmap-1.7.2.jar
-        var assetDownloadPath = getAgentFilePath.resolveSibling(latestAsset.getFileName());
+        var assetDownloadPath = agentFilePath.resolveSibling(latestAsset.getFileName());
 
         // don't download if the asset file does already exist
         if (Files.exists(assetDownloadPath)) {
@@ -89,12 +122,12 @@ public final class AppMapJavaAgentDownloadService {
 
         // create a relative symbolic appmap.jar pointing to the downloaded JAR file
         try {
-            Files.deleteIfExists(getAgentFilePath);
-            Files.createSymbolicLink(getAgentFilePath, getAgentFilePath.getParent().relativize(assetDownloadPath));
+            Files.deleteIfExists(agentFilePath);
+            Files.createSymbolicLink(agentFilePath, agentFilePath.getParent().relativize(assetDownloadPath));
         } catch (IOException e) {
             // copy the downloaded file to "agent.jar" as a fallback,
             // e.g. on system where symbolic links are unsupported
-            Files.copy(assetDownloadPath, getAgentFilePath);
+            Files.copy(assetDownloadPath, agentFilePath);
         }
 
         return true;
@@ -167,7 +200,12 @@ public final class AppMapJavaAgentDownloadService {
         }
     }
 
-    private @Nullable Path getJavaAgentPath() {
+    /**
+     * Creates the parent directory of the agent jar file and returns the path to the jar.
+     *
+     * @return The path to the Java agent JAR if the parent directory exists. {@code null} if the parent directory could not be created.
+     */
+    private @Nullable Path getOrCreateAgentFilePath() {
         var agentDir = getOrCreateAgentDir();
         return agentDir == null ? null : getAgentFilePath();
     }
@@ -175,7 +213,8 @@ public final class AppMapJavaAgentDownloadService {
     /**
      * @return The path of the directory, where the AppMap Java agent should be stored (~/.appmap/lib/java).
      */
-    @Nullable Path getOrCreateAgentDir() {
+    @Nullable
+    Path getOrCreateAgentDir() {
         var getAgentDirPath = getAgentDirPath();
         try {
             Files.createDirectories(getAgentDirPath);
