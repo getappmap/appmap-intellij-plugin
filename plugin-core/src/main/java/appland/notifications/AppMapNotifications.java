@@ -3,15 +3,20 @@ package appland.notifications;
 import appland.AppMapBundle;
 import appland.AppMapPlugin;
 import appland.actions.StopAppMapRecordingAction;
+import appland.settings.AppMapApplicationSettingsService;
 import appland.startup.FirstAppMapLaunchStartupActivity;
 import appland.webviews.navie.NavieEditorProvider;
 import com.intellij.ide.BrowserUtil;
 import com.intellij.notification.*;
 import com.intellij.openapi.actionSystem.DataContext;
+import com.intellij.openapi.application.ApplicationInfo;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.application.ModalityState;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.ui.DialogWrapper;
+import com.intellij.openapi.ui.Messages;
 import com.intellij.openapi.vfs.VirtualFile;
+import com.intellij.util.net.HttpConfigurable;
 import com.intellij.util.ui.EdtInvocationManager;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -158,6 +163,37 @@ public final class AppMapNotifications {
             );
             notification.notify(project);
         });
+    }
+
+    @SuppressWarnings({"removal", "DialogTitleCapitalization"})
+    public static void showWebviewProxyBrokenWarning(@NotNull Project project) {
+        EdtInvocationManager.invokeLaterIfNeeded(() -> {
+            Messages.showDialog(
+                    project,
+                    AppMapBundle.get("notification.brokenProxySupport.content"),
+                    AppMapBundle.get("notification.brokenProxySupport.title"),
+                    new String[]{AppMapBundle.get("notification.brokenProxySupport.confirmAction")},
+                    0,
+                    Messages.getWarningIcon(),
+                    new DialogWrapper.DoNotAskOption.Adapter() {
+                        @Override
+                        public void rememberChoice(boolean isSelected, int exitCode) {
+                            AppMapApplicationSettingsService.getInstance().setShowBrokenProxyWarning(!isSelected);
+                        }
+                    }
+            );
+        });
+    }
+
+    /**
+     * @return {@code true} if the warning about broken proxy support of webview should be displayed.
+     * The warning is only shown for 2024.1 and for users which have an HTTP proxy configured.
+     */
+    public static boolean isWebviewProxyWarningRequired() {
+        var proxySettings = HttpConfigurable.getInstance();
+        return ApplicationInfo.getInstance().getBuild().getBaselineVersion() == 241
+                && proxySettings.USE_HTTP_PROXY && !proxySettings.PROXY_TYPE_IS_SOCKS
+                && AppMapApplicationSettingsService.getInstance().isShowBrokenProxyWarning();
     }
 
     public static void showAppMapJsonExportFailedNotification(@NotNull Project project, @NotNull String error) {
