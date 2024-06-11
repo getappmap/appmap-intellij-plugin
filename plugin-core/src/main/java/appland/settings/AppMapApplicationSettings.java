@@ -33,6 +33,10 @@ public class AppMapApplicationSettings {
      * This flag is synced with {@link  #firstStart} to avoid the notification with existing users.
      */
     private volatile boolean showFirstAppMapNotification = false;
+    /**
+     * {@code true} if the warning about broken proxy settings should be displayed the next time an AppMap webview is opened.
+     */
+    private volatile boolean showBrokenProxyWarning = true;
 
     /**
      * Map of environment variables to be set when starting AppMap services
