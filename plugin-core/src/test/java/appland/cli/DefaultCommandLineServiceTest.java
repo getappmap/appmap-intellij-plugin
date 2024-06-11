@@ -364,6 +364,20 @@ public class DefaultCommandLineServiceTest extends AppMapBaseTest {
         ), DefaultCommandLineService.createProxyEnvironment());
     }
 
+    @Test
+    public void proxySettingsEnvironmentMinimalSettings() {
+        HttpConfigurable.getInstance().USE_HTTP_PROXY = true;
+        HttpConfigurable.getInstance().PROXY_HOST = "my.proxy.host";
+        HttpConfigurable.getInstance().PROXY_PORT = 8080;
+        HttpConfigurable.getInstance().PROXY_EXCEPTIONS = null;
+
+        assertEquals(Map.of(
+                "http_proxy", "http://my.proxy.host:8080",
+                "https_proxy", "http://my.proxy.host:8080",
+                "no_proxy", ""
+        ), DefaultCommandLineService.createProxyEnvironment());
+    }
+
     private void setupAndAssertProcessRestart(@NotNull Function<VirtualFile, KillableProcessHandler> processForRoot) throws Exception {
         var root = myFixture.addFileToProject("parentA/file.txt", "").getParent().getVirtualFile();
         ModuleTestUtils.withContentRoot(getModule(), root, () -> {
