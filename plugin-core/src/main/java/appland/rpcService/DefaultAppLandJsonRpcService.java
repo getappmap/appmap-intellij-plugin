@@ -36,6 +36,7 @@ import lombok.Data;
 import net.jcip.annotations.GuardedBy;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.jvnet.winp.WinpException;
 
 import java.io.IOException;
 import java.util.Collection;
@@ -251,10 +252,20 @@ public class DefaultAppLandJsonRpcService implements AppLandJsonRpcService, AppL
 
         try {
             var process = server.processHandler;
-            process.destroyProcess();
-            process.waitFor(500);
-            if (!process.isProcessTerminated()) {
-                process.killProcess();
+
+            try {
+                process.setShouldKillProcessSoftly(false);
+                process.destroyProcess();
+                process.waitFor(500);
+            } catch (WinpException e) {
+                // https://github.com/getappmap/appmap-intellij-plugin/issues/706
+                // On Windows 10 and later, ctrl+c is sent to the process as first attempt.
+                // If this attempt takes longer than 5s, then a WinpException is thrown.
+                LOG.warn("Failed to destroyProcess, falling back to forced process termination", e);
+            } finally {
+                if (!process.isProcessTerminated()) {
+                    process.killProcess();
+                }
             }
         } finally {
             if (!isDisposed) {

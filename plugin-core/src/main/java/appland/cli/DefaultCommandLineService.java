@@ -34,6 +34,7 @@ import lombok.EqualsAndHashCode;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.TestOnly;
+import org.jvnet.winp.WinpException;
 
 import javax.annotation.concurrent.GuardedBy;
 import java.net.MalformedURLException;
@@ -511,16 +512,23 @@ public class DefaultCommandLineService implements AppLandCommandLineService {
             var shutdownRunnable = new Runnable() {
                 @Override
                 public void run() {
-                    process.setShouldKillProcessSoftly(false);
-                    process.destroyProcess();
-                    process.waitFor(500);
+                    try {
+                        process.setShouldKillProcessSoftly(false);
+                        process.destroyProcess();
+                        process.waitFor(500);
+                    } catch (WinpException e) {
+                        // https://github.com/getappmap/appmap-intellij-plugin/issues/706
+                        // On Windows 10 and later, ctrl+c is sent to the process as first attempt.
+                        // If this attempt takes longer than 5s, then a WinpException is thrown.
+                        LOG.warn("Failed to destroyProcess, falling back to forced process termination", e);
+                    } finally {
+                        if (!process.isProcessTerminated()) {
+                            process.killProcess();
+                        }
 
-                    if (!process.isProcessTerminated()) {
-                        process.killProcess();
-                    }
-
-                    if (timeout > 0) {
-                        process.waitFor(timeUnit.toMillis(timeout));
+                        if (timeout > 0) {
+                            process.waitFor(timeUnit.toMillis(timeout));
+                        }
                     }
                 }
             };
