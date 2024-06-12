@@ -13,6 +13,9 @@ import org.junit.rules.TestRule;
 import org.mockserver.junit.MockServerRule;
 import org.mockserver.verify.VerificationTimes;
 
+import java.io.IOException;
+import java.nio.file.Files;
+
 import static org.mockserver.model.HttpRequest.request;
 import static org.mockserver.model.HttpResponse.response;
 
@@ -70,5 +73,42 @@ public class AppMapJavaAgentDownloadServiceProxyTest extends AppMapBaseTest {
                         .withPath(".*/(appmap.*?.jar)"),
                 VerificationTimes.once()
         );
+    }
+
+    @Test
+    public void fallbackToBundledAgent() {
+        var service = AppMapJavaAgentDownloadService.getInstance();
+
+        // set up proxy to prevent download of the Java agent
+        mockServerRule.getClient().when(request()).respond(response().withStatusCode(403));
+
+        var agentFilePath = service.getAgentFilePath();
+        assertFalse(Files.exists(agentFilePath));
+
+        var wasDownloaded = service.downloadJavaAgentSyncWithBundledFallback(new EmptyProgressIndicator());
+        assertFalse(wasDownloaded);
+
+        assertTrue(Files.exists(agentFilePath));
+    }
+
+    @Test
+    public void fallbackToBundledAgentNoReplacementOfExisting() throws IOException {
+        var service = AppMapJavaAgentDownloadService.getInstance();
+
+        // set up proxy to prevent download of the Java agent
+        mockServerRule.getClient().when(request()).respond(response().withStatusCode(403));
+
+        var agentFilePath = service.getAgentFilePath();
+        assertFalse(Files.exists(agentFilePath));
+
+        // create an empty appmap.jar for our test
+        Files.createDirectories(agentFilePath.getParent());
+        Files.createFile(agentFilePath);
+
+        var wasDownloaded = service.downloadJavaAgentSyncWithBundledFallback(new EmptyProgressIndicator());
+        assertFalse(wasDownloaded);
+
+        assertTrue(Files.exists(agentFilePath));
+        assertEquals("An existing appmap.jar file must not be replaced by the fallback code", 0, Files.size(agentFilePath));
     }
 }

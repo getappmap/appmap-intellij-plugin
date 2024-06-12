@@ -34,6 +34,7 @@ import lombok.EqualsAndHashCode;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.TestOnly;
+import org.jvnet.winp.WinpException;
 
 import javax.annotation.concurrent.GuardedBy;
 import java.net.MalformedURLException;
@@ -69,7 +70,7 @@ public class DefaultCommandLineService implements AppLandCommandLineService {
 
     public DefaultCommandLineService() {
         var connection = ApplicationManager.getApplication().getMessageBus().connect(this);
-        connection.subscribe(AppMapConfigFileListener.TOPIC, this::refreshForOpenProjectsInBackground);
+        connection.subscribe(AppMapConfigFileListener.TOPIC, (AppMapConfigFileListener) this::refreshForOpenProjectsInBackground);
     }
 
     @Override
@@ -383,6 +384,10 @@ public class DefaultCommandLineService implements AppLandCommandLineService {
             return null;
         }
 
+        if (!AppMapApplicationSettingsService.getInstance().isEnableScanner()) {
+            return null;
+        }
+
         // don't launch for in-memory directories in unit test mode
         if (ApplicationManager.getApplication().isUnitTestMode() && directory.getFileSystem() instanceof TempFileSystem) {
             return null;
@@ -507,16 +512,23 @@ public class DefaultCommandLineService implements AppLandCommandLineService {
             var shutdownRunnable = new Runnable() {
                 @Override
                 public void run() {
-                    process.setShouldKillProcessSoftly(false);
-                    process.destroyProcess();
-                    process.waitFor(500);
+                    try {
+                        process.setShouldKillProcessSoftly(false);
+                        process.destroyProcess();
+                        process.waitFor(500);
+                    } catch (WinpException e) {
+                        // https://github.com/getappmap/appmap-intellij-plugin/issues/706
+                        // On Windows 10 and later, ctrl+c is sent to the process as first attempt.
+                        // If this attempt takes longer than 5s, then a WinpException is thrown.
+                        LOG.warn("Failed to destroyProcess, falling back to forced process termination", e);
+                    } finally {
+                        if (!process.isProcessTerminated()) {
+                            process.killProcess();
+                        }
 
-                    if (!process.isProcessTerminated()) {
-                        process.killProcess();
-                    }
-
-                    if (timeout > 0) {
-                        process.waitFor(timeUnit.toMillis(timeout));
+                        if (timeout > 0) {
+                            process.waitFor(timeUnit.toMillis(timeout));
+                        }
                     }
                 }
             };
@@ -616,7 +628,7 @@ public class DefaultCommandLineService implements AppLandCommandLineService {
             return Map.of(
                     "http_proxy", proxyURL,
                     "https_proxy", proxyURL,
-                    "no_proxy", settings.PROXY_EXCEPTIONS);
+                    "no_proxy", StringUtil.defaultIfEmpty(settings.PROXY_EXCEPTIONS, ""));
         } catch (MalformedURLException | URISyntaxException e) {
             LOG.debug("Unable to create proxy settings for AppMap command line", e);
             return Map.of();

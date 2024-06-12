@@ -22,6 +22,7 @@ import java.util.*;
 public class AppMapApplicationSettings {
     private volatile boolean firstStart = true;
     private volatile boolean enableTelemetry = true;
+    private volatile boolean enableScanner = false;
     private volatile @Nullable String apiKey = null;
     /**
      * {@code true} if page "Install AppMap Agent" of the installation guide webview was at least shown once.
@@ -32,6 +33,10 @@ public class AppMapApplicationSettings {
      * This flag is synced with {@link  #firstStart} to avoid the notification with existing users.
      */
     private volatile boolean showFirstAppMapNotification = false;
+    /**
+     * {@code true} if the warning about broken proxy settings should be displayed the next time an AppMap webview is opened.
+     */
+    private volatile boolean showBrokenProxyWarning = true;
 
     /**
      * Map of environment variables to be set when starting AppMap services
@@ -49,6 +54,7 @@ public class AppMapApplicationSettings {
     public AppMapApplicationSettings(@NotNull AppMapApplicationSettings settings) {
         this.firstStart = settings.firstStart;
         this.enableTelemetry = settings.enableTelemetry;
+        this.enableScanner = settings.enableScanner;
         this.apiKey = settings.apiKey;
         this.installInstructionsViewed = settings.installInstructionsViewed;
         this.showFirstAppMapNotification = settings.showFirstAppMapNotification;

@@ -2,6 +2,7 @@ package appland.cli;
 
 import appland.AppMapBaseTest;
 import appland.files.AppMapFiles;
+import appland.settings.AppMapApplicationSettings;
 import appland.settings.AppMapApplicationSettingsService;
 import appland.settings.AppMapSettingsListener;
 import appland.testRules.ResetIdeHttpProxyRule;
@@ -242,7 +243,13 @@ public class DefaultCommandLineServiceTest extends AppMapBaseTest {
 
     @Test
     public void scannerProcessRestart() throws Exception {
-        setupAndAssertProcessRestart(getScannerFunction);
+        try {
+            AppMapApplicationSettingsService.getInstance().setEnableScanner(true);
+
+            setupAndAssertProcessRestart(getScannerFunction);
+        } finally {
+            AppMapApplicationSettingsService.getInstance().setEnableScanner(false);
+        }
     }
 
     @Test
@@ -270,6 +277,25 @@ public class DefaultCommandLineServiceTest extends AppMapBaseTest {
                 AppMapApplicationSettingsService.getInstance().setApiKeyNotifying(null);
             });
             assertActiveRoots(tempDir);
+        });
+    }
+
+    @Test
+    public void scannerSettingDefault() throws Exception {
+        var settings = AppMapApplicationSettingsService.getInstance();
+        assertFalse("Scanner must be turned off by default", settings.isEnableScanner());
+
+        var tempDir = myFixture.createFile("test.txt", "").getParent();
+        ModuleTestUtils.withContentRoot(getModule(), tempDir, () -> {
+            createAppMapYaml(tempDir, "tmp/appmap");
+            waitForProcessStatus(true, tempDir, true);
+            assertActiveRoots(tempDir);
+
+            for (var processes : TestCommandLineService.getInstance().processes.values()) {
+                assertNull("Scanner must not be launched if the setting is off", processes.getScanner());
+
+                assertNotNull("Indexer must not be controlled by scanner setting", processes.getIndexer());
+            }
         });
     }
 
@@ -364,6 +390,20 @@ public class DefaultCommandLineServiceTest extends AppMapBaseTest {
         ), DefaultCommandLineService.createProxyEnvironment());
     }
 
+    @Test
+    public void proxySettingsEnvironmentMinimalSettings() {
+        HttpConfigurable.getInstance().USE_HTTP_PROXY = true;
+        HttpConfigurable.getInstance().PROXY_HOST = "my.proxy.host";
+        HttpConfigurable.getInstance().PROXY_PORT = 8080;
+        HttpConfigurable.getInstance().PROXY_EXCEPTIONS = null;
+
+        assertEquals(Map.of(
+                "http_proxy", "http://my.proxy.host:8080",
+                "https_proxy", "http://my.proxy.host:8080",
+                "no_proxy", ""
+        ), DefaultCommandLineService.createProxyEnvironment());
+    }
+
     private void setupAndAssertProcessRestart(@NotNull Function<VirtualFile, KillableProcessHandler> processForRoot) throws Exception {
         var root = myFixture.addFileToProject("parentA/file.txt", "").getParent().getVirtualFile();
         ModuleTestUtils.withContentRoot(getModule(), root, () -> {
@@ -392,7 +432,7 @@ public class DefaultCommandLineServiceTest extends AppMapBaseTest {
 
         var refreshLatch = new CountDownLatch(1);
         var bus = ApplicationManager.getApplication().getMessageBus().connect(getTestRootDisposable());
-        bus.subscribe(AppLandCommandLineListener.TOPIC, refreshLatch::countDown);
+        bus.subscribe(AppLandCommandLineListener.TOPIC, (AppLandCommandLineListener) refreshLatch::countDown);
         try {
             var content = appMapPath != null ? "appmap_dir: " + appMapPath + "\n" : "";
             return VfsTestUtil.createFile(directory, "appmap.yml", content);

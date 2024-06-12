@@ -5,6 +5,7 @@ import appland.index.AppMapSearchScopes;
 import appland.utils.GsonUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.intellij.execution.ExecutionException;
 import com.intellij.execution.configurations.GeneralCommandLine;
@@ -267,6 +268,10 @@ public final class AppMapFiles {
         return loadAppMapFile(file, SIZE_THRESHOLD_GIANT_BYTES, SIZE_THRESHOLD_LARGE_BYTES, APPMAP_CLI_MAX_PRUNE_SIZE);
     }
 
+    public static boolean isGiantAppMap(@NotNull VirtualFile file) {
+        return file.getLength() > SIZE_THRESHOLD_GIANT_BYTES;
+    }
+
     @RequiresReadLock
     public static @Nullable VirtualFile findTopLevelContentRoot(@NotNull Project project,
                                                                 @NotNull VirtualFile insideContentRoot) {
@@ -342,26 +347,30 @@ public final class AppMapFiles {
     }
 
     /**
-     * Executes the stats command with the AppMap CLI and returns STDOUT if the command executed successfully.
+     * Executes the stats command with the AppMap CLI and if the command executed successfully returns '{ functions: parsedSTDOUT }` based on the command's STDOUT.
      * The maximum runtime is limited to {@link #STATS_COMMAND_TIMEOUT_MILLIS} milliseconds.
      *
      * @param file The file to pass to the stats command
-     * @return STDOUT of the process if it executed successfully
+     * @return {@link JsonObject} containing the AppMap stats, which were retrieved from the AppMap CLI.
      */
     @RequiresBackgroundThread
-    public static @Nullable String loadAppMapStats(@NotNull VirtualFile file) {
+    public static @NotNull JsonObject loadAppMapStats(@NotNull VirtualFile file) {
+        JsonArray statsFunctions = null;
+
         var command = AppLandCommandLineService.getInstance().createAppMapStatsCommand(file);
-        if (command == null) {
-            return null;
+        if (command != null) {
+            try {
+                var processOutput = ExecUtil.execAndGetOutput(command, STATS_COMMAND_TIMEOUT_MILLIS);
+                var jsonString = getOutputOrLogStatus(command, processOutput);
+                if (jsonString != null) {
+                    statsFunctions = GsonUtils.GSON.fromJson(jsonString, JsonArray.class);
+                }
+            } catch (ExecutionException e) {
+                LOG.debug("error retrieving AppMap file stats: " + file.getPath(), e);
+            }
         }
 
-        try {
-            var processOutput = ExecUtil.execAndGetOutput(command, STATS_COMMAND_TIMEOUT_MILLIS);
-            return getOutputOrLogStatus(command, processOutput);
-        } catch (ExecutionException e) {
-            LOG.debug("error retrieving AppMap file stats: " + file.getPath(), e);
-        }
-        return null;
+        return GsonUtils.singlePropertyObject("functions", statsFunctions != null ? statsFunctions : new JsonArray());
     }
 
     private static @Nullable String getOutputOrLogStatus(@NotNull GeneralCommandLine command, @NotNull ProcessOutput processOutput) {

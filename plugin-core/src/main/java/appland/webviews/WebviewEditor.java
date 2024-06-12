@@ -1,6 +1,7 @@
 package appland.webviews;
 
 import appland.AppMapBundle;
+import appland.notifications.AppMapNotifications;
 import appland.utils.GsonUtils;
 import appland.webviews.webserver.AppMapWebview;
 import appland.webviews.webserver.WebviewAuthTokenRequestHandler;
@@ -195,6 +196,10 @@ public abstract class WebviewEditor<T> extends UserDataHolderBase implements Fil
 
         if (Registry.is("appmap.webview.open.dev.tools", false)) {
             ApplicationManager.getApplication().invokeLater(this::openDevTools);
+        }
+
+        if (AppMapNotifications.isWebviewProxyWarningRequired()) {
+            AppMapNotifications.showWebviewProxyBrokenWarning(project);
         }
     }
 

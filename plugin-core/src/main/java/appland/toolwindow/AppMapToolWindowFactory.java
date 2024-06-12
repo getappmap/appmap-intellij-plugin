@@ -1,5 +1,6 @@
 package appland.toolwindow;
 
+import appland.notifications.AppMapNotifications;
 import appland.settings.AppMapApplicationSettingsService;
 import appland.settings.AppMapSettingsListener;
 import appland.toolwindow.appmap.AppMapWindowPanel;
@@ -63,6 +64,10 @@ public class AppMapToolWindowFactory implements ToolWindowFactory, DumbAware {
                         }, ModalityState.defaultModalityState());
                     }
                 });
+
+        if (AppMapNotifications.isWebviewProxyWarningRequired()) {
+            AppMapNotifications.showWebviewProxyBrokenWarning(project);
+        }
     }
 
     private void updateToolWindowContent(@NotNull Project project, @NotNull ToolWindow toolWindow) {
