@@ -11,7 +11,7 @@ By using AppMap data, Navie is the first AI code architect with the context to u
 
 ## Requirements and Use
 
-**2023.2** and newer JetBrains IDEs are required to use this plugin.  
+**2023.1** and newer JetBrains IDEs are required to use this plugin.  
 Supported web applications and API frameworks: Ruby on Rails, Django, Flask, Express, Nest.js, Next.js, and Spring, Kotlin, and Scala
 Supported programming languages: Java, Python, Ruby, TypeScript/JavaScript (for Node.js).
 
