@@ -1,5 +1,16 @@
 AppMap Plugin Changelog
 
+## [0.68.0](https://github.com/getappmap/appmap-intellij-plugin/compare/v0.67.2...v0.68.0) (2024-06-12)
+
+
+### Features
+
+-  add setting to control launch of AppMap scanner ([2a47d22]())-  fall back to bundled agent JAR if the download of the latest release failed ([688b081]())-  restore compatibility with 2023.1 ([b355cb9]())-  update webview install-guide to the latest version ([2740c23]())
+
+### Bug Fixes
+
+-  handle giant AppMaps in AppMaps webview ([d549dca]())-  handle timeout when terminating processes on Windows ([9d3722d]())-  NPE with 2024.1 for proxy server without exceptions ([f32199a]())-  show unsupported projects in Installation Guide webview ([64c44c5]())-  show warning for users of 2024.1 with proxy servers ([533f82d]())
+
 ## [0.67.2](https://github.com/getappmap/appmap-intellij-plugin/compare/v0.67.1...v0.67.2) (2024-05-20)
 
 
