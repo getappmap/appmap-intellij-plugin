@@ -18,6 +18,18 @@ export function mountWebview() {
       },
       data() {
         return initData;
+      },
+      mounted() {
+        let emailInput = document.querySelector("#email-input");
+        if (emailInput) {
+          let focusEventSent = false;
+          emailInput.addEventListener("focus", () => {
+            if (!focusEventSent) {
+              focusEventSent = true;
+              setTimeout(() => vscode.postMessage({"command": "email-input-focused"}), 250);
+            }
+          });
+        }
       }
     });
 

@@ -7,6 +7,7 @@ import appland.settings.AppMapApplicationSettingsService;
 import appland.startup.FirstAppMapLaunchStartupActivity;
 import appland.webviews.navie.NavieEditorProvider;
 import com.intellij.ide.BrowserUtil;
+import com.intellij.ide.util.PropertiesComponent;
 import com.intellij.notification.*;
 import com.intellij.openapi.actionSystem.DataContext;
 import com.intellij.openapi.application.ApplicationInfo;
@@ -15,6 +16,7 @@ import com.intellij.openapi.application.ModalityState;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.DialogWrapper;
 import com.intellij.openapi.ui.Messages;
+import com.intellij.openapi.util.SystemInfo;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.util.net.HttpConfigurable;
 import com.intellij.util.ui.EdtInvocationManager;
@@ -231,5 +233,48 @@ public final class AppMapNotifications {
             );
             notification.notify(project);
         });
+    }
+
+    /**
+     * @return {@code true} if the current IDE has broken text input.
+     */
+    public static boolean isWebviewTextInputBroken() {
+        var buildBaseline = ApplicationInfo.getInstance().getBuild().getBaselineVersion();
+
+        // Linux <= 2023.1 is broken,
+        // https://youtrack.jetbrains.com/issue/JBR-5348/JCEF-OSR-Keyboard-doesnt-work-on-Linux
+        return SystemInfo.isLinux && buildBaseline <= 231;
+    }
+
+    /**
+     * @param project  Current project
+     * @param forNavie If the notification is shown for the Navie webview {@code true} of for the sign-in webview {@code false}.
+     */
+    @SuppressWarnings("removal")
+    public static void showWebviewTextInputBrokenMessage(@NotNull Project project, boolean forNavie) {
+        var properties = PropertiesComponent.getInstance();
+        var hideMessagePropertyKey = forNavie ? "appmap.navie.hideIsBrokenMessage" : "appmap.signin.hideIsBrokenMessage";
+        if (properties.getBoolean(hideMessagePropertyKey, false)) {
+            return;
+        }
+
+        var titleKey = forNavie ? "webview.navie.webviewBroken.title" : "webview.signin.webviewBroken.title";
+        var messageKey = forNavie ? "webview.navie.webviewBroken.message" : "webview.signin.webviewBroken.message";
+
+        ApplicationManager.getApplication().invokeLater(() -> {
+            Messages.showDialog(project,
+                    AppMapBundle.get(messageKey),
+                    AppMapBundle.get(titleKey),
+                    new String[]{Messages.getOkButton()},
+                    0,
+                    Messages.getWarningIcon(),
+                    // already deprecated in 2022.1, but there's no alternative API in Messages.
+                    new DialogWrapper.DoNotAskOption.Adapter() {
+                        @Override
+                        public void rememberChoice(boolean isSelected, int exitCode) {
+                            properties.setValue(hideMessagePropertyKey, isSelected, false);
+                        }
+                    });
+        }, ModalityState.any());
     }
 }
