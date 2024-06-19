@@ -100,7 +100,7 @@ public class AppMapToolWindowFactory implements ToolWindowFactory, DumbAware {
 
         return AppMapApplicationSettingsService.getInstance().isAuthenticated()
                 ? (T) new AppMapWindowPanel(project, toolWindow.getDisposable())
-                : (T) new SignInViewPanel(toolWindow.getDisposable());
+                : (T) new SignInViewPanel(project, toolWindow.getDisposable());
     }
 }
 
