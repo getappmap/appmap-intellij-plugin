@@ -1,5 +1,6 @@
 package appland.toolwindow.signInView;
 
+import appland.notifications.AppMapNotifications;
 import appland.oauth.AppMapLoginAction;
 import appland.settings.AppMapApplicationSettingsService;
 import appland.toolwindow.AppMapToolWindowContent;
@@ -10,9 +11,12 @@ import appland.webviews.OpenExternalTargetLinksHandler;
 import appland.webviews.webserver.AppMapWebview;
 import com.google.gson.JsonObject;
 import com.intellij.openapi.Disposable;
+import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.diagnostic.Logger;
+import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.SimpleToolWindowPanel;
 import com.intellij.openapi.util.Disposer;
+import com.intellij.openapi.util.registry.Registry;
 import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.ui.jcef.JBCefBrowserBase;
 import com.intellij.ui.jcef.JBCefJSQuery;
@@ -29,13 +33,17 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class SignInViewPanel extends SimpleToolWindowPanel implements Disposable, AppMapToolWindowContent {
     private static final Logger LOG = Logger.getInstance(SignInViewPanel.class);
 
+    private final Project project;
+
     private final AtomicBoolean pageLoaded = new AtomicBoolean(false);
     private final JCEFHtmlPanel htmlPanel = new JCEFHtmlPanel(true, null, null);
     // queries must be created before the webview is initialized
     private final @NotNull JBCefJSQuery postMessageQuery = JBCefJSQuery.create((JBCefBrowserBase) htmlPanel);
 
-    public SignInViewPanel(@NotNull Disposable parentDisposable) {
+    public SignInViewPanel(@NotNull Project project, @NotNull Disposable parentDisposable) {
         super(true, true);
+        this.project = project;
+
         Disposer.register(parentDisposable, this);
 
         add(htmlPanel.getComponent());
@@ -80,6 +88,10 @@ public class SignInViewPanel extends SimpleToolWindowPanel implements Disposable
     }
 
     private void initWebView() {
+        if (Registry.is("appmap.webview.open.dev.tools", false)) {
+            ApplicationManager.getApplication().invokeLater(htmlPanel::openDevtools);
+        }
+
         // add handler for messages sent by the JS application
         postMessageQuery.addHandler(request -> {
             try {
@@ -116,6 +128,13 @@ public class SignInViewPanel extends SimpleToolWindowPanel implements Disposable
 
             // known message, but not handled
             case "click-sign-in-link":
+                return true;
+
+            // handler to show message about broken text input on Linux
+            case "email-input-focused":
+                if (AppMapNotifications.isWebviewTextInputBroken()) {
+                    AppMapNotifications.showWebviewTextInputBrokenMessage(project, false);
+                }
                 return true;
 
             default:
