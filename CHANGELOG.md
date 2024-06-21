@@ -1,5 +1,12 @@
 AppMap Plugin Changelog
 
+## [0.69.0](https://github.com/getappmap/appmap-intellij-plugin/compare/v0.68.0...v0.69.0) (2024-06-21)
+
+
+### Features
+
+-  notify when sign-in to AppMap is attempted with broken text input support ([f8a0d58]())-  update webview signin to the latest version ([2632f6c]())
+
 ## [0.68.0](https://github.com/getappmap/appmap-intellij-plugin/compare/v0.67.2...v0.68.0) (2024-06-12)
 
 
