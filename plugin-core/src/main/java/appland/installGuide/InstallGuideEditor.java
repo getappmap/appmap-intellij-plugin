@@ -9,6 +9,7 @@ import appland.installGuide.projectData.ProjectMetadata;
 import appland.oauth.AppMapLoginAction;
 import appland.settings.AppMapApplicationSettingsService;
 import appland.settings.AppMapSettingsListener;
+import appland.utils.DataContexts;
 import appland.webviews.OpenExternalLinksHandler;
 import appland.webviews.WebviewEditor;
 import appland.webviews.findings.FindingsOverviewEditorProvider;
@@ -310,12 +311,9 @@ public class InstallGuideEditor extends WebviewEditor<List<ProjectMetadata>> {
                 }
             };
 
-            var dataContext = new DataContext() {
-                @Override
-                public @Nullable Object getData(@NotNull String dataId) {
-                    return CommonDataKeys.PROJECT.is(dataId) ? project : null;
-                }
-            };
+            var dataContext = DataContexts.createCustomContext(dataId -> {
+                return CommonDataKeys.PROJECT.is(dataId) ? project : null;
+            });
 
             try {
                 var executor = DefaultRunExecutor.getRunExecutorInstance();
