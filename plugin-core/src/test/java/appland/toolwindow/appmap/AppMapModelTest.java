@@ -15,11 +15,6 @@ import static appland.utils.ModelTestUtil.assertTreeHierarchy;
 
 public class AppMapModelTest extends AppMapBaseTest {
     @Override
-    protected boolean runInDispatchThread() {
-        return false;
-    }
-
-    @Override
     protected TempDirTestFixture createTempDirTestFixture() {
         // create temp files on disk
         return new TempDirTestFixtureImpl();

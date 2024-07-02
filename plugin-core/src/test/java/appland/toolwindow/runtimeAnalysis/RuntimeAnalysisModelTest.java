@@ -21,11 +21,6 @@ import java.util.concurrent.TimeUnit;
 import static appland.utils.ModelTestUtil.assertTreeHierarchy;
 
 public class RuntimeAnalysisModelTest extends AppMapBaseTest {
-    @Override
-    protected boolean runInDispatchThread() {
-        return false;
-    }
-
     @Test
     public void unauthenticated() {
         AppMapApplicationSettingsService.getInstance().setApiKey(null);
@@ -132,6 +127,7 @@ public class RuntimeAnalysisModelTest extends AppMapBaseTest {
     private void loadFindingsDirectory(@NotNull String directoryPath) throws Exception {
         var condition = TestFindingsManager.createFindingsCondition(getProject(), getTestRootDisposable());
         WriteAction.computeAndWait(() -> myFixture.copyDirectoryToProject(directoryPath, "root"));
+        waitUntilIndexesAreReady();
         assertTrue(condition.await(30, TimeUnit.SECONDS));
     }
 }
