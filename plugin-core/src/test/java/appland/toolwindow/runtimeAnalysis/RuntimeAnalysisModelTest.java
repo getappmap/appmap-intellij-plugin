@@ -21,11 +21,6 @@ import java.util.concurrent.TimeUnit;
 import static appland.utils.ModelTestUtil.assertTreeHierarchy;
 
 public class RuntimeAnalysisModelTest extends AppMapBaseTest {
-    @Override
-    protected boolean runInDispatchThread() {
-        return false;
-    }
-
     @Test
     public void unauthenticated() {
         AppMapApplicationSettingsService.getInstance().setApiKey(null);
