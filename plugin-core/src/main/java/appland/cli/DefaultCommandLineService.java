@@ -24,7 +24,7 @@ import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.openapi.vfs.VfsUtil;
 import com.intellij.openapi.vfs.VfsUtilCore;
 import com.intellij.openapi.vfs.VirtualFile;
-import com.intellij.openapi.vfs.ex.temp.TempFileSystem;
+import com.intellij.openapi.vfs.ex.temp.TempFileSystemMarker;
 import com.intellij.util.concurrency.AppExecutorUtil;
 import com.intellij.util.io.BaseOutputReader;
 import com.intellij.util.net.HttpConfigurable;
@@ -352,7 +352,7 @@ public class DefaultCommandLineService implements AppLandCommandLineService {
         }
 
         // don't launch for in-memory directories in unit test mode
-        if (ApplicationManager.getApplication().isUnitTestMode() && directory.getFileSystem() instanceof TempFileSystem) {
+        if (ApplicationManager.getApplication().isUnitTestMode() && directory.getFileSystem() instanceof TempFileSystemMarker) {
             return null;
         }
 
@@ -390,7 +390,7 @@ public class DefaultCommandLineService implements AppLandCommandLineService {
         }
 
         // don't launch for in-memory directories in unit test mode
-        if (ApplicationManager.getApplication().isUnitTestMode() && directory.getFileSystem() instanceof TempFileSystem) {
+        if (ApplicationManager.getApplication().isUnitTestMode() && directory.getFileSystem() instanceof TempFileSystemMarker) {
             return null;
         }
 
