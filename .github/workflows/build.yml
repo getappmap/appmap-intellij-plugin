@@ -20,16 +20,16 @@ jobs:
         timeout-minutes: 45
         steps:
             - name: Fetch Sources
-              uses: actions/checkout@v3
+              uses: actions/checkout@v4
 
             - name: Gradle Wrapper Validation
-              uses: gradle/wrapper-validation-action@v1
+              uses: gradle/actions/wrapper-validation@v3
 
             - name: Setup Java
-              uses: actions/setup-java@v3
+              uses: actions/setup-java@v4
               with:
                   distribution: temurin
-                  java-version: 17
+                  java-version: 21
 
             # https://docs.github.com/en/rest/overview/resources-in-the-rest-api?apiVersion=2022-11-28#rate-limits-for-requests-from-github-actions
             - name: Show GitHub Actions rate limit
@@ -39,26 +39,19 @@ jobs:
               run: |
                   curl -s -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" -i https://api.github.com/users/octocat | grep x-ratelimit
 
-            - name: Run Linters and Test (Linux and macOS)
-              if: runner.os != 'Windows'
+            - name: Run Linters and Tests
               shell: bash
               run: ./gradlew check
 
-            # Termination of AppMap CLI processes is failing with IC-2021.3 for unknown reasons (process.destroy() etc.)
-            - name: Run Linters and Test with 2023.2 (Windows)
-              if: runner.os == 'Windows'
-              shell: bash
-              run: ./gradlew check -PideVersion=IC-2023.2.1
-
             - name: Verify plugin
               shell: bash
-              run: ./gradlew verifyPlugin
+              run: ./gradlew verifyPluginProjectConfiguration
 
             - name: Run Plugin Verifier
               shell: bash
               # JetBrains plugin verifier should always report the same results, regardless of the OS
               if: runner.os == 'Linux'
-              run: ./gradlew runPluginVerifier
+              run: ./gradlew verifyPlugin
 
             - name: Upload Test Reports
               uses: actions/upload-artifact@v3

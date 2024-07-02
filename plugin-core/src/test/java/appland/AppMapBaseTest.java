@@ -2,23 +2,34 @@ package appland;
 
 import appland.cli.AppLandCommandLineService;
 import appland.cli.TestCommandLineService;
+import appland.config.AppMapConfigFile;
+import appland.files.AppMapFiles;
 import appland.settings.AppMapApplicationSettings;
 import appland.settings.AppMapApplicationSettingsService;
+import appland.utils.IndexTestUtils;
+import appland.utils.ModuleTestUtils;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.application.ReadAction;
 import com.intellij.openapi.application.WriteAction;
+import com.intellij.openapi.roots.ModuleRootManager;
 import com.intellij.openapi.roots.ModuleRootModificationUtil;
 import com.intellij.openapi.util.ThrowableComputable;
 import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.openapi.vfs.VfsUtil;
+import com.intellij.openapi.vfs.VfsUtilCore;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.openapi.vfs.ex.temp.TempFileSystem;
 import com.intellij.testFramework.LightProjectDescriptor;
 import com.intellij.testFramework.fixtures.LightPlatformCodeInsightFixture4TestCase;
+import com.intellij.util.PathUtil;
+import com.intellij.util.ThrowableRunnable;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.junit.Assert;
 
+import java.nio.file.Path;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.concurrent.TimeUnit;
 
@@ -58,6 +69,19 @@ public abstract class AppMapBaseTest extends LightPlatformCodeInsightFixture4Tes
         } finally {
             super.tearDown();
         }
+    }
+
+    public @NotNull VirtualFile createAppMapConfig(@NotNull VirtualFile parentDirectory, @NotNull Path appMapOutputPath) throws Exception {
+        return WriteAction.<VirtualFile, Exception>computeAndWait(() -> {
+            var file = parentDirectory.createChildData(this, AppMapFiles.APPMAP_YML);
+
+            var configFile = new AppMapConfigFile();
+            configFile.setAppMapDir(PathUtil.toSystemIndependentName(appMapOutputPath.toString()));
+            configFile.setName("Test case config");
+            configFile.writeTo(file);
+
+            return file;
+        });
     }
 
     public @NotNull VirtualFile createAppMapWithIndexes(@NotNull String appMapName) throws Throwable {
@@ -124,7 +148,19 @@ public abstract class AppMapBaseTest extends LightPlatformCodeInsightFixture4Tes
         return ReadAction.compute(() -> psiFile.getParent().getVirtualFile());
     }
 
-    protected void withExcludedFolder(@NotNull VirtualFile excludedFolder, @NotNull Runnable runnable) {
+    protected void withContentRoot(@NotNull VirtualFile contentRoot, @NotNull ThrowableRunnable<Exception> runnable) throws Exception {
+        ModuleTestUtils.withContentRoot(getModule(), contentRoot, runnable);
+    }
+
+    protected void withContentRoots(@NotNull Collection<VirtualFile> contentRoots, @NotNull ThrowableRunnable<Exception> runnable) throws Exception {
+        ModuleTestUtils.withContentRoots(getModule(), contentRoots, runnable);
+    }
+
+    protected void withExcludedFolder(@NotNull VirtualFile excludedFolder, @NotNull ThrowableRunnable<Exception> runnable) throws Exception {
+        var hasContentRoot = Arrays.stream(ModuleRootManager.getInstance(getModule()).getContentRoots())
+                .anyMatch(root -> VfsUtilCore.isAncestor(root, excludedFolder, false));
+        assertTrue("Excluded folders must be located in a content root", hasContentRoot);
+
         try {
             ModuleRootModificationUtil.updateExcludedFolders(getModule(), excludedFolder.getParent(),
                     Collections.emptyList(),
@@ -137,6 +173,10 @@ public abstract class AppMapBaseTest extends LightPlatformCodeInsightFixture4Tes
                     Collections.singletonList(excludedFolder.getUrl()),
                     Collections.emptyList());
         }
+    }
+
+    protected void waitUntilIndexesAreReady() {
+        IndexTestUtils.waitUntilIndexesAreReady(getProject());
     }
 
     private String createAppMapEvents(int requestCount, int queryCount) {

@@ -5,9 +5,11 @@ import org.commonmark.parser.Parser
 import org.commonmark.renderer.html.HtmlRenderer
 import org.gradle.api.JavaVersion.VERSION_17
 import org.gradle.api.tasks.testing.logging.TestLogEvent
-import org.jetbrains.intellij.tasks.PrepareSandboxTask
-import org.jetbrains.intellij.tasks.RunPluginVerifierTask
-import org.jetbrains.intellij.tasks.RunPluginVerifierTask.FailureLevel
+import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType
+import org.jetbrains.intellij.platform.gradle.TestFrameworkType
+import org.jetbrains.intellij.platform.gradle.tasks.InstrumentCodeTask
+import org.jetbrains.intellij.platform.gradle.tasks.PrepareSandboxTask
+import org.jetbrains.intellij.platform.gradle.tasks.VerifyPluginTask.FailureLevel
 
 buildscript {
     dependencies {
@@ -16,14 +18,13 @@ buildscript {
 
     repositories {
         mavenCentral()
-        maven { setUrl("https://www.jetbrains.com/intellij-repository/releases") }
     }
 }
 
 plugins {
     idea
     id("org.jetbrains.kotlin.jvm") version "1.9.24"
-    id("org.jetbrains.intellij") version "1.17.3"
+    id("org.jetbrains.intellij.platform") version "2.0.0-beta8"
     id("org.jetbrains.changelog") version "1.3.1"
     id("com.adarshr.test-logger") version "3.2.0"
     id("de.undercouch.download") version "5.6.0"
@@ -31,38 +32,56 @@ plugins {
     kotlin("plugin.lombok") version "1.9.24"
 }
 
-val pluginVersion = prop("pluginVersion")
+val pluginVersionString = prop("pluginVersion")
 val lombokVersion = prop("lombokVersion")
+val ideVersion = prop("ideVersion")
 
 group = "appland.appmap"
-version = pluginVersion
+version = pluginVersionString
 
 val isCI = System.getenv("CI") == "true"
-val agentOutputPath = rootProject.layout.buildDirectory.asFile.get().resolve("appmap-java-agent").resolve("appmap-agent.jar")
-val githubToken = System.getenv("GITHUB_TOKEN").takeUnless { it.isNullOrEmpty() }
+val agentOutputPath = rootProject.layout.buildDirectory.asFile.get()
+    .resolve("appmap-java-agent")
+    .resolve("appmap-agent.jar")
+val githubToken = System.getenv("GITHUB_TOKEN").takeUnless(String::isNullOrEmpty)
 
 allprojects {
-    repositories {
-        mavenCentral()
-        maven { setUrl("https://www.jetbrains.com/intellij-repository/releases") }
-    }
-
     apply {
         plugin("org.jetbrains.kotlin.jvm")
         plugin("org.jetbrains.kotlin.plugin.lombok")
         plugin("idea")
-        plugin("org.jetbrains.intellij")
         plugin("com.adarshr.test-logger")
+
+        plugin("org.jetbrains.intellij.platform.module")
+    }
+
+    repositories {
+        mavenCentral()
+        intellijPlatform {
+            defaultRepositories()
+        }
     }
 
     val testOutput = configurations.create("testOutput")
     dependencies {
+        intellijPlatform {
+            intellijIdeaCommunity(ideVersion)
+            // using "Bundled" to gain access to the Java plugin's test classes
+            testFramework(TestFrameworkType.Bundled)
+        }
+
+        // added because org.jetbrains.intellij.platform resolves to an older version bundled with the SDK
+        compileOnly("org.jetbrains:annotations:24.1.0")
+
         compileOnly("com.google.code.findbugs:jsr305:3.0.2")
 
         // Jackson JSON is missing from 2023.1+
         implementation("com.fasterxml.jackson.core:jackson-core:2.14.2")
         implementation("com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.14.2")
         implementation("org.yaml:snakeyaml:1.33")
+
+        // https://mvnrepository.com/artifact/junit/junit
+        testImplementation("junit:junit:4.13.2")
 
         // http://wiremock.org, Apache 2 license
         testImplementation("org.wiremock:wiremock:3.5.4")
@@ -81,13 +100,13 @@ allprojects {
         testImplementation("org.mock-server:mockserver-netty:5.15.0")
         // https://mvnrepository.com/artifact/org.mock-server/mockserver-junit-rule
         testImplementation("org.mock-server:mockserver-junit-rule:5.15.0")
+
+        // workaround for https://github.com/JetBrains/intellij-platform-gradle-plugin/issues/1663
+        testImplementation("org.opentest4j:opentest4j:1.3.0")
     }
 
-    intellij {
-        version.set(prop("ideVersion"))
-        downloadSources.set(!isCI)
-        updateSinceUntilBuild.set(true)
-        instrumentCode.set(false)
+    intellijPlatform {
+        instrumentCode = false
     }
 
     configure<JavaPluginExtension> {
@@ -104,16 +123,6 @@ allprojects {
             kotlinOptions.jvmTarget = "17"
         }
 
-        buildSearchableOptions.get().enabled = false
-
-        buildPlugin {
-            dependsOn(":copyPluginAssets")
-            from(rootProject.layout.buildDirectory.dir("appmap-assets")) {
-                into("")
-                include("**/*")
-            }
-        }
-
         processTestResources {
             dependsOn(":copyPluginAssets")
             from(rootProject.layout.buildDirectory.dir("appmap-assets")) {
@@ -122,38 +131,41 @@ allprojects {
             }
         }
 
-        runIde {
-            onlyIf { this.project == rootProject }
-            systemProperty("appmap.sandbox", "true")
-            jvmArgs("-Xmx2048m")
-        }
-
-        verifyPlugin {
+        named("verifyPluginProjectConfiguration") {
             dependsOn(":copyPluginAssets")
-            onlyIf { this.project == rootProject }
+            onlyIf { project == rootProject }
         }
 
-        withType<PrepareSandboxTask> {
+        withType<PrepareSandboxTask>().configureEach {
             dependsOn(":copyPluginAssets")
             from(rootProject.layout.buildDirectory.dir("appmap-assets")) {
-                into(intellij.pluginName.get())
+                into(rootProject.name)
                 include("**/*")
             }
         }
 
+        withType<InstrumentCodeTask>().configureEach {
+            onlyIf { false }
+        }
+
         // Target to execute tests, which are incompatible with the AppMap agent.
         // Only tests with category "appland.WithoutAppMapAgent" are executed.
-        create<Test>("testWithoutAgent") {
-            useJUnit {
-                includeCategories("appland.WithoutAppMapAgent")
+        val testWithoutAgent by intellijPlatformTesting.testIde.registering {
+            type = IntelliJPlatformType.IntellijIdeaCommunity
+            version = ideVersion
+
+            task {
+                useJUnit {
+                    includeCategories("appland.WithoutAppMapAgent")
+                }
             }
         }
 
         named("check") {
-            dependsOn(named("testWithoutAgent"))
+            dependsOn(testWithoutAgent.name)
         }
 
-        withType<Test> {
+        withType<Test>().configureEach {
             // all our tests need the jar, even if the agent is disabled
             dependsOn(":downloadAppMapAgent")
 
@@ -181,11 +193,13 @@ allprojects {
 
         // only run the default test target with the AppMap agent
         named<Test>("test") {
+            val logFileName = "appmap-agent-${System.currentTimeMillis()}.log"
+
             // attach AppMap agent, but only if Gradle is online
             jvmArgs(
                 "-javaagent:$agentOutputPath",
                 "-Dappmap.config.file=${rootProject.file("appmap.yml")}",
-                "-Dappmap.debug.file=${project.layout.buildDirectory.asFile.get().resolve("appmap-agent-${System.currentTimeMillis()}.log")}",
+                "-Dappmap.debug.file=${project.layout.buildDirectory.asFile.get().resolve(logFileName)}",
                 "-Dappmap.output.directory=${rootProject.file("tmp/appmap")}"
             )
             systemProperty("appmap.test.withAgent", "true")
@@ -195,14 +209,60 @@ allprojects {
             }
         }
 
-        withType<RunPluginVerifierTask> {
-            onlyIf { this.project == rootProject }
-            mustRunAfter("check")
+        withType<Zip>().configureEach {
+            duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+        }
+    }
+}
 
-            // 1.365 is broken,
-            // remove this version as soon as https://youtrack.jetbrains.com/issue/MP-6438 is fixed.
-            verifierVersion.set("1.364")
-            ideVersions.set(prop("ideVersionVerifier").split(","))
+project(":") {
+    apply {
+        plugin("org.jetbrains.intellij.platform")
+    }
+
+    dependencies {
+        intellijPlatform {
+            // fixme use when https://github.com/JetBrains/intellij-platform-gradle-plugin/issues/1673 is resolved
+            // pluginModule(implementation(project(":plugin-core")))
+            // pluginModule(implementation(project(":plugin-gradle")))
+            // pluginModule(implementation(project(":plugin-java")))
+            // pluginModule(implementation(project(":plugin-maven")))
+
+            implementation(project(":plugin-core"))
+            implementation(project(":plugin-gradle"))
+            implementation(project(":plugin-java"))
+            implementation(project(":plugin-maven"))
+
+            pluginVerifier()
+            zipSigner()
+        }
+    }
+
+    intellijPlatform {
+        pluginConfiguration {
+            version = pluginVersionString
+            description.set(provider {
+                file("${rootDir}/description.md").readText().renderMarkdown()
+            })
+
+            ideaVersion {
+                sinceBuild.set(prop("sinceBuild"))
+                untilBuild.set(prop("untilBuild"))
+            }
+
+            changeNotes.set(provider {
+                when {
+                    pluginVersionString.endsWith("-SNAPSHOT") -> changelog.getUnreleased().toHTML()
+                    else -> changelog.get(pluginVersionString).toHTML()
+                }
+            })
+        }
+
+        verifyPlugin {
+            ides {
+                ides(prop("ideVersionVerifier").split(","))
+            }
+
             failureLevel.set(
                 listOf(
                     FailureLevel.INTERNAL_API_USAGES,
@@ -213,26 +273,31 @@ allprojects {
                 )
             )
         }
-
-        withType<Zip> {
-            duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-        }
     }
-}
 
-project(":") {
-    dependencies {
-        implementation(project(":plugin-core"))
-        implementation(project(":plugin-gradle"))
-        implementation(project(":plugin-java"))
-        implementation(project(":plugin-maven"))
-    }
 
     changelog {
         path.set("${project.projectDir}/CHANGELOG.md")
     }
 
     tasks {
+        buildPlugin {
+            dependsOn(":copyPluginAssets")
+            from(rootProject.layout.buildDirectory.dir("appmap-assets")) {
+                into("")
+                include("**/*")
+            }
+        }
+
+        runIde {
+            systemProperty("appmap.sandbox", "true")
+            jvmArgs("-Xmx2048m")
+        }
+
+        verifyPlugin {
+            mustRunAfter("check")
+        }
+
         task<Copy>("copyPluginAssets") {
             dependsOn(":downloadAppMapAgent")
 
@@ -289,18 +354,6 @@ project(":") {
 
         patchPluginXml {
             dependsOn(":copyPluginAssets")
-
-            sinceBuild.set(prop("sinceBuild"))
-            untilBuild.set(prop("untilBuild"))
-            pluginDescription.set(file("${rootDir}/description.md").readText().renderMarkdown())
-
-            changeNotes.set(provider {
-                if (pluginVersion.endsWith("-SNAPSHOT")) {
-                    changelog.getUnreleased().toHTML()
-                } else {
-                    changelog.get(pluginVersion).toHTML()
-                }
-            })
         }
 
         @Suppress("UNCHECKED_CAST")
@@ -336,10 +389,10 @@ project(":") {
 project(":plugin-java") {
     dependencies {
         implementation(project(":plugin-core"))
-    }
-
-    intellij {
-        plugins.set(listOf("java", "com.intellij.properties"))
+        intellijPlatform {
+            bundledPlugin("com.intellij.java")
+            bundledPlugin("com.intellij.properties")
+        }
     }
 }
 
@@ -347,10 +400,11 @@ project(":plugin-gradle") {
     dependencies {
         implementation(project(":plugin-core"))
         implementation(project(":plugin-java"))
-    }
-
-    intellij {
-        plugins.set(listOf("java", "gradle", "com.intellij.properties"))
+        intellijPlatform {
+            bundledPlugin("com.intellij.java")
+            bundledPlugin("com.intellij.gradle")
+            bundledPlugin("com.intellij.properties")
+        }
     }
 }
 
@@ -358,10 +412,11 @@ project(":plugin-maven") {
     dependencies {
         implementation(project(":plugin-core"))
         implementation(project(":plugin-java"))
-    }
-
-    intellij {
-        plugins.set(listOf("java", "maven", "com.intellij.properties"))
+        intellijPlatform {
+            bundledPlugin("com.intellij.java")
+            bundledPlugin("org.jetbrains.idea.maven")
+            bundledPlugin("com.intellij.properties")
+        }
     }
 }
 

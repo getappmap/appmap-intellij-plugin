@@ -7,14 +7,18 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.databind.node.TextNode;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.util.text.StringUtil;
+import com.intellij.openapi.vfs.VfsUtilCore;
 import com.intellij.openapi.vfs.VirtualFile;
+import com.intellij.util.concurrency.annotations.RequiresWriteLock;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.io.IOException;
+import java.io.*;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collections;
 import java.util.List;
@@ -118,38 +122,64 @@ public class AppMapConfigFile {
         YamlUtils.YAML.writeValue(filePath.toFile(), yamlData);
     }
 
+    @RequiresWriteLock
+    public void writeTo(@NotNull VirtualFile file) throws IOException {
+        var output = new StringWriter();
+        YamlUtils.YAML.writeValue(output, yamlData);
+        VfsUtilCore.saveText(file, output.toString());
+    }
+
+    /**
+     * Parses the content of the given file as an AppMap configuration file and returns the result.
+     *
+     * @param configFile VirtualFile, it's not required that it's located on the local filesystem.
+     */
     public static @Nullable AppMapConfigFile parseConfigFile(@Nullable VirtualFile configFile) {
         if (configFile == null) {
             return null;
         }
 
         try {
-            var nioPath = configFile.toNioPath();
-            return parseConfigFile(nioPath);
-        } catch (UnsupportedOperationException e) {
+            try (var inputStream = configFile.getInputStream();
+                 var reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8))) {
+                return parseConfigFile(reader);
+            }
+        } catch (Exception e) {
+            LOG.debug("Error reading AppMap configuration: " + configFile, e);
             return null;
         }
     }
 
     /**
-     * A simple implementation to parse the needed config data from an appmap.yml file.
-     * This is not using A YAML parse, but attempts line-matching. There's no YAML parser available in the SDK.
+     * Parses the content of the given file as an AppMap configuration file and returns the result.
      */
     public static @Nullable AppMapConfigFile parseConfigFile(@Nullable Path configFile) {
         if (configFile == null) {
             return null;
         }
 
+        try (var inputStream = Files.newBufferedReader(configFile, StandardCharsets.UTF_8)) {
+            return parseConfigFile(inputStream);
+        } catch (Exception e) {
+            LOG.debug("Error reading AppMap configuration: " + configFile, e);
+            return null;
+        }
+    }
+
+    /**
+     * A simple implementation to parse the needed config data from a Reader.
+     */
+    private static @Nullable AppMapConfigFile parseConfigFile(@NotNull Reader configFile) {
         try {
-            var yamlTree = YamlUtils.YAML.readTree(configFile.toFile());
+            var yamlTree = YamlUtils.YAML.readTree(configFile);
             if (!yamlTree.isObject()) {
-                LOG.debug("appmap.yml is not an object: " + configFile);
+                LOG.debug("appmap.yml is not an object");
                 return null;
             }
 
             return new AppMapConfigFile((ObjectNode) yamlTree);
         } catch (Exception e) {
-            LOG.debug("Error reading appmap configuration: " + configFile, e);
+            LOG.debug("Error reading appmap configuration", e);
             return null;
         }
     }

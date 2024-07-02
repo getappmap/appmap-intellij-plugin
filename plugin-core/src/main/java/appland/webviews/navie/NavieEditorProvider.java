@@ -5,6 +5,7 @@ import appland.Icons;
 import appland.notifications.AppMapNotifications;
 import appland.rpcService.AppLandJsonRpcService;
 import appland.settings.AppMapProjectSettingsService;
+import appland.utils.DataContexts;
 import appland.webviews.WebviewEditorProvider;
 import com.intellij.openapi.actionSystem.CommonDataKeys;
 import com.intellij.openapi.actionSystem.DataContext;
@@ -60,12 +61,12 @@ public final class NavieEditorProvider extends WebviewEditorProvider {
      */
     @RequiresEdt
     public static void openEditorForAppMap(@NotNull Project project, @NotNull VirtualFile appMap) {
-        openEditor(project, dataId -> {
+        openEditor(project, DataContexts.createCustomContext(dataId -> {
             if (DATA_KEY_APPMAP.is(dataId)) {
                 return appMap;
             }
             return null;
-        });
+        }));
     }
 
     /**
