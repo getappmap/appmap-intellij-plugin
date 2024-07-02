@@ -2,7 +2,6 @@ package appland.cli;
 
 import appland.AppMapBaseTest;
 import appland.files.AppMapFiles;
-import appland.settings.AppMapApplicationSettings;
 import appland.settings.AppMapApplicationSettingsService;
 import appland.settings.AppMapSettingsListener;
 import appland.testRules.ResetIdeHttpProxyRule;
@@ -223,10 +222,11 @@ public class DefaultCommandLineServiceTest extends AppMapBaseTest {
     public void directoryRefreshAfterAppMapIndexing() throws Throwable {
         Assume.assumeFalse("AppMap processes don't terminate reliably on Windows", SystemInfo.isWindows);
 
-        var projectDir = myFixture.copyDirectoryToProject("projects/without_existing_index", "test-project");
-
-        var refreshCondition = TestCommandLineService.newVfsRefreshCondition(getProject(), getTestRootDisposable());
-        ModuleTestUtils.withContentRoot(getModule(), projectDir, () -> {
+        var appMapConfig = myFixture.copyFileToProject("projects/without_existing_index/appmap.yml", "test-project/appmap.yml");
+        ModuleTestUtils.withContentRoot(getModule(), appMapConfig.getParent(), () -> {
+            // copying AppMaps into a watched directory must trigger a file refresh based on the output of the AppMap process
+            var refreshCondition = TestCommandLineService.newVfsRefreshCondition(getProject(), getTestRootDisposable());
+            myFixture.copyDirectoryToProject("projects/without_existing_index", "test-project");
             assertTrue(refreshCondition.await(30, TimeUnit.SECONDS));
 
             var refreshedFiles = TestCommandLineService.getInstance().getRefreshedFiles();
