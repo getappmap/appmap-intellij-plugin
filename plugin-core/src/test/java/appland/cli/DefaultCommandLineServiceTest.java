@@ -2,6 +2,7 @@ package appland.cli;
 
 import appland.AppMapBaseTest;
 import appland.files.AppMapFiles;
+import appland.settings.AppMapApplicationSettings;
 import appland.settings.AppMapApplicationSettingsService;
 import appland.settings.AppMapSettingsListener;
 import appland.testRules.ResetIdeHttpProxyRule;
@@ -228,7 +229,7 @@ public class DefaultCommandLineServiceTest extends AppMapBaseTest {
     @Test
     public void directoryRefreshAfterAppMapIndexing() throws Throwable {
         var appMapConfig = myFixture.copyFileToProject("projects/without_existing_index/appmap.yml", "test-project/appmap.yml");
-        withContentRoot(appMapConfig.getParent(), () -> {
+        ModuleTestUtils.withContentRoot(getModule(), appMapConfig.getParent(), () -> {
             // copying AppMaps into a watched directory must trigger a file refresh based on the output of the AppMap process
             var refreshCondition = TestCommandLineService.newVfsRefreshCondition(getProject(), getTestRootDisposable());
             myFixture.copyDirectoryToProject("projects/without_existing_index", "test-project");
