@@ -35,6 +35,7 @@ import com.intellij.openapi.fileEditor.FileEditorManager;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.LocalFileSystem;
 import com.intellij.openapi.vfs.VirtualFile;
+import com.intellij.ui.NewUI;
 import com.intellij.util.Alarm;
 import com.intellij.util.SingleAlarm;
 import org.jetbrains.annotations.Nls;
@@ -141,6 +142,7 @@ public class InstallGuideEditor extends WebviewEditor<List<ProjectMetadata>> {
     @Override
     protected void setupInitMessage(@Nullable List<ProjectMetadata> initData, @NotNull JsonObject payload) {
         addBaseProperties(payload);
+        payload.addProperty("uiStyle", NewUI.isEnabled() ? "new-ui" : "classic");
         payload.add("projects", gson.toJsonTree(initData));
         payload.add("disabledPages", new JsonArray());
     }

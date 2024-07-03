@@ -19,6 +19,7 @@ export function mountWebview() {
           props: {
             projects: this.projects,
             editor: 'jetbrains',
+            uiStyle: initialData.uiStyle || 'classic',
             analysisEnabled: this.analysisEnabled,
             userAuthenticated: this.userAuthenticated,
             featureFlags: new Set(['disable-record-pending']),
