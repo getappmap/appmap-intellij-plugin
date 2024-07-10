@@ -1,5 +1,6 @@
 /* eslint-disable */
 const path = require('path');
+const webpack = require('webpack');
 
 module.exports = (env, argv) => {
   let config = {
@@ -56,6 +57,11 @@ module.exports = (env, argv) => {
         },
       ],
     },
+    plugins: [
+      new webpack.optimize.LimitChunkCountPlugin({
+        maxChunks: 1
+      }),
+    ],
   }
 
   if (argv.mode === 'development') {

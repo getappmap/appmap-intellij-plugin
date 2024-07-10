@@ -11,6 +11,14 @@
             margin: 0;
             overflow-y: hidden;
         }
+
+        /*
+        HACK:
+        Browser downloads don't work in JCEF. This hides the download button.
+        */
+        [data-cy="mermaid-diagram"] [data-cy="download"] {
+            display: none !important;
+        }
     </style>
 </head>
 <body>
