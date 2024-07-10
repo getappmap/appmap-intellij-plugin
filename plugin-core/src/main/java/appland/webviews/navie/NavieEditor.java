@@ -92,6 +92,7 @@ public class NavieEditor extends WebviewEditor<Void> {
         var apiKey = AppMapApplicationSettingsService.getInstance().getApiKey();
         var filters = AppMapProjectSettingsService.getState(project).getAppMapFilters().values();
         var codeSelection = NavieEditorProvider.KEY_CODE_SELECTION.get(file);
+        var promptSuggestion = NavieEditorProvider.KEY_PROMPT_SUGGESTION.get(file);
 
         var port = NavieEditorProvider.KEY_INDEXER_RPC_PORT.get(file);
         assert port != null;
@@ -117,6 +118,9 @@ public class NavieEditor extends WebviewEditor<Void> {
         payload.add("mostRecentAppMaps", gson.toJsonTree(updatableNavieData.mostRecentAppMaps));
         if (codeSelection != null) {
             payload.add("codeSelection", gson.toJsonTree(codeSelection));
+        }
+        if (promptSuggestion != null) {
+            payload.add("suggestion", gson.toJsonTree(promptSuggestion));
         }
     }
 

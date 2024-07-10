@@ -14,6 +14,7 @@ import appland.webviews.OpenExternalLinksHandler;
 import appland.webviews.WebviewEditor;
 import appland.webviews.findings.FindingsOverviewEditorProvider;
 import appland.webviews.navie.NavieEditorProvider;
+import appland.webviews.navie.NaviePromptSuggestion;
 import appland.webviews.webserver.AppMapWebview;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -72,7 +73,8 @@ public class InstallGuideEditor extends WebviewEditor<List<ProjectMetadata>> {
                 "open-navie",
                 "open-page",
                 "perform-auth",
-                "perform-install"
+                "perform-install",
+                "submit-to-navie"
         ));
         this.currentPage = page;
     }
@@ -200,6 +202,11 @@ public class InstallGuideEditor extends WebviewEditor<List<ProjectMetadata>> {
                 break;
             }
 
+            case "submit-to-navie": {
+                handleSubmitToNavie(message);
+                break;
+            }
+
             default:
                 LOG.warn("Unhandled message type: " + messageId);
         }
@@ -292,6 +299,17 @@ public class InstallGuideEditor extends WebviewEditor<List<ProjectMetadata>> {
     private void handleOpenNavie() {
         ApplicationManager.getApplication().invokeLater(() -> {
             NavieEditorProvider.openEditor(project, DataContext.EMPTY_CONTEXT);
+        }, ModalityState.defaultModalityState());
+    }
+
+    private void handleSubmitToNavie(@Nullable JsonObject message) {
+        assert message != null;
+        var suggestion = message.getAsJsonObject("suggestion");
+        assert suggestion != null;
+        var label = suggestion.getAsJsonPrimitive("label").getAsString();
+        var prompt = suggestion.getAsJsonPrimitive("prompt").getAsString();
+        ApplicationManager.getApplication().invokeLater(() -> {
+            NavieEditorProvider.openEditorWithPrompt(project, new NaviePromptSuggestion(label, prompt));
         }, ModalityState.defaultModalityState());
     }
 

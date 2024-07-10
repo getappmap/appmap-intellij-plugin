@@ -14,6 +14,7 @@ export function mountWebview() {
     const app = new Vue({
       el: '#app',
       render(h) {
+        // follows https://github.com/getappmap/vscode-appland/blob/develop/web/src/chatSearchView.js
         return h(VChatSearch, {
           ref: 'ui',
           props: {
@@ -45,6 +46,10 @@ export function mountWebview() {
       mounted() {
         if (initialData.codeSelection) {
           this.$refs.ui.includeCodeSelection(initialData.codeSelection);
+        }
+        if (initialData.suggestion) {
+          this.$refs.ui.$refs.vchat.addUserMessage(initialData.suggestion.label);
+          this.$refs.ui.sendMessage(initialData.suggestion.prompt);
         }
       },
     });

@@ -45,9 +45,18 @@ public final class NavieEditorProvider extends WebviewEditorProvider {
      */
     static final Key<VirtualFile> KEY_APPMAP_CONTEXT_FILE = Key.create("appland.navie.appmap");
     /**
+     * Optional prompt suggestion passed to the Navie webview.
+     */
+    static final Key<NaviePromptSuggestion> KEY_PROMPT_SUGGESTION = Key.create("appland.navie.promptSuggestions");
+
+    /**
      * Optional AppMap context in the context passed to @link{{@link #openEditor(Project, DataContext)}}.
      */
     static final DataKey<VirtualFile> DATA_KEY_APPMAP = DataKey.create("appland.navie.appmap");
+    /**
+     * Optional prompt suggestion passed to {@link #openEditor(Project, DataContext)}
+     */
+    static final DataKey<NaviePromptSuggestion> DATA_KEY_PROMPT_SUGGESTION = DataKey.create("appland.navie.promptSuggestions");
 
     public NavieEditorProvider() {
         super(TYPE_ID);
@@ -64,6 +73,22 @@ public final class NavieEditorProvider extends WebviewEditorProvider {
         openEditor(project, DataContexts.createCustomContext(dataId -> {
             if (DATA_KEY_APPMAP.is(dataId)) {
                 return appMap;
+            }
+            return null;
+        }));
+    }
+
+    /**
+     * Opens the Navie webview with the given prompt.
+     *
+     * @param project    Current project
+     * @param suggestion Prompt to be shown in the new Navie editor
+     */
+    @RequiresEdt
+    public static void openEditorWithPrompt(@NotNull Project project, @NotNull NaviePromptSuggestion suggestion) {
+        openEditor(project, DataContexts.createCustomContext(dataId -> {
+            if (DATA_KEY_PROMPT_SUGGESTION.is(dataId)) {
+                return suggestion;
             }
             return null;
         }));
@@ -92,6 +117,7 @@ public final class NavieEditorProvider extends WebviewEditorProvider {
             KEY_INDEXER_RPC_PORT.set(file, indexerPort);
             KEY_CODE_SELECTION.set(file, codeSelection);
             KEY_APPMAP_CONTEXT_FILE.set(file, context.getData(DATA_KEY_APPMAP));
+            KEY_PROMPT_SUGGESTION.set(file, context.getData(DATA_KEY_PROMPT_SUGGESTION));
 
             AppMapProjectSettingsService.getState(project).setExplainWithNavieOpened(true);
             FileEditorManager.getInstance(project).openFile(file, true);
