@@ -53,6 +53,8 @@ public class ModuleTestUtils {
                 contentEntriesRef.set(contentEntries);
             });
 
+            IndexTestUtils.waitUntilIndexesAreReady(module.getProject());
+
             runnable.run();
         } finally {
             // remove again to avoid breaking follow-up tests

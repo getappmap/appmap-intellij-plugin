@@ -42,7 +42,7 @@ public class PythonLanguageAnalyzer implements LanguageAnalyzer {
         }
 
         if (scanner.containsWord("flask")) {
-            return new Feature("flask",
+            return new Feature("Flask",
                     Score.Okay,
                     "Flask support is currently in Beta. Please read the docs.");
         }

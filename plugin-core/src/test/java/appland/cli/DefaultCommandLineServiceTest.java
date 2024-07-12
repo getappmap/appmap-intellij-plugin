@@ -2,7 +2,6 @@ package appland.cli;
 
 import appland.AppMapBaseTest;
 import appland.files.AppMapFiles;
-import appland.settings.AppMapApplicationSettings;
 import appland.settings.AppMapApplicationSettingsService;
 import appland.settings.AppMapSettingsListener;
 import appland.testRules.ResetIdeHttpProxyRule;
@@ -40,6 +39,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
+@SuppressWarnings("removal")
 public class DefaultCommandLineServiceTest extends AppMapBaseTest {
     @Rule
     public final TestRule resetProxyRule = new ResetIdeHttpProxyRule();
@@ -79,7 +79,7 @@ public class DefaultCommandLineServiceTest extends AppMapBaseTest {
         var parentDir = myFixture.createFile("test.txt", "").getParent();
         assertNotNull(parentDir);
 
-        ModuleTestUtils.withContentRoot(getModule(), parentDir, () -> {
+        withContentRoot(parentDir, () -> {
             assertFalse("Service must not execute for a directory without appmap.yaml", service.isRunning(parentDir, false));
 
             // creating an appmap.yml file must trigger the launch of the matching AppMap processes
@@ -116,7 +116,7 @@ public class DefaultCommandLineServiceTest extends AppMapBaseTest {
         Assume.assumeTrue(SystemInfo.isUnix);
 
         var tempDir = myFixture.createFile("test.txt", "").getParent();
-        ModuleTestUtils.withContentRoot(getModule(), tempDir, () -> {
+        withContentRoot(tempDir, () -> {
             var service = AppLandCommandLineService.getInstance();
             createAppMapYaml(tempDir, "tmp/appmaps");
             waitForProcessStatus(true, tempDir, true);
@@ -196,7 +196,7 @@ public class DefaultCommandLineServiceTest extends AppMapBaseTest {
         var nestedRootA = myFixture.addFileToProject("parentA/subDir/file.txt", "").getParent().getVirtualFile();
         var newRootB = myFixture.addFileToProject("parentB/file.txt", "").getParent().getVirtualFile();
 
-        ModuleTestUtils.withContentRoot(getModule(), topLevelDir, () -> {
+        withContentRoot(topLevelDir, () -> {
             createAppMapYaml(newRootA);
             waitForProcessStatus(true, newRootA, true);
 
@@ -223,10 +223,11 @@ public class DefaultCommandLineServiceTest extends AppMapBaseTest {
     public void directoryRefreshAfterAppMapIndexing() throws Throwable {
         Assume.assumeFalse("AppMap processes don't terminate reliably on Windows", SystemInfo.isWindows);
 
-        var projectDir = myFixture.copyDirectoryToProject("projects/without_existing_index", "test-project");
-
-        var refreshCondition = TestCommandLineService.newVfsRefreshCondition(getProject(), getTestRootDisposable());
-        ModuleTestUtils.withContentRoot(getModule(), projectDir, () -> {
+        var appMapConfig = myFixture.copyFileToProject("projects/without_existing_index/appmap.yml", "test-project/appmap.yml");
+        withContentRoot(appMapConfig.getParent(), () -> {
+            // copying AppMaps into a watched directory must trigger a file refresh based on the output of the AppMap process
+            var refreshCondition = TestCommandLineService.newVfsRefreshCondition(getProject(), getTestRootDisposable());
+            myFixture.copyDirectoryToProject("projects/without_existing_index", "test-project");
             assertTrue(refreshCondition.await(30, TimeUnit.SECONDS));
 
             var refreshedFiles = TestCommandLineService.getInstance().getRefreshedFiles();
@@ -261,7 +262,7 @@ public class DefaultCommandLineServiceTest extends AppMapBaseTest {
                 .subscribe(AppMapSettingsListener.TOPIC, new RestartServicesAfterApiChangeListener());
 
         var tempDir = myFixture.createFile("test.txt", "").getParent();
-        ModuleTestUtils.withContentRoot(getModule(), tempDir, () -> {
+        withContentRoot(tempDir, () -> {
             createAppMapYaml(tempDir, "tmp/appmap");
             waitForProcessStatus(true, tempDir, true);
             assertActiveRoots(tempDir);
@@ -286,7 +287,7 @@ public class DefaultCommandLineServiceTest extends AppMapBaseTest {
         assertFalse("Scanner must be turned off by default", settings.isEnableScanner());
 
         var tempDir = myFixture.createFile("test.txt", "").getParent();
-        ModuleTestUtils.withContentRoot(getModule(), tempDir, () -> {
+        withContentRoot(tempDir, () -> {
             createAppMapYaml(tempDir, "tmp/appmap");
             waitForProcessStatus(true, tempDir, true);
             assertActiveRoots(tempDir);
@@ -304,7 +305,7 @@ public class DefaultCommandLineServiceTest extends AppMapBaseTest {
         var newRootA = myFixture.addFileToProject("parentA/file.txt", "").getParent().getVirtualFile();
 
         final var rootRefreshCondition = ProjectRefreshUtil.newProjectRefreshCondition(getTestRootDisposable());
-        ModuleTestUtils.withContentRoot(getModule(), newRootA, () -> {
+        withContentRoot(newRootA, () -> {
             assertTrue(rootRefreshCondition.await(30, TimeUnit.SECONDS));
 
             // no watched roots because there's no appmap.yml
@@ -406,7 +407,7 @@ public class DefaultCommandLineServiceTest extends AppMapBaseTest {
 
     private void setupAndAssertProcessRestart(@NotNull Function<VirtualFile, KillableProcessHandler> processForRoot) throws Exception {
         var root = myFixture.addFileToProject("parentA/file.txt", "").getParent().getVirtualFile();
-        ModuleTestUtils.withContentRoot(getModule(), root, () -> {
+        withContentRoot(root, () -> {
             createAppMapYaml(root);
             waitForProcessStatus(true, root, true);
             assertActiveRoots(root);

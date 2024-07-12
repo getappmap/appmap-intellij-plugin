@@ -73,6 +73,7 @@ public class FindingsManagerTest extends AppMapBaseTest {
         var condition = TestFindingsManager.createFindingsCondition(getProject(), getTestRootDisposable());
         var root = myFixture.copyDirectoryToProject("projects/with_modification_date", "root");
         assertTrue(condition.await(30, TimeUnit.SECONDS));
+        waitUntilIndexesAreReady();
 
         var findingsFile = root.findFileByRelativePath("tmp/appmap/with_modification_date/appmap-findings.json");
         assertNotNull(findingsFile);
@@ -98,6 +99,7 @@ public class FindingsManagerTest extends AppMapBaseTest {
         var condition = TestFindingsManager.createFindingsCondition(getProject(), getTestRootDisposable());
         myFixture.copyDirectoryToProject("projects/with_http_requests", "root");
         assertTrue(condition.await(30, TimeUnit.SECONDS));
+        waitUntilIndexesAreReady();
 
         var manager = FindingsManager.getInstance(getProject());
         var findings = manager.findFindingsByHash("b751d44a3b3cf40dd0fa5ba47b2f910f3d73229907b7b5d3b47de87b0c747541");

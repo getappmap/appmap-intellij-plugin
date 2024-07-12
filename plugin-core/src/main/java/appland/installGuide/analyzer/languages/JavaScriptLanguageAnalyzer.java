@@ -50,7 +50,7 @@ public class JavaScriptLanguageAnalyzer implements LanguageAnalyzer {
         FeatureEx web = null;
         if (findDependencyVersion(dependencies, "express") != null) {
             web = new FeatureEx();
-            web.title = "express.js";
+            web.title = "Express.js";
             web.score = Score.Okay;
             web.text = "This project uses Express. AppMap will automatically recognize web requests, SQL queries, and key framework functions during recording.";
         }
@@ -70,10 +70,10 @@ public class JavaScriptLanguageAnalyzer implements LanguageAnalyzer {
     }
 
     private @Nullable Feature findTestPackage(@NotNull List<Pair<String, String>> dependencies) {
-        for (var nameWithMajorVersion : List.of(Pair.create("mocha", 8), Pair.create("jest", 25))) {
+        for (var nameWithMajorVersion : List.of(Pair.create("Mocha", 8), Pair.create("Jest", 25))) {
             var name = nameWithMajorVersion.first;
             var minimumMajorVersion = nameWithMajorVersion.second;
-            var packageVersion = findDependencyVersion(dependencies, name);
+            var packageVersion = findDependencyVersion(dependencies, name.toLowerCase());
 
             if (packageVersion != null) {
                 var test = new Feature();

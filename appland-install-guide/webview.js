@@ -108,6 +108,10 @@ export function mountWebview() {
       vscode.postMessage({command: 'perform-auth'});
     });
 
+    app.$on('submit-to-navie', (suggestion) => {
+      vscode.postMessage({command: 'submit-to-navie', suggestion});
+    });
+
     // listeners for messages sent by the plugin
     messages.on('page', ({page}) => {
       app.$refs.ui.jumpTo(page);

@@ -1,5 +1,6 @@
 /* eslint-disable */
 const path = require('path');
+const webpack = require('webpack');
 
 module.exports = (env, argv) => {
   const isProduction = argv.mode === 'production'
@@ -56,6 +57,11 @@ module.exports = (env, argv) => {
         },
       ],
     },
+    plugins: [
+      new webpack.optimize.LimitChunkCountPlugin({
+        maxChunks: 1
+      }),
+    ],
   }
 
   if (!isProduction) {

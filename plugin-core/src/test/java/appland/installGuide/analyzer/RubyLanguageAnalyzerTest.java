@@ -15,7 +15,7 @@ public class RubyLanguageAnalyzerTest extends LanguageAnalyzerBaseTest {
         var result = loadDirectory("ruby-rails-rspec");
         assertLanguage(result.getFeatures(), "Gemfile", null);
         assertWeb(result.getFeatures(), "Rails", Score.Good);
-        assertTest(result.getFeatures(), "rspec", Score.Good);
+        assertTest(result.getFeatures(), "RSpec", Score.Good);
     }
 
     private void assertLanguage(@NotNull Features features, @Nullable String depFile, @Nullable String pluginValue) {

@@ -4,10 +4,10 @@ import appland.AppMapBaseTest;
 import appland.config.AppMapConfigFile;
 import appland.files.AppMapFiles;
 import appland.index.AppMapSearchScopes;
-import appland.utils.ModuleTestUtils;
 import com.intellij.execution.RunManager;
 import com.intellij.execution.jar.JarApplicationConfiguration;
 import com.intellij.execution.jar.JarApplicationConfigurationType;
+import com.intellij.openapi.application.ReadAction;
 import com.intellij.openapi.application.WriteAction;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.openapi.vfs.VirtualFileManager;
@@ -30,6 +30,13 @@ public class AppMapJavaPackageConfigTest extends AppMapBaseTest {
         return new TempDirTestFixtureImpl();
     }
 
+    @Override
+    protected boolean runInDispatchThread() {
+        // Without this, there was a deadlock between AppMap project refresh and App process shutdown in 2024.2,
+        // but only in our test setup/teardown.
+        return false;
+    }
+
     @Test
     public void systemIndependentAppMapDir() {
         var config = AppMapJavaPackageConfig.generateAppMapConfig(getProject(), createTempDir("appmap-root"), "tmp\\appmap");
@@ -41,7 +48,7 @@ public class AppMapJavaPackageConfigTest extends AppMapBaseTest {
         var contextFile = myFixture.configureByText("a.java", "").getVirtualFile();
 
         // wrap with withContentRoot, because the scope to locate an existing appmap.yml is based on content roots
-        ModuleTestUtils.withContentRoot(getModule(), contextFile.getParent(), () -> assertConfigUpdate(contextFile, Path.of("tmp/appmap"), "tmp/appmap"));
+        withContentRoot(contextFile.getParent(), () -> assertConfigUpdate(contextFile, Path.of("tmp/appmap"), "tmp/appmap"));
     }
 
     @Test
@@ -50,7 +57,7 @@ public class AppMapJavaPackageConfigTest extends AppMapBaseTest {
 
         // wrap with withContentRoot, because the scope to locate an existing appmap.yml is based on content roots
         var absoluteConfigPath = contextFile.toNioPath().resolveSibling("tmp/appmap").toAbsolutePath();
-        ModuleTestUtils.withContentRoot(getModule(), contextFile.getParent(), () -> assertConfigUpdate(contextFile, absoluteConfigPath, "tmp/appmap"));
+        withContentRoot(contextFile.getParent(), () -> assertConfigUpdate(contextFile, absoluteConfigPath, "tmp/appmap"));
     }
 
     @Test
@@ -61,7 +68,7 @@ public class AppMapJavaPackageConfigTest extends AppMapBaseTest {
         // config file out of scope, must not be found
         WriteAction.runAndWait(() -> contextDir.getParent().createChildData(this, AppMapFiles.APPMAP_YML));
 
-        ModuleTestUtils.withContentRoot(getModule(), contextFile.getParent(), () -> {
+        withContentRoot(contextFile.getParent(), () -> {
             var scope = GlobalSearchScopes.directoryScope(getProject(), contextDir, true);
             var locatedConfigFile = AppMapJavaPackageConfig.findAndUpdateAppMapConfig(contextFile, scope);
             assertNull("Update must not write to a file outside the project", locatedConfigFile);
@@ -77,7 +84,7 @@ public class AppMapJavaPackageConfigTest extends AppMapBaseTest {
         expectedConfig.setPackages(List.of("com.example.application", "com.example.controllers", "com.example.models"));
         expectedConfig.setAppMapDir("tmp/appmap");
 
-        ModuleTestUtils.withContentRoot(getModule(), rootDir, () -> {
+        withContentRoot(rootDir, () -> {
             var configFilePath = AppMapJavaPackageConfig.createAppMapConfig(getModule(), rootDir, Path.of("tmp/appmap"));
             var config = AppMapConfigFile.parseConfigFile(configFilePath);
             assertEquals(expectedConfig, config);
@@ -89,12 +96,15 @@ public class AppMapJavaPackageConfigTest extends AppMapBaseTest {
         var rootDir = createMultiMod();
 
         var mod = getModule();
-        ModuleTestUtils.withContentRoot(mod, rootDir, () -> {
-            var configPath = AppMapJavaConfigUtil.findBestAppMapContentRootDirectory(mod, rootDir.findChild("mod1"));
+        withContentRoot(rootDir, () -> {
+            var configPath = ReadAction.compute(() -> {
+                return AppMapJavaConfigUtil.findBestAppMapContentRootDirectory(mod, rootDir.findChild("mod1"));
+            });
             var found = rootDir.findChild("appmap.yml");
             assertEquals(rootDir, configPath);
         });
     }
+
     private void assertConfigUpdate(@NotNull VirtualFile contextFile,
                                     @NotNull Path appMapOutputDirPath,
                                     @NotNull String expectedAppMapDir) throws IOException {

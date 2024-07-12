@@ -9,10 +9,12 @@ import appland.installGuide.projectData.ProjectMetadata;
 import appland.oauth.AppMapLoginAction;
 import appland.settings.AppMapApplicationSettingsService;
 import appland.settings.AppMapSettingsListener;
+import appland.utils.DataContexts;
 import appland.webviews.OpenExternalLinksHandler;
 import appland.webviews.WebviewEditor;
 import appland.webviews.findings.FindingsOverviewEditorProvider;
 import appland.webviews.navie.NavieEditorProvider;
+import appland.webviews.navie.NaviePromptSuggestion;
 import appland.webviews.webserver.AppMapWebview;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -71,7 +73,8 @@ public class InstallGuideEditor extends WebviewEditor<List<ProjectMetadata>> {
                 "open-navie",
                 "open-page",
                 "perform-auth",
-                "perform-install"
+                "perform-install",
+                "submit-to-navie"
         ));
         this.currentPage = page;
     }
@@ -199,6 +202,11 @@ public class InstallGuideEditor extends WebviewEditor<List<ProjectMetadata>> {
                 break;
             }
 
+            case "submit-to-navie": {
+                handleSubmitToNavie(message);
+                break;
+            }
+
             default:
                 LOG.warn("Unhandled message type: " + messageId);
         }
@@ -294,6 +302,17 @@ public class InstallGuideEditor extends WebviewEditor<List<ProjectMetadata>> {
         }, ModalityState.defaultModalityState());
     }
 
+    private void handleSubmitToNavie(@Nullable JsonObject message) {
+        assert message != null;
+        var suggestion = message.getAsJsonObject("suggestion");
+        assert suggestion != null;
+        var label = suggestion.getAsJsonPrimitive("label").getAsString();
+        var prompt = suggestion.getAsJsonPrimitive("prompt").getAsString();
+        ApplicationManager.getApplication().invokeLater(() -> {
+            NavieEditorProvider.openEditorWithPrompt(project, new NaviePromptSuggestion(label, prompt));
+        }, ModalityState.defaultModalityState());
+    }
+
     private void executeInstallCommand(String path, String language) {
         var commandLine = AppLandCommandLineService.getInstance().createInstallCommand(Paths.get(path), language);
         if (commandLine == null) {
@@ -310,12 +329,9 @@ public class InstallGuideEditor extends WebviewEditor<List<ProjectMetadata>> {
                 }
             };
 
-            var dataContext = new DataContext() {
-                @Override
-                public @Nullable Object getData(@NotNull String dataId) {
-                    return CommonDataKeys.PROJECT.is(dataId) ? project : null;
-                }
-            };
+            var dataContext = DataContexts.createCustomContext(dataId -> {
+                return CommonDataKeys.PROJECT.is(dataId) ? project : null;
+            });
 
             try {
                 var executor = DefaultRunExecutor.getRunExecutorInstance();
