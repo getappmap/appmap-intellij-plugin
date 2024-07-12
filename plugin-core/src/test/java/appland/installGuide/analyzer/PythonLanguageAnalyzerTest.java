@@ -22,7 +22,7 @@ public class PythonLanguageAnalyzerTest extends LanguageAnalyzerBaseTest {
     public void pipFlask() {
         var result = loadDirectory("python-pip-flask");
         assertLanguage(result.getFeatures(), "requirements.txt", null);
-        assertWeb(result.getFeatures(), "flask", Score.Okay);
+        assertWeb(result.getFeatures(), "Flask", Score.Okay);
         assertIsBad(result.getFeatures().test);
     }
 
@@ -30,7 +30,7 @@ public class PythonLanguageAnalyzerTest extends LanguageAnalyzerBaseTest {
     public void pipFlaskUnittest() {
         var result = loadDirectory("python-pip-flask-unittest");
         assertLanguage(result.getFeatures(), "requirements.txt", null);
-        assertWeb(result.getFeatures(), "flask", Score.Okay);
+        assertWeb(result.getFeatures(), "Flask", Score.Okay);
         assertTest(result.getFeatures(), "unittest", Score.Okay);
     }
 
@@ -38,7 +38,7 @@ public class PythonLanguageAnalyzerTest extends LanguageAnalyzerBaseTest {
     public void pythonUnittestMultipleFiles() {
         var result = loadDirectory("python-unittest-multiple-files");
         assertLanguage(result.getFeatures(), "requirements.txt", null);
-        assertWeb(result.getFeatures(), "flask", Score.Okay);
+        assertWeb(result.getFeatures(), "Flask", Score.Okay);
         assertTest(result.getFeatures(), "unittest", Score.Okay);
     }
 
