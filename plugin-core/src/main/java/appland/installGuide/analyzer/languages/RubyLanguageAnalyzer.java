@@ -78,9 +78,9 @@ public class RubyLanguageAnalyzer implements LanguageAnalyzer {
 
     @AllArgsConstructor
     private enum TestFramework {
-        Minitest("minitest", "minitest"),
-        RSpec("rspec", "rspec"),
-        Cucumber("cucumber", "cucumber");
+        Minitest("Minitest", "minitest"),
+        RSpec("RSpec", "rspec"),
+        Cucumber("Cucumber", "cucumber");
 
         private final String title;
         private final String markerWord;
