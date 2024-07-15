@@ -1,5 +1,16 @@
 AppMap Plugin Changelog
 
+## [0.70.0](https://github.com/getappmap/appmap-intellij-plugin/compare/v0.69.0...v0.70.0) (2024-07-15)
+
+
+### Features
+
+-  support 2024.2 eap ([c64d5e2]())-  support prompt passed from install instructions to Navie ([d6f82db]())-  update webview install-guide to the latest version ([8f7efb7]())-  update webview navie to the latest version ([b9e3950]())
+
+### Bug Fixes
+
+-  Normalize casing of dependencies ([8501c27]())
+
 ## [0.69.0](https://github.com/getappmap/appmap-intellij-plugin/compare/v0.68.0...v0.69.0) (2024-06-21)
 
 
