@@ -24,7 +24,7 @@ buildscript {
 plugins {
     idea
     id("org.jetbrains.kotlin.jvm") version "1.9.24"
-    id("org.jetbrains.intellij.platform") version "2.0.0-beta8"
+    id("org.jetbrains.intellij.platform") version "2.0.0-beta9"
     id("org.jetbrains.changelog") version "1.3.1"
     id("com.adarshr.test-logger") version "3.2.0"
     id("de.undercouch.download") version "5.6.0"
