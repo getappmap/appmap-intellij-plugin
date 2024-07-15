@@ -36,11 +36,11 @@ jobs:
 
             - name: Verify plugin
               shell: bash
-              run: ./gradlew verifyPlugin
+              run: ./gradlew verifyPluginProjectConfiguration
 
             - name: Run Plugin Verifier
               shell: bash
-              run: ./gradlew runPluginVerifier
+              run: ./gradlew verifyPlugin
 
             - name: "Install Dependencies"
               shell: bash
