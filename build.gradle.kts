@@ -223,15 +223,15 @@ project(":") {
     dependencies {
         intellijPlatform {
             // fixme use when https://github.com/JetBrains/intellij-platform-gradle-plugin/issues/1673 is resolved
-            // pluginModule(implementation(project(":plugin-core")))
-            // pluginModule(implementation(project(":plugin-gradle")))
-            // pluginModule(implementation(project(":plugin-java")))
-            // pluginModule(implementation(project(":plugin-maven")))
+            pluginModule(implementation(project(":plugin-core")))
+            pluginModule(implementation(project(":plugin-gradle")))
+            pluginModule(implementation(project(":plugin-java")))
+            pluginModule(implementation(project(":plugin-maven")))
 
-            implementation(project(":plugin-core"))
-            implementation(project(":plugin-gradle"))
-            implementation(project(":plugin-java"))
-            implementation(project(":plugin-maven"))
+//            implementation(project(":plugin-core"))
+//            implementation(project(":plugin-gradle"))
+//            implementation(project(":plugin-java"))
+//            implementation(project(":plugin-maven"))
 
             pluginVerifier()
             zipSigner()
