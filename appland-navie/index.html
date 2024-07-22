@@ -1,31 +1,44 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AppMap AI: Explain</title>
-    <style>
-        body {
-            font-family: system-ui, sans-serif;
-            height: 100%;
-            margin: 0;
-            overflow-y: hidden;
-        }
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>AppMap AI: Explain</title>
+        <style>
+            body {
+                font-family: system-ui, sans-serif;
+                height: 100%;
+                margin: 0;
+                overflow-y: hidden;
+            }
 
-        /*
-        HACK:
-        Browser downloads don't work in JCEF. This hides the download button.
-        */
-        [data-cy="mermaid-diagram"] [data-cy="download"] {
-            display: none !important;
-        }
-    </style>
-</head>
-<body>
-    <div id="app"></div>
-    <script src="./dist/main.js"></script>
-    <script type="text/javascript">
-        AppLandWeb.mountWebview();
-    </script>
-</body>
+            /* 
+            Integration fixes
+
+            HACK:
+            Browser downloads don't work in JCEF. This hides the download button.
+            */
+            [data-cy="context-menu-item"]:nth-child(3) {
+                display: none !important;
+            }
+
+            .context-container__title {
+                text-overflow: ellipsis;
+                overflow: hidden;
+                white-space: nowrap;
+            }
+
+            .context__body__table .context__pinned-item {
+                margin: 0 !important;
+                box-shadow: none !important;
+            }
+        </style>
+    </head>
+    <body>
+        <div id="app"></div>
+        <script src="./dist/main.js"></script>
+        <script type="text/javascript">
+            AppLandWeb.mountWebview();
+        </script>
+    </body>
 </html>
