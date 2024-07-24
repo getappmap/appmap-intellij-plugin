@@ -1,6 +1,7 @@
 package appland.webviews;
 
 import appland.AppMapBundle;
+import appland.actions.OpenInRightSplit;
 import appland.files.FileLocation;
 import appland.files.FileLookup;
 import appland.notifications.AppMapNotifications;
@@ -10,7 +11,6 @@ import appland.telemetry.TelemetryService;
 import appland.utils.GsonUtils;
 import appland.webviews.appMap.ExportSvgUtil;
 import com.google.gson.JsonObject;
-import com.intellij.ide.actions.OpenInRightSplitAction;
 import com.intellij.ide.actions.RevealFileAction;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.application.ModalityState;
@@ -186,7 +186,7 @@ public final class SharedAppMapWebViewMessages {
         ApplicationManager.getApplication().invokeLater(() -> {
             // IntelliJ's lines are 0-based, AppMap lines seem to be 1-based
             var descriptor = new OpenFileDescriptor(project, referencedFile, location.getZeroBasedLine(-1), -1);
-            OpenInRightSplitAction.Companion.openInRightSplit(project, referencedFile, descriptor, true);
+            OpenInRightSplit.openInRightSplit(project, referencedFile, descriptor);
         }, ModalityState.defaultModalityState());
     }
 
