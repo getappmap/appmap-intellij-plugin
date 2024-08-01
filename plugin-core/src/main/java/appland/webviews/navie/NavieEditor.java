@@ -135,8 +135,10 @@ public class NavieEditor extends WebviewEditor<Void> {
                 applyWebViewFilters();
             }
         });
-        busConnection.subscribe(AppMapFileChangeListener.TOPIC, (AppMapFileChangeListener) changeTypes -> {
-            updateNaviePropertiesAlarm.cancelAndRequest();
+        busConnection.subscribe(AppMapFileChangeListener.TOPIC, (AppMapFileChangeListener) (changeTypes, isGenericRefresh) -> {
+            if (!isGenericRefresh) {
+                updateNaviePropertiesAlarm.cancelAndRequest();
+            }
         });
         busConnection.subscribe(AppMapConfigFileListener.TOPIC, (AppMapConfigFileListener) updateNaviePropertiesAlarm::cancelAndRequest);
     }

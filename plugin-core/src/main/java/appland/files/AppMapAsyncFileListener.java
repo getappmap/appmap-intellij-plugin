@@ -57,7 +57,7 @@ public class AppMapAsyncFileListener implements AsyncFileListener {
 
         @Override
         public void afterVfsChange() {
-            AppMapFileChangeListener.sendNotification(changeTypes);
+            AppMapFileChangeListener.sendNotification(changeTypes, false);
         }
     }
 }

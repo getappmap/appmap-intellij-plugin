@@ -27,7 +27,7 @@ public class FirstAppMapListener implements AppMapFileChangeListener {
     }
 
     @Override
-    public void refreshAppMaps(@NotNull Set<AppMapFileEventType> changeTypes) {
+    public void refreshAppMaps(@NotNull Set<AppMapFileEventType> changeTypes, boolean isGenericRefresh) {
         if (!changeTypes.contains(AppMapFileEventType.Create)) {
             return;
         }
