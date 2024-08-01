@@ -6,7 +6,6 @@ import appland.settings.AppMapProjectSettingsService;
 import appland.telemetry.TelemetryService;
 import com.intellij.execution.ExecutionException;
 import com.intellij.execution.process.CapturingProcessHandler;
-import com.intellij.ide.actions.OpenInRightSplitAction;
 import com.intellij.openapi.actionSystem.ActionUpdateThread;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
@@ -44,7 +43,7 @@ public class GenerateOpenApiAction extends AnAction implements DumbAware {
 
     @Override
     public void actionPerformed(@NotNull AnActionEvent e) {
-        createOpenApiFileInteractive(Objects.requireNonNull(e.getProject()), false);
+        createOpenApiFileInteractive(Objects.requireNonNull(e.getProject()));
     }
 
     /**
@@ -55,11 +54,10 @@ public class GenerateOpenApiAction extends AnAction implements DumbAware {
      * <p>
      * After the file was created, the result is shown in a new editor.
      *
-     * @param project           The current project
-     * @param showInSplitEditor If the result file should be opened in a split editor
+     * @param project The current project
      */
     @RequiresEdt
-    public static void createOpenApiFileInteractive(@NotNull Project project, boolean showInSplitEditor) {
+    public static void createOpenApiFileInteractive(@NotNull Project project) {
         var commandLineService = AppLandCommandLineService.getInstance();
         var roots = commandLineService.getActiveRoots();
 
@@ -68,7 +66,7 @@ public class GenerateOpenApiAction extends AnAction implements DumbAware {
                     AppMapBundle.get("action.appmap.generateOpenAPI.noRootMessage.text"),
                     AppMapBundle.get("action.appmap.generateOpenAPI.noRootMessage.title"));
         } else if (roots.size() == 1) {
-            createOpenApiFile(project, roots.get(0), showInSplitEditor);
+            createOpenApiFile(project, roots.get(0));
         } else {
             //noinspection RedundantCast,unchecked
             JBPopupFactory.getInstance()
@@ -78,14 +76,14 @@ public class GenerateOpenApiAction extends AnAction implements DumbAware {
                     .setMovable(false)
                     .setResizable(false)
                     .setRequestFocus(true)
-                    .setItemChosenCallback(root -> createOpenApiFile(project, root, showInSplitEditor))
+                    .setItemChosenCallback(root -> createOpenApiFile(project, root))
                     .createPopup()
                     .showInFocusCenter();
         }
     }
 
     @RequiresEdt
-    public static void createOpenApiFile(@NotNull Project project, @NotNull VirtualFile projectRoot, boolean showInSplitEditor) {
+    public static void createOpenApiFile(@NotNull Project project, @NotNull VirtualFile projectRoot) {
         var commandLine = AppLandCommandLineService.getInstance().createGenerateOpenApiCommand(projectRoot);
         if (commandLine == null) {
             LOG.debug("Unable to create command line, e.g. because CLI tool is missing.");
@@ -99,12 +97,7 @@ public class GenerateOpenApiAction extends AnAction implements DumbAware {
             @Override
             public void onSuccess() {
                 if (openApiFile != null) {
-                    var editorManager = FileEditorManager.getInstance(project);
-                    if (showInSplitEditor && editorManager.getSelectedEditor() != null) {
-                        OpenInRightSplitAction.Companion.openInRightSplit(project, openApiFile, null, true);
-                    } else {
-                        editorManager.openFile(openApiFile, true);
-                    }
+                    FileEditorManager.getInstance(project).openFile(openApiFile, true);
                 }
             }
 
