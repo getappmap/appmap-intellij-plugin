@@ -377,7 +377,7 @@ public class NavieEditor extends WebviewEditor<Void> {
      */
     @RequiresReadLock
     private static @NotNull UpdatableNavieData createUpdatableNavieData(@NotNull Project project) {
-        var isAppMapYamlPresent = !AppMapFiles.findAppMapConfigFiles(project).isEmpty();
+        var isAppMapYamlPresent = AppMapFiles.isAppMapConfigAvailable(project);
         var mostRecentAppMaps = findMostRecentAppMaps(project);
         return new UpdatableNavieData(isAppMapYamlPresent, mostRecentAppMaps);
     }
