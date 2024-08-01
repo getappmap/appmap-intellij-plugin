@@ -79,8 +79,19 @@ public final class AppMapFiles {
      */
     @RequiresReadLock
     public static @NotNull Collection<VirtualFile> findAppMapConfigFiles(@NotNull GlobalSearchScope scope) {
-        var indexId = AppMapConfigFileIndex.INDEX_ID;
-        return FileBasedIndex.getInstance().getContainingFiles(indexId, AppMapFiles.APPMAP_YML, scope);
+        var project = scope.getProject();
+        if (project != null && DumbService.isDumb(scope.getProject())) {
+            return Collections.emptyList();
+        }
+
+        return FileBasedIndex.getInstance().getContainingFiles(AppMapConfigFileIndex.INDEX_ID, APPMAP_YML, scope);
+    }
+
+    @RequiresReadLock
+    public static boolean isAppMapConfigAvailable(@NotNull Project project) {
+        // FileBasedIndex.getAllKeys and FileBasedIndex.processAllKeys didn't work,
+        // because they processed outdated index data.
+        return !findAppMapConfigFiles(project).isEmpty();
     }
 
     /**
