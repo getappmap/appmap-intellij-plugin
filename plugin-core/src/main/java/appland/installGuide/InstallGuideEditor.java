@@ -104,7 +104,7 @@ public class InstallGuideEditor extends WebviewEditor<List<ProjectMetadata>> {
     }
 
     private void setupListeners() {
-        IndexedFileListenerUtil.registerListeners(project, this, true, true, projectRefreshAlarm::cancelAndRequest);
+        IndexedFileListenerUtil.registerListeners(project, this, true, true, true, projectRefreshAlarm::cancelAndRequest);
 
         ApplicationManager.getApplication().getMessageBus()
                 .connect(this)

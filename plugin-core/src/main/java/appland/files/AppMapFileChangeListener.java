@@ -9,6 +9,7 @@ import java.util.Set;
 /**
  * Listener to be notified after changes to .appmap.json files.
  */
+@FunctionalInterface
 public interface AppMapFileChangeListener {
     Topic<AppMapFileChangeListener> TOPIC = Topic.create("AppMap file change", AppMapFileChangeListener.class);
 

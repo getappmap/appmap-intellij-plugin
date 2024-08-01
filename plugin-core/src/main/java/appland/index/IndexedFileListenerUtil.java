@@ -15,8 +15,11 @@ public final class IndexedFileListenerUtil {
     private IndexedFileListenerUtil() {
     }
 
-    public static void registerListeners(@NotNull Project project, @NotNull Disposable parent,
-                                         boolean appMapFileListener, boolean findingsFileListener,
+    public static void registerListeners(@NotNull Project project,
+                                         @NotNull Disposable parent,
+                                         boolean appMapFileListener,
+                                         boolean findingsFileListener,
+                                         boolean allowGenericFilesystemRefresh,
                                          @NotNull Runnable action) {
 
         var application = ApplicationManager.getApplication();
@@ -39,7 +42,11 @@ public final class IndexedFileListenerUtil {
         });
 
         if (appMapFileListener) {
-            busConnection.subscribe(AppMapFileChangeListener.TOPIC, (changes, isGenericRefresh) -> application.invokeLater(action));
+            busConnection.subscribe(AppMapFileChangeListener.TOPIC, (AppMapFileChangeListener) (changes, isGenericRefresh) -> {
+                if (allowGenericFilesystemRefresh || !isGenericRefresh) {
+                    application.invokeLater(action);
+                }
+            });
         }
 
         if (findingsFileListener) {
