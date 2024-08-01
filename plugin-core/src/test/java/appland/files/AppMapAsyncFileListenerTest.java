@@ -22,7 +22,7 @@ public class AppMapAsyncFileListenerTest extends AppMapBaseTest {
 
         ApplicationManager.getApplication().getMessageBus()
                 .connect(getTestRootDisposable())
-                .subscribe(AppMapFileChangeListener.TOPIC, changes -> {
+                .subscribe(AppMapFileChangeListener.TOPIC, (changes, isGenericRefresh) -> {
                     latch.countDown();
                 });
 
