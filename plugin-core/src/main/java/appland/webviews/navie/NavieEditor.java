@@ -25,6 +25,7 @@ import appland.webviews.appMap.AppMapFileEditorState;
 import appland.webviews.webserver.AppMapWebview;
 import com.google.gson.JsonObject;
 import com.google.gson.annotations.SerializedName;
+import com.intellij.openapi.actionSystem.DataContext;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.application.ModalityState;
 import com.intellij.openapi.application.ReadAction;
@@ -77,6 +78,7 @@ public class NavieEditor extends WebviewEditor<Void> {
                 "open-appmap",
                 "open-install-instructions",
                 "open-location",
+                "open-new-chat",
                 "open-record-instructions",
                 "select-llm-option",
                 "show-appmap-tree"));
@@ -171,6 +173,11 @@ public class NavieEditor extends WebviewEditor<Void> {
                 }
                 break;
             }
+            case "open-new-chat":
+                ApplicationManager.getApplication().invokeLater(() -> {
+                    NavieEditorProvider.openEditor(project, DataContext.EMPTY_CONTEXT);
+                }, ModalityState.defaultModalityState());
+                break;
             case "open-record-instructions":
                 ApplicationManager.getApplication().invokeLater(() -> {
                     InstallGuideEditorProvider.open(project, InstallGuideViewPage.RecordAppMaps);
