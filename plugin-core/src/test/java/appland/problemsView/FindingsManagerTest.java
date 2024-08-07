@@ -3,9 +3,10 @@ package appland.problemsView;
 import appland.AppMapBaseTest;
 import appland.index.AppMapFindingsUtil;
 import appland.problemsView.model.TestStatus;
+import com.intellij.openapi.application.ReadAction;
+import com.intellij.testFramework.EdtTestUtil;
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import java.sql.Date;
@@ -35,12 +36,13 @@ public class FindingsManagerTest extends AppMapBaseTest {
     }
 
     @Test
-    @Ignore("Unstable on Windows CI")
     public void findingsVSCodeSystem() throws Exception {
         var manager = FindingsManager.getInstance(getProject());
 
         var condition = TestFindingsManager.createFindingsCondition(getProject(), getTestRootDisposable());
-        var root = myFixture.copyDirectoryToProject("vscode/workspaces/project-system", "root");
+        var root = EdtTestUtil.runInEdtAndGet(() -> {
+            return myFixture.copyDirectoryToProject("vscode/workspaces/project-system", "root");
+        });
         assertTrue(condition.await(30, TimeUnit.SECONDS));
 
         var findingsFile = root.findChild("appmap-findings.json");
@@ -71,7 +73,9 @@ public class FindingsManagerTest extends AppMapBaseTest {
         var manager = FindingsManager.getInstance(getProject());
 
         var condition = TestFindingsManager.createFindingsCondition(getProject(), getTestRootDisposable());
-        var root = myFixture.copyDirectoryToProject("projects/with_modification_date", "root");
+        var root = EdtTestUtil.runInEdtAndGet(() -> {
+            return myFixture.copyDirectoryToProject("projects/with_modification_date", "root");
+        });
         assertTrue(condition.await(30, TimeUnit.SECONDS));
         waitUntilIndexesAreReady();
 
@@ -97,12 +101,14 @@ public class FindingsManagerTest extends AppMapBaseTest {
     @Test
     public void findOtherFindingByHash() throws InterruptedException {
         var condition = TestFindingsManager.createFindingsCondition(getProject(), getTestRootDisposable());
-        myFixture.copyDirectoryToProject("projects/with_http_requests", "root");
+        EdtTestUtil.runInEdtAndWait(() -> myFixture.copyDirectoryToProject("projects/with_http_requests", "root"));
         assertTrue(condition.await(30, TimeUnit.SECONDS));
         waitUntilIndexesAreReady();
 
         var manager = FindingsManager.getInstance(getProject());
-        var findings = manager.findFindingsByHash("b751d44a3b3cf40dd0fa5ba47b2f910f3d73229907b7b5d3b47de87b0c747541");
+        var findings = ReadAction.compute(() -> {
+            return manager.findFindingsByHash("b751d44a3b3cf40dd0fa5ba47b2f910f3d73229907b7b5d3b47de87b0c747541");
+        });
         assertEquals(1, findings.size());
     }
 }

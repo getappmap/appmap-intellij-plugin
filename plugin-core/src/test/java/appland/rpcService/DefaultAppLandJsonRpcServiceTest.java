@@ -22,6 +22,11 @@ import static org.hamcrest.Matchers.hasEntry;
 import static org.junit.Assert.assertArrayEquals;
 
 public class DefaultAppLandJsonRpcServiceTest extends AppMapBaseTest {
+    @Override
+    protected boolean runInDispatchThread() {
+        return false;
+    }
+
     @Test
     public void launchedWithProject() {
         waitForJsonRpcServer();
