@@ -435,7 +435,7 @@ public class DefaultAppLandJsonRpcService implements AppLandJsonRpcService, AppL
             }
 
             var currentRestartDelay = nextRestartDelayMillis;
-            var restartNeeded = currentRestartDelay >= 0L
+            var restartNeeded = currentRestartDelay > 0L
                     && currentRestartDelay <= MAX_RESTART_DELAY_MILLIS
                     && !isDisposed;
 
