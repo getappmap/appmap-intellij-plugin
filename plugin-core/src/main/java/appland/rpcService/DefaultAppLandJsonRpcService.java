@@ -233,7 +233,11 @@ public class DefaultAppLandJsonRpcService implements AppLandJsonRpcService, AppL
         try {
             stopServerSync(this.jsonRpcServer);
         } finally {
-            startServer();
+            try {
+                startServer();
+            } finally {
+                project.getMessageBus().syncPublisher(AppLandJsonRpcListener.TOPIC).serverRestarted();
+            }
         }
     }
 
