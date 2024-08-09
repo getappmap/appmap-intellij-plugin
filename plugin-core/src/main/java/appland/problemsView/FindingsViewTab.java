@@ -35,7 +35,7 @@ public final class FindingsViewTab extends ProblemsViewPanel {
         var rootNode = new FindingsRootNode(this);
         getTreeModel().setRoot(rootNode);
 
-        IndexedFileListenerUtil.registerListeners(project, this, false, true, () -> {
+        IndexedFileListenerUtil.registerListeners(project, this, false, true, false, () -> {
             rootNode.structureChanged(null);
         });
     }

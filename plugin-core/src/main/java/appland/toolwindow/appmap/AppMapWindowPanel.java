@@ -91,7 +91,7 @@ public class AppMapWindowPanel extends SimpleToolWindowPanel implements DataProv
         this.tree = createTree(project, this, appMapModel);
         this.treeRefreshAlarm = new SingleAlarm(() -> refreshAndExpand(appMapModel), TREE_REFRESH_DELAY_MILLIS, this, Alarm.ThreadToUse.POOLED_THREAD);
 
-        IndexedFileListenerUtil.registerListeners(project, this, true, false, () -> rebuild(false));
+        IndexedFileListenerUtil.registerListeners(project, this, true, false, true, () -> rebuild(false));
 
         // create the content panel
         var appMapPanel = createAppMapPanel(project, tree, appMapModel);

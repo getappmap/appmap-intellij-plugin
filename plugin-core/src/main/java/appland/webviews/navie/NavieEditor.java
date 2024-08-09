@@ -3,12 +3,12 @@ package appland.webviews.navie;
 import appland.AppMapBundle;
 import appland.actions.SetNavieOpenAiKeyAction;
 import appland.config.AppMapConfigFileListener;
-import appland.files.AppMapFileChangeListener;
 import appland.files.AppMapFiles;
 import appland.files.FileLookup;
 import appland.files.OpenAppMapFileNavigatable;
 import appland.index.AppMapMetadata;
 import appland.index.AppMapMetadataService;
+import appland.index.IndexedFileListenerUtil;
 import appland.installGuide.InstallGuideEditorProvider;
 import appland.installGuide.InstallGuideViewPage;
 import appland.rpcService.AppLandJsonRpcService;
@@ -135,10 +135,10 @@ public class NavieEditor extends WebviewEditor<Void> {
                 applyWebViewFilters();
             }
         });
-        busConnection.subscribe(AppMapFileChangeListener.TOPIC, (AppMapFileChangeListener) changeTypes -> {
-            updateNaviePropertiesAlarm.cancelAndRequest();
-        });
         busConnection.subscribe(AppMapConfigFileListener.TOPIC, (AppMapConfigFileListener) updateNaviePropertiesAlarm::cancelAndRequest);
+
+        // listen for changes of AppMap files
+        IndexedFileListenerUtil.registerListeners(project, this, true, false, false, updateNaviePropertiesAlarm::cancelAndRequest);
     }
 
     @Override
@@ -377,7 +377,7 @@ public class NavieEditor extends WebviewEditor<Void> {
      */
     @RequiresReadLock
     private static @NotNull UpdatableNavieData createUpdatableNavieData(@NotNull Project project) {
-        var isAppMapYamlPresent = !AppMapFiles.findAppMapConfigFiles(project).isEmpty();
+        var isAppMapYamlPresent = AppMapFiles.isAppMapConfigAvailable(project);
         var mostRecentAppMaps = findMostRecentAppMaps(project);
         return new UpdatableNavieData(isAppMapYamlPresent, mostRecentAppMaps);
     }

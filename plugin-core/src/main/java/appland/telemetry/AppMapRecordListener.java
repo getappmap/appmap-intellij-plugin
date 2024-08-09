@@ -11,7 +11,7 @@ public class AppMapRecordListener implements AppMapFileChangeListener {
     @NotNull private final AtomicBoolean appMapRecordedThisSession = new AtomicBoolean(false);
 
     @Override
-    public void refreshAppMaps(@NotNull Set<AppMapFileEventType> changeTypes) {
+    public void refreshAppMaps(@NotNull Set<AppMapFileEventType> changeTypes, boolean isGenericRefresh) {
         if (!changeTypes.contains(AppMapFileEventType.Create) && !changeTypes.contains(AppMapFileEventType.Modify)) {
             return;
         }

@@ -1,6 +1,7 @@
 package appland.files;
 
 import appland.cli.AppLandCommandLineService;
+import appland.index.AppMapConfigFileIndex;
 import appland.index.AppMapSearchScopes;
 import appland.utils.GsonUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -13,6 +14,7 @@ import com.intellij.execution.process.ProcessOutput;
 import com.intellij.execution.util.ExecUtil;
 import com.intellij.openapi.application.ReadAction;
 import com.intellij.openapi.diagnostic.Logger;
+import com.intellij.openapi.project.DumbService;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.roots.ProjectRootManager;
 import com.intellij.openapi.util.io.FileUtil;
@@ -21,10 +23,10 @@ import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.openapi.vfs.VfsUtil;
 import com.intellij.openapi.vfs.VfsUtilCore;
 import com.intellij.openapi.vfs.VirtualFile;
-import com.intellij.psi.search.FilenameIndex;
 import com.intellij.psi.search.GlobalSearchScope;
 import com.intellij.util.concurrency.annotations.RequiresBackgroundThread;
 import com.intellij.util.concurrency.annotations.RequiresReadLock;
+import com.intellij.util.indexing.FileBasedIndex;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -77,7 +79,19 @@ public final class AppMapFiles {
      */
     @RequiresReadLock
     public static @NotNull Collection<VirtualFile> findAppMapConfigFiles(@NotNull GlobalSearchScope scope) {
-        return FilenameIndex.getVirtualFilesByName(APPMAP_YML, false, scope);
+        var project = scope.getProject();
+        if (project != null && DumbService.isDumb(scope.getProject())) {
+            return Collections.emptyList();
+        }
+
+        return FileBasedIndex.getInstance().getContainingFiles(AppMapConfigFileIndex.INDEX_ID, APPMAP_YML, scope);
+    }
+
+    @RequiresReadLock
+    public static boolean isAppMapConfigAvailable(@NotNull Project project) {
+        // FileBasedIndex.getAllKeys and FileBasedIndex.processAllKeys didn't work,
+        // because they processed outdated index data.
+        return !findAppMapConfigFiles(project).isEmpty();
     }
 
     /**

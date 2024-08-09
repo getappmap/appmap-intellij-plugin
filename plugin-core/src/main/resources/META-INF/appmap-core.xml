@@ -72,6 +72,7 @@
         <fileBasedIndex implementation="appland.index.AppMapServerRequestCountIndex"/>
         <fileBasedIndex implementation="appland.index.AppMapSqlQueriesCountIndex"/>
         <fileBasedIndex implementation="appland.index.ClassMapTypeIndex"/>
+        <fileBasedIndex implementation="appland.index.AppMapConfigFileIndex"/>
 
         <roots.watchedRootsProvider implementation="appland.index.AppMapWatchedRootsProvider"/>
         <!-- For 2023.1 and earlier -->
