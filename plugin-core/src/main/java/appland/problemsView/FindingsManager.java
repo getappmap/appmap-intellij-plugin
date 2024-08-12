@@ -12,15 +12,12 @@ import com.google.gson.JsonSyntaxException;
 import com.intellij.analysis.problemsView.Problem;
 import com.intellij.analysis.problemsView.ProblemsProvider;
 import com.intellij.openapi.application.ApplicationManager;
-import com.intellij.openapi.application.ModalityState;
-import com.intellij.openapi.application.ReadAction;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.fileEditor.FileDocumentManager;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.roots.ProjectRootManager;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.search.FilenameIndex;
-import com.intellij.util.concurrency.AppExecutorUtil;
 import com.intellij.util.concurrency.annotations.RequiresReadLock;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -168,39 +165,18 @@ public class FindingsManager implements ProblemsProvider {
         }
     }
 
+    @RequiresReadLock
     public void reloadAsync() {
-        // the non-blocking ReadAction must not have side effects, because it may be executed multiple times
-        ReadAction.nonBlocking(this::findFindingsFiles)
-                .inSmartMode(project)
-                .expireWith(this)
-                .coalesceBy(getClass(), project)
-                .finishOnUiThread(ModalityState.any(), findingFiles -> {
-                    if (project.isDisposed()) {
-                        return;
-                    }
+        ApplicationManager.getApplication().assertReadAccessAllowed();
 
-                    // We can't use "submit().onSuccess()" to process the files, because the non-blocking ReadAction
-                    // cancels the progress indicator, which is wrapping the code of "onSuccess()". But loading the
-                    // findings must not be cancelled, so we're moving into our own ReadAction outside the original
-                    // progress indicator.
-                    ApplicationManager.getApplication().executeOnPooledThread(() -> {
-                        if (project.isDisposed()) {
-                            return;
-                        }
+        var findingFiles = findFindingsFiles();
 
-                        ReadAction.run(() -> {
-                            if (project.isDisposed()) {
-                                return;
-                            }
+        clearAndNotify();
+        for (var findingFile : findingFiles) {
+            addFindingsFile(findingFile);
+        }
 
-                            clearAndNotify();
-                            for (var findingFile : findingFiles) {
-                                addFindingsFile(findingFile);
-                            }
-                            project.getMessageBus().syncPublisher(ScannerFindingsListener.TOPIC).afterFindingsReloaded();
-                        });
-                    });
-                }).submit(AppExecutorUtil.getAppExecutorService());
+        publisher.afterFindingsReloaded();
     }
 
     public void addFindingsFile(@NotNull VirtualFile findingsFile) {
