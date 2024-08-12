@@ -31,7 +31,7 @@ public class InstallGuideEditorProvider extends WebviewEditorProvider {
             assert provider != null;
 
             // an open Install Guide webview must navigate to the new page
-            var openEditor = provider.findOpenEditor(project, Predicates.alwaysTrue());
+            var openEditor = provider.focusOpenEditor(project, Predicates.alwaysTrue());
             if (openEditor != null) {
                 ((InstallGuideEditor) openEditor).navigateTo(page, true, false);
                 return;
