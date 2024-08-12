@@ -1,6 +1,6 @@
 package appland.problemsView.listener;
 
-import appland.AppMapBaseTest;
+import appland.AppMapLocalTempFilesTest;
 import com.intellij.openapi.application.ReadAction;
 import com.intellij.openapi.application.WriteAction;
 import com.intellij.openapi.vfs.VirtualFile;
@@ -13,7 +13,7 @@ import java.util.concurrent.TimeUnit;
 
 import static appland.problemsView.TestFindingsManager.createFindingsCondition;
 
-public class ScannerFilesAsyncListenerTest extends AppMapBaseTest {
+public class ScannerFilesAsyncListenerTest extends AppMapLocalTempFilesTest {
     @Override
     protected boolean runInDispatchThread() {
         return false;

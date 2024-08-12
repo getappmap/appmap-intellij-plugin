@@ -2,7 +2,6 @@ package appland.cli;
 
 import appland.AppMapBaseTest;
 import appland.files.AppMapFiles;
-import appland.settings.AppMapApplicationSettings;
 import appland.settings.AppMapApplicationSettingsService;
 import appland.settings.AppMapSettingsListener;
 import appland.testRules.ResetIdeHttpProxyRule;
