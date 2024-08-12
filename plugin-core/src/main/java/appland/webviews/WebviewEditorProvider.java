@@ -87,7 +87,7 @@ public abstract class WebviewEditorProvider implements FileEditorProvider, DumbA
      * @param reuseOpenEditor If {@code true}, then an already available webview editor is focused instead of creating a new one.
      */
     public void open(@NotNull Project project, @NotNull String title, boolean reuseOpenEditor) {
-        if (reuseOpenEditor && focusOpenEditor(project, Predicates.alwaysTrue())) {
+        if (reuseOpenEditor && focusOpenEditor(project, Predicates.alwaysTrue()) != null) {
             return;
         }
 
@@ -109,14 +109,14 @@ public abstract class WebviewEditorProvider implements FileEditorProvider, DumbA
         return file;
     }
 
-    public boolean focusOpenEditor(@NotNull Project project, @NotNull Predicate<WebviewEditor<?>> editorPredicate) {
+    public WebviewEditor<?> focusOpenEditor(@NotNull Project project, @NotNull Predicate<WebviewEditor<?>> editorPredicate) {
         var openEditor = findOpenEditor(project, editorPredicate);
         if (openEditor != null) {
             FileEditorManagerEx.getInstanceEx(project).openFile(openEditor.file, true, true);
-            return true;
+            return openEditor;
         }
 
-        return false;
+        return null;
     }
 
     public @Nullable WebviewEditor<?> findOpenEditor(@NotNull Project project,
