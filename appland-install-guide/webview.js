@@ -8,7 +8,6 @@ export function mountWebview() {
   const messages = new MessagePublisher(vscode);
 
   messages.on('init', (initialData) => {
-    let currentPage = initialData.page;
     let currentProject;
 
     const app = new Vue({
@@ -22,7 +21,6 @@ export function mountWebview() {
             analysisEnabled: this.analysisEnabled,
             userAuthenticated: this.userAuthenticated,
             featureFlags: new Set(['disable-record-pending']),
-            disabledPages: new Set(this.disabledPages),
             findingsEnabled: this.findingsEnabled,
           },
         });
@@ -32,28 +30,10 @@ export function mountWebview() {
           projects: initialData.projects,
           analysisEnabled: initialData.analysisEnabled,
           userAuthenticated: initialData.userAuthenticated,
-          disabledPages: initialData.disabledPages,
           findingsEnabled: initialData.findingsEnabled,
         };
       },
-      beforeCreate() {
-        this.$on('open-page', async (pageId) => {
-          // Wait until next frame if there's no current project. It may take some time for the
-          // view to catch up.
-          if (!currentProject) await new Promise((resolve) => requestAnimationFrame(resolve));
-
-          currentPage = pageId;
-          vscode.postMessage({
-            command: 'open-page',
-            page: currentPage,
-            project: currentProject,
-            projects: this.projects,
-          });
-        });
-      },
       mounted() {
-        this.$refs.ui.jumpTo(initialData.page);
-
         document.addEventListener('click', (e) => {
           if (e && e.target) {
             const href = e.target.href;
@@ -70,7 +50,6 @@ export function mountWebview() {
     app.$on('clipboard', (text) => {
       vscode.postMessage({
         command: 'clipboard',
-        page: currentPage,
         project: currentProject,
         text,
       });
@@ -92,10 +71,6 @@ export function mountWebview() {
       vscode.postMessage({command: 'open-file', file});
     });
 
-    app.$on('open-instruction', (pageId) => {
-      app.$refs.ui.jumpTo(pageId);
-    });
-
     app.$on('perform-install', (path, language) => {
       vscode.postMessage({command: 'perform-install', path, language});
     });
@@ -113,10 +88,6 @@ export function mountWebview() {
     });
 
     // listeners for messages sent by the plugin
-    messages.on('page', ({page}) => {
-      app.$refs.ui.jumpTo(page);
-    });
-
     messages.on('projects', ({projects}) => {
       app.projects = projects;
       app.$forceUpdate();
