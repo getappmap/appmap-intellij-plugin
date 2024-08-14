@@ -24,9 +24,5 @@ public class VSCodeFixturesTest extends AppMapBaseTest {
 
         var projects = ProjectDataService.getInstance(getProject()).getAppMapProjects(true);
         Assert.assertEquals(1, projects.size());
-
-        var projectA = projects.get(0);
-        Assert.assertEquals("Ruby", projectA.getLanguage().getName());
-        Assert.assertTrue(projectA.isHasNode());
     }
 }

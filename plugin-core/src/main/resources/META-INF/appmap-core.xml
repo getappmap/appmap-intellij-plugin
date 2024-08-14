@@ -1,22 +1,6 @@
 <idea-plugin>
     <resource-bundle>messages.appland</resource-bundle>
 
-    <extensionPoints>
-        <extensionPoint dynamic="true"
-                        qualifiedName="appland.languageAnalyzer"
-                        interface="appland.installGuide.analyzer.LanguageAnalyzer"/>
-    </extensionPoints>
-
-    <extensions defaultExtensionNs="appland">
-        <languageAnalyzer implementation="appland.installGuide.analyzer.languages.PythonLanguageAnalyzer"/>
-        <languageAnalyzer implementation="appland.installGuide.analyzer.languages.JavaLanguageAnalyzer"/>
-        <languageAnalyzer implementation="appland.installGuide.analyzer.languages.JavaScriptLanguageAnalyzer"/>
-        <languageAnalyzer implementation="appland.installGuide.analyzer.languages.RubyLanguageAnalyzer"/>
-
-        <languageAnalyzer order="last"
-                          implementation="appland.installGuide.analyzer.languages.UnknownLanguageAnalyzer"/>
-    </extensions>
-
     <applicationListeners>
         <listener topic="com.intellij.openapi.project.ProjectManagerListener"
                   class="appland.cli.AppLandProjectManagerListener"/>
