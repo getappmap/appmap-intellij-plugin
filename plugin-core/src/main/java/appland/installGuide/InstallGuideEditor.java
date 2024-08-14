@@ -18,7 +18,6 @@ import appland.webviews.navie.NaviePromptSuggestion;
 import appland.webviews.webserver.AppMapWebview;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.intellij.execution.ExecutionException;
 import com.intellij.execution.Executor;
@@ -54,16 +53,12 @@ import java.util.Set;
 public class InstallGuideEditor extends WebviewEditor<List<ProjectMetadata>> {
     private static final @NotNull Logger LOG = Logger.getInstance(InstallGuideEditor.class);
 
-    // currently displayed page, may be read or modified from different threads
-    private volatile @NotNull InstallGuideViewPage currentPage;
     // to debounce the JS refresh of available AppMaps
     private final SingleAlarm projectRefreshAlarm = new SingleAlarm(this::refreshProjects, 500, this, Alarm.ThreadToUse.POOLED_THREAD);
     // to debounce the JS refresh when settings change
     private final SingleAlarm settingsRefreshAlarm = new SingleAlarm(this::refreshSettings, 500, this, Alarm.ThreadToUse.POOLED_THREAD);
 
-    public InstallGuideEditor(@NotNull Project project,
-                              @NotNull VirtualFile file,
-                              @NotNull InstallGuideViewPage page) {
+    public InstallGuideEditor(@NotNull Project project, @NotNull VirtualFile file) {
         super(project, AppMapWebview.InstallGuide, file, Set.of(
                 "click-link",
                 "clipboard",
@@ -71,28 +66,10 @@ public class InstallGuideEditor extends WebviewEditor<List<ProjectMetadata>> {
                 "open-file",
                 "open-findings-overview",
                 "open-navie",
-                "open-page",
                 "perform-auth",
                 "perform-install",
                 "submit-to-navie"
         ));
-        this.currentPage = page;
-    }
-
-    /**
-     * Navigate to the given page.
-     *
-     * @param page               Target page
-     * @param postWebviewMessage If the webview should be instructed to navigate to the given page.
-     * @param fromWebview        If the navigation originated from the webview
-     */
-    public void navigateTo(@NotNull InstallGuideViewPage page, boolean postWebviewMessage, boolean fromWebview) {
-        this.currentPage = page;
-
-        if (postWebviewMessage) {
-            assert !fromWebview;
-            postMessage(createPageNavigationJSON(page));
-        }
     }
 
     private void refreshProjects() {
@@ -145,7 +122,6 @@ public class InstallGuideEditor extends WebviewEditor<List<ProjectMetadata>> {
     protected void setupInitMessage(@Nullable List<ProjectMetadata> initData, @NotNull JsonObject payload) {
         addBaseProperties(payload);
         payload.add("projects", gson.toJsonTree(initData));
-        payload.add("disabledPages", new JsonArray());
     }
 
     @Override
@@ -186,11 +162,6 @@ public class InstallGuideEditor extends WebviewEditor<List<ProjectMetadata>> {
                 handleOpenNavie();
                 break;
 
-            case "open-page":
-                assert message != null;
-                handleMessageOpenPage(message);
-                break;
-
             case "perform-install": {
                 assert message != null;
                 handleMessagePerformInstall(message);
@@ -210,12 +181,6 @@ public class InstallGuideEditor extends WebviewEditor<List<ProjectMetadata>> {
             default:
                 LOG.warn("Unhandled message type: " + messageId);
         }
-    }
-
-    private @NotNull JsonObject createPageNavigationJSON(@NotNull InstallGuideViewPage page) {
-        var json = createMessageObject("page");
-        json.addProperty("page", page.getPageId());
-        return json;
     }
 
     private @NotNull JsonObject createUpdateProjectsMessage() {
@@ -246,7 +211,6 @@ public class InstallGuideEditor extends WebviewEditor<List<ProjectMetadata>> {
     private void addBaseProperties(@NotNull JsonObject json) {
         var settings = AppMapApplicationSettingsService.getInstance();
 
-        json.addProperty("page", currentPage.getPageId());
         json.addProperty("userAuthenticated", settings.getApiKey() != null);
         json.addProperty("analysisEnabled", true);
     }
@@ -288,12 +252,6 @@ public class InstallGuideEditor extends WebviewEditor<List<ProjectMetadata>> {
                 FileEditorManager.getInstance(project).openFile(file, true);
             }
         });
-    }
-
-    private void handleMessageOpenPage(@NotNull JsonObject message) {
-        // update state, which is based on the new page
-        var viewId = message.getAsJsonPrimitive("page").getAsString();
-        navigateTo(InstallGuideViewPage.findByPageId(viewId), false, true);
     }
 
     private void handleOpenNavie() {

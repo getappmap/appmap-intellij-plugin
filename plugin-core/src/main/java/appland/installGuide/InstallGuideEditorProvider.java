@@ -33,17 +33,12 @@ public class InstallGuideEditorProvider extends WebviewEditorProvider {
             // an open Install Guide webview must navigate to the new page
             var openEditor = provider.findOpenEditor(project, Predicates.alwaysTrue());
             if (openEditor != null) {
-                ((InstallGuideEditor) openEditor).navigateTo(page, true, false);
                 return;
             }
 
             var file = provider.createVirtualFile(AppMapBundle.get("installGuide.editor.title"));
             INSTALL_GUIDE_PAGE_KEY.set(file, page);
-            var newEditors = FileEditorManager.getInstance(project).openFile(file, true);
-            if (newEditors.length == 1) {
-                // don't post webview message because the init message of the new editor was just sent
-                ((InstallGuideEditor) newEditors[0]).navigateTo(page, false, false);
-            }
+            FileEditorManager.getInstance(project).openFile(file, true);
         } finally {
             // notify in a background thread because we don't want to delay opening the editor
             ApplicationManager.getApplication().executeOnPooledThread(() -> {
@@ -64,6 +59,6 @@ public class InstallGuideEditorProvider extends WebviewEditorProvider {
     @Override
     public @NotNull FileEditor createEditor(@NotNull Project project, @NotNull VirtualFile file) {
         var page = INSTALL_GUIDE_PAGE_KEY.get(file);
-        return new InstallGuideEditor(project, file, page);
+        return new InstallGuideEditor(project, file);
     }
 }
