@@ -30,20 +30,27 @@ public final class AppMapSecureApplicationSettingsService implements AppMapSecur
     @Override
     public @Nullable String getOpenAIKey() {
         if (!isCached) {
-            // load the key in a background task to avoid the warning about the slow operation
-            var title = AppMapBundle.get("applicationSettings.openAI.loadingKey");
-            var task = new Task.WithResult<String, Exception>(null, title, false) {
-                @Override
-                protected String compute(@NotNull ProgressIndicator indicator) {
-                    return PasswordSafe.getInstance().getPassword(createOpenAIKey());
-                }
-            };
-
-            // getPassword is a slow operation in 2024.2+
-            task.queue();
-
             try {
-                cachedOpenAIKey = task.getResult();
+                String currentKeyValue;
+                // If on EDT, load the key in a background task to avoid the warning about the slow operation
+                if (ApplicationManager.getApplication().isDispatchThread()) {
+                    var title = AppMapBundle.get("applicationSettings.openAI.loadingKey");
+
+                    // Using a task because getPassword is a slow operation in 2024.2+
+                    var task = new Task.WithResult<String, Exception>(null, title, false) {
+                        @Override
+                        protected String compute(@NotNull ProgressIndicator indicator) {
+                            return PasswordSafe.getInstance().getPassword(createOpenAIKey());
+                        }
+                    };
+
+                    task.queue();
+                    currentKeyValue = task.getResult();
+                } else {
+                    currentKeyValue = PasswordSafe.getInstance().getPassword(createOpenAIKey());
+                }
+
+                cachedOpenAIKey = currentKeyValue;
                 // we're only caching successfully retrieved key values
                 isCached = true;
             } catch (Exception e) {
