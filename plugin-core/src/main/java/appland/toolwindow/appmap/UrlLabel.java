@@ -1,4 +1,4 @@
-package appland.toolwindow.installGuide;
+package appland.toolwindow.appmap;
 
 import appland.Icons;
 import com.intellij.ide.BrowserUtil;
@@ -9,7 +9,7 @@ import org.jetbrains.annotations.NotNull;
 import javax.swing.event.HyperlinkEvent;
 import javax.swing.event.HyperlinkListener;
 
-public class UrlLabel extends JBLabel {
+class UrlLabel extends JBLabel {
     public UrlLabel(@NotNull String label, @NotNull String url) {
         super(createLink(label, url));
 
