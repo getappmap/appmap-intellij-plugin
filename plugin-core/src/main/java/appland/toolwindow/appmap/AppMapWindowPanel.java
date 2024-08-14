@@ -12,8 +12,6 @@ import appland.toolwindow.AppMapToolWindowContent;
 import appland.toolwindow.CollapsiblePanel;
 import appland.toolwindow.appmap.nodes.Node;
 import appland.toolwindow.codeObjects.CodeObjectsPanel;
-import appland.toolwindow.installGuide.InstallGuidePanel;
-import appland.toolwindow.installGuide.UrlLabel;
 import appland.toolwindow.navie.NaviePanel;
 import appland.toolwindow.runtimeAnalysis.RuntimeAnalysisPanel;
 import com.intellij.ide.CommonActionsManager;
@@ -101,7 +99,6 @@ public class AppMapWindowPanel extends SimpleToolWindowPanel implements DataProv
 
         var topPanels = new VerticalBox();
         topPanels.add(createNaviePanel(project, this));
-        topPanels.add(createInstallGuidePanel(project, this));
 
         var panel = new JPanel(new BorderLayout());
         panel.setMinimumSize(new JBDimension(200, 200));
@@ -294,24 +291,6 @@ public class AppMapWindowPanel extends SimpleToolWindowPanel implements DataProv
         appMapModel.getInvoker().invokeLater(() -> TreeUtil.expand(this.tree, 3));
     }
 
-    private @NotNull JComponent createContentPanel(@NotNull Project project,
-                                                   @NotNull JComponent viewport,
-                                                   @NotNull Disposable parent,
-                                                   @NotNull AppMapModel appMapModel) {
-        var appMapPanel = createAppMapPanel(project, viewport, appMapModel);
-        var splitter = createSplitter();
-        splitter.setFirstComponent(appMapPanel);
-        splitter.setSecondComponent(createSouthPanel(project, parent));
-
-        var panel = new JPanel(new BorderLayout());
-        panel.add(createInstallGuidePanel(project, parent), BorderLayout.NORTH);
-        panel.add(splitter, BorderLayout.CENTER);
-
-        this.appMapTreePanelPath = List.of(panel, splitter, appMapPanel, viewport);
-
-        return panel;
-    }
-
     /**
      * @return Splitter, which distributes the remaining space to the other component if a component has its maximum size set.
      */
@@ -460,15 +439,6 @@ public class AppMapWindowPanel extends SimpleToolWindowPanel implements DataProv
         contentPanel.add(createCodeObjectsPanel(project, parent));
         contentPanel.add(createDocumentationLinksPanel(project));
         return contentPanel;
-    }
-
-    @NotNull
-    private static JPanel createInstallGuidePanel(@NotNull Project project, @NotNull Disposable parent) {
-        return new appland.toolwindow.CollapsiblePanel(project,
-                AppMapBundle.get("toolwindow.appmap.instructions"),
-                "appmap.toolWindow.installGuide.collapsed",
-                true,
-                new InstallGuidePanel(project, parent));
     }
 
     @NotNull
