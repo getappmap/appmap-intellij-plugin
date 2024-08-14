@@ -9,11 +9,8 @@ import appland.problemsView.FindingsManager;
 import appland.settings.AppMapProjectSettingsService;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.application.ReadAction;
-import com.intellij.openapi.module.Module;
-import com.intellij.openapi.module.ModuleType;
 import com.intellij.openapi.progress.ProgressManager;
 import com.intellij.openapi.project.Project;
-import com.intellij.openapi.roots.ProjectRootManager;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.search.GlobalSearchScopes;
 import com.intellij.util.concurrency.annotations.RequiresReadLock;
@@ -70,27 +67,19 @@ public class DefaultProjectDataService implements ProjectDataService {
 
         var projectSettings = AppMapProjectSettingsService.getState(project);
         var appMapConfigs = AppMapFiles.findAppMapConfigFiles(project);
-        var investigatedFindings = projectSettings.isInvestigatedFindings();
-
-        var module = ProjectRootManager.getInstance(project).getFileIndex().getModuleForFile(root);
-        var isJavaProject = module != null && isJavaModule(module);
 
         return ProjectMetadata.builder()
                 .name(root.getPresentableName())
                 .path(path)
-                .agentInstalled(!appMapConfigs.isEmpty() || isJavaProject)
+                .agentInstalled(!appMapConfigs.isEmpty())
                 .appMapOpened(projectSettings.isOpenedAppMapEditor())
                 .generatedOpenApi(projectSettings.isCreatedOpenAPI())
-                .investigatedFindings(investigatedFindings)
+                .investigatedFindings(projectSettings.isInvestigatedFindings())
                 .analysisPerformed(isAnalysisPerformed(root))
                 .numFindings(numFindings)
                 .numHttpRequests(countRoutes(allAppMaps))
                 .numAppMaps(allAppMaps.size())
                 .build();
-    }
-
-    private boolean isJavaModule(@NotNull Module module) {
-        return "JAVA_MODULE".equals(ModuleType.get(module).getId());
     }
 
     private @NotNull Integer countRoutes(List<AppMapMetadata> appMaps) {

@@ -1,14 +1,10 @@
 package appland.installGuide.projectData;
 
-import appland.index.AppMapMetadata;
-import appland.problemsView.model.FindingsDomainCount;
 import com.google.gson.annotations.SerializedName;
 import lombok.Builder;
 import lombok.Data;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-
-import java.util.List;
 
 @Data
 @Builder
