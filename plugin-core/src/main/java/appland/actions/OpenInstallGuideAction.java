@@ -11,6 +11,9 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Objects;
 
 public class OpenInstallGuideAction extends AnAction implements DumbAware {
+    // same as in plugin.xml
+    public static final String ACTION_ID = "appmap.openInstallGuide";
+
     @Override
     public @NotNull ActionUpdateThread getActionUpdateThread() {
         return ActionUpdateThread.BGT;
