@@ -161,6 +161,10 @@
             <add-to-group group-id="HelpMenu" anchor="before" relative-to-action="CheckForUpdate"/>
         </action>
 
+        <action id="appmap.openInstallGuide"
+                icon="AllIcons.General.ContextHelp"
+                class="appland.actions.OpenInstallGuideAction"/>
+
         <group id="appmapToolsMenu" popup="true" icon="appland.Icons.APPMAP_TOOLS_MENU">
             <!--
             <reference ref="uploadAppMap"/>
@@ -180,7 +184,5 @@
 
             <add-to-group group-id="ToolsMenu" anchor="last"/>
         </group>
-        <action id="openInstallGuide" class="appland.actions.OpenInstallGuideAction"
-                text="AppLand: Install Guide (Beta)"/>
     </actions>
 </idea-plugin>

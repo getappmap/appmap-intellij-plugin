@@ -2,6 +2,7 @@ package appland.toolwindow.appmap;
 
 import appland.AppMapBundle;
 import appland.Icons;
+import appland.actions.OpenInstallGuideAction;
 import appland.actions.StartAppMapRecordingAction;
 import appland.actions.StopAppMapRecordingAction;
 import appland.index.IndexedFileListenerUtil;
@@ -121,8 +122,9 @@ public class AppMapWindowPanel extends SimpleToolWindowPanel implements DataProv
         var actions = new DefaultActionGroup();
         actions.add(new StartAppMapRecordingAction());
         actions.add(new StopAppMapRecordingAction());
+        actions.add(ActionManager.getInstance().getAction(OpenInstallGuideAction.ACTION_ID));
 
-        var bar = ActionManager.getInstance().createActionToolbar("appmapToolWindow", actions, true);
+        var bar = ActionManager.getInstance().createActionToolbar(ActionPlaces.TOOLWINDOW_TOOLBAR_BAR, actions, true);
         bar.setTargetComponent(this);
         bar.setLayoutPolicy(ActionToolbar.NOWRAP_LAYOUT_POLICY);
 
