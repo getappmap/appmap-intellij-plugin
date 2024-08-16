@@ -1,5 +1,16 @@
 AppMap Plugin Changelog
 
+## [0.73.0](https://github.com/getappmap/appmap-intellij-plugin/compare/v0.72.0...v0.73.0) (2024-08-16)
+
+
+### Features
+
+-  add action to open the instructions from the AppMap toolwindow ([c65f55b]())-  Add command completions to Navie ([43e8e09]())
+
+### Bug Fixes
+
+-  "New chat" button opens a new chat ([2ab32d6]())-  avoid exception about slow operation when loading OpenAI key ([0e10a11]())-  don't refresh the Navie editor after a generic filesystem refresh ([855561e]())-  don't restart JSON-RPC service if the restart has been disabled ([6b261d9]())-  focus open install guide webview editor when it's invoked from the toolwindow ([886bda3]())-  obeye dumb mode when looking up appmap.yml files ([e3bdd79]())-  refactor refresh of findings to avoid concurrent updates and too many updates in a short time frame ([67625e7]())-  refresh Navie editor after change of indexing status ([a591a5f]())
+
 ## [0.72.0](https://github.com/getappmap/appmap-intellij-plugin/compare/v0.71.0...v0.72.0) (2024-07-31)
 
 
