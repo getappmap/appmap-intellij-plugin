@@ -25,6 +25,9 @@ export function mountWebview() {
             appmapYmlPresent: this.appmapYmlPresent,
             targetAppmapData: initialData.targetAppmapData,
             targetAppmapFsPath: initialData.targetAppmapFsPath,
+            openNewChat() {
+              vscode.postMessage({ command: "open-new-chat" });
+            },
           },
         });
       },

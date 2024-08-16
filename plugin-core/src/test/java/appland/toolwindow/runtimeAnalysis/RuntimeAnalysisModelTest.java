@@ -1,6 +1,6 @@
 package appland.toolwindow.runtimeAnalysis;
 
-import appland.AppMapBaseTest;
+import appland.AppMapLocalTempFilesTest;
 import appland.problemsView.FindingsManager;
 import appland.problemsView.TestFindingsManager;
 import appland.settings.AppMapApplicationSettingsService;
@@ -15,12 +15,13 @@ import org.junit.Assume;
 import org.junit.Ignore;
 import org.junit.Test;
 
+import java.nio.file.Path;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import static appland.utils.ModelTestUtil.assertTreeHierarchy;
 
-public class RuntimeAnalysisModelTest extends AppMapBaseTest {
+public class RuntimeAnalysisModelTest extends AppMapLocalTempFilesTest {
     @Override
     protected boolean runInDispatchThread() {
         return false;
@@ -86,11 +87,11 @@ public class RuntimeAnalysisModelTest extends AppMapBaseTest {
     public void hierarchy() throws Exception {
         loadFindingsDirectory("projects/runtime_analysis_tree");
 
+        var tempDirName = Path.of(myFixture.getTempDirPath()).getFileName();
         var model = new RuntimeAnalysisModel(getProject(), getTestRootDisposable());
-
         var expected = "-Root\n" +
                 " Findings Table\n" +
-                " -src\n" +
+                " -" + tempDirName + "\n" +
                 "  -Failed tests\n" +
                 "   Failed test 1\n" +
                 "   Failed test 2\n" +
@@ -132,6 +133,7 @@ public class RuntimeAnalysisModelTest extends AppMapBaseTest {
     private void loadFindingsDirectory(@NotNull String directoryPath) throws Exception {
         var condition = TestFindingsManager.createFindingsCondition(getProject(), getTestRootDisposable());
         WriteAction.computeAndWait(() -> myFixture.copyDirectoryToProject(directoryPath, "root"));
+        waitUntilIndexesAreReady();
         assertTrue(condition.await(30, TimeUnit.SECONDS));
     }
 }

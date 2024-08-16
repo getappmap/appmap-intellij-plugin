@@ -3,12 +3,12 @@ package appland.webviews.navie;
 import appland.AppMapBundle;
 import appland.actions.SetNavieOpenAiKeyAction;
 import appland.config.AppMapConfigFileListener;
-import appland.files.AppMapFileChangeListener;
 import appland.files.AppMapFiles;
 import appland.files.FileLookup;
 import appland.files.OpenAppMapFileNavigatable;
 import appland.index.AppMapMetadata;
 import appland.index.AppMapMetadataService;
+import appland.index.IndexedFileListenerUtil;
 import appland.installGuide.InstallGuideEditorProvider;
 import appland.installGuide.InstallGuideViewPage;
 import appland.rpcService.AppLandJsonRpcService;
@@ -25,6 +25,7 @@ import appland.webviews.appMap.AppMapFileEditorState;
 import appland.webviews.webserver.AppMapWebview;
 import com.google.gson.JsonObject;
 import com.google.gson.annotations.SerializedName;
+import com.intellij.openapi.actionSystem.DataContext;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.application.ModalityState;
 import com.intellij.openapi.application.ReadAction;
@@ -77,6 +78,7 @@ public class NavieEditor extends WebviewEditor<Void> {
                 "open-appmap",
                 "open-install-instructions",
                 "open-location",
+                "open-new-chat",
                 "open-record-instructions",
                 "select-llm-option",
                 "show-appmap-tree"));
@@ -133,10 +135,10 @@ public class NavieEditor extends WebviewEditor<Void> {
                 applyWebViewFilters();
             }
         });
-        busConnection.subscribe(AppMapFileChangeListener.TOPIC, (AppMapFileChangeListener) changeTypes -> {
-            updateNaviePropertiesAlarm.cancelAndRequest();
-        });
         busConnection.subscribe(AppMapConfigFileListener.TOPIC, (AppMapConfigFileListener) updateNaviePropertiesAlarm::cancelAndRequest);
+
+        // listen for changes of AppMap files
+        IndexedFileListenerUtil.registerListeners(project, this, true, false, false, updateNaviePropertiesAlarm::cancelAndRequest);
     }
 
     @Override
@@ -171,6 +173,11 @@ public class NavieEditor extends WebviewEditor<Void> {
                 }
                 break;
             }
+            case "open-new-chat":
+                ApplicationManager.getApplication().invokeLater(() -> {
+                    NavieEditorProvider.openEditor(project, DataContext.EMPTY_CONTEXT);
+                }, ModalityState.defaultModalityState());
+                break;
             case "open-record-instructions":
                 ApplicationManager.getApplication().invokeLater(() -> {
                     InstallGuideEditorProvider.open(project, InstallGuideViewPage.RecordAppMaps);
@@ -370,7 +377,7 @@ public class NavieEditor extends WebviewEditor<Void> {
      */
     @RequiresReadLock
     private static @NotNull UpdatableNavieData createUpdatableNavieData(@NotNull Project project) {
-        var isAppMapYamlPresent = !AppMapFiles.findAppMapConfigFiles(project).isEmpty();
+        var isAppMapYamlPresent = AppMapFiles.isAppMapConfigAvailable(project);
         var mostRecentAppMaps = findMostRecentAppMaps(project);
         return new UpdatableNavieData(isAppMapYamlPresent, mostRecentAppMaps);
     }

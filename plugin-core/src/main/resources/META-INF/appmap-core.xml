@@ -1,22 +1,6 @@
 <idea-plugin>
     <resource-bundle>messages.appland</resource-bundle>
 
-    <extensionPoints>
-        <extensionPoint dynamic="true"
-                        qualifiedName="appland.languageAnalyzer"
-                        interface="appland.installGuide.analyzer.LanguageAnalyzer"/>
-    </extensionPoints>
-
-    <extensions defaultExtensionNs="appland">
-        <languageAnalyzer implementation="appland.installGuide.analyzer.languages.PythonLanguageAnalyzer"/>
-        <languageAnalyzer implementation="appland.installGuide.analyzer.languages.JavaLanguageAnalyzer"/>
-        <languageAnalyzer implementation="appland.installGuide.analyzer.languages.JavaScriptLanguageAnalyzer"/>
-        <languageAnalyzer implementation="appland.installGuide.analyzer.languages.RubyLanguageAnalyzer"/>
-
-        <languageAnalyzer order="last"
-                          implementation="appland.installGuide.analyzer.languages.UnknownLanguageAnalyzer"/>
-    </extensions>
-
     <applicationListeners>
         <listener topic="com.intellij.openapi.project.ProjectManagerListener"
                   class="appland.cli.AppLandProjectManagerListener"/>
@@ -28,6 +12,9 @@
         <listener topic="appland.settings.AppMapSettingsListener"
                   class="appland.settings.AppMapNavieSettingsReloadProjectListener"
                   activeInTestMode="false"/>
+        <listener topic="appland.config.AppMapConfigFileListener"
+                  class="appland.cli.AppMapCommandLineConfigListener"
+                  activeInTestMode="true"/>
     </applicationListeners>
 
     <projectListeners>
@@ -69,6 +56,7 @@
         <fileBasedIndex implementation="appland.index.AppMapServerRequestCountIndex"/>
         <fileBasedIndex implementation="appland.index.AppMapSqlQueriesCountIndex"/>
         <fileBasedIndex implementation="appland.index.ClassMapTypeIndex"/>
+        <fileBasedIndex implementation="appland.index.AppMapConfigFileIndex"/>
 
         <roots.watchedRootsProvider implementation="appland.index.AppMapWatchedRootsProvider"/>
         <!-- For 2023.1 and earlier -->
@@ -173,6 +161,10 @@
             <add-to-group group-id="HelpMenu" anchor="before" relative-to-action="CheckForUpdate"/>
         </action>
 
+        <action id="appmap.openInstallGuide"
+                icon="AllIcons.General.ContextHelp"
+                class="appland.actions.OpenInstallGuideAction"/>
+
         <group id="appmapToolsMenu" popup="true" icon="appland.Icons.APPMAP_TOOLS_MENU">
             <!--
             <reference ref="uploadAppMap"/>
@@ -192,7 +184,5 @@
 
             <add-to-group group-id="ToolsMenu" anchor="last"/>
         </group>
-        <action id="openInstallGuide" class="appland.actions.OpenInstallGuideAction"
-                text="AppLand: Install Guide (Beta)"/>
     </actions>
 </idea-plugin>

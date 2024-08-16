@@ -233,7 +233,11 @@ public class DefaultAppLandJsonRpcService implements AppLandJsonRpcService, AppL
         try {
             stopServerSync(this.jsonRpcServer);
         } finally {
-            startServer();
+            try {
+                startServer();
+            } finally {
+                project.getMessageBus().syncPublisher(AppLandJsonRpcListener.TOPIC).serverRestarted();
+            }
         }
     }
 
@@ -431,7 +435,7 @@ public class DefaultAppLandJsonRpcService implements AppLandJsonRpcService, AppL
             }
 
             var currentRestartDelay = nextRestartDelayMillis;
-            var restartNeeded = currentRestartDelay >= 0L
+            var restartNeeded = currentRestartDelay > 0L
                     && currentRestartDelay <= MAX_RESTART_DELAY_MILLIS
                     && !isDisposed;
 

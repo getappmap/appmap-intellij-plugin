@@ -70,8 +70,8 @@ public class DefaultCommandLineService implements AppLandCommandLineService {
     protected final ConcurrentHashMap<VirtualFile, CliProcesses> processes = new ConcurrentHashMap<>();
 
     public DefaultCommandLineService() {
-        var connection = ApplicationManager.getApplication().getMessageBus().connect(this);
-        connection.subscribe(AppMapConfigFileListener.TOPIC, (AppMapConfigFileListener) this::refreshForOpenProjectsInBackground);
+        // AppLandCommandLineListener is registering the listener for appmap.yml changes,
+        // it's active even in test mode.
     }
 
     @Override

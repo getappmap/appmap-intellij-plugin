@@ -40,7 +40,7 @@ public class FindingDetailsEditorProvider extends WebviewEditorProvider {
         assert provider != null;
 
         // we only want to reuse for the same list of findings
-        if (provider.focusOpenEditor(project, webviewEditor -> isEditorWithFindings(webviewEditor, findings))) {
+        if (provider.focusOpenEditor(project, webviewEditor -> isEditorWithFindings(webviewEditor, findings)) != null) {
             return;
         }
 
