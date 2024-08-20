@@ -103,6 +103,15 @@ public class AppMapApplicationSettings {
         }
     }
 
+    public void setEnableScannerNotifying(boolean enableScanner) {
+        var changed = this.enableScanner != enableScanner;
+        this.enableScanner = enableScanner;
+
+        if (changed) {
+            settingsPublisher().scannedEnabledChanged();
+        }
+    }
+
     public boolean isAuthenticated() {
         return apiKey != null;
     }

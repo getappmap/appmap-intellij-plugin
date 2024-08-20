@@ -10,7 +10,7 @@
                   class="appland.cli.RestartServicesAfterApiChangeListener"
                   activeInTestMode="false"/>
         <listener topic="appland.settings.AppMapSettingsListener"
-                  class="appland.settings.AppMapNavieSettingsReloadProjectListener"
+                  class="appland.settings.AppMapSettingsReloadProjectListener"
                   activeInTestMode="false"/>
         <listener topic="appland.config.AppMapConfigFileListener"
                   class="appland.cli.AppMapCommandLineConfigListener"

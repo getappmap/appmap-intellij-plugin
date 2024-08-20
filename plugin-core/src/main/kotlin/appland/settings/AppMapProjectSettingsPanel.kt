@@ -35,7 +35,11 @@ class AppMapProjectSettingsPanel {
         notify: Boolean,
     ) {
         applicationSettings.isEnableTelemetry = enableTelemetry.isSelected
-        applicationSettings.isEnableScanner = enableScanner.isSelected
+        if (notify) {
+            applicationSettings.setEnableScannerNotifying(enableScanner.isSelected)
+        } else {
+            applicationSettings.isEnableScanner = enableScanner.isSelected
+        }
         applicationSettings.isCliPassParentEnv = cliEnvironment.isPassParentEnvs
         if (notify) {
             applicationSettings.setCliEnvironmentNotifying(cliEnvironment.envs)
