@@ -30,6 +30,9 @@ public interface AppMapSettingsListener {
     default void openAIKeyChange() {
     }
 
+    default void scannedEnabledChanged() {
+    }
+
     default void cliEnvironmentChanged(@NotNull Set<String> modifiedKeys) {
     }
 }

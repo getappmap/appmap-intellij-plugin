@@ -8,6 +8,7 @@ import appland.actions.StopAppMapRecordingAction;
 import appland.index.IndexedFileListenerUtil;
 import appland.installGuide.InstallGuideEditorProvider;
 import appland.installGuide.InstallGuideViewPage;
+import appland.settings.AppMapApplicationSettingsService;
 import appland.toolwindow.AppMapContentPanel;
 import appland.toolwindow.AppMapToolWindowContent;
 import appland.toolwindow.CollapsiblePanel;
@@ -437,7 +438,9 @@ public class AppMapWindowPanel extends SimpleToolWindowPanel implements DataProv
 
     private static @NotNull JComponent createSouthPanel(@NotNull Project project, @NotNull Disposable parent) {
         var contentPanel = new VerticalBox();
-        contentPanel.add(createRuntimeAnalysisPanel(project, parent));
+        if (AppMapApplicationSettingsService.getInstance().isEnableScanner()) {
+            contentPanel.add(createRuntimeAnalysisPanel(project, parent));
+        }
         contentPanel.add(createCodeObjectsPanel(project, parent));
         contentPanel.add(createDocumentationLinksPanel(project));
         return contentPanel;
