@@ -75,7 +75,6 @@ public class DefaultCommandLineServiceTest extends AppMapBaseTest {
     }
 
     @Test
-    @Ignore("flaky test")
     public void directoryTree() throws Exception {
         var service = AppLandCommandLineService.getInstance();
 
