@@ -40,14 +40,14 @@
         <postStartupActivity implementation="appland.rpcService.AppMapJsonRpcServerStartupActivity"/>
         <postStartupActivity implementation="appland.cli.AppLandProjectOpenActivity"/>
 
-        <fileEditorProvider implementation="appland.webviews.appMap.AppMapFileEditorProvider"/>
+        <fileEditorProvider implementation="appland.webviews.appMap.AppMapFileEditorProvider" order="first"/>
         <editorNotificationProvider implementation="appland.webviews.appMap.AppMapNotificationProvider"/>
 
-        <fileEditorProvider implementation="appland.installGuide.InstallGuideEditorProvider"/>
+        <fileEditorProvider implementation="appland.installGuide.InstallGuideEditorProvider" order="first"/>
 
-        <fileEditorProvider implementation="appland.webviews.findings.FindingsOverviewEditorProvider"/>
-        <fileEditorProvider implementation="appland.webviews.findingDetails.FindingDetailsEditorProvider"/>
-        <fileEditorProvider implementation="appland.webviews.navie.NavieEditorProvider"/>
+        <fileEditorProvider implementation="appland.webviews.findings.FindingsOverviewEditorProvider" order="first"/>
+        <fileEditorProvider implementation="appland.webviews.findingDetails.FindingDetailsEditorProvider" order="first"/>
+        <fileEditorProvider implementation="appland.webviews.navie.NavieEditorProvider" order="first"/>
 
         <fileIconProvider implementation="appland.webviews.WebviewEditorIconProvider"/>
 
