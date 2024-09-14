@@ -1,5 +1,16 @@
 AppMap Plugin Changelog
 
+## [0.74.0](https://github.com/getappmap/appmap-intellij-plugin/compare/v0.73.0...v0.74.0) (2024-09-14)
+
+
+### Features
+
+-  Update @appland/components to v4.36.0 ([3bdc6c8]())
+
+### Bug Fixes
+
+-  don't show AppMap problems view and the Runtime Analysis if scanner is off ([231df0c]())-  make the AppMap viewer the default view for .appmap.json files ([756f0d4]())
+
 ## [0.73.0](https://github.com/getappmap/appmap-intellij-plugin/compare/v0.72.0...v0.73.0) (2024-08-16)
 
 
