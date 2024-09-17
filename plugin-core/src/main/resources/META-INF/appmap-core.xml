@@ -165,15 +165,25 @@
                 icon="AllIcons.General.ContextHelp"
                 class="appland.actions.OpenInstallGuideAction"/>
 
+        <action id="appmap.navie.pinContextFile"
+                icon="appland.Icons.APPMAP_FILE"
+                class="appland.actions.AddNavieContextFilesAction">
+            <add-to-group group-id="ProjectViewPopupMenu" anchor="last"/>
+            <add-to-group group-id="EditorTabPopupMenu" anchor="last"/>
+        </action>
+
+        <action id="appmap.navie.chooseAndPinContextFile"
+                class="appland.actions.ChooseAndAddNavieContextFilesAction">
+            <override-text place="MainMenu"/>
+        </action>
+
         <group id="appmapToolsMenu" popup="true" icon="appland.Icons.APPMAP_TOOLS_MENU">
-            <!--
-            <reference ref="uploadAppMap"/>
-            <separator/> -->
             <reference ref="startAppMapRemoteRecording"/>
             <reference ref="stopAppMapRemoteRecording"/>
             <separator/>
             <reference ref="appmap.generateOpenAPI"/>
             <reference ref="appmap.openNavie"/>
+            <reference ref="appmap.navie.chooseAndPinContextFile"/>
             <separator/>
             <reference ref="appMapLogin"/>
             <reference ref="appMapLogout"/>

@@ -11,6 +11,7 @@ import appland.index.AppMapMetadataService;
 import appland.index.IndexedFileListenerUtil;
 import appland.installGuide.InstallGuideEditorProvider;
 import appland.installGuide.InstallGuideViewPage;
+import appland.notifications.AppMapNotifications;
 import appland.rpcService.AppLandJsonRpcService;
 import appland.settings.AppMapApplicationSettingsService;
 import appland.settings.AppMapProjectSettingsService;
@@ -30,6 +31,7 @@ import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.application.ModalityState;
 import com.intellij.openapi.application.ReadAction;
 import com.intellij.openapi.diagnostic.Logger;
+import com.intellij.openapi.fileEditor.FileDocumentManager;
 import com.intellij.openapi.fileEditor.OpenFileDescriptor;
 import com.intellij.openapi.progress.ProgressIndicator;
 import com.intellij.openapi.progress.Task;
@@ -55,6 +57,7 @@ import java.nio.file.Path;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
@@ -380,6 +383,49 @@ public class NavieEditor extends WebviewEditor<Void> {
         var isAppMapYamlPresent = AppMapFiles.isAppMapConfigAvailable(project);
         var mostRecentAppMaps = findMostRecentAppMaps(project);
         return new UpdatableNavieData(isAppMapYamlPresent, mostRecentAppMaps);
+    }
+
+    /**
+     * Adds the given files as pinned files to the Navie webview.
+     *
+     * @param contextFiles Files to pin in the webview
+     */
+    public void addPinnedFiles(@NotNull List<VirtualFile> contextFiles) {
+        if (contextFiles.isEmpty()) {
+            return;
+        }
+
+        var maxPinnedFileSizeKB = AppMapApplicationSettingsService.getInstance().getMaxPinnedFileSizeKB();
+
+        var validFileRequests = ReadAction.compute(() -> {
+            var validRequests = new ArrayList<NaviePinFileRequest>();
+            for (var file : contextFiles) {
+                var isValid = file.isValid()
+                        && file.isInLocalFileSystem()
+                        && !file.isDirectory()
+                        && file.getLength() <= 1024L * maxPinnedFileSizeKB;
+
+                if (isValid) {
+                    var document = FileDocumentManager.getInstance().getDocument(file);
+                    if (document != null) {
+                        var url = file.getUrl();
+                        validRequests.add(new NaviePinFileRequest(file.getPresentableName(), url, document.getText()));
+                    }
+                }
+            }
+            return validRequests;
+        });
+
+        if (!validFileRequests.isEmpty()) {
+            var pinFiles = createMessageObject("pin-files");
+            pinFiles.add("requests", gson.toJsonTree(validFileRequests));
+            postMessage(pinFiles);
+        }
+
+        var tooLargeFilesCount = contextFiles.size() - validFileRequests.size();
+        if (tooLargeFilesCount > 0) {
+            AppMapNotifications.showNaviePinnedFileTooLargeNotification(project, tooLargeFilesCount, maxPinnedFileSizeKB);
+        }
     }
 
     /**

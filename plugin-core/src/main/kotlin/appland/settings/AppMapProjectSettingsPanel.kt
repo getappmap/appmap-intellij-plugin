@@ -3,8 +3,10 @@ package appland.settings
 import appland.AppMapBundle
 import com.intellij.execution.configuration.EnvironmentVariablesComponent
 import com.intellij.openapi.util.text.Strings
+import com.intellij.ui.JBIntSpinner
 import com.intellij.ui.components.JBTextField
 import com.intellij.ui.dsl.builder.AlignX
+import com.intellij.ui.dsl.builder.RightGap
 import com.intellij.ui.dsl.builder.RowLayout
 import com.intellij.ui.dsl.builder.panel
 import java.awt.BorderLayout
@@ -15,6 +17,7 @@ class AppMapProjectSettingsPanel {
     private lateinit var enableTelemetry: JCheckBox
     private lateinit var enableScanner: JCheckBox
     private lateinit var cliEnvironment: EnvironmentVariablesComponent
+    private lateinit var maxPinnedFileSizeKB: JBIntSpinner
     private lateinit var openAIKey: JBTextField
 
     fun loadSettingsFrom(
@@ -25,6 +28,7 @@ class AppMapProjectSettingsPanel {
         enableScanner.isSelected = applicationSettings.isEnableScanner
         cliEnvironment.envs = applicationSettings.cliEnvironment
         cliEnvironment.isPassParentEnvs = applicationSettings.isCliPassParentEnv
+        maxPinnedFileSizeKB.number = applicationSettings.maxPinnedFileSizeKB
 
         openAIKey.text = Strings.notNullize(secureApplicationSettings.openAIKey)
     }
@@ -46,6 +50,7 @@ class AppMapProjectSettingsPanel {
         } else {
             applicationSettings.cliEnvironment = cliEnvironment.envs
         }
+        applicationSettings.maxPinnedFileSizeKB = maxPinnedFileSizeKB.number
 
         secureApplicationSettings.openAIKey = Strings.nullize(openAIKey.text)
     }
@@ -57,6 +62,11 @@ class AppMapProjectSettingsPanel {
         return panel {
             row {
                 enableTelemetry = checkBox(AppMapBundle.get("projectSettings.enableTelemetry.title")).component
+            }
+            row(AppMapBundle.get("projectSettings.maxPinnedFileSize.label")) {
+                maxPinnedFileSizeKB = spinner(0..4096).gap(RightGap.SMALL).component
+                label(AppMapBundle.get("projectSettings.maxPinnedFileSize.unit"))
+                rowComment(AppMapBundle.get("projectSettings.maxPinnedFileSize.comment"))
             }
             group(AppMapBundle.get("projectSettings.appMapServices")) {
                 row {

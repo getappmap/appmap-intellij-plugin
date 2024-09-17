@@ -4,24 +4,25 @@ import appland.AppMapBundle;
 import appland.AppMapPlugin;
 import appland.actions.StopAppMapRecordingAction;
 import appland.settings.AppMapApplicationSettingsService;
+import appland.settings.AppMapProjectConfigurable;
 import appland.startup.FirstAppMapLaunchStartupActivity;
 import appland.webviews.navie.NavieEditorProvider;
 import com.intellij.ide.BrowserUtil;
 import com.intellij.ide.util.PropertiesComponent;
 import com.intellij.notification.*;
+import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.DataContext;
 import com.intellij.openapi.application.ApplicationInfo;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.application.ModalityState;
+import com.intellij.openapi.options.ShowSettingsUtil;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.DialogWrapper;
 import com.intellij.openapi.ui.Messages;
 import com.intellij.openapi.util.SystemInfo;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.util.net.HttpConfigurable;
-import com.intellij.util.ui.EDT;
 import com.intellij.util.ui.EdtInvocationManager;
-import com.intellij.util.ui.UIUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -283,5 +284,29 @@ public final class AppMapNotifications {
                         }
                     });
         }, ModalityState.defaultModalityState());
+    }
+
+    public static void showNaviePinnedFileTooLargeNotification(@NotNull Project project,
+                                                               int skippedFiles,
+                                                               int fileSizeLimitKB) {
+        EdtInvocationManager.invokeLaterIfNeeded(() -> {
+            var notification = new AppMapFullContentNotification(
+                    GENERIC_NOTIFICATIONS_ID, null,
+                    AppMapBundle.get("notification.naviePinnedFileTooLarge.title"),
+                    null,
+                    AppMapBundle.get("notification.naviePinnedFileTooLarge.content", skippedFiles, fileSizeLimitKB),
+                    NotificationType.INFORMATION, null
+            );
+
+            var action = AppMapBundle.get("notification.naviePinnedFileTooLarge.showSettings");
+            notification.addAction(new NotificationAction(action) {
+                @Override
+                public void actionPerformed(@NotNull AnActionEvent e, @NotNull Notification notification) {
+                    notification.expire();
+                    ShowSettingsUtil.getInstance().showSettingsDialog(project, AppMapProjectConfigurable.class);
+                }
+            });
+            notification.notify(project);
+        });
     }
 }
