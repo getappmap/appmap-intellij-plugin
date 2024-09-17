@@ -1,5 +1,12 @@
 AppMap Plugin Changelog
 
+## [0.74.1](https://github.com/getappmap/appmap-intellij-plugin/compare/v0.74.0...v0.74.1) (2024-09-17)
+
+
+### Bug Fixes
+
+-  Update @appland/components to v4.37.3 ([c679884]())
+
 ## [0.74.0](https://github.com/getappmap/appmap-intellij-plugin/compare/v0.73.0...v0.74.0) (2024-09-14)
 
 
