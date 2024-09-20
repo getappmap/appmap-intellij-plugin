@@ -65,7 +65,7 @@ public class AddNavieContextFilesAction extends AnAction {
 
     private @Nullable NavieEditor findActiveNavieEditor(@NotNull AnActionEvent e) {
         var editorManager = FileEditorManager.getInstance(Objects.requireNonNull(e.getProject()));
-        var editor = (editorManager).getSelectedEditor();
+        var editor = editorManager.getSelectedEditor();
 
         // If invoked with the context menu of an editor tab, then "editor" equals the clicked tab's editor and not the
         // visible Navie editor tab. We're attempting a fallback in such a case.

@@ -255,6 +255,11 @@ public final class AppMapNotifications {
      */
     @SuppressWarnings("removal")
     public static void showWebviewTextInputBrokenMessage(@NotNull Project project, boolean forNavie) {
+        // don't show in our unit tests because there's no user interaction
+        if (ApplicationManager.getApplication().isUnitTestMode()) {
+            return;
+        }
+
         var properties = PropertiesComponent.getInstance();
         var hideMessagePropertyKey = forNavie ? "appmap.navie.hideIsBrokenMessage" : "appmap.signin.hideIsBrokenMessage";
         if (properties.getBoolean(hideMessagePropertyKey, false)) {

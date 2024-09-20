@@ -2,12 +2,13 @@ package appland.rpcService;
 
 import appland.AppMapBaseTest;
 import appland.cli.AppLandCommandLineService;
+import appland.cli.TestAppLandDownloadService;
 import appland.settings.AppMapApplicationSettingsService;
 import com.intellij.openapi.application.ApplicationInfo;
-import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.vfs.VirtualFile;
 import org.jetbrains.annotations.NotNull;
 import org.junit.Assume;
+import org.junit.Before;
 import org.junit.Test;
 
 import java.util.Collection;
@@ -25,6 +26,11 @@ public class DefaultAppLandJsonRpcServiceTest extends AppMapBaseTest {
     @Override
     protected boolean runInDispatchThread() {
         return false;
+    }
+
+    @Before
+    public void ensureToolsDownloaded() {
+        TestAppLandDownloadService.ensureDownloaded();
     }
 
     @Test
@@ -65,7 +71,7 @@ public class DefaultAppLandJsonRpcServiceTest extends AppMapBaseTest {
     public void serverRestartAfterTermination() throws Exception {
         waitForJsonRpcServer();
 
-        var latch = createWaitForRestartCondition(false);
+        var latch = createWaitForJsonRpcServerRestartCondition(false);
 
         // kill and wait for restart
         TestAppLandJsonRpcService.killJsonRpcProcess(getProject());
@@ -97,7 +103,7 @@ public class DefaultAppLandJsonRpcServiceTest extends AppMapBaseTest {
         var appMapSettings = AppMapApplicationSettingsService.getInstance();
         appMapSettings.setApiKey("dummy");
         try {
-            var latch = createWaitForRestartCondition(false);
+            var latch = createWaitForJsonRpcServerRestartCondition(false);
 
             // change API key and wait for restart
             appMapSettings.setApiKeyNotifying("new-api-key");
@@ -118,40 +124,5 @@ public class DefaultAppLandJsonRpcServiceTest extends AppMapBaseTest {
         // IntelliJ IDEA 2023.2 by JetBrains s.r.o.
         var matches = editorInfo.matches("IntelliJ IDEA [0-9.]+( EAP | Beta)? by JetBrains s\\.r\\.o\\.");
         assertTrue("Code editor info must match: " + editorInfo, matches);
-    }
-
-    private void waitForJsonRpcServer() {
-        var service = AppLandJsonRpcService.getInstance(getProject());
-        if (service.isServerRunning()) {
-            return;
-        }
-
-        var latch = createWaitForRestartCondition(true);
-        ApplicationManager.getApplication().executeOnPooledThread(service::startServer);
-        try {
-            assertTrue("The AppMap JSON-RPC server must launch", latch.await(30, TimeUnit.SECONDS));
-        } catch (InterruptedException e) {
-            addSuppressedException(e);
-        }
-    }
-
-    private @NotNull CountDownLatch createWaitForRestartCondition(boolean allowStart) {
-        var latch = new CountDownLatch(1);
-        getProject().getMessageBus()
-                .connect(getTestRootDisposable())
-                .subscribe(AppLandJsonRpcListener.TOPIC, new AppLandJsonRpcListenerAdapter() {
-                    @Override
-                    public void serverStarted() {
-                        if (allowStart) {
-                            latch.countDown();
-                        }
-                    }
-
-                    @Override
-                    public void serverRestarted() {
-                        latch.countDown();
-                    }
-                });
-        return latch;
     }
 }
