@@ -60,7 +60,7 @@ jobs:
 
             - name: Save AppMaps
               uses: actions/cache/save@v4
-              if: runner.os == 'Linux' && matrix.ide_version == 'IC-2023.1'
+              if: runner.os == 'Linux' && matrix.ide_version == '2023.1'
               with:
                   path: ./tmp/appmap
                   key: appmaps-${{ github.sha }}-${{ github.run_attempt }}
