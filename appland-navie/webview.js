@@ -59,6 +59,11 @@ export function mountWebview() {
 
     handleAppMapMessages(app, vscode, messages);
 
+    messages.on('pin-files', (props) => {
+      const { requests } = props;
+      app.$root.$emit('pin-files', requests);
+    });
+
     messages.on('update', (props) => {
       Object.entries(props)
         .filter(([key]) => key !== 'type')

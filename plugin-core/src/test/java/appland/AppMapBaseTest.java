@@ -5,6 +5,8 @@ import appland.cli.TestCommandLineService;
 import appland.config.AppMapConfigFile;
 import appland.files.AppMapFiles;
 import appland.problemsView.TestFindingsManager;
+import appland.rpcService.AppLandJsonRpcListener;
+import appland.rpcService.AppLandJsonRpcListenerAdapter;
 import appland.rpcService.AppLandJsonRpcService;
 import appland.settings.AppMapApplicationSettings;
 import appland.settings.AppMapApplicationSettingsService;
@@ -33,6 +35,7 @@ import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
 public abstract class AppMapBaseTest extends LightPlatformCodeInsightFixture4TestCase {
@@ -184,6 +187,72 @@ public abstract class AppMapBaseTest extends LightPlatformCodeInsightFixture4Tes
 
     protected void waitUntilIndexesAreReady() {
         IndexTestUtils.waitUntilIndexesAreReady(getProject());
+    }
+
+    protected void waitForJsonRpcServer() {
+        var service = AppLandJsonRpcService.getInstance(getProject());
+        if (service.isServerRunning()) {
+            return;
+        }
+
+        var latch = createWaitForJsonRpcServerRestartCondition(true);
+        ApplicationManager.getApplication().executeOnPooledThread(service::startServer);
+        try {
+            assertTrue("The AppMap JSON-RPC server must launch", latch.await(30, TimeUnit.SECONDS));
+        } catch (InterruptedException e) {
+            addSuppressedException(e);
+        }
+    }
+
+    protected void waitForJsonRpcServerPort() {
+        var service = AppLandJsonRpcService.getInstance(getProject());
+        if (service.isServerRunning()) {
+            return;
+        }
+
+        var latch = createWaitForJsonRpcServerPortCondition();
+        ApplicationManager.getApplication().executeOnPooledThread(service::startServer);
+        try {
+            assertTrue("The AppMap JSON-RPC server must launch", latch.await(30, TimeUnit.SECONDS));
+        } catch (InterruptedException e) {
+            addSuppressedException(e);
+        }
+    }
+
+    protected @NotNull CountDownLatch createWaitForJsonRpcServerRestartCondition(boolean allowStart) {
+        var latch = new CountDownLatch(1);
+        getProject().getMessageBus()
+                .connect(getTestRootDisposable())
+                .subscribe(AppLandJsonRpcListener.TOPIC, new AppLandJsonRpcListenerAdapter() {
+                    @Override
+                    public void serverStarted() {
+                        if (allowStart) {
+                            latch.countDown();
+                        }
+                    }
+
+                    @Override
+                    public void serverRestarted() {
+                        latch.countDown();
+                    }
+                });
+        return latch;
+    }
+
+    protected @NotNull CountDownLatch createWaitForJsonRpcServerPortCondition() {
+        var latch = new CountDownLatch(1);
+        getProject().getMessageBus()
+                .connect(getTestRootDisposable())
+                .subscribe(AppLandJsonRpcListener.TOPIC, new AppLandJsonRpcListenerAdapter() {
+                    @Override
+                    public void serverConfigurationUpdated(@NotNull Collection<VirtualFile> contentRoots,
+                                                           @NotNull Collection<VirtualFile> appMapConfigFiles) {
+                        if (AppLandJsonRpcService.getInstance(getProject()).getServerPort() != null) {
+                            latch.countDown();
+                        }
+                    }
+                });
+        return latch;
     }
 
     private String createAppMapEvents(int requestCount, int queryCount) {

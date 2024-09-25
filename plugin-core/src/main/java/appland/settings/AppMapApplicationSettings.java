@@ -48,6 +48,11 @@ public class AppMapApplicationSettings {
     private volatile HashMap<String, String> cliEnvironment = new HashMap<>();
     private volatile boolean cliPassParentEnv = true;
 
+    /**
+     * Maximum accepted file size in kilobytes for files pinned inside a Navie webview editor.
+     */
+    private volatile int maxPinnedFileSizeKB = 20;
+
     public AppMapApplicationSettings() {
     }
 
@@ -60,6 +65,7 @@ public class AppMapApplicationSettings {
         this.showFirstAppMapNotification = settings.showFirstAppMapNotification;
         this.cliEnvironment.putAll(settings.cliEnvironment);
         this.cliPassParentEnv = settings.cliPassParentEnv;
+        this.maxPinnedFileSizeKB = settings.maxPinnedFileSizeKB;
     }
 
     public @NotNull Map<String, String> getCliEnvironment() {
