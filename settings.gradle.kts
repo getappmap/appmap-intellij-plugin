@@ -11,3 +11,6 @@ include("plugin-core")
 include("plugin-gradle")
 include("plugin-java")
 include("plugin-maven")
+
+// module to tests without additional test dependencies
+include("tests-integration")
