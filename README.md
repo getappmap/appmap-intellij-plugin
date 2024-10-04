@@ -9,9 +9,17 @@ AppMap is a developer tools platform powered by runtime analysis and AI. It's co
 * AppMap data - Runtime traces of your application runtime.
 * AppMap diagrams - Interactive visualizations of AppMap data.
 
-By using AppMap data, Navie is the first AI code architect with the context to understand how your app works when it runs, like a principal engineer or software architect. AppMap data provides Navie with accurate information about application behavior, APIs, database queries, and more, providing valuable context so you can ask more challenging questions and get better answers.
+Navie is the first AI code architect with the context to understand how your app works when it runs, like a principal engineer or software architect. AppMap data provides Navie with accurate information about application behavior, APIs, database queries, and more, providing valuable context so you can ask more challenging questions and get better answers.
 
 ![image](https://appmap.io/assets/img/appmap-navie-intellij-screenshot.png)
+
+
+## Requirements and Use
+
+**2023.1** and newer JetBrains IDEs are required to use this plugin.  
+Supported web applications and API frameworks: Ruby on Rails, Django, Flask, Express, Nest.js, Next.js, and Spring, Kotlin, and Scala
+Supported programming languages: Java, Python, Ruby, TypeScript/JavaScript (for Node.js).
+
 
 ## Get started
 1. **Install [the AppMap Plugin](https://plugins.jetbrains.com/plugin/16701-appmap)** from within the code editor or from the marketplace.  
@@ -20,16 +28,14 @@ By using AppMap data, Navie is the first AI code architect with the context to u
 
 3. **Ask Navie** for guidance recording AppMap data specific to interactions or code scenarios you're interested in analyzing.
 
-   
+
 ## Examples
-Here are some examples of Navie making context-aware suggestions, providing tactical solutions, and reasoning about the larger context of the specific code being worked on.
+[Here are some examples](https://appmap.io/product/examples/navie) of Navie making context-aware suggestions, providing tactical solutions, and reasoning about the larger context of the specific code being worked on.
 
-1. [Understand complex data flows and add a new feature in Java Spring](https://appmap.io/navie/how-to/understand-complex-data-flows-and-add-new-features-in-java-spring/)
-2. [Find and fix slow API endpoints in a FastAPI app](https://appmap.io/navie/how-to/fix-slow-api-endpoints-in-a-fastapi-app-with-navie/)
-3. [Find and fix a database performance issue in Ruby on Rails](https://appmap.io/navie/how-to/find-and-fix-a-database-performance-issue-in-ruby-on-rails/)
-4. [Quickly add a new feature to a complex Python app](https://appmap.io/navie/how-to/adding-a-new-feature-to-a-complex-python-application/)
-5. [Fixing performance issues with MongoDB in a MERN app](https://appmap.io/navie/how-to/fixing-performance-issues-with-mongodb-in-a-mern-app/)
 
+## Chat Modes
+
+Navie provides different modes of interaction to assist you with your code and project. Here's a quick overview:
 
 ## Chat Modes
 
@@ -37,9 +43,15 @@ Navie provides different modes of interaction to assist you with your code and p
 
 - **`@explain` (default)**: Navie makes context-aware suggestions, provides specific solutions, and reasons about the larger context of the specific code being worked on.
 
-- **`@help`**: Activate help mode by beginning any question with the prefix "@help". This mode offers assistance with using AppMap, including guidance for generating and leveraging AppMap data effectively.
+- **`@plan`**: Navie focuses the AI response on building a detailed implementation plan for the relevant query. This will focus Navie on only understanding the problem and the application to generate a step-by-step plan.
 
 - **`@generate`**: Activate code generation mode by beginning any question with the prefix "@generate". In this mode Navie's response are optimized to include code snippets you can use directly in the files are working on.
+
+- **`@test`**: Navie's responses are optimized for test case creation, such as unit testing or integration testing. This prefix will understand how your tests are currently written and provide updated tests based on features or code that is provided. 
+
+- **`@diagram`**:  Navie will create and render a Mermaid compatible diagram within the Navie chat window. You can open this diagram in the [Mermaid Live Editor](https://mermaid.live), copy the Mermaid Definitions to your clipboard, save to disk, or expand a full window view.
+
+- **`@help`**: Activate help mode by beginning any question with the prefix "@help". This mode offers assistance with using AppMap, including guidance for generating and leveraging AppMap data effectively.
 
 **Via the JetBrains Tools menu option**
 You can open Navie by clicking on the JetBrains menu option *Tools -> AppMap*. From there you can select *Explain with AppMap Navie*.
@@ -49,6 +61,7 @@ You can open Navie by clicking on the JetBrains menu option *Tools -> AppMap*. F
 **Ask Navie about a specific AppMap visualization**: You can target your question more specifically to an AppMap, representing a test case, API call, or other interaction by clicking the “Ask Navie” box on any AppMap you open.
 
 ![image](https://appmap.io/assets/img/product/ask-navie-about-a-map.webp)
+
 
 ## Bring your own key or model for Navie
 
