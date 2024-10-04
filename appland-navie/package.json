@@ -6,8 +6,8 @@
     "bundle": "tsup --env.NODE_ENV production"
   },
   "devDependencies": {
-    "buffer": "^6.0.3",
     "browserify-fs": "^1.0.0",
+    "buffer": "^6.0.3",
     "node-libs-browser": "^2.2.1",
     "process": "^0.11.10",
     "tsup": "^8.2.4",
@@ -19,5 +19,6 @@
     "url": "^0.11",
     "vue": "^2.7",
     "vue-template-compiler": "^2.7"
-  }
+  },
+  "packageManager": "yarn@3.2.1"
 }
