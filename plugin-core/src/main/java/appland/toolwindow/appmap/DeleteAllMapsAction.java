@@ -41,7 +41,7 @@ final class DeleteAllMapsAction extends AnAction {
             if (CommonDataKeys.VIRTUAL_FILE_ARRAY.is(dataId)) {
                 return parentContext.getData(AppMapWindowPanel.KEY_ALL_APPMAPS);
             }
-            return parentContext.getData(dataId);
+            return null;
         });
     }
 }

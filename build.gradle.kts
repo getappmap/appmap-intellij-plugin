@@ -24,7 +24,7 @@ buildscript {
 plugins {
     idea
     id("org.jetbrains.kotlin.jvm") version "1.9.24"
-    id("org.jetbrains.intellij.platform") version "2.0.0"
+    id("org.jetbrains.intellij.platform") version "2.1.0"
     id("org.jetbrains.changelog") version "1.3.1"
     id("com.adarshr.test-logger") version "3.2.0"
     id("de.undercouch.download") version "5.6.0"
@@ -38,6 +38,13 @@ val ideVersion = prop("ideVersion")
 
 group = "appland.appmap"
 version = pluginVersionString
+
+val platformVersion = when {
+    // e.g. '2024.1'
+    ideVersion.length == 6 -> ideVersion.replace(".", "").substring(2).toInt()
+    // e.g. '243.16718.32'
+    else -> ideVersion.substringBefore(".").toInt()
+}
 
 val isCI = System.getenv("CI") == "true"
 val agentOutputPath = rootProject.layout.buildDirectory.asFile.get()
@@ -68,6 +75,16 @@ allprojects {
             intellijIdeaCommunity(ideVersion)
             // using "Bundled" to gain access to the Java plugin's test classes
             testFramework(TestFrameworkType.Bundled)
+
+            // org.jetbrains.intellij.platform requires to bundledModules for 2024.2+
+            if (platformVersion >= 242) {
+                bundledModule("intellij.platform.collaborationTools")
+                bundledModule("intellij.platform.vcs.impl")
+            }
+            // 2024.3 extracted JSON support into a plugin
+            if (platformVersion >= 243) {
+                bundledPlugin("com.intellij.modules.json")
+            }
         }
 
         // added because org.jetbrains.intellij.platform resolves to an older version bundled with the SDK
@@ -96,13 +113,16 @@ allprojects {
             testImplementation(project(":plugin-core", "testOutput"))
         }
 
-        // https://mvnrepository.com/artifact/org.mock-server/mockserver-netty
-        testImplementation("org.mock-server:mockserver-netty:5.15.0")
-        // https://mvnrepository.com/artifact/org.mock-server/mockserver-junit-rule
-        testImplementation("org.mock-server:mockserver-junit-rule:5.15.0")
-
         // workaround for https://github.com/JetBrains/intellij-platform-gradle-plugin/issues/1663
         testImplementation("org.opentest4j:opentest4j:1.3.0")
+
+        // Subproject test-integration must not get our additional test dependencies
+        // because mockserver is conflicting with the SDK's bundled library versions.
+        // See https://github.com/getappmap/appmap-intellij-plugin/pull/794.
+        if (!project.name.startsWith("tests-")) {
+            // https://mvnrepository.com/artifact/org.mock-server/mockserver-junit-rule
+            testImplementation("org.mock-server:mockserver-junit-rule:5.15.0")
+        }
     }
 
     intellijPlatform {
@@ -222,16 +242,10 @@ project(":") {
 
     dependencies {
         intellijPlatform {
-            // fixme use when https://github.com/JetBrains/intellij-platform-gradle-plugin/issues/1673 is resolved
-            // pluginModule(implementation(project(":plugin-core")))
-            // pluginModule(implementation(project(":plugin-gradle")))
-            // pluginModule(implementation(project(":plugin-java")))
-            // pluginModule(implementation(project(":plugin-maven")))
-
-            implementation(project(":plugin-core"))
-            implementation(project(":plugin-gradle"))
-            implementation(project(":plugin-java"))
-            implementation(project(":plugin-maven"))
+            pluginModule(implementation(project(":plugin-core")))
+            pluginModule(implementation(project(":plugin-gradle")))
+            pluginModule(implementation(project(":plugin-java")))
+            pluginModule(implementation(project(":plugin-maven")))
 
             pluginVerifier()
             zipSigner()
@@ -417,6 +431,12 @@ project(":plugin-maven") {
             bundledPlugin("org.jetbrains.idea.maven")
             bundledPlugin("com.intellij.properties")
         }
+    }
+}
+
+project(":tests-integration") {
+    dependencies {
+        implementation(project(":plugin-core"))
     }
 }
 

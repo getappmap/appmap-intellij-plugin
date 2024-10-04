@@ -9,7 +9,7 @@ import org.jetbrains.annotations.Nullable;
 /**
  * Provides factory methods to create customized {@link DataContext} implementations, which are compatible with all our supported IDEs.
  * <p>
- * 2024.2 is rejecting custom implementations and is only accepting DataContext implementations provides by the SDK itself.
+ * 2024.2 is rejecting custom implementations and is only accepting DataContext implementations provided by the SDK itself.
  */
 @SuppressWarnings("removal")
 public final class DataContexts {

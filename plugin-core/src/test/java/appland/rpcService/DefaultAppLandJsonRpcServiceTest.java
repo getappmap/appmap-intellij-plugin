@@ -122,7 +122,8 @@ public class DefaultAppLandJsonRpcServiceTest extends AppMapBaseTest {
 
         // For example:
         // IntelliJ IDEA 2023.2 by JetBrains s.r.o.
-        var matches = editorInfo.matches("IntelliJ IDEA [0-9.]+( EAP | Beta)? by JetBrains s\\.r\\.o\\.");
+        // IntelliJ IDEA 2024.3 EAP by JetBrains s.r.o.
+        var matches = editorInfo.matches("IntelliJ IDEA [0-9.]+( EAP| Beta)? by JetBrains s\\.r\\.o\\.");
         assertTrue("Code editor info must match: " + editorInfo, matches);
     }
 }
