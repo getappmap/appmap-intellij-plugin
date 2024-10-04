@@ -19,6 +19,7 @@ class AppMapProjectSettingsPanel {
     private lateinit var cliEnvironment: EnvironmentVariablesComponent
     private lateinit var maxPinnedFileSizeKB: JBIntSpinner
     private lateinit var openAIKey: JBTextField
+    private lateinit var useAnimation: JCheckBox
 
     fun loadSettingsFrom(
         applicationSettings: AppMapApplicationSettings,
@@ -31,6 +32,8 @@ class AppMapProjectSettingsPanel {
         maxPinnedFileSizeKB.number = applicationSettings.maxPinnedFileSizeKB
 
         openAIKey.text = Strings.notNullize(secureApplicationSettings.openAIKey)
+        useAnimation.isSelected = applicationSettings.isUseAnimation
+
     }
 
     fun applySettingsTo(
@@ -53,6 +56,7 @@ class AppMapProjectSettingsPanel {
         applicationSettings.maxPinnedFileSizeKB = maxPinnedFileSizeKB.number
 
         secureApplicationSettings.openAIKey = Strings.nullize(openAIKey.text)
+        applicationSettings.isUseAnimation = useAnimation.isSelected
     }
 
     fun getMainPanel(): JPanel {
@@ -67,6 +71,9 @@ class AppMapProjectSettingsPanel {
                 maxPinnedFileSizeKB = spinner(0..4096).gap(RightGap.SMALL).component
                 label(AppMapBundle.get("projectSettings.maxPinnedFileSize.unit"))
                 rowComment(AppMapBundle.get("projectSettings.maxPinnedFileSize.comment"))
+            }
+            row {
+                useAnimation = checkBox(AppMapBundle.get("projectSettings.useAnimation.title")).component
             }
             group(AppMapBundle.get("projectSettings.appMapServices")) {
                 row {
