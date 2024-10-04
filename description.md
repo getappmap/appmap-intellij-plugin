@@ -27,11 +27,6 @@ Supported programming languages: Java, Python, Ruby, TypeScript/JavaScript (for 
 ## Examples
 [Here are some examples](https://appmap.io/product/examples/navie) of Navie making context-aware suggestions, providing tactical solutions, and reasoning about the larger context of the specific code being worked on.
 
-
-## Chat Modes
-
-Navie provides different modes of interaction to assist you with your code and project. Here's a quick overview:
-
 ## Chat Modes
 
 Navie provides different modes of interaction to assist you with your code and project. Here's a quick overview:
@@ -57,6 +52,15 @@ You can open Navie by clicking on the JetBrains menu option *Tools -> AppMap*. F
 
 ![image](https://appmap.io/assets/img/product/ask-navie-about-a-map.webp)
 
+## Pin files to Navie's context
+
+Pin specific data files to your conversation with Navie to include data sources you know are relevant to the issue. This includes pinning the text of the issue itself.
+
+![image](https://appmap.io/assets/img/pinned-context.webp)
+
+Pin code from Navie responses to your conversation when a Navie response contains code that you want to reference in subsequent prompts.
+
+![image](https://appmap.io/assets/img/pin-from-response.webp
 
 ## Bring your own key or model for Navie
 
