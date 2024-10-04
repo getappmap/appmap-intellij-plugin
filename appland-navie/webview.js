@@ -25,6 +25,8 @@ export function mountWebview() {
             appmapYmlPresent: this.appmapYmlPresent,
             targetAppmapData: initialData.targetAppmapData,
             targetAppmapFsPath: initialData.targetAppmapFsPath,
+            editorType: 'intellij',
+            useAnimation: initialData.useAnimation,
             openNewChat() {
               vscode.postMessage({ command: "open-new-chat" });
             },
@@ -74,6 +76,7 @@ export function mountWebview() {
         });
     });
 
+    app.$on('choose-files-to-pin', () => vscode.postMessage({ command: 'choose-files-to-pin' }));
     app.$on('open-install-instructions', () => vscode.postMessage({command: 'open-install-instructions'}))
     app.$on('open-record-instructions', () => vscode.postMessage({command: 'open-record-instructions'}))
     app.$on('open-appmap', (path) => vscode.postMessage({command: 'open-appmap', path}))

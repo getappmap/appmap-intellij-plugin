@@ -1,6 +1,8 @@
 package appland.actions;
 
 import appland.webviews.navie.NavieEditor;
+import com.intellij.openapi.project.Project;
+
 import com.intellij.openapi.actionSystem.ActionUpdateThread;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
@@ -26,15 +28,19 @@ public class ChooseAndAddNavieContextFilesAction extends AnAction {
         e.getPresentation().setEnabled(findActiveNavieEditor(e) != null);
     }
 
+    public static void chooseAndAddPinnedFiles(Project project, NavieEditor editor) {
+        var descriptor = new FileChooserDescriptor(true, false, false, false, false, true);
+        var chosenFiles = FileChooser.chooseFiles(descriptor, project, null);
+        if (chosenFiles.length > 0) {
+            editor.addPinnedFiles(List.of(chosenFiles));
+        }
+    }
+
     @Override
     public void actionPerformed(@NotNull AnActionEvent e) {
         var editor = findActiveNavieEditor(e);
         if (editor != null) {
-            var descriptor = new FileChooserDescriptor(true, false, false, false, false, true);
-            var chosenFiles = FileChooser.chooseFiles(descriptor, e.getProject(), null);
-            if (chosenFiles.length > 0) {
-                editor.addPinnedFiles(List.of(chosenFiles));
-            }
+            chooseAndAddPinnedFiles(e.getProject(), editor);
         }
     }
 

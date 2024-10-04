@@ -1,6 +1,7 @@
 package appland.webviews.navie;
 
 import appland.AppMapBundle;
+import appland.actions.ChooseAndAddNavieContextFilesAction;
 import appland.actions.SetNavieOpenAiKeyAction;
 import appland.config.AppMapConfigFileListener;
 import appland.files.AppMapFiles;
@@ -13,6 +14,7 @@ import appland.installGuide.InstallGuideEditorProvider;
 import appland.installGuide.InstallGuideViewPage;
 import appland.notifications.AppMapNotifications;
 import appland.rpcService.AppLandJsonRpcService;
+import appland.settings.AppMapApplicationSettings;
 import appland.settings.AppMapApplicationSettingsService;
 import appland.settings.AppMapProjectSettingsService;
 import appland.settings.AppMapSecureApplicationSettingsService;
@@ -26,12 +28,16 @@ import appland.webviews.appMap.AppMapFileEditorState;
 import appland.webviews.webserver.AppMapWebview;
 import com.google.gson.JsonObject;
 import com.google.gson.annotations.SerializedName;
+import com.intellij.openapi.actionSystem.AnActionEvent;
+import com.intellij.openapi.actionSystem.CommonDataKeys;
 import com.intellij.openapi.actionSystem.DataContext;
+import com.intellij.openapi.actionSystem.Presentation;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.application.ModalityState;
 import com.intellij.openapi.application.ReadAction;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.fileEditor.FileDocumentManager;
+import com.intellij.openapi.fileEditor.FileEditorManager;
 import com.intellij.openapi.fileEditor.OpenFileDescriptor;
 import com.intellij.openapi.progress.ProgressIndicator;
 import com.intellij.openapi.progress.Task;
@@ -78,6 +84,7 @@ public class NavieEditor extends WebviewEditor<Void> {
 
     public NavieEditor(@NotNull Project project, @NotNull VirtualFile file) {
         super(project, AppMapWebview.Navie, file, SharedAppMapWebViewMessages.withBaseMessages(
+                "choose-files-to-pin",
                 "open-appmap",
                 "open-install-instructions",
                 "open-location",
@@ -94,7 +101,9 @@ public class NavieEditor extends WebviewEditor<Void> {
 
     @Override
     protected void setupInitMessage(@Nullable Void initData, @NotNull JsonObject payload) {
-        var apiKey = AppMapApplicationSettingsService.getInstance().getApiKey();
+        AppMapApplicationSettings settings = AppMapApplicationSettingsService.getInstance();
+        var apiKey = settings.getApiKey();
+        var useAnimation = settings.isUseAnimation();
         var filters = AppMapProjectSettingsService.getState(project).getAppMapFilters().values();
         var codeSelection = NavieEditorProvider.KEY_CODE_SELECTION.get(file);
         var promptSuggestion = NavieEditorProvider.KEY_PROMPT_SUGGESTION.get(file);
@@ -127,6 +136,7 @@ public class NavieEditor extends WebviewEditor<Void> {
         if (promptSuggestion != null) {
             payload.add("suggestion", gson.toJsonTree(promptSuggestion));
         }
+        payload.addProperty("useAnimation", useAnimation);
     }
 
     @Override
@@ -151,6 +161,9 @@ public class NavieEditor extends WebviewEditor<Void> {
         }
 
         switch (messageId) {
+            case "choose-files-to-pin":
+                handleChooseFilesToPin();
+                break;
             case "open-appmap": {
                 var path = message != null ? message.getAsJsonPrimitive("path") : null;
                 if (path != null) {
@@ -240,6 +253,12 @@ public class NavieEditor extends WebviewEditor<Void> {
                         .submit(updateAppMapsThread);
             }
         }.queue();
+    }
+
+    private void handleChooseFilesToPin() {
+        ApplicationManager.getApplication().invokeLater(() -> {
+            ChooseAndAddNavieContextFilesAction.chooseAndAddPinnedFiles(project, this);
+        });
     }
 
     private void handleOpenLocation(@NotNull String pathWithLineRange, @Nullable String directory) {

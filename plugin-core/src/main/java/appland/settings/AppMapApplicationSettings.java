@@ -24,6 +24,7 @@ public class AppMapApplicationSettings {
     private volatile boolean enableTelemetry = true;
     private volatile boolean enableScanner = false;
     private volatile @Nullable String apiKey = null;
+    private volatile boolean useAnimation = true;
     /**
      * {@code true} if page "Install AppMap Agent" of the installation guide webview was at least shown once.
      */
@@ -66,6 +67,7 @@ public class AppMapApplicationSettings {
         this.cliEnvironment.putAll(settings.cliEnvironment);
         this.cliPassParentEnv = settings.cliPassParentEnv;
         this.maxPinnedFileSizeKB = settings.maxPinnedFileSizeKB;
+        this.useAnimation = settings.useAnimation;
     }
 
     public @NotNull Map<String, String> getCliEnvironment() {

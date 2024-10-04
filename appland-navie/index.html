@@ -1,57 +1,66 @@
 <!DOCTYPE html>
 <html lang="en">
-    <head>
-        <meta charset="UTF-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>AppMap AI: Explain</title>
-        <link rel="stylesheet" href="./dist/main.css" />
-        <style>
-            body {
-                font-family: system-ui, sans-serif;
-                height: 100%;
-                margin: 0;
-                overflow-y: hidden;
-            }
 
-            /* 
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AppMap AI: Explain</title>
+    <link rel="stylesheet" href="./dist/main.css" />
+    <style>
+        body {
+            font-family: system-ui, sans-serif;
+            font-size: 80%;
+            height: 100%;
+            margin: 0;
+            overflow-y: hidden;
+        }
+
+        /* body .code-snippet {
+            font-size: 120%;
+        } */
+
+        /* 
             Integration fixes
 
             HACK:
             Browser downloads don't work in JCEF. This hides the download button.
             */
-            [data-cy="context-menu-item"]:nth-child(3) {
-                display: none !important;
-            }
+        [data-cy="context-menu-item"]:nth-child(3) {
+            display: none !important;
+        }
 
-            .context-container__title {
-                text-overflow: ellipsis;
-                overflow: hidden;
-                white-space: nowrap;
-            }
+        .context-container__title {
+            text-overflow: ellipsis;
+            overflow: hidden;
+            white-space: nowrap;
+        }
 
-            .context__body__table .context__pinned-item {
-                margin: 0 !important;
-                box-shadow: none !important;
-            }
+        .context__body__table .context__pinned-item,
+        .pinned-items__body__table .pinned-items__pinned-item {
+            margin: 0 !important;
+            box-shadow: none !important;
+        }
 
-            .recording-method-grid .popper__body {
-                overflow: hidden;
-                padding: 1rem;
-                background-color: #141924;
-                border-radius: 1rem;
-                border: 1px solid #2d3546;
-            }
+        .recording-method-grid .popper__body {
+            overflow: hidden;
+            padding: 1rem;
+            background-color: #141924;
+            border-radius: 1rem;
+            border: 1px solid #2d3546;
+        }
 
-            /* 
+        /* 
                 The baseline of the chat input is too high. This makes it a lot less obvious.
              */
-            [data-cy="chat-input"] {
-                padding-top: 0.9rem !important;
-            }
-        </style>
-    </head>
-    <body>
-        <div id="app"></div>
-        <script src="./dist/main.js"></script>
-    </body>
+        [data-cy="chat-input"] {
+            padding-top: 0.9rem !important;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="app"></div>
+    <script src="./dist/main.js"></script>
+</body>
+
 </html>
