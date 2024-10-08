@@ -52,6 +52,7 @@ import com.intellij.psi.search.GlobalSearchScopes;
 import com.intellij.util.Alarm;
 import com.intellij.util.SingleAlarm;
 import com.intellij.util.concurrency.AppExecutorUtil;
+import com.intellij.util.concurrency.annotations.RequiresEdt;
 import com.intellij.util.concurrency.annotations.RequiresReadLock;
 import lombok.Value;
 import org.jetbrains.annotations.Nls;
@@ -406,9 +407,12 @@ public class NavieEditor extends WebviewEditor<Void> {
 
     /**
      * Adds the given files as pinned files to the Navie webview.
+     * <p>
+     * If a file is larger than the configured max file size, then it's excluded and a notification is shown to the user.
      *
      * @param contextFiles Files to pin in the webview
      */
+    @RequiresEdt
     public void addPinnedFiles(@NotNull List<VirtualFile> contextFiles) {
         if (contextFiles.isEmpty()) {
             return;
