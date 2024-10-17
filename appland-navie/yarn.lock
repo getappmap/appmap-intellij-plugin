@@ -14,7 +14,7 @@
     rxjs "^7.8.1"
     socket.io-client "^4.7.2"
 
-"@appland/components@^4.38.3":
+"@appland/components@^4.39.0":
   version "4.39.0"
   resolved "https://registry.yarnpkg.com/@appland/components/-/components-4.39.0.tgz#ae0dfae7ddfdf498830a674e1c57f6dab418a51b"
   integrity sha512-+zf/ueYFSkysgkOEpiZqSIEALXGttwi+mDqF/FY5zoMi77jIVoG9bzGTf2QtckFTUGiTI4yFvCWj17CtSw/jfg==
