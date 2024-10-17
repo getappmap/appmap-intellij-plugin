@@ -1,5 +1,16 @@
 AppMap Plugin Changelog
 
+## [0.75.0](https://github.com/getappmap/appmap-intellij-plugin/compare/v0.74.1...v0.75.0) (2024-10-17)
+
+
+### Features
+
+-  Support 2024.3 eap ([f8f9696]())-  Support pinned files for Navie webview ([814f24b]())-  Upgrade the Navie frontend to v4.39.0 ([89aadd3]())
+
+### Bug Fixes
+
+-  show new file pinning UI ([5be1ebf]())-  Update @appland/components to v4.37.4 ([6d39706]())
+
 ## [0.74.1](https://github.com/getappmap/appmap-intellij-plugin/compare/v0.74.0...v0.74.1) (2024-09-17)
 
 
