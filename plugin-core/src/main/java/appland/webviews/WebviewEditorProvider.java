@@ -1,6 +1,7 @@
 package appland.webviews;
 
 import com.google.common.base.Predicates;
+import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.fileEditor.FileEditor;
 import com.intellij.openapi.fileEditor.FileEditorManager;
 import com.intellij.openapi.fileEditor.FileEditorPolicy;
@@ -106,6 +107,10 @@ public abstract class WebviewEditorProvider implements FileEditorProvider, DumbA
     public LightVirtualFile createVirtualFile(@NotNull String title) {
         var file = new LightVirtualFile(title);
         WEBVIEW_EDITOR_KEY.set(file, webviewTypeId);
+        // TestEditorManagerImpl is used in tests and only uses custom editor provider is set via KEY :(
+        if (ApplicationManager.getApplication().isUnitTestMode()) {
+            FileEditorProvider.KEY.set(file, this);
+        }
         return file;
     }
 

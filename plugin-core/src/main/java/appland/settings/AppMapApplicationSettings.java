@@ -24,6 +24,7 @@ public class AppMapApplicationSettings {
     private volatile boolean enableTelemetry = true;
     private volatile boolean enableScanner = false;
     private volatile @Nullable String apiKey = null;
+    private volatile boolean useAnimation = true;
     /**
      * {@code true} if page "Install AppMap Agent" of the installation guide webview was at least shown once.
      */
@@ -48,6 +49,11 @@ public class AppMapApplicationSettings {
     private volatile HashMap<String, String> cliEnvironment = new HashMap<>();
     private volatile boolean cliPassParentEnv = true;
 
+    /**
+     * Maximum accepted file size in kilobytes for files pinned inside a Navie webview editor.
+     */
+    private volatile int maxPinnedFileSizeKB = 20;
+
     public AppMapApplicationSettings() {
     }
 
@@ -60,6 +66,8 @@ public class AppMapApplicationSettings {
         this.showFirstAppMapNotification = settings.showFirstAppMapNotification;
         this.cliEnvironment.putAll(settings.cliEnvironment);
         this.cliPassParentEnv = settings.cliPassParentEnv;
+        this.maxPinnedFileSizeKB = settings.maxPinnedFileSizeKB;
+        this.useAnimation = settings.useAnimation;
     }
 
     public @NotNull Map<String, String> getCliEnvironment() {
