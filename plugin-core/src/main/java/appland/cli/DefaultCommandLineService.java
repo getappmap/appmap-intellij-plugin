@@ -1,7 +1,6 @@
 package appland.cli;
 
 import appland.config.AppMapConfigFile;
-import appland.config.AppMapConfigFileListener;
 import appland.files.AppMapFiles;
 import appland.files.AppMapVfsUtils;
 import appland.settings.AppMapApplicationSettingsService;
@@ -21,7 +20,6 @@ import com.intellij.openapi.project.ProjectManager;
 import com.intellij.openapi.util.Key;
 import com.intellij.openapi.util.SystemInfo;
 import com.intellij.openapi.util.text.StringUtil;
-import com.intellij.openapi.vfs.VfsUtil;
 import com.intellij.openapi.vfs.VfsUtilCore;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.openapi.vfs.ex.temp.TempFileSystemMarker;
@@ -270,11 +268,6 @@ public class DefaultCommandLineService implements AppLandCommandLineService {
             // We must not call stopAll on the EDT to avoid deadlocks, see #597.
             application.executeOnPooledThread(() -> stopAll(false));
         }
-    }
-
-    // extracted as method to allow overriding and testing it
-    protected void requestVirtualFileRefresh(@NotNull Path path) {
-        VfsUtil.markDirtyAndRefresh(true, false, false, path.toFile());
     }
 
     @TestOnly
@@ -658,7 +651,7 @@ public class DefaultCommandLineService implements AppLandCommandLineService {
     /**
      * Listen to index events of the indexer.
      */
-    private class IndexEventsProcessListener extends ProcessAdapter {
+    private static class IndexEventsProcessListener extends ProcessAdapter {
         @Override
         public void onTextAvailable(@NotNull ProcessEvent event, @NotNull Key outputType) {
             if (LOG.isTraceEnabled()) {
@@ -675,7 +668,7 @@ public class DefaultCommandLineService implements AppLandCommandLineService {
 
                         // Refresh parent directory of the indexed AppMap, because it contains both
                         // myAppMap.appmap.json file and the corresponding metadata directory myAppMap/
-                        requestVirtualFileRefresh(Path.of(filePath).getParent());
+                        VfsRefreshService.getInstance().requestVirtualFileRefresh(Path.of(filePath).getParent());
                     } catch (InvalidPathException e) {
                         if (LOG.isDebugEnabled()) {
                             LOG.debug("Error parsing indexed file path: " + filePath, e);

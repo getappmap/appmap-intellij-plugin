@@ -1,7 +1,7 @@
 package appland;
 
 import appland.cli.AppLandCommandLineService;
-import appland.cli.TestCommandLineService;
+import appland.cli.TestVfsRefreshService;
 import appland.config.AppMapConfigFile;
 import appland.files.AppMapFiles;
 import appland.problemsView.TestFindingsManager;
@@ -302,7 +302,7 @@ public abstract class AppMapBaseTest extends LightPlatformCodeInsightFixture4Tes
     }
 
     private void resetState() {
-        TestCommandLineService.getInstance().reset();
+        TestVfsRefreshService.getInstance().reset();
     }
 
     private void shutdownAppMapProcesses() {
