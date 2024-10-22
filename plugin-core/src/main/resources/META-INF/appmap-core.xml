@@ -46,7 +46,8 @@
         <fileEditorProvider implementation="appland.installGuide.InstallGuideEditorProvider" order="first"/>
 
         <fileEditorProvider implementation="appland.webviews.findings.FindingsOverviewEditorProvider" order="first"/>
-        <fileEditorProvider implementation="appland.webviews.findingDetails.FindingDetailsEditorProvider" order="first"/>
+        <fileEditorProvider implementation="appland.webviews.findingDetails.FindingDetailsEditorProvider"
+                            order="first"/>
         <fileEditorProvider implementation="appland.webviews.navie.NavieEditorProvider" order="first"/>
 
         <fileIconProvider implementation="appland.webviews.WebviewEditorIconProvider"/>
@@ -79,6 +80,11 @@
         <applicationService serviceInterface="appland.cli.AppLandDownloadService"
                             serviceImplementation="appland.cli.DefaultAppLandDownloadService"
                             testServiceImplementation="appland.cli.TestAppLandDownloadService"/>
+
+        <applicationService
+                serviceInterface="appland.cli.VfsRefreshService"
+                serviceImplementation="appland.cli.DefaultVfsRefreshService"
+                testServiceImplementation="appland.cli.TestVfsRefreshService"/>
 
         <applicationService id="appmap.settings"
                             serviceImplementation="appland.settings.AppMapApplicationSettingsService"/>
