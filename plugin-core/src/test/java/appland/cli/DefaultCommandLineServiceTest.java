@@ -230,11 +230,11 @@ public class DefaultCommandLineServiceTest extends AppMapBaseTest {
         var appMapConfig = myFixture.copyFileToProject("projects/without_existing_index/appmap.yml", "test-project/appmap.yml");
         ModuleTestUtils.withContentRoot(getModule(), appMapConfig.getParent(), () -> {
             // copying AppMaps into a watched directory must trigger a file refresh based on the output of the AppMap process
-            var refreshCondition = TestCommandLineService.newVfsRefreshCondition(getProject(), getTestRootDisposable());
+            var refreshCondition = TestVfsRefreshService.newVfsRefreshCondition(getProject(), getTestRootDisposable());
             myFixture.copyDirectoryToProject("projects/without_existing_index", "test-project");
             assertTrue(refreshCondition.await(30, TimeUnit.SECONDS));
 
-            var refreshedFiles = TestCommandLineService.getInstance().getRefreshedFiles();
+            var refreshedFiles = TestVfsRefreshService.getInstance().getRefreshedFiles();
             assertSize(1, refreshedFiles);
             var refreshedPath = refreshedFiles.iterator().next();
             assertTrue("The parent directory of the AppMap must be refreshed", refreshedPath.endsWith("appmap"));
