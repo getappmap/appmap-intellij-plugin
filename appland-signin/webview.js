@@ -1,18 +1,18 @@
-import Vue from 'vue';
-import {VSidebarSignIn} from '@appland/components';
-import '@appland/diagrams/dist/style.css';
-import MessagePublisher from 'messagePublisher';
-import vscode from 'vsCodeBridge';
+import Vue from "vue";
+import { VSidebarSignIn } from "@appland/components";
+import "@appland/diagrams/dist/style.css";
+import MessagePublisher from "messagePublisher";
+import vscode from "vsCodeBridge";
 
 export function mountWebview() {
   const messages = new MessagePublisher(vscode);
 
-  messages.on('init', ({page, data: initData}) => {
+  messages.on("init", ({ page, data: initData }) => {
     const app = new Vue({
-      el: '#app',
+      el: "#app",
       render(h) {
         return h(VSidebarSignIn, {
-          ref: 'ui',
+          ref: "ui",
           props: initData,
         });
       },
@@ -26,23 +26,23 @@ export function mountWebview() {
           emailInput.addEventListener("focus", () => {
             if (!focusEventSent) {
               focusEventSent = true;
-              setTimeout(() => vscode.postMessage({"command": "email-input-focused"}), 250);
+              setTimeout(() => vscode.postMessage({ command: "email-input-focused" }), 250);
             }
           });
         }
-      }
+      },
     });
 
-    app.$on('sign-in', () => {
-      vscode.postMessage({command: 'sign-in'})
+    app.$on("sign-in", () => {
+      vscode.postMessage({ command: "sign-in" });
     });
-    app.$on('click-sign-in-link', (linkType) => {
-      vscode.postMessage({command: 'click-sign-in-link', linkType})
+    app.$on("click-sign-in-link", (linkType) => {
+      vscode.postMessage({ command: "click-sign-in-link", linkType });
     });
-    app.$on('activate', (apiKey) => {
-      vscode.postMessage({command: 'activate', apiKey})
+    app.$on("activate", (apiKey) => {
+      vscode.postMessage({ command: "activate", apiKey });
     });
   });
 
-  vscode.postMessage({command: 'ready'});
+  vscode.postMessage({ command: "ready" });
 }
