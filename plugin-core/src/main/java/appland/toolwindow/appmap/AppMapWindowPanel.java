@@ -80,7 +80,7 @@ public class AppMapWindowPanel extends SimpleToolWindowPanel implements DataProv
     // Hierarchy of components, which are expanded to make the focus component visible.
     // We're storing the path instead of iterating the parents of the tree component,
     // because CollapsiblePanel does not keep invisible subcomponents as children.
-    private @NotNull List<Component> appMapTreePanelPath;
+    private final @NotNull List<Component> appMapTreePanelPath;
 
     public AppMapWindowPanel(@NotNull Project project, @NotNull Disposable parent) {
         super(true);
@@ -184,8 +184,7 @@ public class AppMapWindowPanel extends SimpleToolWindowPanel implements DataProv
 
             if (c instanceof CollapsiblePanel) {
                 ((CollapsiblePanel) c).setCollapsed(false);
-            } else if (c instanceof Splitter && previous != null) {
-                var splitter = (Splitter) c;
+            } else if (c instanceof Splitter splitter && previous != null) {
                 // 1.0 to display the first component, 0.0 to display the other component
                 splitter.setProportion(previous.equals(splitter.getFirstComponent()) ? 1.0f : 0.0f);
             }

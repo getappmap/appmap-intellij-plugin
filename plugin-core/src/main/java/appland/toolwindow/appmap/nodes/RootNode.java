@@ -85,7 +85,7 @@ public class RootNode extends Node {
     private @NotNull List<AppMapMetadata> getCachedAppMaps() {
         // If we're on the EDT, we're unable to load the AppMaps because it involves slow operations. Also, we're unable
         // to launch a Task.WithResult because it's causing an exception about nested access to DataContext.
-        // If we're onthe EDT and if the AppMaps have not been cached yet, we're returning an empty list.
+        // If we're on the EDT and if the AppMaps have not been cached yet, we're returning an empty list.
         if (needAppMapRefresh.get() && !ApplicationManager.getApplication().isDispatchThread()) {
             cachedAppMaps.set(loadAppMaps());
             needAppMapRefresh.set(false);
