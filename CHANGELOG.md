@@ -1,5 +1,12 @@
 AppMap Plugin Changelog
 
+## [0.75.1](https://github.com/getappmap/appmap-intellij-plugin/compare/v0.75.0...v0.75.1) (2024-11-01)
+
+
+### Bug Fixes
+
+-  debounce requests for a filesystem refresh ([464fa2f]())-  don't delay loading of AppMaps in the AppMap panel ([41113b0]())-  don't refresh AppMap panel after a filesystem refresh unrelated to AppMaps ([90f1a05]())-  Update the screenshots to png as jetbrains doesn't support webp rendering ([#804](https://github.com/getappmap/appmap-intellij-plugin/issues/804)) ([9e3a375]())-  Update the sign in to @appland/components v4.40.0 ([83912b4]())
+
 ## [0.75.0](https://github.com/getappmap/appmap-intellij-plugin/compare/v0.74.1...v0.75.0) (2024-10-17)
 
 
