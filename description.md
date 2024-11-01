@@ -46,21 +46,21 @@ Navie provides different modes of interaction to assist you with your code and p
 **Via the JetBrains Tools menu option**
 You can open Navie by clicking on the JetBrains menu option *Tools -> AppMap*. From there you can select *Explain with AppMap Navie*.
 
-![image](https://appmap.io/assets/img/product/tools-appmap-vscode.webp)
+![image](https://appmap.io/assets/img/product/tools-appmap-vscode.png)
 
 **Ask Navie about a specific AppMap visualization**: You can target your question more specifically to an AppMap, representing a test case, API call, or other interaction by clicking the “Ask Navie” box on any AppMap you open.
 
-![image](https://appmap.io/assets/img/product/ask-navie-about-a-map.webp)
+![image](https://appmap.io/assets/img/product/ask-navie-about-a-map.png)
 
 ## Pin files to Navie's context
 
 Pin specific data files to your conversation with Navie to include data sources you know are relevant to the issue. This includes pinning the text of the issue itself.
 
-![image](https://appmap.io/assets/img/pinned-context.webp)
+![image](https://appmap.io/assets/img/pinned-context.png)
 
 Pin code from Navie responses to your conversation when a Navie response contains code that you want to reference in subsequent prompts.
 
-![image](https://appmap.io/assets/img/pin-from-response.webp
+![image](https://appmap.io/assets/img/pin-from-response.png)
 
 ## Bring your own key or model for Navie
 

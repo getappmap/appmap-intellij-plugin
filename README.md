@@ -62,11 +62,11 @@ You can open Navie by clicking on the JetBrains menu option *Tools -> AppMap*. F
 
 Pin specific data files to your conversation with Navie to include data sources you know are relevant to the issue. This includes pinning the text of the issue itself.
 
-![image](https://appmap.io/assets/img/pinned-context.webp)
+![image](https://appmap.io/assets/img/pinned-context.png)
 
 Pin code from Navie responses to your conversation when a Navie response contains code that you want to reference in subsequent prompts.
 
-![image](https://appmap.io/assets/img/pin-from-response.webp)
+![image](https://appmap.io/assets/img/pin-from-response.png)
 
 ## Bring your own key or model for Navie
 

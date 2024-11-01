@@ -9,6 +9,7 @@ import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.application.ReadAction;
 import com.intellij.openapi.project.DumbService;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.util.Computable;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.ui.tree.LeafState;
 import com.intellij.util.concurrency.annotations.RequiresBackgroundThread;
@@ -85,7 +86,7 @@ public class RootNode extends Node {
     private @NotNull List<AppMapMetadata> getCachedAppMaps() {
         // If we're on the EDT, we're unable to load the AppMaps because it involves slow operations. Also, we're unable
         // to launch a Task.WithResult because it's causing an exception about nested access to DataContext.
-        // If we're onthe EDT and if the AppMaps have not been cached yet, we're returning an empty list.
+        // If we're on the EDT and if the AppMaps have not been cached yet, we're returning an empty list.
         if (needAppMapRefresh.get() && !ApplicationManager.getApplication().isDispatchThread()) {
             cachedAppMaps.set(loadAppMaps());
             needAppMapRefresh.set(false);
@@ -97,7 +98,11 @@ public class RootNode extends Node {
     }
 
     private @NotNull List<AppMapMetadata> loadAppMaps() {
-        return DumbService.getInstance(myProject).runReadActionInSmartMode(() -> {
+        if (DumbService.isDumb(myProject)) {
+            return Collections.emptyList();
+        }
+
+        return ApplicationManager.getApplication().runReadAction((Computable<List<AppMapMetadata>>) () -> {
             return AppMapMetadataService.getInstance(myProject).findAppMaps(model.getNameFilter());
         });
     }
