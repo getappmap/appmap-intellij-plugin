@@ -78,6 +78,7 @@ public class NavieEditor extends WebviewEditor<Void> {
     public NavieEditor(@NotNull Project project, @NotNull VirtualFile file) {
         super(project, AppMapWebview.Navie, file, SharedAppMapWebViewMessages.withBaseMessages(
                 "choose-files-to-pin",
+                "click-link",
                 "open-appmap",
                 "open-install-instructions",
                 "open-location",
@@ -157,6 +158,13 @@ public class NavieEditor extends WebviewEditor<Void> {
             case "choose-files-to-pin":
                 handleChooseFilesToPin();
                 break;
+            case "click-link": {
+                var pathSpec = message != null ? message.getAsJsonPrimitive("link") : null;
+                if (pathSpec != null) {
+                    handleClickLink(StringUtil.trimStart(pathSpec.getAsString(), "file://"));
+                }
+                break;
+            }
             case "open-appmap": {
                 var path = message != null ? message.getAsJsonPrimitive("path") : null;
                 if (path != null) {
@@ -254,20 +262,22 @@ public class NavieEditor extends WebviewEditor<Void> {
         });
     }
 
+    private void handleClickLink(@NotNull String path) {
+        var virtualFile = findFileByPathOrNotify(path, null);
+        if (virtualFile != null) {
+            ApplicationManager.getApplication().invokeLater(() -> {
+                new OpenFileDescriptor(project, virtualFile).navigate(true);
+            }, ModalityState.defaultModalityState());
+        }
+    }
+
     private void handleOpenLocation(@NotNull String pathWithLineRange, @Nullable String directory) {
         var colonIndex = pathWithLineRange.lastIndexOf(':');
         var filePath = colonIndex > 0 ? pathWithLineRange.substring(0, colonIndex) : pathWithLineRange;
         var lineRangeOrEventId = colonIndex > 0 ? pathWithLineRange.substring(colonIndex + 1) : null;
-        var searchScope = directory != null ? createDirectorySearchScope(project, directory) : null;
 
-        var virtualFile = ReadAction.compute(() -> FileLookup.findRelativeFile(project, searchScope, null, filePath));
+        var virtualFile = findFileByPathOrNotify(filePath, directory);
         if (virtualFile == null) {
-            ApplicationManager.getApplication().invokeLater(() -> {
-                Messages.showErrorDialog(
-                        project,
-                        AppMapBundle.get("notification.genericFileNotFound.message"),
-                        AppMapBundle.get("notification.genericFileNotFound.title"));
-            });
             return;
         }
 
@@ -291,6 +301,28 @@ public class NavieEditor extends WebviewEditor<Void> {
                 new OpenFileDescriptor(project, virtualFile, startLine, 0).navigate(true);
             }, ModalityState.defaultModalityState());
         }
+    }
+
+    /**
+     * Locate a {@link VirtualFile} by path (relative or absolute).
+     * If the file is not found, an error is shown to the user and {@code null} is returned.
+     *
+     * @param filePath  The path to look up. It's either a relative or an absolute path.
+     * @param directory An optional path to a directory to restrict the search for the {@link VirtualFile}.
+     * @return The file if it was found, otherwise {@code null}
+     */
+    private @Nullable VirtualFile findFileByPathOrNotify(@NotNull String filePath, @Nullable String directory) {
+        var searchScope = directory != null ? createDirectorySearchScope(project, directory) : null;
+        var virtualFile = ReadAction.compute(() -> FileLookup.findRelativeFile(project, searchScope, null, filePath));
+        if (virtualFile != null) {
+            return virtualFile;
+        }
+
+        ApplicationManager.getApplication().invokeLater(() -> Messages.showErrorDialog(
+                project,
+                AppMapBundle.get("notification.genericFileNotFound.message"),
+                AppMapBundle.get("notification.genericFileNotFound.title")));
+        return null;
     }
 
     private void handleSelectLlmOption(@NotNull String choice) {
