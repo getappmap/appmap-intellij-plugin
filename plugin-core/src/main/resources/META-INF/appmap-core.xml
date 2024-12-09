@@ -24,6 +24,9 @@
         <listener topic="appland.cli.AppLandDownloadListener"
                   class="appland.cli.StartServicesAfterDownloadListener"/>
 
+        <listener topic="appland.cli.AppLandDownloadListener"
+                  class="appland.cli.FailedDownloadNotificationListener"/>
+
         <listener topic="appland.files.AppMapFileChangeListener"
                   class="appland.notifications.FirstAppMapListener"/>
     </projectListeners>

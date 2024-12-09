@@ -65,6 +65,8 @@ public class AppMapApplicationSettings {
      */
     private volatile int maxPinnedFileSizeKB = 20;
 
+    private volatile boolean showFailedCliDownloadError = true;
+
     public AppMapApplicationSettings() {
     }
 

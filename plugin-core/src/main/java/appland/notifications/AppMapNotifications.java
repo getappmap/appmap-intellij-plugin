@@ -354,4 +354,36 @@ public final class AppMapNotifications {
             }
         });
     }
+
+    /**
+     * See https://github.com/getappmap/appmap-intellij-plugin/issues/814.
+     */
+    public static void showFailedCliBinaryDownloadNotification(@NotNull Project project) {
+        if (!AppMapApplicationSettingsService.getInstance().isShowFailedCliDownloadError()) {
+            return;
+        }
+
+        // the message should only appear once
+        AppMapApplicationSettingsService.getInstance().setShowFailedCliDownloadError(false);
+
+        ApplicationManager.getApplication().invokeLater(() -> {
+            Notification notification = new AppMapFullContentNotification(
+                    GENERIC_NOTIFICATIONS_ID,
+                    null,
+                    AppMapBundle.get("notification.cliDownloadFailed.title"),
+                    null,
+                    AppMapBundle.get("notification.cliDownloadFailed.content"),
+                    NotificationType.ERROR,
+                    null
+            );
+
+            var showInstructionsAction = NotificationAction.create(lazy("notification.cliDownloadFailed.browseAction"), (e, n) -> {
+                n.expire();
+                BrowserUtil.browse("https://appmap.io/docs/reference/appmap-airgapped-install.html#download-the-appmap-application-binaries");
+            });
+
+            notification = notification.addAction(showInstructionsAction);
+            notification.notify(project);
+        });
+    }
 }
