@@ -43,6 +43,7 @@ import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -580,11 +581,17 @@ public class DefaultCommandLineService implements AppLandCommandLineService {
                 ? GeneralCommandLine.ParentEnvironmentType.CONSOLE
                 : GeneralCommandLine.ParentEnvironmentType.NONE;
 
+        var providedEnvironment = new HashMap<String, String>();
+        AppLandCliEnvProvider.EP_NAME.forEachExtensionSafe(provider -> {
+            providedEnvironment.putAll(provider.getEnvironment());
+        });
+
         return commandLine.withParentEnvironmentType(environmentType)
                 .withEnvironment(settings.getCliEnvironment())
                 .withEnvironment(isNotEmpty(appMapKey) ? Map.of("APPMAP_API_KEY", appMapKey) : Map.of())
                 .withEnvironment(isNotEmpty(openAIKey) ? Map.of("OPENAI_API_KEY", openAIKey) : Map.of())
-                .withEnvironment(createProxyEnvironment());
+                .withEnvironment(createProxyEnvironment())
+                .withEnvironment(providedEnvironment);
     }
 
     /**

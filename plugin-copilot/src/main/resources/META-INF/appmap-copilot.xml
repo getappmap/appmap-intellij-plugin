@@ -1,0 +1,9 @@
+<idea-plugin>
+    <extensions defaultExtensionNs="appland.cli">
+        <envProvider implementation="appland.copilotChat.CopilotAppMapEnvProvider"/>
+    </extensions>
+
+    <extensions defaultExtensionNs="com.intellij">
+        <httpRequestHandler implementation="appland.copilotChat.NavieCopilotChatRequestHandler"/>
+    </extensions>
+</idea-plugin>

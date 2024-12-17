@@ -28,6 +28,12 @@
                   class="appland.notifications.FirstAppMapListener"/>
     </projectListeners>
 
+    <extensionPoints>
+        <extensionPoint dynamic="true"
+                        qualifiedName="appland.cli.envProvider"
+                        interface="appland.cli.AppLandCliEnvProvider"/>
+    </extensionPoints>
+
     <extensions defaultExtensionNs="com.intellij">
         <applicationService serviceImplementation="appland.telemetry.TelemetryService"/>
         <applicationService serviceImplementation="appland.AppLandLifecycleService"/>
