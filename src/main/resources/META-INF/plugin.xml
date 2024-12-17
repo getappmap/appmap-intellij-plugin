@@ -8,8 +8,8 @@
     <!--suppress CheckTagEmptyBody, PluginXmlValidity -->
     <description></description>
 
-
     <xi:include href="/META-INF/appmap-core.xml" xpointer="xpointer(/idea-plugin/*)"/>
+    <xi:include href="/META-INF/appmap-copilot.xml" xpointer="xpointer(/idea-plugin/*)"/>
 
     <depends>com.intellij.modules.platform</depends>
     <depends>com.intellij.modules.lang</depends>

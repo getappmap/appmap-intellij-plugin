@@ -246,6 +246,10 @@ project(":") {
             pluginModule(implementation(project(":plugin-gradle")))
             pluginModule(implementation(project(":plugin-java")))
             pluginModule(implementation(project(":plugin-maven")))
+            pluginModule(implementation(project(":plugin-copilot")))
+
+            // adding this for runIde support
+            plugin("com.github.copilot", prop("copilotPluginVersion"))
 
             pluginVerifier()
             zipSigner()
@@ -397,6 +401,14 @@ project(":") {
                 }
             }
         }
+    }
+}
+
+project(":plugin-copilot") {
+    dependencies {
+        implementation(project(":plugin-core"))
+
+        implementation("com.knuddels:jtokkit:1.1.0")
     }
 }
 

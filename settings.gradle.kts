@@ -8,6 +8,7 @@ pluginManagement {
 rootProject.name = "intellij-appmap"
 
 include("plugin-core")
+include("plugin-copilot")
 include("plugin-gradle")
 include("plugin-java")
 include("plugin-maven")
