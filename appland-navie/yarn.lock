@@ -19,9 +19,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@appland/components@npm:^4.40.1":
-  version: 4.40.1
-  resolution: "@appland/components@npm:4.40.1"
+"@appland/components@npm:^4.42.0":
+  version: 4.42.0
+  resolution: "@appland/components@npm:4.42.0"
   dependencies:
     "@appland/client": "npm:^1.12.0"
     "@appland/diagrams": "npm:^1.7.0"
@@ -47,7 +47,7 @@ __metadata:
     sql-formatter: "npm:^4.0.2"
     vue: "npm:^2.7.16"
     vuex: "npm:^3.6.0"
-  checksum: 10c0/f40b6ea040ac25ce5593c12cb58f1ad4ca2a927ae68ca949a20bf45bef89a1a05a5f84f89feae80a5d36588f80827df85f229590c83ea6d2ba0b483d864b38bd
+  checksum: 10c0/3cd72d37cc1b495a4e44fe2893335e604d5ba22dc3e1ff8b678cf3dff0e5f43fa29adb25d7f20fba9ac9432e1ac5ea5d262729eea943893130b5eab068a2afb7
   languageName: node
   linkType: hard
 
@@ -86,10 +86,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@appland/rpc@npm:^1.13.0":
-  version: 1.15.0
-  resolution: "@appland/rpc@npm:1.15.0"
-  checksum: 10c0/a089b4845cf84976530518c7281a6d5d41ec9d9c6206df32d10b3a27aab5c5aaeeb424e89d2639df56c4b1943f3ed2c960ec6464e5041bd94fbd557a65d5b570
+"@appland/rpc@npm:1.16.0":
+  version: 1.16.0
+  resolution: "@appland/rpc@npm:1.16.0"
+  checksum: 10c0/d53193ddcd738d342bf5df6315b4bd42b9f66e709c5df3c28a53c1872efd64755933dac40888b73207aefa08acc3cd176422978f952ec1dee292fee2c38c9a61
   languageName: node
   linkType: hard
 
@@ -771,7 +771,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "appmap-intellij-navie@workspace:."
   dependencies:
-    "@appland/components": "npm:^4.40.1"
+    "@appland/components": "npm:^4.42.0"
     browserify-fs: "npm:^1.0.0"
     buffer: "npm:^6.0.3"
     highlight.js: "npm:^11.9.0"
