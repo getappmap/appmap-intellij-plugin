@@ -1,6 +1,6 @@
 package appland.copilotChat;
 
-import appland.copilotChat.copilot.CopilotChatResponseChoice;
+import appland.copilotChat.copilot.CopilotChatCompletionsStreamChunk.CopilotChatResponseChoice;
 import appland.copilotChat.copilot.CopilotChatResponseListener;
 import appland.copilotChat.copilot.CopilotChatSession;
 import appland.copilotChat.openAI.OpenAIChatResponseChunk;
@@ -21,12 +21,13 @@ abstract class CopilotToOpenAICompletionsConverter implements CopilotChatRespons
                                @NotNull CopilotChatResponseChoice item) {
         var delta = new OpenAIChatResponseChunk.Delta(item.delta().role(), item.delta().content());
         var choice = new OpenAIChatResponseChunk.OpenAIChatResponseChoice(item.index(), delta, item.finishReason());
-        var chunk = new OpenAIChatResponseChunk(id,
-                "chat-completion-chunk",
-                created,
+        var chunk = new OpenAIChatResponseChunk(
+                id,
                 model,
+                created,
+                List.of(choice),
                 CopilotChatSession.systemFingerprint,
-                List.of(choice));
+                "chat-completion-chunk");
 
         onNewChunk(chunk);
     }
