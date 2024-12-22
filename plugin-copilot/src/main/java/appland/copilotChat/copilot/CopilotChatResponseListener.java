@@ -6,7 +6,7 @@ public interface CopilotChatResponseListener {
     void onChatResponse(@NotNull String id,
                         @NotNull String model,
                         long created,
-                        @NotNull CopilotChatResponseChoice item);
+                        @NotNull CopilotChatCompletionsStreamChunk.CopilotChatResponseChoice item);
 
     void end();
 }

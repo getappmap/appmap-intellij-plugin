@@ -8,11 +8,11 @@ import java.util.List;
 
 public record OpenAIChatResponseChunk(
         @SerializedName("id") String id,
-        @SerializedName("object") String object,
-        @SerializedName("created") long created,
         @SerializedName("model") String model,
+        @SerializedName("created") long created,
+        @SerializedName("choices") List<OpenAIChatResponseChoice> choices,
         @SerializedName("system_fingerprint") String systemFingerprint,
-        @SerializedName("choices") List<OpenAIChatResponseChoice> choices
+        @SerializedName("object") String object
 ) {
     public record OpenAIChatResponseChoice(
             @SerializedName("index") int index,
@@ -23,6 +23,5 @@ public record OpenAIChatResponseChunk(
 
     public record Delta(@Nullable @SerializedName("role") String role,
                         @Nullable @SerializedName("content") String content) {
-
     }
 }

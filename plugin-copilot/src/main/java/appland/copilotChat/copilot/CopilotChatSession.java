@@ -122,12 +122,4 @@ public final class CopilotChatSession {
 
     // dummy ID to send as system_fingerprint property to OpenAI/Navie
     public static @NotNull String systemFingerprint = UUID.randomUUID().toString();
-
-    private record CopilotChatCompletionsStreamChunk(
-            @SerializedName("id") @NotNull String id,
-            @SerializedName("model") @NotNull String model,
-            @SerializedName("created") long created,
-            @SerializedName("choices") List<@NotNull CopilotChatResponseChoice> choices
-    ) {
-    }
 }
