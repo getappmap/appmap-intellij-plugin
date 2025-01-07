@@ -14,7 +14,8 @@ public final class GitHubCopilot {
     public static final CharSequence OPEN_AI_ORGANIZATION = "github-copilot";
     public static final CharSequence OPEN_AI_VERSION = "2020-10-01";
 
-    public static final String FALLBACK_MODEL_NAME = "gpt-4o";
+    public static final String CHAT_FALLBACK_MODEL_NAME = "gpt-4o";
+    public static final double CHAT_DEFAULT_TEMPERATURE = 0.1;
 
     private GitHubCopilot() {
     }
