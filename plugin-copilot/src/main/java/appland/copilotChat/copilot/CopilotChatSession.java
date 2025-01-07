@@ -2,6 +2,7 @@ package appland.copilotChat.copilot;
 
 import appland.utils.GsonUtils;
 import com.google.gson.annotations.SerializedName;
+import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.util.Urls;
 import com.intellij.util.io.HttpRequests;
 import io.netty.handler.codec.http.HttpHeaderNames;
@@ -10,12 +11,15 @@ import org.jetbrains.annotations.Nullable;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.net.HttpURLConnection;
 import java.net.URLConnection;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
 public final class CopilotChatSession {
+    private static final Logger LOG = Logger.getInstance(CopilotChatSession.class);
+
     private final @NotNull String endpoint;
     private final @NotNull UpdatingCopilotToken copilotToken;
     private final @NotNull Map<@NotNull String, @NotNull String> baseHeaders;
@@ -52,21 +56,39 @@ public final class CopilotChatSession {
         var appliedTemp = temperature != null ? temperature : 0.1;
         var copilotRequest = new CopilotChatRequest(model.id(), messages, maxOutputTokens, true, appliedTemp, topP, n);
 
-        var chatEndpoint = Urls.newFromEncoded(endpoint + "/chat/completions");
-        HttpRequests.post(chatEndpoint.toExternalForm(), "application/json")
-                .isReadResponseOnError(true)
-                .gzip(true)
-                .tuner(connection -> {
-                    applyHeaders(connection, baseHeaders);
-                    connection.setRequestProperty("openai-intent", "conversation-panel");
-                    connection.setRequestProperty("openai-organization", "github-copilot");
-                    connection.setRequestProperty("x-request-id", requestId());
-                })
-                .connect(httpRequest -> {
-                    httpRequest.write(GitHubCopilotService.gson.toJson(copilotRequest));
-                    readServerEvents(httpRequest.getReader(), responseListener);
-                    return null;
-                });
+        try {
+            var chatEndpoint = Urls.newFromEncoded(endpoint + "/chat/completions");
+            HttpRequests.post(chatEndpoint.toExternalForm(), "application/json")
+                    .gzip(true)
+                    .throwStatusCodeException(true)
+                    .isReadResponseOnError(true)
+                    .tuner(connection -> {
+                        applyHeaders(connection, baseHeaders);
+                        connection.setRequestProperty("openai-intent", "conversation-panel");
+                        connection.setRequestProperty("openai-organization", "github-copilot");
+                        connection.setRequestProperty("x-request-id", requestId());
+                    })
+                    .connect(httpRequest -> {
+                        httpRequest.write(GsonUtils.GSON.toJson(copilotRequest));
+
+                        // Don't call "getReader()" for error responses,
+                        // to not prevent the method calling this processor will throw a HTTP error exception.
+                        if (httpRequest.getConnection() instanceof HttpURLConnection) {
+                            var responseCode = ((HttpURLConnection) httpRequest.getConnection()).getResponseCode();
+                            if (responseCode >= 400) {
+                                return null;
+                            }
+                        }
+
+                        readServerEvents(httpRequest.getReader(), responseListener);
+                        return null;
+                    });
+        } catch (HttpRequests.HttpStatusException e) {
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("Failed to send chat request. ", e);
+            }
+            throw e;
+        }
     }
 
     private static void readServerEvents(@NotNull BufferedReader response,
@@ -99,7 +121,7 @@ public final class CopilotChatSession {
 
     private static void processSSEChunk(@NotNull CopilotChatResponseListener responseListener,
                                         @NotNull String sseData) {
-        var chunk = GitHubCopilotService.gson.fromJson(sseData, CopilotChatCompletionsStreamChunk.class);
+        var chunk = GsonUtils.GSON.fromJson(sseData, CopilotChatCompletionsStreamChunk.class);
 
         var id = chunk.id();
         var modelName = chunk.model();

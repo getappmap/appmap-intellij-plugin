@@ -1,9 +1,12 @@
 package appland.copilotChat.copilot;
 
+import appland.utils.GsonUtils;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.util.io.HttpRequests;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
+import java.time.Instant;
 
 /**
  * Refreshed the GitHub Copilot token when it's near its expiration.
@@ -21,7 +24,7 @@ class UpdatingCopilotToken {
                         connection.addRequestProperty("Authorization", "Bearer " + githubToken);
                     }).readString();
 
-            return GitHubCopilotService.gson.fromJson(response, CopilotToken.class);
+            return GsonUtils.GSON.fromJson(response, CopilotToken.class);
         } catch (Exception e) {
             LOG.warn("Failed to fetch a new Copilot token", e);
             return null;
@@ -55,7 +58,7 @@ class UpdatingCopilotToken {
      */
     @NotNull String getAuthorizationHeader() {
         // GitHub Copilot's default seems to be 30 minutes (1800 seconds)
-        var remainingSeconds = token.expiresAt() - System.currentTimeMillis() / 1000;
+        var remainingSeconds = token.expiresAt() - Instant.now().getEpochSecond();
         if (remainingSeconds < 180) {
             LOG.debug("Copilot token is about to expire, refreshing it");
             var newToken = fetchRawCopilotToken(githubToken);
