@@ -18,17 +18,18 @@ abstract class CopilotToOpenAICompletionsConverter implements CopilotChatRespons
     public void onChatResponse(@NotNull String id,
                                @NotNull String model,
                                long created,
-                               @NotNull CopilotChatResponseChoice item) {
-        var delta = new OpenAIChatResponseChunk.Delta(item.delta().role(), item.delta().content());
-        var choice = new OpenAIChatResponseChunk.OpenAIChatResponseChoice(item.index(), delta, item.finishReason());
-        var chunk = new OpenAIChatResponseChunk(
+                               @NotNull List<CopilotChatResponseChoice> choices) {
+        var openAIChoices = choices.stream().map(c -> {
+            var delta = new OpenAIChatResponseChunk.Delta(c.delta().role(), c.delta().content());
+            return new OpenAIChatResponseChunk.OpenAIChatResponseChoice(c.index(), delta, c.finishReason());
+        }).toList();
+
+        onNewChunk(new OpenAIChatResponseChunk(
                 id,
                 model,
                 created,
-                List.of(choice),
+                openAIChoices,
                 CopilotChatSession.systemFingerprint,
-                "chat-completion-chunk");
-
-        onNewChunk(chunk);
+                "chat-completion-chunk"));
     }
 }

@@ -121,14 +121,22 @@ public class NavieCopilotChatRequestHandler extends HttpRequestHandler {
             @Override
             protected void onNewChunk(@NotNull OpenAIChatResponseChunk chunk) {
                 var json = GsonUtils.GSON.toJson(chunk);
-                var content = Unpooled.copiedBuffer("data: " + json + "\n\n", StandardCharsets.UTF_8);
-                channel.writeAndFlush(new DefaultHttpContent(content));
+                var httpContent = new DefaultHttpContent(Unpooled.copiedBuffer("data: " + json + "\n\n", StandardCharsets.UTF_8));
+                try {
+                    channel.writeAndFlush(httpContent);
+                } finally {
+                    httpContent.release();
+                }
             }
 
             @Override
             public void end() {
-                var content = Unpooled.copiedBuffer("data: [DONE]\n\n", StandardCharsets.UTF_8);
-                channel.writeAndFlush(new DefaultHttpContent(content));
+                var httpContent = new DefaultHttpContent(Unpooled.copiedBuffer("data: [DONE]\n\n", StandardCharsets.UTF_8));
+                try {
+                    channel.writeAndFlush(httpContent);
+                } finally {
+                    httpContent.release();
+                }
 
                 var future = channel.writeAndFlush(LastHttpContent.EMPTY_LAST_CONTENT);
                 future.addListener(ChannelFutureListener.CLOSE);
