@@ -53,7 +53,7 @@ public final class CopilotChatSession {
                     @Nullable Double topP,
                     @Nullable Integer n) throws IOException {
         var maxOutputTokens = model.capabilities().limits().get(CopilotModelDefinition.CopilotCapabilityLimit.MaxOutputTokens);
-        var appliedTemp = temperature != null ? temperature : 0.1;
+        var appliedTemp = temperature != null ? temperature : GitHubCopilot.CHAT_DEFAULT_TEMPERATURE;
         var copilotRequest = new CopilotChatRequest(model.id(), messages, maxOutputTokens, true, appliedTemp, topP, n);
 
         try {

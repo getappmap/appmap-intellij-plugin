@@ -87,7 +87,7 @@ public class NavieCopilotChatRequestHandler extends HttpRequestHandler {
         var requestBody = fullHttpRequest.content().toString(StandardCharsets.UTF_8);
         var openAIRequest = GsonUtils.GSON.fromJson(requestBody, OpenAIChatCompletionsRequest.class);
 
-        var copilotModel = getCopilotModel(openAIRequest.model(), GitHubCopilot.FALLBACK_MODEL_NAME);
+        var copilotModel = getCopilotModel(openAIRequest.model(), GitHubCopilot.CHAT_FALLBACK_MODEL_NAME);
         if (copilotModel == null) {
             Responses.response(HttpResponseStatus.INTERNAL_SERVER_ERROR,
                     fullHttpRequest,
@@ -122,21 +122,13 @@ public class NavieCopilotChatRequestHandler extends HttpRequestHandler {
             protected void onNewChunk(@NotNull OpenAIChatResponseChunk chunk) {
                 var json = GsonUtils.GSON.toJson(chunk);
                 var httpContent = new DefaultHttpContent(Unpooled.copiedBuffer("data: " + json + "\n\n", StandardCharsets.UTF_8));
-                try {
-                    channel.writeAndFlush(httpContent);
-                } finally {
-                    httpContent.release();
-                }
+                channel.writeAndFlush(httpContent);
             }
 
             @Override
             public void end() {
                 var httpContent = new DefaultHttpContent(Unpooled.copiedBuffer("data: [DONE]\n\n", StandardCharsets.UTF_8));
-                try {
-                    channel.writeAndFlush(httpContent);
-                } finally {
-                    httpContent.release();
-                }
+                channel.writeAndFlush(httpContent);
 
                 var future = channel.writeAndFlush(LastHttpContent.EMPTY_LAST_CONTENT);
                 future.addListener(ChannelFutureListener.CLOSE);
