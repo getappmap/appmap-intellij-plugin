@@ -126,9 +126,7 @@ public final class CopilotChatSession {
         var id = chunk.id();
         var modelName = chunk.model();
         var created = chunk.created();
-        for (var choice : chunk.choices()) {
-            responseListener.onChatResponse(id, modelName, created, choice);
-        }
+        responseListener.onChatResponse(id, modelName, created, chunk.choices());
     }
 
     private void applyHeaders(@NotNull URLConnection connection, @NotNull Map<String, String> headers) {
