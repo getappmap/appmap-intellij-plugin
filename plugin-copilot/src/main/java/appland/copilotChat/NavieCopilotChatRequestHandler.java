@@ -3,10 +3,12 @@ package appland.copilotChat;
 import appland.copilotChat.copilot.*;
 import appland.copilotChat.openAI.*;
 import appland.utils.GsonUtils;
+import com.google.gson.JsonParseException;
+import com.google.gson.annotations.SerializedName;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.util.Urls;
-import com.intellij.util.io.HttpRequests;
+import com.knuddels.jtokkit.api.Encoding;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
@@ -15,7 +17,6 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.ide.BuiltInServerManager;
 import org.jetbrains.ide.HttpRequestHandler;
-import org.jetbrains.io.NettyUtil;
 import org.jetbrains.io.Responses;
 
 import java.io.IOException;
@@ -24,6 +25,7 @@ import java.security.MessageDigest;
 import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.regex.Pattern;
 
 /**
  * Adds a new request handler to the IDE's built-in HTTP server.
@@ -95,19 +97,24 @@ public class NavieCopilotChatRequestHandler extends HttpRequestHandler {
             return;
         }
 
+        var tokenizer = GitHubCopilotService.getInstance().loadTokenizer(copilotModel.capabilities().tokenizer());
+
         try {
             if (openAIRequest.stream()) {
-                sendStreamingChatResponse(chatSession, copilotModel, openAIRequest, channelHandlerContext);
+                sendStreamingChatResponse(chatSession,
+                        copilotModel,
+                        openAIRequest,
+                        channelHandlerContext);
             } else {
-                sendCompleteChatResponse(chatSession, copilotModel, fullHttpRequest, openAIRequest, channelHandlerContext);
+                sendCompleteChatResponse(chatSession,
+                        copilotModel,
+                        fullHttpRequest,
+                        openAIRequest,
+                        channelHandlerContext,
+                        tokenizer);
             }
-        } catch (HttpRequests.HttpStatusException e) {
-            Responses.response(HttpResponseStatus.valueOf(e.getStatusCode()), fullHttpRequest, e.getMessage());
-            NettyUtil.logAndClose(e, Logger.getInstance(this.getClass()), channelHandlerContext.channel());
-        } catch (Exception e) {
-            var message = "Unknown error executing HTTP request: " + e.getMessage();
-            Responses.response(HttpResponseStatus.INTERNAL_SERVER_ERROR, fullHttpRequest, message);
-            NettyUtil.logAndClose(e, Logger.getInstance(this.getClass()), channelHandlerContext.channel());
+        } catch (IOException e) {
+            handleHttpServerError(fullHttpRequest, e, copilotModel, tokenizer, openAIRequest);
         }
     }
 
@@ -153,9 +160,8 @@ public class NavieCopilotChatRequestHandler extends HttpRequestHandler {
                                           @NotNull CopilotModelDefinition copilotModel,
                                           @NotNull FullHttpRequest fullHttpRequest,
                                           @NotNull OpenAIChatCompletionsRequest openAIRequest,
-                                          @NotNull ChannelHandlerContext channelHandlerContext) throws IOException {
-        var tokenizer = GitHubCopilotService.getInstance().loadTokenizer(copilotModel.capabilities().tokenizer());
-
+                                          @NotNull ChannelHandlerContext channelHandlerContext,
+                                          @NotNull Encoding tokenizer) throws IOException {
         var promptTokens = new AtomicInteger(0);
         for (var message : openAIRequest.messages()) {
             promptTokens.addAndGet(tokenizer.countTokens(message.content()));
@@ -274,5 +280,83 @@ public class NavieCopilotChatRequestHandler extends HttpRequestHandler {
      */
     private static boolean isEqualByHash(@NotNull String expectedValue, @NotNull String value) {
         return MessageDigest.isEqual(expectedValue.getBytes(StandardCharsets.UTF_8), value.getBytes(StandardCharsets.UTF_8));
+    }
+
+    private static void handleHttpServerError(@NotNull FullHttpRequest fullHttpRequest,
+                                              @NotNull Exception exception,
+                                              @NotNull CopilotModelDefinition copilotModel,
+                                              @NotNull Encoding tokenizer, @NotNull OpenAIChatCompletionsRequest openAIRequest) {
+        // Navie and Copilot share the same JSON structure for an error
+        record ResponseErrorMessage(@SerializedName("error") Error error) {
+            record Error(@SerializedName("message") @Nullable String message,
+                         @SerializedName("type") @Nullable String type, @SerializedName("param") @Nullable String param,
+                         @SerializedName("code") @Nullable String code) {
+            }
+        }
+
+        ResponseErrorMessage serverError = null;
+        // try to parse the message as JSON and fallback to a generic error if it fails
+        try {
+            serverError = GsonUtils.GSON.fromJson(exception.getMessage(), ResponseErrorMessage.class);
+        } catch (JsonParseException e) {
+            // ignored
+        }
+
+        Integer maxInputTokens = null;
+        Integer tokensUsed = null;
+
+        // for example:
+        // {"error":{"message":"prompt token count of 503856 exceeds the limit of 64000","param":"","code":"","type":""}}
+        var hasValidServerError = serverError != null && serverError.error != null && serverError.error.message != null;
+        if (hasValidServerError) {
+            var copilotMessage = serverError.error.message;
+            var pattern = Pattern.compile("prompt token count of (\\d+) exceeds the limit of (\\d+)");
+            var matcher = pattern.matcher(copilotMessage);
+            if (matcher.find()) {
+                tokensUsed = Integer.parseInt(matcher.group(1));
+                maxInputTokens = Integer.parseInt(matcher.group(2));
+            }
+        }
+
+        if (maxInputTokens == null) {
+            maxInputTokens = copilotModel.capabilities()
+                    .limits()
+                    .get(CopilotModelDefinition.CopilotCapabilityLimit.MaxPromptTokens);
+        }
+
+        // as a fallback, count the tokens used by the prompt messages
+        if (tokensUsed == null) {
+            var tokens = 0;
+            for (var message : openAIRequest.messages()) {
+                tokens += tokenizer.countTokens(message.content());
+            }
+            tokensUsed = tokens;
+        }
+
+        // Navie always expects a 422 response status code
+        // If the server did not provide the max counts, we only send a context_length_exceeded error if the tokens used
+        // exceed the max input tokens.
+        ResponseErrorMessage navieError;
+        if (hasValidServerError || maxInputTokens != null && tokensUsed > maxInputTokens) {
+            navieError = new ResponseErrorMessage(new ResponseErrorMessage.Error(
+                    "This model's maximum context length is " + maxInputTokens + " tokens. " +
+                            "However, your messages resulted in " + tokensUsed + " tokens.",
+                    "invalid_request_error",
+                    "messages",
+                    "context_length_exceeded"
+            ));
+        } else {
+            navieError = new ResponseErrorMessage(new ResponseErrorMessage.Error(
+                    "An unknown error occurred while processing your request.",
+                    "server_error",
+                    null,
+                    null
+            ));
+        }
+
+        // Navie always expects a 422 response status code
+        Responses.response(HttpResponseStatus.UNPROCESSABLE_ENTITY,
+                fullHttpRequest,
+                GsonUtils.GSON.toJson(navieError));
     }
 }
