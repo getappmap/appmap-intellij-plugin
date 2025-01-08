@@ -1,6 +1,7 @@
 package appland.actions;
 
 import appland.AppMapBundle;
+import appland.settings.AppMapApplicationSettingsService;
 import appland.settings.AppMapSecureApplicationSettingsService;
 import appland.utils.WrappingTextInputDialog;
 import com.intellij.openapi.actionSystem.ActionUpdateThread;
@@ -40,6 +41,7 @@ public class SetNavieOpenAiKeyAction extends AnAction implements DumbAware {
         var newKey = dialog.getInputString();
         if (newKey != null) {
             AppMapSecureApplicationSettingsService.getInstance().setOpenAIKey(StringUtil.nullize(newKey));
+            AppMapApplicationSettingsService.getInstance().setEnableCopilotIntegration(StringUtil.isNotEmpty(newKey));
         }
     }
 }

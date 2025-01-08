@@ -50,6 +50,11 @@ public class AppMapApplicationSettings {
     private volatile boolean cliPassParentEnv = true;
 
     /**
+     * If {@code true}, the GitHub Copilot integration is enabled if the GitHub Copilot plugin is installed and enabled.
+     */
+    private volatile boolean enableCopilotIntegration = true;
+
+    /**
      * Maximum accepted file size in kilobytes for files pinned inside a Navie webview editor.
      */
     private volatile int maxPinnedFileSizeKB = 20;
