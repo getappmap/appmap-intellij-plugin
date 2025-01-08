@@ -64,9 +64,9 @@ public final class CopilotChatSession {
                     .isReadResponseOnError(true)
                     .tuner(connection -> {
                         applyHeaders(connection, baseHeaders);
-                        connection.setRequestProperty("openai-intent", "conversation-panel");
-                        connection.setRequestProperty("openai-organization", "github-copilot");
-                        connection.setRequestProperty("x-request-id", requestId());
+                        connection.setRequestProperty(GitHubCopilot.HEADER_OPENAI_INTENT, "conversation-panel");
+                        connection.setRequestProperty(GitHubCopilot.HEADER_OPENAI_ORGANIZATION, "github-copilot");
+                        connection.setRequestProperty(GitHubCopilot.HEADER_REQUEST_ID, requestId());
                     })
                     .connect(httpRequest -> {
                         httpRequest.write(GsonUtils.GSON.toJson(copilotRequest));

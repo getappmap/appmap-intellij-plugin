@@ -221,9 +221,9 @@ public class NavieCopilotChatRequestHandler extends HttpRequestHandler {
                         channelHandlerContext.channel(),
                         new ReadOnlyHttpHeaders(true,
                                 HttpHeaderNames.CONTENT_TYPE, "application/json",
-                                "openai-organization", GitHubCopilot.OPEN_AI_ORGANIZATION,
-                                "openai-version", GitHubCopilot.OPEN_AI_VERSION,
-                                "x-request-id", CopilotChatSession.requestId()));
+                                GitHubCopilot.HEADER_OPENAI_ORGANIZATION, GitHubCopilot.OPEN_AI_ORGANIZATION,
+                                GitHubCopilot.HEADER_OPENAI_VERSION, GitHubCopilot.OPEN_AI_VERSION,
+                                GitHubCopilot.HEADER_REQUEST_ID, CopilotChatSession.requestId()));
             }
         };
 
@@ -282,6 +282,10 @@ public class NavieCopilotChatRequestHandler extends HttpRequestHandler {
         return MessageDigest.isEqual(expectedValue.getBytes(StandardCharsets.UTF_8), value.getBytes(StandardCharsets.UTF_8));
     }
 
+    /**
+     * Handle a server error response from GitHub Copilot.
+     * If the Copilot API sent a "context token overflow" error, we convert it into a suitable error response for Navie.
+     */
     private static void handleHttpServerError(@NotNull FullHttpRequest fullHttpRequest,
                                               @NotNull Exception exception,
                                               @NotNull CopilotModelDefinition copilotModel,
