@@ -2,6 +2,7 @@ package appland.copilotChat;
 
 import appland.cli.AppLandCliEnvProvider;
 import appland.copilotChat.copilot.GitHubCopilotService;
+import appland.settings.AppMapApplicationSettingsService;
 import com.intellij.ide.plugins.PluginManager;
 
 import java.util.Map;
@@ -26,6 +27,10 @@ public class CopilotAppMapEnvProvider implements AppLandCliEnvProvider {
     }
 
     public static boolean isGitHubCopilotEnabled() {
+        if (!AppMapApplicationSettingsService.getInstance().isEnableCopilotIntegration()) {
+            return false;
+        }
+
         return PluginManager.getLoadedPlugins()
                 .stream()
                 .anyMatch(plugin -> plugin.isEnabled() && plugin.getPluginId().equals(GitHubCopilotService.CopilotPluginId));

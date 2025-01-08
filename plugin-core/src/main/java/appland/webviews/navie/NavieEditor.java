@@ -329,11 +329,15 @@ public class NavieEditor extends WebviewEditor<Void> {
         switch (choice) {
             // Clear LLM environment settings and remove OpenAPI key
             case "default": {
-                var environment = new HashMap<>(AppMapApplicationSettingsService.getInstance().getCliEnvironment());
+                var settings = AppMapApplicationSettingsService.getInstance();
+
+                var environment = new HashMap<>(settings.getCliEnvironment());
                 for (var dropped : AppLandJsonRpcService.LLM_ENV_VARIABLES) {
                     environment.remove(dropped);
                 }
-                AppMapApplicationSettingsService.getInstance().setCliEnvironment(environment);
+
+                settings.setCliEnvironment(environment);
+                settings.setEnableCopilotIntegration(false);
                 AppMapSecureApplicationSettingsService.getInstance().setOpenAIKey(null);
                 return;
             }
@@ -344,7 +348,10 @@ public class NavieEditor extends WebviewEditor<Void> {
                 }, ModalityState.defaultModalityState());
                 return;
             }
-            // Unused, the webview opens a browser windowK
+            case "copilot":
+                AppMapApplicationSettingsService.getInstance().setEnableCopilotIntegration(true);
+                return;
+            // Unused, the webview opens a browser window
             case "own-model":
                 return;
             default:
