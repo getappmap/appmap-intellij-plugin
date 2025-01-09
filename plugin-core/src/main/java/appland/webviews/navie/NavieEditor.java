@@ -13,7 +13,6 @@ import appland.index.IndexedFileListenerUtil;
 import appland.installGuide.InstallGuideEditorProvider;
 import appland.installGuide.InstallGuideViewPage;
 import appland.notifications.AppMapNotifications;
-import appland.rpcService.AppLandJsonRpcService;
 import appland.settings.*;
 import appland.toolwindow.AppMapToolWindowFactory;
 import appland.utils.GsonUtils;
@@ -58,7 +57,6 @@ import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.Executor;
 import java.util.stream.Collectors;
@@ -329,30 +327,26 @@ public class NavieEditor extends WebviewEditor<Void> {
         switch (choice) {
             // Clear LLM environment settings and remove OpenAPI key
             case "default": {
-                var settings = AppMapApplicationSettingsService.getInstance();
-
-                var environment = new HashMap<>(settings.getCliEnvironment());
-                for (var dropped : AppLandJsonRpcService.LLM_ENV_VARIABLES) {
-                    environment.remove(dropped);
-                }
-
-                settings.setCliEnvironment(environment);
-                settings.setEnableCopilotIntegration(false);
                 AppMapSecureApplicationSettingsService.getInstance().setOpenAIKey(null);
+                AppMapApplicationSettingsService.resetCustomModelEnvironmentSettings();
+                // avoid defaulting back to Copilot, which is the default for new users
+                AppMapApplicationSettingsService.getInstance().setCopilotIntegrationDisabledNotifying(true);
                 return;
             }
-            // Ask user for OpenAI API key
+            case "copilot":
+                AppMapSecureApplicationSettingsService.getInstance().setOpenAIKey(null);
+                AppMapApplicationSettingsService.resetCustomModelEnvironmentSettings();
+                AppMapApplicationSettingsService.getInstance().setCopilotIntegrationDisabledNotifying(false);
+                return;
+            // Ask user for OpenAI API key, successful selection by the user turns off the Copilot integration
             case "own-key": {
                 ApplicationManager.getApplication().invokeLater(() -> {
                     SetNavieOpenAiKeyAction.showInputDialog(project);
                 }, ModalityState.defaultModalityState());
                 return;
             }
-            case "copilot":
-                AppMapApplicationSettingsService.getInstance().setEnableCopilotIntegration(true);
-                return;
-            // Unused, the webview opens a browser window
             case "own-model":
+                // no automatic settings, because webview opens a browser window telling the user about manual setup
                 return;
             default:
                 LOG.warn("Unknown type passed to select-llm-option: " + choice);

@@ -574,8 +574,6 @@ public class DefaultCommandLineService implements AppLandCommandLineService {
      */
     private static GeneralCommandLine applyServiceEnvironment(@NotNull GeneralCommandLine commandLine) {
         var settings = AppMapApplicationSettingsService.getInstance();
-        var appMapKey = settings.getApiKey();
-        var openAIKey = AppMapSecureApplicationSettingsService.getInstance().getOpenAIKey();
 
         var environmentType = settings.isCliPassParentEnv()
                 ? GeneralCommandLine.ParentEnvironmentType.CONSOLE
@@ -588,8 +586,6 @@ public class DefaultCommandLineService implements AppLandCommandLineService {
 
         return commandLine.withParentEnvironmentType(environmentType)
                 .withEnvironment(settings.getCliEnvironment())
-                .withEnvironment(isNotEmpty(appMapKey) ? Map.of("APPMAP_API_KEY", appMapKey) : Map.of())
-                .withEnvironment(isNotEmpty(openAIKey) ? Map.of("OPENAI_API_KEY", openAIKey) : Map.of())
                 .withEnvironment(createProxyEnvironment())
                 .withEnvironment(providedEnvironment);
     }

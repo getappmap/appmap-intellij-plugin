@@ -50,9 +50,9 @@ public class AppMapApplicationSettings {
     private volatile boolean cliPassParentEnv = true;
 
     /**
-     * If {@code true}, the GitHub Copilot integration is enabled if the GitHub Copilot plugin is installed and enabled.
+     * If {@code true}, the GitHub Copilot integration was explicitly disabled by the user.
      */
-    private volatile boolean enableCopilotIntegration = true;
+    private volatile boolean copilotIntegrationDisabled = false;
 
     /**
      * Maximum accepted file size in kilobytes for files pinned inside a Navie webview editor.
@@ -73,6 +73,8 @@ public class AppMapApplicationSettings {
         this.cliPassParentEnv = settings.cliPassParentEnv;
         this.maxPinnedFileSizeKB = settings.maxPinnedFileSizeKB;
         this.useAnimation = settings.useAnimation;
+        this.showBrokenProxyWarning = settings.showBrokenProxyWarning;
+        this.copilotIntegrationDisabled = settings.copilotIntegrationDisabled;
     }
 
     public @NotNull Map<String, String> getCliEnvironment() {
@@ -127,6 +129,15 @@ public class AppMapApplicationSettings {
 
     public boolean isAuthenticated() {
         return apiKey != null;
+    }
+
+    public void setCopilotIntegrationDisabledNotifying(boolean copilotIntegrationDisabled) {
+        var changed = this.copilotIntegrationDisabled != copilotIntegrationDisabled;
+        this.copilotIntegrationDisabled = copilotIntegrationDisabled;
+
+        if (changed) {
+            settingsPublisher().copilotIntegrationDisabledChanged();
+        }
     }
 
     @NotNull

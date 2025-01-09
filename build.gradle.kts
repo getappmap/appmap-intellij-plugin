@@ -407,8 +407,13 @@ project(":") {
 project(":plugin-copilot") {
     dependencies {
         implementation(project(":plugin-core"))
-
         implementation("com.knuddels:jtokkit:1.1.0")
+
+        // Unfortunately, we can't use the Copilot plugin in test mode. In test mode with version 1.5.30-231, it throws:
+        //  java.lang.ClassNotFoundException: com.github.copilot.lang.agent.CopilotAgentProcessTestService
+        /*intellijPlatform {
+            plugin("com.github.copilot", prop("copilotPluginVersion"))
+        }*/
     }
 }
 
