@@ -27,6 +27,10 @@ public class CopilotAppMapEnvProvider implements AppLandCliEnvProvider {
         );
     }
 
+    public static boolean isGitHubCopilotIntegrationEnabled() {
+        return !hasCustomModelSettings() && !isGitHubCopilotDisabled();
+    }
+
     /**
      * @return {@code true} if the user has set custom model settings for Navie for an OpenAI or Azure OpenAI API key.
      * Existing settings for a custom key override the Copilot integration.

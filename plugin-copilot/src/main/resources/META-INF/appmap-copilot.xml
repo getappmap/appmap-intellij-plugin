@@ -7,5 +7,7 @@
 
     <extensions defaultExtensionNs="com.intellij">
         <httpRequestHandler implementation="appland.copilotChat.NavieCopilotChatRequestHandler"/>
+
+        <postStartupActivity implementation="appland.copilotChat.CopilotStartupNotificationActivity"/>
     </extensions>
 </idea-plugin>

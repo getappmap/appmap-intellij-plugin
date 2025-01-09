@@ -2,6 +2,7 @@ package appland.settings;
 
 import com.google.common.collect.Maps;
 import com.intellij.openapi.application.ApplicationManager;
+import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.util.xmlb.annotations.Transient;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -55,6 +56,11 @@ public class AppMapApplicationSettings {
     private volatile boolean copilotIntegrationDisabled = false;
 
     /**
+     * Tracks if the Copilot integration was detected to be available at least once.
+     */
+    private volatile boolean copilotIntegrationDetected = false;
+
+    /**
      * Maximum accepted file size in kilobytes for files pinned inside a Navie webview editor.
      */
     private volatile int maxPinnedFileSizeKB = 20;
@@ -75,6 +81,7 @@ public class AppMapApplicationSettings {
         this.useAnimation = settings.useAnimation;
         this.showBrokenProxyWarning = settings.showBrokenProxyWarning;
         this.copilotIntegrationDisabled = settings.copilotIntegrationDisabled;
+        this.copilotIntegrationDetected = settings.copilotIntegrationDetected;
     }
 
     public @NotNull Map<String, String> getCliEnvironment() {
@@ -107,6 +114,10 @@ public class AppMapApplicationSettings {
                 settingsPublisher().cliEnvironmentChanged(modifiedKeys);
             }
         }
+    }
+
+    public boolean hasAppMapKey() {
+        return StringUtil.isNotEmpty(apiKey);
     }
 
     public void setApiKeyNotifying(@Nullable String apiKey) {

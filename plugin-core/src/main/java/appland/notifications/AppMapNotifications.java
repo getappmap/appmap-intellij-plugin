@@ -15,8 +15,10 @@ import com.intellij.openapi.actionSystem.DataContext;
 import com.intellij.openapi.application.ApplicationInfo;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.application.ModalityState;
+import com.intellij.openapi.application.ReadAction;
 import com.intellij.openapi.options.ShowSettingsUtil;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.project.ProjectManager;
 import com.intellij.openapi.ui.DialogWrapper;
 import com.intellij.openapi.ui.Messages;
 import com.intellij.openapi.util.SystemInfo;
@@ -312,6 +314,44 @@ public final class AppMapNotifications {
                 }
             });
             notification.notify(project);
+        });
+    }
+
+    /**
+     * Displays a notification that the Copilot authentication is required in all open projects.
+     */
+    public static void showFirstCopilotIntegrationEnabled() {
+        ApplicationManager.getApplication().assertIsDispatchThread();
+
+        ReadAction.run(() -> {
+            for (var project : ProjectManager.getInstance().getOpenProjects()) {
+                new AppMapFullContentNotification(
+                        GENERIC_NOTIFICATIONS_ID, null,
+                        AppMapBundle.get("notification.copilotIntegrationAvailable.title"),
+                        null,
+                        AppMapBundle.get("notification.copilotIntegrationAvailable.content"),
+                        NotificationType.INFORMATION, null
+                ).notify(project);
+            }
+        });
+    }
+
+    /**
+     * Displays a notification that the Copilot authentication is required in all open projects.
+     */
+    public static void showCopilotAuthenticationRequired() {
+        ApplicationManager.getApplication().assertIsDispatchThread();
+
+        ReadAction.run(() -> {
+            for (var project : ProjectManager.getInstance().getOpenProjects()) {
+                new AppMapFullContentNotification(
+                        GENERIC_NOTIFICATIONS_ID, null,
+                        AppMapBundle.get("notification.copilotAuthRequired.title"),
+                        null,
+                        AppMapBundle.get("notification.copilotAuthRequired.content"),
+                        NotificationType.INFORMATION, null
+                ).notify(project);
+            }
         });
     }
 }

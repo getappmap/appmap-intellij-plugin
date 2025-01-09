@@ -40,6 +40,10 @@ public final class GitHubCopilotService {
 
     private final EncodingRegistry registry = Encodings.newDefaultEncodingRegistry();
 
+    public boolean isCopilotAuthenticated() {
+        return loadGitHubOAuthToken() != null;
+    }
+
     public @NotNull Encoding loadTokenizer(@NotNull String tokenizerName) {
         var encodingType = EncodingType.fromName(tokenizerName).orElseThrow();
         return registry.getEncoding(encodingType);
