@@ -34,6 +34,11 @@
                         interface="appland.cli.AppLandCliEnvProvider"/>
     </extensionPoints>
 
+    <extensions defaultExtensionNs="appland.cli">
+        <envProvider order="last"
+                     implementation="appland.webviews.navie.NavieLanguageModelEnvProvider"/>
+    </extensions>
+
     <extensions defaultExtensionNs="com.intellij">
         <applicationService serviceImplementation="appland.telemetry.TelemetryService"/>
         <applicationService serviceImplementation="appland.AppLandLifecycleService"/>

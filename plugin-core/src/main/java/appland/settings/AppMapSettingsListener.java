@@ -30,6 +30,9 @@ public interface AppMapSettingsListener {
     default void openAIKeyChange() {
     }
 
+    default void copilotIntegrationDisabledChanged() {
+    }
+
     default void scannedEnabledChanged() {
     }
 
