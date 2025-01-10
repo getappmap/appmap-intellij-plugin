@@ -4,6 +4,7 @@ import appland.cli.AppLandCliEnvProvider;
 import appland.copilotChat.copilot.GitHubCopilotService;
 import appland.rpcService.AppLandJsonRpcService;
 import appland.settings.AppMapApplicationSettingsService;
+import appland.settings.AppMapSecureApplicationSettingsService;
 import com.intellij.ide.plugins.PluginManager;
 
 import java.util.Map;
@@ -37,7 +38,9 @@ public class CopilotAppMapEnvProvider implements AppLandCliEnvProvider {
      */
     public static boolean hasCustomModelSettings() {
         var environment = AppMapApplicationSettingsService.getInstance().getCliEnvironment();
-        return environment.containsKey(AppLandJsonRpcService.OPENAI_API_KEY)
+        return AppMapSecureApplicationSettingsService.getInstance().hasOpenAIKey()
+                || environment.containsKey(AppLandJsonRpcService.OPENAI_API_KEY)
+                || environment.containsKey(AppLandJsonRpcService.OPENAI_BASE_URL)
                 || environment.containsKey(AppLandJsonRpcService.AZURE_OPENAI_API_KEY);
     }
 

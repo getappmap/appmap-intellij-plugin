@@ -19,10 +19,11 @@ public interface AppLandJsonRpcService extends Disposable {
 
     String OPENAI_API_KEY = "OPENAI_API_KEY";
     String AZURE_OPENAI_API_KEY = "AZURE_OPENAI_API_KEY";
+    String OPENAI_BASE_URL = "OPENAI_BASE_URL";
     // all environment variables, which define LLM settings of Navie
     Set<String> LLM_ENV_VARIABLES = Set.of(
             OPENAI_API_KEY,
-            "OPENAI_BASE_URL",
+            OPENAI_BASE_URL,
             "APPMAP_NAVIE_MODEL",
             "APPMAP_NAVIE_TOKEN_LIMIT",
             AZURE_OPENAI_API_KEY,
