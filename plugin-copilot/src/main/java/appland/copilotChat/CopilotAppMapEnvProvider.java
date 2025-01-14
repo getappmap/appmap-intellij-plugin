@@ -17,7 +17,7 @@ import java.util.Map;
 public class CopilotAppMapEnvProvider implements AppLandCliEnvProvider {
     @Override
     public Map<String, String> getEnvironment() {
-        if (hasCustomModelSettings() || isGitHubCopilotDisabled()) {
+        if (isDisabled()) {
             return Map.of();
         }
 
@@ -28,15 +28,15 @@ public class CopilotAppMapEnvProvider implements AppLandCliEnvProvider {
         );
     }
 
-    public static boolean isGitHubCopilotIntegrationEnabled() {
-        return !hasCustomModelSettings() && !isGitHubCopilotDisabled();
+    public static boolean isDisabled() {
+        return hasCustomAppMapModelSettings() || isGitHubCopilotDisabled();
     }
 
     /**
      * @return {@code true} if the user has set custom model settings for Navie for an OpenAI or Azure OpenAI API key.
      * Existing settings for a custom key override the Copilot integration.
      */
-    public static boolean hasCustomModelSettings() {
+    static boolean hasCustomAppMapModelSettings() {
         var environment = AppMapApplicationSettingsService.getInstance().getCliEnvironment();
         return AppMapSecureApplicationSettingsService.getInstance().hasOpenAIKey()
                 || environment.containsKey(AppLandJsonRpcService.OPENAI_API_KEY)
@@ -44,7 +44,7 @@ public class CopilotAppMapEnvProvider implements AppLandCliEnvProvider {
                 || environment.containsKey(AppLandJsonRpcService.AZURE_OPENAI_API_KEY);
     }
 
-    public static boolean isGitHubCopilotDisabled() {
+    private static boolean isGitHubCopilotDisabled() {
         if (AppMapApplicationSettingsService.getInstance().isCopilotIntegrationDisabled()) {
             return true;
         }

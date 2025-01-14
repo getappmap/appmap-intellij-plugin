@@ -21,7 +21,7 @@ public class CopilotStartupNotificationActivity implements StartupActivity, Dumb
             return;
         }
         // don't show if the GitHub Copilot plugin is unavailable
-        if (!CopilotAppMapEnvProvider.isGitHubCopilotIntegrationEnabled()) {
+        if (CopilotAppMapEnvProvider.isDisabled()) {
             return;
         }
 
