@@ -70,16 +70,14 @@ Navie provides different command modes to assist you with your code and project.
 
 ## Activating Navie
 
-**From the Tools menu**
-
-You can open Navie by clicking on the JetBrains menu option *Tools -> AppMap*. From there you can select *Explain with
-AppMap Navie*.
-
+**Activate Navie from the Tools menu**
+Select 'Explain with AppMap Navie AI' from the Tools/AppMap... dropdown
 ![Open Navie from Tools](https://appmap.io/assets/img/product/tools-appmap-vscode.png)
 
-**From the sidebar panel**
-
+**Activate Navie from the AppMap sidebar**
+Click the 'New Navie Chat' button
 ![New Navie Chat](https://appmap.io/assets/img/product/new-navie-chat.png)
+
 
 ## Add Files to a Navie chat
 
@@ -91,7 +89,17 @@ as "pinning". Some types of files you may want to pin include:
 * Code files
 * Navie chat responses from previous conversations
 
+**Pin files from the file list**
+Right-click on a file to select 'AppMap: Add Files to Navie Context'
+![New Navie Chat](https://appmap.io/assets/img/product/add-context-from-file.png)
+
+**Pin files from a Navie response**
+Click the pin icon in the header of a Navie response
 ![Pin from Response](https://appmap.io/assets/img/pin-from-response.png)
+
+**Pin files from the Navie's Context Sources Pane**
+Click the 'Add Context' button 
+![New Navie Chat](https://appmap.io/assets/img/product/add-context-in-context-window.png)
 
 ## Choosing your LLM for Navie
 
