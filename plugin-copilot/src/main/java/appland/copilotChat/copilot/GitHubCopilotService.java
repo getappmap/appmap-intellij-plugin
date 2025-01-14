@@ -9,6 +9,9 @@ import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.components.Service;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.extensions.PluginId;
+import com.intellij.openapi.util.SystemInfo;
+import com.intellij.openapi.util.text.StringUtil;
+import com.intellij.util.EnvironmentUtil;
 import com.knuddels.jtokkit.Encodings;
 import com.knuddels.jtokkit.api.Encoding;
 import com.knuddels.jtokkit.api.EncodingRegistry;
@@ -112,7 +115,7 @@ public final class GitHubCopilotService {
      * @return The {@link Path} to the GitHub Copilot plugin's configuration file, or {@code null} if it could not be found.
      */
     private static @Null Path findGitHubCopilotConfig() {
-        var basePath = Path.of(SystemProperties.getUserHome(), ".config", "github-copilot");
+        var basePath = findCopilotSettingsDirectory();
         if (!Files.isDirectory(basePath)) {
             return null;
         }
@@ -128,6 +131,25 @@ public final class GitHubCopilotService {
         }
 
         return null;
+    }
+
+    /**
+     * @return The {@link java.nio.file.Path} to the GitHub Copilot base directory
+     */
+    private static @NotNull Path findCopilotSettingsDirectory() {
+        Path localAppDataPath;
+        if (SystemInfo.isWindows) {
+            // Windows: %LOCALAPPDATA%\AppData\Local\github-copilot
+            var localAppData = EnvironmentUtil.getValue("LOCALAPPDATA");
+            localAppDataPath = StringUtil.isNotEmpty(localAppData)
+                    ? Path.of(localAppData)
+                    : Path.of(SystemProperties.getUserHome(), "AppData", "Local");
+        } else {
+            // Linux and macOS: ~/.config/github-copilot
+            localAppDataPath = Path.of(SystemProperties.getUserHome(), ".config");
+        }
+
+        return localAppDataPath.resolve("github-copilot");
     }
 
     /**
