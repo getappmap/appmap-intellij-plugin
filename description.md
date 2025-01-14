@@ -94,7 +94,7 @@ as "pinning". Some types of files you may want to pin include:
 **Pin files from the file list**  
 Right-click on a file to select 'AppMap: Add Files to Navie Context'  
 
-![New Navie Chat](https://appmap.io/assets/img/product/add-context-from-file.png)
+![Add context from file](https://appmap.io/assets/img/product/add-context-from-file.png)
 
 **Pin files from a Navie response**  
 Click the pin icon in the header of a Navie response  
@@ -104,7 +104,7 @@ Click the pin icon in the header of a Navie response
 **Pin files from the Navie's Context Sources Pane**  
 Click the 'Add Context' button  
 
-![New Navie Chat](https://appmap.io/assets/img/product/add-context-in-context-window.png)
+![Add context from the context window](https://appmap.io/assets/img/product/add-context-in-context-window.png)
 
 ## Choosing your LLM for Navie
 
