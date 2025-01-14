@@ -7,9 +7,6 @@ developer that knows your application best.
 Choose your AI LLM to use with Navie AI including: GitHub Copilot’s LLM, OpenAI, Anthropic Claude, Gemini, and local
 models.
 
-TODO: Update header image
-
-
 ## Requirements and Use
 
 **2023.1** and newer JetBrains IDEs are required to use this plugin.  
@@ -78,7 +75,7 @@ AppMap Navie*.
 
 **From the sidebar panel**
 
-TODO: Include a screenshot of "New Navie Chat" in the sidebar.
+![New Navie Chat](https://appmap.io/assets/img/product/new-navie-chat.png)
 
 ## Add files to a Navie chat
 
@@ -116,7 +113,7 @@ Navie can assistance with making AppMap data. Use the `@help` command for this.
 
 In IntelliJ, you can record AppMap data using the "Start with AppMap" menu item.
 
-TODO: Screenshot of Start with AppMap
+![Start with AppMap](https://appmap.io/assets/img/product/start-with-appmap.png)
 
 #### Requirements for making AppMap data
 
