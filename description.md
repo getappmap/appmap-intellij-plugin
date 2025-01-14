@@ -21,7 +21,7 @@ Refer to AppMap documentation for the latest information on supported languages,
 [*] AppMap Navie is designed to work with a wide range of languages and frameworks, but AppMap data recordings require a
 language-specific library.
 
-## Get started
+## Get Started
 
 1. **Install [the AppMap Plugin](https://plugins.jetbrains.com/plugin/16701-appmap)** from within the code editor or
    from the marketplace.
@@ -38,9 +38,9 @@ language-specific library.
 specifications, documentation,
 and reasoning about a broad context of mature application code.
 
-## Chat Modes
+## Command Modes
 
-Navie provides different modes of interaction to assist you with your code and project. Here's a quick overview:
+Navie provides different command modes to assist you with your code and project. Here's a quick overview:
 
 - **`@explain` (default)**: Provides context-aware suggestions, specific solutions, and reasons about the
   larger context of the specific code being worked on.
@@ -81,7 +81,7 @@ AppMap Navie*.
 
 ![New Navie Chat](https://appmap.io/assets/img/product/new-navie-chat.png)
 
-## Add files to a Navie chat
+## Add Files to a Navie chat
 
 You can add specific files to your conversation with Navie. This feature is referred to
 as "pinning". Some types of files you may want to pin include:
@@ -120,13 +120,13 @@ In IntelliJ, you can record AppMap data using the "Start with AppMap" menu item.
 
 ![Start with AppMap](https://appmap.io/assets/img/product/start-with-appmap.png)
 
-#### Requirements for making AppMap data
+#### Requirements for Making AppMap Data
 
 Supported programming languages: Node.js, Java (+ Kotlin), Ruby, and Python.
 AppMap works particularly well with web application frameworks such as: Nest.js, Next.js, Spring, Ruby on Rails, Django,
 and Flask.
 
-## Using AppMap data
+## Using AppMap Data
 
 AppMap diagrams include:
 
