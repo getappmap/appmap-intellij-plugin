@@ -21,6 +21,6 @@
     "vue-template-compiler": "^2.7"
   },
   "resolutions": {
-    "@appland/rpc": "1.16.0"
+    "@appland/rpc": "1.17.0"
   }
 }
