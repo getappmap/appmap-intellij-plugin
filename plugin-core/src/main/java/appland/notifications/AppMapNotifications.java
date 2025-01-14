@@ -349,7 +349,7 @@ public final class AppMapNotifications {
                         AppMapBundle.get("notification.copilotAuthRequired.title"),
                         null,
                         AppMapBundle.get("notification.copilotAuthRequired.content"),
-                        NotificationType.INFORMATION, null
+                        NotificationType.WARNING, null
                 ).notify(project);
             }
         });
