@@ -71,13 +71,11 @@ Navie provides different command modes to assist you with your code and project.
 ## Activating Navie
 
 **Activate Navie from the Tools menu**  
-
 Select 'Explain with AppMap Navie AI' from the Tools/AppMap dropdown  
 
 ![Open Navie from Tools](https://appmap.io/assets/img/product/tools-appmap-vscode.png)
 
 **Activate Navie from the AppMap sidebar**  
-
 Click the 'New Navie Chat' button  
 
 ![New Navie Chat](https://appmap.io/assets/img/product/new-navie-chat.png)
@@ -94,19 +92,16 @@ as "pinning". Some types of files you may want to pin include:
 * Navie chat responses from previous conversations
 
 **Pin files from the file list**  
-
 Right-click on a file to select 'AppMap: Add Files to Navie Context'  
 
 ![New Navie Chat](https://appmap.io/assets/img/product/add-context-from-file.png)
 
 **Pin files from a Navie response**  
-
 Click the pin icon in the header of a Navie response  
 
 ![Pin from Response](https://appmap.io/assets/img/pin-from-response.png)
 
 **Pin files from the Navie's Context Sources Pane**  
-
 Click the 'Add Context' button  
 
 ![New Navie Chat](https://appmap.io/assets/img/product/add-context-in-context-window.png)
