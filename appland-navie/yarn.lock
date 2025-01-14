@@ -2,7 +2,7 @@
 # yarn lockfile v1
 
 
-"@appland/client@^1.12.0":
+"@appland/client@1.23.0", "@appland/client@^1.12.0":
   version "1.23.0"
   resolved "https://registry.yarnpkg.com/@appland/client/-/client-1.23.0.tgz#9861ad35117b8601cd5bda66d3a5f7b273449208"
   integrity sha512-GZ4oJZAvPih3I4AB8z9istdUKZ03IeR4o/lvesvSdsW4s7/Bg0ggOhQ3UI+HQWz2jE9XYirbod0iLclMhk/+ww==
@@ -73,10 +73,12 @@
     "@appland/models" "^2.10.0"
     js-yaml "^4.1.0"
 
-"@appland/rpc@1.16.0", "@appland/rpc@^1.13.0":
-  version "1.16.0"
-  resolved "https://registry.yarnpkg.com/@appland/rpc/-/rpc-1.16.0.tgz#05d797a11fb0beeafa4a62fbfcc5cf81fbdf6054"
-  integrity sha512-rJ7+woylnkyEnaIeQoqx6mFxcWzfxA0YdLWkSp/KDbgB3FgNt9Zj4AH/E43UeHJbu+Zq90BULCNWT9DA9B0Atg==
+"@appland/rpc@1.17.0", "@appland/rpc@^1.13.0":
+  version "1.17.0"
+  resolved "https://registry.yarnpkg.com/@appland/rpc/-/rpc-1.17.0.tgz#9988819433d72a57a79a2f9cb71bfb0e8d8aecf2"
+  integrity sha512-055Qi/Kdk31dKXvVI11xrHBfkdHPX7B3lDX7I5jNg5A3Pjxxy/iefoDJnSuu057OAg4u9MSuj77Bhi7vqELjtg==
+  dependencies:
+    "@appland/client" "1.23.0"
 
 "@appland/sequence-diagram@^1.11.0":
   version "1.12.0"
