@@ -21,6 +21,10 @@ public class CopilotAppMapEnvProvider implements AppLandCliEnvProvider {
             return Map.of();
         }
 
+        if (!GitHubCopilotService.getInstance().isCopilotAuthenticated()) {
+            return Map.of();
+        }
+
         return Map.of(
                 "OPENAI_BASE_URL", NavieCopilotChatRequestHandler.getBaseUrl(),
                 "APPMAP_NAVIE_COMPLETION_BACKEND", "openai",
@@ -28,6 +32,11 @@ public class CopilotAppMapEnvProvider implements AppLandCliEnvProvider {
         );
     }
 
+    /**
+     * @return {@code true} if the integration with GitHub Copilot is unavailable,
+     * either because the user chose a different LLM in Navie or because the GitHub Copilot plugin is not installed.
+     * This method must not evaluate the state of Copilot authentication.
+     */
     public static boolean isDisabled() {
         return hasCustomAppMapModelSettings() || isGitHubCopilotDisabled();
     }
