@@ -20,8 +20,15 @@ public class CopilotStartupNotificationActivity implements StartupActivity, Dumb
         if (!AppMapApplicationSettingsService.getInstance().hasAppMapKey()) {
             return;
         }
+
         // don't show if the GitHub Copilot plugin is unavailable
         if (CopilotAppMapEnvProvider.isDisabled()) {
+            return;
+        }
+
+        // if the Copilot integration is enabled, but not authenticated, show a notification
+        if (!GitHubCopilotService.getInstance().isCopilotAuthenticated()) {
+            ApplicationManager.getApplication().invokeLater(AppMapNotifications::showCopilotAuthenticationRequired);
             return;
         }
 
@@ -32,12 +39,6 @@ public class CopilotStartupNotificationActivity implements StartupActivity, Dumb
                 AppMapApplicationSettingsService.getInstance().setCopilotIntegrationDetected(true);
                 ApplicationManager.getApplication().invokeLater(AppMapNotifications::showFirstCopilotIntegrationEnabled);
             }
-            return;
-        }
-
-        // if the Copilot integration is enabled, but not authenticated, show a notification
-        if (!GitHubCopilotService.getInstance().isCopilotAuthenticated()) {
-            ApplicationManager.getApplication().invokeLater(AppMapNotifications::showCopilotAuthenticationRequired);
         }
     }
 }
