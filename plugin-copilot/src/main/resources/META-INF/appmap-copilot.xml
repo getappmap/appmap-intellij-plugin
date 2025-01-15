@@ -1,0 +1,13 @@
+<idea-plugin>
+    <extensions defaultExtensionNs="appland.cli">
+        <!-- "first" to override the Copilot integration if custom API keys are defined in the environment settings -->
+        <envProvider order="first"
+                     implementation="appland.copilotChat.CopilotAppMapEnvProvider"/>
+    </extensions>
+
+    <extensions defaultExtensionNs="com.intellij">
+        <httpRequestHandler implementation="appland.copilotChat.NavieCopilotChatRequestHandler"/>
+
+        <postStartupActivity implementation="appland.copilotChat.CopilotStartupNotificationActivity"/>
+    </extensions>
+</idea-plugin>

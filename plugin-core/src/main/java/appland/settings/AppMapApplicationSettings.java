@@ -2,6 +2,7 @@ package appland.settings;
 
 import com.google.common.collect.Maps;
 import com.intellij.openapi.application.ApplicationManager;
+import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.util.xmlb.annotations.Transient;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -50,6 +51,16 @@ public class AppMapApplicationSettings {
     private volatile boolean cliPassParentEnv = true;
 
     /**
+     * If {@code true}, the GitHub Copilot integration was explicitly disabled by the user.
+     */
+    private volatile boolean copilotIntegrationDisabled = false;
+
+    /**
+     * Tracks if the Copilot integration was detected to be available at least once.
+     */
+    private volatile boolean copilotIntegrationDetected = false;
+
+    /**
      * Maximum accepted file size in kilobytes for files pinned inside a Navie webview editor.
      */
     private volatile int maxPinnedFileSizeKB = 20;
@@ -68,6 +79,9 @@ public class AppMapApplicationSettings {
         this.cliPassParentEnv = settings.cliPassParentEnv;
         this.maxPinnedFileSizeKB = settings.maxPinnedFileSizeKB;
         this.useAnimation = settings.useAnimation;
+        this.showBrokenProxyWarning = settings.showBrokenProxyWarning;
+        this.copilotIntegrationDisabled = settings.copilotIntegrationDisabled;
+        this.copilotIntegrationDetected = settings.copilotIntegrationDetected;
     }
 
     public @NotNull Map<String, String> getCliEnvironment() {
@@ -102,6 +116,10 @@ public class AppMapApplicationSettings {
         }
     }
 
+    public boolean hasAppMapKey() {
+        return StringUtil.isNotEmpty(apiKey);
+    }
+
     public void setApiKeyNotifying(@Nullable String apiKey) {
         var changed = !Objects.equals(apiKey, this.apiKey);
         this.apiKey = apiKey;
@@ -122,6 +140,15 @@ public class AppMapApplicationSettings {
 
     public boolean isAuthenticated() {
         return apiKey != null;
+    }
+
+    public void setCopilotIntegrationDisabledNotifying(boolean copilotIntegrationDisabled) {
+        var changed = this.copilotIntegrationDisabled != copilotIntegrationDisabled;
+        this.copilotIntegrationDisabled = copilotIntegrationDisabled;
+
+        if (changed) {
+            settingsPublisher().copilotIntegrationDisabledChanged();
+        }
     }
 
     @NotNull
