@@ -1,5 +1,16 @@
 AppMap Plugin Changelog
 
+## [0.76.0](https://github.com/getappmap/appmap-intellij-plugin/compare/v0.75.1...v0.76.0) (2025-01-15)
+
+
+### Features
+
+-  integrate Navie with GitHub Copilot ([f801960]())-  Open files for link embedded in Navie's content ([f026178]())-  update Navie ([40a2d3d]())-  update Navie webview ([42cca97]())-  Update the marketplace content ([0258d66]())-  update webview navie to the latest version ([f1027bf]())-  update webview navie to the latest version ([739c240]())
+
+### Bug Fixes
+
+-  Remove README.md content which mirrors description.md ([8d6b5fd]())-  Update @appland/components to v4.43.2 ([6e018d0]())
+
 ## [0.75.1](https://github.com/getappmap/appmap-intellij-plugin/compare/v0.75.0...v0.75.1) (2024-11-01)
 
 
