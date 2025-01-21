@@ -1,0 +1,327 @@
+{
+  "data" : [ {
+    "capabilities" : {
+      "family" : "gpt-3.5-turbo",
+      "limits" : {
+        "max_context_window_tokens" : 16384,
+        "max_output_tokens" : 4096,
+        "max_prompt_tokens" : 16384
+      },
+      "object" : "model_capabilities",
+      "supports" : {
+        "streaming" : true,
+        "tool_calls" : true
+      },
+      "tokenizer" : "cl100k_base",
+      "type" : "chat"
+    },
+    "id" : "gpt-3.5-turbo",
+    "model_picker_enabled" : false,
+    "name" : "GPT 3.5 Turbo",
+    "object" : "model",
+    "preview" : false,
+    "vendor" : "Azure OpenAI",
+    "version" : "gpt-3.5-turbo-0613"
+  }, {
+    "capabilities" : {
+      "family" : "gpt-3.5-turbo",
+      "limits" : {
+        "max_context_window_tokens" : 16384,
+        "max_output_tokens" : 4096,
+        "max_prompt_tokens" : 16384
+      },
+      "object" : "model_capabilities",
+      "supports" : {
+        "streaming" : true,
+        "tool_calls" : true
+      },
+      "tokenizer" : "cl100k_base",
+      "type" : "chat"
+    },
+    "id" : "gpt-3.5-turbo-0613",
+    "model_picker_enabled" : false,
+    "name" : "GPT 3.5 Turbo",
+    "object" : "model",
+    "preview" : false,
+    "vendor" : "Azure OpenAI",
+    "version" : "gpt-3.5-turbo-0613"
+  }, {
+    "capabilities" : {
+      "family" : "gpt-4",
+      "limits" : {
+        "max_context_window_tokens" : 32768,
+        "max_output_tokens" : 4096,
+        "max_prompt_tokens" : 32768
+      },
+      "object" : "model_capabilities",
+      "supports" : {
+        "streaming" : true,
+        "tool_calls" : true
+      },
+      "tokenizer" : "cl100k_base",
+      "type" : "chat"
+    },
+    "id" : "gpt-4",
+    "model_picker_enabled" : false,
+    "name" : "GPT 4",
+    "object" : "model",
+    "preview" : false,
+    "vendor" : "Azure OpenAI",
+    "version" : "gpt-4-0613"
+  }, {
+    "capabilities" : {
+      "family" : "gpt-4",
+      "limits" : {
+        "max_context_window_tokens" : 32768,
+        "max_output_tokens" : 4096,
+        "max_prompt_tokens" : 32768
+      },
+      "object" : "model_capabilities",
+      "supports" : {
+        "streaming" : true,
+        "tool_calls" : true
+      },
+      "tokenizer" : "cl100k_base",
+      "type" : "chat"
+    },
+    "id" : "gpt-4-0613",
+    "model_picker_enabled" : false,
+    "name" : "GPT 4",
+    "object" : "model",
+    "preview" : false,
+    "vendor" : "Azure OpenAI",
+    "version" : "gpt-4-0613"
+  }, {
+    "capabilities" : {
+      "family" : "gpt-4o",
+      "limits" : {
+        "max_context_window_tokens" : 128000,
+        "max_output_tokens" : 4096,
+        "max_prompt_tokens" : 64000,
+        "vision" : {
+          "max_prompt_image_size" : 3145728,
+          "max_prompt_images" : 1
+        }
+      },
+      "object" : "model_capabilities",
+      "supports" : {
+        "parallel_tool_calls" : true,
+        "streaming" : true,
+        "tool_calls" : true
+      },
+      "tokenizer" : "o200k_base",
+      "type" : "chat"
+    },
+    "id" : "gpt-4o",
+    "model_picker_enabled" : true,
+    "name" : "GPT 4o",
+    "object" : "model",
+    "preview" : false,
+    "vendor" : "Azure OpenAI",
+    "version" : "gpt-4o-2024-05-13"
+  }, {
+    "capabilities" : {
+      "family" : "gpt-4o",
+      "limits" : {
+        "max_context_window_tokens" : 128000,
+        "max_output_tokens" : 4096,
+        "max_prompt_tokens" : 64000,
+        "vision" : {
+          "max_prompt_image_size" : 3145728,
+          "max_prompt_images" : 1
+        }
+      },
+      "object" : "model_capabilities",
+      "supports" : {
+        "parallel_tool_calls" : true,
+        "streaming" : true,
+        "tool_calls" : true
+      },
+      "tokenizer" : "o200k_base",
+      "type" : "chat"
+    },
+    "id" : "gpt-4o-2024-05-13",
+    "model_picker_enabled" : false,
+    "name" : "GPT 4o",
+    "object" : "model",
+    "preview" : false,
+    "vendor" : "Azure OpenAI",
+    "version" : "gpt-4o-2024-05-13"
+  }, {
+    "capabilities" : {
+      "family" : "gpt-4o",
+      "limits" : {
+        "max_context_window_tokens" : 128000,
+        "max_output_tokens" : 4096,
+        "max_prompt_tokens" : 64000
+      },
+      "object" : "model_capabilities",
+      "supports" : {
+        "parallel_tool_calls" : true,
+        "streaming" : true,
+        "tool_calls" : true
+      },
+      "tokenizer" : "o200k_base",
+      "type" : "chat"
+    },
+    "id" : "gpt-4-o-preview",
+    "model_picker_enabled" : false,
+    "name" : "GPT 4o",
+    "object" : "model",
+    "preview" : false,
+    "vendor" : "Azure OpenAI",
+    "version" : "gpt-4o-2024-05-13"
+  }, {
+    "capabilities" : {
+      "family" : "gpt-4o",
+      "limits" : {
+        "max_context_window_tokens" : 128000,
+        "max_output_tokens" : 16384,
+        "max_prompt_tokens" : 64000
+      },
+      "object" : "model_capabilities",
+      "supports" : {
+        "parallel_tool_calls" : true,
+        "streaming" : true,
+        "tool_calls" : true
+      },
+      "tokenizer" : "o200k_base",
+      "type" : "chat"
+    },
+    "id" : "gpt-4o-2024-08-06",
+    "model_picker_enabled" : false,
+    "name" : "GPT 4o",
+    "object" : "model",
+    "preview" : false,
+    "vendor" : "Azure OpenAI",
+    "version" : "gpt-4o-2024-08-06"
+  }, {
+    "capabilities" : {
+      "family" : "text-embedding-ada-002",
+      "limits" : {
+        "max_inputs" : 256
+      },
+      "object" : "model_capabilities",
+      "supports" : { },
+      "tokenizer" : "cl100k_base",
+      "type" : "embeddings"
+    },
+    "id" : "text-embedding-ada-002",
+    "model_picker_enabled" : false,
+    "name" : "Embedding V2 Ada",
+    "object" : "model",
+    "preview" : false,
+    "vendor" : "Azure OpenAI",
+    "version" : "text-embedding-ada-002"
+  }, {
+    "capabilities" : {
+      "family" : "text-embedding-3-small",
+      "limits" : {
+        "max_inputs" : 512
+      },
+      "object" : "model_capabilities",
+      "supports" : {
+        "dimensions" : true
+      },
+      "tokenizer" : "cl100k_base",
+      "type" : "embeddings"
+    },
+    "id" : "text-embedding-3-small",
+    "model_picker_enabled" : false,
+    "name" : "Embedding V3 small",
+    "object" : "model",
+    "preview" : false,
+    "vendor" : "Azure OpenAI",
+    "version" : "text-embedding-3-small"
+  }, {
+    "capabilities" : {
+      "family" : "text-embedding-3-small",
+      "object" : "model_capabilities",
+      "supports" : {
+        "dimensions" : true
+      },
+      "tokenizer" : "cl100k_base",
+      "type" : "embeddings"
+    },
+    "id" : "text-embedding-3-small-inference",
+    "model_picker_enabled" : false,
+    "name" : "Embedding V3 small (Inference)",
+    "object" : "model",
+    "preview" : false,
+    "vendor" : "Azure OpenAI",
+    "version" : "text-embedding-3-small"
+  }, {
+    "capabilities" : {
+      "family" : "gpt-4o-mini",
+      "limits" : {
+        "max_context_window_tokens" : 128000,
+        "max_output_tokens" : 4096,
+        "max_prompt_tokens" : 64000
+      },
+      "object" : "model_capabilities",
+      "supports" : {
+        "parallel_tool_calls" : true,
+        "streaming" : true,
+        "tool_calls" : true
+      },
+      "tokenizer" : "o200k_base",
+      "type" : "chat"
+    },
+    "id" : "gpt-4o-mini",
+    "model_picker_enabled" : false,
+    "name" : "GPT 4o Mini",
+    "object" : "model",
+    "preview" : false,
+    "vendor" : "Azure OpenAI",
+    "version" : "gpt-4o-mini-2024-07-18"
+  }, {
+    "capabilities" : {
+      "family" : "gpt-4o-mini",
+      "limits" : {
+        "max_context_window_tokens" : 128000,
+        "max_output_tokens" : 4096,
+        "max_prompt_tokens" : 64000
+      },
+      "object" : "model_capabilities",
+      "supports" : {
+        "parallel_tool_calls" : true,
+        "streaming" : true,
+        "tool_calls" : true
+      },
+      "tokenizer" : "o200k_base",
+      "type" : "chat"
+    },
+    "id" : "gpt-4o-mini-2024-07-18",
+    "model_picker_enabled" : false,
+    "name" : "GPT 4o Mini",
+    "object" : "model",
+    "preview" : false,
+    "vendor" : "Azure OpenAI",
+    "version" : "gpt-4o-mini-2024-07-18"
+  }, {
+    "capabilities" : {
+      "family" : "gpt-4-turbo",
+      "limits" : {
+        "max_context_window_tokens" : 128000,
+        "max_output_tokens" : 4096,
+        "max_prompt_tokens" : 64000
+      },
+      "object" : "model_capabilities",
+      "supports" : {
+        "parallel_tool_calls" : true,
+        "streaming" : true,
+        "tool_calls" : true
+      },
+      "tokenizer" : "cl100k_base",
+      "type" : "chat"
+    },
+    "id" : "gpt-4-0125-preview",
+    "model_picker_enabled" : false,
+    "name" : "GPT 4 Turbo",
+    "object" : "model",
+    "preview" : false,
+    "vendor" : "Azure OpenAI",
+    "version" : "gpt-4-0125-preview"
+  } ],
+  "object" : "list"
+}
