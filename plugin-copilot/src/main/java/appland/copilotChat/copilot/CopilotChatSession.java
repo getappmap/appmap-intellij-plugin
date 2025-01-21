@@ -52,7 +52,7 @@ public final class CopilotChatSession {
                     @Nullable Double temperature,
                     @Nullable Double topP,
                     @Nullable Integer n) throws IOException {
-        var maxOutputTokens = model.capabilities().limits().get(CopilotModelDefinition.CopilotCapabilityLimit.MaxOutputTokens);
+        var maxOutputTokens = model.capabilities().limits().maxOutputTokens();
         var appliedTemp = temperature != null ? temperature : GitHubCopilot.CHAT_DEFAULT_TEMPERATURE;
         var copilotRequest = new CopilotChatRequest(model.id(), messages, maxOutputTokens, true, appliedTemp, topP, n);
 
@@ -72,7 +72,7 @@ public final class CopilotChatSession {
                         httpRequest.write(GsonUtils.GSON.toJson(copilotRequest));
 
                         // Don't call "getReader()" for error responses,
-                        // to not prevent the method calling this processor will throw a HTTP error exception.
+                        // to not prevent the method calling this processor will throw an HTTP error exception.
                         if (httpRequest.getConnection() instanceof HttpURLConnection) {
                             var responseCode = ((HttpURLConnection) httpRequest.getConnection()).getResponseCode();
                             if (responseCode >= 400) {
