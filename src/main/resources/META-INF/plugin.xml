@@ -8,6 +8,9 @@
     <!--suppress CheckTagEmptyBody, PluginXmlValidity -->
     <description></description>
 
+    <!-- The AppMap plugin is currently not compatible with Rider -->
+    <incompatible-with>com.intellij.modules.rider</incompatible-with>
+
     <xi:include href="/META-INF/appmap-core.xml" xpointer="xpointer(/idea-plugin/*)"/>
     <xi:include href="/META-INF/appmap-copilot.xml" xpointer="xpointer(/idea-plugin/*)"/>
 
