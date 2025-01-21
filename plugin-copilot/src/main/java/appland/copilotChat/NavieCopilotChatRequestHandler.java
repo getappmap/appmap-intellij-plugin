@@ -323,9 +323,7 @@ public class NavieCopilotChatRequestHandler extends HttpRequestHandler {
         }
 
         if (maxInputTokens == null) {
-            maxInputTokens = copilotModel.capabilities()
-                    .limits()
-                    .get(CopilotModelDefinition.CopilotCapabilityLimit.MaxPromptTokens);
+            maxInputTokens = copilotModel.capabilities().limits().maxPromptTokens();
         }
 
         // as a fallback, count the tokens used by the prompt messages

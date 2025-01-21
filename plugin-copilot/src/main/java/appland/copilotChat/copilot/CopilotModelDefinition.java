@@ -2,8 +2,6 @@ package appland.copilotChat.copilot;
 
 import com.google.gson.annotations.SerializedName;
 
-import java.util.Map;
-
 public record CopilotModelDefinition(
         @SerializedName("id") String id,
         @SerializedName("name") String name,
@@ -16,18 +14,14 @@ public record CopilotModelDefinition(
             @SerializedName("family") String family,
             @SerializedName("type") String type,
             @SerializedName("tokenizer") String tokenizer,
-            @SerializedName("limits") Map<CopilotCapabilityLimit, Integer> limits
+            @SerializedName("limits") CopilotCapabilityLimits limits
     ) {
     }
 
-    public enum CopilotCapabilityLimit {
-        @SerializedName("max_context_window_tokens")
-        MaxContextWindowTokens,
-
-        @SerializedName("max_output_tokens")
-        MaxOutputTokens,
-
-        @SerializedName("max_prompt_tokens")
-        MaxPromptTokens
+    // only including the limits we actually need
+    public record CopilotCapabilityLimits(
+            @SerializedName("max_output_tokens") int maxOutputTokens,
+            @SerializedName("max_prompt_tokens") int maxPromptTokens
+    ) {
     }
 }
