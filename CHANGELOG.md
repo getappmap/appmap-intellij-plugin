@@ -1,5 +1,12 @@
 AppMap Plugin Changelog
 
+## [0.76.1](https://github.com/getappmap/appmap-intellij-plugin/compare/v0.76.0...v0.76.1) (2025-01-21)
+
+
+### Bug Fixes
+
+-  in the integration with Copilot, loading the models failed ([d8a08e7]())
+
 ## [0.76.0](https://github.com/getappmap/appmap-intellij-plugin/compare/v0.75.1...v0.76.0) (2025-01-15)
 
 
