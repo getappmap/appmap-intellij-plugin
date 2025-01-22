@@ -56,6 +56,12 @@ public class AppMapApplicationSettings {
     private volatile boolean copilotIntegrationDisabled = false;
 
     /**
+     * The id of the Copilot model to use with Navie.
+     * A default will be used if it's null or if there's no model of the name available in Copilot.
+     */
+    private volatile @Nullable String copilotModelId = null;
+
+    /**
      * Tracks if the Copilot integration was detected to be available at least once.
      */
     private volatile boolean copilotIntegrationDetected = false;
@@ -150,6 +156,15 @@ public class AppMapApplicationSettings {
 
         if (changed) {
             settingsPublisher().copilotIntegrationDisabledChanged();
+        }
+    }
+
+    public void setCopilotModelId(@Nullable String copilotModelId) {
+        var changed = !Objects.equals(copilotModelId, this.copilotModelId);
+        this.copilotModelId = copilotModelId;
+
+        if (changed) {
+            settingsPublisher().copilotModelChanged();
         }
     }
 

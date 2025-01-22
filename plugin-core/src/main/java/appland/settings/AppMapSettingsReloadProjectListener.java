@@ -36,6 +36,11 @@ public class AppMapSettingsReloadProjectListener implements AppMapSettingsListen
     }
 
     @Override
+    public void copilotModelChanged() {
+        showReloadNotificationAlarm.cancelAndRequest();
+    }
+
+    @Override
     public void scannedEnabledChanged() {
         showReloadNotificationInAllProjects();
     }
