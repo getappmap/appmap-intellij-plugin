@@ -33,6 +33,9 @@ public interface AppMapSettingsListener {
     default void copilotIntegrationDisabledChanged() {
     }
 
+    default void copilotModelChanged() {
+    }
+
     default void scannedEnabledChanged() {
     }
 

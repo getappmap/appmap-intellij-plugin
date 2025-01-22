@@ -262,7 +262,7 @@ public class NavieCopilotChatRequestHandler extends HttpRequestHandler {
         if (_cachedModels == null) {
             var chatSession = cachedCopilotChatSession();
             if (chatSession != null) {
-                _cachedModels = chatSession.loadModels();
+                _cachedModels = chatSession.loadChatModels();
             }
         }
         return _cachedModels;
