@@ -1,5 +1,10 @@
 package appland.notifications;
 
+import java.util.Arrays;
+import java.util.function.Consumer;
+
+import static appland.AppMapBundle.lazy;
+
 import appland.AppMapBundle;
 import appland.AppMapPlugin;
 import appland.actions.StopAppMapRecordingAction;
@@ -27,11 +32,6 @@ import com.intellij.util.net.HttpConfigurable;
 import com.intellij.util.ui.EdtInvocationManager;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-
-import java.util.Arrays;
-import java.util.function.Consumer;
-
-import static appland.AppMapBundle.lazy;
 
 public final class AppMapNotifications {
     public static final String REMOTE_RECORDING_ID = "appmap.remoteRecording";
@@ -90,7 +90,7 @@ public final class AppMapNotifications {
                         lazy("notification.stopButton"),
                         (e, n) -> {
                             n.expire();
-                            new StopAppMapRecordingAction().actionPerformed(e);
+                            StopAppMapRecordingAction.execute(project);
                         }));
             }
 
