@@ -23,13 +23,13 @@ buildscript {
 
 plugins {
     idea
-    id("org.jetbrains.kotlin.jvm") version "1.9.24"
+    id("org.jetbrains.kotlin.jvm")
     id("org.jetbrains.intellij.platform") version "2.1.0"
     id("org.jetbrains.changelog") version "1.3.1"
     id("com.adarshr.test-logger") version "3.2.0"
     id("de.undercouch.download") version "5.6.0"
 
-    kotlin("plugin.lombok") version "1.9.24"
+    kotlin("plugin.lombok")
 }
 
 val pluginVersionString = prop("pluginVersion")
@@ -249,7 +249,10 @@ project(":") {
             pluginModule(implementation(project(":plugin-copilot")))
 
             // adding this for runIde support
-            plugin("com.github.copilot", prop("copilotPluginVersion"))
+            val copilotPluginVersion = prop("copilotPluginVersion")
+            if (copilotPluginVersion.isNotEmpty()) {
+                plugin("com.github.copilot", copilotPluginVersion)
+            }
 
             pluginVerifier()
             zipSigner()
