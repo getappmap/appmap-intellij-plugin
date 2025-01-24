@@ -6,7 +6,9 @@ import appland.rpcService.AppLandJsonRpcService;
 import appland.settings.AppMapApplicationSettingsService;
 import appland.settings.AppMapSecureApplicationSettingsService;
 import com.intellij.ide.plugins.PluginManager;
+import com.intellij.openapi.util.text.StringUtil;
 
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -25,11 +27,16 @@ public class CopilotAppMapEnvProvider implements AppLandCliEnvProvider {
             return Map.of();
         }
 
-        return Map.of(
-                "OPENAI_BASE_URL", NavieCopilotChatRequestHandler.getBaseUrl(),
-                "APPMAP_NAVIE_COMPLETION_BACKEND", "openai",
-                "OPENAI_API_KEY", GitHubCopilotService.RandomIdeSessionId
-        );
+        var userCopilotModel = AppMapApplicationSettingsService.getInstance().getCopilotModelId();
+
+        var env = new HashMap<String, String>();
+        env.put("OPENAI_BASE_URL", NavieCopilotChatRequestHandler.getBaseUrl());
+        env.put("APPMAP_NAVIE_COMPLETION_BACKEND", "openai");
+        env.put("OPENAI_API_KEY", GitHubCopilotService.RandomIdeSessionId);
+        if (StringUtil.isNotEmpty(userCopilotModel)) {
+            env.put("APPMAP_NAVIE_MODEL", userCopilotModel);
+        }
+       return Map.copyOf(env);
     }
 
     /**

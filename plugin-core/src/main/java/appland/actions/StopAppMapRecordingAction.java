@@ -1,5 +1,11 @@
 package appland.actions;
 
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.Objects;
+import java.util.concurrent.atomic.AtomicReference;
+
 import appland.AppMapBundle;
 import appland.Icons;
 import appland.files.AppMapFiles;
@@ -31,12 +37,6 @@ import com.intellij.util.concurrency.annotations.RequiresReadLock;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.Objects;
-import java.util.concurrent.atomic.AtomicReference;
-
 public class StopAppMapRecordingAction extends AnAction implements DumbAware {
     private static final Logger LOG = Logger.getInstance(StopAppMapRecordingAction.class);
 
@@ -67,8 +67,12 @@ public class StopAppMapRecordingAction extends AnAction implements DumbAware {
     @Override
     public void actionPerformed(@NotNull AnActionEvent e) {
         var project = e.getProject();
-        assert project != null;
+        if (project != null) {
+            execute(project);
+        }
+    }
 
+    public static void execute(@NotNull Project project) {
         new Task.Modal(project, AppMapBundle.get("action.stopAppMapRemoteRecording.locationProgress.title"), true) {
             private final AtomicReference<Path> location = new AtomicReference<>();
 

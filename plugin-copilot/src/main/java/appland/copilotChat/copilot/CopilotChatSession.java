@@ -13,6 +13,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URLConnection;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -32,7 +33,7 @@ public final class CopilotChatSession {
         this.baseHeaders = baseHeaders;
     }
 
-    public List<CopilotModelDefinition> loadModels() throws IOException {
+    public List<CopilotModelDefinition> loadChatModels() throws IOException {
         record ModelsResponse(@SerializedName("data") CopilotModelDefinition[] models) {
         }
 
@@ -43,7 +44,10 @@ public final class CopilotChatSession {
                 .isReadResponseOnError(true)
                 .tuner(connection -> applyHeaders(connection, baseHeaders))
                 .readString();
-        return List.of(GsonUtils.GSON.fromJson(response, ModelsResponse.class).models);
+
+        return Arrays.stream(GsonUtils.GSON.fromJson(response, ModelsResponse.class).models)
+                .filter(model -> "chat".equals(model.capabilities().type()))
+                .toList();
     }
 
     public void ask(@NotNull CopilotChatResponseListener responseListener,

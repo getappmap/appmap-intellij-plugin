@@ -18,7 +18,7 @@ jobs:
                 os: [ ubuntu, windows, macos ]
                 include:
                     # Run tests with latest platform version, but only on Linux
-                    - ide_version: "2024.2"
+                    - ide_version: "2024.3"
                       os: ubuntu
 
         name: Test ${{ matrix.ide_version }} on ${{ matrix.os }}
