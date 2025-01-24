@@ -1,5 +1,12 @@
 AppMap Plugin Changelog
 
+## [0.77.0](https://github.com/getappmap/appmap-intellij-plugin/compare/v0.76.1...v0.77.0) (2025-01-24)
+
+
+### Features
+
+-  Show notification if the download of an AppMap CLI binary failed ([64db02b]())-  support 2025.1 ([aecef20]())-  support to choose the copilot model for Navie ([e5bb5fc]())
+
 ## [0.76.1](https://github.com/getappmap/appmap-intellij-plugin/compare/v0.76.0...v0.76.1) (2025-01-21)
 
 
