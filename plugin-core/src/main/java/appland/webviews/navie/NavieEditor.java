@@ -91,6 +91,18 @@ public class NavieEditor extends WebviewEditor<Void> {
         return AppMapBundle.get("webview.navie.title");
     }
 
+    public void notifyJsonRpcServerRestarting() {
+        ApplicationManager.getApplication().executeOnPooledThread(() -> {
+            postMessage(createMessageObject("navie-restarting"));
+        });
+    }
+
+    public void notifyJsonRpcServerRestarted() {
+        ApplicationManager.getApplication().executeOnPooledThread(() -> {
+            postMessage(createMessageObject("navie-restarted"));
+        });
+    }
+
     @Override
     protected void setupInitMessage(@Nullable Void initData, @NotNull JsonObject payload) {
         AppMapApplicationSettings settings = AppMapApplicationSettingsService.getInstance();

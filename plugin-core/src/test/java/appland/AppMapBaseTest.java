@@ -6,7 +6,6 @@ import appland.config.AppMapConfigFile;
 import appland.files.AppMapFiles;
 import appland.problemsView.TestFindingsManager;
 import appland.rpcService.AppLandJsonRpcListener;
-import appland.rpcService.AppLandJsonRpcListenerAdapter;
 import appland.rpcService.AppLandJsonRpcService;
 import appland.settings.AppMapApplicationSettings;
 import appland.settings.AppMapApplicationSettingsService;
@@ -223,7 +222,7 @@ public abstract class AppMapBaseTest extends LightPlatformCodeInsightFixture4Tes
         var latch = new CountDownLatch(1);
         getProject().getMessageBus()
                 .connect(getTestRootDisposable())
-                .subscribe(AppLandJsonRpcListener.TOPIC, new AppLandJsonRpcListenerAdapter() {
+                .subscribe(AppLandJsonRpcListener.TOPIC, new AppLandJsonRpcListener() {
                     @Override
                     public void serverStarted() {
                         if (allowStart) {
@@ -243,7 +242,7 @@ public abstract class AppMapBaseTest extends LightPlatformCodeInsightFixture4Tes
         var latch = new CountDownLatch(1);
         getProject().getMessageBus()
                 .connect(getTestRootDisposable())
-                .subscribe(AppLandJsonRpcListener.TOPIC, new AppLandJsonRpcListenerAdapter() {
+                .subscribe(AppLandJsonRpcListener.TOPIC, new AppLandJsonRpcListener() {
                     @Override
                     public void serverConfigurationUpdated(@NotNull Collection<VirtualFile> contentRoots,
                                                            @NotNull Collection<VirtualFile> appMapConfigFiles) {
