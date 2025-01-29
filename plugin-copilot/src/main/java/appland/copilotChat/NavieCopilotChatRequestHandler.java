@@ -89,7 +89,7 @@ public class NavieCopilotChatRequestHandler extends HttpRequestHandler {
         var requestBody = fullHttpRequest.content().toString(StandardCharsets.UTF_8);
         var openAIRequest = GsonUtils.GSON.fromJson(requestBody, OpenAIChatCompletionsRequest.class);
 
-        var copilotModel = getCopilotModel(openAIRequest.model(), GitHubCopilot.CHAT_FALLBACK_MODEL_NAME);
+        var copilotModel = getCopilotModel(openAIRequest.model(), GitHubCopilot.CHAT_FALLBACK_MODEL_ID);
         if (copilotModel == null) {
             Responses.response(HttpResponseStatus.INTERNAL_SERVER_ERROR,
                     fullHttpRequest,
@@ -241,19 +241,19 @@ public class NavieCopilotChatRequestHandler extends HttpRequestHandler {
         }).toList();
     }
 
-    private @Nullable CopilotModelDefinition getCopilotModel(@NotNull String name, @NotNull String fallbackModelName) {
+    private @Nullable CopilotModelDefinition getCopilotModel(@NotNull String modelId, @NotNull String fallbackModelId) {
         try {
             var models = cachedCopilotModels();
             if (models == null) {
                 return null;
             }
 
-            var model = models.stream().filter(m -> name.equals(m.id())).findFirst();
+            var model = models.stream().filter(m -> modelId.equals(m.id())).findFirst();
             return model.orElseGet(() -> {
-                return models.stream().filter(m -> fallbackModelName.equals(m.id())).findFirst().orElse(null);
+                return models.stream().filter(m -> fallbackModelId.equals(m.id())).findFirst().orElse(null);
             });
         } catch (Exception e) {
-            LOG.warn("Failed to load GitHub Copilot model " + name, e);
+            LOG.warn("Failed to load GitHub Copilot model " + modelId, e);
             return null;
         }
     }
