@@ -18,47 +18,82 @@ import java.util.Set;
  * which require a project reload to activate.
  */
 public class AppMapSettingsReloadProjectListener implements AppMapSettingsListener {
-    @Override
-    public void cliEnvironmentChanged(@NotNull Set<String> modifiedKeys) {
-        if (CollectionUtils.containsAny(modifiedKeys, AppLandJsonRpcService.LLM_ENV_VARIABLES)) {
-            showReloadNotificationAlarm.cancelAndRequest();
-        }
-    }
-
-    @Override
-    public void openAIKeyChange() {
-        showReloadNotificationAlarm.cancelAndRequest();
-    }
-
-    @Override
-    public void copilotIntegrationDisabledChanged() {
-        showReloadNotificationAlarm.cancelAndRequest();
-    }
-
-    @Override
-    public void copilotModelChanged() {
-        showReloadNotificationAlarm.cancelAndRequest();
-    }
-
-    @Override
-    public void scannedEnabledChanged() {
-        showReloadNotificationInAllProjects();
-    }
-
-    // debounce the notification, because several separate settings are changed at once
-    private static final SingleAlarm showReloadNotificationAlarm = new SingleAlarm(
-            AppMapSettingsReloadProjectListener::showReloadNotificationInAllProjects,
+    // debounce the notification, because several separate settings may be changed at once
+    private final SingleAlarm showReloadNotificationAlarm = new SingleAlarm(
+            this::showReloadNotificationInAllProjects,
             1_000,
             AppLandLifecycleService.getInstance(),
             Alarm.ThreadToUse.SWING_THREAD,
             ModalityState.defaultModalityState());
 
-    private static void showReloadNotificationInAllProjects() {
+    // debounce the notification, because several separate settings may be changed at once
+    private final SingleAlarm reloadJsonRpcServerAlarm = new SingleAlarm(
+            this::restartJsonRpcServerInAllProjects,
+            1_000,
+            AppLandLifecycleService.getInstance(),
+            Alarm.ThreadToUse.POOLED_THREAD,
+            ModalityState.defaultModalityState());
+
+
+    @Override
+    public void cliEnvironmentChanged(@NotNull Set<String> modifiedKeys) {
+        if (CollectionUtils.containsAny(modifiedKeys, AppLandJsonRpcService.LLM_ENV_VARIABLES)) {
+            reloadJsonRpcServerAlarm.cancelAndRequest();
+        }
+    }
+
+    @Override
+    public void openAIKeyChange() {
+        reloadJsonRpcServerAlarm.cancelAndRequest();
+    }
+
+    @Override
+    public void apiKeyChanged() {
+        reloadJsonRpcServerAlarm.cancelAndRequest();
+    }
+
+    @Override
+    public void copilotIntegrationDisabledChanged() {
+        reloadJsonRpcServerAlarm.cancelAndRequest();
+    }
+
+    @Override
+    public void copilotModelChanged() {
+        reloadJsonRpcServerAlarm.cancelAndRequest();
+    }
+
+    @Override
+    public void scannedEnabledChanged() {
+        showReloadNotificationAlarm.cancelAndRequest();
+    }
+
+    private void showReloadNotificationInAllProjects() {
         ApplicationManager.getApplication().assertReadAccessAllowed();
 
         for (var project : ProjectManager.getInstance().getOpenProjects()) {
             if (!project.isDisposed() && !project.isDefault()) {
                 AppMapNotifications.showReloadProjectNotification(project);
+            }
+        }
+    }
+
+    private void restartJsonRpcServerInAllProjects() {
+        // For unknown reasons this method is executed on the EDT despite Alarm.ThreadToUse.POOLED_THREAD.
+        // Seen with 2023.1.
+        if (ApplicationManager.getApplication().isDispatchThread()) {
+            ApplicationManager.getApplication().executeOnPooledThread(this::doRestartJsonRpcServer);
+        } else {
+            doRestartJsonRpcServer();
+        }
+    }
+
+    @SuppressWarnings("UnstableApiUsage")
+    private void doRestartJsonRpcServer() {
+        ApplicationManager.getApplication().assertIsNonDispatchThread();
+
+        for (var project : ProjectManager.getInstance().getOpenProjects()) {
+            if (!project.isDisposed() && !project.isDefault()) {
+                AppLandJsonRpcService.getInstance(project).restartServer();
             }
         }
     }

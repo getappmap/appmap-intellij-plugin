@@ -4,7 +4,6 @@ import appland.config.AppMapConfigFile;
 import appland.files.AppMapFiles;
 import appland.files.AppMapVfsUtils;
 import appland.settings.AppMapApplicationSettingsService;
-import appland.settings.AppMapSecureApplicationSettingsService;
 import com.intellij.execution.ExecutionException;
 import com.intellij.execution.configurations.GeneralCommandLine;
 import com.intellij.execution.configurations.PtyCommandLine;
@@ -49,8 +48,6 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
-
-import static com.intellij.openapi.util.text.StringUtil.isNotEmpty;
 
 @SuppressWarnings("removal")
 public class DefaultCommandLineService implements AppLandCommandLineService {
@@ -224,8 +221,8 @@ public class DefaultCommandLineService implements AppLandCommandLineService {
     }
 
     @Override
-    public @Nullable GeneralCommandLine createAppMapJsonRpcCommand() {
-        var cmd = createAppMapCommand("rpc", "--port", "0");
+    public @Nullable GeneralCommandLine createAppMapJsonRpcCommand(@Nullable Integer port) {
+        var cmd = createAppMapCommand("rpc", "--port", port != null ? port.toString() : "0");
         if (cmd == null) {
             return null;
         }

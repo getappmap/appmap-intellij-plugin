@@ -5,7 +5,6 @@ import appland.cli.AppLandDownloadListener;
 import appland.cli.CliTool;
 import appland.config.AppMapConfigFileListener;
 import appland.files.AppMapFiles;
-import appland.settings.AppMapSettingsListener;
 import appland.utils.GsonUtils;
 import com.google.gson.JsonObject;
 import com.intellij.execution.ExecutionException;
@@ -60,7 +59,7 @@ import java.util.stream.Collectors;
  * - Add/remove/update of an appmap.yml file
  */
 @SuppressWarnings("UnstableApiUsage")
-public class DefaultAppLandJsonRpcService implements AppLandJsonRpcService, AppLandDownloadListener, AppMapSettingsListener {
+public class DefaultAppLandJsonRpcService implements AppLandJsonRpcService, AppLandDownloadListener {
     private static final Logger LOG = Logger.getInstance(DefaultAppLandJsonRpcService.class);
     // pattern to capture the code in STDOUT of the server process
     private static final Pattern PORT_PATTERN = Pattern.compile("^Running JSON-RPC server on port: (\\d+)$");
@@ -76,11 +75,6 @@ public class DefaultAppLandJsonRpcService implements AppLandJsonRpcService, AppL
     private final @Nullable ScheduledFuture<?> pollingFuture;
     // debounce requests to send the configuration message to the server by 1s
     private final SingleAlarm sendConfigurationAlarm = new SingleAlarm(this::sendConfigurationSet,
-            1_000,
-            this,
-            Alarm.ThreadToUse.POOLED_THREAD);
-    // debounce requests to restart the JSON-RPC server process
-    private final SingleAlarm restartServerAlarm = new SingleAlarm(this::restartServerAsync,
             1_000,
             this,
             Alarm.ThreadToUse.POOLED_THREAD);
@@ -102,7 +96,6 @@ public class DefaultAppLandJsonRpcService implements AppLandJsonRpcService, AppL
 
         var applicationBus = application.getMessageBus().connect(this);
         applicationBus.subscribe(AppLandDownloadListener.TOPIC, this);
-        applicationBus.subscribe(AppMapSettingsListener.TOPIC, this);
         applicationBus.subscribe(AppMapConfigFileListener.TOPIC, (AppMapConfigFileListener) this::triggerSendConfigurationSet);
 
         var projectBus = project.getMessageBus().connect(this);
@@ -172,6 +165,10 @@ public class DefaultAppLandJsonRpcService implements AppLandJsonRpcService, AppL
 
     @Override
     public void startServer() {
+        startServer(null);
+    }
+
+    private void startServer(@Nullable Integer port) {
         if (isServerRunning()) {
             LOG.debug("AppMap JSON-RPC server is already running.");
             return;
@@ -182,7 +179,7 @@ public class DefaultAppLandJsonRpcService implements AppLandJsonRpcService, AppL
             return;
         }
 
-        var commandLine = AppLandCommandLineService.getInstance().createAppMapJsonRpcCommand();
+        var commandLine = AppLandCommandLineService.getInstance().createAppMapJsonRpcCommand(port);
         if (commandLine == null) {
             LOG.debug("Unable to launch JSON-RPC server, because CLI command is unavailable.");
             return;
@@ -232,6 +229,11 @@ public class DefaultAppLandJsonRpcService implements AppLandJsonRpcService, AppL
     }
 
     @Override
+    public void restartServer() {
+        restartServerSync();
+    }
+
+    @Override
     public synchronized @Nullable Integer getServerPort() {
         var server = jsonRpcServer;
         return server != null ? server.jsonRpcPort : null;
@@ -259,13 +261,21 @@ public class DefaultAppLandJsonRpcService implements AppLandJsonRpcService, AppL
     @RequiresBackgroundThread
     private void restartServerSync() {
         ApplicationManager.getApplication().assertIsNonDispatchThread();
+
+        var publisher = project.getMessageBus().syncPublisher(AppLandJsonRpcListener.TOPIC);
+
+        Integer previousPort = null;
         try {
-            stopServerSync(this.jsonRpcServer);
+            publisher.beforeServerRestart();
+
+            previousPort = stopServerSync(this.jsonRpcServer);
         } finally {
-            try {
-                startServer();
-            } finally {
-                project.getMessageBus().syncPublisher(AppLandJsonRpcListener.TOPIC).serverRestarted();
+            if (!project.isDisposed()) {
+                try {
+                    startServer(previousPort);
+                } finally {
+                    publisher.serverRestarted();
+                }
             }
         }
     }
@@ -274,18 +284,19 @@ public class DefaultAppLandJsonRpcService implements AppLandJsonRpcService, AppL
      * Stops the server and waits for a short time before it's forcibly killed.
      *
      * @param server The server to stop, a {@code null} value is ignored.
+     * @return Port used by the server, if a server was running.
      */
     @RequiresBackgroundThread
-    private void stopServerSync(@Nullable JsonRpcServer server) {
+    private Integer stopServerSync(@Nullable JsonRpcServer server) {
         ApplicationManager.getApplication().assertIsNonDispatchThread();
 
         if (server == null) {
-            return;
+            return null;
         }
 
+        var port = server.getJsonRpcPort();
         try {
             var process = server.processHandler;
-
             try {
                 process.setShouldKillProcessSoftly(false);
                 process.destroyProcess();
@@ -305,6 +316,7 @@ public class DefaultAppLandJsonRpcService implements AppLandJsonRpcService, AppL
                 project.getMessageBus().syncPublisher(AppLandJsonRpcListener.TOPIC).serverStopped();
             }
         }
+        return port;
     }
 
     @Override
@@ -314,17 +326,8 @@ public class DefaultAppLandJsonRpcService implements AppLandJsonRpcService, AppL
         }
     }
 
-    @Override
-    public void apiKeyChanged() {
-        triggerRestartServer();
-    }
-
     private void triggerSendConfigurationSet() {
         sendConfigurationAlarm.cancelAndRequest();
-    }
-
-    private void triggerRestartServer() {
-        restartServerAlarm.cancelAndRequest();
     }
 
     /**

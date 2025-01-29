@@ -4,7 +4,11 @@ import appland.AppMapBaseTest;
 import appland.cli.AppLandCommandLineService;
 import appland.cli.TestAppLandDownloadService;
 import appland.settings.AppMapApplicationSettingsService;
+import appland.settings.AppMapSecureApplicationSettingsService;
+import appland.settings.AppMapSettingsListener;
+import appland.settings.AppMapSettingsReloadProjectListener;
 import com.intellij.openapi.application.ApplicationInfo;
+import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.vfs.VirtualFile;
 import org.jetbrains.annotations.NotNull;
 import org.junit.Assume;
@@ -23,6 +27,14 @@ import static org.hamcrest.Matchers.hasEntry;
 import static org.junit.Assert.assertArrayEquals;
 
 public class DefaultAppLandJsonRpcServiceTest extends AppMapBaseTest {
+    @Before
+    public void setupListener() {
+        // by default, the listener is inactive in test mode to avoid side-effects
+        ApplicationManager.getApplication().getMessageBus()
+                .connect(getTestRootDisposable())
+                .subscribe(AppMapSettingsListener.TOPIC, new AppMapSettingsReloadProjectListener());
+    }
+
     @Override
     protected boolean runInDispatchThread() {
         return false;
@@ -50,7 +62,7 @@ public class DefaultAppLandJsonRpcServiceTest extends AppMapBaseTest {
         getProject().getMessageBus()
                 .connect(getTestRootDisposable())
                 .subscribe(AppLandJsonRpcListener.TOPIC,
-                        new AppLandJsonRpcListenerAdapter() {
+                        new AppLandJsonRpcListener() {
                             @Override
                             public void serverConfigurationUpdated(@NotNull Collection<VirtualFile> contentRoots,
                                                                    @NotNull Collection<VirtualFile> appMapConfigFiles) {
@@ -84,7 +96,7 @@ public class DefaultAppLandJsonRpcServiceTest extends AppMapBaseTest {
         settings.setApiKey("dummy");
         settings.setCliEnvironment(Map.of("FOO", "BAR", "BAZ", "QUX"));
         try {
-            var commandLine = AppLandCommandLineService.getInstance().createAppMapJsonRpcCommand();
+            var commandLine = AppLandCommandLineService.getInstance().createAppMapJsonRpcCommand(null);
             assert commandLine != null;
             assertThat(commandLine.getEffectiveEnvironment(), allOf(
                     hasEntry("APPMAP_API_KEY", "dummy"),
@@ -111,6 +123,76 @@ public class DefaultAppLandJsonRpcServiceTest extends AppMapBaseTest {
             assertTrue("The JSON-RPC server must restart after unexpected termination", latch.await(60, TimeUnit.SECONDS));
         } finally {
             appMapSettings.setApiKey(null);
+        }
+    }
+
+    @Test
+    public void restartAfterOpenAIKeyChanged() throws Exception {
+        AppMapSecureApplicationSettingsService.getInstance().setOpenAIKey(null);
+
+        waitForJsonRpcServer();
+        try {
+            var latch = createWaitForJsonRpcServerRestartCondition(false);
+
+            AppMapSecureApplicationSettingsService.getInstance().setOpenAIKey("my-open-ai-key");
+
+            assertTrue("The JSON-RPC server must restart after a change to the OpenAI key", latch.await(60, TimeUnit.SECONDS));
+        } finally {
+            AppMapSecureApplicationSettingsService.getInstance().setOpenAIKey(null);
+        }
+    }
+
+    @Test
+    public void restartAfterAppMapEnvChanged() throws Exception {
+        var baseEnv = Map.of("APPMAP_NAVIE_MODEL", "my-custom-model");
+        AppMapApplicationSettingsService.getInstance().setCliEnvironment(baseEnv);
+
+        waitForJsonRpcServer();
+        try {
+            var latch = createWaitForJsonRpcServerRestartCondition(false);
+
+            var modifiedEnv = Map.of("APPMAP_NAVIE_MODEL", "my-custom-model", "OPENAI_BASE_URL", "http://example.com");
+            AppMapApplicationSettingsService.getInstance().setCliEnvironmentNotifying(modifiedEnv);
+
+            assertTrue("The JSON-RPC server must restart after a change to the OpenAI key", latch.await(60, TimeUnit.SECONDS));
+        } finally {
+            AppMapApplicationSettingsService.getInstance().setCliEnvironment(Map.of());
+        }
+    }
+
+    @Test
+    public void restartAfterCopilotEnabled() throws Exception {
+        AppMapApplicationSettingsService.getInstance().setCopilotIntegrationDisabled(true);
+
+        waitForJsonRpcServer();
+        try {
+            var latch = createWaitForJsonRpcServerRestartCondition(false);
+
+            AppMapApplicationSettingsService.getInstance().setCopilotIntegrationDisabledNotifying(false);
+
+            assertTrue("The JSON-RPC server must restart after Copilot state changed", latch.await(60, TimeUnit.SECONDS));
+        } finally {
+            AppMapApplicationSettingsService.getInstance().setCliEnvironment(Map.of());
+        }
+    }
+
+    @Test
+    public void ensureServerPortIsReused() throws Exception {
+        AppMapApplicationSettingsService.getInstance().setCopilotIntegrationDisabled(true);
+
+        waitForJsonRpcServer();
+        var firstPort = AppLandJsonRpcService.getInstance(getProject()).getServerPort();
+
+        try {
+            var latch = createWaitForJsonRpcServerRestartCondition(false);
+
+            AppMapApplicationSettingsService.getInstance().setCopilotIntegrationDisabledNotifying(false);
+            assertTrue("The JSON-RPC server must restart after Copilot state changed", latch.await(60, TimeUnit.SECONDS));
+
+            var newPort = AppLandJsonRpcService.getInstance(getProject()).getServerPort();
+            assertEquals("Port must remain the same after a restart", firstPort, newPort);
+        } finally {
+            AppMapApplicationSettingsService.getInstance().setCliEnvironment(Map.of());
         }
     }
 
