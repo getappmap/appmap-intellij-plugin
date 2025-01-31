@@ -29,6 +29,9 @@
 
         <listener topic="appland.files.AppMapFileChangeListener"
                   class="appland.notifications.FirstAppMapListener"/>
+
+        <listener topic="appland.rpcService.AppLandJsonRpcListener"
+                  class="appland.settings.AppMapNavieRestartedListener"/>
     </projectListeners>
 
     <extensionPoints>
