@@ -8,7 +8,6 @@ import appland.files.AppMapFiles;
 import appland.settings.AppMapSettingsListener;
 import appland.utils.GsonUtils;
 import com.google.gson.JsonObject;
-import com.intellij.ProjectTopics;
 import com.intellij.execution.ExecutionException;
 import com.intellij.execution.process.KillableProcessHandler;
 import com.intellij.execution.process.ProcessAdapter;
@@ -101,7 +100,7 @@ public class DefaultAppLandJsonRpcService implements AppLandJsonRpcService, AppL
         applicationBus.subscribe(AppMapConfigFileListener.TOPIC, (AppMapConfigFileListener) this::triggerSendConfigurationSet);
 
         var projectBus = project.getMessageBus().connect(this);
-        projectBus.subscribe(ProjectTopics.PROJECT_ROOTS, new ModuleRootListener() {
+        projectBus.subscribe(ModuleRootListener.TOPIC, new ModuleRootListener() {
             @Override
             public void rootsChanged(@NotNull ModuleRootEvent event) {
                 triggerSendConfigurationSet();
