@@ -24,6 +24,7 @@ import com.intellij.ide.actions.DeleteAction;
 import com.intellij.openapi.Disposable;
 import com.intellij.openapi.actionSystem.*;
 import com.intellij.openapi.actionSystem.ex.ActionUtil;
+import com.intellij.openapi.actionSystem.toolbarLayout.ToolbarLayoutStrategy;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.fileChooser.actions.VirtualFileDeleteProvider;
 import com.intellij.openapi.project.Project;
@@ -127,7 +128,7 @@ public class AppMapWindowPanel extends SimpleToolWindowPanel implements DataProv
 
         var bar = ActionManager.getInstance().createActionToolbar(ActionPlaces.TOOLWINDOW_TOOLBAR_BAR, actions, true);
         bar.setTargetComponent(this);
-        bar.setLayoutPolicy(ActionToolbar.NOWRAP_LAYOUT_POLICY);
+        bar.setLayoutStrategy(ToolbarLayoutStrategy.NOWRAP_STRATEGY);
 
         var panel = new JPanel(new BorderLayout());
         panel.add(createNameFilter(appMapModel), BorderLayout.CENTER);
