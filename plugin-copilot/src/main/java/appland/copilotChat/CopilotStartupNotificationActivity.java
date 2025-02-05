@@ -1,17 +1,17 @@
 package appland.copilotChat;
 
+import appland.ProjectActivityAdapter;
 import appland.copilotChat.copilot.GitHubCopilotService;
 import appland.notifications.AppMapNotifications;
 import appland.settings.AppMapApplicationSettingsService;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.project.DumbAware;
 import com.intellij.openapi.project.Project;
-import com.intellij.openapi.startup.StartupActivity;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
-public class CopilotStartupNotificationActivity implements StartupActivity, DumbAware {
+public class CopilotStartupNotificationActivity extends ProjectActivityAdapter implements DumbAware {
     private static final AtomicBoolean isNotificationShown = new AtomicBoolean(false);
 
     @Override

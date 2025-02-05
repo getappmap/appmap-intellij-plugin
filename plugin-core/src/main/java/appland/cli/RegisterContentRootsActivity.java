@@ -1,6 +1,7 @@
 package appland.cli;
 
 import appland.AppLandLifecycleService;
+import appland.ProjectActivityAdapter;
 import com.intellij.ProjectTopics;
 import com.intellij.execution.ExecutionException;
 import com.intellij.openapi.Disposable;
@@ -18,7 +19,7 @@ import org.jetbrains.annotations.NotNull;
  * Executed on the EDT when indexes are ready.
  */
 @SuppressWarnings("UnstableApiUsage")
-public class RegisterContentRootsActivity implements StartupActivity {
+public class RegisterContentRootsActivity extends ProjectActivityAdapter {
     private static final Logger LOG = Logger.getInstance(RegisterContentRootsActivity.class);
 
     @Override
