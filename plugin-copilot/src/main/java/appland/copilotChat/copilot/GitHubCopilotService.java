@@ -72,7 +72,6 @@ public final class GitHubCopilotService {
                 "copilot-language-server-version", GitHubCopilot.LANGUAGE_SERVER_VERSION,
                 "editor-plugin-version", GitHubCopilot.GITHUB_COPILOT_PLUGIN_VERSION,
                 "editor-version", getCopilotEditorVersion(),
-                "user-agent", GitHubCopilot.USER_AGENT,
                 "x-github-api-version", GitHubCopilot.GITHUB_API_VERSION,
                 "vscode-machineid", machineId,
                 "vscode-sessionid", UUID.randomUUID().toString()

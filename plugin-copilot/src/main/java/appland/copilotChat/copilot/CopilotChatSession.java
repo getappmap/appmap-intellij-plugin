@@ -53,6 +53,7 @@ public final class CopilotChatSession {
     public void ask(@NotNull CopilotChatResponseListener responseListener,
                     @NotNull CopilotModelDefinition model,
                     @NotNull List<CopilotChatRequest.Message> messages,
+                    @NotNull Map<String, String> proxiedRequestHeaders,
                     @Nullable Double temperature,
                     @Nullable Double topP,
                     @Nullable Integer n) throws IOException {
@@ -67,6 +68,7 @@ public final class CopilotChatSession {
                     .throwStatusCodeException(true)
                     .isReadResponseOnError(true)
                     .tuner(connection -> {
+                        applyHeaders(connection, proxiedRequestHeaders);
                         applyHeaders(connection, baseHeaders);
                         connection.setRequestProperty(GitHubCopilot.HEADER_OPENAI_INTENT, "conversation-panel");
                         connection.setRequestProperty(GitHubCopilot.HEADER_OPENAI_ORGANIZATION, "github-copilot");
