@@ -7,9 +7,12 @@ import appland.settings.AppMapApplicationSettingsService;
 import appland.settings.AppMapSecureApplicationSettingsService;
 import com.intellij.ide.plugins.PluginManager;
 import com.intellij.openapi.util.text.StringUtil;
+import com.intellij.openapi.extensions.PluginDescriptor;
 
 import java.util.HashMap;
 import java.util.Map;
+
+import org.jetbrains.annotations.Nullable;
 
 /**
  * Extends the environment setup of AppMap CLI commands with the values to use this plugin's GitHub Copilot integration.
@@ -60,13 +63,22 @@ public class CopilotAppMapEnvProvider implements AppLandCliEnvProvider {
                 || environment.containsKey(AppLandJsonRpcService.AZURE_OPENAI_API_KEY);
     }
 
+    /**
+     * @return The GitHub Copilot plugin descriptor, or {@code null} if it's not installed.
+     */
+    public static @Nullable PluginDescriptor getCopilotPlugin() {
+        return PluginManager.getLoadedPlugins()
+                .stream()
+                .filter(plugin -> plugin.isEnabled() && plugin.getPluginId().equals(GitHubCopilotService.CopilotPluginId))
+                .findFirst()
+                .orElse(null);
+    }
+
     private static boolean isGitHubCopilotDisabled() {
         if (AppMapApplicationSettingsService.getInstance().isCopilotIntegrationDisabled()) {
             return true;
         }
 
-        return PluginManager.getLoadedPlugins()
-                .stream()
-                .noneMatch(plugin -> plugin.isEnabled() && plugin.getPluginId().equals(GitHubCopilotService.CopilotPluginId));
+        return getCopilotPlugin() == null;
     }
 }
