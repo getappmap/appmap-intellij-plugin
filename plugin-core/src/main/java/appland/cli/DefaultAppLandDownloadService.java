@@ -6,7 +6,6 @@ import com.google.gson.JsonObject;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.application.PathManager;
 import com.intellij.openapi.diagnostic.Logger;
-import com.intellij.openapi.progress.PerformInBackgroundOption;
 import com.intellij.openapi.progress.ProgressIndicator;
 import com.intellij.openapi.progress.ProgressManager;
 import com.intellij.openapi.progress.Task;
@@ -229,7 +228,7 @@ public class DefaultAppLandDownloadService implements AppLandDownloadService {
         var latestVersion = service.fetchLatestRemoteVersion(type);
         if (latestVersion != null && !service.isDownloaded(type, latestVersion, ApplicationManager.getApplication().isUnitTestMode())) {
             var title = AppMapBundle.get("cliDownload.progress.title", type.getPresentableName());
-            new Task.Backgroundable(project, title, true, PerformInBackgroundOption.ALWAYS_BACKGROUND) {
+            new Task.Backgroundable(project, title, true) {
                 @Override
                 public void run(@NotNull ProgressIndicator indicator) {
                     var success = service.download(type, latestVersion, indicator);

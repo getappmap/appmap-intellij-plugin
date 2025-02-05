@@ -2,7 +2,6 @@ package appland.cli;
 
 import appland.AppLandLifecycleService;
 import appland.ProjectActivityAdapter;
-import com.intellij.ProjectTopics;
 import com.intellij.execution.ExecutionException;
 import com.intellij.openapi.Disposable;
 import com.intellij.openapi.application.ApplicationManager;
@@ -11,14 +10,12 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.roots.ModuleRootEvent;
 import com.intellij.openapi.roots.ModuleRootListener;
 import com.intellij.openapi.roots.ProjectRootManager;
-import com.intellij.openapi.startup.StartupActivity;
 import org.jetbrains.annotations.NotNull;
 
 /**
  * Launch processes for the opened project and registers a listener to update the processes when content roots change.
  * Executed on the EDT when indexes are ready.
  */
-@SuppressWarnings("UnstableApiUsage")
 public class RegisterContentRootsActivity extends ProjectActivityAdapter {
     private static final Logger LOG = Logger.getInstance(RegisterContentRootsActivity.class);
 
@@ -61,7 +58,7 @@ public class RegisterContentRootsActivity extends ProjectActivityAdapter {
      */
     public static void listenForContentRootChanges(@NotNull Project project, @NotNull Disposable disposable) {
         var busConnection = project.getMessageBus().connect(disposable);
-        busConnection.subscribe(ProjectTopics.PROJECT_ROOTS, new ModuleRootListener() {
+        busConnection.subscribe(ModuleRootListener.TOPIC, new ModuleRootListener() {
             @Override
             public void rootsChanged(@NotNull ModuleRootEvent event) {
                 LOG.debug("rootsChanged: " + event);
