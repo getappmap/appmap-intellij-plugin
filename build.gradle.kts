@@ -129,6 +129,8 @@ allprojects {
         instrumentCode = false
     }
 
+    // Only 2024.2+ is supporting Java 21
+    // https://plugins.jetbrains.com/docs/intellij/setting-up-theme-environment.html#add-jdk-and-intellij-platform-plugin-sdk
     configure<JavaPluginExtension> {
         sourceCompatibility = VERSION_17
         targetCompatibility = VERSION_17
