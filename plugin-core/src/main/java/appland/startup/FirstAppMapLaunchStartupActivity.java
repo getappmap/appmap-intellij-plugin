@@ -1,17 +1,17 @@
 package appland.startup;
 
+import appland.ProjectActivityAdapter;
 import appland.settings.AppMapApplicationSettingsService;
 import appland.telemetry.TelemetryService;
 import appland.toolwindow.AppMapToolWindowFactory;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.project.Project;
-import com.intellij.openapi.startup.StartupActivity;
 import com.intellij.openapi.util.EmptyRunnable;
 import com.intellij.openapi.wm.ToolWindowManager;
 import com.intellij.util.concurrency.annotations.RequiresEdt;
 import org.jetbrains.annotations.NotNull;
 
-public class FirstAppMapLaunchStartupActivity implements StartupActivity {
+public class FirstAppMapLaunchStartupActivity extends ProjectActivityAdapter {
     @RequiresEdt
     public static void showAppMapToolWindow(@NotNull Project project) {
         ApplicationManager.getApplication().assertIsDispatchThread();
