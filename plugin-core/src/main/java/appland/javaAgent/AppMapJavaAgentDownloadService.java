@@ -6,7 +6,6 @@ import appland.utils.SystemProperties;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.components.Service;
 import com.intellij.openapi.diagnostic.Logger;
-import com.intellij.openapi.progress.PerformInBackgroundOption;
 import com.intellij.openapi.progress.ProgressIndicator;
 import com.intellij.openapi.progress.Task;
 import com.intellij.openapi.project.Project;
@@ -47,7 +46,7 @@ public final class AppMapJavaAgentDownloadService {
     @SuppressWarnings("DialogTitleCapitalization")
     public void downloadJavaAgent(@NotNull Project project) {
         var title = AppMapBundle.get("javaAgent.download.title");
-        new Task.Backgroundable(project, title, false, PerformInBackgroundOption.ALWAYS_BACKGROUND) {
+        new Task.Backgroundable(project, title, false) {
             @Override
             public void run(@NotNull ProgressIndicator indicator) {
                 downloadJavaAgentSyncWithBundledFallback(indicator);

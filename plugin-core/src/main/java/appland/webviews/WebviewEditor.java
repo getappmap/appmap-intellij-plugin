@@ -13,7 +13,6 @@ import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.fileEditor.FileEditor;
 import com.intellij.openapi.fileEditor.FileEditorLocation;
 import com.intellij.openapi.fileEditor.FileEditorState;
-import com.intellij.openapi.progress.PerformInBackgroundOption;
 import com.intellij.openapi.progress.ProgressIndicator;
 import com.intellij.openapi.progress.Task;
 import com.intellij.openapi.project.Project;
@@ -233,7 +232,7 @@ public abstract class WebviewEditor<T> extends UserDataHolderBase implements Fil
 
         // send init message to webview to launch the JS application in a background thread
         isWebViewReady.set(true);
-        new Task.Backgroundable(project, getLoadingProgressTitle(), false, PerformInBackgroundOption.ALWAYS_BACKGROUND) {
+        new Task.Backgroundable(project, getLoadingProgressTitle(), false) {
             @Override
             public void run(@NotNull ProgressIndicator indicator) {
                 if (!isValid()) {

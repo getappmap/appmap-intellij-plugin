@@ -2,7 +2,6 @@ package appland.index;
 
 import appland.files.AppMapFileChangeListener;
 import appland.problemsView.listener.ScannerFindingsListener;
-import com.intellij.ProjectTopics;
 import com.intellij.openapi.Disposable;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.project.DumbService;
@@ -34,7 +33,7 @@ public final class IndexedFileListenerUtil {
             }
         });
 
-        busConnection.subscribe(ProjectTopics.PROJECT_ROOTS, new ModuleRootListener() {
+        busConnection.subscribe(ModuleRootListener.TOPIC, new ModuleRootListener() {
             @Override
             public void rootsChanged(@NotNull ModuleRootEvent event) {
                 application.invokeLater(action);

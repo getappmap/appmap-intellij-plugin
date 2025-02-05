@@ -7,7 +7,6 @@ import appland.javaAgent.JavaAgentStatus;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.fileEditor.FileEditorManager;
-import com.intellij.openapi.progress.PerformInBackgroundOption;
 import com.intellij.openapi.progress.ProgressIndicator;
 import com.intellij.openapi.progress.Task;
 import com.intellij.openapi.project.DumbAware;
@@ -29,10 +28,7 @@ public class PluginStatus extends AnAction implements DumbAware {
     public void actionPerformed(@NotNull AnActionEvent event) {
         Project project = Objects.requireNonNull(event.getProject());
 
-        new Task.Backgroundable(project,
-                AppMapBundle.get("action.appmap.pluginStatus.generatingReport"),
-                true,
-                PerformInBackgroundOption.ALWAYS_BACKGROUND) {
+        new Task.Backgroundable(project, AppMapBundle.get("action.appmap.pluginStatus.generatingReport"), true) {
 
             private volatile VirtualFile statusReportFile;
 
