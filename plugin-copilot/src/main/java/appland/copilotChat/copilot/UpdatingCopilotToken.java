@@ -16,7 +16,7 @@ class UpdatingCopilotToken {
 
     private static @Nullable CopilotToken fetchRawCopilotToken(@NotNull String githubToken) {
         try {
-            var response = HttpRequests.request("https://api.github.com/copilot_internal/v2/token")
+            var response = HttpRequests.request(GitHubCopilot.INTERNAL_API_URL + "/v2/token")
                     .accept("application/json")
                     .isReadResponseOnError(true)
                     .gzip(true)
