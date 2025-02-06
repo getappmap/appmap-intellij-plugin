@@ -1,5 +1,7 @@
 package appland.copilotChat.copilot;
 
+import appland.AppMapPlugin;
+import appland.copilotChat.CopilotAppMapEnvProvider;
 import appland.utils.GsonUtils;
 import appland.utils.SystemProperties;
 import com.esotericsoftware.kryo.kryo5.util.Null;
@@ -23,6 +25,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
@@ -68,15 +71,23 @@ public final class GitHubCopilotService {
         }
 
         var apiEndpoint = copilotToken.getToken().endpoints().getOrDefault(CopilotToken.CopilotEndpoint.API, "https://api.githubcopilot.com");
-        var baseHeaders = Map.of(
+        var baseHeaders = new HashMap<>(
+            Map.of(
+                "x-appmap-plugin-version", AppMapPlugin.getDescriptor().getVersion(),
+                "x-github-api-version", GitHubCopilot.GITHUB_API_VERSION,
                 "copilot-language-server-version", GitHubCopilot.LANGUAGE_SERVER_VERSION,
                 "editor-plugin-version", GitHubCopilot.GITHUB_COPILOT_PLUGIN_VERSION,
                 "editor-version", getCopilotEditorVersion(),
-                "user-agent", GitHubCopilot.USER_AGENT,
-                "x-github-api-version", GitHubCopilot.GITHUB_API_VERSION,
                 "vscode-machineid", machineId,
                 "vscode-sessionid", UUID.randomUUID().toString()
+            )
         );
+
+        var copilotPlugin = CopilotAppMapEnvProvider.getCopilotPlugin();
+        if (copilotPlugin != null) {
+            baseHeaders.put("x-appmap-copilot-plugin-version", copilotPlugin.getVersion());
+        }
+
         return new CopilotChatSession(apiEndpoint, copilotToken, baseHeaders);
     }
 
