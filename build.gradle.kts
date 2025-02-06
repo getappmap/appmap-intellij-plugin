@@ -321,6 +321,7 @@ project(":") {
 
         task<Copy>("copyPluginAssets") {
             dependsOn(":downloadAppMapAgent")
+            doNotTrackState("target directory can contain temporary sockets")
 
             inputs.file("${project.rootDir}/NOTICE.txt")
             inputs.file(agentOutputPath)
