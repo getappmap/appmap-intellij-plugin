@@ -317,8 +317,28 @@ public final class AppMapNotifications {
         });
     }
 
+
     /**
-     * Displays a notification that the Copilot authentication is required in all open projects.
+     * Displays a notification that the Copilot content exclusions download failed.
+     */
+    public static void showCopilotExclusionDownloadFailed(Exception error) {
+        ApplicationManager.getApplication().assertIsDispatchThread();
+
+        ReadAction.run(() -> {
+            for (var project : ProjectManager.getInstance().getOpenProjects()) {
+                new AppMapFullContentNotification(
+                        GENERIC_NOTIFICATIONS_ID, null,
+                        AppMapBundle.get("notification.copilotExclusionDownloadFailed.title"),
+                        AppMapBundle.get("notification.copilotExclusionDownloadFailed.subtitle"),
+                        AppMapBundle.get("notification.copilotExclusionDownloadFailed.content", error.toString()),
+                        NotificationType.ERROR, null
+                ).notify(project);
+            }
+        });
+    }
+
+    /**
+     * Displays a notification that the Copilot integration is available in all open projects.
      */
     public static void showFirstCopilotIntegrationEnabled() {
         ApplicationManager.getApplication().assertIsDispatchThread();

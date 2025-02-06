@@ -1,5 +1,6 @@
 package appland.copilotChat.copilot;
 
+import appland.notifications.AppMapNotifications;
 import appland.utils.GsonUtils;
 import appland.utils.SystemProperties;
 import com.esotericsoftware.kryo.kryo5.util.Null;
@@ -23,6 +24,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.Map;
 import java.util.UUID;
 
@@ -53,12 +55,74 @@ public final class GitHubCopilotService {
     }
 
     /**
+     * Whether the content exclusions have been downloaded.
+     */
+    private boolean contentExclusionsDownloaded = false;
+
+    /**
+     * Downloads the content exclusions from the GitHub Copilot API and writes them to the global ignores file.
+     */
+    private void downloadContentExclusions(String githubToken) throws IOException {
+        var exclusions = CopilotContentExclusion.fetchGlobal(githubToken);
+        var paths = new ArrayList<String>();
+        for (var exclusion : exclusions) {
+            LOG.debug("Downloaded content exclusion: " + exclusion);
+            for (var rule : exclusion.rules())
+                paths.addAll(rule.paths());
+        }
+        var path = contentExclusionPath();
+        Files.createDirectories(path.getParent());
+        Files.write(path, paths);
+        contentExclusionsDownloaded = true;
+    }
+
+    /**
+     * Downloads the content exclusions from the GitHub Copilot API and writes them to the global ignores file.
+     * If download is unsuccessful, simply return false.
+     *
+     * @return Whether the content exclusions have been downloaded.
+     */
+    public boolean downloadContentExclusions() {
+        var githubToken = loadGitHubOAuthToken();
+        try {
+            downloadContentExclusions(githubToken);
+            return true;
+        } catch (IOException e) {
+            return false;
+        }
+    }
+
+    /**
+     * Ensures that the content exclusions have been downloaded.
+     *
+     * @return Whether the content exclusions have been downloaded.
+     */
+    private boolean ensureContentExclusionsDownloaded(String githubToken) {
+        if (contentExclusionsDownloaded) return true;
+        try {
+            downloadContentExclusions(githubToken);
+            return true;
+        } catch (IOException e) {
+            ApplicationManager.getApplication().invokeLater(() -> AppMapNotifications.showCopilotExclusionDownloadFailed(e));
+            return false;
+        }
+    }
+
+    /**
+     * @return The path to the global ignores file.
+     */
+    private static Path contentExclusionPath() {
+        return Path.of(SystemProperties.getUserHome(), ".appmap", "navie", "global-ignore");
+    }
+
+    /**
      * Creates a new chat session with the GitHub Copilot API.
      * If the OAuth token or the Copilot token could not be retrieved, this method will return {@code null}.
      */
     public @Nullable CopilotChatSession createChatSession() {
         var githubToken = loadGitHubOAuthToken();
-        if (githubToken == null) {
+
+        if (githubToken == null || !ensureContentExclusionsDownloaded(githubToken)) {
             return null;
         }
 
