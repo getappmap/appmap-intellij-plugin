@@ -27,7 +27,8 @@ public class CopilotStartupNotificationActivity implements StartupActivity, Dumb
         }
 
         // if the Copilot integration is enabled, but not authenticated, show a notification
-        if (!GitHubCopilotService.getInstance().isCopilotAuthenticated()) {
+        GitHubCopilotService copilotService = GitHubCopilotService.getInstance();
+        if (!copilotService.isCopilotAuthenticated()) {
             ApplicationManager.getApplication().invokeLater(AppMapNotifications::showCopilotAuthenticationRequired);
             return;
         }
@@ -39,6 +40,12 @@ public class CopilotStartupNotificationActivity implements StartupActivity, Dumb
                 AppMapApplicationSettingsService.getInstance().setCopilotIntegrationDetected(true);
                 ApplicationManager.getApplication().invokeLater(AppMapNotifications::showFirstCopilotIntegrationEnabled);
             }
+        }
+
+        try {
+            copilotService.ensureContentExclusionsDownloaded();
+        } catch (Exception e) {
+            // this is ok for now, it will be retried later
         }
     }
 }
