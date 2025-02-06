@@ -73,12 +73,13 @@ public final class GitHubCopilotService {
         var apiEndpoint = copilotToken.getToken().endpoints().getOrDefault(CopilotToken.CopilotEndpoint.API, "https://api.githubcopilot.com");
         var baseHeaders = new HashMap<>(
             Map.of(
-                "editor-version", getCopilotEditorVersion(),
+                "x-appmap-plugin-version", AppMapPlugin.getDescriptor().getVersion(),
                 "x-github-api-version", GitHubCopilot.GITHUB_API_VERSION,
-                "x-appmap-machineid", machineId,
-                "x-appmap-copilot-language-server-version", GitHubCopilot.LANGUAGE_SERVER_VERSION,
-                "x-appmap-copilot-plugin-version", CopilotAppMapEnvProvider.getCopilotPlugin().getVersion(),
-                "x-appmap-plugin-version", AppMapPlugin.getDescriptor().getVersion()
+                "copilot-language-server-version", GitHubCopilot.LANGUAGE_SERVER_VERSION,
+                "editor-plugin-version", GitHubCopilot.GITHUB_COPILOT_PLUGIN_VERSION,
+                "editor-version", getCopilotEditorVersion(),
+                "vscode-machineid", machineId,
+                "vscode-sessionid", UUID.randomUUID().toString()
             )
         );
 

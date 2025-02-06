@@ -241,7 +241,10 @@ public class NavieCopilotChatRequestHandler extends HttpRequestHandler {
     }
 
     private @NotNull Map<String, String> collectProxiedRequestHeaders(@NotNull FullHttpRequest fullHttpRequest) {
-        return fullHttpRequest.headers().entries().stream().collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+        return fullHttpRequest.headers().entries().stream()
+            .filter(entry -> entry.getKey().toLowerCase().startsWith("x-appmap-")
+                || entry.getKey().toLowerCase().equals("user-agent"))
+            .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
 
     private @NotNull List<CopilotChatRequest.Message> asCopilotChatMessages(List<OpenAIChatCompletionsRequest.Message> messages) {
