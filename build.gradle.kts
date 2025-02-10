@@ -24,7 +24,7 @@ buildscript {
 plugins {
     idea
     id("org.jetbrains.kotlin.jvm")
-    id("org.jetbrains.intellij.platform") version "2.1.0"
+    id("org.jetbrains.intellij.platform") version "2.2.1"
     id("org.jetbrains.changelog") version "1.3.1"
     id("com.adarshr.test-logger") version "3.2.0"
     id("de.undercouch.download") version "5.6.0"
@@ -74,7 +74,11 @@ allprojects {
         intellijPlatform {
             intellijIdeaCommunity(ideVersion)
             // using "Bundled" to gain access to the Java plugin's test classes
+            testFramework(TestFrameworkType.Platform)
             testFramework(TestFrameworkType.Bundled)
+            if (project.name == "plugin-java") {
+                testFramework(TestFrameworkType.Plugin.Java)
+            }
 
             // org.jetbrains.intellij.platform requires to bundledModules for 2024.2+
             if (platformVersion >= 242) {
