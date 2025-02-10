@@ -96,9 +96,6 @@ allprojects {
 
         compileOnly("com.google.code.findbugs:jsr305:3.0.2")
 
-        // Jackson JSON is missing from 2023.1+
-        implementation("com.fasterxml.jackson.core:jackson-core:2.14.2")
-        implementation("com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.14.2")
         implementation("org.yaml:snakeyaml:1.33")
 
         // https://mvnrepository.com/artifact/junit/junit
