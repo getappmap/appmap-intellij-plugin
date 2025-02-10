@@ -103,9 +103,20 @@ public class NavieEditor extends WebviewEditor<Void> {
         var port = NavieEditorProvider.KEY_INDEXER_RPC_PORT.get(file);
         assert port != null;
 
-        var updatableNavieData = DumbService.getInstance(project).runReadActionInSmartMode(() -> {
-            return createUpdatableNavieData(project);
-        });
+        // If the IDE is in dumb mode (e.g. indexing files), then showing the Navie UI must not be delayed until
+        // smart mode is available.
+        // Instead, we pass empty data to Navie and trigger a refresh when the IDE switches to smart mode.
+        UpdatableNavieData updatableNavieData;
+        if (DumbService.isDumb(project)) {
+            updatableNavieData = new UpdatableNavieData(false, List.of());
+        } else {
+            // It's possible that the IDE turns into dumb mode again before the data is fetched.
+            // To avoid this, we execute in smart mode. Even though it could potentially block the UI like before,
+            // it should happen very infrequently.
+            updatableNavieData = DumbService
+                    .getInstance(project)
+                    .runReadActionInSmartMode(() -> createUpdatableNavieData(project));
+        }
 
         var appMapContextFile = NavieEditorProvider.KEY_APPMAP_CONTEXT_FILE.get(file);
         if (appMapContextFile != null) {
@@ -144,6 +155,14 @@ public class NavieEditor extends WebviewEditor<Void> {
 
         // listen for changes of AppMap files
         IndexedFileListenerUtil.registerListeners(project, this, true, false, false, updateNaviePropertiesAlarm::cancelAndRequest);
+
+        // refresh properties when IDE switches into smart mode
+        busConnection.subscribe(DumbService.DUMB_MODE, new DumbService.DumbModeListener() {
+            @Override
+            public void exitDumbMode() {
+                updateNaviePropertiesAlarm.cancelAndRequest();
+            }
+        });
     }
 
     @Override
