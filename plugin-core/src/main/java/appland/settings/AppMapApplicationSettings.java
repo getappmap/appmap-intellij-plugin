@@ -142,7 +142,7 @@ public class AppMapApplicationSettings {
         this.enableScanner = enableScanner;
 
         if (changed) {
-            settingsPublisher().scannedEnabledChanged();
+            settingsPublisher().scannerEnabledChanged();
         }
     }
 

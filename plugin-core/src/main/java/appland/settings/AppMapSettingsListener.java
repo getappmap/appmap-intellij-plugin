@@ -36,7 +36,7 @@ public interface AppMapSettingsListener {
     default void copilotModelChanged() {
     }
 
-    default void scannedEnabledChanged() {
+    default void scannerEnabledChanged() {
     }
 
     default void cliEnvironmentChanged(@NotNull Set<String> modifiedKeys) {
