@@ -20,6 +20,11 @@ public class AppMapModelTest extends AppMapBaseTest {
         return new TempDirTestFixtureImpl();
     }
 
+    @Override
+    protected boolean runInDispatchThread() {
+        return false;
+}
+
     @Test
     public void emptyAppMaps() {
         var model = new AppMapModel(getProject());
