@@ -1,0 +1,189 @@
+package appland.webviews;
+
+import appland.webviews.webserver.AppMapWebview;
+import com.intellij.ide.ui.UISettings;
+import com.intellij.ui.ColorUtil;
+import com.intellij.ui.JBColor;
+import com.intellij.ui.jcef.JBCefScrollbarsHelper;
+import com.intellij.ui.scale.JBUIScale;
+import com.intellij.util.ui.JBUI;
+import com.intellij.util.ui.UIUtil;
+import org.cef.browser.CefBrowser;
+import org.cef.browser.CefFrame;
+import org.cef.callback.CefCallback;
+import org.cef.handler.CefRequestHandlerAdapter;
+import org.cef.handler.CefResourceHandler;
+import org.cef.handler.CefResourceRequestHandler;
+import org.cef.handler.CefResourceRequestHandlerAdapter;
+import org.cef.misc.BoolRef;
+import org.cef.misc.IntRef;
+import org.cef.misc.StringRef;
+import org.cef.network.CefRequest;
+import org.cef.network.CefResponse;
+import org.jetbrains.annotations.NotNull;
+
+import java.awt.*;
+import java.io.ByteArrayInputStream;
+import java.nio.charset.StandardCharsets;
+import java.util.Locale;
+
+public class IdeStyleResourceHandler extends CefRequestHandlerAdapter {
+    @Override
+    public CefResourceRequestHandler getResourceRequestHandler(CefBrowser browser,
+                                                               CefFrame frame,
+                                                               CefRequest request,
+                                                               boolean isNavigation,
+                                                               boolean isDownload,
+                                                               String requestInitiator,
+                                                               BoolRef disableDefaultHandling) {
+
+        if (isIdeStylesRequest(request)) {
+            var ideStylesStream = new ByteArrayInputStream(createIdeStyles().getBytes(StandardCharsets.UTF_8));
+
+            return new CefResourceRequestHandlerAdapter() {
+                @Override
+                public CefResourceHandler getResourceHandler(CefBrowser browser, CefFrame frame, CefRequest request) {
+                    return new CefResourceHandler() {
+                        @Override
+                        public boolean processRequest(CefRequest cefRequest, CefCallback cefCallback) {
+                            cefCallback.Continue();
+                            return true;
+                        }
+
+                        @Override
+                        public void getResponseHeaders(CefResponse cefResponse, IntRef intRef, StringRef stringRef) {
+                            cefResponse.setMimeType("text/css");
+                            cefResponse.setStatus(200);
+                        }
+
+                        @Override
+                        public boolean readResponse(byte[] bytes, int bytesToRead, IntRef bytesRead, CefCallback cefCallback) {
+                            try {
+                                bytesRead.set(ideStylesStream.read(bytes, 0, bytesToRead));
+                                if (bytesRead.get() != -1) {
+                                    return true;
+                                }
+                            } catch (Exception e) {
+                                cefCallback.cancel();
+                            }
+                            bytesRead.set(0);
+                            return false;
+                        }
+
+                        @Override
+                        public void cancel() {
+                            // empty
+                        }
+                    };
+                }
+            };
+        }
+
+        // fallback to default handling of JCEF
+        return null;
+    }
+
+    // see https://github.com/getappmap/vscode-appland/blob/bfd83ad8c848d31257ab004688eb847feecbcf32/web/static/styles/navie-integration.css#L1-L0
+    private @NotNull String createIdeStyles() {
+        var background = UIUtil.getPanelBackground();
+
+        // used for glow and border around Navie's main text input box
+        var highlight = UIUtil.getFocusedBorderColor();
+        var highlightLight = highlight.brighter();
+        var highlightDark = highlight.darker();
+
+        // text color
+        var foreground = UIUtil.getLabelForeground();
+        var foregroundSecondary = UIUtil.getLabelDisabledForeground();
+        var foregroundLight = foreground.brighter();
+        var foregroundDark = foreground.darker();
+
+        var linkColor = JBUI.CurrentTheme.Link.Foreground.ENABLED;
+        var linkColorHover = JBUI.CurrentTheme.Link.Foreground.HOVERED;
+
+        var error = JBUI.CurrentTheme.Focus.errorColor(true);
+        var warning = JBUI.CurrentTheme.Focus.warningColor(true);
+        var success = JBColor.GREEN.brighter();
+
+        var fontFamily = UISettings.getInstance().getFontFace();
+        var fontSize = UISettings.getInstance().getFontSize() + "px";
+        var fontWeight = "normal";
+
+        var buttonBackground = JBUI.CurrentTheme.Button.defaultButtonColorStart();
+        var buttonBackgroundHover = JBUI.CurrentTheme.Button.focusBorderColor(true);
+        var buttonForeground = foregroundContrastColor(buttonBackground);
+
+        var inputBackground = UIUtil.getTextFieldBackground();
+        var inputForeground = UIUtil.getTextFieldForeground();
+
+        // AppMap is using "1px solid var(--appmap-color-border,rgba(255,255,255,.1))" at some places,
+        // we're applying the same alpha value to make it fit.
+        var border = ColorUtil.withAlpha(JBUI.CurrentTheme.List.buttonSeparatorColor(), 0.1);
+        var selection = JBUI.CurrentTheme.List.Selection.foreground(true);
+
+        var colorTileBackground = JBColor.DARK_GRAY;
+        var colorTileShadow = JBColor.LIGHT_GRAY;
+
+        // apply the global scale factor to the webview
+        var ideStyles = "html { transform: scale(" + String.format(Locale.ENGLISH, "%.3f", JBUIScale.scale(1.0f)) + "); }";
+
+        // CSS colors based on the current theme
+        var ideThemeColors = ":root {\n" +
+                "  --appmap-color-background: " + toCssColor(background) + ";\n" +
+                "  --appmap-color-highlight: " + toCssColor(highlight) + ";\n" +
+                "  --appmap-color-highlight-light: " + toCssColor(highlightLight) + ";\n" +
+                "  --appmap-color-highlight-dark: " + toCssColor(highlightDark) + ";\n" +
+                "  --appmap-color-input-bg: " + toCssColor(inputBackground) + ";\n" +
+                "  --appmap-color-input-fg: " + toCssColor(inputForeground) + ";\n" +
+                "  --appmap-color-button-fg: " + toCssColor(buttonForeground) + ";\n" +
+                "  --appmap-color-button-bg: " + toCssColor(buttonBackground) + ";\n" +
+                "  --appmap-color-button-bg-hover: " + toCssColor(buttonBackgroundHover) + ";\n" +
+                "  --appmap-color-selection: " + toCssColor(selection) + ";\n" +
+                "  --appmap-color-border: " + toCssColor(border) + ";\n" +
+                "  --appmap-color-foreground: " + toCssColor(foreground) + ";\n" +
+                "  --appmap-color-foreground-secondary: " + toCssColor(foregroundSecondary) + ";\n" +
+                "  --appmap-color-foreground-light: " + toCssColor(foregroundLight) + ";\n" +
+                "  --appmap-color-foreground-dark: " + toCssColor(foregroundDark) + ";\n" +
+                "  --appmap-font-family: " + fontFamily + ";\n" +
+                "  --appmap-font-size: " + fontSize + ";\n" +
+                "  --appmap-font-weight: " + fontWeight + ";\n" +
+                "  --appmap-color-success: " + toCssColor(success) + ";\n" +
+                "  --appmap-color-error: " + toCssColor(error) + ";\n" +
+                "  --appmap-color-warning: " + toCssColor(warning) + ";\n" +
+                "  --appmap-color-link: " + toCssColor(linkColor) + ";\n" +
+                "  --appmap-color-link-hover: " + toCssColor(linkColorHover) + ";\n" +
+                "  --appmap-color-tile-background: " + toCssColor(colorTileBackground) + ";\n" +
+                "  --appmap-color-tile-shadow: " + toCssColor(colorTileShadow) + ";\n" +
+                "}\n";
+
+        return JBCefScrollbarsHelper.buildScrollbarsStyle() + "\n" + ideThemeColors + "\n" + ideStyles;
+    }
+
+    /**
+     * @return true if the request is for a webview asset, but not yet signed with an auth token
+     */
+    private static boolean isIdeStylesRequest(CefRequest request) {
+        var url = request.getURL();
+        return url.startsWith(AppMapWebview.getBaseUrlWithPath()) && url.endsWith("/ide-styles.css");
+    }
+
+    private @NotNull String toCssColor(@NotNull Color color) {
+        return String.format(Locale.ENGLISH,
+                "rgba(%d, %d, %d, %.3f)",
+                color.getRed(),
+                color.getGreen(),
+                color.getBlue(),
+                (double) color.getAlpha() / 255.0);
+    }
+
+    private @NotNull Color foregroundContrastColor(@NotNull Color background) {
+        return contrastColor(background, JBColor.WHITE, JBColor.BLACK);
+    }
+
+    private @NotNull Color contrastColor(@NotNull Color background, @NotNull Color first, @NotNull Color second) {
+        if (ColorUtil.calculateContrastRatio(background, first) > ColorUtil.calculateContrastRatio(background, second)) {
+            return first;
+        }
+        return second;
+    }
+}
