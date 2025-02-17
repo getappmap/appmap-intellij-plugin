@@ -88,12 +88,13 @@ jobs:
               shell: bash
               run: ./gradlew verifyPlugin
 
-    appmap-analysis:
-        if: always()
-        needs: [test]
-        uses: getappmap/analyze-action/.github/workflows/appmap-analysis.yml@v1
-        permissions:
-          actions: read
-          contents: read
-          checks: write
-          pull-requests: write
+# Disabled until it's working again
+#    appmap-analysis:
+#        if: always()
+#        needs: [test]
+#        uses: getappmap/analyze-action/.github/workflows/appmap-analysis.yml@v1
+#        permissions:
+#          actions: read
+#          contents: read
+#          checks: write
+#          pull-requests: write
