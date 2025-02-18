@@ -15,6 +15,7 @@ import com.intellij.execution.process.ProcessEvent;
 import com.intellij.execution.process.ProcessOutputTypes;
 import com.intellij.openapi.application.ApplicationInfo;
 import com.intellij.openapi.application.ApplicationManager;
+import com.intellij.openapi.application.PathManager;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.project.DumbService;
 import com.intellij.openapi.project.Project;
@@ -37,7 +38,11 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jvnet.winp.WinpException;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
@@ -88,6 +93,7 @@ public class DefaultAppLandJsonRpcService implements AppLandJsonRpcService, AppL
     protected volatile @Nullable JsonRpcServer jsonRpcServer = null;
 
     private static final @NotNull AtomicInteger jsonRpcRequestCounter = new AtomicInteger(0);
+    private static final @Nullable FileOutputStream OUTPUT_LOG_STREAM = createOutputLogStream();
 
     public DefaultAppLandJsonRpcService(@NotNull Project project) {
         this.project = project;
@@ -138,6 +144,30 @@ public class DefaultAppLandJsonRpcService implements AppLandJsonRpcService, AppL
     @Override
     public synchronized boolean isServerRunning() {
         return jsonRpcServer != null;
+    }
+
+    private static @Nullable FileOutputStream createOutputLogStream() {
+        try {
+            var logFile = new File(PathManager.getLogPath(), "appmap-json-rpc.log");
+            return new FileOutputStream(logFile, false);
+        } catch (FileNotFoundException e) {
+            LOG.warn("Failed to create log file for JSON-RPC server", e);
+            return null;
+        }
+    }
+
+
+    private static void logOutput(@NotNull String text) {
+        if (OUTPUT_LOG_STREAM != null) {
+            try {
+                synchronized (OUTPUT_LOG_STREAM) {
+                    OUTPUT_LOG_STREAM.write(text.getBytes(StandardCharsets.UTF_8));
+                    OUTPUT_LOG_STREAM.flush();
+                }
+            } catch (IOException e) {
+                LOG.warn("Failed to write to log file for JSON-RPC server", e);
+            }
+        }
     }
 
     @Override
@@ -408,6 +438,8 @@ public class DefaultAppLandJsonRpcService implements AppLandJsonRpcService, AppL
 
         @Override
         public void onTextAvailable(@NotNull ProcessEvent event, @NotNull Key outputType) {
+            logOutput(event.getText());
+
             if (LOG.isDebugEnabled() && outputType != ProcessOutputTypes.SYSTEM) {
                 LOG.debug("JSON-RPC: " + event.getText().trim());
             }
@@ -424,6 +456,7 @@ public class DefaultAppLandJsonRpcService implements AppLandJsonRpcService, AppL
 
         @Override
         public void processTerminated(@NotNull ProcessEvent event) {
+            logOutput("AppMap JSON-RPC server terminated: " + event + "\n\n");
             if (LOG.isDebugEnabled()) {
                 LOG.debug("AppMap JSON-RPC server terminated: " + event);
             }
