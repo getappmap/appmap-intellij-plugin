@@ -21,37 +21,52 @@ public class AppMapSettingsReloadProjectListener implements AppMapSettingsListen
     @Override
     public void cliEnvironmentChanged(@NotNull Set<String> modifiedKeys) {
         if (CollectionUtils.containsAny(modifiedKeys, AppLandJsonRpcService.LLM_ENV_VARIABLES)) {
-            showReloadNotificationAlarm.cancelAndRequest();
+            requestReloadNotification();
         }
     }
 
     @Override
     public void openAIKeyChange() {
-        showReloadNotificationAlarm.cancelAndRequest();
+        requestReloadNotification();
     }
 
     @Override
     public void copilotIntegrationDisabledChanged() {
-        showReloadNotificationAlarm.cancelAndRequest();
+        requestReloadNotification();
     }
 
     @Override
     public void copilotModelChanged() {
-        showReloadNotificationAlarm.cancelAndRequest();
+        requestReloadNotification();
     }
 
     @Override
-    public void scannedEnabledChanged() {
-        showReloadNotificationInAllProjects();
+    public void scannerEnabledChanged() {
+        requestReloadNotification();
+    }
+
+    private static void requestReloadNotification() {
+        // showReloadNotificationInAllProjects was a static field,
+        // but 2025.1 warns about "class init must not use services".
+        // We're initializing on demand to avoid this.
+        if (showReloadNotificationAlarm == null) {
+            synchronized (AppMapSettingsReloadProjectListener.class) {
+                if (showReloadNotificationAlarm == null) {
+                    showReloadNotificationAlarm = new SingleAlarm(
+                            AppMapSettingsReloadProjectListener::showReloadNotificationInAllProjects,
+                            1_000,
+                            AppLandLifecycleService.getInstance(),
+                            Alarm.ThreadToUse.SWING_THREAD,
+                            ModalityState.defaultModalityState());
+                }
+            }
+        }
+
+        showReloadNotificationAlarm.cancelAndRequest();
     }
 
     // debounce the notification, because several separate settings are changed at once
-    private static final SingleAlarm showReloadNotificationAlarm = new SingleAlarm(
-            AppMapSettingsReloadProjectListener::showReloadNotificationInAllProjects,
-            1_000,
-            AppLandLifecycleService.getInstance(),
-            Alarm.ThreadToUse.SWING_THREAD,
-            ModalityState.defaultModalityState());
+    private static volatile SingleAlarm showReloadNotificationAlarm = null;
 
     private static void showReloadNotificationInAllProjects() {
         ApplicationManager.getApplication().assertReadAccessAllowed();
