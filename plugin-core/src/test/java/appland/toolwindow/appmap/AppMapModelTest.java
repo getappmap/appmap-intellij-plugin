@@ -1,7 +1,6 @@
 package appland.toolwindow.appmap;
 
 import appland.AppMapBaseTest;
-import appland.utils.ModuleTestUtils;
 import com.intellij.openapi.application.WriteAction;
 import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.testFramework.fixtures.TempDirTestFixture;
@@ -18,6 +17,11 @@ public class AppMapModelTest extends AppMapBaseTest {
     protected TempDirTestFixture createTempDirTestFixture() {
         // create temp files on disk
         return new TempDirTestFixtureImpl();
+    }
+
+    @Override
+    protected boolean runInDispatchThread() {
+        return false;
     }
 
     @Test

@@ -1,11 +1,11 @@
 package appland.utils;
 
 import com.intellij.openapi.Disposable;
-import com.intellij.openapi.application.ApplicationManager;
+import com.intellij.testFramework.EdtTestUtil;
 import com.intellij.ui.tree.AsyncTreeModel;
 import com.intellij.ui.tree.TreeTestUtil;
 import com.intellij.ui.treeStructure.Tree;
-import com.intellij.util.ui.EDT;
+import com.intellij.util.concurrency.ThreadingAssertions;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.tree.TreeModel;
@@ -17,13 +17,9 @@ public final class ModelTestUtil {
     public static void assertTreeHierarchy(@NotNull TreeModel model,
                                            @NotNull String expected,
                                            @NotNull Disposable disposable) {
-        if (EDT.isCurrentThreadEdt()) {
-            assertTreeHierarchyOnEDT(model, expected, disposable);
-        } else {
-            ApplicationManager.getApplication().invokeAndWait(() -> {
-                assertTreeHierarchyOnEDT(model, expected, disposable);
-            });
-        }
+        ThreadingAssertions.assertBackgroundThread();
+
+        EdtTestUtil.runInEdtAndWait(() -> assertTreeHierarchyOnEDT(model, expected, disposable));
     }
 
     private static void assertTreeHierarchyOnEDT(@NotNull TreeModel model,

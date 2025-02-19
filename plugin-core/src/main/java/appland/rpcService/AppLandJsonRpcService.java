@@ -43,6 +43,11 @@ public interface AppLandJsonRpcService extends Disposable {
     void startServer();
 
     /**
+     * Restarts a running server on the current thread, while keeping the same port as the previous instance.
+     */
+    void restartServer();
+
+    /**
      * Stops the server in a background thread.
      * The calling thread is not blocked.
      */

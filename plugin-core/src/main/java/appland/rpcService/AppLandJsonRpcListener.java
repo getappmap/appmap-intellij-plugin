@@ -9,12 +9,31 @@ import java.util.Collection;
 public interface AppLandJsonRpcListener {
     Topic<AppLandJsonRpcListener> TOPIC = Topic.create("appmap.jsonRpcListener", AppLandJsonRpcListener.class);
 
-    void serverStarted();
+    default void serverStarted() {
+    }
 
-    void serverStopped();
+    default void serverStopped() {
+    }
 
-    void serverRestarted();
+    /**
+     * Sent before the JSON-RPC server is restarted.
+     */
+    default void beforeServerRestart() {
+    }
 
-    void serverConfigurationUpdated(@NotNull Collection<VirtualFile> contentRoots,
-                                    @NotNull Collection<VirtualFile> appMapConfigFiles);
+    /**
+     * Sent after the JSON-RPC server was restarted.
+     */
+    default void serverRestarted() {
+    }
+
+    /**
+     * Sent after a new AppMap JSON-RPC server was fully initialized.
+     *
+     * @param contentRoots      The content roots passed to the server process
+     * @param appMapConfigFiles The content files passed to the server process
+     */
+    default void serverConfigurationUpdated(@NotNull Collection<VirtualFile> contentRoots,
+                                            @NotNull Collection<VirtualFile> appMapConfigFiles) {
+    }
 }

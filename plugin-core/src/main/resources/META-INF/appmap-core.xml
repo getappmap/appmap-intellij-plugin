@@ -29,6 +29,9 @@
 
         <listener topic="appland.files.AppMapFileChangeListener"
                   class="appland.notifications.FirstAppMapListener"/>
+
+        <listener topic="appland.rpcService.AppLandJsonRpcListener"
+                  class="appland.settings.AppMapNavieRestartedListener"/>
     </projectListeners>
 
     <extensionPoints>
@@ -74,10 +77,6 @@
         <fileBasedIndex implementation="appland.index.AppMapConfigFileIndex"/>
 
         <roots.watchedRootsProvider implementation="appland.index.AppMapWatchedRootsProvider"/>
-        <!-- For 2023.1 and earlier -->
-        <!--suppress PluginXmlValidity -->
-        <indexableFilesContributor implementation="appland.index.AppMapIndexableFilesContributor"/>
-        <!-- For 2023.2 and later -->
         <indexedRootsProvider implementation="appland.index.AppMapIndexedRootsSetContributor"/>
 
         <toolWindow id="applandToolWindow" anchor="right" secondary="false"

@@ -78,7 +78,7 @@ public interface AppLandCommandLineService extends Disposable {
     /**
      * Stop all processes.
      *
-     * @param timeout Length of timeout to wait for process termination. 0 disables the waiting for termination.
+     * @param timeout  Length of timeout to wait for process termination. 0 disables the waiting for termination.
      * @param timeUnit Unit of timeout.
      */
     void stopAll(int timeout, @NotNull TimeUnit timeUnit);
@@ -120,7 +120,9 @@ public interface AppLandCommandLineService extends Disposable {
     /**
      * Creates the command line to launch the AppMap JSON-RPC server.
      *
+     * @param port If non-null, then the JSON-RPC server will be launched with this port.
+     *             This is useful to restart a server on the same port.
      * @return The command line or {@code null} if the CLI is unavailable
      */
-    @Nullable GeneralCommandLine createAppMapJsonRpcCommand();
+    @Nullable GeneralCommandLine createAppMapJsonRpcCommand(@Nullable Integer port);
 }

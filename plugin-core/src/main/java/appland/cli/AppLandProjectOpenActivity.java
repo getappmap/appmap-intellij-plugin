@@ -1,12 +1,12 @@
 package appland.cli;
 
+import appland.ProjectActivityAdapter;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.project.DumbAware;
 import com.intellij.openapi.project.Project;
-import com.intellij.openapi.startup.StartupActivity;
 import org.jetbrains.annotations.NotNull;
 
-public class AppLandProjectOpenActivity implements StartupActivity, DumbAware {
+public class AppLandProjectOpenActivity extends ProjectActivityAdapter implements DumbAware {
     @Override
     public void runActivity(@NotNull Project project) {
         // In 2024.2, StartupActivity (but not ProjectActivity) is not synchronous anymore for tests.

@@ -14,8 +14,10 @@ public final class GitHubCopilot {
     public static final CharSequence OPEN_AI_ORGANIZATION = "github-copilot";
     public static final CharSequence OPEN_AI_VERSION = "2020-10-01";
 
-    public static final String CHAT_FALLBACK_MODEL_NAME = "gpt-4o";
+    public static final String CHAT_FALLBACK_MODEL_ID = "gpt-4o";
     public static final double CHAT_DEFAULT_TEMPERATURE = 0.1;
+
+    public static final String INTERNAL_API_URL = "https://api.github.com/copilot_internal";
 
     // HTTP header names used by GitHub Copilot
     public static final String HEADER_OPENAI_ORGANIZATION = "openai-organization";
