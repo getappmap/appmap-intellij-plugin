@@ -71,7 +71,6 @@ public class ChooseCopilotModelAction extends AnAction implements DumbAware {
             var popup = JBPopupFactory.getInstance()
                     .createPopupChooserBuilder(filteredModels)
                     .setTitle(AppMapBundle.get("action.copilot.chooseModel.popup.title"))
-                    .setAdText(AppMapBundle.get("action.copilot.chooseModel.popup.adText"))
                     .setRenderer(new CopilotModelRenderer(currentModel))
                     .setSelectedValue(currentModel, true)
                     .setItemsChosenCallback(selectedModels -> {
