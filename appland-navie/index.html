@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>AppMap AI: Explain</title>
     <link rel="stylesheet" href="./dist/main.css" />
+    <link rel="stylesheet" href="./ide-styles.css" />
     <style>
         body {
             font-family: system-ui, sans-serif;
@@ -59,6 +60,11 @@
         /* The save button is not yet implemented. */
         [data-cy="save-message"] {
             display: none !important;
+        }
+
+        /* Styling of the text in Navie's "Pinned Items" */
+        .intellij-notice p {
+            color: var(--appmap-color-foreground) !important;
         }
     </style>
 </head>
