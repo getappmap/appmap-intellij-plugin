@@ -120,7 +120,7 @@ public interface AppLandCommandLineService extends Disposable {
     /**
      * Creates the command line to launch the AppMap JSON-RPC server.
      *
-     * @param port If non-null, then the JSOn-RPC server will be launched with this port.
+     * @param port If non-null, then the JSON-RPC server will be launched with this port.
      *             This is useful to restart a server on the same port.
      * @return The command line or {@code null} if the CLI is unavailable
      */
