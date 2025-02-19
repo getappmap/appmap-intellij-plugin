@@ -1,5 +1,16 @@
 AppMap Plugin Changelog
 
+## [0.78.0](https://github.com/getappmap/appmap-intellij-plugin/compare/v0.77.0...v0.78.0) (2025-02-19)
+
+
+### Features
+
+-  Add logging for the AppMap RPC server ([3fc5562]())-  Download content exclusion lists from GitHub ([bedc434]())-  support restarting AppMap JSON-RPC without reopening the project ([b78a649]())
+
+### Bug Fixes
+
+-  don't delay Navie UI until IDE finished indexing ([c85c0a1]())
+
 ## [0.77.0](https://github.com/getappmap/appmap-intellij-plugin/compare/v0.76.1...v0.77.0) (2025-01-24)
 
 
