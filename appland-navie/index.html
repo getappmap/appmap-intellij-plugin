@@ -7,6 +7,7 @@
     <title>AppMap AI: Explain</title>
     <link rel="stylesheet" href="./dist/main.css" />
     <link rel="stylesheet" href="./ide-styles.css" />
+    <!--suppress CssUnusedSymbol -->
     <style>
         body {
             font-family: system-ui, sans-serif;
@@ -50,9 +51,7 @@
             border: 1px solid #2d3546;
         }
 
-        /* 
-                The baseline of the chat input is too high. This makes it a lot less obvious.
-             */
+        /* The baseline of the chat input is too high. This makes it a lot less obvious. */
         [data-cy="chat-input"] {
             padding-top: 0.9rem !important;
         }
@@ -63,8 +62,22 @@
         }
 
         /* Styling of the text in Navie's "Pinned Items" */
+        /*noinspection CssUnresolvedCustomProperty*/
         .intellij-notice p {
             color: var(--appmap-color-foreground) !important;
+        }
+
+        /* Style the appmap icon in Navie */
+        /*noinspection CssUnresolvedCustomProperty*/
+        .context__body__table-row__header svg path {
+            fill: var(--appmap-color-foreground);
+        }
+
+        /* override monospace font for code snippets */
+        /*noinspection CssUnresolvedCustomProperty*/
+        .message .message-body code {
+            font-family: var(--appmap-font-code-family), monospace !important;
+            font-size: var(--appmap-font-code-size) !important;
         }
     </style>
 </head>
