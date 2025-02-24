@@ -1,5 +1,16 @@
 ## Indexing of AppMap Data
 
+### Developing or Testing For A Different Major Version
+
+Release builds must be created with the earliest support version.
+But testing or fixing API compatibility can be done for a different major version.
+
+Property `platformVersion` in file `gradle.properties` defines which IDE platform to use.
+File `gradle-$platformVersion.properties` contains the properties for the configured versin.
+
+Use `./gradlew -PplatformVersion=...` to override the version on the command line.
+For example, use `./gradlew -PplatformVersion=251` to run a sandbox IDE for 2025.1.
+
 ### Indexed `appmap.yml` Files
 
 `appmap.yml` files, which are located in a project, are indexed.

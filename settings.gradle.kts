@@ -4,10 +4,10 @@ pluginManagement {
         gradlePluginPortal()
     }
 
-    val platformVersion = extra["ideVersion"] as String
+    val platformVersion = (extra["platformVersion"] as String).toInt()
     plugins {
         val kotlinVersion = when {
-            platformVersion.startsWith("251.") || platformVersion.startsWith("2025.1") -> "2.1.0"
+            platformVersion == 251 -> "2.1.0"
             else -> "1.9.24"
         }
         kotlin("jvm") version kotlinVersion
