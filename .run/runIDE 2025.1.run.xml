@@ -1,10 +1,10 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="intellij-plugin [runIde]" type="GradleRunConfiguration" factoryName="Gradle">
+  <configuration default="false" name="runIDE 2025.1" type="GradleRunConfiguration" factoryName="Gradle">
     <ExternalSystemSettings>
       <option name="executionName" />
       <option name="externalProjectPath" value="$PROJECT_DIR$" />
       <option name="externalSystemIdString" value="GRADLE" />
-      <option name="scriptParameters" value="-PideVersion=2024.3.1 -PcopilotPluginVersion=1.5.30-242" />
+      <option name="scriptParameters" value="-PplatformVersion=251" />
       <option name="taskDescriptions">
         <list />
       </option>

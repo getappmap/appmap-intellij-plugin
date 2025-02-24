@@ -10,6 +10,11 @@ import org.jetbrains.intellij.platform.gradle.TestFrameworkType
 import org.jetbrains.intellij.platform.gradle.tasks.InstrumentCodeTask
 import org.jetbrains.intellij.platform.gradle.tasks.PrepareSandboxTask
 import org.jetbrains.intellij.platform.gradle.tasks.VerifyPluginTask.FailureLevel
+import org.jetbrains.kotlin.konan.properties.loadProperties
+import kotlin.collections.component1
+import kotlin.collections.component2
+
+loadPlatformProperties()
 
 buildscript {
     dependencies {
@@ -474,4 +479,16 @@ fun String.renderMarkdown(): String {
 
 fun prop(name: String): String {
     return extra.properties[name] as? String ?: error("Property `$name` is not defined in gradle.properties")
+}
+
+fun loadPlatformProperties() {
+    val platformVersion = prop("platformVersion").toInt()
+    val platformFilePath = rootDir.resolve("gradle-$platformVersion.properties")
+    loadProperties(platformFilePath.toString()).forEach { (key, value) ->
+        val name = key.toString()
+        // don't override properties which were overridden on the Gradle commandline with '-Pname=value"
+        if (!rootProject.extra.has(name)) {
+            rootProject.extra.set(name, value)
+        }
+    }
 }
