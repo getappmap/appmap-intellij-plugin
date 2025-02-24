@@ -2,6 +2,7 @@ package appland.webviews;
 
 import appland.webviews.webserver.AppMapWebview;
 import com.intellij.ide.ui.UISettings;
+import com.intellij.openapi.editor.colors.EditorColorsManager;
 import com.intellij.ui.ColorUtil;
 import com.intellij.ui.JBColor;
 import com.intellij.ui.jcef.JBCefScrollbarsHelper;
@@ -85,6 +86,8 @@ public class IdeStyleResourceHandler extends CefRequestHandlerAdapter {
 
     // see https://github.com/getappmap/vscode-appland/blob/bfd83ad8c848d31257ab004688eb847feecbcf32/web/static/styles/navie-integration.css#L1-L0
     private @NotNull String createIdeStyles() {
+        var scheme = EditorColorsManager.getInstance().getGlobalScheme();
+
         var background = UIUtil.getPanelBackground();
 
         // used for glow and border around Navie's main text input box
@@ -108,6 +111,9 @@ public class IdeStyleResourceHandler extends CefRequestHandlerAdapter {
         var fontFamily = UISettings.getInstance().getFontFace();
         var fontSize = UISettings.getInstance().getFontSize() + "px";
         var fontWeight = "normal";
+
+        var fontCodeFamily = scheme.getEditorFontName();
+        var fontCodeSize = String.format("%.2fpx", scheme.getEditorFontSize2D());
 
         var buttonBackground = JBUI.CurrentTheme.Button.defaultButtonColorStart();
         var buttonBackgroundHover = JBUI.CurrentTheme.Button.focusBorderColor(true);
@@ -147,6 +153,8 @@ public class IdeStyleResourceHandler extends CefRequestHandlerAdapter {
                 "  --appmap-font-family: " + fontFamily + ";\n" +
                 "  --appmap-font-size: " + fontSize + ";\n" +
                 "  --appmap-font-weight: " + fontWeight + ";\n" +
+                "  --appmap-font-code-family: " + fontCodeFamily + ";\n" + // custom property
+                "  --appmap-font-code-size: " + fontCodeSize + ";\n" + // custom property
                 "  --appmap-color-success: " + toCssColor(success) + ";\n" +
                 "  --appmap-color-error: " + toCssColor(error) + ";\n" +
                 "  --appmap-color-warning: " + toCssColor(warning) + ";\n" +
