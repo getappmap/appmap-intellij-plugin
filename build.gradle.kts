@@ -29,7 +29,7 @@ buildscript {
 plugins {
     idea
     id("org.jetbrains.kotlin.jvm")
-    id("org.jetbrains.intellij.platform") version "2.2.1"
+    id("org.jetbrains.intellij.platform") version "2.2.2-SNAPSHOT"
     id("org.jetbrains.changelog") version "1.3.1"
     id("com.adarshr.test-logger") version "3.2.0"
     id("de.undercouch.download") version "5.6.0"
@@ -44,12 +44,7 @@ val ideVersion = prop("ideVersion")
 group = "appland.appmap"
 version = pluginVersionString
 
-val platformVersion = when {
-    // e.g. '2024.1'
-    ideVersion.length == 6 -> ideVersion.replace(".", "").substring(2).toInt()
-    // e.g. '243.16718.32'
-    else -> ideVersion.substringBefore(".").toInt()
-}
+val platformVersion = prop("platformVersion").toInt()
 
 val isCI = System.getenv("CI") == "true"
 val agentOutputPath = rootProject.layout.buildDirectory.asFile.get()
