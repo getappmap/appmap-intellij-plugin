@@ -1,6 +1,5 @@
-package appland.webviews;
+package appland.webviews.webserver;
 
-import appland.webviews.webserver.AppMapWebview;
 import com.intellij.ide.ui.UISettings;
 import com.intellij.openapi.editor.colors.EditorColorsManager;
 import com.intellij.ui.ColorUtil;
@@ -9,83 +8,14 @@ import com.intellij.ui.jcef.JBCefScrollbarsHelper;
 import com.intellij.ui.scale.JBUIScale;
 import com.intellij.util.ui.JBUI;
 import com.intellij.util.ui.UIUtil;
-import org.cef.browser.CefBrowser;
-import org.cef.browser.CefFrame;
-import org.cef.callback.CefCallback;
-import org.cef.handler.CefRequestHandlerAdapter;
-import org.cef.handler.CefResourceHandler;
-import org.cef.handler.CefResourceRequestHandler;
-import org.cef.handler.CefResourceRequestHandlerAdapter;
-import org.cef.misc.BoolRef;
-import org.cef.misc.IntRef;
-import org.cef.misc.StringRef;
-import org.cef.network.CefRequest;
-import org.cef.network.CefResponse;
 import org.jetbrains.annotations.NotNull;
 
 import java.awt.*;
-import java.io.ByteArrayInputStream;
-import java.nio.charset.StandardCharsets;
 import java.util.Locale;
 
-public class IdeStyleResourceHandler extends CefRequestHandlerAdapter {
-    @Override
-    public CefResourceRequestHandler getResourceRequestHandler(CefBrowser browser,
-                                                               CefFrame frame,
-                                                               CefRequest request,
-                                                               boolean isNavigation,
-                                                               boolean isDownload,
-                                                               String requestInitiator,
-                                                               BoolRef disableDefaultHandling) {
-
-        if (isIdeStylesRequest(request)) {
-            var ideStylesStream = new ByteArrayInputStream(createIdeStyles().getBytes(StandardCharsets.UTF_8));
-
-            return new CefResourceRequestHandlerAdapter() {
-                @Override
-                public CefResourceHandler getResourceHandler(CefBrowser browser, CefFrame frame, CefRequest request) {
-                    return new CefResourceHandler() {
-                        @Override
-                        public boolean processRequest(CefRequest cefRequest, CefCallback cefCallback) {
-                            cefCallback.Continue();
-                            return true;
-                        }
-
-                        @Override
-                        public void getResponseHeaders(CefResponse cefResponse, IntRef intRef, StringRef stringRef) {
-                            cefResponse.setMimeType("text/css");
-                            cefResponse.setStatus(200);
-                        }
-
-                        @Override
-                        public boolean readResponse(byte[] bytes, int bytesToRead, IntRef bytesRead, CefCallback cefCallback) {
-                            try {
-                                bytesRead.set(ideStylesStream.read(bytes, 0, bytesToRead));
-                                if (bytesRead.get() != -1) {
-                                    return true;
-                                }
-                            } catch (Exception e) {
-                                cefCallback.cancel();
-                            }
-                            bytesRead.set(0);
-                            return false;
-                        }
-
-                        @Override
-                        public void cancel() {
-                            // empty
-                        }
-                    };
-                }
-            };
-        }
-
-        // fallback to default handling of JCEF
-        return null;
-    }
-
+class IdeStyleRequest {
     // see https://github.com/getappmap/vscode-appland/blob/bfd83ad8c848d31257ab004688eb847feecbcf32/web/static/styles/navie-integration.css#L1-L0
-    private @NotNull String createIdeStyles() {
+    static @NotNull String createIdeStyles() {
         var scheme = EditorColorsManager.getInstance().getGlobalScheme();
 
         var background = UIUtil.getPanelBackground();
@@ -167,15 +97,7 @@ public class IdeStyleResourceHandler extends CefRequestHandlerAdapter {
         return JBCefScrollbarsHelper.buildScrollbarsStyle() + "\n" + ideThemeColors + "\n" + ideStyles;
     }
 
-    /**
-     * @return true if the request is for a webview asset, but not yet signed with an auth token
-     */
-    private static boolean isIdeStylesRequest(CefRequest request) {
-        var url = request.getURL();
-        return url.startsWith(AppMapWebview.getBaseUrlWithPath()) && url.endsWith("/ide-styles.css");
-    }
-
-    private @NotNull String toCssColor(@NotNull Color color) {
+    private static @NotNull String toCssColor(@NotNull Color color) {
         return String.format(Locale.ENGLISH,
                 "rgba(%d, %d, %d, %.3f)",
                 color.getRed(),
@@ -184,11 +106,11 @@ public class IdeStyleResourceHandler extends CefRequestHandlerAdapter {
                 (double) color.getAlpha() / 255.0);
     }
 
-    private @NotNull Color foregroundContrastColor(@NotNull Color background) {
+    private static @NotNull Color foregroundContrastColor(@NotNull Color background) {
         return contrastColor(background, JBColor.WHITE, JBColor.BLACK);
     }
 
-    private @NotNull Color contrastColor(@NotNull Color background, @NotNull Color first, @NotNull Color second) {
+    private static @NotNull Color contrastColor(@NotNull Color background, @NotNull Color first, @NotNull Color second) {
         if (ColorUtil.calculateContrastRatio(background, first) > ColorUtil.calculateContrastRatio(background, second)) {
             return first;
         }
