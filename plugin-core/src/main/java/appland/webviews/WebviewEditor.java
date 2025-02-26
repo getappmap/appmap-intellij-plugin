@@ -179,8 +179,6 @@ public abstract class WebviewEditor<T> extends UserDataHolderBase implements Fil
     }
 
     private void setupJCEF() {
-        // provide CSS styles customized to match the current IDE
-        contentPanel.getJBCefClient().addRequestHandler(new IdeStyleResourceHandler(), contentPanel.getCefBrowser());
         // open links to https://appmap.io in the external browser
         contentPanel.getJBCefClient().addRequestHandler(new OpenExternalLinksHandler(), contentPanel.getCefBrowser());
         // open new webview windows, which are opened via <a href="..." target="_blank", in the external browser
