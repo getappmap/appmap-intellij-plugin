@@ -72,6 +72,8 @@ public final class CopilotChatSession {
                         connection.setRequestProperty(GitHubCopilot.HEADER_OPENAI_ORGANIZATION, "github-copilot");
                         connection.setRequestProperty(GitHubCopilot.HEADER_REQUEST_ID, requestId());
                     })
+                    .connectTimeout(10000)
+                    .readTimeout(60000)
                     .connect(httpRequest -> {
                         httpRequest.write(GsonUtils.GSON.toJson(copilotRequest));
 
@@ -87,7 +89,7 @@ public final class CopilotChatSession {
                         readServerEvents(httpRequest.getReader(), responseListener);
                         return null;
                     });
-        } catch (HttpRequests.HttpStatusException e) {
+        } catch (IOException e) {
             if (LOG.isDebugEnabled()) {
                 LOG.debug("Failed to send chat request. ", e);
             }
