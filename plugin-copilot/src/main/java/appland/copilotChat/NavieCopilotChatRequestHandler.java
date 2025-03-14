@@ -8,8 +8,12 @@ import com.google.gson.annotations.SerializedName;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.util.Urls;
+import com.intellij.util.io.HttpRequests;
 import com.knuddels.jtokkit.api.Encoding;
+import io.netty.buffer.ByteBufAllocator;
+import io.netty.buffer.ByteBufUtil;
 import io.netty.buffer.Unpooled;
+import io.netty.channel.Channel;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.http.*;
@@ -20,6 +24,7 @@ import org.jetbrains.ide.HttpRequestHandler;
 import org.jetbrains.io.Responses;
 
 import java.io.IOException;
+import java.nio.CharBuffer;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.time.Instant;
@@ -46,44 +51,45 @@ public class NavieCopilotChatRequestHandler extends HttpRequestHandler {
 
     @Override
     public boolean isSupported(@NotNull FullHttpRequest request) {
-        return request.method() == HttpMethod.POST;
+        if (request.method() != HttpMethod.POST) return false;
+        var path = request.uri();
+        return path.startsWith(BASE_PATH + "/chat/completions");
     }
 
     @Override
     public boolean process(@NotNull QueryStringDecoder queryStringDecoder,
                            @NotNull FullHttpRequest fullHttpRequest,
                            @NotNull ChannelHandlerContext channelHandlerContext) {
-        String requestPath;
-        try {
-            requestPath = queryStringDecoder.path();
-        } catch (IllegalArgumentException e) {
-            return false;
-        }
-
-        if (!requestPath.startsWith(BASE_PATH + "/") && !requestPath.equals(BASE_PATH)) {
-            return false;
-        }
-
-        if (isEqualByHash("/chat/completions", requestPath.substring(BASE_PATH.length()))) {
-            // verify the authorization header, which must contain our random ide session id
-            var expectedAuthHeader = "Bearer " + GitHubCopilotService.RandomIdeSessionId;
-            if (isEqualByHash(expectedAuthHeader, fullHttpRequest.headers().get(HttpHeaderNames.AUTHORIZATION))) {
+        var expectedAuthHeader = "Bearer " + GitHubCopilotService.RandomIdeSessionId;
+        if (!isEqualByHash(expectedAuthHeader, fullHttpRequest.headers().get(HttpHeaderNames.AUTHORIZATION))) {
+            sendErrorResponse(HttpResponseStatus.UNAUTHORIZED, "Unauthorized", fullHttpRequest, channelHandlerContext.channel());
+        } else {
+            try {
                 handleChatCompletions(fullHttpRequest, channelHandlerContext);
-                return true;
+            } catch (HttpRequests.HttpStatusException e) {
+                if (e.getMessage().contains(" exceeds the limit of ")) {
+                    // token count limit, reformat to a suitable error response
+                    sendErrorResponse(HttpResponseStatus.UNPROCESSABLE_ENTITY,
+                            makeLimitError(e),
+                            fullHttpRequest,
+                            channelHandlerContext.channel());
+                } else {
+                    // otherwise, just forward the error
+                    sendErrorResponse(HttpResponseStatus.valueOf(e.getStatusCode()), e.getMessage(), fullHttpRequest, channelHandlerContext.channel());
+                }
+            } catch (Exception e) {
+                LOG.warn("Failed to handle Copilot chat request", e);
+                sendErrorResponse(HttpResponseStatus.INTERNAL_SERVER_ERROR, e.toString(), fullHttpRequest, channelHandlerContext.channel());
             }
         }
-
-        return false;
+        return true;
     }
 
     private void handleChatCompletions(@NotNull FullHttpRequest fullHttpRequest,
-                                       @NotNull ChannelHandlerContext channelHandlerContext) {
+                                       @NotNull ChannelHandlerContext channelHandlerContext) throws IOException, IllegalStateException {
         var chatSession = cachedCopilotChatSession();
         if (chatSession == null) {
-            Responses.response(HttpResponseStatus.INTERNAL_SERVER_ERROR,
-                    fullHttpRequest,
-                    "No GitHub Copilot session found");
-            return;
+            throw new IllegalStateException("No GitHub Copilot session found");
         }
 
         var requestBody = fullHttpRequest.content().toString(StandardCharsets.UTF_8);
@@ -91,31 +97,33 @@ public class NavieCopilotChatRequestHandler extends HttpRequestHandler {
 
         var copilotModel = getCopilotModel(openAIRequest.model(), GitHubCopilot.CHAT_FALLBACK_MODEL_ID);
         if (copilotModel == null) {
-            Responses.response(HttpResponseStatus.INTERNAL_SERVER_ERROR,
-                    fullHttpRequest,
-                    "Unable to find GitHub Copilot model " + openAIRequest.model());
-            return;
+            throw new IllegalStateException("No GitHub Copilot model found");
         }
 
         var tokenizer = GitHubCopilotService.getInstance().loadTokenizer(copilotModel.capabilities().tokenizer());
 
-        try {
-            if (openAIRequest.stream()) {
-                sendStreamingChatResponse(chatSession,
-                        copilotModel,
-                        openAIRequest,
-                        channelHandlerContext);
-            } else {
-                sendCompleteChatResponse(chatSession,
-                        copilotModel,
-                        fullHttpRequest,
-                        openAIRequest,
-                        channelHandlerContext,
-                        tokenizer);
-            }
-        } catch (IOException e) {
-            handleHttpServerError(fullHttpRequest, e, copilotModel, tokenizer, openAIRequest);
+        if (openAIRequest.stream()) {
+            sendStreamingChatResponse(chatSession,
+                    copilotModel,
+                    openAIRequest,
+                    channelHandlerContext);
+        } else {
+            sendCompleteChatResponse(chatSession,
+                    copilotModel,
+                    fullHttpRequest,
+                    openAIRequest,
+                    channelHandlerContext,
+                    tokenizer);
         }
+    }
+
+    private void sendErrorResponse(@NotNull HttpResponseStatus status, @NotNull String message, @NotNull FullHttpRequest request, @NotNull Channel channel) {
+        var content = ByteBufUtil.encodeString(ByteBufAllocator.DEFAULT, CharBuffer.wrap(message), StandardCharsets.UTF_8);
+        var response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, status, content);
+        response.headers().set(HttpHeaderNames.CACHE_CONTROL, "private, must-revalidate");
+        response.headers().set(HttpHeaderNames.LAST_MODIFIED, new Date(Calendar.getInstance().getTimeInMillis()));
+
+        Responses.send(response, channel, request);
     }
 
     private void sendStreamingChatResponse(@NotNull CopilotChatSession chatSession,
@@ -286,10 +294,8 @@ public class NavieCopilotChatRequestHandler extends HttpRequestHandler {
      * Handle a server error response from GitHub Copilot.
      * If the Copilot API sent a "context token overflow" error, we convert it into a suitable error response for Navie.
      */
-    private static void handleHttpServerError(@NotNull FullHttpRequest fullHttpRequest,
-                                              @NotNull Exception exception,
-                                              @NotNull CopilotModelDefinition copilotModel,
-                                              @NotNull Encoding tokenizer, @NotNull OpenAIChatCompletionsRequest openAIRequest) {
+    private static @NotNull String makeLimitError(
+            @NotNull Exception exception) {
         // Navie and Copilot share the same JSON structure for an error
         record ResponseErrorMessage(@SerializedName("error") Error error) {
             record Error(@SerializedName("message") @Nullable String message,
@@ -319,46 +325,18 @@ public class NavieCopilotChatRequestHandler extends HttpRequestHandler {
             if (matcher.find()) {
                 tokensUsed = Integer.parseInt(matcher.group(1));
                 maxInputTokens = Integer.parseInt(matcher.group(2));
+                var error = new ResponseErrorMessage(new ResponseErrorMessage.Error(
+                        "This model's maximum context length is " + maxInputTokens + " tokens. " +
+                                "However, your messages resulted in " + tokensUsed + " tokens.",
+                        "invalid_request_error",
+                        "messages",
+                        "context_length_exceeded"
+                ));
+                return GsonUtils.GSON.toJson(error);
             }
         }
 
-        if (maxInputTokens == null) {
-            maxInputTokens = copilotModel.capabilities().limits().maxPromptTokens();
-        }
-
-        // as a fallback, count the tokens used by the prompt messages
-        if (tokensUsed == null) {
-            var tokens = 0;
-            for (var message : openAIRequest.messages()) {
-                tokens += tokenizer.countTokens(message.content());
-            }
-            tokensUsed = tokens;
-        }
-
-        // Navie always expects a 422 response status code
-        // If the server did not provide the max counts, we only send a context_length_exceeded error if the tokens used
-        // exceed the max input tokens.
-        ResponseErrorMessage navieError;
-        if (hasValidServerError || maxInputTokens != null && tokensUsed > maxInputTokens) {
-            navieError = new ResponseErrorMessage(new ResponseErrorMessage.Error(
-                    "This model's maximum context length is " + maxInputTokens + " tokens. " +
-                            "However, your messages resulted in " + tokensUsed + " tokens.",
-                    "invalid_request_error",
-                    "messages",
-                    "context_length_exceeded"
-            ));
-        } else {
-            navieError = new ResponseErrorMessage(new ResponseErrorMessage.Error(
-                    "An unknown error occurred while processing your request.",
-                    "server_error",
-                    null,
-                    null
-            ));
-        }
-
-        // Navie always expects a 422 response status code
-        Responses.response(HttpResponseStatus.UNPROCESSABLE_ENTITY,
-                fullHttpRequest,
-                GsonUtils.GSON.toJson(navieError));
+        // fall back to the original error
+        return exception.getMessage();
     }
 }

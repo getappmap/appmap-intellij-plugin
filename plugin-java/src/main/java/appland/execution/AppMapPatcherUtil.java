@@ -36,9 +36,8 @@ final class AppMapPatcherUtil {
     public static @NotNull List<String> prepareJavaParameters(@NotNull Project project,
                                                               @NotNull RunProfile configuration,
                                                               @NotNull SimpleJavaParameters javaParameters) throws Exception {
-        if (!ApplicationManager.getApplication().isDispatchThread()) {
-            ApplicationManager.getApplication().assertReadAccessNotAllowed();
-        }
+        // < 2025.1 either execute this on the EDT or in a background thread without read access
+        // 2025.1 seems to execute this with read access if in a background thread, at least in test mode.
 
         var task = new Task.WithResult<List<String>, Exception>(project, AppMapBundle.get("appMapConfig.creatingConfig"), true) {
             @Override

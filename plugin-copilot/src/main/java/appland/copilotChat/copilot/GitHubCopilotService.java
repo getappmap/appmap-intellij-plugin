@@ -3,12 +3,15 @@ package appland.copilotChat.copilot;
 import appland.notifications.AppMapNotifications;
 import appland.utils.GsonUtils;
 import appland.utils.SystemProperties;
+import appland.utils.UserLog;
 import com.google.gson.JsonObject;
+import com.intellij.openapi.Disposable;
 import com.intellij.openapi.application.ApplicationInfo;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.components.Service;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.extensions.PluginId;
+import com.intellij.openapi.util.Disposer;
 import com.intellij.openapi.util.SystemInfo;
 import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.util.EnvironmentUtil;
@@ -28,7 +31,11 @@ import java.util.Map;
 import java.util.UUID;
 
 @Service(Service.Level.APP)
-public final class GitHubCopilotService {
+public final class GitHubCopilotService implements Disposable {
+    GitHubCopilotService() {
+        Disposer.register(this, userLog);
+    }
+
     public static GitHubCopilotService getInstance() {
         return ApplicationManager.getApplication().getService(GitHubCopilotService.class);
     }
@@ -43,6 +50,13 @@ public final class GitHubCopilotService {
     public static final @NotNull String RandomIdeSessionId = UUID.randomUUID().toString();
 
     private final EncodingRegistry registry = Encodings.newDefaultEncodingRegistry();
+
+    private final @NotNull UserLog userLog = new UserLog("appmap-copilot-proxy.log");
+
+    @Override
+    public void dispose() {
+        // no-op, the disposer will take care of disposing the user log
+    }
 
     public boolean isCopilotAuthenticated() {
         return loadGitHubOAuthToken() != null;
@@ -63,6 +77,7 @@ public final class GitHubCopilotService {
      */
     private synchronized void downloadContentExclusions(@NotNull String githubToken) throws IOException {
         if (contentExclusionsDownloaded) return;
+        userLog.log("Downloading content exclusions");
         var exclusions = CopilotContentExclusion.fetchGlobal(githubToken);
         var paths = new ArrayList<String>();
         for (var exclusion : exclusions) {
@@ -73,6 +88,7 @@ public final class GitHubCopilotService {
         var path = contentExclusionPath();
         Files.createDirectories(path.getParent());
         Files.write(path, paths);
+        userLog.log("Downloaded content exclusions to " + path);
         contentExclusionsDownloaded = true;
     }
 
@@ -92,6 +108,7 @@ public final class GitHubCopilotService {
         try {
             downloadContentExclusions(githubToken);
         } catch (IOException e) {
+            userLog.log("Failed to download content exclusions: " + e);
             LOG.warn("Failed to download content exclusions", e);
             throw e;
         }
@@ -137,7 +154,9 @@ public final class GitHubCopilotService {
                 "vscode-machineid", machineId,
                 "vscode-sessionid", UUID.randomUUID().toString()
         );
-        return new CopilotChatSession(apiEndpoint, copilotToken, baseHeaders);
+
+        userLog.log("Creating chat session with GitHub Copilot API");
+        return new CopilotChatSession(apiEndpoint, copilotToken, baseHeaders, userLog);
     }
 
     /**
@@ -147,6 +166,7 @@ public final class GitHubCopilotService {
         var configPath = findGitHubCopilotConfig();
         if (configPath == null) {
             LOG.debug("Unable to find an existing GitHub Copilot configuration file.");
+            userLog.log("Unable to find an existing GitHub Copilot configuration file.");
             return null;
         }
 

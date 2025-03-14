@@ -90,6 +90,7 @@ export function mountWebview() {
     app.$on('open-record-instructions', () => vscode.postMessage({command: 'open-record-instructions'}))
     app.$on('open-appmap', (path) => vscode.postMessage({command: 'open-appmap', path}))
     app.$on('open-location', (path, directory) => vscode.postMessage({command: 'open-location', path, directory}))
+    app.$on('save-message', (message) => vscode.postMessage({command: 'save-message', ...message}))
     app.$on('select-llm-option', (choice) => vscode.postMessage({command: 'select-llm-option', choice}));
     app.$on('show-appmap-tree', () => vscode.postMessage({command: 'show-appmap-tree'}));
   });

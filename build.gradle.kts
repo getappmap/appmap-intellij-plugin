@@ -10,6 +10,11 @@ import org.jetbrains.intellij.platform.gradle.TestFrameworkType
 import org.jetbrains.intellij.platform.gradle.tasks.InstrumentCodeTask
 import org.jetbrains.intellij.platform.gradle.tasks.PrepareSandboxTask
 import org.jetbrains.intellij.platform.gradle.tasks.VerifyPluginTask.FailureLevel
+import org.jetbrains.kotlin.konan.properties.loadProperties
+import kotlin.collections.component1
+import kotlin.collections.component2
+
+loadPlatformProperties()
 
 buildscript {
     dependencies {
@@ -24,7 +29,7 @@ buildscript {
 plugins {
     idea
     id("org.jetbrains.kotlin.jvm")
-    id("org.jetbrains.intellij.platform") version "2.2.1"
+    id("org.jetbrains.intellij.platform") version "2.3.1-SNAPSHOT"
     id("org.jetbrains.changelog") version "1.3.1"
     id("com.adarshr.test-logger") version "3.2.0"
     id("de.undercouch.download") version "5.6.0"
@@ -39,12 +44,7 @@ val ideVersion = prop("ideVersion")
 group = "appland.appmap"
 version = pluginVersionString
 
-val platformVersion = when {
-    // e.g. '2024.1'
-    ideVersion.length == 6 -> ideVersion.replace(".", "").substring(2).toInt()
-    // e.g. '243.16718.32'
-    else -> ideVersion.substringBefore(".").toInt()
-}
+val platformVersion = prop("platformVersion").toInt()
 
 val isCI = System.getenv("CI") == "true"
 val agentOutputPath = rootProject.layout.buildDirectory.asFile.get()
@@ -474,4 +474,16 @@ fun String.renderMarkdown(): String {
 
 fun prop(name: String): String {
     return extra.properties[name] as? String ?: error("Property `$name` is not defined in gradle.properties")
+}
+
+fun loadPlatformProperties() {
+    val platformVersion = prop("platformVersion").toInt()
+    val platformFilePath = rootDir.resolve("gradle-$platformVersion.properties")
+    loadProperties(platformFilePath.toString()).forEach { (key, value) ->
+        val name = key.toString()
+        // don't override properties which were overridden on the Gradle commandline with '-Pname=value"
+        if (!rootProject.extra.has(name)) {
+            rootProject.extra.set(name, value)
+        }
+    }
 }

@@ -1,6 +1,7 @@
 package appland.copilotChat.copilot;
 
 import appland.utils.GsonUtils;
+import appland.utils.UserLog;
 import com.google.gson.annotations.SerializedName;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.util.Urls;
@@ -24,13 +25,16 @@ public final class CopilotChatSession {
     private final @NotNull String endpoint;
     private final @NotNull UpdatingCopilotToken copilotToken;
     private final @NotNull Map<@NotNull String, @NotNull String> baseHeaders;
+    private final @NotNull UserLog userLog;
 
     CopilotChatSession(@NotNull String endpoint,
                        @NotNull UpdatingCopilotToken copilotToken,
-                       @NotNull Map<String, String> baseHeaders) {
+                       @NotNull Map<String, String> baseHeaders,
+                       @NotNull UserLog userLog) {
         this.endpoint = endpoint;
         this.copilotToken = copilotToken;
         this.baseHeaders = baseHeaders;
+        this.userLog = userLog;
     }
 
     public List<CopilotModelDefinition> loadChatModels() throws IOException {
@@ -38,6 +42,7 @@ public final class CopilotChatSession {
         }
 
         var modelsEndpoint = Urls.newFromEncoded(endpoint + "/models");
+        userLog.log("Loading models from " + modelsEndpoint);
         var response = HttpRequests.request(modelsEndpoint.toExternalForm())
                 .accept("application/json")
                 .gzip(true)
@@ -62,6 +67,7 @@ public final class CopilotChatSession {
 
         try {
             var chatEndpoint = Urls.newFromEncoded(endpoint + "/chat/completions");
+            userLog.log("Sending chat request to " + chatEndpoint);
             HttpRequests.post(chatEndpoint.toExternalForm(), "application/json")
                     .gzip(true)
                     .throwStatusCodeException(true)
@@ -72,6 +78,8 @@ public final class CopilotChatSession {
                         connection.setRequestProperty(GitHubCopilot.HEADER_OPENAI_ORGANIZATION, "github-copilot");
                         connection.setRequestProperty(GitHubCopilot.HEADER_REQUEST_ID, requestId());
                     })
+                    .connectTimeout(10000)
+                    .readTimeout(60000)
                     .connect(httpRequest -> {
                         httpRequest.write(GsonUtils.GSON.toJson(copilotRequest));
 
@@ -79,6 +87,7 @@ public final class CopilotChatSession {
                         // to not prevent the method calling this processor will throw an HTTP error exception.
                         if (httpRequest.getConnection() instanceof HttpURLConnection) {
                             var responseCode = ((HttpURLConnection) httpRequest.getConnection()).getResponseCode();
+                            userLog.log("Chat request response code: " + responseCode);
                             if (responseCode >= 400) {
                                 return null;
                             }
@@ -87,7 +96,8 @@ public final class CopilotChatSession {
                         readServerEvents(httpRequest.getReader(), responseListener);
                         return null;
                     });
-        } catch (HttpRequests.HttpStatusException e) {
+        } catch (IOException e) {
+            userLog.log("Failed to send chat request. " + e.toString());
             if (LOG.isDebugEnabled()) {
                 LOG.debug("Failed to send chat request. ", e);
             }
