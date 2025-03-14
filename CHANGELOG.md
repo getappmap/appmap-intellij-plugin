@@ -1,5 +1,16 @@
 AppMap Plugin Changelog
 
+## [0.79.0](https://github.com/getappmap/appmap-intellij-plugin/compare/v0.78.0...v0.79.0) (2025-03-14)
+
+
+### Features
+
+-  Add some logging to github copilot proxy ([cd19a0b]())-  style AppMap webviews to match the IDE's theme, update Navie webview ([fcfabe6]())-  support "save as" in Navie webview ([189e6ac]())
+
+### Bug Fixes
+
+-  Actually send error responses to the client in the copilot proxy ([8a7c07f]())-  IDE styling was not always applied to webviews ([de1550f]())-  Retrieve service on demand to avoid a warning on 2025.1 about class initialization of services ([c0e6ce0]())-  Set timeout on chat completion requests, show log on io errors ([34098ed]())
+
 ## [0.78.0](https://github.com/getappmap/appmap-intellij-plugin/compare/v0.77.0...v0.78.0) (2025-02-19)
 
 
