@@ -47,7 +47,10 @@ public final class CopilotChatSession {
                 .accept("application/json")
                 .gzip(true)
                 .isReadResponseOnError(true)
-                .tuner(connection -> applyHeaders(connection, baseHeaders))
+                .tuner(connection -> {
+                    applyHeaders(connection, baseHeaders);
+                    connection.setRequestProperty(HttpHeaderNames.AUTHORIZATION.toString(), copilotToken.getAuthorizationHeader());
+                })
                 .readString();
 
         return Arrays.stream(GsonUtils.GSON.fromJson(response, ModelsResponse.class).models)
@@ -58,6 +61,7 @@ public final class CopilotChatSession {
     public void ask(@NotNull CopilotChatResponseListener responseListener,
                     @NotNull CopilotModelDefinition model,
                     @NotNull List<CopilotChatRequest.Message> messages,
+                    @NotNull Map<String, String> proxiedRequestHeaders,
                     @Nullable Double temperature,
                     @Nullable Double topP,
                     @Nullable Integer n) throws IOException {
@@ -74,6 +78,8 @@ public final class CopilotChatSession {
                     .isReadResponseOnError(true)
                     .tuner(connection -> {
                         applyHeaders(connection, baseHeaders);
+                        applyHeaders(connection, proxiedRequestHeaders);
+                        connection.setRequestProperty(HttpHeaderNames.AUTHORIZATION.toString(), copilotToken.getAuthorizationHeader());
                         connection.setRequestProperty(GitHubCopilot.HEADER_OPENAI_INTENT, "conversation-panel");
                         connection.setRequestProperty(GitHubCopilot.HEADER_OPENAI_ORGANIZATION, "github-copilot");
                         connection.setRequestProperty(GitHubCopilot.HEADER_REQUEST_ID, requestId());
@@ -144,9 +150,8 @@ public final class CopilotChatSession {
     }
 
     private void applyHeaders(@NotNull URLConnection connection, @NotNull Map<String, String> headers) {
-        connection.addRequestProperty(HttpHeaderNames.AUTHORIZATION.toString(), copilotToken.getAuthorizationHeader());
         for (var entry : headers.entrySet()) {
-            connection.addRequestProperty(entry.getKey(), entry.getValue());
+            connection.setRequestProperty(entry.getKey(), entry.getValue());
         }
     }
 

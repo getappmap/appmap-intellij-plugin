@@ -31,6 +31,7 @@ import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 /**
  * Adds a new request handler to the IDE's built-in HTTP server.
@@ -105,6 +106,7 @@ public class NavieCopilotChatRequestHandler extends HttpRequestHandler {
         if (openAIRequest.stream()) {
             sendStreamingChatResponse(chatSession,
                     copilotModel,
+                    fullHttpRequest,
                     openAIRequest,
                     channelHandlerContext);
         } else {
@@ -128,6 +130,7 @@ public class NavieCopilotChatRequestHandler extends HttpRequestHandler {
 
     private void sendStreamingChatResponse(@NotNull CopilotChatSession chatSession,
                                            @NotNull CopilotModelDefinition copilotModel,
+                                           @NotNull FullHttpRequest fullHttpRequest,
                                            @NotNull OpenAIChatCompletionsRequest openAIRequest,
                                            @NotNull ChannelHandlerContext context) throws IOException {
         var channel = context.channel();
@@ -159,6 +162,7 @@ public class NavieCopilotChatRequestHandler extends HttpRequestHandler {
         chatSession.ask(converter,
                 copilotModel,
                 asCopilotChatMessages(openAIRequest.messages()),
+                collectProxiedRequestHeaders(fullHttpRequest),
                 openAIRequest.temperature(),
                 openAIRequest.topP(),
                 openAIRequest.n());
@@ -238,9 +242,17 @@ public class NavieCopilotChatRequestHandler extends HttpRequestHandler {
         chatSession.ask(listener,
                 copilotModel,
                 asCopilotChatMessages(openAIRequest.messages()),
+                collectProxiedRequestHeaders(fullHttpRequest),
                 openAIRequest.temperature(),
                 openAIRequest.topP(),
                 openAIRequest.n());
+    }
+
+    private @NotNull Map<String, String> collectProxiedRequestHeaders(@NotNull FullHttpRequest fullHttpRequest) {
+        return fullHttpRequest.headers().entries().stream()
+            .filter(entry -> entry.getKey().toLowerCase().startsWith("x-appmap-")
+                || entry.getKey().toLowerCase().equals("user-agent"))
+            .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
 
     private @NotNull List<CopilotChatRequest.Message> asCopilotChatMessages(List<OpenAIChatCompletionsRequest.Message> messages) {
