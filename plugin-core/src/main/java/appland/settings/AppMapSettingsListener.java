@@ -44,4 +44,7 @@ public interface AppMapSettingsListener {
 
     default void cliEnvironmentChanged(@NotNull Set<String> modifiedKeys) {
     }
+
+    default void selectedAppMapModelChanged() {
+    }
 }
