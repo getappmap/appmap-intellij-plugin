@@ -9,6 +9,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
+import java.util.Map;
 
 public class AppMapProjectConfigurable implements Configurable {
     private final AppMapProjectSettingsPanel form = new AppMapProjectSettingsPanel();
@@ -63,6 +64,7 @@ public class AppMapProjectConfigurable implements Configurable {
     @Data
     private static class InlineSecureApplicationSettings implements AppMapSecureApplicationSettings {
         String openAIKey;
+        Map<String, String> modelConfig;
 
         public InlineSecureApplicationSettings() {
         }
@@ -70,6 +72,7 @@ public class AppMapProjectConfigurable implements Configurable {
         // copy constructor
         public InlineSecureApplicationSettings(@NotNull AppMapSecureApplicationSettings settings) {
             this.openAIKey = settings.getOpenAIKey();
+            this.modelConfig = settings.getModelConfig();
         }
     }
 }
