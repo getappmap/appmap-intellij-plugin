@@ -73,7 +73,12 @@ public class AppMapApplicationSettings {
 
     private volatile boolean showFailedCliDownloadError = true;
 
-    private @Nullable volatile String selectedAppMapModel = null;
+    private volatile @Nullable String selectedAppMapModel = null;
+
+    /**
+     * Model config values, which are not secret.
+     */
+    private volatile HashMap<String, String> modelConfig = new HashMap<>();
 
     public AppMapApplicationSettings() {
     }
@@ -95,6 +100,7 @@ public class AppMapApplicationSettings {
         this.copilotModelId = settings.copilotModelId;
         this.showFailedCliDownloadError = settings.showFailedCliDownloadError;
         this.selectedAppMapModel = settings.selectedAppMapModel;
+        this.modelConfig.putAll(settings.modelConfig);
     }
 
     public @NotNull Map<String, String> getCliEnvironment() {
@@ -179,6 +185,27 @@ public class AppMapApplicationSettings {
 
         if (changed) {
             settingsPublisher().selectedAppMapModelChanged();
+        }
+    }
+
+    public @NotNull Map<String, String> getModelConfig() {
+        // return an immutable copy to prevent callers from modifying the stored map directly.
+        return Collections.unmodifiableMap(modelConfig);
+    }
+
+    public void setModelConfig(@NotNull Map<String, String> modelConfig) {
+        this.modelConfig = new HashMap<>(modelConfig);
+    }
+
+    @Transient
+    public void setModelConfigNotifying(@NotNull Map<String, String> modelConfig) {
+        var oldModelConfig = new HashMap<>(modelConfig);
+        var newModelConfig = new HashMap<>(modelConfig);
+
+        this.modelConfig = newModelConfig;
+
+        if (!oldModelConfig.equals(newModelConfig)) {
+            settingsPublisher().modelConfigChange();
         }
     }
 
