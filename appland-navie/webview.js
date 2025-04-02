@@ -2,7 +2,7 @@ import Vue from "vue";
 import MessagePublisher from "messagePublisher";
 import vscode from "vsCodeBridge";
 import handleAppMapMessages from "handleAppMapMessages";
-import { VChatSearch } from "@appland/components";
+import {VChatSearch} from "@appland/components";
 
 import "@appland/diagrams/dist/style.css";
 import "highlight.js/styles/base16/snazzy.css";
@@ -27,8 +27,9 @@ export function mountWebview() {
             targetAppmapFsPath: initialData.targetAppmapFsPath,
             editorType: 'intellij',
             useAnimation: initialData.useAnimation,
+            preselectedModelId: initialData.preselectedModelId,
             openNewChat() {
-              vscode.postMessage({ command: "open-new-chat" });
+              vscode.postMessage({command: "open-new-chat"});
             },
           },
         });
@@ -62,26 +63,37 @@ export function mountWebview() {
     handleAppMapMessages(app, vscode, messages);
 
     messages.on('pin-files', (props) => {
-      const { requests } = props;
+      const {requests} = props;
       app.$root.$emit('pin-files', requests);
     });
 
     messages.on('update', (props) => {
       Object.entries(props)
-        .filter(([key]) => key !== 'type')
-        .forEach(([key, value]) => {
-          if (key in app.$data && app[key] !== value) {
-            app[key] = value;
-          }
-        });
+          .filter(([key]) => key !== 'type')
+          .forEach(([key, value]) => {
+            if (key in app.$data && app[key] !== value) {
+              app[key] = value;
+            }
+          });
     });
 
     messages
         .on('navie-restarting', () => {
           app.$refs.ui.onNavieRestarting();
         })
-        .on('navie-restarted', () => {
-          app.$refs.ui.loadNavieConfig();
+        .on('navie-restarted', async () => {
+          /* eslint-disable no-console */
+          app.$refs.ui.loadNavieConfig().catch((e) => console.error(e));
+          app.$refs.ui.loadModelConfig().catch((e) => console.error(e));
+
+          // Request the model list a few times to make sure it has time to fully load
+          for (let i = 0; i < 5; i += 1) {
+            app.$refs.ui.initializeModels().catch((e) => console.error(e));
+
+            // eslint-disable-next-line no-await-in-loop
+            await new Promise((resolve) => setTimeout(resolve, (i + 1) * 2000));
+          }
+          /* eslint-enable no-console */
         });
 
     app.$on('choose-files-to-pin', () => vscode.postMessage({ command: 'choose-files-to-pin' }));
@@ -93,6 +105,8 @@ export function mountWebview() {
     app.$on('save-message', (message) => vscode.postMessage({command: 'save-message', ...message}))
     app.$on('select-llm-option', (choice) => vscode.postMessage({command: 'select-llm-option', choice}));
     app.$on('show-appmap-tree', () => vscode.postMessage({command: 'show-appmap-tree'}));
+    app.$on('change-model-config', ({key, value, secret}) => vscode.postMessage({command: 'change-model-config', key, value, secret}));
+    app.$on("select-model", ({provider,id}) => vscode.postMessage({command: "select-model", "id": `${provider}:${id}`}));
   });
 
   vscode.postMessage({ command: "ready" });
