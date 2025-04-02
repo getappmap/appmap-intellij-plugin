@@ -73,6 +73,8 @@ public class AppMapApplicationSettings {
 
     private volatile boolean showFailedCliDownloadError = true;
 
+    private @Nullable volatile String selectedAppMapModel = null;
+
     public AppMapApplicationSettings() {
     }
 
@@ -90,6 +92,9 @@ public class AppMapApplicationSettings {
         this.showBrokenProxyWarning = settings.showBrokenProxyWarning;
         this.copilotIntegrationDisabled = settings.copilotIntegrationDisabled;
         this.copilotIntegrationDetected = settings.copilotIntegrationDetected;
+        this.copilotModelId = settings.copilotModelId;
+        this.showFailedCliDownloadError = settings.showFailedCliDownloadError;
+        this.selectedAppMapModel = settings.selectedAppMapModel;
     }
 
     public @NotNull Map<String, String> getCliEnvironment() {
@@ -165,6 +170,15 @@ public class AppMapApplicationSettings {
 
         if (changed) {
             settingsPublisher().copilotModelChanged();
+        }
+    }
+
+    public void setSelectedAppMapModelNotifying(@Nullable String selectedAppMapModel) {
+        var changed = !Objects.equals(selectedAppMapModel, this.selectedAppMapModel);
+        this.selectedAppMapModel = selectedAppMapModel;
+
+        if (changed) {
+            settingsPublisher().selectedAppMapModelChanged();
         }
     }
 
