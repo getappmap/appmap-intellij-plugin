@@ -9,6 +9,7 @@ import appland.rpcService.AppLandJsonRpcListener;
 import appland.rpcService.AppLandJsonRpcService;
 import appland.settings.AppMapApplicationSettings;
 import appland.settings.AppMapApplicationSettingsService;
+import appland.settings.AppMapSecureApplicationSettingsService;
 import appland.utils.IndexTestUtils;
 import appland.utils.ModuleTestUtils;
 import com.intellij.openapi.application.ApplicationManager;
@@ -54,6 +55,8 @@ public abstract class AppMapBaseTest extends LightPlatformCodeInsightFixture4Tes
         } else {
             edt(() -> TempFileSystem.getInstance().cleanupForNextTest());
         }
+
+        AppMapSecureApplicationSettingsService.reset();
 
         TestFindingsManager.reset(getProject());
 

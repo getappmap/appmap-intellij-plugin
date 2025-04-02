@@ -1,6 +1,7 @@
 package appland.settings;
 
 import appland.AppMapBundle;
+import appland.utils.GsonUtils;
 import com.intellij.credentialStore.CredentialAttributes;
 import com.intellij.credentialStore.CredentialAttributesKt;
 import com.intellij.ide.passwordSafe.PasswordSafe;
@@ -13,7 +14,9 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.TestOnly;
 
+import java.util.Map;
 import java.util.Objects;
 
 @Service(Service.Level.APP)
@@ -24,6 +27,38 @@ public final class AppMapSecureApplicationSettingsService implements AppMapSecur
 
     private volatile boolean isCached = false;
     private volatile @NotNull CachedSettings cachedSettings = new CachedSettings();
+
+    @TestOnly
+    public static void reset() {
+        var service = (AppMapSecureApplicationSettingsService) getInstance();
+        service.isCached = false;
+        service.cachedSettings = new CachedSettings();
+    }
+
+    @Override
+    public synchronized @NotNull Map<String, String> getModelConfig() {
+        updateCachedData();
+        return cachedSettings.getModelConfig();
+    }
+
+    @Override
+    public void setModelConfig(@NotNull Map<String, String> config) {
+        updateCachedData();
+
+        var oldValue = cachedSettings.modelConfig;
+        try {
+            PasswordSafe.getInstance().setPassword(createModelConfigCredentials(), GsonUtils.GSON.toJson(config));
+            cachedSettings.setModelConfig(config);
+        } finally {
+            if (!Objects.equals(oldValue, config)) {
+                // notify listeners on background thread, outside the synchronized block
+                ApplicationManager.getApplication().executeOnPooledThread(() -> ApplicationManager.getApplication()
+                        .getMessageBus()
+                        .syncPublisher(AppMapSettingsListener.TOPIC)
+                        .modelConfigChange());
+            }
+        }
+    }
 
     /**
      * @return The stored value of the OpenAI key. Because this method is called often
@@ -41,7 +76,7 @@ public final class AppMapSecureApplicationSettingsService implements AppMapSecur
 
         var oldValue = cachedSettings.openAIKey;
         try {
-            PasswordSafe.getInstance().setPassword(createOpenAIKey(), key);
+            PasswordSafe.getInstance().setPassword(createOpenAIKeyCredentials(), key);
             cachedSettings.openAIKey = key;
         } finally {
             if (!Objects.equals(oldValue, key)) {
@@ -54,6 +89,7 @@ public final class AppMapSecureApplicationSettingsService implements AppMapSecur
             }
         }
     }
+
 
     private synchronized void updateCachedData() {
         if (isCached) {
@@ -72,28 +108,47 @@ public final class AppMapSecureApplicationSettingsService implements AppMapSecur
             } else {
                 cachedSettings = loadSettingsInBackground();
             }
+
+            isCached = true;
         } catch (Exception e) {
             isCached = false;
             cachedSettings = new CachedSettings();
         }
     }
 
+    @SuppressWarnings("unchecked")
     private @NotNull CachedSettings loadSettingsInBackground() {
-        var openAiKey = PasswordSafe.getInstance().getPassword(createOpenAIKey());
-        return new CachedSettings(openAiKey);
+        var passwordSafe = PasswordSafe.getInstance();
+
+        var openAiKey = passwordSafe.getPassword(createOpenAIKeyCredentials());
+        var modelConfig = GsonUtils.GSON.fromJson(passwordSafe.getPassword(createModelConfigCredentials()), Map.class);
+        return new CachedSettings(openAiKey, modelConfig);
     }
 
-    private @NotNull CredentialAttributes createOpenAIKey() {
+    private @NotNull CredentialAttributes createOpenAIKeyCredentials() {
         return new CredentialAttributes(CredentialAttributesKt.generateServiceName("AppMap", "OpenAI"));
+    }
+
+    private @NotNull CredentialAttributes createModelConfigCredentials() {
+        return new CredentialAttributes(CredentialAttributesKt.generateServiceName("AppMap", "ModelConfig"));
     }
 
     @AllArgsConstructor
     @Data
     private static class CachedSettings implements AppMapSecureApplicationSettings {
         @Nullable String openAIKey;
+        @Nullable Map<String, String> modelConfig;
 
         public CachedSettings() {
             this.openAIKey = null;
+        }
+
+        public @NotNull Map<String, String> getModelConfig() {
+            return modelConfig == null ? Map.of() : Map.copyOf(modelConfig);
+        }
+
+        public void setModelConfig(@Nullable Map<String, String> modelConfig) {
+            this.modelConfig = modelConfig == null ? Map.of() : Map.copyOf(modelConfig);
         }
     }
 }

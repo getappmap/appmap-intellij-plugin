@@ -1,7 +1,10 @@
 package appland.settings;
 
 import com.intellij.openapi.util.text.StringUtil;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.Map;
 
 /**
  * Application settings, which are securely stored in the {@link com.intellij.ide.passwordSafe.PasswordSafe}.
@@ -23,4 +26,8 @@ public interface AppMapSecureApplicationSettings {
     default boolean hasOpenAIKey() {
         return StringUtil.isNotEmpty(getOpenAIKey());
     }
+
+    @NotNull Map<String, String> getModelConfig();
+
+    void setModelConfig(@NotNull Map<String, String> config);
 }
