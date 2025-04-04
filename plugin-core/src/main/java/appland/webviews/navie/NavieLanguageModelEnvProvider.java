@@ -18,14 +18,7 @@ import java.util.Map;
 public class NavieLanguageModelEnvProvider implements AppLandCliEnvProvider {
     @Override
     public Map<String, String> getEnvironment() {
-        var settings = AppMapApplicationSettingsService.getInstance();
-
-        var openAIKey = AppMapSecureApplicationSettingsService.getInstance().getOpenAIKey();
-        if (StringUtil.isNotEmpty(openAIKey)) {
-            return Map.of(AppLandJsonRpcService.OPENAI_API_KEY, openAIKey);
-        }
-
-        var appMapKey = settings.getApiKey();
+        var appMapKey = AppMapApplicationSettingsService.getInstance().getApiKey();
         if (StringUtil.isNotEmpty(appMapKey)) {
             return Map.of("APPMAP_API_KEY", appMapKey);
         }

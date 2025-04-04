@@ -14,6 +14,7 @@ public interface AppMapSecureApplicationSettings {
      * The key used to store the OpenAI key in the password safe.
      * If possible, this method should be called from a background thread.
      */
+    @Deprecated
     @Nullable String getOpenAIKey();
 
     /**
@@ -21,13 +22,24 @@ public interface AppMapSecureApplicationSettings {
      *
      * @param key New value of the OpenAI key.
      */
+    @Deprecated
     void setOpenAIKey(@Nullable String key);
 
+    @Deprecated
     default boolean hasOpenAIKey() {
         return StringUtil.isNotEmpty(getOpenAIKey());
     }
 
+    /**
+     * @return The complete data of the currently stored model configuration settings.
+     */
     @NotNull Map<String, String> getModelConfig();
 
-    void setModelConfig(@NotNull Map<String, String> config);
+    /**
+     * Updates one item of the model configuration settings.
+     *
+     * @param key   The key of the item to update.
+     * @param value The new value of the item. If null, the item will be removed.
+     */
+    void setModelConfigItem(@NotNull String key, @Nullable String value);
 }

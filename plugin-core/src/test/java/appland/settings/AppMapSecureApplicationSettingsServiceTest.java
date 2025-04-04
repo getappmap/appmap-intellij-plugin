@@ -5,7 +5,10 @@ import com.intellij.openapi.application.ApplicationManager;
 import org.junit.Test;
 
 import java.util.Map;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
+@SuppressWarnings("deprecation")
 public class AppMapSecureApplicationSettingsServiceTest extends AppMapBaseTest {
     @Test
     public void openAiKey() {
@@ -27,11 +30,11 @@ public class AppMapSecureApplicationSettingsServiceTest extends AppMapBaseTest {
         ApplicationManager.getApplication().assertIsDispatchThread();
 
         var settings = AppMapSecureApplicationSettingsService.getInstance();
-        settings.setModelConfig(Map.of("first_key", "first_value"));
+        settings.setModelConfigItem("first_key", "first_value");
         assertEquals(Map.of("first_key", "first_value"), settings.getModelConfig());
 
         // settings must be properly loaded into the cache
-        AppMapSecureApplicationSettingsService.reset();
+        AppMapSecureApplicationSettingsService.resetCache();
         assertEquals(Map.of("first_key", "first_value"), settings.getModelConfig());
     }
 
@@ -40,5 +43,45 @@ public class AppMapSecureApplicationSettingsServiceTest extends AppMapBaseTest {
         ApplicationManager.getApplication().assertIsDispatchThread();
 
         AppMapSecureApplicationSettingsService.getInstance().getModelConfig().put("first_key", "first_value");
+    }
+
+    @Test
+    public void modelConfigListenerForNewKey() throws Exception {
+        var condition = new CountDownLatch(1);
+        var listener = new AppMapSettingsListener() {
+            @Override
+            public void secureModelConfigChange() {
+                ApplicationManager.getApplication().assertIsNonDispatchThread();
+                condition.countDown();
+            }
+        };
+
+        ApplicationManager.getApplication().getMessageBus()
+                .connect(getTestRootDisposable())
+                .subscribe(AppMapSettingsListener.TOPIC, listener);
+
+        AppMapSecureApplicationSettingsService.getInstance().setModelConfigItem("first_key", "first_value");
+        assertTrue(condition.await(15, TimeUnit.SECONDS));
+    }
+
+    @Test
+    public void modelConfigListenerForUpdatedValue() throws Exception {
+        AppMapSecureApplicationSettingsService.getInstance().setModelConfigItem("first_key", "first_value");
+
+        var condition = new CountDownLatch(1);
+        var listener = new AppMapSettingsListener() {
+            @Override
+            public void secureModelConfigChange() {
+                ApplicationManager.getApplication().assertIsNonDispatchThread();
+                condition.countDown();
+            }
+        };
+
+        ApplicationManager.getApplication().getMessageBus()
+                .connect(getTestRootDisposable())
+                .subscribe(AppMapSettingsListener.TOPIC, listener);
+
+        AppMapSecureApplicationSettingsService.getInstance().setModelConfigItem("first_key", "updated_value");
+        assertTrue(condition.await(15, TimeUnit.SECONDS));
     }
 }

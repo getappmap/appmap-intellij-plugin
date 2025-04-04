@@ -4,10 +4,7 @@ import com.google.common.collect.Maps;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.util.xmlb.annotations.Transient;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.*;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -78,6 +75,7 @@ public class AppMapApplicationSettings {
     /**
      * Model config values, which are not secret.
      */
+    @Setter(AccessLevel.NONE)
     private volatile HashMap<String, String> modelConfig = new HashMap<>();
 
     public AppMapApplicationSettings() {
@@ -193,19 +191,22 @@ public class AppMapApplicationSettings {
         return Collections.unmodifiableMap(modelConfig);
     }
 
-    public void setModelConfig(@NotNull Map<String, String> modelConfig) {
-        this.modelConfig = new HashMap<>(modelConfig);
+    public void setModelConfigItem(@NotNull String key, @Nullable String value) {
+        if (value == null) {
+            modelConfig.remove(key);
+        } else {
+            modelConfig.put(key, value);
+        }
     }
 
     @Transient
-    public void setModelConfigNotifying(@NotNull Map<String, String> modelConfig) {
-        var oldModelConfig = new HashMap<>(modelConfig);
-        var newModelConfig = new HashMap<>(modelConfig);
+    public void setModelConfigItemNotifying(@NotNull String key, @Nullable String value) {
+        var oldValue = getModelConfig().get(key);
 
-        this.modelConfig = newModelConfig;
+        setModelConfigItem(key, value);
 
-        if (!oldModelConfig.equals(newModelConfig)) {
-            settingsPublisher().modelConfigChange();
+        if (!Objects.equals(oldValue, value)) {
+            ApplicationManager.getApplication().executeOnPooledThread(settingsPublisher()::modelConfigChange);
         }
     }
 

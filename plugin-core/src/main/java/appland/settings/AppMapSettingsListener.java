@@ -33,6 +33,9 @@ public interface AppMapSettingsListener {
     default void modelConfigChange() {
     }
 
+    default void secureModelConfigChange() {
+    }
+
     default void copilotIntegrationDisabledChanged() {
     }
 
