@@ -16,6 +16,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.TestOnly;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
@@ -30,6 +31,16 @@ public final class AppMapSecureApplicationSettingsService implements AppMapSecur
 
     @TestOnly
     public static void reset() {
+        resetCache();
+
+        var passwordSafe = PasswordSafe.getInstance();
+        var service = (AppMapSecureApplicationSettingsService) getInstance();
+        passwordSafe.setPassword(service.createOpenAIKeyCredentials(), null);
+        passwordSafe.setPassword(service.createModelConfigCredentials(), GsonUtils.GSON.toJson(Map.of()));
+    }
+
+    @TestOnly
+    static void resetCache() {
         var service = (AppMapSecureApplicationSettingsService) getInstance();
         service.isCached = false;
         service.cachedSettings = new CachedSettings();
@@ -42,20 +53,27 @@ public final class AppMapSecureApplicationSettingsService implements AppMapSecur
     }
 
     @Override
-    public void setModelConfig(@NotNull Map<String, String> config) {
-        updateCachedData();
+    public synchronized void setModelConfigItem(@NotNull String key, @Nullable String value) {
+        var oldModelConfig = getModelConfig();
+        var oldValue = oldModelConfig.get(key);
 
-        var oldValue = cachedSettings.modelConfig;
+        var updatedModelConfig = new HashMap<>(oldModelConfig);
+        if (value == null) {
+            updatedModelConfig.remove(key);
+        } else {
+            updatedModelConfig.put(key, value);
+        }
+
         try {
-            PasswordSafe.getInstance().setPassword(createModelConfigCredentials(), GsonUtils.GSON.toJson(config));
-            cachedSettings.setModelConfig(config);
+            PasswordSafe.getInstance().setPassword(createModelConfigCredentials(), GsonUtils.GSON.toJson(updatedModelConfig));
+            cachedSettings.setModelConfig(updatedModelConfig);
         } finally {
-            if (!Objects.equals(oldValue, config)) {
+            if (!Objects.equals(oldValue, value)) {
                 // notify listeners on background thread, outside the synchronized block
                 ApplicationManager.getApplication().executeOnPooledThread(() -> ApplicationManager.getApplication()
                         .getMessageBus()
                         .syncPublisher(AppMapSettingsListener.TOPIC)
-                        .modelConfigChange());
+                        .secureModelConfigChange());
             }
         }
     }
@@ -135,7 +153,7 @@ public final class AppMapSecureApplicationSettingsService implements AppMapSecur
 
     @AllArgsConstructor
     @Data
-    private static class CachedSettings implements AppMapSecureApplicationSettings {
+    private static class CachedSettings {
         @Nullable String openAIKey;
         @Nullable Map<String, String> modelConfig;
 

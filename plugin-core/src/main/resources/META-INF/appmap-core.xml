@@ -38,6 +38,10 @@
         <extensionPoint dynamic="true"
                         qualifiedName="appland.cli.envProvider"
                         interface="appland.cli.AppLandCliEnvProvider"/>
+
+        <extensionPoint dynamic="true"
+                        qualifiedName="appland.cli.modelInfoProvider"
+                        interface="appland.cli.AppLandModelInfoProvider"/>
     </extensionPoints>
 
     <extensions defaultExtensionNs="appland.cli">
@@ -105,6 +109,7 @@
                         serviceImplementation="appland.remote.DefaultRemoteRecordingStatusService"/>
         <projectService serviceInterface="appland.installGuide.projectData.ProjectDataService"
                         serviceImplementation="appland.installGuide.projectData.DefaultProjectDataService"/>
+        <postStartupActivity implementation="appland.settings.AppMapSettingsMigrationActivity"/>
 
         <projectService serviceInterface="appland.rpcService.AppLandJsonRpcService"
                         serviceImplementation="appland.rpcService.DefaultAppLandJsonRpcService"
