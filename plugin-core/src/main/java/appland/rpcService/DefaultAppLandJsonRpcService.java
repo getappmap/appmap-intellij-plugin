@@ -245,8 +245,7 @@ public class DefaultAppLandJsonRpcService implements AppLandJsonRpcService, AppL
     /**
      * Queries existing Navie threads via JSON-RPC.
      * @param params RPC parameters
-     * @return list of threads
-     * @throws IOException on RPC error
+     * @return list of threads, or an empty list if the server is not running or if the query failed
      */
     @Override
     @NotNull
