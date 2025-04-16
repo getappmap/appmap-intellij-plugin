@@ -28,6 +28,7 @@ export function mountWebview() {
             editorType: 'intellij',
             useAnimation: initialData.useAnimation,
             preselectedModelId: initialData.preselectedModelId,
+            threadId: initialData.threadId,
             openNewChat() {
               vscode.postMessage({command: "open-new-chat"});
             },

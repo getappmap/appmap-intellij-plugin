@@ -48,6 +48,7 @@ import com.intellij.util.Alarm;
 import com.intellij.util.SingleAlarm;
 import com.intellij.util.concurrency.AppExecutorUtil;
 import com.intellij.util.concurrency.annotations.RequiresEdt;
+import appland.webviews.navie.NavieEditorProvider;
 import com.intellij.util.concurrency.annotations.RequiresReadLock;
 import lombok.Value;
 import org.jetbrains.annotations.Nls;
@@ -162,6 +163,11 @@ public class NavieEditor extends WebviewEditor<Void> {
         }
         payload.addProperty("useAnimation", useAnimation);
         payload.addProperty("preselectedModelId", AppMapApplicationSettingsService.getInstance().getSelectedAppMapModel());
+        // include threadId if opening an existing thread
+        var threadId = NavieEditorProvider.KEY_THREAD_ID.get(file);
+        if (threadId != null) {
+            payload.addProperty("threadId", threadId);
+        }
     }
 
     @Override

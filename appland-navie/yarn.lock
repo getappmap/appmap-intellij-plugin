@@ -14,10 +14,10 @@
     rxjs "^7.8.1"
     socket.io-client "^4.7.2"
 
-"@appland/components@^4.45.0":
-  version "4.45.0"
-  resolved "https://registry.yarnpkg.com/@appland/components/-/components-4.45.0.tgz#a11ebcbc58203d30e4f617e1d9b19630530f418b"
-  integrity sha512-/8PAixDlOzou/iFLHVxOzbH7rZHt5y2695fBg+zyrIEuMTUJfWAABiU17fG43NArXIozmPKskU7k+0Xb+noGiw==
+"@appland/components@^4.46.3":
+  version "4.46.3"
+  resolved "https://registry.yarnpkg.com/@appland/components/-/components-4.46.3.tgz#597d47a6c8e616bbcf7427c5c603e5e06af3e522"
+  integrity sha512-HHZapOXEMjY6tBmsmUVz76Lw4mRUbsl2iU5AGTpBi8th69KXRkj5kbttzNj3RON6XOVtNIyyU6sETYBK0+lQyQ==
   dependencies:
     "@appland/client" "^1.12.0"
     "@appland/diagrams" "^1.7.0"
@@ -73,10 +73,10 @@
     "@appland/models" "^2.10.0"
     js-yaml "^4.1.0"
 
-"@appland/rpc@^1.13.0", "@appland/rpc@^1.18.0":
-  version "1.18.0"
-  resolved "https://registry.yarnpkg.com/@appland/rpc/-/rpc-1.18.0.tgz#189dc5fb08df47291cefb1f3d1faa5a99ff03435"
-  integrity sha512-RArPRMCmT4rhtFJrOW64c20rMeaJfAu7wk9Cq3LxJaT4AkgM/PBBt/R5voUtgzJyOEtTC+rduMBeAW6CsePvzg==
+"@appland/rpc@1.19.0", "@appland/rpc@^1.13.0", "@appland/rpc@^1.19.0":
+  version "1.19.0"
+  resolved "https://registry.yarnpkg.com/@appland/rpc/-/rpc-1.19.0.tgz#f7df3b65f9e3a927e563ae5848520dd10d19b5a8"
+  integrity sha512-LdViF1uMKPnitMIbUwIRgsDmC6mCdQM5kpMABSCWLJx+7X00yszCrSa2fU+wVorR1J2+euqviSSLD1sKnAhqZw==
   dependencies:
     "@appland/client" "1.23.0"
 
