@@ -177,6 +177,7 @@
         <action id="appmap.generateOpenAPI" class="appland.actions.GenerateOpenApiAction"/>
 
         <action id="appmap.openNavie" class="appland.actions.OpenAppMapNavieAction"/>
+        <action id="appmap.navie.openThread" class="appland.actions.OpenNavieThreadAction"/>
         <action id="appmap.navie.openAIKey" class="appland.actions.SetNavieOpenAiKeyAction"/>
 
         <action id="appmap.pluginStatus" class="appland.actions.PluginStatus"/>
@@ -207,6 +208,7 @@
             <separator/>
             <reference ref="appmap.generateOpenAPI"/>
             <reference ref="appmap.openNavie"/>
+            <reference ref="appmap.navie.openThread"/>
             <reference ref="appmap.navie.chooseAndPinContextFile"/>
             <separator/>
             <reference ref="appMapLogin"/>

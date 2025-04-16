@@ -48,6 +48,14 @@ public final class NavieEditorProvider extends WebviewEditorProvider {
      * Optional prompt suggestion passed to the Navie webview.
      */
     static final Key<NaviePromptSuggestion> KEY_PROMPT_SUGGESTION = Key.create("appland.navie.promptSuggestions");
+    /**
+     * Optional Navie thread ID to open.
+     */
+    static final Key<String> KEY_THREAD_ID = Key.create("appland.navie.threadId");
+    /**
+     * DataContext key for thread ID.
+     */
+    static final DataKey<String> DATA_KEY_THREAD_ID = DataKey.create("appland.navie.threadId");
 
     /**
      * Optional AppMap context in the context passed to @link{{@link #openEditor(Project, DataContext)}}.
@@ -93,6 +101,18 @@ public final class NavieEditorProvider extends WebviewEditorProvider {
             return null;
         }));
     }
+    /**
+     * Opens the Navie webview focusing an existing thread by ID.
+     */
+    @RequiresEdt
+    public static void openEditorWithThreadId(@NotNull Project project, @NotNull String threadId) {
+        openEditor(project, DataContexts.createCustomContext(dataId -> {
+            if (DATA_KEY_THREAD_ID.is(dataId)) {
+                return threadId;
+            }
+            return null;
+        }));
+    }
 
     /**
      * Open a new Navie webview with indexer port and selected derived from the current DataContext.
@@ -118,6 +138,11 @@ public final class NavieEditorProvider extends WebviewEditorProvider {
             KEY_CODE_SELECTION.set(file, codeSelection);
             KEY_APPMAP_CONTEXT_FILE.set(file, context.getData(DATA_KEY_APPMAP));
             KEY_PROMPT_SUGGESTION.set(file, context.getData(DATA_KEY_PROMPT_SUGGESTION));
+            // threadId from DataContext
+            String threadId = context.getData(DATA_KEY_THREAD_ID);
+            if (threadId != null) {
+                KEY_THREAD_ID.set(file, threadId);
+            }
 
             AppMapProjectSettingsService.getState(project).setExplainWithNavieOpened(true);
             FileEditorManager.getInstance(project).openFile(file, true);
