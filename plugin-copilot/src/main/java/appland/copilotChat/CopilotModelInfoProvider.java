@@ -34,10 +34,14 @@ public class CopilotModelInfoProvider implements AppLandModelInfoProvider {
             return null;
         }
 
+        var nameCounts = filteredModels.stream()
+                .collect(Collectors.groupingBy(CopilotModelDefinition::name, Collectors.counting()));
         var baseUrl = NavieCopilotChatRequestHandler.getBaseUrl();
         var apiKey = GitHubCopilotService.RandomIdeSessionId;
         return filteredModels.stream().map(model -> new ModelInfo(
-                model.name(),
+                nameCounts.get(model.name()) > 1
+                        ? String.format("%s (%s)", model.name(), model.version())
+                        : model.name(),
                 model.id(),
                 "Copilot",
                 Instant.now().toString(),
