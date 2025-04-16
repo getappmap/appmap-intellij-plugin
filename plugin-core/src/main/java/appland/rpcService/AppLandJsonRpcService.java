@@ -6,6 +6,10 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Set;
+import java.io.IOException;
+import java.util.List;
+import appland.rpcService.NavieThreadQueryV1Response;
+import appland.rpcService.NavieThreadQueryV1Params;
 
 /**
  * Project service to interact with the AppLand JSON-RPC service, mainly used for Navie.
@@ -59,4 +63,12 @@ public interface AppLandJsonRpcService extends Disposable {
      */
     @Nullable
     Integer getServerPort();
+    /**
+     * Queries existing Navie threads.
+     * @param params RPC parameters
+     * @return list of threads
+     * @throws IOException on RPC error
+     */
+    @NotNull
+    List<NavieThreadQueryV1Response.NavieThread> queryNavieThreads(@NotNull NavieThreadQueryV1Params params) throws IOException;
 }

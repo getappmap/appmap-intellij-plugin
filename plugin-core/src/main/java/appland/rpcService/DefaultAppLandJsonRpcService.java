@@ -34,6 +34,12 @@ import com.intellij.util.concurrency.annotations.RequiresBackgroundThread;
 import com.intellij.util.concurrency.annotations.RequiresReadLock;
 import com.intellij.util.io.BaseOutputReader;
 import com.intellij.util.io.HttpRequests;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
+import appland.rpcService.NavieThreadQueryV1Params;
+import appland.rpcService.NavieThreadQueryV1Response;
 import lombok.Data;
 import net.jcip.annotations.GuardedBy;
 import org.jetbrains.annotations.NotNull;
@@ -237,6 +243,34 @@ public class DefaultAppLandJsonRpcService implements AppLandJsonRpcService, AppL
         return port != null ? "http://127.0.0.1:" + port : null;
     }
 
+    /**
+     * Queries existing Navie threads via JSON-RPC.
+     * @param params RPC parameters
+     * @return list of threads, or an empty list if the server is not running or if the query failed
+     */
+    @Override
+    @NotNull
+    public List<NavieThreadQueryV1Response.NavieThread> queryNavieThreads(@NotNull NavieThreadQueryV1Params params) throws IOException {
+        String serverUrl = getServerUrl();
+        if (serverUrl == null) {
+            throw new IOException("Navie JSON-RPC server is not running");
+        }
+
+        try {
+            var response = sendJsonRpcMessage(serverUrl, "v1.navie.thread.query", params);
+            if (response == null) {
+                throw new IOException("Received empty response from JSON-RPC server");
+            }
+
+            var result = GsonUtils.GSON.fromJson(response, NavieThreadQueryV1Response.class);
+            return result.result();
+        } catch (IOException e) {
+            LOG.debug("Failed to send \"v1.navie.thread.query\" message", e);
+        }
+
+        return List.of();
+    }
+
     @RequiresBackgroundThread
     private void restartServerAsync() {
         if (isDisposed || project.isDisposed()) {
@@ -438,7 +472,7 @@ public class DefaultAppLandJsonRpcService implements AppLandJsonRpcService, AppL
     /**
      * @throws IOException If a response other than 2xx was returned or if the JSON-RPC response contained an error code.
      */
-    private static void sendJsonRpcMessage(@NotNull String serverUrl,
+    private static @Nullable JsonObject sendJsonRpcMessage(@NotNull String serverUrl,
                                            @NotNull String method,
                                            @NotNull Object params) throws IOException {
         var payload = new JsonObject();
@@ -467,7 +501,10 @@ public class DefaultAppLandJsonRpcService implements AppLandJsonRpcService, AppL
                     throw new IOException("Error response sending JSON-RPC request: " + error);
                 }
             }
+            return response;
         }
+
+        return null;
     }
 
     @RequiresReadLock
