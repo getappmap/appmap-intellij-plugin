@@ -5,14 +5,13 @@ import org.commonmark.parser.Parser
 import org.commonmark.renderer.html.HtmlRenderer
 import org.gradle.api.JavaVersion.VERSION_17
 import org.gradle.api.tasks.testing.logging.TestLogEvent
+import org.jetbrains.changelog.Changelog
 import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType
 import org.jetbrains.intellij.platform.gradle.TestFrameworkType
 import org.jetbrains.intellij.platform.gradle.tasks.InstrumentCodeTask
 import org.jetbrains.intellij.platform.gradle.tasks.PrepareSandboxTask
 import org.jetbrains.intellij.platform.gradle.tasks.VerifyPluginTask.FailureLevel
 import org.jetbrains.kotlin.konan.properties.loadProperties
-import kotlin.collections.component1
-import kotlin.collections.component2
 
 loadPlatformProperties()
 
@@ -30,7 +29,7 @@ plugins {
     idea
     id("org.jetbrains.kotlin.jvm")
     id("org.jetbrains.intellij.platform") version "2.3.0"
-    id("org.jetbrains.changelog") version "1.3.1"
+    id("org.jetbrains.changelog") version "2.2.1"
     id("com.adarshr.test-logger") version "3.2.0"
     id("de.undercouch.download") version "5.6.0"
 
@@ -275,10 +274,11 @@ project(":") {
             }
 
             changeNotes.set(provider {
-                when {
-                    pluginVersionString.endsWith("-SNAPSHOT") -> changelog.getUnreleased().toHTML()
-                    else -> changelog.get(pluginVersionString).toHTML()
+                val item = when {
+                    pluginVersionString.endsWith("-SNAPSHOT") -> changelog.getUnreleased()
+                    else -> changelog.get(pluginVersionString)
                 }
+                changelog.renderItem(item.withHeader(false), Changelog.OutputType.HTML)
             })
         }
 
