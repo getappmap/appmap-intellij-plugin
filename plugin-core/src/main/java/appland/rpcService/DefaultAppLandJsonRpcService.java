@@ -242,6 +242,7 @@ public class DefaultAppLandJsonRpcService implements AppLandJsonRpcService, AppL
         var port = getServerPort();
         return port != null ? "http://127.0.0.1:" + port : null;
     }
+
     /**
      * Queries existing Navie threads via JSON-RPC.
      * @param params RPC parameters

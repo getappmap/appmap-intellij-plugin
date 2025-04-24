@@ -5,7 +5,7 @@ import java.util.List;
 import org.jetbrains.annotations.Nullable;
 
 public record NavieThreadQueryV1Response(
-        List<NavieThread> result
+        @SerializedName("result") List<NavieThread> result
 ) {
   public record NavieThread(
           @SerializedName("id") String id,
