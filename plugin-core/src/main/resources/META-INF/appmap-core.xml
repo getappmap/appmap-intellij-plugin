@@ -177,7 +177,9 @@
         <action id="appmap.generateOpenAPI" class="appland.actions.GenerateOpenApiAction"/>
 
         <action id="appmap.openNavie" class="appland.actions.OpenAppMapNavieAction"/>
-        <action id="appmap.navie.openThread" class="appland.actions.OpenNavieThreadAction"/>
+        <action id="appmap.navie.openThread" class="appland.actions.OpenNavieThreadAction">
+            <override-text place="MainMenu"/>
+        </action>
         <action id="appmap.navie.openAIKey" class="appland.actions.SetNavieOpenAiKeyAction"/>
 
         <action id="appmap.pluginStatus" class="appland.actions.PluginStatus"/>
