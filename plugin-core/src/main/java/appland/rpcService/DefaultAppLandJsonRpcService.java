@@ -2,9 +2,12 @@ package appland.rpcService;
 
 import appland.cli.AppLandCommandLineService;
 import appland.cli.AppLandDownloadListener;
+import appland.cli.AppLandModelInfoProvider;
 import appland.cli.CliTool;
 import appland.config.AppMapConfigFileListener;
 import appland.files.AppMapFiles;
+import appland.settings.AppMapApplicationSettingsService;
+import appland.settings.AppMapSettingsListener;
 import appland.utils.GsonUtils;
 import appland.utils.UserLog;
 import com.google.gson.JsonObject;
@@ -31,6 +34,12 @@ import com.intellij.util.concurrency.annotations.RequiresBackgroundThread;
 import com.intellij.util.concurrency.annotations.RequiresReadLock;
 import com.intellij.util.io.BaseOutputReader;
 import com.intellij.util.io.HttpRequests;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
+import appland.rpcService.NavieThreadQueryV1Params;
+import appland.rpcService.NavieThreadQueryV1Response;
 import lombok.Data;
 import net.jcip.annotations.GuardedBy;
 import org.jetbrains.annotations.NotNull;
@@ -38,6 +47,7 @@ import org.jetbrains.annotations.Nullable;
 import org.jvnet.winp.WinpException;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
@@ -70,7 +80,12 @@ public class DefaultAppLandJsonRpcService implements AppLandJsonRpcService, AppL
     // future to control the lifetime of the appmap.yml polling
     private final @Nullable ScheduledFuture<?> pollingFuture;
     // debounce requests to send the configuration message to the server by 1s
-    private final SingleAlarm sendConfigurationAlarm = new SingleAlarm(this::sendConfigurationSet,
+    private final SingleAlarm updateServerSettingsAlarm = new SingleAlarm(this::updateServerSettings,
+            1_000,
+            this,
+            Alarm.ThreadToUse.POOLED_THREAD);
+    // debounce requests to send model configuration update messages by 1s
+    private final SingleAlarm updateModelConfigAlarm = new SingleAlarm(this::updateModelConfig,
             1_000,
             this,
             Alarm.ThreadToUse.POOLED_THREAD);
@@ -93,6 +108,17 @@ public class DefaultAppLandJsonRpcService implements AppLandJsonRpcService, AppL
         var applicationBus = application.getMessageBus().connect(this);
         applicationBus.subscribe(AppLandDownloadListener.TOPIC, this);
         applicationBus.subscribe(AppMapConfigFileListener.TOPIC, (AppMapConfigFileListener) this::triggerSendConfigurationSet);
+        applicationBus.subscribe(AppMapSettingsListener.TOPIC, new AppMapSettingsListener() {
+            @Override
+            public void modelConfigChange() {
+                restartServerAsync();
+            }
+
+            @Override
+            public void secureModelConfigChange() {
+                restartServerAsync();
+            }
+        });
 
         var projectBus = project.getMessageBus().connect(this);
         projectBus.subscribe(ModuleRootListener.TOPIC, new ModuleRootListener() {
@@ -103,7 +129,8 @@ public class DefaultAppLandJsonRpcService implements AppLandJsonRpcService, AppL
         });
 
         if (!application.isUnitTestMode()) {
-            // poll AppMap configuration files every 30s and send "v1.configuration.set"
+            // poll AppMap configuration files every 30s and send "v1.configuration.set",
+            // but we don't want to update the model configuration.
             this.pollingFuture = AppExecutorUtil.getAppScheduledExecutorService().scheduleWithFixedDelay(this::triggerSendConfigurationSet,
                     30_000,
                     30_000,
@@ -216,6 +243,34 @@ public class DefaultAppLandJsonRpcService implements AppLandJsonRpcService, AppL
         return port != null ? "http://127.0.0.1:" + port : null;
     }
 
+    /**
+     * Queries existing Navie threads via JSON-RPC.
+     * @param params RPC parameters
+     * @return list of threads, or an empty list if the server is not running or if the query failed
+     */
+    @Override
+    @NotNull
+    public List<NavieThreadQueryV1Response.NavieThread> queryNavieThreads(@NotNull NavieThreadQueryV1Params params) throws IOException {
+        String serverUrl = getServerUrl();
+        if (serverUrl == null) {
+            throw new IOException("Navie JSON-RPC server is not running");
+        }
+
+        try {
+            var response = sendJsonRpcMessage(serverUrl, "v1.navie.thread.query", params);
+            if (response == null) {
+                throw new IOException("Received empty response from JSON-RPC server");
+            }
+
+            var result = GsonUtils.GSON.fromJson(response, NavieThreadQueryV1Response.class);
+            return result.result();
+        } catch (IOException e) {
+            LOG.debug("Failed to send \"v1.navie.thread.query\" message", e);
+        }
+
+        return List.of();
+    }
+
     @RequiresBackgroundThread
     private void restartServerAsync() {
         if (isDisposed || project.isDisposed()) {
@@ -299,13 +354,17 @@ public class DefaultAppLandJsonRpcService implements AppLandJsonRpcService, AppL
     }
 
     private void triggerSendConfigurationSet() {
-        sendConfigurationAlarm.cancelAndRequest();
+        updateServerSettingsAlarm.cancelAndRequest();
+    }
+
+    private void triggerModelConfigUpdate() {
+        updateModelConfigAlarm.cancelAndRequest();
     }
 
     /**
-     * Sends message "v1.configuration.set" to the currently running JSON-RPC server.
+     * Updates the JSON-RPC server with the current settings by sending JSON-RPC messages.
      */
-    private void sendConfigurationSet() {
+    private void updateServerSettings() {
         ApplicationManager.getApplication().assertIsNonDispatchThread();
 
         var serverUrl = getServerUrl();
@@ -314,6 +373,67 @@ public class DefaultAppLandJsonRpcService implements AppLandJsonRpcService, AppL
             return;
         }
 
+        sendConfigurationSetMessage(serverUrl);
+    }
+
+    /**
+     * Updates the JSON-RPC server with the current settings by sending JSON-RPC messages.
+     */
+    private void updateModelConfig() {
+        ApplicationManager.getApplication().assertIsNonDispatchThread();
+
+        var serverUrl = getServerUrl();
+        if (serverUrl == null) {
+            LOG.debug("Unable to send \"v1.configuration.set\" because JSON-RPC service is unavailable.");
+            return;
+        }
+
+        sendNavieModelsAddMessage(serverUrl);
+        sendNavieModelsSelectMessage(serverUrl);
+    }
+
+    private void sendNavieModelsAddMessage(@NotNull String serverUrl) {
+        List<AppLandModelInfoProvider.ModelInfo> allModels = null;
+
+        for (var provider : AppLandModelInfoProvider.EP_NAME.getExtensionList()) {
+            try {
+                var models = provider.getModelInfo();
+                if (models != null) {
+                    if (allModels == null) {
+                        allModels = new ArrayList<>(models);
+                    } else {
+                        allModels.addAll(models);
+                    }
+                }
+            } catch (IOException e) {
+                LOG.debug("Failed to get models from provider: " + provider.getClass().getName(), e);
+            }
+        }
+
+        if (allModels != null) {
+            try {
+                sendJsonRpcMessage(serverUrl, "v1.navie.models.add", allModels);
+            } catch (IOException e) {
+                LOG.debug("Failed to send \"v1.navie.models.add\" message", e);
+            }
+        }
+    }
+
+    private void sendNavieModelsSelectMessage(@NotNull String serverUrl) {
+        var selectedModel = AppMapApplicationSettingsService.getInstance().getSelectedAppMapModel();
+        if (StringUtil.isNotEmpty(selectedModel)) {
+            try {
+                sendJsonRpcMessage(serverUrl, "v1.navie.models.select", new NavieModelsSelectV1Params(selectedModel));
+            } catch (IOException e) {
+                LOG.debug("Failed to send \"v1.navie.models.select\" message", e);
+            }
+        }
+    }
+
+    /**
+     * Sends message "v1.configuration.set" to the currently running JSON-RPC server.
+     */
+    private void sendConfigurationSetMessage(String serverUrl) {
         var contentRootsWithConfigFiles = DumbService.getInstance(project).runReadActionInSmartMode(() -> {
             var contentRoots = List.of(AppMapFiles.findTopLevelContentRoots(project));
             var configFiles = AppMapFiles.findAppMapConfigFiles(project);
@@ -352,7 +472,7 @@ public class DefaultAppLandJsonRpcService implements AppLandJsonRpcService, AppL
     /**
      * @throws IOException If a response other than 2xx was returned or if the JSON-RPC response contained an error code.
      */
-    private static void sendJsonRpcMessage(@NotNull String serverUrl,
+    private static @Nullable JsonObject sendJsonRpcMessage(@NotNull String serverUrl,
                                            @NotNull String method,
                                            @NotNull Object params) throws IOException {
         var payload = new JsonObject();
@@ -381,7 +501,10 @@ public class DefaultAppLandJsonRpcService implements AppLandJsonRpcService, AppL
                     throw new IOException("Error response sending JSON-RPC request: " + error);
                 }
             }
+            return response;
         }
+
+        return null;
     }
 
     @RequiresReadLock
@@ -425,6 +548,7 @@ public class DefaultAppLandJsonRpcService implements AppLandJsonRpcService, AppL
                 if (port > 0) {
                     jsonRpcServer.jsonRpcPort = port;
                     triggerSendConfigurationSet();
+                    triggerModelConfigUpdate();
                 }
             }
         }

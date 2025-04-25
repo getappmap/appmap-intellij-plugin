@@ -2,12 +2,15 @@ package appland.settings;
 
 import appland.AppMapBaseTest;
 import com.intellij.configurationStore.XmlSerializer;
+import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.util.JDOMUtil;
 import org.jetbrains.annotations.NotNull;
 import org.junit.Assert;
 import org.junit.Test;
 
 import java.util.Map;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 public class AppMapApplicationSettingsTest extends AppMapBaseTest {
     @Test
@@ -40,6 +43,46 @@ public class AppMapApplicationSettingsTest extends AppMapBaseTest {
         var settings = createSettings();
         var copiedSettings = new AppMapApplicationSettings(settings);
         Assert.assertEquals("Copy constructor must copy all settings", settings, copiedSettings);
+    }
+
+    @Test
+    public void modelConfigListenerForNewKey() throws Exception {
+        var condition = new CountDownLatch(1);
+        var listener = new AppMapSettingsListener() {
+            @Override
+            public void modelConfigChange() {
+                ApplicationManager.getApplication().assertIsNonDispatchThread();
+                condition.countDown();
+            }
+        };
+
+        ApplicationManager.getApplication().getMessageBus()
+                .connect(getTestRootDisposable())
+                .subscribe(AppMapSettingsListener.TOPIC, listener);
+
+        AppMapApplicationSettingsService.getInstance().setModelConfigItemNotifying("first_key", "first_value");
+        assertTrue(condition.await(15, TimeUnit.SECONDS));
+    }
+
+    @Test
+    public void modelConfigListenerForUpdatedValue() throws Exception {
+        AppMapApplicationSettingsService.getInstance().setModelConfigItem("first_key", "first_value");
+
+        var condition = new CountDownLatch(1);
+        var listener = new AppMapSettingsListener() {
+            @Override
+            public void modelConfigChange() {
+                ApplicationManager.getApplication().assertIsNonDispatchThread();
+                condition.countDown();
+            }
+        };
+
+        ApplicationManager.getApplication().getMessageBus()
+                .connect(getTestRootDisposable())
+                .subscribe(AppMapSettingsListener.TOPIC, listener);
+
+        AppMapApplicationSettingsService.getInstance().setModelConfigItemNotifying("first_key", "updated_value");
+        assertTrue(condition.await(15, TimeUnit.SECONDS));
     }
 
     @NotNull

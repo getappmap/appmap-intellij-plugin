@@ -48,6 +48,7 @@ import com.intellij.util.Alarm;
 import com.intellij.util.SingleAlarm;
 import com.intellij.util.concurrency.AppExecutorUtil;
 import com.intellij.util.concurrency.annotations.RequiresEdt;
+import appland.webviews.navie.NavieEditorProvider;
 import com.intellij.util.concurrency.annotations.RequiresReadLock;
 import lombok.Value;
 import org.jetbrains.annotations.Nls;
@@ -90,7 +91,9 @@ public class NavieEditor extends WebviewEditor<Void> {
                 "open-record-instructions",
                 "save-message",
                 "select-llm-option",
-                "show-appmap-tree"));
+                "show-appmap-tree",
+                "change-model-config",
+                "select-model"));
     }
 
     @Override
@@ -159,6 +162,12 @@ public class NavieEditor extends WebviewEditor<Void> {
             payload.add("suggestion", gson.toJsonTree(promptSuggestion));
         }
         payload.addProperty("useAnimation", useAnimation);
+        payload.addProperty("preselectedModelId", AppMapApplicationSettingsService.getInstance().getSelectedAppMapModel());
+        // include threadId if opening an existing thread
+        var threadId = NavieEditorProvider.KEY_THREAD_ID.get(file);
+        if (threadId != null) {
+            payload.addProperty("threadId", threadId);
+        }
     }
 
     @Override
@@ -254,6 +263,23 @@ public class NavieEditor extends WebviewEditor<Void> {
                 ApplicationManager.getApplication().invokeLater(() -> {
                     AppMapToolWindowFactory.showAppMapTreePanel(project);
                 }, ModalityState.defaultModalityState());
+                break;
+            case "change-model-config":
+                var key = message != null ? message.get("key").getAsString() : null;
+                var value = message != null ? StringUtil.nullize(message.get("value").getAsString()) : null;
+                var secret = message != null ? message.get("secret").getAsBoolean() : null;
+
+                if (key != null) {
+                    if (secret) {
+                        AppMapSecureApplicationSettingsService.getInstance().setModelConfigItem(key, value);
+                    } else {
+                        AppMapApplicationSettingsService.getInstance().setModelConfigItemNotifying(key, value);
+                    }
+                }
+                break;
+            case "select-model":
+                var modelId = message != null ? message.getAsJsonPrimitive("id").getAsString() : null;
+                AppMapApplicationSettingsService.getInstance().setSelectedAppMapModelNotifying(modelId);
                 break;
         }
     }

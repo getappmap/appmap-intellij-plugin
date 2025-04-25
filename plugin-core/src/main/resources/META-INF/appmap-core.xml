@@ -38,6 +38,10 @@
         <extensionPoint dynamic="true"
                         qualifiedName="appland.cli.envProvider"
                         interface="appland.cli.AppLandCliEnvProvider"/>
+
+        <extensionPoint dynamic="true"
+                        qualifiedName="appland.cli.modelInfoProvider"
+                        interface="appland.cli.AppLandModelInfoProvider"/>
     </extensionPoints>
 
     <extensions defaultExtensionNs="appland.cli">
@@ -105,6 +109,7 @@
                         serviceImplementation="appland.remote.DefaultRemoteRecordingStatusService"/>
         <projectService serviceInterface="appland.installGuide.projectData.ProjectDataService"
                         serviceImplementation="appland.installGuide.projectData.DefaultProjectDataService"/>
+        <postStartupActivity implementation="appland.settings.AppMapSettingsMigrationActivity"/>
 
         <projectService serviceInterface="appland.rpcService.AppLandJsonRpcService"
                         serviceImplementation="appland.rpcService.DefaultAppLandJsonRpcService"
@@ -172,6 +177,9 @@
         <action id="appmap.generateOpenAPI" class="appland.actions.GenerateOpenApiAction"/>
 
         <action id="appmap.openNavie" class="appland.actions.OpenAppMapNavieAction"/>
+        <action id="appmap.navie.openThread" class="appland.actions.OpenNavieThreadAction">
+            <override-text place="MainMenu"/>
+        </action>
         <action id="appmap.navie.openAIKey" class="appland.actions.SetNavieOpenAiKeyAction"/>
 
         <action id="appmap.pluginStatus" class="appland.actions.PluginStatus"/>
@@ -202,6 +210,7 @@
             <separator/>
             <reference ref="appmap.generateOpenAPI"/>
             <reference ref="appmap.openNavie"/>
+            <reference ref="appmap.navie.openThread"/>
             <reference ref="appmap.navie.chooseAndPinContextFile"/>
             <separator/>
             <reference ref="appMapLogin"/>

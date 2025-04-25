@@ -1,17 +1,9 @@
 <idea-plugin>
     <extensions defaultExtensionNs="appland.cli">
-        <!-- "first" to override the Copilot integration if custom API keys are defined in the environment settings -->
-        <envProvider order="first"
-                     implementation="appland.copilotChat.CopilotAppMapEnvProvider"/>
+        <modelInfoProvider
+                order="first"
+                implementation="appland.copilotChat.CopilotModelInfoProvider"/>
     </extensions>
-
-    <actions>
-        <action id="copilot.chooseModel"
-                class="appland.copilotChat.ChooseCopilotModelAction">
-            <override-text place="MainMenu"/>
-            <add-to-group group-id="appmapToolsMenu" relative-to-action="appmap.navie.openAIKey" anchor="after"/>
-        </action>
-    </actions>
 
     <extensions defaultExtensionNs="com.intellij">
         <httpRequestHandler implementation="appland.copilotChat.NavieCopilotChatRequestHandler"/>
