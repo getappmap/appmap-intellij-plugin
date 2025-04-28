@@ -1,5 +1,12 @@
 AppMap Plugin Changelog
 
+## [0.80.0](https://github.com/getappmap/appmap-intellij-plugin/compare/v0.79.0...v0.80.0) (2025-04-28)
+
+
+### Features
+
+-  apply model config values to the AppMap JSON-RPC service ([24fa653]())-  Integrate chat history ([2509c14]())-  Navie model selector ([425db71]())
+
 ## [0.79.0](https://github.com/getappmap/appmap-intellij-plugin/compare/v0.78.0...v0.79.0) (2025-03-14)
 
 
