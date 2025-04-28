@@ -4,10 +4,7 @@ import com.google.common.collect.Maps;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.util.xmlb.annotations.Transient;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.*;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -73,6 +70,14 @@ public class AppMapApplicationSettings {
 
     private volatile boolean showFailedCliDownloadError = true;
 
+    private volatile @Nullable String selectedAppMapModel = null;
+
+    /**
+     * Model config values, which are not secret.
+     */
+    @Setter(AccessLevel.NONE)
+    private volatile HashMap<String, String> modelConfig = new HashMap<>();
+
     public AppMapApplicationSettings() {
     }
 
@@ -90,6 +95,10 @@ public class AppMapApplicationSettings {
         this.showBrokenProxyWarning = settings.showBrokenProxyWarning;
         this.copilotIntegrationDisabled = settings.copilotIntegrationDisabled;
         this.copilotIntegrationDetected = settings.copilotIntegrationDetected;
+        this.copilotModelId = settings.copilotModelId;
+        this.showFailedCliDownloadError = settings.showFailedCliDownloadError;
+        this.selectedAppMapModel = settings.selectedAppMapModel;
+        this.modelConfig.putAll(settings.modelConfig);
     }
 
     public @NotNull Map<String, String> getCliEnvironment() {
@@ -165,6 +174,39 @@ public class AppMapApplicationSettings {
 
         if (changed) {
             settingsPublisher().copilotModelChanged();
+        }
+    }
+
+    public void setSelectedAppMapModelNotifying(@Nullable String selectedAppMapModel) {
+        var changed = !Objects.equals(selectedAppMapModel, this.selectedAppMapModel);
+        this.selectedAppMapModel = selectedAppMapModel;
+
+        if (changed) {
+            settingsPublisher().selectedAppMapModelChanged();
+        }
+    }
+
+    public @NotNull Map<String, String> getModelConfig() {
+        // return an immutable copy to prevent callers from modifying the stored map directly.
+        return Collections.unmodifiableMap(modelConfig);
+    }
+
+    public void setModelConfigItem(@NotNull String key, @Nullable String value) {
+        if (value == null) {
+            modelConfig.remove(key);
+        } else {
+            modelConfig.put(key, value);
+        }
+    }
+
+    @Transient
+    public void setModelConfigItemNotifying(@NotNull String key, @Nullable String value) {
+        var oldValue = getModelConfig().get(key);
+
+        setModelConfigItem(key, value);
+
+        if (!Objects.equals(oldValue, value)) {
+            ApplicationManager.getApplication().executeOnPooledThread(settingsPublisher()::modelConfigChange);
         }
     }
 

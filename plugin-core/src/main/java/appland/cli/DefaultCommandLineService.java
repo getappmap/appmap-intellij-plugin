@@ -4,6 +4,7 @@ import appland.config.AppMapConfigFile;
 import appland.files.AppMapFiles;
 import appland.files.AppMapVfsUtils;
 import appland.settings.AppMapApplicationSettingsService;
+import appland.settings.AppMapSecureApplicationSettingsService;
 import com.intellij.execution.ExecutionException;
 import com.intellij.execution.configurations.GeneralCommandLine;
 import com.intellij.execution.configurations.PtyCommandLine;
@@ -222,12 +223,22 @@ public class DefaultCommandLineService implements AppLandCommandLineService {
 
     @Override
     public @Nullable GeneralCommandLine createAppMapJsonRpcCommand(@Nullable Integer port) {
-        var cmd = createAppMapCommand("rpc", "--port", port != null ? port.toString() : "0");
+        var cmd = createAppMapCommand(
+                "rpc",
+                "--port", port != null ? port.toString() : "0",
+                "--navie-provider", "local"
+        );
         if (cmd == null) {
             return null;
         }
 
-        return applyServiceEnvironment(cmd);
+        cmd = applyServiceEnvironment(cmd);
+
+        var modelConfig = new HashMap<String, String>();
+        modelConfig.putAll(AppMapApplicationSettingsService.getInstance().getModelConfig());
+        modelConfig.putAll(AppMapSecureApplicationSettingsService.getInstance().getModelConfig());
+        modelConfig.put("APPMAP_NAVIE_MODEL_SELECTOR", "1");
+        return cmd.withEnvironment(modelConfig);
     }
 
     // We're not synchronizing, because some IDE threads display or use the result of toString

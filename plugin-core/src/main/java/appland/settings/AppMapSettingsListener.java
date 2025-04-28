@@ -30,6 +30,12 @@ public interface AppMapSettingsListener {
     default void openAIKeyChange() {
     }
 
+    default void modelConfigChange() {
+    }
+
+    default void secureModelConfigChange() {
+    }
+
     default void copilotIntegrationDisabledChanged() {
     }
 
@@ -40,5 +46,8 @@ public interface AppMapSettingsListener {
     }
 
     default void cliEnvironmentChanged(@NotNull Set<String> modifiedKeys) {
+    }
+
+    default void selectedAppMapModelChanged() {
     }
 }
