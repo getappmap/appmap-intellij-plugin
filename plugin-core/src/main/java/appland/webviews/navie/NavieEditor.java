@@ -546,7 +546,7 @@ public class NavieEditor extends WebviewEditor<Void> {
         var maxPinnedFileSizeKB = AppMapApplicationSettingsService.getInstance().getMaxPinnedFileSizeKB();
 
         var validFileRequests = ReadAction.compute(() -> {
-            var validRequests = new ArrayList<NaviePinFileRequest>();
+            var fileUris = new ArrayList<String>();
             for (var file : contextFiles) {
                 var isValid = file.isValid()
                         && file.isInLocalFileSystem()
@@ -557,11 +557,11 @@ public class NavieEditor extends WebviewEditor<Void> {
                     var document = FileDocumentManager.getInstance().getDocument(file);
                     if (document != null) {
                         var url = file.getUrl();
-                        validRequests.add(new NaviePinFileRequest(file.getPresentableName(), url, document.getText()));
+                        fileUris.add(url);
                     }
                 }
             }
-            return validRequests;
+            return fileUris;
         });
 
         if (!validFileRequests.isEmpty()) {
