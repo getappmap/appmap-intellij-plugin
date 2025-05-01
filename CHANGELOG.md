@@ -1,5 +1,12 @@
 AppMap Plugin Changelog
 
+## [0.80.1](https://github.com/getappmap/appmap-intellij-plugin/compare/v0.80.0...v0.80.1) (2025-05-01)
+
+
+### Bug Fixes
+
+-  Highlighted code selections should now be included in all cases ([c6e4ebc]())-  Improve render support for indented code blocks ([9ed7c00]())-  Pinned items can now be appended in all cases ([27fe7f4]())
+
 ## [0.80.0](https://github.com/getappmap/appmap-intellij-plugin/compare/v0.79.0...v0.80.0) (2025-04-28)
 
 
