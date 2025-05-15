@@ -1,10 +1,5 @@
 package appland.notifications;
 
-import java.util.Arrays;
-import java.util.function.Consumer;
-
-import static appland.AppMapBundle.lazy;
-
 import appland.AppMapBundle;
 import appland.AppMapPlugin;
 import appland.actions.StopAppMapRecordingAction;
@@ -32,6 +27,11 @@ import com.intellij.util.net.HttpConfigurable;
 import com.intellij.util.ui.EdtInvocationManager;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.Arrays;
+import java.util.function.Consumer;
+
+import static appland.AppMapBundle.lazy;
 
 public final class AppMapNotifications {
     public static final String REMOTE_RECORDING_ID = "appmap.remoteRecording";
@@ -340,39 +340,31 @@ public final class AppMapNotifications {
     /**
      * Displays a notification that the Copilot integration is available in all open projects.
      */
-    public static void showFirstCopilotIntegrationEnabled() {
+    public static void showFirstCopilotIntegrationEnabled(@NotNull Project project) {
         ApplicationManager.getApplication().assertIsDispatchThread();
 
-        ReadAction.run(() -> {
-            for (var project : ProjectManager.getInstance().getOpenProjects()) {
-                new AppMapFullContentNotification(
-                        GENERIC_NOTIFICATIONS_ID, null,
-                        AppMapBundle.get("notification.copilotIntegrationAvailable.title"),
-                        null,
-                        AppMapBundle.get("notification.copilotIntegrationAvailable.content"),
-                        NotificationType.INFORMATION, null
-                ).notify(project);
-            }
-        });
+        new AppMapFullContentNotification(
+                GENERIC_NOTIFICATIONS_ID, null,
+                AppMapBundle.get("notification.copilotIntegrationAvailable.title"),
+                null,
+                AppMapBundle.get("notification.copilotIntegrationAvailable.content"),
+                NotificationType.INFORMATION, null
+        ).notify(project);
     }
 
     /**
      * Displays a notification that the Copilot authentication is required in all open projects.
      */
-    public static void showCopilotAuthenticationRequired() {
+    public static void showCopilotAuthenticationRequired(@NotNull Project project) {
         ApplicationManager.getApplication().assertIsDispatchThread();
 
-        ReadAction.run(() -> {
-            for (var project : ProjectManager.getInstance().getOpenProjects()) {
-                new AppMapFullContentNotification(
-                        GENERIC_NOTIFICATIONS_ID, null,
-                        AppMapBundle.get("notification.copilotAuthRequired.title"),
-                        null,
-                        AppMapBundle.get("notification.copilotAuthRequired.content"),
-                        NotificationType.WARNING, null
-                ).notify(project);
-            }
-        });
+        new AppMapFullContentNotification(
+                GENERIC_NOTIFICATIONS_ID, null,
+                AppMapBundle.get("notification.copilotAuthRequired.title"),
+                null,
+                AppMapBundle.get("notification.copilotAuthRequired.content"),
+                NotificationType.WARNING, null
+        ).notify(project);
     }
 
     /**
