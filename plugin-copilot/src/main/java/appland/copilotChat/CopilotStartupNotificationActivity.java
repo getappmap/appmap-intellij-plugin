@@ -32,7 +32,7 @@ public class CopilotStartupNotificationActivity extends ProjectActivityAdapter i
         var copilotService = GitHubCopilotService.getInstance();
         if (copilotService.isCopilotAuthenticated()) {// if the Copilot integration is enabled for the first time, show a notification
             var wasDetectedBefore = AppMapApplicationSettingsService.getInstance().isCopilotIntegrationDetected();
-            if (!wasDetectedBefore && isNotificationShown.compareAndExchange(false, true)) {
+            if (!wasDetectedBefore && isNotificationShown.compareAndSet(false, true)) {
                 AppMapApplicationSettingsService.getInstance().setCopilotIntegrationDetected(true);
                 ApplicationManager.getApplication().invokeLater(() -> showFirstCopilotIntegrationEnabled(project));
             }
