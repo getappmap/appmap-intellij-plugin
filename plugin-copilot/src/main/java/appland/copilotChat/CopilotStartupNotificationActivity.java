@@ -30,22 +30,18 @@ public class CopilotStartupNotificationActivity extends ProjectActivityAdapter i
 
         // if the Copilot integration is enabled, but not authenticated, show a notification
         var copilotService = GitHubCopilotService.getInstance();
-        if (!copilotService.isCopilotAuthenticated()) {
-            ApplicationManager.getApplication().invokeLater(() -> showCopilotAuthenticationRequired(project));
-            return;
-        }
+        if (copilotService.isCopilotAuthenticated()) {// if the Copilot integration is enabled for the first time, show a notification
+            var wasDetectedBefore = AppMapApplicationSettingsService.getInstance().isCopilotIntegrationDetected();
+            if (!wasDetectedBefore && isNotificationShown.compareAndExchange(false, true)) {
+                AppMapApplicationSettingsService.getInstance().setCopilotIntegrationDetected(true);
+                ApplicationManager.getApplication().invokeLater(() -> showFirstCopilotIntegrationEnabled(project));
+            }
 
-        // if the Copilot integration is enabled for the first time, show a notification
-        var wasDetectedBefore = AppMapApplicationSettingsService.getInstance().isCopilotIntegrationDetected();
-        if (!wasDetectedBefore && isNotificationShown.compareAndExchange(false, true)) {
-            AppMapApplicationSettingsService.getInstance().setCopilotIntegrationDetected(true);
-            ApplicationManager.getApplication().invokeLater(() -> showFirstCopilotIntegrationEnabled(project));
-        }
-
-        try {
-            copilotService.ensureContentExclusionsDownloaded();
-        } catch (Exception e) {
-            // this is ok for now, it will be retried later
+            try {
+                copilotService.ensureContentExclusionsDownloaded();
+            } catch (Exception e) {
+                // this is ok for now, it will be retried later
+            }
         }
     }
 }
