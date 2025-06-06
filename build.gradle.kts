@@ -256,7 +256,7 @@ project(":") {
                 plugin("com.github.copilot", copilotPluginVersion)
             }
 
-            pluginVerifier()
+            pluginVerifier("1.384")
             zipSigner()
         }
     }
