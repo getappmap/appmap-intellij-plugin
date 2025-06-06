@@ -7,7 +7,7 @@ pluginManagement {
     val platformVersion = (extra["platformVersion"] as String).toInt()
     plugins {
         val kotlinVersion = when {
-            platformVersion == 251 -> "2.1.0"
+            platformVersion >= 251 -> "2.1.21"
             else -> "1.9.24"
         }
         kotlin("jvm") version kotlinVersion

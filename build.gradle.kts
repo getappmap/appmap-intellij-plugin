@@ -8,6 +8,7 @@ import org.gradle.api.tasks.testing.logging.TestLogEvent
 import org.jetbrains.changelog.Changelog
 import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType
 import org.jetbrains.intellij.platform.gradle.TestFrameworkType
+import org.jetbrains.intellij.platform.gradle.models.ProductRelease
 import org.jetbrains.intellij.platform.gradle.tasks.InstrumentCodeTask
 import org.jetbrains.intellij.platform.gradle.tasks.PrepareSandboxTask
 import org.jetbrains.intellij.platform.gradle.tasks.VerifyPluginTask.FailureLevel
@@ -28,7 +29,7 @@ buildscript {
 plugins {
     idea
     id("org.jetbrains.kotlin.jvm")
-    id("org.jetbrains.intellij.platform") version "2.5.1-SNAPSHOT"
+    id("org.jetbrains.intellij.platform") version "2.6.1-SNAPSHOT"
     id("org.jetbrains.changelog") version "2.2.1"
     id("com.adarshr.test-logger") version "3.2.0"
     id("de.undercouch.download") version "5.6.0"
@@ -256,7 +257,7 @@ project(":") {
                 plugin("com.github.copilot", copilotPluginVersion)
             }
 
-            pluginVerifier()
+            pluginVerifier("1.384")
             zipSigner()
         }
     }
@@ -270,7 +271,6 @@ project(":") {
 
             ideaVersion {
                 sinceBuild.set(prop("sinceBuild"))
-                untilBuild.set(prop("untilBuild"))
             }
 
             changeNotes.set(provider {
@@ -284,7 +284,19 @@ project(":") {
 
         pluginVerification {
             ides {
-                ides(prop("ideVersionVerifier").split(","))
+                // earliest supported major version
+                select {
+                    sinceBuild = "241"
+                    untilBuild = "241.*"
+                    types.set(listOf(IntelliJPlatformType.IntellijIdeaCommunity))
+                }
+
+                // latest supported major version
+                select {
+                    sinceBuild = "252"
+                    untilBuild = "252.*"
+                    types.set(listOf(IntelliJPlatformType.IntellijIdeaCommunity))
+                }
             }
 
             failureLevel.set(
