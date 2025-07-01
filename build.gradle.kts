@@ -88,6 +88,7 @@ allprojects {
             if (platformVersion >= 243) {
                 bundledPlugin("com.intellij.modules.json")
             }
+            bundledPlugin("Git4Idea")
         }
 
         // added because org.jetbrains.intellij.platform resolves to an older version bundled with the SDK
