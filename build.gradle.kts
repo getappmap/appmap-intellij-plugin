@@ -98,6 +98,7 @@ allprojects {
                 bundledModule("intellij.platform.collaborationTools.auth.base")
                 bundledModule("intellij.platform.collaborationTools.auth")
             }
+            bundledPlugin("Git4Idea")
         }
 
         // added because org.jetbrains.intellij.platform resolves to an older version bundled with the SDK
@@ -210,6 +211,7 @@ allprojects {
                     bundledModule("intellij.platform.collaborationTools.auth.base")
                     bundledModule("intellij.platform.collaborationTools.auth")
                 }
+                bundledPlugin("Git4Idea")
             }
 
             task {
