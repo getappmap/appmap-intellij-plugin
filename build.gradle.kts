@@ -8,7 +8,6 @@ import org.gradle.api.tasks.testing.logging.TestLogEvent
 import org.jetbrains.changelog.Changelog
 import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType
 import org.jetbrains.intellij.platform.gradle.TestFrameworkType
-import org.jetbrains.intellij.platform.gradle.models.ProductRelease
 import org.jetbrains.intellij.platform.gradle.tasks.InstrumentCodeTask
 import org.jetbrains.intellij.platform.gradle.tasks.PrepareSandboxTask
 import org.jetbrains.intellij.platform.gradle.tasks.VerifyPluginTask.FailureLevel
@@ -252,12 +251,9 @@ project(":") {
             pluginComposedModule(implementation(project(":plugin-copilot")))
 
             // adding this for runIde support
-            val copilotPluginVersion = prop("copilotPluginVersion")
-            if (copilotPluginVersion.isNotEmpty()) {
-                plugin("com.github.copilot", copilotPluginVersion)
-            }
+            compatiblePlugin("com.github.copilot")
 
-            pluginVerifier("1.384")
+            pluginVerifier()
             zipSigner()
         }
     }
@@ -428,10 +424,11 @@ project(":plugin-copilot") {
         implementation(project(":plugin-core"))
         implementation("com.knuddels:jtokkit:1.1.0")
 
-        // Unfortunately, we can't use the Copilot plugin in test mode. In test mode with version 1.5.30-231, it throws:
+        // Unfortunately, we can't use the Copilot plugin in test mode. In test mode with version 1.5.30-231,
+        // it throws an exception because the test service implementations are not included:
         //  java.lang.ClassNotFoundException: com.github.copilot.lang.agent.CopilotAgentProcessTestService
         /*intellijPlatform {
-            plugin("com.github.copilot", prop("copilotPluginVersion"))
+            compatiblePlugin("com.github.copilot")
         }*/
     }
 }
