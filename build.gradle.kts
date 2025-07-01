@@ -245,11 +245,11 @@ project(":") {
 
     dependencies {
         intellijPlatform {
-            pluginModule(implementation(project(":plugin-core")))
-            pluginModule(implementation(project(":plugin-gradle")))
-            pluginModule(implementation(project(":plugin-java")))
-            pluginModule(implementation(project(":plugin-maven")))
-            pluginModule(implementation(project(":plugin-copilot")))
+            pluginComposedModule(implementation(project(":plugin-core")))
+            pluginComposedModule(implementation(project(":plugin-gradle")))
+            pluginComposedModule(implementation(project(":plugin-java")))
+            pluginComposedModule(implementation(project(":plugin-maven")))
+            pluginComposedModule(implementation(project(":plugin-copilot")))
 
             // adding this for runIde support
             val copilotPluginVersion = prop("copilotPluginVersion")
