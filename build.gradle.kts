@@ -244,11 +244,17 @@ project(":") {
 
     dependencies {
         intellijPlatform {
-            pluginComposedModule(implementation(project(":plugin-core")))
+            // use pluginComposedModule when https://github.com/JetBrains/intellij-platform-gradle-plugin/issues/1971 is fixed
+            implementation(project(":plugin-core"))
+            implementation(project(":plugin-gradle"))
+            implementation(project(":plugin-java"))
+            implementation(project(":plugin-maven"))
+            implementation(project(":plugin-copilot"))
+            /*pluginComposedModule(implementation(project(":plugin-core")))
             pluginComposedModule(implementation(project(":plugin-gradle")))
             pluginComposedModule(implementation(project(":plugin-java")))
             pluginComposedModule(implementation(project(":plugin-maven")))
-            pluginComposedModule(implementation(project(":plugin-copilot")))
+            pluginComposedModule(implementation(project(":plugin-copilot")))*/
 
             // adding this for runIde support
             compatiblePlugin("com.github.copilot")
