@@ -68,9 +68,8 @@ public class NaviePanel extends AppMapContentPanel {
         button.addActionListener(e -> {
             var manager = ActionManager.getInstance();
             var action = manager.getAction(QuickReviewAction.ACTION_ID);
-            if (action != null) {
-                manager.tryToExecute(action, null, this, ActionPlaces.TOOLWINDOW_CONTENT, true);
-            }
+            assert (action != null);
+            manager.tryToExecute(action, null, this, ActionPlaces.TOOLWINDOW_CONTENT, true);
         });
         return button;
     }

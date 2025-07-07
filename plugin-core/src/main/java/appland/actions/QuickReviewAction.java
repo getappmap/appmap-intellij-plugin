@@ -1,9 +1,14 @@
 package appland.actions;
 
+import appland.AppMapBundle;
+import appland.notifications.AppMapNotifications;
 import appland.webviews.navie.NavieEditorProvider;
 import appland.webviews.navie.NaviePromptSuggestion;
 import com.intellij.icons.AllIcons;
 import com.intellij.ide.util.PropertiesComponent;
+import com.intellij.notification.Notification;
+import com.intellij.notification.NotificationType;
+import com.intellij.notification.Notifications;
 import com.intellij.openapi.actionSystem.ActionUpdateThread;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
@@ -44,22 +49,32 @@ public class QuickReviewAction extends AnAction implements DumbAware {
     }
 
     @Override
+    public void update(@NotNull AnActionEvent e) {
+        super.update(e);
+        e.getPresentation().setEnabled(e.getProject() != null);
+    }
+
+    @Override
     public void actionPerformed(@NotNull AnActionEvent e) {
         var project = e.getProject();
-        if (project == null) {
-            return;
-        }
+        assert (project != null);
 
         var repositoryManager = GitRepositoryManager.getInstance(project);
         var repositories = repositoryManager.getRepositories();
         if (repositories.isEmpty()) {
+            Notifications.Bus.notify(new Notification(
+                    AppMapNotifications.GENERIC_NOTIFICATIONS_ID,
+                    AppMapBundle.get("action.appmap.quickReview.noRepositories.title"),
+                    AppMapBundle.get("action.appmap.quickReview.noRepositories.message"),
+                    NotificationType.INFORMATION
+            ), project);
             return;
         }
 
         // For now, we'll just use the first repository
         var repository = repositories.get(0);
 
-        new Task.Backgroundable(project, "Fetching Git Refs", true) {
+        new Task.Backgroundable(project, AppMapBundle.get("action.appmap.quickReview.fetchingRefs.progressTitle"), true) {
             private List<GitRef> refs;
             private boolean dirty = false;
 
@@ -69,7 +84,7 @@ public class QuickReviewAction extends AnAction implements DumbAware {
                     refs = getItems(project, repository);
                     dirty = isDirty();
                 } catch (VcsException ex) {
-                    throw new RuntimeException("Failed to fetch Git refs", ex);
+                    throw new RuntimeException(ex);
                 }
             }
 
@@ -87,6 +102,18 @@ public class QuickReviewAction extends AnAction implements DumbAware {
             }
 
             @Override
+            public void onThrowable(@NotNull Throwable error) {
+                new Notification(
+                        AppMapNotifications.GENERIC_NOTIFICATIONS_ID,
+                        AppMapBundle.get("action.appmap.quickReview.fetchingRefs.error"),
+                        error.getMessage() != null
+                                ? error.getMessage() + "<br><br><code>" + error.toString() + "</code>"
+                                : error.toString(),
+                        NotificationType.ERROR
+                ).notify(project);
+            }
+
+            @Override
             public void onSuccess() {
                 if (refs == null || refs.isEmpty()) {
                     return;
@@ -100,9 +127,10 @@ public class QuickReviewAction extends AnAction implements DumbAware {
                         /* only show HEAD if the repository is dirty */
                         .filter(gitRef -> dirty || !gitRef.commit.equals(head))
                         .peek(gitRef -> {
-                            if (gitRef.commit.equals(head)) gitRef.description = "review uncommitted changes";
+                            if (gitRef.commit.equals(head))
+                                gitRef.description = AppMapBundle.get("action.appmap.quickReview.reviewUncommittedChanges");
                             if (gitRef.label.equals(lastPickedRef)) {
-                                gitRef.description = "last picked ⋅ " + gitRef.description;
+                                gitRef.description = AppMapBundle.get("action.appmap.quickReview.lastPickedPrefix") + " ⋅ " + gitRef.description;
                                 seenLastPicked.set(true);
                             }
                         })
@@ -116,19 +144,21 @@ public class QuickReviewAction extends AnAction implements DumbAware {
                 var popup = JBPopupFactory.getInstance()
                         .createPopupChooserBuilder(refs)
                         .setRenderer(new GitRefCellRenderer())
-                        .setTitle("Select base for review")
-                        .setMovable(false)
-                        .setResizable(false)
+                        .setTitle(AppMapBundle.get("action.appmap.quickReview.selectBase.title"))
+                        .setNamerForFiltering(GitRef::toString)
+                        .setMovable(true)
+                        .setResizable(true)
+                        .setDimensionServiceKey("appmap.quickReviewPopup")
                         .setRequestFocus(true)
                         .setItemChosenCallback((selectedValue) -> {
                             if (selectedValue != null) {
                                 PropertiesComponent.getInstance().setValue(LAST_PICKED_REF_KEY, selectedValue.label);
                                 NavieEditorProvider.openEditorWithPrompt(project, new NaviePromptSuggestion(
-                                        "Quick Review",
+                                        AppMapBundle.get("action.appmap.quickReview.text"),
                                         String.format("@review /base=%s", selectedValue.label)));
                             }
                         }).createPopup();
-                popup.showCenteredInCurrentWindow(project);
+                popup.showInBestPositionFor(e.getDataContext());
             }
         }.queue();
     }
@@ -241,8 +271,11 @@ public class QuickReviewAction extends AnAction implements DumbAware {
             var component = (JLabel) super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
             if (value instanceof GitRef) {
                 var ref = (GitRef) value;
+                var description = ref.description != null ? ref.description : "";
+                // sometimes description is very long, truncate it then
+                if (description.length() > 100) description = description.substring(0, 100) + "...";
                 component.setText("<html><b>" + ref.label + "</b> " +
-                        "<small>" + ref.description + "</small></html>");
+                        "<small>" + description + "</small></html>");
                 component.setIcon(ref.getIcon());
             }
             return component;
@@ -252,7 +285,7 @@ public class QuickReviewAction extends AnAction implements DumbAware {
     // HACK: platform version 241 does not define GitCommand.FOR_EACH_REF
     // and the final GitCommand constructors are private, so we need to replace
     // the command in GitLineHandler with a custom one.
-    class GitCommandLineHandler extends GitLineHandler {
+    private static class GitCommandLineHandler extends GitLineHandler {
         public GitCommandLineHandler(@Nullable Project project, @NotNull VirtualFile directory, @NotNull String command) {
             super(project, directory, GitCommand.LOG);
             var paramsList = this.myCommandLine.getParametersList();
