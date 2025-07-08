@@ -1,7 +1,6 @@
 .idea
 .vscode
 .gradle
-.yarn
 .intellijPlatform
 build
 node_modules
