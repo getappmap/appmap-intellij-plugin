@@ -1,0 +1,28 @@
+{
+  "publisher": "appland",
+  "name": "appmap-intellij-webview",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "bundle": "tsup --env.NODE_ENV production"
+  },
+  "devDependencies": {
+    "browserify-fs": "^1.0.0",
+    "buffer": "^6.0.3",
+    "node-libs-browser": "^2.2.1",
+    "process": "^0.11.10",
+    "tsup": "^8.2.4",
+    "typescript": "^5.6.2"
+  },
+  "dependencies": {
+    "@appland/components": "^4.46.4",
+    "@appland/rpc": "^1.19.0",
+    "highlight.js": "^11.11.1",
+    "url": "^0.11",
+    "vue": "^2.7",
+    "vue-template-compiler": "^2.7"
+  },
+  "resolutions": {
+    "@appland/rpc": "1.19.0"
+  }
+}

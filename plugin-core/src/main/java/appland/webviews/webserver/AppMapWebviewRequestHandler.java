@@ -1,18 +1,17 @@
 package appland.webviews.webserver;
 
+import appland.AppMapPlugin;
 import com.intellij.openapi.application.ReadAction;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.http.*;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import org.jetbrains.ide.HttpRequestHandler;
 import org.jetbrains.io.FileResponses;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Path;
 import java.util.Objects;
 
 /**
@@ -78,38 +77,12 @@ public class AppMapWebviewRequestHandler extends HttpRequestHandler {
 
     private boolean processWebviewResource(@NotNull FullHttpRequest fullHttpRequest, @NotNull ChannelHandlerContext channelHandlerContext, String requestPath) {
         var webviewPath = requestPath.substring(APPMAP_SERVER_BASE_PATH.length() + 1);
-        var slashIndex = webviewPath.indexOf('/');
-        if (slashIndex == -1) {
-            return false;
-        }
-
-        var webviewDirName = webviewPath.substring(0, slashIndex);
-        var relativeFilePath = slashIndex + 1 < webviewPath.length() ? webviewPath.substring(slashIndex + 1) : null;
-        if (relativeFilePath == null) {
-            return false;
-        }
-
-        var localFile = findLocalWebviewFile(webviewDirName, relativeFilePath);
-        if (localFile == null) {
-            return false;
-        }
+        var localFile = AppMapPlugin.getPluginPath().resolve("webview").resolve(webviewPath);
 
         FileResponses.INSTANCE.sendFile(fullHttpRequest,
                 channelHandlerContext.channel(),
                 localFile,
                 EmptyHttpHeaders.INSTANCE);
         return true;
-    }
-
-    private @Nullable Path findLocalWebviewFile(@NotNull String webviewDirName, @NotNull String relativeFilePath) {
-        for (var webview : AppMapWebview.values()) {
-            if (webview.getWebviewAssetsDirectoryName().equals(webviewDirName)) {
-                var baseDirPath = webview.getBaseDirPath();
-                var filePath = baseDirPath.resolve(relativeFilePath).toAbsolutePath().normalize();
-                return filePath.startsWith(baseDirPath) ? filePath : null;
-            }
-        }
-
-        return null;
     }
 }

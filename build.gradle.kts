@@ -343,10 +343,7 @@ project(":") {
 
             inputs.file("${project.rootDir}/NOTICE.txt")
             inputs.file(agentOutputPath)
-            inputs.dir("${project.rootDir}/appland")
-            inputs.dir("${project.rootDir}/appland-install-guide")
-            inputs.dir("${project.rootDir}/appland-findings")
-            inputs.dir("${project.rootDir}/appland-signin")
+            inputs.dir("${project.rootDir}/appland-webview")
 
             destinationDir = project.layout.buildDirectory.asFile.get()
             from(project.rootDir) {
@@ -357,29 +354,9 @@ project(":") {
                 into("appmap-assets/appmap-java-agent")
                 include("*.jar")
             }
-            from("${project.rootDir}/appland") {
-                into("appmap-assets/appmap")
-                include("index.html")
-                include("dist/**")
-            }
-            from("${project.rootDir}/appland-install-guide") {
-                into("appmap-assets/appland-install-guide")
-                include("index.html")
-                include("dist/**")
-            }
-            from("${project.rootDir}/appland-findings") {
-                into("appmap-assets/appland-findings")
-                include("index.html")
-                include("dist/**")
-            }
-            from("${project.rootDir}/appland-signin") {
-                into("appmap-assets/appland-signin")
-                include("index.html")
-                include("dist/**")
-            }
-            from("${project.rootDir}/appland-navie") {
-                into("appmap-assets/appland-navie")
-                include("index.html")
+            from("${project.rootDir}/appland-webview") {
+                into("appmap-assets/webview")
+                include("*.html")
                 include("dist/**")
             }
 
