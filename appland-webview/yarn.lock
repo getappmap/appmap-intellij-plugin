@@ -33,9 +33,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@appland/components@npm:^4.46.4":
+"@appland/components@file:.yalc/@appland/components::locator=appmap-intellij-webview%40workspace%3A.":
   version: 4.46.4
-  resolution: "@appland/components@npm:4.46.4"
+  resolution: "@appland/components@file:.yalc/@appland/components#.yalc/@appland/components::hash=e73b8f&locator=appmap-intellij-webview%40workspace%3A."
   dependencies:
     "@appland/client": "npm:^1.12.0"
     "@appland/diagrams": "npm:^1.7.0"
@@ -53,6 +53,7 @@ __metadata:
     highlight.js: "npm:^11.9.0"
     jayson: "npm:^4.1.0"
     js-base64: "npm:^3.7.7"
+    lucide-vue: "npm:^0.511.0"
     marked: "npm:^10.0.0"
     marked-highlight: "npm:^2.0.7"
     mermaid: "npm:^10.9.1"
@@ -61,7 +62,7 @@ __metadata:
     sql-formatter: "npm:^4.0.2"
     vue: "npm:^2.7.16"
     vuex: "npm:^3.6.0"
-  checksum: 10c0/f42316409a8d162e070c944b829bee044b6071228fc99d08e5d6625bc566df616d2140c606bb51865c080583b967812e9a2cd001322f3cd3174f80417eec71b3
+  checksum: 10c0/0100ca569dbd19cb1552158a1a39156e97a274811ab24d15086fe02244109c1ca2aa2043e55cb5b280496765d0dbaaafa8591833b8f81fb1ae468139b9b370ae
   languageName: node
   linkType: hard
 
@@ -784,7 +785,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "appmap-intellij-webview@workspace:."
   dependencies:
-    "@appland/components": "npm:^4.46.4"
+    "@appland/components": "file:.yalc/@appland/components"
     "@appland/rpc": "npm:^1.19.0"
     browserify-fs: "npm:^1.0.0"
     buffer: "npm:^6.0.3"
@@ -2948,6 +2949,15 @@ __metadata:
   version: 2.2.1
   resolution: "ltgt@npm:2.2.1"
   checksum: 10c0/60fdad732c3aa6acf37e927a5ef58c0d1776192321d55faa1f8775c134c27fbf20ef8ec542fb7f7f33033f79c2a2df75cac39b43e274b32e9d95400154cd41f3
+  languageName: node
+  linkType: hard
+
+"lucide-vue@npm:^0.511.0":
+  version: 0.511.0
+  resolution: "lucide-vue@npm:0.511.0"
+  peerDependencies:
+    vue: ^2.6.12
+  checksum: 10c0/28570f0fee0d2670d3233a87c4a3830768af9129dd471dd66868fe3a2e069fd417b93d1cabbced129b9e6a874408a1b680e7f2f206276901cc4438ef5be87189
   languageName: node
   linkType: hard
 

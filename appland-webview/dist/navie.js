@@ -1,7 +1,8 @@
 import { handleAppMapMessages } from './chunk-IFYTZTYP.js';
-import { vue_runtime_default, rs, MessagePublisher, vsCodeBridge_default, kn } from './chunk-HCS4X2XG.js';
+import './chunk-TNT5476E.js';
+import { vue_runtime_default, Zs, MessagePublisher, vsCodeBridge_default, Xn } from './chunk-BIQ4AVON.js';
 import './chunk-SDHD3UEE.js';
-import './chunk-YWHJFWTB.js';
+import './chunk-IKWFAN4T.js';
 import { init_polyfillShim } from './chunk-NBJJPFWB.js';
 
 // navie.js
@@ -12,7 +13,7 @@ function mountWebview() {
     const app = new vue_runtime_default({
       el: "#app",
       render(h) {
-        return h(kn, {
+        return h(Xn, {
           ref: "ui",
           props: {
             appmapRpcPort: initialData.appmapRpcPort,
@@ -97,7 +98,7 @@ function mountWebview() {
   });
   vsCodeBridge_default.postMessage({ command: "ready" });
 }
-vue_runtime_default.use(rs);
+vue_runtime_default.use(Zs);
 mountWebview();
 
 export { mountWebview };

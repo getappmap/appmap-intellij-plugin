@@ -1,6 +1,7 @@
-import { vue_runtime_default, rs, MessagePublisher, vsCodeBridge_default, pi, hi } from './chunk-HCS4X2XG.js';
+import './chunk-TNT5476E.js';
+import { vue_runtime_default, Zs, MessagePublisher, vsCodeBridge_default, Yi, Fi } from './chunk-BIQ4AVON.js';
 import './chunk-SDHD3UEE.js';
-import './chunk-YWHJFWTB.js';
+import './chunk-IKWFAN4T.js';
 import { init_polyfillShim } from './chunk-NBJJPFWB.js';
 
 // findings.js
@@ -11,9 +12,9 @@ function mountWebview() {
     console.log("received js init: " + page + ", " + JSON.stringify(initData));
     let component;
     if (page === "finding-overview") {
-      component = pi;
+      component = Yi;
     } else if (page === "finding-details") {
-      component = hi;
+      component = Fi;
     } else {
       throw new Error("unknown page type: " + page);
     }
@@ -37,7 +38,7 @@ function mountWebview() {
   });
   vsCodeBridge_default.postMessage({ command: "ready" });
 }
-vue_runtime_default.use(rs);
+vue_runtime_default.use(Zs);
 mountWebview();
 //# sourceMappingURL=findings.js.map
 //# sourceMappingURL=findings.js.map

@@ -1,7 +1,8 @@
 import { handleAppMapMessages } from './chunk-IFYTZTYP.js';
-import { vue_runtime_default, rs, MessagePublisher, vsCodeBridge_default, ii } from './chunk-HCS4X2XG.js';
+import './chunk-TNT5476E.js';
+import { vue_runtime_default, Zs, MessagePublisher, vsCodeBridge_default, Bi } from './chunk-BIQ4AVON.js';
 import './chunk-SDHD3UEE.js';
-import './chunk-YWHJFWTB.js';
+import './chunk-IKWFAN4T.js';
 import { init_polyfillShim } from './chunk-NBJJPFWB.js';
 
 // appmap.js
@@ -12,7 +13,7 @@ function mountWebview() {
     let app = new vue_runtime_default(
       {
         el: "#app",
-        render: (h) => h(ii, { ref: "ui", props: properties }),
+        render: (h) => h(Bi, { ref: "ui", props: properties }),
         mounted() {
           vsCodeBridge_default.postMessage({ command: "webviewMounted" });
         },
@@ -53,7 +54,7 @@ function mountWebview() {
   });
   vsCodeBridge_default.postMessage({ command: "ready" });
 }
-vue_runtime_default.use(rs);
+vue_runtime_default.use(Zs);
 mountWebview();
 //# sourceMappingURL=appmap.js.map
 //# sourceMappingURL=appmap.js.map

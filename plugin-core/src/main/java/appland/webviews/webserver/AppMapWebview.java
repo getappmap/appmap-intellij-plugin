@@ -20,7 +20,8 @@ public enum AppMapWebview {
     AppMap("appmap"),
     InstallGuide("install-guide"),
     Findings("findings"),
-    Navie("navie");
+    Navie("navie"),
+    Review("review");
 
     public static @NotNull String getBaseUrl() {
         return "http://localhost:" + BuiltInServerOptions.getInstance().getEffectiveBuiltInServerPort();

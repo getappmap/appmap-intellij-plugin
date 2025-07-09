@@ -6,7 +6,14 @@ const isProduction = process.env.NODE_ENV === "production";
 
 export default defineConfig([
     {
-        entry: ["signin.js", "findings.js", "appmap.js", "install-guide.js", "navie.js"],
+        entry: [
+    'appmap.js',
+    'findings.js',
+    'install-guide.js',
+    'navie.js',
+    'signin.js',
+    'review.ts',
+  ],
         outDir: "dist",
         name: "main",
         noExternal: [/./],
@@ -15,6 +22,7 @@ export default defineConfig([
         treeshake: true,
         format: "esm",
         sourcemap: true,
+        minify: isProduction,
         inject: ["polyfillShim.js"],
         define: {
             global: "globalThis",

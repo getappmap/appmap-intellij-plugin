@@ -3,6 +3,7 @@ package appland.actions;
 import appland.AppMapBundle;
 import appland.webviews.navie.NavieEditorProvider;
 import appland.webviews.navie.NaviePromptSuggestion;
+import appland.webviews.review.ReviewEditorProvider;
 import com.intellij.icons.AllIcons;
 import com.intellij.ide.util.PropertiesComponent;
 import com.intellij.openapi.actionSystem.ActionUpdateThread;
@@ -14,6 +15,7 @@ import com.intellij.openapi.project.DumbAware;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.Messages;
 import com.intellij.openapi.ui.popup.JBPopupFactory;
+import com.intellij.openapi.util.registry.Registry;
 import com.intellij.openapi.vcs.VcsException;
 import com.intellij.openapi.vfs.VirtualFile;
 import git4idea.commands.Git;
@@ -142,9 +144,12 @@ public class QuickReviewAction extends AnAction implements DumbAware {
                         .setItemChosenCallback((selectedValue) -> {
                             if (selectedValue != null) {
                                 PropertiesComponent.getInstance().setValue(LAST_PICKED_REF_KEY, selectedValue.label);
-                                NavieEditorProvider.openEditorWithPrompt(project, new NaviePromptSuggestion(
-                                        AppMapBundle.get("action.appmap.quickReview.text"),
-                                        String.format("@review /base=%s", selectedValue.label)));
+                                if (Registry.is("appmap.experimental.review.ui"))
+                                    ReviewEditorProvider.openEditor(project, selectedValue.label);
+                                else
+                                    NavieEditorProvider.openEditorWithPrompt(project, new NaviePromptSuggestion(
+                                            AppMapBundle.get("action.appmap.quickReview.text"),
+                                            String.format("@review /base=%s", selectedValue.label)));
                             }
                         }).createPopup();
                 popup.showInBestPositionFor(e.getDataContext());
