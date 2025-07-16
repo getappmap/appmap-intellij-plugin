@@ -26,7 +26,7 @@ public class AppMapWebviewTest extends AppMapBaseTest {
         var port = BuiltInServerOptions.getInstance().getEffectiveBuiltInServerPort();
         assertEquals("A webview base URL must not contain a double slash",
                 "http://localhost:" + port + "/_appmap-webviews/signin.html",
-                AppMapWebview.getBaseUrlWithPath("signin.html"));
+                AppMapWebview.SignIn.getIndexHtmlUrl());
     }
 
     @Test

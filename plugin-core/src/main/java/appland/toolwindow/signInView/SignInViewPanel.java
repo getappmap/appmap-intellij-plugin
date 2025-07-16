@@ -84,7 +84,7 @@ public class SignInViewPanel extends SimpleToolWindowPanel implements Disposable
 
         htmlPanel.getJBCefClient().addDisplayHandler(new ConsoleInitMessageHandler(this::initWebView), htmlPanel.getCefBrowser());
 
-        htmlPanel.loadURL(AppMapWebview.getBaseUrlWithPath("signin.html"));
+        htmlPanel.loadURL(AppMapWebview.SignIn.getIndexHtmlUrl());
     }
 
     private void initWebView() {

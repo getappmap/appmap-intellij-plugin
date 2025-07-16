@@ -17,11 +17,12 @@ import static appland.webviews.webserver.AppMapWebviewRequestHandler.APPMAP_SERV
 @RequiredArgsConstructor
 @Getter
 public enum AppMapWebview {
-    AppMap("appmap"),
-    InstallGuide("install-guide"),
-    Findings("findings"),
-    Navie("navie"),
-    Review("review");
+    AppMap("appmap.html"),
+    InstallGuide("install-guide.html"),
+    Findings("findings.html"),
+    Navie("navie.html"),
+    Review("review.html"),
+    SignIn("signin.html");
 
     public static @NotNull String getBaseUrl() {
         return "http://localhost:" + BuiltInServerOptions.getInstance().getEffectiveBuiltInServerPort();
@@ -41,6 +42,6 @@ public enum AppMapWebview {
      * @return HTTP URL of the IDE's built-in webserver for this webview's index.html file.
      */
     public @NotNull String getIndexHtmlUrl() {
-        return getBaseUrlWithPath() + "/" + name + ".html";
+        return getBaseUrlWithPath() + "/" + name;
     }
 }
