@@ -10,8 +10,6 @@ import com.intellij.openapi.util.Key;
 import com.intellij.openapi.vfs.VirtualFile;
 import org.jetbrains.annotations.NotNull;
 
-import com.intellij.testFramework.LightVirtualFile;
-
 import javax.swing.*;
 
 public class ReviewEditorProvider extends WebviewEditorProvider {

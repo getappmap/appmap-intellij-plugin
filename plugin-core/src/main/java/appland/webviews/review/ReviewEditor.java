@@ -44,7 +44,7 @@ public class ReviewEditor extends WebviewEditor<Void> {
             case "open-location":
                 if (message != null && message.has("args")) {
                     var args = message.getAsJsonArray("args");
-                    if (args.size() < 1) return;
+                    if (args.isEmpty()) return;
 
                     var location = args.get(0).getAsString();
                     handleOpenLocation(location, null);
@@ -54,7 +54,7 @@ public class ReviewEditor extends WebviewEditor<Void> {
             case "show-navie-thread":
                 if (message != null && message.has("args")) {
                     var args = message.getAsJsonArray("args");
-                    if (args.size() < 1) return;
+                    if (args.isEmpty()) return;
                     var threadId = args.get(0).getAsString();
                     ApplicationManager.getApplication().invokeLater(() -> {
                         NavieEditorProvider.openEditorWithThreadId(project, threadId);
