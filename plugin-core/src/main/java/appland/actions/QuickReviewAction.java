@@ -1,14 +1,10 @@
 package appland.actions;
 
 import appland.AppMapBundle;
-import appland.notifications.AppMapNotifications;
 import appland.webviews.navie.NavieEditorProvider;
 import appland.webviews.navie.NaviePromptSuggestion;
 import com.intellij.icons.AllIcons;
 import com.intellij.ide.util.PropertiesComponent;
-import com.intellij.notification.Notification;
-import com.intellij.notification.NotificationType;
-import com.intellij.notification.Notifications;
 import com.intellij.openapi.actionSystem.ActionUpdateThread;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
@@ -16,6 +12,7 @@ import com.intellij.openapi.progress.ProgressIndicator;
 import com.intellij.openapi.progress.Task;
 import com.intellij.openapi.project.DumbAware;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.ui.Messages;
 import com.intellij.openapi.ui.popup.JBPopupFactory;
 import com.intellij.openapi.vcs.VcsException;
 import com.intellij.openapi.vfs.VirtualFile;
@@ -29,9 +26,7 @@ import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
 import java.awt.*;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Comparator;
+import java.util.*;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.regex.Pattern;
@@ -39,7 +34,7 @@ import java.util.regex.Pattern;
 public class QuickReviewAction extends AnAction implements DumbAware {
     public static final String ACTION_ID = "appmap.quickReview";
     private static final String LAST_PICKED_REF_KEY = "appmap.quickReview.lastPickedRef";
-    private static final List<String> COMMON_MAIN_BRANCHES = Arrays.asList(
+    private static final Collection<String> COMMON_MAIN_BRANCHES = Set.of(
             "main", "master", "develop", "release", "staging", "testing", "qa", "prod"
     );
 
@@ -62,12 +57,9 @@ public class QuickReviewAction extends AnAction implements DumbAware {
         var repositoryManager = GitRepositoryManager.getInstance(project);
         var repositories = repositoryManager.getRepositories();
         if (repositories.isEmpty()) {
-            Notifications.Bus.notify(new Notification(
-                    AppMapNotifications.GENERIC_NOTIFICATIONS_ID,
-                    AppMapBundle.get("action.appmap.quickReview.noRepositories.title"),
+            Messages.showInfoMessage(project,
                     AppMapBundle.get("action.appmap.quickReview.noRepositories.message"),
-                    NotificationType.INFORMATION
-            ), project);
+                    AppMapBundle.get("action.appmap.quickReview.noRepositories.title"));
             return;
         }
 
@@ -103,14 +95,11 @@ public class QuickReviewAction extends AnAction implements DumbAware {
 
             @Override
             public void onThrowable(@NotNull Throwable error) {
-                new Notification(
-                        AppMapNotifications.GENERIC_NOTIFICATIONS_ID,
-                        AppMapBundle.get("action.appmap.quickReview.fetchingRefs.error"),
-                        error.getMessage() != null
-                                ? error.getMessage() + "<br><br><code>" + error.toString() + "</code>"
-                                : error.toString(),
-                        NotificationType.ERROR
-                ).notify(project);
+                var message = error.getMessage() != null
+                        ? error.getMessage() + "<br><br><code>" + error.toString() + "</code>"
+                        : error.toString();
+
+                Messages.showErrorDialog(project, message, AppMapBundle.get("action.appmap.quickReview.fetchingRefs.error"));
             }
 
             @Override
