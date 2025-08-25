@@ -18,7 +18,7 @@ jobs:
                 os: [ ubuntu, windows, macos ]
                 include:
                     # Run tests with latest platform version, but only on Linux
-                    - platform_version: "251"
+                    - platform_version: "252"
                       os: ubuntu
 
         name: Test ${{ matrix.platform_version }} on ${{ matrix.os }}
@@ -28,14 +28,14 @@ jobs:
             - name: Fetch Sources
               uses: actions/checkout@v4
 
-            - name: Gradle Wrapper Validation
-              uses: gradle/actions/wrapper-validation@v3
-
             - name: Setup Java
               uses: actions/setup-java@v4
               with:
-                  distribution: temurin
+                  distribution: jetbrains
                   java-version: ${{ env.JAVA_VERSION }}
+
+            - name: Setup Gradle
+              uses: gradle/actions/setup-gradle@v4
 
             # https://docs.github.com/en/rest/overview/resources-in-the-rest-api?apiVersion=2022-11-28#rate-limits-for-requests-from-github-actions
             - name: Show GitHub Actions rate limit

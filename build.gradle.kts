@@ -28,7 +28,7 @@ buildscript {
 plugins {
     idea
     id("org.jetbrains.kotlin.jvm")
-    id("org.jetbrains.intellij.platform") version "2.5.1-SNAPSHOT"
+    id("org.jetbrains.intellij.platform") version "2.7.0"
     id("org.jetbrains.changelog") version "2.2.1"
     id("com.adarshr.test-logger") version "3.2.0"
     id("de.undercouch.download") version "5.6.0"
@@ -244,17 +244,20 @@ project(":") {
 
     dependencies {
         intellijPlatform {
-            pluginModule(implementation(project(":plugin-core")))
-            pluginModule(implementation(project(":plugin-gradle")))
-            pluginModule(implementation(project(":plugin-java")))
-            pluginModule(implementation(project(":plugin-maven")))
-            pluginModule(implementation(project(":plugin-copilot")))
+            // use pluginComposedModule when https://github.com/JetBrains/intellij-platform-gradle-plugin/issues/1971 is fixed
+            implementation(project(":plugin-core"))
+            implementation(project(":plugin-gradle"))
+            implementation(project(":plugin-java"))
+            implementation(project(":plugin-maven"))
+            implementation(project(":plugin-copilot"))
+            /*pluginComposedModule(implementation(project(":plugin-core")))
+            pluginComposedModule(implementation(project(":plugin-gradle")))
+            pluginComposedModule(implementation(project(":plugin-java")))
+            pluginComposedModule(implementation(project(":plugin-maven")))
+            pluginComposedModule(implementation(project(":plugin-copilot")))*/
 
             // adding this for runIde support
-            val copilotPluginVersion = prop("copilotPluginVersion")
-            if (copilotPluginVersion.isNotEmpty()) {
-                plugin("com.github.copilot", copilotPluginVersion)
-            }
+            compatiblePlugin("com.github.copilot")
 
             pluginVerifier()
             zipSigner()
@@ -270,7 +273,6 @@ project(":") {
 
             ideaVersion {
                 sinceBuild.set(prop("sinceBuild"))
-                untilBuild.set(prop("untilBuild"))
             }
 
             changeNotes.set(provider {
@@ -284,7 +286,19 @@ project(":") {
 
         pluginVerification {
             ides {
-                ides(prop("ideVersionVerifier").split(","))
+                // earliest supported major version
+                select {
+                    sinceBuild = "241"
+                    untilBuild = "241.*"
+                    types.set(listOf(IntelliJPlatformType.IntellijIdeaCommunity))
+                }
+
+                // latest supported major version
+                select {
+                    sinceBuild = "252"
+                    untilBuild = "252.*"
+                    types.set(listOf(IntelliJPlatformType.IntellijIdeaCommunity))
+                }
             }
 
             failureLevel.set(
@@ -416,10 +430,11 @@ project(":plugin-copilot") {
         implementation(project(":plugin-core"))
         implementation("com.knuddels:jtokkit:1.1.0")
 
-        // Unfortunately, we can't use the Copilot plugin in test mode. In test mode with version 1.5.30-231, it throws:
+        // Unfortunately, we can't use the Copilot plugin in test mode. In test mode with version 1.5.30-231,
+        // it throws an exception because the test service implementations are not included:
         //  java.lang.ClassNotFoundException: com.github.copilot.lang.agent.CopilotAgentProcessTestService
         /*intellijPlatform {
-            plugin("com.github.copilot", prop("copilotPluginVersion"))
+            compatiblePlugin("com.github.copilot")
         }*/
     }
 }

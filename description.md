@@ -1,4 +1,4 @@
-# Runtime‑aware AI starts here
+# Runtime-aware AI starts here
 
 ### Live code behavior, surfaced to your AI tools in your JetBrains IDE
 
@@ -14,17 +14,17 @@ Navie combines static analysis with live AppMap traces, so you can ask things li
 
 Pinpoint performance bottlenecks and logic errors through automatically generated sequence diagrams, flame graphs, dependency maps, and trace views.
 
-### Context‑aware code reviews
+### Context-aware code reviews
 
 From security checks to maintainability recommendations, Navie’s `@review` mode analyzes your current branch changes against your base branch with runtime insights.
 
-### Zero fine‑tuning required
+### Zero fine-tuning required
 
-Works out-of-the-box with enterprise‑ready LLMs—simply plug in your API key or let Navie default to GitHub Copilot or AppMap’s built‑in endpoint.
+Works out-of-the-box with enterprise-ready LLMs—simply plug in your API key or let Navie default to GitHub Copilot or AppMap’s built-in endpoint.
 
 ## What AppMap Does
 
--   Captures real‑time snapshots of code execution, data flow, and behavior with zero effort and no code changes.
+-   Captures real-time snapshots of code execution, data flow, and behavior with zero effort and no code changes.
 
 -   Feeds runtime context to AI assistants like Navie, GitHub Copilot, Anthropic Claude, Google Gemini, OpenAI, and your own local LLMs.
 
