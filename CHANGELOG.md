@@ -1,5 +1,12 @@
 AppMap Plugin Changelog
 
+## [0.80.2](https://github.com/getappmap/appmap-intellij-plugin/compare/v0.80.1...v0.80.2) (2025-08-25)
+
+
+### Bug Fixes
+
+-  don't show multiple notifications about Copilot after a project is opened ([f2f4a23]())-  don't show notification about Copilot not being authenticated ([7d5de47]())-  replace non-breaking hyphens with a regular dash to satisfy the JetBrains plugin verifier ([1767210]())-  the check for the "navie is now integrated with Copilot" notification was wrong ([5167f67]())
+
 ## [0.80.1](https://github.com/getappmap/appmap-intellij-plugin/compare/v0.80.0...v0.80.1) (2025-05-01)
 
 
