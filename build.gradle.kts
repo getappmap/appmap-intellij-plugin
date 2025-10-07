@@ -183,7 +183,10 @@ allprojects {
         // Target to execute tests, which are incompatible with the AppMap agent.
         // Only tests with category "appland.WithoutAppMapAgent" are executed.
         val testWithoutAgent by intellijPlatformTesting.testIde.registering {
-            type = IntelliJPlatformType.IntellijIdeaCommunity
+            type = when {
+                platformVersion >= 253 -> IntelliJPlatformType.IntellijIdeaUltimate
+                else -> IntelliJPlatformType.IntellijIdeaCommunity
+            }
             version = ideVersion
 
             task {
