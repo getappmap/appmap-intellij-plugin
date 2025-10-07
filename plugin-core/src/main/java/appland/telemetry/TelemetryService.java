@@ -1,22 +1,21 @@
 package appland.telemetry;
 
-import com.intellij.notification.NotificationType;
-import com.intellij.openapi.application.ApplicationManager;
-import com.intellij.openapi.project.Project;
-
 import appland.AppMapBundle;
 import appland.notifications.AppMapNotifications;
 import appland.settings.AppMapApplicationSettingsService;
-import appland.telemetry.data.BaseData;
-import appland.telemetry.data.TelemetryEvent;
-
+import appland.telemetry.appinsights.AppInsightsTelemetryReporter;
+import appland.telemetry.appinsights.BaseData;
+import appland.telemetry.appinsights.TelemetryEvent;
+import com.intellij.notification.NotificationType;
+import com.intellij.openapi.application.ApplicationManager;
+import com.intellij.openapi.project.Project;
 import org.jetbrains.annotations.NotNull;
 
 public class TelemetryService {
     @NotNull private final String instrumentationKey = "50c1a5c2-49b4-4913-b7cc-86a78d40745f";
     @NotNull private final String ingestionEndpoint = "https://centralus-0.in.applicationinsights.azure.com";
     @NotNull private final String eventPrefix = "appland.appmap/";
-    @NotNull protected final AppInsightsClient client = new AppInsightsClient(ingestionEndpoint);
+    @NotNull private final TelemetryReporter reporter = new AppInsightsTelemetryReporter(ingestionEndpoint);
 
     public static @NotNull TelemetryService getInstance() {
         return ApplicationManager.getApplication().getService(TelemetryService.class);
@@ -50,7 +49,7 @@ public class TelemetryService {
         }
 
         ApplicationManager.getApplication().executeOnPooledThread(() -> {
-            client.track(event);
+            reporter.track(event);
         });
     }
 

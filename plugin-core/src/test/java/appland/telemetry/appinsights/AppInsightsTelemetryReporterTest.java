@@ -1,8 +1,6 @@
-package appland.telemetry;
+package appland.telemetry.appinsights;
 
 import appland.AppMapBaseTest;
-import appland.telemetry.data.BaseData;
-import appland.telemetry.data.TelemetryEvent;
 import appland.testRules.MockServerSettingsRule;
 import org.junit.Rule;
 import org.junit.Test;
@@ -14,7 +12,7 @@ import static org.mockserver.model.HttpRequest.request;
 import static org.mockserver.model.HttpResponse.response;
 import static org.mockserver.model.JsonPathBody.jsonPath;
 
-public class AppInsightsClientTest extends AppMapBaseTest {
+public class AppInsightsTelemetryReporterTest extends AppMapBaseTest {
     @Rule
     public MockServerRule mockServerRule = new MockServerRule(this, false);
     @Rule
@@ -31,7 +29,7 @@ public class AppInsightsClientTest extends AppMapBaseTest {
                 .when(request().withMethod("POST").withPath("/v2/track"))
                 .respond(response().withStatusCode(200));
 
-        new AppInsightsClient("http://127.0.0.1:" + mockServerRule.getPort()).track(
+        new AppInsightsTelemetryReporter("http://127.0.0.1:" + mockServerRule.getPort()).track(
                 new TelemetryEvent("my-key", new BaseData("my-event")
                         .property("property1", "propertyValue1")
                         .property("property2", "propertyValue2")

@@ -1,8 +1,9 @@
-package appland.telemetry;
+package appland.telemetry.appinsights;
 
 import appland.AppMapPlugin;
-import appland.telemetry.data.Tag;
-import appland.telemetry.data.TelemetryEvent;
+import appland.telemetry.Identity;
+import appland.telemetry.Session;
+import appland.telemetry.TelemetryReporter;
 import appland.utils.GsonUtils;
 import com.intellij.openapi.application.ApplicationInfo;
 import com.intellij.openapi.diagnostic.Logger;
@@ -16,14 +17,15 @@ import org.jetbrains.annotations.NotNull;
  * Based on:
  * https://github.com/Azure/azure-sdk-for-java/blob/4a53adf6274ced5af8243983042b5e32bac85bd7/sdk/monitor/azure-monitor-opentelemetry-exporter/src/main/java/com/azure/monitor/opentelemetry/exporter/AzureMonitorExporterBuilder.java
  */
-class AppInsightsClient {
+public class AppInsightsTelemetryReporter implements TelemetryReporter {
     private final @NotNull String ingestionEndpoint;
 
-    AppInsightsClient(@NotNull String ingestionEndpoint) {
+    public AppInsightsTelemetryReporter(@NotNull String ingestionEndpoint) {
         this.ingestionEndpoint = ingestionEndpoint;
     }
 
     @RequiresBackgroundThread
+    @Override
     public void track(@NotNull TelemetryEvent event) {
         var userId = Identity.getOrCreateMachineId();
         var osVersion = System.getProperty("os.version");
