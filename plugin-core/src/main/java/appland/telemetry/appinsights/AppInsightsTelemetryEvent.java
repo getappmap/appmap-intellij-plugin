@@ -1,14 +1,13 @@
 package appland.telemetry.appinsights;
 
-import java.text.SimpleDateFormat;
-import java.util.HashMap;
-
+import com.google.gson.annotations.SerializedName;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import com.google.gson.annotations.SerializedName;
+import java.text.SimpleDateFormat;
+import java.util.HashMap;
 
-public class TelemetryEvent {
+class AppInsightsTelemetryEvent {
     @SerializedName("name")
     @NotNull final String name = "Microsoft.ApplicationInsights.Event";
 
@@ -24,18 +23,18 @@ public class TelemetryEvent {
     @SerializedName("data")
     @NotNull MessageData data;
 
-    public TelemetryEvent(@NotNull String iKey, @NotNull BaseData baseData) {
+    public AppInsightsTelemetryEvent(@NotNull String iKey, @NotNull BaseData baseData) {
         this.iKey = iKey;
         this.time = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'").format(new java.util.Date());
         this.data = new MessageData(baseData);
     }
 
-    public TelemetryEvent property(String key, String value) {
+    public AppInsightsTelemetryEvent property(String key, String value) {
         data.baseData.property(key, value);
         return this;
     }
 
-    public TelemetryEvent tag(Tag tag, String value) {
+    public AppInsightsTelemetryEvent tag(Tag tag, String value) {
         if (tags == null) {
             tags = new HashMap<>();
         }

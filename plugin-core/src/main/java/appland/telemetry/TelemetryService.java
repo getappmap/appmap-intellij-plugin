@@ -4,25 +4,16 @@ import appland.AppMapBundle;
 import appland.notifications.AppMapNotifications;
 import appland.settings.AppMapApplicationSettingsService;
 import appland.telemetry.appinsights.AppInsightsTelemetryReporter;
-import appland.telemetry.appinsights.BaseData;
-import appland.telemetry.appinsights.TelemetryEvent;
 import com.intellij.notification.NotificationType;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.project.Project;
 import org.jetbrains.annotations.NotNull;
 
 public class TelemetryService {
-    @NotNull private final String instrumentationKey = "50c1a5c2-49b4-4913-b7cc-86a78d40745f";
-    @NotNull private final String ingestionEndpoint = "https://centralus-0.in.applicationinsights.azure.com";
-    @NotNull private final String eventPrefix = "appland.appmap/";
-    @NotNull private final TelemetryReporter reporter = new AppInsightsTelemetryReporter(ingestionEndpoint);
+    @NotNull private final TelemetryReporter reporter = new AppInsightsTelemetryReporter();
 
     public static @NotNull TelemetryService getInstance() {
         return ApplicationManager.getApplication().getService(TelemetryService.class);
-    }
-
-    public interface TelemetryEventBuilder {
-        BaseData build(@NotNull BaseData eventData);
     }
 
     public boolean isEnabled() {
@@ -38,29 +29,20 @@ public class TelemetryService {
                 (enabled) -> AppMapApplicationSettingsService.getInstance().setEnableTelemetry(enabled));
     }
 
+    public void sendEvent(@NotNull String name) {
+        sendEvent(new TelemetryEvent(name));
+    }
+
     /**
      * Sends data to the telemetry server. The request is sent in a background thread.
      *
      * @param event Tracked event
      */
-    private void sendEvent(@NotNull TelemetryEvent event) {
+    public void sendEvent(@NotNull TelemetryEvent event) {
         if (!isEnabled()) {
             return;
         }
 
-        ApplicationManager.getApplication().executeOnPooledThread(() -> {
-            reporter.track(event);
-        });
-    }
-
-    public void sendEvent(@NotNull String name, @NotNull TelemetryEventBuilder builder) {
-        var data = builder.build(new BaseData(eventPrefix + name));
-        var event = new TelemetryEvent(instrumentationKey, data);
-        sendEvent(event);
-    }
-
-    public void sendEvent(@NotNull String name) {
-        var event = new TelemetryEvent(instrumentationKey, new BaseData(eventPrefix + name));
-        sendEvent(event);
+        ApplicationManager.getApplication().executeOnPooledThread(() -> reporter.track(event));
     }
 }

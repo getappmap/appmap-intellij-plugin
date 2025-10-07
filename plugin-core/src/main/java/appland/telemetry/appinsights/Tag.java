@@ -1,11 +1,10 @@
 package appland.telemetry.appinsights;
 
+import lombok.Getter;
 import org.jetbrains.annotations.NotNull;
 
-import lombok.Getter;
-
 @Getter
-public enum Tag {
+enum Tag {
     OsVersion("ai.device.osVersion"),
     UserId("ai.user.id"),
     SessionId("ai.session.id");

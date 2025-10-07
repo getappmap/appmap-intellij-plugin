@@ -3,6 +3,7 @@ package appland.execution;
 import appland.AppMapBundle;
 import appland.Icons;
 import appland.jetbrains.JavaVersion;
+import appland.telemetry.TelemetryEvent;
 import appland.telemetry.TelemetryService;
 import com.intellij.execution.ExecutionException;
 import com.intellij.execution.Executor;
@@ -42,8 +43,8 @@ public class AppMapJvmExecutor extends Executor {
     public static void verifyJDK(@NotNull Project project, @NotNull Sdk jdk) throws ExecutionException {
         var version = JavaVersion.tryParse(jdk.getVersionString());
         if (version != null && version.isAtLeast(LATEST_SUPPORTED_JAVA_VERSION + 1)) {
-            TelemetryService.getInstance().sendEvent("run_config:incompatible_jdk",
-                    event -> event.property("appmap.jdkVersion", jdk.getVersionString()));
+            TelemetryService.getInstance().sendEvent(new TelemetryEvent("run_config:incompatible_jdk")
+                    .withProperty("appmap.jdkVersion", jdk.getVersionString()));
 
             throw new UnsupportedJdkException(project);
         }

@@ -4,7 +4,7 @@ import org.jetbrains.annotations.NotNull;
 
 import com.google.gson.annotations.SerializedName;
 
-public class MessageData {
+class MessageData {
     @SerializedName("baseType")
     @NotNull final String baseType = "EventData";
 

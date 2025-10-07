@@ -1,13 +1,14 @@
 package appland.telemetry.appinsights;
 
-import java.util.HashMap;
-
+import appland.telemetry.TelemetryEvent;
+import com.google.gson.annotations.SerializedName;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import com.google.gson.annotations.SerializedName;
+import java.util.HashMap;
 
-public class BaseData {
+@SuppressWarnings("unused")
+class BaseData {
     @SerializedName("ver")
     @NotNull final Integer version = 2;
 
@@ -24,7 +25,19 @@ public class BaseData {
         this.name = name;
     }
 
-    public BaseData property(String key, String value) {
+    /**
+     * Constructor to copy the properties and metrics from an existing TelemetryEvent.
+     *
+     * @param name  The name of the event.
+     * @param event The event to copy.
+     */
+    public BaseData(@NotNull String name, @NotNull TelemetryEvent event) {
+        this(name);
+        this.properties = new HashMap<>(event.getProperties());
+        this.metrics = new HashMap<>(event.getMetrics());
+    }
+
+    public @NotNull BaseData property(String key, String value) {
         if (this.properties == null) {
             this.properties = new HashMap<>();
         }
@@ -32,7 +45,7 @@ public class BaseData {
         return this;
     }
 
-    public BaseData metric(String key, Double value) {
+    public @NotNull BaseData metric(String key, Double value) {
         if (this.metrics == null) {
             this.metrics = new HashMap<>();
         }
