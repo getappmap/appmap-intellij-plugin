@@ -7,6 +7,7 @@ import org.jetbrains.annotations.Nullable;
 import java.text.SimpleDateFormat;
 import java.util.HashMap;
 
+@SuppressWarnings("unused")
 class AppInsightsTelemetryEvent {
     @SerializedName("name")
     @NotNull final String name = "Microsoft.ApplicationInsights.Event";

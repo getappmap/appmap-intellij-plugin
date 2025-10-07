@@ -30,17 +30,12 @@ public class SplunkTelemetryReporterTest extends AppMapBaseTest {
                 .when(request().withMethod("POST").withPath("/services/collector/event/1.0"))
                 .respond(response().withStatusCode(200).withBody(new JsonBody("{okay: true}")));
 
-        var settings = new SplunkSettings(
-                "http://127.0.0.1:" + mockServerRule.getPort(),
-                "my-splunk-token",
-                null
-        );
-        new SplunkTelemetryReporter(settings).track(new TelemetryEvent("my-event")
-                .withProperty("property1", "propertyValue1")
-                .withProperty("property2", "propertyValue2")
-                .withMetric("metric1", 42.0)
-                .withMetric("metric2", 7.0)
-        );
+        new SplunkTelemetryReporter("http://127.0.0.1:" + mockServerRule.getPort(), "my-splunk-token").track(
+                new TelemetryEvent("my-event")
+                        .withProperty("property1", "propertyValue1")
+                        .withProperty("property2", "propertyValue2")
+                        .withMetric("metric1", 42.0)
+                        .withMetric("metric2", 7.0));
 
         var expectedBody = """
                 {

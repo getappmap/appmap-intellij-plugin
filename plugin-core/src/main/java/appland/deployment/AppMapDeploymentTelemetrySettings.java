@@ -1,19 +1,34 @@
-package appland.telemetry.splunk;
+package appland.deployment;
 
+import com.google.gson.annotations.SerializedName;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.jetbrains.annotations.Nullable;
 
 @Data
-public class SplunkSettings {
+@AllArgsConstructor
+@NoArgsConstructor
+public final class AppMapDeploymentTelemetrySettings {
+    /**
+     * Currently, only `splunk` is supported.
+     */
+    @SerializedName("backend")
+    @Nullable String backend;
+
     /**
      * The URL of your Splunk HTTP Event Collector (HEC) endpoint.
      * Note it's recommended to include the port number (usually 8088 or 443).
      */
-    private final @Nullable String url;
+    @SerializedName("url")
+    @Nullable String url;
+
     /**
      * Your Splunk HEC token.
      */
-    private final @Nullable String token;
+    @SerializedName("token")
+    @Nullable String token;
+
     /**
      * Your CA certificate.
      * If not set, the server certificate will not be verified.
@@ -21,5 +36,6 @@ public class SplunkSettings {
      * If the value starts with `@`, it will be interpreted as a path to a CA certificate file.
      * Otherwise, the value will be used as the literal CA certificate.
      */
-    private final @Nullable String ca;
+    @SerializedName("ca")
+    @Nullable String certificateAuthorityCertificate;
 }
