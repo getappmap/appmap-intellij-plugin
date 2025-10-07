@@ -1,0 +1,72 @@
+package appland.telemetry;
+
+import appland.AppMapBaseTest;
+import appland.telemetry.data.BaseData;
+import appland.telemetry.data.TelemetryEvent;
+import appland.testRules.MockServerSettingsRule;
+import org.junit.Rule;
+import org.junit.Test;
+import org.mockserver.junit.MockServerRule;
+import org.mockserver.model.MediaType;
+import org.mockserver.verify.VerificationTimes;
+
+import static org.mockserver.model.HttpRequest.request;
+import static org.mockserver.model.HttpResponse.response;
+import static org.mockserver.model.JsonPathBody.jsonPath;
+
+public class AppInsightsClientTest extends AppMapBaseTest {
+    @Rule
+    public MockServerRule mockServerRule = new MockServerRule(this, false);
+    @Rule
+    public MockServerSettingsRule mockServerSettingsRule = new MockServerSettingsRule();
+
+    @Override
+    protected boolean runInDispatchThread() {
+        return false;
+    }
+
+    @Test
+    public void telemetryEvent() {
+        mockServerRule.getClient()
+                .when(request().withMethod("POST").withPath("/v2/track"))
+                .respond(response().withStatusCode(200));
+
+        new AppInsightsClient("http://127.0.0.1:" + mockServerRule.getPort()).track(
+                new TelemetryEvent("my-key", new BaseData("my-event")
+                        .property("property1", "propertyValue1")
+                        .property("property2", "propertyValue2")
+                        .metric("metric1", 42.0)
+                        .metric("metric2", 7.0)
+                ));
+
+        mockServerRule.getClient().verify(
+                request().withMethod("POST").withPath("/v2/track").withContentType(MediaType.APPLICATION_JSON),
+                VerificationTimes.once());
+
+        // common properties
+        mockServerRule.getClient()
+                .verify(request().withBody(jsonPath("$.data.baseData.properties[?(@.'common.os' != '')]")))
+                .verify(request().withBody(jsonPath("$.data.baseData.properties[?(@.'common.platformversion' != '')]")))
+                .verify(request().withBody(jsonPath("$.data.baseData.properties[?(@.'common.jvmversion' != '')]")))
+                .verify(request().withBody(jsonPath("$.data.baseData.properties[?(@.'common.extversion' != '')]")))
+                .verify(request().withBody(jsonPath("$.data.baseData.properties[?(@.'common.intellijversion' != '')]")))
+                .verify(request().withBody(jsonPath("$.data.baseData.properties[?(@.'common.product' != '')]")))
+                .verify(request().withBody(jsonPath("$.data.baseData.properties[?(@.'common.source' != '')]")));
+
+        // properties
+        mockServerRule.getClient()
+                .verify(request().withBody(jsonPath("$.data.baseData.properties[?(@.property1 == 'propertyValue1')]")))
+                .verify(request().withBody(jsonPath("$.data.baseData.properties[?(@.property2 == 'propertyValue2')]")));
+
+        // metrics
+        mockServerRule.getClient()
+                .verify(request().withBody(jsonPath("$.data.baseData.metrics[?(@.metric1 == 42.0)]")))
+                .verify(request().withBody(jsonPath("$.data.baseData.metrics[?(@.metric2 == 7.0)]")));
+
+        // tags
+        mockServerRule.getClient()
+                .verify(request().withBody(jsonPath("$.tags[?(@.'ai.device.osVersion' != '')]")))
+                .verify(request().withBody(jsonPath("$.tags[?(@.'ai.user.id' != '')]")))
+                .verify(request().withBody(jsonPath("$.tags[?(@.'ai.session.id' != '')]")));
+    }
+}

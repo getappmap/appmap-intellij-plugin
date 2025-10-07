@@ -14,9 +14,7 @@ import org.jetbrains.annotations.NotNull;
 
 /*
  * Based on:
- * https://github.com/Azure/azure-sdk-for-java/blob/4a53adf6274ced5af8243983042b5e32bac85bd7/sdk/
- * monitor/azure-monitor-opentelemetry-exporter/src/main/java/com/azure/monitor/opentelemetry/
- * exporter/AzureMonitorExporterBuilder.java
+ * https://github.com/Azure/azure-sdk-for-java/blob/4a53adf6274ced5af8243983042b5e32bac85bd7/sdk/monitor/azure-monitor-opentelemetry-exporter/src/main/java/com/azure/monitor/opentelemetry/exporter/AzureMonitorExporterBuilder.java
  */
 class AppInsightsClient {
     private final @NotNull String ingestionEndpoint;
@@ -42,7 +40,7 @@ class AppInsightsClient {
                 .tag(Tag.SessionId, Session.getId());
 
         try {
-            var url = Urls.newFromEncoded(ingestionEndpoint).resolve("/v2/track").toExternalForm();
+            var url = Urls.newFromEncoded(ingestionEndpoint).resolve("v2/track").toExternalForm();
             var json = GsonUtils.GSON.toJson(event);
 
             HttpRequests.post(url, "application/json")
