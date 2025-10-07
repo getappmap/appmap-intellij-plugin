@@ -1,4 +1,4 @@
-package appland.telemetry.data;
+package appland.telemetry.appinsights;
 
 import org.jetbrains.annotations.NotNull;
 
