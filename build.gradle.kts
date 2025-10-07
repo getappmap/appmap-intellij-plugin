@@ -71,7 +71,12 @@ allprojects {
     val testOutput = configurations.create("testOutput")
     dependencies {
         intellijPlatform {
-            intellijIdeaCommunity(ideVersion)
+            // 2025.3 is only available as a unified build
+            when {
+                platformVersion >= 253 -> intellijIdeaUltimate(ideVersion)
+                else -> intellijIdeaCommunity(ideVersion)
+            }
+
             // using "Bundled" to gain access to the Java plugin's test classes
             testFramework(TestFrameworkType.Platform)
             testFramework(TestFrameworkType.Bundled)
@@ -87,6 +92,11 @@ allprojects {
             // 2024.3 extracted JSON support into a plugin
             if (platformVersion >= 243) {
                 bundledPlugin("com.intellij.modules.json")
+            }
+            // 2025.3 extracted OAuth support into modules
+            if (platformVersion >= 243) {
+                bundledModule("intellij.platform.collaborationTools.auth.base")
+                bundledModule("intellij.platform.collaborationTools.auth")
             }
         }
 
@@ -293,11 +303,11 @@ project(":") {
                     types.set(listOf(IntelliJPlatformType.IntellijIdeaCommunity))
                 }
 
-                // latest supported major version
+                // latest supported major version, 2025.3 is only available as a unified build
                 select {
-                    sinceBuild = "252"
-                    untilBuild = "252.*"
-                    types.set(listOf(IntelliJPlatformType.IntellijIdeaCommunity))
+                    sinceBuild = "253"
+                    untilBuild = "253.*"
+                    types.set(listOf(IntelliJPlatformType.IntellijIdeaUltimate))
                 }
             }
 
