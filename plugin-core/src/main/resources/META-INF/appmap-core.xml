@@ -45,6 +45,7 @@
     </extensionPoints>
 
     <extensions defaultExtensionNs="appland.cli">
+        <envProvider implementation="appland.telemetry.splunk.AppMapSplunkTelemetryCliEnvProvider"/>
         <envProvider order="last"
                      implementation="appland.webviews.navie.NavieLanguageModelEnvProvider"/>
     </extensions>

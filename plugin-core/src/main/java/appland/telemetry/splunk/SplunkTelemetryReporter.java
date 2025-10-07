@@ -17,15 +17,17 @@ public class SplunkTelemetryReporter implements TelemetryReporter {
     private static final @NotNull String EXTENSION_IDId = "appland.appmap";
     public static final @NotNull String BASE_PATH = "services/collector/event/1.0";
 
-    private final @NotNull SplunkSettings settings;
+    private final @NotNull String url;
+    private final @NotNull String token;
 
-    public SplunkTelemetryReporter(@NotNull SplunkSettings settings) {
-        this.settings = settings;
+    public SplunkTelemetryReporter(@NotNull String url, @NotNull String token) {
+        this.url = url;
+        this.token = token;
     }
 
     @Override
     public void track(@NotNull TelemetryEvent event) {
-        if (StringUtil.isEmpty(settings.getUrl())) {
+        if (StringUtil.isEmpty(url)) {
             return;
         }
 
@@ -38,9 +40,9 @@ public class SplunkTelemetryReporter implements TelemetryReporter {
         );
 
         try {
-            var url = Urls.parse(settings.getUrl(), false);
+            var url = Urls.parse(this.url, false);
             if (url == null) {
-                Logger.getInstance(getClass()).warn("Invalid Splunk URL: " + settings.getUrl());
+                Logger.getInstance(getClass()).warn("Invalid Splunk URL: " + this.url);
                 return;
             }
 
@@ -55,7 +57,7 @@ public class SplunkTelemetryReporter implements TelemetryReporter {
                     .throwStatusCodeException(true)
                     .tuner(t -> {
                         t.setRequestProperty("Accept", "application/json");
-                        t.setRequestProperty("Authorization", "Splunk " + settings.getToken());
+                        t.setRequestProperty("Authorization", "Splunk " + token);
                     })
                     .connect(req -> {
                         req.write(json);

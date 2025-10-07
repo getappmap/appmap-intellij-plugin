@@ -9,7 +9,7 @@ enum Tag {
     UserId("ai.user.id"),
     SessionId("ai.session.id");
 
-    private final String id;
+    private final @NotNull String id;
 
     Tag(@NotNull String id) {
         this.id = id;

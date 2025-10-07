@@ -9,8 +9,7 @@ import java.util.HashMap;
 
 @SuppressWarnings("unused")
 class BaseData {
-    @SerializedName("ver")
-    @NotNull final Integer version = 2;
+    @SerializedName("ver") final int version = 2;
 
     @SerializedName("name")
     @NotNull String name;
@@ -22,7 +21,7 @@ class BaseData {
     @Nullable HashMap<String, Double> metrics;
 
     public BaseData(@NotNull String name) {
-        this.name = name;
+        this(name, null);
     }
 
     /**
@@ -31,10 +30,10 @@ class BaseData {
      * @param name  The name of the event.
      * @param event The event to copy.
      */
-    public BaseData(@NotNull String name, @NotNull TelemetryEvent event) {
-        this(name);
-        this.properties = new HashMap<>(event.getProperties());
-        this.metrics = new HashMap<>(event.getMetrics());
+    public BaseData(@NotNull String name, @Nullable TelemetryEvent event) {
+        this.name = name;
+        this.properties = event != null ? new HashMap<>(event.getProperties()) : null;
+        this.metrics = event != null ? new HashMap<>(event.getMetrics()) : null;
     }
 
     public @NotNull BaseData property(String key, String value) {
