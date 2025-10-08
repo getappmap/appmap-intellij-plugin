@@ -22,6 +22,11 @@ public class AppMapFilesTest extends LightPlatformCodeInsightFixture4TestCase {
         return new TempDirTestFixtureImpl();
     }
 
+    @Override
+    protected boolean runInDispatchThread() {
+        return false;
+    }
+
     @Test
     public void files() {
         var file = myFixture.configureByText("a.json", "");

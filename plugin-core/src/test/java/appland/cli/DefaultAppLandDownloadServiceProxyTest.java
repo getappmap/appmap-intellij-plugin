@@ -24,6 +24,11 @@ public class DefaultAppLandDownloadServiceProxyTest extends AppMapBaseTest {
     @Rule
     public OverrideIdeHttpProxyRule ideHttpProxyRule = new OverrideIdeHttpProxyRule(mockServerRule);
 
+    @Override
+    protected boolean runInDispatchThread() {
+        return false;
+    }
+
     @Test
     public void downloadWithHttpProxy() throws Exception {
         var toolType = CliTool.AppMap;
