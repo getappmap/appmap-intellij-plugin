@@ -210,7 +210,7 @@ public class DefaultAppLandJsonRpcService implements AppLandJsonRpcService, AppL
             } catch (ExecutionException e) {
                 LOG.debug("Failed to launch AppMap JSON-RPC server, command: " + commandLine.getCommandLineString(), e);
             } finally {
-                if (!isDisposed) {
+                if (!isDisposed && !project.isDisposed()) {
                     project.getMessageBus().syncPublisher(AppLandJsonRpcListener.TOPIC).serverStarted();
                 }
             }
@@ -339,7 +339,7 @@ public class DefaultAppLandJsonRpcService implements AppLandJsonRpcService, AppL
                 }
             }
         } finally {
-            if (!isDisposed) {
+            if (!isDisposed && !project.isDisposed()) {
                 project.getMessageBus().syncPublisher(AppLandJsonRpcListener.TOPIC).serverStopped();
             }
         }
@@ -573,7 +573,7 @@ public class DefaultAppLandJsonRpcService implements AppLandJsonRpcService, AppL
             if (restartNeeded) {
                 nextRestartDelayMillis = (long) ((double) currentRestartDelay * NEXT_RESTART_FACTOR);
                 AppExecutorUtil.getAppScheduledExecutorService().schedule(() -> {
-                            if (!isDisposed) {
+                            if (!isDisposed && !project.isDisposed()) {
                                 try {
                                     DefaultAppLandJsonRpcService.this.startServer();
                                 } finally {
