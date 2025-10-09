@@ -358,7 +358,7 @@ public class DefaultCommandLineService implements AppLandCommandLineService {
             return null;
         }
 
-        var indexerPath = AppLandDownloadService.getInstance().getDownloadFilePath(CliTool.AppMap);
+        var indexerPath = CliTools.getBinaryPath(CliTool.AppMap);
         if (indexerPath == null || Files.notExists(indexerPath)) {
             return null;
         }
@@ -396,7 +396,7 @@ public class DefaultCommandLineService implements AppLandCommandLineService {
             return null;
         }
 
-        var scannerPath = AppLandDownloadService.getInstance().getDownloadFilePath(CliTool.Scanner);
+        var scannerPath = CliTools.getBinaryPath(CliTool.Scanner);
         if (scannerPath == null || Files.notExists(scannerPath)) {
             return null;
         }
@@ -555,7 +555,7 @@ public class DefaultCommandLineService implements AppLandCommandLineService {
     }
 
     private static @Nullable GeneralCommandLine createAppMapCliCommand(boolean createPtyCommandLine, @NotNull String... parameters) {
-        var toolPath = AppLandDownloadService.getInstance().getDownloadFilePath(CliTool.AppMap);
+        var toolPath = CliTools.getBinaryPath(CliTool.AppMap);
         if (toolPath == null || Files.notExists(toolPath)) {
             LOG.debug("AppMap CLI executable not found: " + toolPath);
             return null;

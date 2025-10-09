@@ -2,6 +2,7 @@ package appland.javaAgent;
 
 import appland.AppMapBundle;
 import appland.AppMapPlugin;
+import appland.settings.DownloadSettings;
 import appland.utils.SystemProperties;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.components.Service;
@@ -91,6 +92,11 @@ public final class AppMapJavaAgentDownloadService {
     }
 
     public boolean downloadJavaAgentSync(@NotNull ProgressIndicator indicator) throws IOException {
+        if (!DownloadSettings.isAssetDownloadEnabled()) {
+            LOG.info("asset download disabled, not downloading");
+            return false;
+        }
+
         var agentFilePath = getOrCreateAgentFilePath();
         if (agentFilePath == null) {
             LOG.warn("unable to locate target file path for AppMap Java agent");

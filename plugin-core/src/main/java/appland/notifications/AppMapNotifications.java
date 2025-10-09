@@ -5,6 +5,7 @@ import appland.AppMapPlugin;
 import appland.actions.StopAppMapRecordingAction;
 import appland.settings.AppMapApplicationSettingsService;
 import appland.settings.AppMapProjectConfigurable;
+import appland.settings.DownloadSettings;
 import appland.startup.FirstAppMapLaunchStartupActivity;
 import appland.webviews.navie.NavieEditorProvider;
 import com.intellij.ide.BrowserUtil;
@@ -157,6 +158,30 @@ public final class AppMapNotifications {
                     null, null, AppMapBundle.get("notification.appMapSignIn.content"),
                     NotificationType.INFORMATION, null
             );
+            notification.notify(project);
+        });
+    }
+
+    public static void showAppMapBinaryUnavailableNotification(@NotNull Project project) {
+        EdtInvocationManager.invokeLaterIfNeeded(() -> {
+            var isDownloadEnabled = DownloadSettings.isAssetDownloadEnabled();
+            var content = isDownloadEnabled
+                    ? AppMapBundle.get("notification.appMapBinaryUnavailable.content.downloadEnabled")
+                    : AppMapBundle.get("notification.appMapBinaryUnavailable.content.downloadDisabled");
+
+            var notification = new AppMapFullContentNotification(
+                    GENERIC_NOTIFICATIONS_ID, null,
+                    AppMapBundle.get("notification.appMapBinaryUnavailable.title"), null, content,
+                    NotificationType.WARNING, null
+            );
+
+            if (!isDownloadEnabled) {
+                var actionLabel = AppMapBundle.get("notification.navieUnavailable.content.downloadsDisabled.showSettings");
+                notification.addAction(NotificationAction.createSimpleExpiring(actionLabel, () -> {
+                    ShowSettingsUtil.getInstance().showSettingsDialog(project, AppMapProjectConfigurable.class);
+                }));
+            }
+
             notification.notify(project);
         });
     }

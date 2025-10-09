@@ -1,11 +1,13 @@
 package appland.deployment;
 
 import appland.AppMapPlugin;
+import appland.cli.CliTool;
 import appland.utils.GsonUtils;
 import com.google.gson.JsonParseException;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.components.Service;
 import com.intellij.openapi.diagnostic.Logger;
+import com.intellij.openapi.util.text.StringUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.TestOnly;
@@ -14,7 +16,9 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
+import java.util.stream.Stream;
 
 /**
  * Service providing cached access to the deployment settings.
@@ -46,6 +50,29 @@ public final class AppMapDeploymentSettingsService {
     }
 
     /**
+     * @return The directories where bundled binaries are searched.
+     */
+    public static @NotNull List<Path> bundledBinarySearchPath() {
+        return List.of(AppMapPlugin.getPluginPath().resolve("resources"));
+    }
+
+    /**
+     * Locates all bundled binaries of the given type at resources/ and extension/resources/ of the plugin distribution.
+     * Results of all locations are combined.
+     *
+     * @param type     The type of the binary.
+     * @param platform The platform to search for.
+     * @param arch     The architecture to search for.
+     * @return The bundled binaries of the given type. An empty list is returned if no binaries are found.
+     * If more than one binary of the given type exists, the latest one is returned.
+     */
+    public @NotNull Stream<Path> findBundledBinaries(@NotNull CliTool type, String platform, String arch) {
+        return bundledBinarySearchPath()
+                .stream()
+                .flatMap(searchPath -> findBundledBinaries(searchPath, type, platform, arch).stream());
+    }
+
+    /**
      * @return The deployment settings.
      * If there are no deployment settings, then an empty settings instance with defaults is returned.
      */
@@ -63,10 +90,37 @@ public final class AppMapDeploymentSettingsService {
      * @return Paths where the deployment settings file is searched.
      */
     public static @NotNull Collection<Path> deploymentSettingsFileSearchPath() {
-        return List.of(
-                AppMapPlugin.getPluginPath().resolve(SITE_CONFIG_FILENAME),
-                AppMapPlugin.getPluginPath().resolve("extension").resolve(SITE_CONFIG_FILENAME)
-        );
+        return List.of(AppMapPlugin.getPluginPath().resolve(SITE_CONFIG_FILENAME));
+    }
+
+    /**
+     * Find the bundled binaries of the given type in the given directory.
+     * Package-visible for tests.
+     */
+    static @NotNull List<Path> findBundledBinaries(@NotNull Path parentDirectory,
+                                                   @NotNull CliTool type,
+                                                   @NotNull String platform,
+                                                   @NotNull String arch) {
+        if (!Files.isDirectory(parentDirectory)) {
+            return Collections.emptyList();
+        }
+
+        try (var fileStream = Files.list(parentDirectory)) {
+            // e.g. appmap-linux-x64-0.9.0.exe -> appmap-linux-x64-0.9.0
+            return fileStream.filter(file -> {
+                if (!Files.isRegularFile(file)) {
+                    return false;
+                }
+
+                // e.g. appmap-windows-x64-0.9.0.exe -> appmap-windows-x64-0.9.0
+                var baseFilename = StringUtil.trimEnd(file.getFileName().toString(), ".exe");
+                return baseFilename.startsWith(StringUtil.trimEnd(type.getBinaryName(platform, arch), ".exe"));
+            }).toList();
+        } catch (IOException e) {
+            var logger = Logger.getInstance(AppMapDeploymentSettingsService.class);
+            logger.debug("Error finding latest bundled binary for " + type + " in directory " + parentDirectory, e);
+            return Collections.emptyList();
+        }
     }
 
     /**

@@ -5,8 +5,8 @@ import org.jetbrains.annotations.NotNull;
 
 public class StartServicesAfterDownloadListener implements AppLandDownloadListener {
     @Override
-    public void downloadFinished(@NotNull CliTool type, boolean success) {
-        if (!success) {
+    public void downloadFinished(@NotNull CliTool type, @NotNull AppMapDownloadStatus status) {
+        if (!status.isSuccessful()) {
             return;
         }
 
@@ -15,8 +15,7 @@ public class StartServicesAfterDownloadListener implements AppLandDownloadListen
             return;
         }
 
-        var service = AppLandDownloadService.getInstance();
-        if (service.isDownloaded(CliTool.AppMap) && service.isDownloaded(CliTool.Scanner)) {
+        if (CliTools.isBinaryAvailable(CliTool.AppMap) && CliTools.isBinaryAvailable(CliTool.Scanner)) {
             AppLandCommandLineService.getInstance().refreshForOpenProjectsInBackground();
         }
     }

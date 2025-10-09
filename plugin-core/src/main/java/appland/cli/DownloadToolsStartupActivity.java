@@ -1,6 +1,8 @@
 package appland.cli;
 
 import appland.ProjectActivityAdapter;
+import appland.notifications.AppMapNotifications;
+import appland.settings.DownloadSettings;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.project.DumbAware;
@@ -26,6 +28,12 @@ public class DownloadToolsStartupActivity extends ProjectActivityAdapter impleme
 
         if (ACTIVE.compareAndSet(false, true)) {
             try {
+                if (DownloadSettings.isAssetDownloadDisabled() && CliTools.getBinaryPath(CliTool.AppMap) == null) {
+                    // Show a notification but still continue with queueDownloadTasks avoid assumptions about its
+                    // implementation.
+                    AppMapNotifications.showAppMapBinaryUnavailableNotification(project);
+                }
+
                 AppLandDownloadService.getInstance().queueDownloadTasks(project);
             } catch (IOException e) {
                 LOG.warn("Download of CLI binaries failed", e);

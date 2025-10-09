@@ -10,5 +10,5 @@ public interface AppLandDownloadListener {
     @Topic.AppLevel
     Topic<AppLandDownloadListener> TOPIC = Topic.create("appland.cliDownload", AppLandDownloadListener.class);
 
-    void downloadFinished(@NotNull CliTool type, boolean success);
+    void downloadFinished(@NotNull CliTool type, @NotNull AppMapDownloadStatus status);
 }

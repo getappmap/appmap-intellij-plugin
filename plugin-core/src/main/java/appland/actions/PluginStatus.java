@@ -3,6 +3,7 @@ package appland.actions;
 import appland.AppMapBundle;
 import appland.cli.AppLandDownloadService;
 import appland.cli.CliTool;
+import appland.cli.CliTools;
 import appland.deployment.AppMapDeploymentSettingsService;
 import appland.javaAgent.JavaAgentStatus;
 import appland.telemetry.SplunkTelemetryUtils;
@@ -63,7 +64,7 @@ public class PluginStatus extends AnAction implements DumbAware {
         String deploymentReport = deploymentStatusReport();
         String cliReport = appmapBinaryStatusReport(CliTool.AppMap);
         String scannerReport = appmapBinaryStatusReport(CliTool.Scanner);
-        return header + JavaAgentStatus.generateStatusReport(indicator) + deploymentReport + cliReport + scannerReport;
+        return header + deploymentReport + JavaAgentStatus.generateStatusReport(indicator) + cliReport + scannerReport;
     }
 
     private static @NotNull String deploymentStatusReport() {
@@ -79,19 +80,25 @@ public class PluginStatus extends AnAction implements DumbAware {
         var settings = AppMapDeploymentSettingsService.getCachedDeploymentSettings();
         if (settings.isEmpty()) {
             output.append("No deployment settings were found.\n");
-        } else if (SplunkTelemetryUtils.isSplunkTelemetryEnabled(settings)) {
-            var telemetrySettings = Objects.requireNonNull(settings.getTelemetry());
-            if (SplunkTelemetryUtils.isSplunkTelemetryActive(settings)) {
-                output.append("Splunk telemetry is active.\n");
-            } else {
-                output.append("Splunk telemetry is configured, but inactive.\n");
-            }
-
-            output.append("Backend: %s\n".formatted(StringUtil.notNullize(telemetrySettings.getBackend())));
-            output.append("URL: %s\n".formatted(telemetrySettings.getUrl()));
-            output.append("Token: %s\n".formatted(StringUtil.trimMiddle(StringUtil.notNullize(telemetrySettings.getToken()), 3)));
         } else {
-            output.append("Deployment settings were found, but no valid telemetry settings were found.\n");
+            output.append("Automatic update of AppMap binaries: ");
+            output.append(settings.isAutoUpdateTools() ? "enabled" : "disabled");
+            output.append("\n\n");
+
+            if (SplunkTelemetryUtils.isSplunkTelemetryEnabled(settings)) {
+                var telemetrySettings = Objects.requireNonNull(settings.getTelemetry());
+                if (SplunkTelemetryUtils.isSplunkTelemetryActive(settings)) {
+                    output.append("Splunk telemetry is active.");
+                } else {
+                    output.append("Splunk telemetry is configured, but inactive.");
+                }
+
+                output.append("\n\nBackend: %s\n".formatted(StringUtil.notNullize(telemetrySettings.getBackend())));
+                output.append("\n\nURL: %s\n".formatted(StringUtil.defaultIfEmpty(telemetrySettings.getUrl(), "*not set*")));
+                output.append("\n\nToken: %s\n".formatted(StringUtil.trimMiddle(StringUtil.notNullize(telemetrySettings.getToken()), 3)));
+            } else {
+                output.append("Deployment settings were found, but no valid telemetry settings were found.\n\n");
+            }
         }
         output.append("\n\n");
         return output.toString();
@@ -112,13 +119,17 @@ public class PluginStatus extends AnAction implements DumbAware {
                 latestVersion == null ? "Failed to check for the latest version" : latestVersion);
 
         var downloadedVersion = service.findLatestDownloadedVersion(type);
-        var downloadPath = service.getDownloadFilePath(type);
+        var downloadPath = CliTools.getBinaryPath(type);
 
-        String downloadedVersionText = "Your version: ";
-        downloadedVersionText += downloadedVersion == null ? "<unavailable>" : downloadedVersion;
-        downloadedVersionText += downloadPath == null ? "<unavailable>" : String.format("\n\nDownload location: %s", downloadPath);
+        String localVersionText = "Your version: ";
+        if (downloadedVersion == null || downloadPath == null) {
+            localVersionText += "*unavailable*";
+        } else {
+            localVersionText += downloadedVersion;
+            localVersionText += String.format("\n\nLocation: %s", downloadPath);
+        }
 
-        return getBinaryReportHeader(type) + latestVersionText + "\n\n" + downloadedVersionText + "\n\n";
+        return getBinaryReportHeader(type) + latestVersionText + "\n\n" + localVersionText + "\n\n";
     }
 
     private static @NotNull String getBinaryReportHeader(CliTool type) {

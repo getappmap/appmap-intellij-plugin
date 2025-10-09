@@ -1,9 +1,6 @@
 package appland.rpcService;
 
-import appland.cli.AppLandCommandLineService;
-import appland.cli.AppLandDownloadListener;
-import appland.cli.AppLandModelInfoProvider;
-import appland.cli.CliTool;
+import appland.cli.*;
 import appland.config.AppMapConfigFileListener;
 import appland.files.AppMapFiles;
 import appland.settings.AppMapApplicationSettingsService;
@@ -34,12 +31,6 @@ import com.intellij.util.concurrency.annotations.RequiresBackgroundThread;
 import com.intellij.util.concurrency.annotations.RequiresReadLock;
 import com.intellij.util.io.BaseOutputReader;
 import com.intellij.util.io.HttpRequests;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import java.io.InputStreamReader;
-import java.nio.charset.StandardCharsets;
-import appland.rpcService.NavieThreadQueryV1Params;
-import appland.rpcService.NavieThreadQueryV1Response;
 import lombok.Data;
 import net.jcip.annotations.GuardedBy;
 import org.jetbrains.annotations.NotNull;
@@ -347,8 +338,8 @@ public class DefaultAppLandJsonRpcService implements AppLandJsonRpcService, AppL
     }
 
     @Override
-    public void downloadFinished(@NotNull CliTool type, boolean success) {
-        if (success && CliTool.AppMap.equals(type) && !isServerRunning()) {
+    public void downloadFinished(@NotNull CliTool type, @NotNull AppMapDownloadStatus status) {
+        if (status.isSuccessful() && CliTool.AppMap.equals(type) && !isServerRunning()) {
             restartServerAsync();
         }
     }

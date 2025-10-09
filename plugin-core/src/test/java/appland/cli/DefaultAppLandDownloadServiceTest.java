@@ -1,6 +1,8 @@
 package appland.cli;
 
 import appland.AppMapBaseTest;
+import appland.AppMapDeploymentTestUtils;
+import appland.deployment.AppMapDeploymentSettings;
 import com.intellij.testFramework.VfsTestUtil;
 import com.intellij.testFramework.fixtures.TempDirTestFixture;
 import com.intellij.testFramework.fixtures.impl.TempDirTestFixtureImpl;
@@ -38,7 +40,15 @@ public class DefaultAppLandDownloadServiceTest extends AppMapBaseTest {
     public void downloadAppMapBinary() throws Exception {
         // We're only testing the download of the AppMap tool and not of the scanner
         // because they work in the same way, and we don't want to extend the test duration unnecessarily.
-        AppLandDownloadServiceTestUtil.downloadLatestCliVersions(getProject(), CliTool.AppMap, getTestRootDisposable());
+        AppLandDownloadServiceTestUtil.assertDownloadLatestCliVersions(getProject(), CliTool.AppMap, getTestRootDisposable());
+    }
+
+    @Test
+    public void downloadAppMapBinaryWithProhibitingDeploymentSettings() throws Exception {
+        AppMapDeploymentTestUtils.withSiteConfigFile(new AppMapDeploymentSettings(null, false), () -> {
+            var status = AppLandDownloadServiceTestUtil.downloadLatestCliVersions(getProject(), CliTool.AppMap, getTestRootDisposable());
+            assertEquals(AppMapDownloadStatus.Skipped, status);
+        });
     }
 
     @Test

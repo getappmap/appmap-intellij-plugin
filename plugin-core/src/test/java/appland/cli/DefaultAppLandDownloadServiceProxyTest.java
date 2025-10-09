@@ -13,8 +13,8 @@ import org.mockserver.model.HttpResponse;
 
 import java.util.Arrays;
 
-import static appland.cli.DefaultAppLandDownloadService.currentArch;
-import static appland.cli.DefaultAppLandDownloadService.currentPlatform;
+import static appland.cli.CliTools.currentArch;
+import static appland.cli.CliTools.currentPlatform;
 
 public class DefaultAppLandDownloadServiceProxyTest extends AppMapBaseTest {
     @Rule
@@ -45,7 +45,7 @@ public class DefaultAppLandDownloadServiceProxyTest extends AppMapBaseTest {
                 .respond(HttpResponse.response().withBody(""));
 
         // Perform the download using the mock HTTP proxy server
-        AppLandDownloadServiceTestUtil.downloadLatestCliVersions(getProject(), toolType, getTestRootDisposable());
+        AppLandDownloadServiceTestUtil.assertDownloadLatestCliVersions(getProject(), toolType, getTestRootDisposable());
 
         var hasDownloadRequest = Arrays.stream(mockServerRule.getClient().retrieveRecordedRequests(null))
                 .anyMatch(request -> {
