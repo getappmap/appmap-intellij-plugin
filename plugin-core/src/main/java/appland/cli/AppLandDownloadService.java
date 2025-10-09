@@ -19,25 +19,13 @@ public interface AppLandDownloadService {
     }
 
     /**
-     * @param type The type of CLI tool
+     * @param type     The type of CLI tool
+     * @param platform The platform to search for
+     * @param arch     The architecture to search for
      * @return The location on disk, where the binary for the given tool type is stored.
      * It's possible that the file does not exist yet.
      */
-    @Nullable Path getDownloadFilePath(@NotNull CliTool type);
-
-    /**
-     * @param type Type of commandline tool
-     * @return {@code true} if there's a downloaded binary of the given tool with any version
-     */
-    boolean isDownloaded(@NotNull CliTool type);
-
-    /**
-     * @param type         Type of commandline tool
-     * @param version      The required version, e.g. 1.2.3
-     * @param unitTestMode To determine the target download location
-     * @return {@code true} if there's a downloaded binary matching type and version
-     */
-    boolean isDownloaded(@NotNull CliTool type, @NotNull String version, boolean unitTestMode);
+    @Nullable Path getDownloadFilePath(@NotNull CliTool type, @NotNull String platform, @NotNull String arch);
 
     /**
      * Download a new copy of the tool binary and store it at the expected location on disk.
@@ -46,10 +34,12 @@ public interface AppLandDownloadService {
      * @param type              Type of commandline tool
      * @param version           Version to download
      * @param progressIndicator Indicator to show the download progress
-     * @return {@code true} if the download succeeded
+     * @return A {@link AppMapDownloadStatus} value indicating the result of the download.
      */
     @RequiresBackgroundThread
-    boolean download(@NotNull CliTool type, @NotNull String version, @NotNull ProgressIndicator progressIndicator);
+    @NotNull AppMapDownloadStatus download(@NotNull CliTool type,
+                                           @NotNull String version,
+                                           @NotNull ProgressIndicator progressIndicator);
 
     /**
      * Fetch metadata about the latest available version
@@ -66,10 +56,10 @@ public interface AppLandDownloadService {
     void queueDownloadTasks(@NotNull Project project) throws IOException;
 
     /**
-     * Fetch metadata about the downloaded version
+     * Fetch the latest version that has been downloaded.
      *
      * @param type Type of command line tool
-     * @return Available version or {@code null} if the retrieval was unsuccessful
+     * @return Latest available version or {@code null} if the retrieval was unsuccessful
      */
-   @Nullable String findLatestDownloadedVersion(@NotNull CliTool type);
+    @Nullable String findLatestDownloadedVersion(@NotNull CliTool type);
 }

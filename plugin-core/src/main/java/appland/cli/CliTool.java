@@ -4,6 +4,10 @@ import appland.AppMapBundle;
 import lombok.Getter;
 import org.jetbrains.annotations.NotNull;
 
+/**
+ * The different CLI tools that can be run.
+ * See {@link CliTools} for helper methods to find binaries of a given type.
+ */
 @Getter
 public enum CliTool {
     AppMap("appmap",
@@ -27,6 +31,12 @@ public enum CliTool {
         this.presentableName = presentableName;
     }
 
+    /**
+     * @param platform "macos", "linux", or "win"
+     * @param arch     "x64" or "arm64"
+     * @return The name of the binary for the given platform and architecture.
+     * The name is used locally and to build the download URL.
+     */
     public @NotNull String getBinaryName(@NotNull String platform, @NotNull String arch) {
         var suffix = "win".equals(platform) ? ".exe" : "";
         return id + "-" + platform + "-" + arch + suffix;

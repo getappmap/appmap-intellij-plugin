@@ -78,6 +78,15 @@ public class AppMapApplicationSettings {
     @Setter(AccessLevel.NONE)
     private volatile HashMap<String, String> modelConfig = new HashMap<>();
 
+    /**
+     * Turn on the automatic download of AppMap assets if this setting is {@code true}.
+     * Turn off the automatic download if this setting is {@code false}.
+     * If the value is {@code null}, the default behavior is controlled
+     * by the {@link appland.deployment.AppMapDeploymentSettings#autoUpdateTools} property.
+     * If there are no deployment settings, then the default behavior is to automatically update tools.
+     */
+    private volatile @Nullable Boolean autoUpdateTools = null;
+
     public AppMapApplicationSettings() {
     }
 
@@ -99,6 +108,7 @@ public class AppMapApplicationSettings {
         this.showFailedCliDownloadError = settings.showFailedCliDownloadError;
         this.selectedAppMapModel = settings.selectedAppMapModel;
         this.modelConfig.putAll(settings.modelConfig);
+        this.autoUpdateTools = settings.autoUpdateTools;
     }
 
     public @NotNull Map<String, String> getCliEnvironment() {
@@ -207,6 +217,15 @@ public class AppMapApplicationSettings {
 
         if (!Objects.equals(oldValue, value)) {
             ApplicationManager.getApplication().executeOnPooledThread(settingsPublisher()::modelConfigChange);
+        }
+    }
+
+    public void setAutoUpdateToolsNotifying(@Nullable Boolean autoUpdateTools) {
+        var changed = !Objects.equals(autoUpdateTools, this.autoUpdateTools);
+        this.autoUpdateTools = autoUpdateTools;
+
+        if (changed) {
+            settingsPublisher().autoUpdateToolsChanged();
         }
     }
 

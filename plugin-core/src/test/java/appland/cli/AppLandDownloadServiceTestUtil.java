@@ -10,7 +10,6 @@ import org.junit.Assert;
 
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
 /**
@@ -21,25 +20,26 @@ final class AppLandDownloadServiceTestUtil {
     }
 
     /**
-     * Downloads the given CLI tool and asserts a successful download.
+     * Downloads the given CLI tool in a background task and asserts that the download finished.
+     * If an exception was during by the download, then it will be rethrown.
      */
-    static void downloadLatestCliVersions(@NotNull Project project,
-                                          @NotNull CliTool toolType,
-                                          @NotNull Disposable parentDisposable) throws Exception {
+    static @NotNull AppMapDownloadStatus downloadLatestCliVersions(@NotNull Project project,
+                                                                   @NotNull CliTool toolType,
+                                                                   @NotNull Disposable parentDisposable) throws Exception {
         var service = AppLandDownloadService.getInstance();
 
         var latestVersion = service.fetchLatestRemoteVersion(toolType);
         Assert.assertNotNull(latestVersion);
 
-        var downloadSuccessful = new AtomicBoolean();
+        var downloadSuccessful = new AtomicReference<AppMapDownloadStatus>();
         var downloadException = new AtomicReference<Exception>();
 
         var latch = new CountDownLatch(1);
         ApplicationManager.getApplication()
                 .getMessageBus()
                 .connect(parentDisposable)
-                .subscribe(AppLandDownloadListener.TOPIC, (cliTool, success) -> {
-                    downloadSuccessful.set(success);
+                .subscribe(AppLandDownloadListener.TOPIC, (cliTool, status) -> {
+                    downloadSuccessful.set(status);
                     latch.countDown();
                 });
 
@@ -56,7 +56,20 @@ final class AppLandDownloadServiceTestUtil {
 
         var ok = latch.await(5, TimeUnit.MINUTES);
         Assert.assertTrue("The download must finish", ok);
-        Assert.assertTrue("The download must be successful", downloadSuccessful.get());
-        Assert.assertNull("The download must not cause an exception", downloadException.get());
+
+        if (downloadException.get() != null) {
+            throw downloadException.get();
+        }
+        return downloadSuccessful.get();
+    }
+
+    /**
+     * Downloads the given CLI tool and asserts a successful download.
+     */
+    static void assertDownloadLatestCliVersions(@NotNull Project project,
+                                                @NotNull CliTool toolType,
+                                                @NotNull Disposable parentDisposable) throws Exception {
+        var status = downloadLatestCliVersions(project, toolType, parentDisposable);
+        Assert.assertTrue("The download must be successful", status.isSuccessful());
     }
 }

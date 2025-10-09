@@ -9,6 +9,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.List;
 
 /**
  * Utilities to test with a specific AppMap deployment setup.
@@ -44,6 +45,29 @@ public final class AppMapDeploymentTestUtils {
             Files.deleteIfExists(jsonFile);
 
             AppMapDeploymentSettingsService.reset();
+        }
+    }
+
+    /**
+     * Copies the given binaries to the directory, where bundled binaries are searched, executes the runnable, and finally deletes the copied binaries.
+     * The binaries must be removed to avoid side-effects on other tests.
+     *
+     * @param binariesToBundle The binaries to copy to the directory.
+     */
+    public static void withBundledBinaries(@NotNull List<Path> binariesToBundle, @NotNull ThrowableRunnable<Exception> runnable) throws Exception {
+        var parentDirectory = AppMapDeploymentSettingsService.bundledBinarySearchPath().get(0);
+        Files.createDirectories(parentDirectory);
+
+        try {
+            for (var binary : binariesToBundle) {
+                Files.copy(binary, parentDirectory.resolve(binary.getFileName()));
+            }
+
+            runnable.run();
+        } finally {
+            for (var binary : binariesToBundle) {
+                Files.deleteIfExists(parentDirectory.resolve(binary.getFileName()));
+            }
         }
     }
 }

@@ -12,10 +12,17 @@ import org.jetbrains.annotations.Nullable;
 public final class AppMapDeploymentSettings {
     @SerializedName("appMap.telemetry")
     @Nullable
-    AppMapDeploymentTelemetrySettings telemetry;
+    private AppMapDeploymentTelemetrySettings telemetry;
+
+    @SerializedName("appMap.autoUpdateTools")
+    private boolean autoUpdateTools = true;
+
+    public AppMapDeploymentSettings(@Nullable AppMapDeploymentTelemetrySettings telemetry) {
+        this(telemetry, true);
+    }
 
     public boolean isEmpty() {
-        return this.telemetry == null;
+        return this.telemetry == null && autoUpdateTools;
     }
 }
 

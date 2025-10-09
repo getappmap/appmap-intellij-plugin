@@ -42,16 +42,16 @@ public class JavaAgentStatus {
         SemVer downloadedVersion = getDownloadedVersion();
         SemVer latestAssetVersion = getLatestAssetVersion(indicator);
 
-        String downloadedVersionText = "Your version: ";
-        downloadedVersionText += downloadedVersion == null ? "Unable to locate" : downloadedVersion;
+        String localVersionText = "Your version: ";
+        localVersionText += downloadedVersion == null ? "Unable to locate" : downloadedVersion;
 
-        Path downloadLocation = getResolvedAgentFilePath();
-        downloadedVersionText += downloadLocation == null ? "" : String.format("\n\nDownload location: %s", downloadLocation);
+        Path localLocation = getResolvedAgentFilePath();
+        localVersionText += localLocation == null ? "" : String.format("\n\nLocation: %s", localLocation);
 
         String latestVersionText = String.format("Latest version: %s",
                 latestAssetVersion == null ? "Failed to check for the latest version" : latestAssetVersion);
 
-        return "### AppMap Java Agent Status\n\n" + latestVersionText + "\n\n" + downloadedVersionText + "\n\n";
+        return "### AppMap Java Agent Status\n\n" + latestVersionText + "\n\n" + localVersionText + "\n\n";
     }
 
     private static @Nullable SemVer getDownloadedVersion() {

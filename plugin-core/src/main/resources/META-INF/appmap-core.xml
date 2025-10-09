@@ -21,6 +21,10 @@
         <listener topic="com.intellij.ide.plugins.DynamicPluginListener"
                   class="appland.startup.DynamicPluginListener"/>
 
+        <listener topic="appland.settings.AppMapSettingsListener"
+                  class="appland.settings.AutoDownloadSettingsListener"
+                  activeInTestMode="false"/>
+
         <listener topic="appland.cli.AppLandDownloadListener"
                   class="appland.cli.StartServicesAfterDownloadListener"/>
 

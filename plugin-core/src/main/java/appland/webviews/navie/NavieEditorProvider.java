@@ -2,6 +2,8 @@ package appland.webviews.navie;
 
 import appland.AppMapBundle;
 import appland.Icons;
+import appland.cli.CliTool;
+import appland.cli.CliTools;
 import appland.notifications.AppMapNotifications;
 import appland.rpcService.AppLandJsonRpcService;
 import appland.settings.AppMapProjectSettingsService;
@@ -101,6 +103,7 @@ public final class NavieEditorProvider extends WebviewEditorProvider {
             return null;
         }));
     }
+
     /**
      * Opens the Navie webview focusing an existing thread by ID.
      */
@@ -125,6 +128,11 @@ public final class NavieEditorProvider extends WebviewEditorProvider {
     public static void openEditor(@NotNull Project project, @NotNull DataContext context) {
         var provider = WebviewEditorProvider.findEditorProvider(TYPE_ID);
         assert provider != null;
+
+        if (CliTools.getBinaryPath(CliTool.AppMap) == null) {
+            AppMapNotifications.showAppMapBinaryUnavailableNotification(project);
+            return;
+        }
 
         var editor = CommonDataKeys.EDITOR_EVEN_IF_INACTIVE.getData(context);
         chooseIndexerJsonRpcPort(project, editor, (indexerPort, codeSelection) -> {

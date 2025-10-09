@@ -372,6 +372,32 @@ project(":") {
             mustRunAfter("check")
         }
 
+        @Suppress("unused")
+        val runIdeWithDeploymentSettings by intellijPlatformTesting.runIde.registering {
+            sandboxDirectory = project.layout.buildDirectory.dir("idea-sandbox-deployment-settings")
+
+            prepareSandboxTask {
+                doLast {
+                    val settingsFile = pluginDirectory.file("site-config.json").get().asFile
+                    if (!settingsFile.exists()) {
+                        settingsFile.writeText("""
+                            {
+                                "appMap.autoUpdateTools": false,
+                                "appMap.telemetry": {
+                                    "backend": "splunk"
+                                }
+                            }
+                            """.trimIndent())
+                    }
+                }
+            }
+
+            task {
+                systemProperty("appmap.sandbox", "true")
+                jvmArgs("-Xmx2048m")
+            }
+        }
+
         task<Copy>("copyPluginAssets") {
             dependsOn(":downloadAppMapAgent")
             doNotTrackState("target directory can contain temporary sockets")
@@ -389,7 +415,7 @@ project(":") {
                 include("NOTICE.txt")
             }
             from(agentOutputPath.parentFile) {
-                into("appmap-assets/appmap-java-agent")
+                into("appmap-assets/resources")
                 include("*.jar")
             }
             from("${project.rootDir}/appland") {

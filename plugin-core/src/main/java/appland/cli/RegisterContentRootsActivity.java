@@ -32,8 +32,7 @@ public class RegisterContentRootsActivity extends ProjectActivityAdapter {
     }
 
     private void launchProcesses(@NotNull Project project) {
-        var downloadService = AppLandDownloadService.getInstance();
-        if (!downloadService.isDownloaded(CliTool.AppMap) || !downloadService.isDownloaded(CliTool.Scanner)) {
+        if (!CliTools.isBinaryAvailable(CliTool.AppMap) || !CliTools.isBinaryAvailable(CliTool.Scanner)) {
             LOG.debug("Skipping launch of processes because tools are unavailable");
             return;
         }

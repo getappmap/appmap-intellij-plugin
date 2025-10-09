@@ -12,8 +12,8 @@ public final class FailedDownloadNotificationListener implements AppLandDownload
     }
 
     @Override
-    public void downloadFinished(@NotNull CliTool type, boolean success) {
-        if (!success) {
+    public void downloadFinished(@NotNull CliTool type, @NotNull AppMapDownloadStatus status) {
+        if (!status.isSuccessful()) {
             AppMapNotifications.showFailedCliBinaryDownloadNotification(project);
         }
     }
