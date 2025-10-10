@@ -24,6 +24,7 @@ import java.util.List;
 @Service(Service.Level.APP)
 public final class AppMapDeploymentSettingsService {
     public static final String SITE_CONFIG_FILENAME = "site-config.json";
+    private static final Logger LOG = Logger.getInstance(AppMapDeploymentSettingsService.class);
 
     private volatile @Nullable AppMapDeploymentSettings cachedDeploymentSettings = null;
 
@@ -92,7 +93,10 @@ public final class AppMapDeploymentSettingsService {
      * @return The deployment settings from the given file, or {@code null} if the file does not exist or cannot be parsed as JSON.
      */
     static @Nullable AppMapDeploymentSettings readDeploymentSettings(@NotNull Path path) {
+        LOG.debug("Attempting to read deployment settings at " + path);
+
         if (Files.isReadable(path) && !Files.isDirectory(path)) {
+            LOG.debug("Found deployment settings file at " + path);
             try {
                 return GsonUtils.GSON.fromJson(Files.readString(path), AppMapDeploymentSettings.class);
             } catch (IOException e) {
@@ -100,7 +104,10 @@ public final class AppMapDeploymentSettingsService {
             } catch (JsonParseException e) {
                 Logger.getInstance(AppMapPlugin.class).error("Failed to parse deployment configuration file " + path, e);
             }
+        } else {
+            LOG.debug("Deployment settings file not found, not readable or not a regular file: " + path);
         }
+
         return null;
     }
 }
