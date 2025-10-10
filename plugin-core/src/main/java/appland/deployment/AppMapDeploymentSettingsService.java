@@ -13,6 +13,8 @@ import org.jetbrains.annotations.TestOnly;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Collection;
+import java.util.List;
 
 /**
  * Service providing cached access to the deployment settings.
@@ -57,6 +59,16 @@ public final class AppMapDeploymentSettingsService {
     }
 
     /**
+     * @return Paths where the deployment settings file is searched.
+     */
+    public static @NotNull Collection<Path> deploymentSettingsFileSearchPath() {
+        return List.of(
+                AppMapPlugin.getPluginPath().resolve(SITE_CONFIG_FILENAME),
+                AppMapPlugin.getPluginPath().resolve("extension").resolve(SITE_CONFIG_FILENAME)
+        );
+    }
+
+    /**
      * Reads the deployment settings from the plugin distribution.
      * They're read every time this method is called.
      *
@@ -65,13 +77,13 @@ public final class AppMapDeploymentSettingsService {
      * The first file found is read for the deployment settings.
      */
     static @Nullable AppMapDeploymentSettings readDeploymentSettings() {
-        var topLevel = readDeploymentSettings(AppMapPlugin.getPluginPath().resolve(SITE_CONFIG_FILENAME));
-        if (topLevel != null) {
-            return topLevel;
+        for (var filePath : deploymentSettingsFileSearchPath()) {
+            var deploymentSettings = readDeploymentSettings(filePath);
+            if (deploymentSettings != null) {
+                return deploymentSettings;
+            }
         }
-
-        // nested location at extension/site-config.json
-        return readDeploymentSettings(AppMapPlugin.getPluginPath().resolve("extension").resolve(SITE_CONFIG_FILENAME));
+        return null;
     }
 
     /**

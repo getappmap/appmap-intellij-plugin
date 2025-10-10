@@ -13,5 +13,9 @@ public final class AppMapDeploymentSettings {
     @SerializedName("appmap.telemetry")
     @Nullable
     AppMapDeploymentTelemetrySettings telemetry;
+
+    public boolean isEmpty() {
+        return this.telemetry == null;
+    }
 }
 

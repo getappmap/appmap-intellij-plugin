@@ -3,7 +3,9 @@ package appland.actions;
 import appland.AppMapBundle;
 import appland.cli.AppLandDownloadService;
 import appland.cli.CliTool;
+import appland.deployment.AppMapDeploymentSettingsService;
 import appland.javaAgent.JavaAgentStatus;
+import appland.telemetry.SplunkTelemetryUtils;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.fileEditor.FileEditorManager;
@@ -11,11 +13,11 @@ import com.intellij.openapi.progress.ProgressIndicator;
 import com.intellij.openapi.progress.Task;
 import com.intellij.openapi.project.DumbAware;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.testFramework.LightVirtualFile;
 import com.intellij.util.concurrency.annotations.RequiresBackgroundThread;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
 import java.util.Objects;
@@ -50,9 +52,41 @@ public class PluginStatus extends AnAction implements DumbAware {
     @NotNull
     private static String statusReportText(ProgressIndicator indicator) {
         String header = "# AppMap Plugin Status Report\n\n";
+        String deploymentReport = deploymentStatusReport();
         String cliReport = appmapBinaryStatusReport(CliTool.AppMap);
         String scannerReport = appmapBinaryStatusReport(CliTool.Scanner);
-        return header + JavaAgentStatus.generateStatusReport(indicator) + cliReport + scannerReport;
+        return header + JavaAgentStatus.generateStatusReport(indicator) + deploymentReport + cliReport + scannerReport;
+    }
+
+    private static @NotNull String deploymentStatusReport() {
+        var output = new StringBuilder();
+        output.append("### Deployment Settings\n");
+
+        output.append("Deployment settings search path:\n");
+        for (var filePath : AppMapDeploymentSettingsService.deploymentSettingsFileSearchPath()) {
+            output.append("- ").append(filePath.toString()).append("\n");
+        }
+        output.append("\n");
+
+        var settings = AppMapDeploymentSettingsService.getCachedDeploymentSettings();
+        if (settings.isEmpty()) {
+            output.append("No deployment settings were found.\n");
+        } else if (SplunkTelemetryUtils.isSplunkTelemetryEnabled(settings)) {
+            var telemetrySettings = Objects.requireNonNull(settings.getTelemetry());
+            if (SplunkTelemetryUtils.isSplunkTelemetryActive(settings)) {
+                output.append("Splunk telemetry is active.\n");
+            } else {
+                output.append("Splunk telemetry is configured, but inactive.\n");
+            }
+
+            output.append("Backend: %s\n".formatted(StringUtil.notNullize(telemetrySettings.getBackend())));
+            output.append("URL: %s\n".formatted(telemetrySettings.getUrl()));
+            output.append("Token: %s\n".formatted(StringUtil.shortenPathWithEllipsis(StringUtil.notNullize(telemetrySettings.getToken()), 3)));
+        } else {
+            output.append("Deployment settings were found, but no valid telemetry settings were found.\n");
+        }
+        output.append("\n\n");
+        return output.toString();
     }
 
     @NotNull
@@ -79,15 +113,10 @@ public class PluginStatus extends AnAction implements DumbAware {
         return getBinaryReportHeader(type) + latestVersionText + "\n\n" + downloadedVersionText + "\n\n";
     }
 
-    @Nullable
-    private static String getBinaryReportHeader(CliTool type) {
-        switch (type) {
-            case AppMap:
-                return "### AppMap CLI Status\n\n";
-            case Scanner:
-                return "### AppMap Scanner Status\n\n";
-            default:
-                return null;
-        }
+    private static @NotNull String getBinaryReportHeader(CliTool type) {
+        return switch (type) {
+            case AppMap -> "### AppMap CLI Status\n\n";
+            case Scanner -> "### AppMap Scanner Status\n\n";
+        };
     }
 }
