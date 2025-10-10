@@ -38,8 +38,18 @@ public class TelemetryService {
         this.reporter = reporter;
     }
 
+    /**
+     * @return If telemetry is enabled, either with the user settings or forced by the configured telemetry reporter.
+     */
     public boolean isEnabled() {
-        return AppMapApplicationSettingsService.getInstance().isEnableTelemetry();
+        return AppMapApplicationSettingsService.getInstance().isEnableTelemetry() || reporter.isAlwaysEnabled();
+    }
+
+    /**
+     * @return The configured telemetry reporter, useful for status reporting.
+     */
+    public @NotNull TelemetryReporter getReporter() {
+        return reporter;
     }
 
     public void notifyTelemetryUsage(@NotNull Project project) {

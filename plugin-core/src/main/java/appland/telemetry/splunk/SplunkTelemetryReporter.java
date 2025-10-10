@@ -26,6 +26,12 @@ public class SplunkTelemetryReporter implements TelemetryReporter {
     }
 
     @Override
+    public boolean isAlwaysEnabled() {
+        // Splunk telemetry must always be enabled, even if the user has disabled it in the settings.
+        return true;
+    }
+
+    @Override
     public void track(@NotNull TelemetryEvent event) {
         if (StringUtil.isEmpty(url)) {
             return;
