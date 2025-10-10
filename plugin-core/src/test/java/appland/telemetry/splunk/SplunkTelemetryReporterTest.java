@@ -25,6 +25,11 @@ public class SplunkTelemetryReporterTest extends AppMapBaseTest {
     }
 
     @Test
+    public void alwaysEnabled() {
+        assertTrue(new SplunkTelemetryReporter("https://my-splunk.example.com", "some-token").isAlwaysEnabled());
+    }
+
+    @Test
     public void telemetryEvent() {
         mockServerRule.getClient()
                 .when(request().withMethod("POST").withPath("/services/collector/event/1.0"))
