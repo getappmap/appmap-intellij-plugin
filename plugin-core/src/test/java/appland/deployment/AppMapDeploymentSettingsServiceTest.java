@@ -2,6 +2,8 @@ package appland.deployment;
 
 import appland.AppMapBaseTest;
 import appland.AppMapPlugin;
+import com.intellij.testFramework.fixtures.TempDirTestFixture;
+import com.intellij.testFramework.fixtures.impl.TempDirTestFixtureImpl;
 import org.junit.Test;
 
 import java.nio.file.Path;
@@ -9,6 +11,12 @@ import java.nio.file.Path;
 import static appland.AppMapDeploymentTestUtils.withSiteConfigFile;
 
 public class AppMapDeploymentSettingsServiceTest extends AppMapBaseTest {
+    @Override
+    protected TempDirTestFixture createTempDirTestFixture() {
+        // create temp files on disk
+        return new TempDirTestFixtureImpl();
+    }
+
     @Test
     public void deploymentConfigurationParsing() throws Exception {
         var content = """
