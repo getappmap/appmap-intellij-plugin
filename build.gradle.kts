@@ -28,7 +28,7 @@ buildscript {
 plugins {
     idea
     id("org.jetbrains.kotlin.jvm")
-    id("org.jetbrains.intellij.platform") version "2.7.0"
+    id("org.jetbrains.intellij.platform") version "2.10.0"
     id("org.jetbrains.changelog") version "2.2.1"
     id("com.adarshr.test-logger") version "3.2.0"
     id("de.undercouch.download") version "5.6.0"
@@ -91,10 +91,10 @@ allprojects {
             }
             // 2024.3 extracted JSON support into a plugin
             if (platformVersion >= 243) {
-                bundledPlugin("com.intellij.modules.json")
+                bundledPlugins("com.intellij.modules.json")
             }
             // 2025.3 extracted OAuth support into modules
-            if (platformVersion >= 243) {
+            if (platformVersion >= 253) {
                 bundledModule("intellij.platform.collaborationTools.auth.base")
                 bundledModule("intellij.platform.collaborationTools.auth")
             }
@@ -188,6 +188,29 @@ allprojects {
                 else -> IntelliJPlatformType.IntellijIdeaCommunity
             }
             version = ideVersion
+
+            testFramework(TestFrameworkType.Platform)
+            testFramework(TestFrameworkType.Bundled)
+            if (project.name == "plugin-java") {
+                testFramework(TestFrameworkType.Plugin.Java)
+            }
+
+            plugins {
+                // org.jetbrains.intellij.platform requires to bundledModules for 2024.2+
+                if (platformVersion >= 242) {
+                    bundledModule("intellij.platform.collaborationTools")
+                    bundledModule("intellij.platform.vcs.impl")
+                }
+                // 2024.3 extracted JSON support into a plugin
+                if (platformVersion >= 243) {
+                    bundledPlugins("com.intellij.modules.json")
+                }
+                // 2025.3 extracted OAuth support into modules
+                if (platformVersion >= 253) {
+                    bundledModule("intellij.platform.collaborationTools.auth.base")
+                    bundledModule("intellij.platform.collaborationTools.auth")
+                }
+            }
 
             task {
                 useJUnit {
