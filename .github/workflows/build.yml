@@ -87,3 +87,17 @@ jobs:
             - name: Run Plugin Verifier
               shell: bash
               run: ./gradlew verifyPlugin
+
+            - name: Prepare plugin distribution upload
+              id: artifact
+              run: |
+                  cd "${{ github.workspace }}/build/distributions"
+                  FILENAME="$(ls *.zip)"
+                  unzip -d content "$FILENAME"
+                  echo "filename=${FILENAME/.zip/}" >> $GITHUB_OUTPUT          
+
+            - name: Upload plugin distribution
+              uses: actions/upload-artifact@v4
+              with:
+                  name: ${{ steps.artifact.outputs.filename }}
+                  path: ${{ github.workspace }}/build/distributions/content/**/*
