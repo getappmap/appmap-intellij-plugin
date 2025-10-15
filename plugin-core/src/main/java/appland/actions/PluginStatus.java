@@ -49,8 +49,16 @@ public class PluginStatus extends AnAction implements DumbAware {
         }.queue();
     }
 
+    /**
+     * Generates a detailed status report for the AppMap plugin.
+     * <p>
+     * This method is package-visible for testing.
+     *
+     * @param indicator the {@link ProgressIndicator} used to monitor the progress of the status report generation.
+     * @return Markdown-formatted status report.
+     */
     @NotNull
-    private static String statusReportText(ProgressIndicator indicator) {
+    static String statusReportText(ProgressIndicator indicator) {
         String header = "# AppMap Plugin Status Report\n\n";
         String deploymentReport = deploymentStatusReport();
         String cliReport = appmapBinaryStatusReport(CliTool.AppMap);
@@ -81,7 +89,7 @@ public class PluginStatus extends AnAction implements DumbAware {
 
             output.append("Backend: %s\n".formatted(StringUtil.notNullize(telemetrySettings.getBackend())));
             output.append("URL: %s\n".formatted(telemetrySettings.getUrl()));
-            output.append("Token: %s\n".formatted(StringUtil.shortenPathWithEllipsis(StringUtil.notNullize(telemetrySettings.getToken()), 3)));
+            output.append("Token: %s\n".formatted(StringUtil.trimMiddle(StringUtil.notNullize(telemetrySettings.getToken()), 3)));
         } else {
             output.append("Deployment settings were found, but no valid telemetry settings were found.\n");
         }
