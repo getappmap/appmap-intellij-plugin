@@ -10,7 +10,7 @@ import org.jetbrains.annotations.Nullable;
 @AllArgsConstructor
 @NoArgsConstructor
 public final class AppMapDeploymentSettings {
-    @SerializedName("appmap.telemetry")
+    @SerializedName("appMap.telemetry")
     @Nullable
     AppMapDeploymentTelemetrySettings telemetry;
 

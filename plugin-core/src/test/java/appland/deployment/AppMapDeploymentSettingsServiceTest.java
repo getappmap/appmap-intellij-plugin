@@ -21,7 +21,7 @@ public class AppMapDeploymentSettingsServiceTest extends AppMapBaseTest {
     public void deploymentConfigurationParsing() throws Exception {
         var content = """
                 {
-                  "appmap.telemetry": {
+                  "appMap.telemetry": {
                     "backend": "splunk",
                     "url": "https://splunk.example.com:443",
                     "token": "my-hec-token",
@@ -47,7 +47,7 @@ public class AppMapDeploymentSettingsServiceTest extends AppMapBaseTest {
     public void deploymentConfigurationAtTopLevel() throws Exception {
         var content = """
                 {
-                  "appmap.telemetry": {
+                  "appMap.telemetry": {
                     "backend": "splunk",
                     "url": "https://splunk.example.com:443",
                     "token": "my-hec-token",
@@ -67,7 +67,7 @@ public class AppMapDeploymentSettingsServiceTest extends AppMapBaseTest {
     public void deploymentConfigurationNestedDirectory() throws Exception {
         var content = """
                 {
-                  "appmap.telemetry": {
+                  "appMap.telemetry": {
                     "backend": "splunk",
                     "url": "https://splunk.example.com:443",
                     "token": "my-hec-token",
