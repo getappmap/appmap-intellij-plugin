@@ -12,7 +12,7 @@ public class AppMapDeploymentSettingsTest extends AppMapBaseTest {
         ));
 
         var expectedJson = """
-                {"appmap.telemetry":{"backend":"splunk","url":"https://my-splunk.example.com:443","token":"my-hec-token","ca":"my-ca-cert"}}
+                {"appMap.telemetry":{"backend":"splunk","url":"https://my-splunk.example.com:443","token":"my-hec-token","ca":"my-ca-cert"}}
                 """;
         assertEquals(expectedJson.trim(), GsonUtils.GSON.toJson(settings).trim());
         assertEquals(settings, GsonUtils.GSON.fromJson(expectedJson, AppMapDeploymentSettings.class));
