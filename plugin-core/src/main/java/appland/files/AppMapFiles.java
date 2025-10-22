@@ -47,8 +47,8 @@ public final class AppMapFiles {
     public static final int SIZE_THRESHOLD_GIANT_BYTES = 200 * 1024 * 1024;
     // Files larger than 10mb and smaller than 200mb are considered large and have to be pruned
     public static final int SIZE_THRESHOLD_LARGE_BYTES = 10 * 1024 * 1024;
-    // Maximum time to wait for the CLI stats command to finish
-    private static final int STATS_COMMAND_TIMEOUT_MILLIS = 20_000;
+    // Maximum time to wait for the CLI stats command to finish (2 minutes)
+    private static final int STATS_COMMAND_TIMEOUT_MILLIS = 120_000;
 
     private AppMapFiles() {
     }
