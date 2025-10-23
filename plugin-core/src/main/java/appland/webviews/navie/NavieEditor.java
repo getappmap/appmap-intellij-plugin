@@ -18,6 +18,7 @@ import appland.toolwindow.AppMapToolWindowFactory;
 import appland.utils.GsonUtils;
 import appland.webviews.SharedAppMapWebViewMessages;
 import appland.webviews.WebviewEditor;
+import appland.webviews.WebviewEditorException;
 import appland.webviews.appMap.AppMapFileEditorProvider;
 import appland.webviews.appMap.AppMapFileEditorState;
 import appland.webviews.webserver.AppMapWebview;
@@ -48,7 +49,6 @@ import com.intellij.util.Alarm;
 import com.intellij.util.SingleAlarm;
 import com.intellij.util.concurrency.AppExecutorUtil;
 import com.intellij.util.concurrency.annotations.RequiresEdt;
-import appland.webviews.navie.NavieEditorProvider;
 import com.intellij.util.concurrency.annotations.RequiresReadLock;
 import lombok.Value;
 import org.jetbrains.annotations.Nls;
@@ -114,7 +114,7 @@ public class NavieEditor extends WebviewEditor<Void> {
     }
 
     @Override
-    protected void setupInitMessage(@Nullable Void initData, @NotNull JsonObject payload) {
+    protected void setupInitMessage(@Nullable Void initData, @NotNull JsonObject payload) throws WebviewEditorException {
         AppMapApplicationSettings settings = AppMapApplicationSettingsService.getInstance();
         var apiKey = settings.getApiKey();
         var useAnimation = settings.isUseAnimation();
@@ -312,7 +312,7 @@ public class NavieEditor extends WebviewEditor<Void> {
         });
     }
 
-    protected @Nullable Void createInitData() {
+    protected @Nullable Void createInitData() throws WebviewEditorException {
         return null;
     }
 

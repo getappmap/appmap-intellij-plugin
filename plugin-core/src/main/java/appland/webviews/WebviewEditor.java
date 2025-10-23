@@ -12,10 +12,12 @@ import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.fileEditor.FileEditor;
 import com.intellij.openapi.fileEditor.FileEditorLocation;
+import com.intellij.openapi.fileEditor.FileEditorManager;
 import com.intellij.openapi.fileEditor.FileEditorState;
 import com.intellij.openapi.progress.ProgressIndicator;
 import com.intellij.openapi.progress.Task;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.ui.Messages;
 import com.intellij.openapi.util.Disposer;
 import com.intellij.openapi.util.UserDataHolderBase;
 import com.intellij.openapi.util.registry.Registry;
@@ -74,7 +76,7 @@ public abstract class WebviewEditor<T> extends UserDataHolderBase implements Fil
      * and also to {@link #afterInit(Object)}.
      */
     @RequiresBackgroundThread
-    protected abstract @Nullable T createInitData();
+    protected abstract @Nullable T createInitData() throws WebviewEditorException;
 
     /**
      * Initialize the init message payload.
@@ -84,7 +86,7 @@ public abstract class WebviewEditor<T> extends UserDataHolderBase implements Fil
      * @param payload  JSON object to send with the initial "init" message to the webview application.
      */
     @RequiresBackgroundThread
-    protected abstract void setupInitMessage(@Nullable T initData, @NotNull JsonObject payload);
+    protected abstract void setupInitMessage(@Nullable T initData, @NotNull JsonObject payload) throws WebviewEditorException;
 
     /**
      * This method allows to post-process editor init, e.g. to send telemetry messages.
@@ -240,11 +242,20 @@ public abstract class WebviewEditor<T> extends UserDataHolderBase implements Fil
                     return;
                 }
 
-                var initData = createInitData();
-                var initMessage = createMessageObject("init");
-                setupInitMessage(initData, initMessage);
-                postMessage(initMessage);
-                afterInit(initData);
+                try {
+                    var initData = createInitData();
+                    var initMessage = createMessageObject("init");
+                    setupInitMessage(initData, initMessage);
+                    postMessage(initMessage);
+                    afterInit(initData);
+                } catch (WebviewEditorException e) {
+                    LOG.warn("error loading webview for " + file.getPresentableUrl(), e);
+
+                    ApplicationManager.getApplication().invokeLater(() -> {
+                        Messages.showErrorDialog(project, e.getLocalizedMessage(), AppMapBundle.get("webview.loading.error.title"));
+                        FileEditorManager.getInstance(project).closeFile(file);
+                    });
+                }
             }
         }.queue();
     }

@@ -6,6 +6,7 @@ import appland.problemsView.FindingsViewTab;
 import appland.problemsView.model.ScannerFinding;
 import appland.utils.GsonUtils;
 import appland.webviews.WebviewEditor;
+import appland.webviews.WebviewEditorException;
 import appland.webviews.findingDetails.FindingDetailsEditorProvider;
 import appland.webviews.webserver.AppMapWebview;
 import com.google.gson.JsonArray;
@@ -32,7 +33,7 @@ public class FindingsOverviewEditor extends WebviewEditor<List<ScannerFinding>> 
     }
 
     @Override
-    protected void setupInitMessage(@Nullable List<ScannerFinding> initData, @NotNull JsonObject payload) {
+    protected void setupInitMessage(@Nullable List<ScannerFinding> initData, @NotNull JsonObject payload) throws WebviewEditorException {
         assert initData != null;
 
         payload.addProperty("page", "finding-overview");
@@ -59,7 +60,7 @@ public class FindingsOverviewEditor extends WebviewEditor<List<ScannerFinding>> 
         }
     }
 
-    protected @NotNull List<ScannerFinding> createInitData() {
+    protected @NotNull List<ScannerFinding> createInitData() throws WebviewEditorException {
         return FindingsManager.getInstance(project).getAllFindings();
     }
 
