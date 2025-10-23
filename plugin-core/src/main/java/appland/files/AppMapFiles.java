@@ -1,9 +1,11 @@
 package appland.files;
 
+import appland.AppMapBundle;
 import appland.cli.AppLandCommandLineService;
 import appland.index.AppMapConfigFileIndex;
 import appland.index.AppMapSearchScopes;
 import appland.utils.GsonUtils;
+import appland.webviews.WebviewEditorException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.google.gson.JsonArray;
@@ -24,8 +26,11 @@ import com.intellij.openapi.vfs.VfsUtil;
 import com.intellij.openapi.vfs.VfsUtilCore;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.search.GlobalSearchScope;
+import com.intellij.util.PathUtil;
+import com.intellij.util.concurrency.ThreadingAssertions;
 import com.intellij.util.concurrency.annotations.RequiresBackgroundThread;
 import com.intellij.util.concurrency.annotations.RequiresReadLock;
+import com.intellij.util.concurrency.annotations.RequiresReadLockAbsence;
 import com.intellij.util.indexing.FileBasedIndex;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -36,6 +41,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
 
+@SuppressWarnings("UnstableApiUsage")
 public final class AppMapFiles {
     private static final Logger LOG = Logger.getInstance("#appmap.files");
 
@@ -250,19 +256,15 @@ public final class AppMapFiles {
      * @param file File to load
      * @return File content or {@code null} if an error occurred
      */
-    @RequiresReadLock
-    public static @Nullable String loadFileContent(@NotNull VirtualFile file) {
+    @RequiresReadLockAbsence
+    private static @Nullable String loadFileContent(@NotNull VirtualFile file) throws IOException {
+        ThreadingAssertions.assertNoReadAccess();
+
         return ReadAction.compute(() -> {
             if (!file.isValid()) {
                 return null;
             }
-
-            try {
-                return VfsUtilCore.loadText(file);
-            } catch (IOException e) {
-                LOG.error("unable to load AppMap file content: " + file.getPath(), e);
-                return null;
-            }
+            return VfsUtilCore.loadText(file);
         });
     }
 
@@ -278,7 +280,7 @@ public final class AppMapFiles {
      * @return The content of {@code null} if an error occurred loading the content
      */
     @RequiresBackgroundThread
-    public static @Nullable String loadAppMapFile(@NotNull VirtualFile file) {
+    public static @NotNull String loadAppMapFile(@NotNull VirtualFile file) throws WebviewEditorException {
         return loadAppMapFile(file, SIZE_THRESHOLD_GIANT_BYTES, SIZE_THRESHOLD_LARGE_BYTES, APPMAP_CLI_MAX_PRUNE_SIZE);
     }
 
@@ -334,10 +336,10 @@ public final class AppMapFiles {
      * @return Content of the AppMap file, pruned when necessary. Either {@code null} in case of errors or valid JSON.
      */
     @RequiresBackgroundThread
-    static @Nullable String loadAppMapFile(@NotNull VirtualFile file,
-                                           int sizeThresholdGiantBytes,
-                                           int sizeThresholdLargeBytes,
-                                           @NotNull String appMapTargetSize) {
+    static @NotNull String loadAppMapFile(@NotNull VirtualFile file,
+                                          int sizeThresholdGiantBytes,
+                                          int sizeThresholdLargeBytes,
+                                          @NotNull String appMapTargetSize) throws WebviewEditorException {
         var fileLength = file.getLength();
 
         if (fileLength > sizeThresholdGiantBytes) {
@@ -346,18 +348,34 @@ public final class AppMapFiles {
 
         if (fileLength > sizeThresholdLargeBytes) {
             var command = AppLandCommandLineService.getInstance().createPruneAppMapCommand(file, appMapTargetSize);
-            if (command != null) {
-                try {
-                    var processOutput = ExecUtil.execAndGetOutput(command);
-                    return getOutputOrLogStatus(command, processOutput);
-                } catch (ExecutionException e) {
-                    LOG.debug("error pruning AppMap: " + file.getPath(), e);
-                }
+            if (command == null) {
+                throw new WebviewEditorException(AppMapBundle.get("appmap.editor.loadingFile.error.missingPruneCommand", file.getPresentableName()));
             }
-            return null;
+
+            ProcessOutput processOutput;
+            try {
+                processOutput = ExecUtil.execAndGetOutput(command);
+            } catch (ExecutionException e) {
+                throw new WebviewEditorException(AppMapBundle.get("appmap.editor.loadingFile.error.prune", file.getPresentableName(), e.getLocalizedMessage()), e);
+            }
+            if (!processOutput.checkSuccess(LOG)) {
+                throw new WebviewEditorException(AppMapBundle.get("appmap.editor.loadingFile.error.prune",
+                        file.getPresentableName(),
+                        execErrorCause(command, processOutput)));
+            }
+
+            return processOutput.getStdout();
         }
 
-        return loadFileContent(file);
+        try {
+            var content = loadFileContent(file);
+            if (content == null) {
+                throw new WebviewEditorException(AppMapBundle.get("appmap.editor.loadingFile.error.content", file.getPresentableName()));
+            }
+            return content;
+        } catch (IOException e) {
+            throw new WebviewEditorException(AppMapBundle.get("appmap.editor.loadingFile.error.content", file.getPresentableName()), e);
+        }
     }
 
     /**
@@ -368,31 +386,36 @@ public final class AppMapFiles {
      * @return {@link JsonObject} containing the AppMap stats, which were retrieved from the AppMap CLI.
      */
     @RequiresBackgroundThread
-    public static @NotNull JsonObject loadAppMapStats(@NotNull VirtualFile file) {
-        JsonArray statsFunctions = null;
-
+    public static @NotNull JsonObject loadAppMapStats(@NotNull VirtualFile file) throws WebviewEditorException {
         var command = AppLandCommandLineService.getInstance().createAppMapStatsCommand(file);
-        if (command != null) {
-            try {
-                var processOutput = ExecUtil.execAndGetOutput(command, STATS_COMMAND_TIMEOUT_MILLIS);
-                var jsonString = getOutputOrLogStatus(command, processOutput);
-                if (jsonString != null) {
-                    statsFunctions = GsonUtils.GSON.fromJson(jsonString, JsonArray.class);
-                }
-            } catch (ExecutionException e) {
-                LOG.debug("error retrieving AppMap file stats: " + file.getPath(), e);
-            }
+        if (command == null) {
+            throw new WebviewEditorException(AppMapBundle.get("appmap.editor.loadingFile.error.missingStatsCommand", file.getPresentableName()));
         }
 
+        ProcessOutput processOutput;
+        try {
+            processOutput = ExecUtil.execAndGetOutput(command, STATS_COMMAND_TIMEOUT_MILLIS);
+        } catch (ExecutionException e) {
+            throw new WebviewEditorException(AppMapBundle.get("appmap.editor.loadingFile.error.stats", file.getPresentableName()), e);
+        }
+        if (!processOutput.checkSuccess(LOG)) {
+            throw new WebviewEditorException(AppMapBundle.get("appmap.editor.loadingFile.error.stats",
+                    file.getPresentableName(),
+                    execErrorCause(command, processOutput)));
+        }
+
+        var statsFunctions = GsonUtils.GSON.fromJson(processOutput.getStdout(), JsonArray.class);
         return GsonUtils.singlePropertyObject("functions", statsFunctions != null ? statsFunctions : new JsonArray());
     }
 
-    private static @Nullable String getOutputOrLogStatus(@NotNull GeneralCommandLine command, @NotNull ProcessOutput processOutput) {
-        if (processOutput.getExitCode() == 0 && !processOutput.isTimeout()) {
-            return processOutput.getStdout();
+    private static @NotNull String execErrorCause(GeneralCommandLine command, @NotNull ProcessOutput processOutput) {
+        var commandName = PathUtil.getFileName(command.getExePath());
+        if (processOutput.isTimeout()) {
+            return AppMapBundle.get("appmap.editor.loadingFile.execErrorCause.timeout", commandName);
         }
-
-        LOG.debug("failed to execute command: " + command.getCommandLineString() + ", status: " + processOutput);
-        return null;
+        if (processOutput.isExitCodeSet()) {
+            return AppMapBundle.get("appmap.editor.loadingFile.execErrorCause.exitCode", commandName, processOutput.getExitCode());
+        }
+        return AppMapBundle.get("appmap.editor.loadingFile.execErrorCause.unknown", commandName);
     }
 }

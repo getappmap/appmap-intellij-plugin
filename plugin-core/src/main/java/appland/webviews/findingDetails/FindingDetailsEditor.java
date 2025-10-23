@@ -6,6 +6,7 @@ import appland.problemsView.FindingsUtil;
 import appland.problemsView.ResolvedStackLocation;
 import appland.utils.GsonUtils;
 import appland.webviews.WebviewEditor;
+import appland.webviews.WebviewEditorException;
 import appland.webviews.appMap.AppMapFileEditorProvider;
 import appland.webviews.appMap.AppMapFileEditorState;
 import appland.webviews.findings.FindingsOverviewEditorProvider;
@@ -75,7 +76,7 @@ public class FindingDetailsEditor extends WebviewEditor<Void> {
     }
 
     @Override
-    protected @Nullable Void createInitData() {
+    protected @Nullable Void createInitData() throws WebviewEditorException {
         return null;
     }
 
@@ -85,7 +86,7 @@ public class FindingDetailsEditor extends WebviewEditor<Void> {
     }
 
     @Override
-    protected void setupInitMessage(@Nullable Void initData, @NotNull JsonObject payload) {
+    protected void setupInitMessage(@Nullable Void initData, @NotNull JsonObject payload) throws WebviewEditorException {
         var findings = FindingDetailsEditorProvider.KEY_FINDINGS.get(file);
         assert findings != null;
 

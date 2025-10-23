@@ -11,11 +11,11 @@ import appland.settings.AppMapSettingsListener;
 import appland.utils.GsonUtils;
 import appland.webviews.SharedAppMapWebViewMessages;
 import appland.webviews.WebviewEditor;
+import appland.webviews.WebviewEditorException;
 import appland.webviews.navie.NavieEditorProvider;
 import appland.webviews.webserver.AppMapWebview;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.application.ModalityState;
@@ -66,20 +66,17 @@ public class AppMapFileEditor extends WebviewEditor<JsonObject> {
     }
 
     @Override
-    protected @Nullable JsonObject createInitData() {
+    protected @Nullable JsonObject createInitData() throws WebviewEditorException {
+        // loadAppMapFile and loadAppMapStats already handle their exceptions and throw WebviewEditorException
         var fileContent = AppMapFiles.loadAppMapFile(file);
-
-        // return early in case of error, for example if the CLI binary is unavailable
-        if (fileContent == null) {
-            return null;
-        }
+        var appMapStats = AppMapFiles.loadAppMapStats(file);
 
         try {
             // parse JSON outside the ReadAction
             var appMapJson = gson.fromJson(fileContent, JsonObject.class);
 
             // retrieve stats from CLI and attach to the parsed AppMap
-            appMapJson.add("stats", AppMapFiles.loadAppMapStats(file));
+            appMapJson.add("stats", appMapStats);
 
             // attach findings for regular or large, pruned AppMaps but not for giant AppMaps
             if (!AppMapFiles.isGiantAppMap(file)) {
@@ -96,13 +93,12 @@ public class AppMapFileEditor extends WebviewEditor<JsonObject> {
 
             return appMapJson;
         } catch (Exception e) {
-            LOG.warn("invalid AppMap json", e);
-            return null;
+            throw new WebviewEditorException(AppMapBundle.get("appmap.editor.loadingFile.error.unknown", file.getPresentableName(), e.getLocalizedMessage()), e);
         }
     }
 
     @Override
-    protected void setupInitMessage(@Nullable JsonObject initData, @NotNull JsonObject payload) {
+    protected void setupInitMessage(@Nullable JsonObject initData, @NotNull JsonObject payload) throws WebviewEditorException {
         var fileNioPath = file.getFileSystem().getNioPath(file);
         var filters = AppMapProjectSettingsService.getState(project).getAppMapFilters().values();
 
@@ -209,8 +205,12 @@ public class AppMapFileEditor extends WebviewEditor<JsonObject> {
     private void reloadAppMapData() {
         ApplicationManager.getApplication().executeOnPooledThread(() -> {
             var message = createMessageObject("loadAppMap");
-            message.add("data", createInitData());
-            postMessage(message);
+            try {
+                message.add("data", createInitData());
+                postMessage(message);
+            } catch (WebviewEditorException e) {
+                LOG.error("Error reloading AppMap data", e);
+            }
         });
     }
 

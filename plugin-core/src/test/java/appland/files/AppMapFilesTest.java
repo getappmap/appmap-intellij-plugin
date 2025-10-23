@@ -2,6 +2,7 @@ package appland.files;
 
 import appland.cli.AppLandCommandLineService;
 import appland.utils.GsonUtils;
+import appland.webviews.WebviewEditorException;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.intellij.execution.ExecutionException;
@@ -75,7 +76,7 @@ public class AppMapFilesTest extends LightPlatformCodeInsightFixture4TestCase {
     }
 
     @Test
-    public void pruneLargeAppMapFile() {
+    public void pruneLargeAppMapFile() throws WebviewEditorException {
         // file with a size of roughly 2.5mb
         var appMap = myFixture.copyFileToProject("appmap/misago_threads_tests_test_threadslists_AllThreadsListTests_test_noscript_pagination.appmap.json");
         var prunedContent = AppMapFiles.loadAppMapFile(appMap, 10 * 1024 * 1024, 2 * 1024 * 1024, "1mb");
@@ -87,7 +88,7 @@ public class AppMapFilesTest extends LightPlatformCodeInsightFixture4TestCase {
     }
 
     @Test
-    public void pruneGiantAppMapFile() {
+    public void pruneGiantAppMapFile() throws WebviewEditorException {
         // file with a size of roughly 2.5mb
         var appMap = myFixture.copyFileToProject("appmap/misago_threads_tests_test_threadslists_AllThreadsListTests_test_noscript_pagination.appmap.json");
         var prunedContent = AppMapFiles.loadAppMapFile(appMap, 2 * 1024 * 1024, 2 * 1024 * 1024, "1mb");
