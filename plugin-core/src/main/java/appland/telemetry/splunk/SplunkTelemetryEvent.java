@@ -12,20 +12,12 @@ import java.util.Map;
  */
 @Value
 class SplunkTelemetryEvent {
-    @SerializedName("extensionId")
-    @NotNull
-    String extensionId;
-
-    @SerializedName("extensionVersion")
-    @NotNull
-    String extensionVersion;
-
-    @SerializedName("eventName")
+    @SerializedName("name")
     @Nullable
-    String eventName;
+    String name;
 
     @SerializedName("properties")
-    @Nullable
+    @NotNull
     Map<String, String> properties;
 
     @SerializedName("measurements")

@@ -1,7 +1,7 @@
 package appland.telemetry.splunk;
 
-import appland.AppMapPlugin;
 import appland.telemetry.TelemetryEvent;
+import appland.telemetry.TelemetryProperties;
 import appland.telemetry.TelemetryReporter;
 import appland.utils.GsonUtils;
 import com.intellij.openapi.diagnostic.Logger;
@@ -11,18 +11,27 @@ import com.intellij.util.io.HttpRequests;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.Map;
 
 public class SplunkTelemetryReporter implements TelemetryReporter {
-    private static final @NotNull String EXTENSION_IDId = "appland.appmap";
     public static final @NotNull String BASE_PATH = "services/collector/event/1.0";
 
     private final @NotNull String url;
     private final @NotNull String token;
+    private final @NotNull Map<String, String> commonProperties;
 
-    public SplunkTelemetryReporter(@NotNull String url, @NotNull String token) {
+    /**
+     * Constructs a new SplunkTelemetryReporter.
+     *
+     * @param url              The URL of the Splunk collector.
+     * @param token            The authentication token for the Splunk collector.
+     * @param commonProperties The common telemetry properties, which are expected to have the "common." prefix.
+     */
+    public SplunkTelemetryReporter(@NotNull String url, @NotNull String token, @NotNull Map<String, String> commonProperties) {
         this.url = url;
         this.token = token;
+        this.commonProperties = commonProperties;
     }
 
     @Override
@@ -37,11 +46,12 @@ public class SplunkTelemetryReporter implements TelemetryReporter {
             return;
         }
 
+        var properties = new HashMap<>(commonProperties);
+        properties.putAll(event.getProperties());
+
         var splunkEvent = new SplunkTelemetryEvent(
-                EXTENSION_IDId,
-                AppMapPlugin.getDescriptor().getVersion(),
                 event.getName(),
-                event.getProperties(),
+                properties,
                 event.getMetrics()
         );
 

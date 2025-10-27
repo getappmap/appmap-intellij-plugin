@@ -6,6 +6,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
+import java.util.Map;
 
 @SuppressWarnings("unused")
 class BaseData {
@@ -21,19 +22,26 @@ class BaseData {
     @Nullable HashMap<String, Double> metrics;
 
     public BaseData(@NotNull String name) {
-        this(name, null);
+        this(name, null, null);
     }
 
     /**
      * Constructor to copy the properties and metrics from an existing TelemetryEvent.
      *
      * @param name  The name of the event.
+     * @param commonProperties Common properties to include.
      * @param event The event to copy.
      */
-    public BaseData(@NotNull String name, @Nullable TelemetryEvent event) {
+    public BaseData(@NotNull String name, @Nullable Map<String, String> commonProperties, @Nullable TelemetryEvent event) {
         this.name = name;
-        this.properties = event != null ? new HashMap<>(event.getProperties()) : null;
-        this.metrics = event != null ? new HashMap<>(event.getMetrics()) : null;
+        this.properties = new HashMap<>();
+        if (commonProperties != null) {
+            this.properties.putAll(commonProperties);
+        }
+        if (event != null) {
+            this.properties.putAll(event.getProperties());
+            this.metrics = new HashMap<>(event.getMetrics());
+        }
     }
 
     public @NotNull BaseData property(String key, String value) {
