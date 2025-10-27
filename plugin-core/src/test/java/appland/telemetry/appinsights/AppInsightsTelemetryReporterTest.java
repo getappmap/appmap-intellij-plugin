@@ -13,6 +13,8 @@ import static org.mockserver.model.HttpRequest.request;
 import static org.mockserver.model.HttpResponse.response;
 import static org.mockserver.model.JsonPathBody.jsonPath;
 
+import java.util.Map;
+
 public class AppInsightsTelemetryReporterTest extends AppMapBaseTest {
     @Rule
     public MockServerRule mockServerRule = new MockServerRule(this, false);
@@ -30,7 +32,8 @@ public class AppInsightsTelemetryReporterTest extends AppMapBaseTest {
                 .when(request().withMethod("POST").withPath("/v2/track"))
                 .respond(response().withStatusCode(200));
 
-        new AppInsightsTelemetryReporter("http://127.0.0.1:" + mockServerRule.getPort()).track(
+        var commonProperties = Map.of("common.extname", "appmap-intellij-plugin");
+        new AppInsightsTelemetryReporter("http://127.0.0.1:" + mockServerRule.getPort(), commonProperties).track(
                 new TelemetryEvent("my-event")
                         .withProperty("property1", "propertyValue1")
                         .withProperty("property2", "propertyValue2")
@@ -43,13 +46,7 @@ public class AppInsightsTelemetryReporterTest extends AppMapBaseTest {
 
         // common properties
         mockServerRule.getClient()
-                .verify(request().withBody(jsonPath("$.data.baseData.properties[?(@.'common.os' != '')]")))
-                .verify(request().withBody(jsonPath("$.data.baseData.properties[?(@.'common.platformversion' != '')]")))
-                .verify(request().withBody(jsonPath("$.data.baseData.properties[?(@.'common.jvmversion' != '')]")))
-                .verify(request().withBody(jsonPath("$.data.baseData.properties[?(@.'common.extversion' != '')]")))
-                .verify(request().withBody(jsonPath("$.data.baseData.properties[?(@.'common.intellijversion' != '')]")))
-                .verify(request().withBody(jsonPath("$.data.baseData.properties[?(@.'common.product' != '')]")))
-                .verify(request().withBody(jsonPath("$.data.baseData.properties[?(@.'common.source' != '')]")));
+                .verify(request().withBody(jsonPath("$.data.baseData.properties[?(@.'common.extname' != '')]")));
 
         // properties
         mockServerRule.getClient()

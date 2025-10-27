@@ -87,9 +87,11 @@ public class TelemetryService {
             // If the `backend` is set to `splunk` but the `url` or `token` are missing, telemetry data will not be sent.
             if (SplunkTelemetryUtils.isSplunkTelemetryEnabled(settings)) {
                 LOG.debug("Splunk telemetry is enabled and active. Creating Splunk telemetry reporter.");
+                var properties = TelemetryProperties.create(true);
                 return new SplunkTelemetryReporter(
                         Objects.requireNonNull(telemetry.getUrl()),
-                        Objects.requireNonNull(telemetry.getToken()));
+                        Objects.requireNonNull(telemetry.getToken()),
+                        TelemetryProperties.withCommonPrefix(properties));
             }
 
             LOG.debug("Splunk telemetry is enabled but inactive. Creating no-op telemetry reporter.");
@@ -97,6 +99,7 @@ public class TelemetryService {
         }
 
         LOG.debug("Creating AppInsights telemetry reporter.");
-        return new AppInsightsTelemetryReporter();
+        var properties = TelemetryProperties.create(false);
+        return new AppInsightsTelemetryReporter(TelemetryProperties.withCommonPrefix(properties));
     }
 }

@@ -1,17 +1,14 @@
 package appland.telemetry.appinsights;
 
-import appland.AppMapPlugin;
-import appland.telemetry.Identity;
-import appland.telemetry.Session;
-import appland.telemetry.TelemetryEvent;
-import appland.telemetry.TelemetryReporter;
+import appland.telemetry.*;
 import appland.utils.GsonUtils;
-import com.intellij.openapi.application.ApplicationInfo;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.util.Urls;
 import com.intellij.util.concurrency.annotations.RequiresBackgroundThread;
 import com.intellij.util.io.HttpRequests;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.Map;
 
 
 /*
@@ -24,13 +21,20 @@ public class AppInsightsTelemetryReporter implements TelemetryReporter {
     private static final @NotNull String DEFAULT_INGESTION_ENDPOINT = "https://centralus-0.in.applicationinsights.azure.com";
 
     private final @NotNull String ingestionEndpoint;
+    private final @NotNull Map<String, String> commonProperties;
 
-    public AppInsightsTelemetryReporter() {
-        this(DEFAULT_INGESTION_ENDPOINT);
+    /**
+     * Constructs a new AppInsightsTelemetryReporter.
+     *
+     * @param commonProperties The common telemetry properties, which are expected to have the "common." prefix.
+     */
+    public AppInsightsTelemetryReporter(@NotNull Map<String, String> commonProperties) {
+        this(DEFAULT_INGESTION_ENDPOINT, commonProperties);
     }
 
-    AppInsightsTelemetryReporter(@NotNull String ingestionEndpoint) {
+    AppInsightsTelemetryReporter(@NotNull String ingestionEndpoint, @NotNull Map<String, String> commonProperties) {
         this.ingestionEndpoint = ingestionEndpoint;
+        this.commonProperties = commonProperties;
     }
 
     @Override
@@ -39,14 +43,9 @@ public class AppInsightsTelemetryReporter implements TelemetryReporter {
         var userId = Identity.getOrCreateMachineId();
         var osVersion = System.getProperty("os.version");
 
-        var appInsightsEvent = new AppInsightsTelemetryEvent(INSTRUMENTATION_KEY, new BaseData(EVENT_PREFIX + event.getName(), event))
-                .property("common.os", System.getProperty("os.name"))
-                .property("common.platformversion", System.getProperty("os.version"))
-                .property("common.jvmversion", System.getProperty("java.version"))
-                .property("common.extversion", AppMapPlugin.getDescriptor().getVersion())
-                .property("common.intellijversion", ApplicationInfo.getInstance().getFullVersion())
-                .property("common.product", ApplicationInfo.getInstance().getBuild().getProductCode())
-                .property("common.source", "JetBrains")
+        var data = new BaseData(EVENT_PREFIX + event.getName(), this.commonProperties, event);
+
+        var appInsightsEvent = new AppInsightsTelemetryEvent(INSTRUMENTATION_KEY, data)
                 .tag(Tag.OsVersion, osVersion)
                 .tag(Tag.UserId, userId)
                 .tag(Tag.SessionId, Session.getId());
