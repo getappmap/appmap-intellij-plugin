@@ -12,6 +12,7 @@ import appland.settings.AppMapSettingsListener;
 import appland.utils.DataContexts;
 import appland.webviews.OpenExternalLinksHandler;
 import appland.webviews.WebviewEditor;
+import appland.webviews.WebviewEditorException;
 import appland.webviews.findings.FindingsOverviewEditorProvider;
 import appland.webviews.navie.NavieEditorProvider;
 import appland.webviews.navie.NaviePromptSuggestion;
@@ -114,12 +115,12 @@ public class InstallGuideEditor extends WebviewEditor<List<ProjectMetadata>> {
     }
 
     @Override
-    protected @Nullable List<ProjectMetadata> createInitData() {
+    protected @Nullable List<ProjectMetadata> createInitData() throws WebviewEditorException {
         return findProjects();
     }
 
     @Override
-    protected void setupInitMessage(@Nullable List<ProjectMetadata> initData, @NotNull JsonObject payload) {
+    protected void setupInitMessage(@Nullable List<ProjectMetadata> initData, @NotNull JsonObject payload) throws WebviewEditorException {
         addBaseProperties(payload);
         payload.add("projects", gson.toJsonTree(initData));
     }

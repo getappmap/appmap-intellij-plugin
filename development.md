@@ -27,3 +27,8 @@ Values `appmap_dir` of these files are marked to be indexed even when such direc
 Content roots are usually the top-level directories of a project.
 Therefore, `appmap.yml` files located in a nested, excluded folder won't be found by this implementation.
 We're not collecting such files because iterating the complete directory tree is expensive without an index.
+
+### Deployment Settings
+
+To launch with automatically created deployment settings for testing, use
+`./gradlew runIdeWithDeploymentSettings`.

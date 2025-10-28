@@ -1,10 +1,11 @@
-package appland.telemetry.data;
+package appland.telemetry.appinsights;
 
 import org.jetbrains.annotations.NotNull;
 
 import com.google.gson.annotations.SerializedName;
 
-public class MessageData {
+@SuppressWarnings("unused")
+class MessageData {
     @SerializedName("baseType")
     @NotNull final String baseType = "EventData";
 

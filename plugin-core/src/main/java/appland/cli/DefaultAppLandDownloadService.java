@@ -1,6 +1,7 @@
 package appland.cli;
 
 import appland.AppMapBundle;
+import appland.settings.DownloadSettings;
 import appland.utils.GsonUtils;
 import com.google.gson.JsonObject;
 import com.intellij.openapi.application.ApplicationManager;
@@ -15,7 +16,6 @@ import com.intellij.openapi.util.Version;
 import com.intellij.openapi.util.io.NioFiles;
 import com.intellij.util.Urls;
 import com.intellij.util.io.HttpRequests;
-import com.intellij.util.system.CpuArch;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -27,55 +27,37 @@ import java.nio.file.StandardCopyOption;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 
-import static java.nio.file.attribute.PosixFilePermission.*;
+import static appland.cli.CliTools.currentArch;
+import static appland.cli.CliTools.currentPlatform;
 
 /**
- * Downloads are stored as "appland-downloads/$NAME/$VERSION/$NAME-$OS-$ARCH",
- * e.g. "appland-downloads/appmap/1.2.3/appmap-linux-x64".
+ * Downloads are stored as "appland-downloads/$NAME/$VERSION/$NAME-$OS-$ARCH", e.g. "appland-downloads/appmap/1.2.3/appmap-linux-x64".
  */
 public class DefaultAppLandDownloadService implements AppLandDownloadService {
     private static final Logger LOG = Logger.getInstance(DefaultAppLandDownloadService.class);
 
     @Override
-    public boolean isDownloaded(@NotNull CliTool type) {
-        var unitTestMode = ApplicationManager.getApplication().isUnitTestMode();
-
-        var directory = getToolDownloadDirectory(type, unitTestMode);
-        if (!Files.isDirectory(directory)) {
-            return false;
-        }
-
-        return findVersionDownloadDirectories(directory)
-                .stream()
-                .anyMatch(path -> {
-                    var fileName = path.getFileName().toString();
-                    return Version.parseVersion(fileName) != null && isDownloaded(type, fileName, unitTestMode);
-                });
-    }
-
-    @Override
-    public boolean isDownloaded(@NotNull CliTool type, @NotNull String version, boolean unitTestMode) {
-        return isExecutableBinary(getExecutableFilePath(type, version, currentPlatform(), currentArch(), unitTestMode));
-    }
-
-    @Override
-    public @Nullable Path getDownloadFilePath(@NotNull CliTool type) {
+    public @Nullable Path getDownloadFilePath(@NotNull CliTool type, @NotNull String platform, @NotNull String arch) {
         var version = findLatestDownloadedVersion(type);
         if (version == null) {
             return null;
         }
 
         var unitTestMode = ApplicationManager.getApplication().isUnitTestMode();
-        return getExecutableFilePath(type, version, currentPlatform(), currentArch(), unitTestMode);
+        return getExecutableFilePath(type, version, platform, arch, unitTestMode);
     }
 
     @Override
-    public boolean download(@NotNull CliTool type,
-                            @NotNull String version,
-                            @NotNull ProgressIndicator progressIndicator) {
+    public @NotNull AppMapDownloadStatus download(@NotNull CliTool type,
+                                                  @NotNull String version,
+                                                  @NotNull ProgressIndicator progressIndicator) {
+        if (DownloadSettings.isAssetDownloadDisabled()) {
+            notifyDownloadFinished(type, AppMapDownloadStatus.Skipped);
+            return AppMapDownloadStatus.Skipped;
+        }
+
         var unitTestMode = ApplicationManager.getApplication().isUnitTestMode();
 
         try {
@@ -97,9 +79,7 @@ public class DefaultAppLandDownloadService implements AppLandDownloadService {
             LOG.debug(String.format("Downloading CLI binary %s from %s to %s", type.getId(), url, targetFilePath));
             HttpRequests.request(url).saveToFile(downloadTargetFilePath, progressIndicator);
 
-            if (SystemInfo.isUnix) {
-                Files.setPosixFilePermissions(downloadTargetFilePath, Set.of(OWNER_READ, OWNER_WRITE, OWNER_EXECUTE, GROUP_READ, OTHERS_READ));
-            }
+            CliTools.fixBinaryPermissions(downloadTargetFilePath);
 
             // now move the downloaded file to the expected path
             Files.move(downloadTargetFilePath, targetFilePath, StandardCopyOption.ATOMIC_MOVE);
@@ -107,8 +87,8 @@ public class DefaultAppLandDownloadService implements AppLandDownloadService {
             // after a successful download, remove previous downloads, make sure to keep the new download
             removeOtherVersions(type, version, unitTestMode);
 
-            notifyDownloadFinished(type, true);
-            return true;
+            notifyDownloadFinished(type, AppMapDownloadStatus.Successful);
+            return AppMapDownloadStatus.Successful;
         } catch (IOException e) {
             LOG.debug("Error downloading CLI binary", e);
 
@@ -122,8 +102,8 @@ public class DefaultAppLandDownloadService implements AppLandDownloadService {
                 LOG.debug("Error cleaning up download directory: " + downloadDir, e);
             }
 
-            notifyDownloadFinished(type, false);
-            return false;
+            notifyDownloadFinished(type, AppMapDownloadStatus.Failed);
+            return AppMapDownloadStatus.Failed;
         }
     }
 
@@ -140,9 +120,11 @@ public class DefaultAppLandDownloadService implements AppLandDownloadService {
     }
 
     @Override
-    public void queueDownloadTasks(@NotNull Project project) throws IOException {
-        downloadTool(project, CliTool.AppMap);
-        downloadTool(project, CliTool.Scanner);
+    public void queueDownloadTasks(@NotNull Project project) {
+        if (DownloadSettings.isAssetDownloadEnabled()) {
+            downloadTool(project, CliTool.AppMap);
+            downloadTool(project, CliTool.Scanner);
+        }
     }
 
     public @Nullable String findLatestDownloadedVersion(@NotNull CliTool type) {
@@ -161,6 +143,10 @@ public class DefaultAppLandDownloadService implements AppLandDownloadService {
                 .map(file -> file.getFileName().toString())
                 .max(Comparator.naturalOrder())
                 .orElse(null);
+    }
+
+    private boolean isDownloaded(@NotNull CliTool type, @NotNull String version, boolean unitTestMode) {
+        return isExecutableBinary(getExecutableFilePath(type, version, currentPlatform(), currentArch(), unitTestMode));
     }
 
     private boolean isExecutableBinary(@NotNull Path file) {
@@ -221,57 +207,34 @@ public class DefaultAppLandDownloadService implements AppLandDownloadService {
         return basePath.resolve(type.getId());
     }
 
-    private void downloadTool(@NotNull Project project, @NotNull CliTool type) throws IOException {
+    private void downloadTool(@NotNull Project project, @NotNull CliTool type) {
         LOG.debug("Downloading AppMap CLI tool: " + type);
-
-        var service = AppLandDownloadService.getInstance();
-        var latestVersion = service.fetchLatestRemoteVersion(type);
-        if (latestVersion != null && !service.isDownloaded(type, latestVersion, ApplicationManager.getApplication().isUnitTestMode())) {
+        var latestVersion = fetchLatestRemoteVersion(type);
+        if (latestVersion != null && !isDownloaded(type, latestVersion, ApplicationManager.getApplication().isUnitTestMode())) {
             var title = AppMapBundle.get("cliDownload.progress.title", type.getPresentableName());
             new Task.Backgroundable(project, title, true) {
                 @Override
                 public void run(@NotNull ProgressIndicator indicator) {
-                    var success = service.download(type, latestVersion, indicator);
-                    if (!success) {
-                        LOG.debug("Download of CLI tool failed: " + type);
+                    var status = download(type, latestVersion, indicator);
+                    switch (status) {
+                        case Failed -> LOG.debug("Download of CLI tool failed: " + type);
+                        case Skipped -> LOG.debug("Download of CLI tool was skipped: " + type);
                     }
                 }
             }.queue();
         }
     }
 
-    private static void notifyDownloadFinished(@NotNull CliTool type, boolean success) {
+    private static void notifyDownloadFinished(@NotNull CliTool type, AppMapDownloadStatus status) {
         var application = ApplicationManager.getApplication();
         if (!application.isDisposed()) {
             application.executeOnPooledThread(() -> {
                 if (!application.isDisposed()) {
                     application.getMessageBus()
                             .syncPublisher(AppLandDownloadListener.TOPIC)
-                            .downloadFinished(type, success);
+                            .downloadFinished(type, status);
                 }
             });
         }
-    }
-
-    // package-visible for our tests
-    static @NotNull String currentPlatform() {
-        if (SystemInfo.isLinux) {
-            return "linux";
-        }
-
-        if (SystemInfo.isMac) {
-            return "macos";
-        }
-
-        if (SystemInfo.isWindows) {
-            return "win";
-        }
-
-        throw new IllegalStateException("Unsupported platform: " + SystemInfo.getOsNameAndVersion());
-    }
-
-    // package-visible for our tests
-    static @NotNull String currentArch() {
-        return CpuArch.isArm64() ? "arm64" : "x64";
     }
 }

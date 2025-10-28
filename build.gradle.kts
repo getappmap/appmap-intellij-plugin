@@ -28,7 +28,7 @@ buildscript {
 plugins {
     idea
     id("org.jetbrains.kotlin.jvm")
-    id("org.jetbrains.intellij.platform") version "2.7.0"
+    id("org.jetbrains.intellij.platform") version "2.10.0"
     id("org.jetbrains.changelog") version "2.2.1"
     id("com.adarshr.test-logger") version "3.2.0"
     id("de.undercouch.download") version "5.6.0"
@@ -71,7 +71,12 @@ allprojects {
     val testOutput = configurations.create("testOutput")
     dependencies {
         intellijPlatform {
-            intellijIdeaCommunity(ideVersion)
+            // 2025.3 is only available as a unified build
+            when {
+                platformVersion >= 253 -> intellijIdeaUltimate(ideVersion)
+                else -> intellijIdeaCommunity(ideVersion)
+            }
+
             // using "Bundled" to gain access to the Java plugin's test classes
             testFramework(TestFrameworkType.Platform)
             testFramework(TestFrameworkType.Bundled)
@@ -86,7 +91,12 @@ allprojects {
             }
             // 2024.3 extracted JSON support into a plugin
             if (platformVersion >= 243) {
-                bundledPlugin("com.intellij.modules.json")
+                bundledPlugins("com.intellij.modules.json")
+            }
+            // 2025.3 extracted OAuth support into modules
+            if (platformVersion >= 253) {
+                bundledModule("intellij.platform.collaborationTools.auth.base")
+                bundledModule("intellij.platform.collaborationTools.auth")
             }
         }
 
@@ -173,8 +183,34 @@ allprojects {
         // Target to execute tests, which are incompatible with the AppMap agent.
         // Only tests with category "appland.WithoutAppMapAgent" are executed.
         val testWithoutAgent by intellijPlatformTesting.testIde.registering {
-            type = IntelliJPlatformType.IntellijIdeaCommunity
+            type = when {
+                platformVersion >= 253 -> IntelliJPlatformType.IntellijIdeaUltimate
+                else -> IntelliJPlatformType.IntellijIdeaCommunity
+            }
             version = ideVersion
+
+            testFramework(TestFrameworkType.Platform)
+            testFramework(TestFrameworkType.Bundled)
+            if (project.name == "plugin-java") {
+                testFramework(TestFrameworkType.Plugin.Java)
+            }
+
+            plugins {
+                // org.jetbrains.intellij.platform requires to bundledModules for 2024.2+
+                if (platformVersion >= 242) {
+                    bundledModule("intellij.platform.collaborationTools")
+                    bundledModule("intellij.platform.vcs.impl")
+                }
+                // 2024.3 extracted JSON support into a plugin
+                if (platformVersion >= 243) {
+                    bundledPlugins("com.intellij.modules.json")
+                }
+                // 2025.3 extracted OAuth support into modules
+                if (platformVersion >= 253) {
+                    bundledModule("intellij.platform.collaborationTools.auth.base")
+                    bundledModule("intellij.platform.collaborationTools.auth")
+                }
+            }
 
             task {
                 useJUnit {
@@ -293,11 +329,11 @@ project(":") {
                     types.set(listOf(IntelliJPlatformType.IntellijIdeaCommunity))
                 }
 
-                // latest supported major version
+                // latest supported major version, 2025.3 is only available as a unified build
                 select {
-                    sinceBuild = "252"
-                    untilBuild = "252.*"
-                    types.set(listOf(IntelliJPlatformType.IntellijIdeaCommunity))
+                    sinceBuild = "253"
+                    untilBuild = "253.*"
+                    types.set(listOf(IntelliJPlatformType.IntellijIdeaUltimate))
                 }
             }
 
@@ -336,6 +372,32 @@ project(":") {
             mustRunAfter("check")
         }
 
+        @Suppress("unused")
+        val runIdeWithDeploymentSettings by intellijPlatformTesting.runIde.registering {
+            sandboxDirectory = project.layout.buildDirectory.dir("idea-sandbox-deployment-settings")
+
+            prepareSandboxTask {
+                doLast {
+                    val settingsFile = pluginDirectory.file("site-config.json").get().asFile
+                    if (!settingsFile.exists()) {
+                        settingsFile.writeText("""
+                            {
+                                "appMap.autoUpdateTools": false,
+                                "appMap.telemetry": {
+                                    "backend": "splunk"
+                                }
+                            }
+                            """.trimIndent())
+                    }
+                }
+            }
+
+            task {
+                systemProperty("appmap.sandbox", "true")
+                jvmArgs("-Xmx2048m")
+            }
+        }
+
         task<Copy>("copyPluginAssets") {
             dependsOn(":downloadAppMapAgent")
             doNotTrackState("target directory can contain temporary sockets")
@@ -353,7 +415,7 @@ project(":") {
                 include("NOTICE.txt")
             }
             from(agentOutputPath.parentFile) {
-                into("appmap-assets/appmap-java-agent")
+                into("appmap-assets/resources")
                 include("*.jar")
             }
             from("${project.rootDir}/appland") {

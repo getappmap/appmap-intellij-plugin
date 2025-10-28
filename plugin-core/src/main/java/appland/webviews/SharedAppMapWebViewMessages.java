@@ -7,6 +7,7 @@ import appland.files.FileLookup;
 import appland.notifications.AppMapNotifications;
 import appland.settings.AppMapProjectSettingsService;
 import appland.settings.AppMapWebViewFilter;
+import appland.telemetry.TelemetryEvent;
 import appland.telemetry.TelemetryService;
 import appland.utils.GsonUtils;
 import appland.webviews.appMap.ExportSvgUtil;
@@ -82,7 +83,6 @@ public final class SharedAppMapWebViewMessages {
             return false;
         }
 
-        var telemetryService = TelemetryService.getInstance();
         var gson = editor.gson;
         switch (messageId) {
             case "clearSelection":
@@ -109,10 +109,8 @@ public final class SharedAppMapWebViewMessages {
                 if (message != null) {
                     var tabId = message.getAsJsonPrimitive("tabId");
                     if (tabId.isString()) {
-                        telemetryService.sendEvent("click_tab", eventData -> {
-                            eventData.property("appmap.click_tab.tabId", tabId.getAsString());
-                            return eventData;
-                        });
+                        TelemetryService.getInstance().sendEvent(new TelemetryEvent("click_tab")
+                                .withProperty("appmap.click_tab.tabId", tabId.getAsString()));
                     }
                 }
                 return true;

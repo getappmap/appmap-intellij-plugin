@@ -50,4 +50,7 @@ public interface AppMapSettingsListener {
 
     default void selectedAppMapModelChanged() {
     }
+
+    default void autoUpdateToolsChanged() {
+    }
 }

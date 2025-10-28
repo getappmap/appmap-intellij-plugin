@@ -1,9 +1,6 @@
 package appland.rpcService;
 
-import appland.cli.AppLandCommandLineService;
-import appland.cli.AppLandDownloadListener;
-import appland.cli.AppLandModelInfoProvider;
-import appland.cli.CliTool;
+import appland.cli.*;
 import appland.config.AppMapConfigFileListener;
 import appland.files.AppMapFiles;
 import appland.settings.AppMapApplicationSettingsService;
@@ -34,12 +31,6 @@ import com.intellij.util.concurrency.annotations.RequiresBackgroundThread;
 import com.intellij.util.concurrency.annotations.RequiresReadLock;
 import com.intellij.util.io.BaseOutputReader;
 import com.intellij.util.io.HttpRequests;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import java.io.InputStreamReader;
-import java.nio.charset.StandardCharsets;
-import appland.rpcService.NavieThreadQueryV1Params;
-import appland.rpcService.NavieThreadQueryV1Response;
 import lombok.Data;
 import net.jcip.annotations.GuardedBy;
 import org.jetbrains.annotations.NotNull;
@@ -210,7 +201,7 @@ public class DefaultAppLandJsonRpcService implements AppLandJsonRpcService, AppL
             } catch (ExecutionException e) {
                 LOG.debug("Failed to launch AppMap JSON-RPC server, command: " + commandLine.getCommandLineString(), e);
             } finally {
-                if (!isDisposed) {
+                if (!isDisposed && !project.isDisposed()) {
                     project.getMessageBus().syncPublisher(AppLandJsonRpcListener.TOPIC).serverStarted();
                 }
             }
@@ -339,7 +330,7 @@ public class DefaultAppLandJsonRpcService implements AppLandJsonRpcService, AppL
                 }
             }
         } finally {
-            if (!isDisposed) {
+            if (!isDisposed && !project.isDisposed()) {
                 project.getMessageBus().syncPublisher(AppLandJsonRpcListener.TOPIC).serverStopped();
             }
         }
@@ -347,8 +338,8 @@ public class DefaultAppLandJsonRpcService implements AppLandJsonRpcService, AppL
     }
 
     @Override
-    public void downloadFinished(@NotNull CliTool type, boolean success) {
-        if (success && CliTool.AppMap.equals(type) && !isServerRunning()) {
+    public void downloadFinished(@NotNull CliTool type, @NotNull AppMapDownloadStatus status) {
+        if (status.isSuccessful() && CliTool.AppMap.equals(type) && !isServerRunning()) {
             restartServerAsync();
         }
     }
@@ -573,7 +564,7 @@ public class DefaultAppLandJsonRpcService implements AppLandJsonRpcService, AppL
             if (restartNeeded) {
                 nextRestartDelayMillis = (long) ((double) currentRestartDelay * NEXT_RESTART_FACTOR);
                 AppExecutorUtil.getAppScheduledExecutorService().schedule(() -> {
-                            if (!isDisposed) {
+                            if (!isDisposed && !project.isDisposed()) {
                                 try {
                                     DefaultAppLandJsonRpcService.this.startServer();
                                 } finally {

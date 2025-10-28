@@ -8,12 +8,12 @@ import com.intellij.openapi.progress.EmptyProgressIndicator;
 public class TestAppLandDownloadService extends DefaultAppLandDownloadService {
     public static void ensureDownloaded() {
         var service = (TestAppLandDownloadService) AppLandDownloadService.getInstance();
-        for (var value : CliTool.values()) {
-            if (!service.isDownloaded(value)) {
-                var version = service.fetchLatestRemoteVersion(value);
+        for (var type : CliTool.values()) {
+            if (service.findLatestDownloadedVersion(type) == null) {
+                var version = service.fetchLatestRemoteVersion(type);
                 assert version != null;
 
-                service.download(value, version, new EmptyProgressIndicator());
+                service.download(type, version, new EmptyProgressIndicator());
             }
         }
     }
