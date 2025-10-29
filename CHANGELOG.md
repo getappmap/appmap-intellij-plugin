@@ -1,5 +1,16 @@
 AppMap Plugin Changelog
 
+## [0.81.0](https://github.com/getappmap/appmap-intellij-plugin/compare/v0.80.2...v0.81.0) (2025-10-29)
+
+
+### Features
+
+-  implement Splunk telemetry reporter ([459d1cc]())-  show the deployment settings in the AppMap status report ([728e3a7]())-  support binary assets bundled with the plugin package ([6354d7c]())-  support deployment settings via site-config.json and use it to configure splunk telemetry ([b76deec]())-  **telemetry:** Enhance telemetry with common properties and CLI support ([0a98488]())
+
+### Bug Fixes
+
+-  better error handling for webview-based editors ([45393f0]())-  incompatibilities of 2025.3 EAP ([448cb5c]())-  NPE generating AppMap status report with deployment settings ([23d500e]())-  tests with 2025.3 eap ([7a49d09]())-  the timeout of 20s to load AppMap stats prevents large AppMap to open ([65a4cd8]())
+
 ## [0.80.2](https://github.com/getappmap/appmap-intellij-plugin/compare/v0.80.1...v0.80.2) (2025-08-25)
 
 
