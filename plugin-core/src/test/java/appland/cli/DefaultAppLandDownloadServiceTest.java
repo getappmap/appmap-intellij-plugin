@@ -71,6 +71,15 @@ public class DefaultAppLandDownloadServiceTest extends AppMapBaseTest {
         assertEquals(List.of(rootPath.resolve("1.2.3")), DefaultAppLandDownloadService.removeOtherVersions(rootPath, "9.9.9"));
     }
 
+    @Test
+    public void parseLatestVersion() {
+        var json = "[{\"tag_name\": \"@appland/scanner-v1.2.3\"}, {\"tag_name\": \"@appland/appmap-v4.5.6\"}]";
+        var releases = com.google.gson.JsonParser.parseString(json).getAsJsonArray();
+
+        assertEquals("4.5.6", DefaultAppLandDownloadService.parseLatestVersion(CliTool.AppMap, releases));
+        assertEquals("1.2.3", DefaultAppLandDownloadService.parseLatestVersion(CliTool.Scanner, releases));
+    }
+
     private static void assertDownloadPath(@NotNull CliTool type) {
         assertNotNull(DefaultAppLandDownloadService.getToolDownloadDirectory(type, true));
         assertNotNull(DefaultAppLandDownloadService.getToolDownloadDirectory(type, false));
