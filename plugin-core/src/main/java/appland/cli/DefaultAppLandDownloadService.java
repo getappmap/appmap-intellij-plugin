@@ -3,6 +3,7 @@ package appland.cli;
 import appland.AppMapBundle;
 import appland.settings.DownloadSettings;
 import appland.utils.GsonUtils;
+import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.application.PathManager;
@@ -37,6 +38,9 @@ import static appland.cli.CliTools.currentPlatform;
  */
 public class DefaultAppLandDownloadService implements AppLandDownloadService {
     private static final Logger LOG = Logger.getInstance(DefaultAppLandDownloadService.class);
+    private static final String LATEST_VERSION_URL = "https://api.github.com/repos/getappmap/appmap-js/releases";
+    private final Object lock = new Object();
+    private volatile JsonArray cachedReleases = null;
 
     @Override
     public @Nullable Path getDownloadFilePath(@NotNull CliTool type, @NotNull String platform, @NotNull String arch) {
@@ -109,13 +113,49 @@ public class DefaultAppLandDownloadService implements AppLandDownloadService {
 
     @Override
     public @Nullable String fetchLatestRemoteVersion(@NotNull CliTool type) {
-        try {
-            var request = HttpRequests.request(Urls.newFromEncoded(type.getLatestVersionURL()));
-            var jsonString = request.readString(ProgressManager.getGlobalProgressIndicator());
-            var json = GsonUtils.GSON.fromJson(jsonString, JsonObject.class);
-            return json.has("version") ? json.getAsJsonPrimitive("version").getAsString() : null;
-        } catch (IOException e) {
+        var releases = getLatestReleases();
+        if (releases == null) {
             return null;
+        }
+        return parseLatestVersion(type, releases);
+    }
+
+    public static @Nullable String parseLatestVersion(@NotNull CliTool type, @NotNull com.google.gson.JsonArray releases) {
+        var prefix = "@appland/" + type.getId() + "-v";
+        for (var release : releases) {
+            var releaseObj = release.getAsJsonObject();
+            if (releaseObj.has("tag_name")) {
+                var tagName = releaseObj.getAsJsonPrimitive("tag_name").getAsString();
+                if (tagName.startsWith(prefix)) {
+                    return tagName.substring(prefix.length());
+                }
+            }
+        }
+        return null;
+    }
+
+    private @Nullable JsonArray getLatestReleases() {
+        if (cachedReleases != null) {
+            return cachedReleases;
+        }
+
+        synchronized (lock) {
+            if (cachedReleases != null) {
+                return cachedReleases;
+            }
+
+            try {
+                var request = HttpRequests.request(Urls.newFromEncoded(LATEST_VERSION_URL));
+                var jsonString = request.readString(ProgressManager.getGlobalProgressIndicator());
+                var json = GsonUtils.GSON.fromJson(jsonString, com.google.gson.JsonArray.class);
+                if (json != null && json.isJsonArray()) {
+                    cachedReleases = json.getAsJsonArray();
+                    return cachedReleases;
+                }
+                return null;
+            } catch (IOException e) {
+                return null;
+            }
         }
     }
 
