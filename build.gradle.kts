@@ -398,8 +398,36 @@ project(":") {
             }
         }
 
-        task<Copy>("copyPluginAssets") {
-            dependsOn(":downloadAppMapAgent")
+        @Suppress("UNCHECKED_CAST")
+        val downloadAppMapAgent by registering(Download::class) {
+            src("https://api.github.com/repos/getappmap/appmap-java/releases/latest")
+            dest(project.layout.buildDirectory.file("appmap-java.json"))
+            overwrite(true)
+            quiet(true)
+            if (isCI && githubToken != null) {
+                header("Authorization", "Bearer $githubToken")
+            }
+
+            doLast {
+                val json = JsonSlurper().parseText(dest.readText()) as Map<*, *>
+                val jarAsset = (json["assets"] as List<Map<*, *>>)
+                    .filter { (it["name"] as? String)?.endsWith(".jar") == true }
+                    .map { it["browser_download_url"]!! }
+                    .firstOrNull()
+
+                download.run {
+                    src(jarAsset)
+                    dest(agentOutputPath)
+                    overwrite(false)
+                    if (isCI && githubToken != null) {
+                        header("Authorization", "Bearer $githubToken")
+                    }
+                }
+            }
+        }
+
+        val copyPluginAssets by registering(Copy::class) {
+            dependsOn(downloadAppMapAgent)
             doNotTrackState("target directory can contain temporary sockets")
 
             inputs.file("${project.rootDir}/NOTICE.txt")
@@ -443,46 +471,18 @@ project(":") {
                 include("index.html")
                 include("dist/**")
             }
+        }
 
-            processResources {
-                dependsOn("copyPluginAssets")
-            }
+        processResources {
+            dependsOn(copyPluginAssets)
+        }
 
-            jar {
-                dependsOn("copyPluginAssets")
-            }
+        jar {
+            dependsOn(copyPluginAssets)
         }
 
         patchPluginXml {
-            dependsOn(":copyPluginAssets")
-        }
-
-        @Suppress("UNCHECKED_CAST")
-        task<Download>("downloadAppMapAgent") {
-            src("https://api.github.com/repos/getappmap/appmap-java/releases/latest")
-            dest(project.layout.buildDirectory.file("appmap-java.json"))
-            overwrite(true)
-            quiet(true)
-            if (isCI && githubToken != null) {
-                header("Authorization", "Bearer $githubToken")
-            }
-
-            doLast {
-                val json = JsonSlurper().parseText(dest.readText()) as Map<*, *>
-                val jarAsset = (json["assets"] as List<Map<*, *>>)
-                    .filter { (it["name"] as? String)?.endsWith(".jar") == true }
-                    .map { it["browser_download_url"]!! }
-                    .firstOrNull()
-
-                download.run {
-                    src(jarAsset)
-                    dest(agentOutputPath)
-                    overwrite(false)
-                    if (isCI && githubToken != null) {
-                        header("Authorization", "Bearer $githubToken")
-                    }
-                }
-            }
+            dependsOn(copyPluginAssets)
         }
     }
 }
