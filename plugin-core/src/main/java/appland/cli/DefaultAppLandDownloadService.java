@@ -4,7 +4,6 @@ import appland.AppMapBundle;
 import appland.settings.DownloadSettings;
 import appland.utils.GsonUtils;
 import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.application.PathManager;
 import com.intellij.openapi.diagnostic.Logger;
@@ -25,9 +24,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static appland.cli.CliTools.currentArch;
@@ -38,9 +35,9 @@ import static appland.cli.CliTools.currentPlatform;
  */
 public class DefaultAppLandDownloadService implements AppLandDownloadService {
     private static final Logger LOG = Logger.getInstance(DefaultAppLandDownloadService.class);
-    private static final String LATEST_VERSION_URL = "https://api.github.com/repos/getappmap/appmap-js/releases";
+    private static final String LATEST_CLI_VERSIONS_URL = "https://api.github.com/repos/getappmap/appmap-js/releases";
     private final Object lock = new Object();
-    private volatile JsonArray cachedReleases = null;
+    private volatile Map<CliTool, String> cachedReleaseVersions = null;
 
     @Override
     public @Nullable Path getDownloadFilePath(@NotNull CliTool type, @NotNull String platform, @NotNull String arch) {
@@ -113,50 +110,18 @@ public class DefaultAppLandDownloadService implements AppLandDownloadService {
 
     @Override
     public @Nullable String fetchLatestRemoteVersion(@NotNull CliTool type) {
-        var releases = getLatestReleases();
-        if (releases == null) {
-            return null;
-        }
-        return parseLatestVersion(type, releases);
-    }
-
-    public static @Nullable String parseLatestVersion(@NotNull CliTool type, @NotNull com.google.gson.JsonArray releases) {
-        var prefix = "@appland/" + type.getId() + "-v";
-        for (var release : releases) {
-            var releaseObj = release.getAsJsonObject();
-            if (releaseObj.has("tag_name")) {
-                var tagName = releaseObj.getAsJsonPrimitive("tag_name").getAsString();
-                if (tagName.startsWith(prefix)) {
-                    return tagName.substring(prefix.length());
+        if (this.cachedReleaseVersions == null) {
+            synchronized (this.lock) {
+                if (this.cachedReleaseVersions == null) {
+                    this.cachedReleaseVersions = fetchLatestReleases(ProgressManager.getGlobalProgressIndicator());
                 }
             }
         }
-        return null;
-    }
 
-    private @Nullable JsonArray getLatestReleases() {
-        if (cachedReleases != null) {
-            return cachedReleases;
-        }
-
-        synchronized (lock) {
-            if (cachedReleases != null) {
-                return cachedReleases;
-            }
-
-            try {
-                var request = HttpRequests.request(Urls.newFromEncoded(LATEST_VERSION_URL));
-                var jsonString = request.readString(ProgressManager.getGlobalProgressIndicator());
-                var json = GsonUtils.GSON.fromJson(jsonString, com.google.gson.JsonArray.class);
-                if (json != null && json.isJsonArray()) {
-                    cachedReleases = json.getAsJsonArray();
-                    return cachedReleases;
-                }
-                return null;
-            } catch (IOException e) {
-                return null;
-            }
-        }
+        // a null map indicates that the versions could not be fetched,
+        // a null version value indicates that the fetch was successful but no version was found
+        var releases = this.cachedReleaseVersions;
+        return releases != null ? releases.get(type) : null;
     }
 
     @Override
@@ -276,5 +241,43 @@ public class DefaultAppLandDownloadService implements AppLandDownloadService {
                 }
             });
         }
+    }
+
+    static @Nullable Map<CliTool, String> fetchLatestReleases(@Nullable ProgressIndicator progressIndicator) {
+        try {
+            var request = HttpRequests.request(Urls.newFromEncoded(LATEST_CLI_VERSIONS_URL));
+            var json = GsonUtils.GSON.fromJson(request.readString(progressIndicator), JsonArray.class);
+            if (json != null && json.isJsonArray()) {
+                // non-null values because unmodifiable maps don't support them
+                var versions = new HashMap<CliTool, @NotNull String>();
+                for (var tool : CliTool.values()) {
+                    var version = parseLatestVersion(tool, json);
+                    if (version == null) {
+                        LOG.debug("No release version found for " + tool.getId());
+                    } else {
+                        versions.put(tool, version);
+                    }
+                }
+                return Map.copyOf(versions);
+            }
+        } catch (IOException e) {
+            LOG.debug("Error fetching latest CLI versions from " + LATEST_CLI_VERSIONS_URL, e);
+        }
+
+        return null;
+    }
+
+    static @Nullable String parseLatestVersion(@NotNull CliTool type, @NotNull JsonArray releases) {
+        var prefix = "@appland/" + type.getId() + "-v";
+        for (var release : releases) {
+            var releaseObj = release.getAsJsonObject();
+            if (releaseObj.has("tag_name")) {
+                var tagName = releaseObj.getAsJsonPrimitive("tag_name").getAsString();
+                if (tagName.startsWith(prefix)) {
+                    return tagName.substring(prefix.length());
+                }
+            }
+        }
+        return null;
     }
 }
