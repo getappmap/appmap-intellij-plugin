@@ -4,6 +4,7 @@ import appland.AppMapBaseTest;
 import appland.testRules.MockServerSettingsRule;
 import appland.testRules.OverrideIdeHttpProxyRule;
 import com.intellij.util.Urls;
+import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
@@ -27,6 +28,12 @@ public class DefaultAppLandDownloadServiceProxyTest extends AppMapBaseTest {
     @Override
     protected boolean runInDispatchThread() {
         return false;
+    }
+
+    @AfterClass
+    public static void cleanup() {
+        // we have to remote all zero-byte downloads created by this test
+        TestAppLandDownloadService.removeDownloads();
     }
 
     @Test
