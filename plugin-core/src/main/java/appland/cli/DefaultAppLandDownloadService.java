@@ -1,6 +1,7 @@
 package appland.cli;
 
 import appland.AppMapBundle;
+import appland.github.GitHubHttpRequests;
 import appland.settings.DownloadSettings;
 import appland.utils.GsonUtils;
 import com.google.gson.JsonArray;
@@ -78,7 +79,9 @@ public class DefaultAppLandDownloadService implements AppLandDownloadService {
             // download the file, it throws an IOException if it fails or if the remote file is unavailable
             var url = type.getDownloadUrl(version, platform, arch);
             LOG.debug(String.format("Downloading CLI binary %s from %s to %s", type.getId(), url, targetFilePath));
-            HttpRequests.request(url).saveToFile(downloadTargetFilePath, progressIndicator);
+            HttpRequests.request(url)
+                    .tuner(GitHubHttpRequests.gitHubTokenTuner())
+                    .saveToFile(downloadTargetFilePath, progressIndicator);
 
             CliTools.fixBinaryPermissions(downloadTargetFilePath);
 
@@ -245,8 +248,11 @@ public class DefaultAppLandDownloadService implements AppLandDownloadService {
 
     static @Nullable Map<CliTool, String> fetchLatestReleases(@Nullable ProgressIndicator progressIndicator) {
         try {
-            var request = HttpRequests.request(Urls.newFromEncoded(LATEST_CLI_VERSIONS_URL));
-            var json = GsonUtils.GSON.fromJson(request.readString(progressIndicator), JsonArray.class);
+            var jsonString = HttpRequests.request(Urls.newFromEncoded(LATEST_CLI_VERSIONS_URL))
+                    .tuner(GitHubHttpRequests.gitHubTokenTuner())
+                    .readString(progressIndicator);
+
+            var json = GsonUtils.GSON.fromJson(jsonString, JsonArray.class);
             if (json != null && json.isJsonArray()) {
                 // non-null values because unmodifiable maps don't support them
                 var versions = new HashMap<CliTool, @NotNull String>();
