@@ -17,6 +17,7 @@
     <depends>com.intellij.modules.platform</depends>
     <depends>com.intellij.modules.lang</depends>
     <depends>com.intellij.modules.json</depends>
+    <depends>Git4Idea</depends>
     <depends config-file="appmap-java.xml" optional="true">com.intellij.java</depends>
     <depends config-file="appmap-gradle.xml" optional="true">com.intellij.gradle</depends>
     <depends config-file="appmap-maven.xml" optional="true">org.jetbrains.idea.maven</depends>
