@@ -1,13 +1,15 @@
 name: Deploy
 on:
     workflow_dispatch:
-    push:
-        branches:
-            - main
+    workflow_run:
+        workflows: [Build]
+        types: [completed]
+        branches: [main]
 
 jobs:
     deploy:
         runs-on: ubuntu-latest
+        if: ${{ github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success' }}
         steps:
             - name: Fetch Sources
               uses: actions/checkout@v5
@@ -29,16 +31,19 @@ jobs:
                   node-version: 20
 
             - name: Run Linters and Tests
+              if: ${{ github.event_name != 'workflow_run' }}
               env:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
               shell: bash
               run: ./gradlew check
 
-            - name: Verify plugin
+            - name: Verify Plugin Structure
+              if: ${{ github.event_name != 'workflow_run' }}
               shell: bash
               run: ./gradlew verifyPluginProjectConfiguration
 
             - name: Run Plugin Verifier
+              if: ${{ github.event_name != 'workflow_run' }}
               shell: bash
               run: ./gradlew verifyPlugin
 
