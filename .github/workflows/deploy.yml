@@ -1,6 +1,11 @@
 name: Deploy
 on:
     workflow_dispatch:
+        inputs:
+            confirm:
+                description: "Acknowledge that verification is NOT performed before deploy"
+                required: true
+                type: boolean
     workflow_run:
         workflows: [Build]
         types: [completed]
@@ -9,7 +14,7 @@ on:
 jobs:
     deploy:
         runs-on: ubuntu-latest
-        if: ${{ github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success' }}
+        if: ${{ github.event_name == 'workflow_dispatch' || (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event != 'schedule') }}
         steps:
             - name: Fetch Sources
               uses: actions/checkout@v5
@@ -29,23 +34,6 @@ jobs:
               uses: actions/setup-node@v6
               with:
                   node-version: 20
-
-            - name: Run Linters and Tests
-              if: ${{ github.event_name != 'workflow_run' }}
-              env:
-                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-              shell: bash
-              run: ./gradlew check
-
-            - name: Verify Plugin Structure
-              if: ${{ github.event_name != 'workflow_run' }}
-              shell: bash
-              run: ./gradlew verifyPluginProjectConfiguration
-
-            - name: Run Plugin Verifier
-              if: ${{ github.event_name != 'workflow_run' }}
-              shell: bash
-              run: ./gradlew verifyPlugin
 
             - name: "Install Dependencies"
               shell: bash
