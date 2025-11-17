@@ -1,5 +1,16 @@
 AppMap Plugin Changelog
 
+## [0.82.0](https://github.com/getappmap/appmap-intellij-plugin/compare/v0.81.0...v0.82.0) (2025-11-17)
+
+
+### Features
+
+-  Use GitHub releases for CLI version checks ([3e07ae5]())
+
+### Bug Fixes
+
+-  cleanup after proxy test ([53220df]())-  update caching of AppMap CLI versions to only include the latest available version ([f53465a]())-  use GitHub API token when requesting latest releases in unit test mode ([fb01ac0]())
+
 ## [0.81.0](https://github.com/getappmap/appmap-intellij-plugin/compare/v0.80.2...v0.81.0) (2025-10-29)
 
 
