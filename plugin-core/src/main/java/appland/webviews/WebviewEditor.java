@@ -43,6 +43,7 @@ public abstract class WebviewEditor<T> extends UserDataHolderBase implements Fil
     private static final Logger LOG = Logger.getInstance(WebviewEditor.class);
 
     protected final @NotNull Project project;
+    protected final AtomicBoolean isDisposed = new AtomicBoolean(false);
     protected final @NotNull AppMapWebview webview;
     protected final @NotNull VirtualFile file;
     private final @NotNull Set<String> supportedMessages;
@@ -132,7 +133,7 @@ public abstract class WebviewEditor<T> extends UserDataHolderBase implements Fil
 
     @Override
     public boolean isValid() {
-        return true;
+        return !isDisposed.get();
     }
 
     @Override
@@ -150,6 +151,7 @@ public abstract class WebviewEditor<T> extends UserDataHolderBase implements Fil
 
     @Override
     public void dispose() {
+        isDisposed.set(true);
     }
 
     @Override
@@ -238,7 +240,7 @@ public abstract class WebviewEditor<T> extends UserDataHolderBase implements Fil
             @Override
             public void run(@NotNull ProgressIndicator indicator) {
                 if (!isValid()) {
-                    // editor was closed before the init completed
+                    // The editor was closed before the init completed
                     return;
                 }
 
