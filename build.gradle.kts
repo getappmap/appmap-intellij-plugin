@@ -73,7 +73,7 @@ allprojects {
         intellijPlatform {
             // 2025.3 is only available as a unified build
             when {
-                platformVersion >= 253 -> intellijIdeaUltimate(ideVersion)
+                platformVersion >= 253 -> intellijIdea(ideVersion)
                 else -> intellijIdeaCommunity(ideVersion)
             }
 
@@ -184,7 +184,7 @@ allprojects {
         // Only tests with category "appland.WithoutAppMapAgent" are executed.
         val testWithoutAgent by intellijPlatformTesting.testIde.registering {
             type = when {
-                platformVersion >= 253 -> IntelliJPlatformType.IntellijIdeaUltimate
+                platformVersion >= 253 -> IntelliJPlatformType.IntellijIdea
                 else -> IntelliJPlatformType.IntellijIdeaCommunity
             }
             version = ideVersion
@@ -333,7 +333,7 @@ project(":") {
                 select {
                     sinceBuild = "253"
                     untilBuild = "253.*"
-                    types.set(listOf(IntelliJPlatformType.IntellijIdeaUltimate))
+                    types.set(listOf(IntelliJPlatformType.IntellijIdea))
                 }
             }
 
@@ -366,10 +366,6 @@ project(":") {
         runIde {
             systemProperty("appmap.sandbox", "true")
             jvmArgs("-Xmx2048m")
-        }
-
-        verifyPlugin {
-            mustRunAfter("check")
         }
 
         @Suppress("unused")
