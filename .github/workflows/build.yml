@@ -26,6 +26,10 @@ jobs:
         runs-on: ${{ matrix.os }}-latest
         timeout-minutes: 45
         steps:
+            - name: Show Available Disk Space
+              shell: bash
+              run: df -h
+
             - name: Fetch Sources
               uses: actions/checkout@v5
 
@@ -36,7 +40,9 @@ jobs:
                   java-version: ${{ env.JAVA_VERSION }}
 
             - name: Setup Gradle
-              uses: gradle/actions/setup-gradle@v4
+              uses: gradle/actions/setup-gradle@v5
+              with:
+                  cache-disabled: true
 
             # https://docs.github.com/en/rest/overview/resources-in-the-rest-api?apiVersion=2022-11-28#rate-limits-for-requests-from-github-actions
             - name: Show GitHub Actions rate limit
@@ -66,6 +72,11 @@ jobs:
                   path: ./tmp/appmap
                   key: appmaps-${{ github.sha }}-${{ github.run_attempt }}
 
+            - name: Show Available Disk Space
+              if: always()
+              shell: bash
+              run: df -h
+
     verify:
         name: Verify Plugin
         runs-on: ubuntu-latest
@@ -78,7 +89,7 @@ jobs:
             - name: Setup Java
               uses: actions/setup-java@v5
               with:
-                  distribution: temurin
+                  distribution: jetbrains
                   java-version: ${{ env.JAVA_VERSION }}
 
             - name: Verify Plugin Structure
