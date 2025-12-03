@@ -347,6 +347,10 @@ project(":") {
                 )
             )
         }
+
+        publishing {
+            token.set(System.getenv("JETBRAINS_MARKETPLACE_TOKEN"))
+        }
     }
 
 
