@@ -40,6 +40,29 @@ public final class AppMapNotifications {
     public static final String GENERIC_NOTIFICATIONS_ID = "appmap.generic";
     public static final String SETTINGS_NOTIFICATIONS_ID = "appmap.settings";
 
+    public static void showSimpleNotification(@NotNull Project project,
+                                                @Nullable String title,
+                                                @NotNull String content,
+                                                @NotNull NotificationType type,
+                                                boolean withClose) {
+
+        ApplicationManager.getApplication().invokeLater(() -> {
+            var notification = new Notification(GENERIC_NOTIFICATIONS_ID, "", type);
+            if (title != null) {
+                notification.setTitle(title);
+            }
+            notification.setContent(content);
+
+            if (withClose) {
+                notification.addAction(NotificationAction.create(
+                        lazy("notification.closeButton"),
+                        (e, n) -> n.expire()));
+            }
+
+            notification.notify(project);
+        }, ModalityState.any());
+    }
+
     public static void showExpiringRecordingNotification(@NotNull Project project,
                                                          @Nullable String title,
                                                          @NotNull String content,
