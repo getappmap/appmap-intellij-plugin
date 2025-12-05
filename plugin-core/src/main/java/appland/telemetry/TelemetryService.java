@@ -53,6 +53,11 @@ public class TelemetryService {
     }
 
     public void notifyTelemetryUsage(@NotNull Project project) {
+        // if telemetry is mandatory (e.g. Splunk), then we don't show the notification to opt-out
+        if (reporter.isAlwaysEnabled()) {
+            return;
+        }
+
         AppMapNotifications.showTelemetryNotification(
                 project,
                 AppMapBundle.get("telemetry.permission.title"),
