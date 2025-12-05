@@ -280,7 +280,11 @@ public class DefaultAppLandDownloadService implements AppLandDownloadService {
             if (releaseObj.has("tag_name")) {
                 var tagName = releaseObj.getAsJsonPrimitive("tag_name").getAsString();
                 if (tagName.startsWith(prefix)) {
-                    return tagName.substring(prefix.length());
+                    var version = tagName.substring(prefix.length());
+                    // verify it starts with a number, otherwise it's not the version
+                    if (!version.isEmpty() && Character.isDigit(version.charAt(0))) {
+                        return version;
+                    }
                 }
             }
         }
