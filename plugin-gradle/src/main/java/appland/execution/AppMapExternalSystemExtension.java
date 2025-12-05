@@ -33,7 +33,7 @@ public class AppMapExternalSystemExtension extends ExternalSystemRunConfiguratio
                 javaParameters.getVMParametersList().addAll(jvmParams);
             } catch (Exception e) {
                 LOG.warn("Unable to execute run configuration", e);
-                AppMapNotifications.showExpiringRecordingNotification(project,
+                AppMapNotifications.showSimpleNotification(project,
                         null,
                         AppMapBundle.get("appMapExecutor.executionError.message", e.getMessage()),
                         NotificationType.ERROR,
