@@ -73,7 +73,7 @@ public class DefaultAppLandDownloadServiceTest extends AppMapBaseTest {
 
     @Test
     public void parseLatestVersion() {
-        var json = "[{\"tag_name\": \"@appland/scanner-v1.2.3\"}, {\"tag_name\": \"@appland/appmap-v4.5.6\"}]";
+        var json = "[{\"tag_name\": \"@appland/appmap-validate-v1.0.0\"}, {\"tag_name\": \"@appland/scanner-v1.2.3\"}, {\"tag_name\": \"@appland/appmap-v4.5.6\"}]";
         var releases = com.google.gson.JsonParser.parseString(json).getAsJsonArray();
 
         assertEquals("4.5.6", DefaultAppLandDownloadService.parseLatestVersion(CliTool.AppMap, releases));
