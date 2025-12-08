@@ -4,6 +4,7 @@ import appland.AppMapPlugin;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.jetbrains.builtInWebServer.BuiltInServerOptions;
 
 import java.nio.file.Path;
@@ -16,11 +17,12 @@ import static appland.webviews.webserver.AppMapWebviewRequestHandler.APPMAP_SERV
 @RequiredArgsConstructor
 @Getter
 public enum AppMapWebview {
-    AppMap("appmap"),
-    InstallGuide("appland-install-guide"),
-    Findings("appland-findings"),
-    SignIn("appland-signin"),
-    Navie("appland-navie");
+    AppMap("appmap.html"),
+    InstallGuide("install-guide.html"),
+    Findings("findings.html"),
+    Navie("navie.html"),
+    Review("review.html"),
+    SignIn("signin.html");
 
     public static @NotNull String getBaseUrl() {
         return "http://localhost:" + BuiltInServerOptions.getInstance().getEffectiveBuiltInServerPort();
@@ -30,19 +32,16 @@ public enum AppMapWebview {
         return getBaseUrl() + APPMAP_SERVER_BASE_PATH;
     }
 
-    private final @NotNull String webviewAssetsDirectoryName;
-
-    /**
-     * @return Directory on the local filesystem, where this webview's data is stored.
-     */
-    public @NotNull Path getBaseDirPath() {
-        return AppMapPlugin.getPluginPath().resolve(webviewAssetsDirectoryName);
+    public static @NotNull String getBaseUrlWithPath(@NotNull String path) {
+        return getBaseUrlWithPath() + "/" + path;
     }
+
+    private final @NotNull String name;
 
     /**
      * @return HTTP URL of the IDE's built-in webserver for this webview's index.html file.
      */
     public @NotNull String getIndexHtmlUrl() {
-        return getBaseUrlWithPath() + "/" + webviewAssetsDirectoryName + "/index.html";
+        return getBaseUrlWithPath() + "/" + name;
     }
 }

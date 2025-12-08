@@ -13,6 +13,8 @@ import org.jetbrains.annotations.NotNull;
 import java.awt.*;
 import java.util.Locale;
 
+import javax.swing.UIManager;
+
 class IdeStyleRequest {
     // see https://github.com/getappmap/vscode-appland/blob/bfd83ad8c848d31257ab004688eb847feecbcf32/web/static/styles/navie-integration.css#L1-L0
     static @NotNull String createIdeStyles() {
@@ -23,7 +25,7 @@ class IdeStyleRequest {
         // used for glow and border around Navie's main text input box
         var highlight = UIUtil.getFocusedBorderColor();
         var highlightLight = highlight.brighter();
-        var highlightDark = highlight.darker();
+        var highlightDark = highlight.darker().darker();
 
         // text color
         var foreground = UIUtil.getLabelForeground();
@@ -57,8 +59,8 @@ class IdeStyleRequest {
         var border = ColorUtil.withAlpha(JBUI.CurrentTheme.List.buttonSeparatorColor(), 0.1);
         var selection = JBUI.CurrentTheme.List.Selection.foreground(true);
 
-        var colorTileBackground = JBColor.DARK_GRAY;
-        var colorTileShadow = JBColor.LIGHT_GRAY;
+        var colorTileBackground = UIManager.getColor("EditorTabs.background");
+        var colorTileShadow = colorTileBackground.darker();
 
         // apply the global scale factor to the webview
         var ideStyles = "html { transform: scale(" + String.format(Locale.ENGLISH, "%.3f", JBUIScale.scale(1.0f)) + "); }";

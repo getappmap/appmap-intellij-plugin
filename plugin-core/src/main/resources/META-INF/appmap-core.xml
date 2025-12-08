@@ -76,6 +76,7 @@
         <fileEditorProvider implementation="appland.webviews.findingDetails.FindingDetailsEditorProvider"
                             order="first"/>
         <fileEditorProvider implementation="appland.webviews.navie.NavieEditorProvider" order="first"/>
+        <fileEditorProvider implementation="appland.webviews.review.ReviewEditorProvider" order="first"/>
 
         <fileIconProvider implementation="appland.webviews.WebviewEditorIconProvider"/>
 
@@ -167,6 +168,8 @@
         <registryKey key="appmap.agent.debug"
                      defaultValue="false"
                      description="Enable debug logging of the AppMap Java agent"/>
+        <registryKey defaultValue="false" description="Enable experimental Navie review UI"
+                     key="appmap.experimental.review.ui"/>
 
         <postStartupActivity implementation="appland.javaAgent.AppMapJavaAgentDownloadActivity"/>
     </extensions>
@@ -215,6 +218,7 @@
             <reference ref="stopAppMapRemoteRecording"/>
             <separator/>
             <reference ref="appmap.generateOpenAPI"/>
+            <action id="appmap.quickReview" class="appland.actions.QuickReviewAction" icon="AllIcons.Actions.Preview"/>
             <reference ref="appmap.openNavie"/>
             <reference ref="appmap.navie.openThread"/>
             <reference ref="appmap.navie.chooseAndPinContextFile"/>
