@@ -5,7 +5,7 @@ plugins:
 - - '@semantic-release/release-notes-generator'
   - preset: conventionalcommits
     writerOpts:
-      commitPartial: |
+      commitPartial: |+
         - {{#if scope}} **{{scope}}:**
         {{~/if}} {{#if subject}}
           {{~subject}}
@@ -14,7 +14,7 @@ plugins:
         {{~/if}}
         
         {{~!-- commit link --}}{{~#if hash}} {{#if @root.linkReferences~}}
-          ([{{shortHash}}]({{commitUrlFormat}}))
+          ([{{shortHash}}]({{@root.host}}/{{@root.owner}}/{{@root.repository}}/commit/{{hash}}))
         {{~else}}
           {{~shortHash}}
         {{~/if}}{{~/if}}
