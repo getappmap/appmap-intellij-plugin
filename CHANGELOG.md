@@ -1,5 +1,12 @@
 AppMap Plugin Changelog
 
+## [0.82.1](https://github.com/getappmap/appmap-intellij-plugin/compare/v0.82.0...v0.82.1) (2025-12-11)
+
+
+### Bug Fixes
+
+-  **cli:** Correctly parse CLI tool versions from GitHub releases ([239bb4f]())-  **telemetry:** Skip usage notification when telemetry is always enabled ([0ae39c5]())
+
 ## [0.82.0](https://github.com/getappmap/appmap-intellij-plugin/compare/v0.81.0...v0.82.0) (2025-11-17)
 
 
