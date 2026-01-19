@@ -43,7 +43,7 @@ public class DynamicPluginListener implements com.intellij.ide.plugins.DynamicPl
             ProgressManager.getInstance().runProcessWithProgressSynchronously(() -> {
                 AppLandCommandLineService.getInstance().stopAll(true);
 
-                AppLandJsonRpcService.getInstance(project).stopServerAsync();
+                AppLandJsonRpcService.getInstance(project).stopServer();
             }, AppMapBundle.get("appmap.unload.stoppingProcesses.title"), false, project);
         }
     }
