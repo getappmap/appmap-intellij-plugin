@@ -13,6 +13,7 @@ import com.intellij.execution.process.KillableProcessHandler;
 import com.intellij.execution.process.ProcessAdapter;
 import com.intellij.execution.process.ProcessEvent;
 import com.intellij.execution.process.ProcessOutputTypes;
+import com.intellij.openapi.application.Application;
 import com.intellij.openapi.application.ApplicationInfo;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.diagnostic.Logger;
@@ -144,7 +145,17 @@ public class DefaultAppLandJsonRpcService implements AppLandJsonRpcService, AppL
                 future.cancel(true);
             }
         } finally {
-            stopServerAsync();
+            var application = ApplicationManager.getApplication();
+            if (application.isDisposed()) {
+                // application shutdown in progress
+                stopServer();
+            } else if (!application.isDispatchThread()) {
+                // dispose not called on EDT
+                stopServer();
+            } else {
+                // Dispose called on EDT, e.g. when the AppMap plugin is unloaded.
+                stopServerAsync();
+            }
         }
     }
 
