@@ -210,11 +210,17 @@ public class DefaultAppLandJsonRpcService implements AppLandJsonRpcService, AppL
 
     @Override
     public synchronized void stopServerAsync() {
+        ApplicationManager.getApplication().executeOnPooledThread(this::stopServer);
+    }
+
+    @Override
+    @RequiresBackgroundThread
+    public synchronized void stopServer() {
         var server = jsonRpcServer;
         if (server != null) {
             this.jsonRpcServer = null;
 
-            ApplicationManager.getApplication().executeOnPooledThread(() -> stopServerSync(server));
+            stopServerSync(server);
         }
     }
 
@@ -236,6 +242,7 @@ public class DefaultAppLandJsonRpcService implements AppLandJsonRpcService, AppL
 
     /**
      * Queries existing Navie threads via JSON-RPC.
+     *
      * @param params RPC parameters
      * @return list of threads, or an empty list if the server is not running or if the query failed
      */
@@ -464,8 +471,8 @@ public class DefaultAppLandJsonRpcService implements AppLandJsonRpcService, AppL
      * @throws IOException If a response other than 2xx was returned or if the JSON-RPC response contained an error code.
      */
     private static @Nullable JsonObject sendJsonRpcMessage(@NotNull String serverUrl,
-                                           @NotNull String method,
-                                           @NotNull Object params) throws IOException {
+                                                           @NotNull String method,
+                                                           @NotNull Object params) throws IOException {
         var payload = new JsonObject();
         payload.addProperty("jsonrpc", "2.0");
         payload.addProperty("method", method);

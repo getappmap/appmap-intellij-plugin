@@ -2,14 +2,13 @@ package appland.rpcService;
 
 import com.intellij.openapi.Disposable;
 import com.intellij.openapi.project.Project;
+import com.intellij.util.concurrency.annotations.RequiresBackgroundThread;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Set;
 import java.io.IOException;
 import java.util.List;
-import appland.rpcService.NavieThreadQueryV1Response;
-import appland.rpcService.NavieThreadQueryV1Params;
+import java.util.Set;
 
 /**
  * Project service to interact with the AppLand JSON-RPC service, mainly used for Navie.
@@ -58,13 +57,23 @@ public interface AppLandJsonRpcService extends Disposable {
     void stopServerAsync();
 
     /**
+     * Stops the server synchronously. This method must not be called from the EDT.
+     * <p>
+     * Please use {@link #stopServerAsync()} instead, if possible.
+     */
+    @RequiresBackgroundThread
+    void stopServer();
+
+    /**
      * @return The port, as returned by the launched JSON-RPC server.
      * {@code null} is returned if the server is not running or has not printed the used port on STDOUT.
      */
     @Nullable
     Integer getServerPort();
+
     /**
      * Queries existing Navie threads.
+     *
      * @param params RPC parameters
      * @return list of threads
      * @throws IOException on RPC error
