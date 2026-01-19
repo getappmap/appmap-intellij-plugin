@@ -42,14 +42,8 @@ public interface AppLandCommandLineService extends Disposable {
     void stop(@NotNull VirtualFile directory, boolean waitForTermination);
 
     /**
-     * Refreshes the processes for the currently open projects.
+     * Refreshes the processes for the currently open projects in a background thread.
      * It stops processes, which are not required anymore and launches services for yet unhandled content roots.
-     */
-    @RequiresBackgroundThread
-    void refreshForOpenProjects();
-
-    /**
-     * Helper to launch {@link #refreshForOpenProjects} in a background thread.
      */
     void refreshForOpenProjectsInBackground();
 

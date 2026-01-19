@@ -22,6 +22,7 @@ import com.intellij.openapi.util.SystemInfo;
 import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.openapi.vfs.VfsUtilCore;
 import com.intellij.openapi.vfs.VirtualFile;
+import com.intellij.openapi.vfs.VirtualFileSet;
 import com.intellij.openapi.vfs.ex.temp.TempFileSystemMarker;
 import com.intellij.util.concurrency.AppExecutorUtil;
 import com.intellij.util.io.BaseOutputReader;
@@ -114,20 +115,6 @@ public class DefaultCommandLineService implements AppLandCommandLineService {
         var entry = processes.remove(directory);
         if (entry != null) {
             stopLocked(entry, waitForTermination ? 1_000 : 0, TimeUnit.MILLISECONDS);
-        }
-    }
-
-    @Override
-    public synchronized void refreshForOpenProjects() {
-        assert !ApplicationManager.getApplication().isDispatchThread();
-
-        try {
-            doRefreshForOpenProjectsLocked();
-        } finally {
-            if (!ApplicationManager.getApplication().isDisposed()) {
-                var messageBus = ApplicationManager.getApplication().getMessageBus();
-                messageBus.syncPublisher(AppLandCommandLineListener.TOPIC).afterRefreshForProjects();
-            }
         }
     }
 
@@ -411,7 +398,48 @@ public class DefaultCommandLineService implements AppLandCommandLineService {
         return process;
     }
 
-    private void doRefreshForOpenProjectsLocked() {
+    private void refreshForOpenProjects() {
+        assert !ApplicationManager.getApplication().isDispatchThread();
+
+        // Fetch the AppMap root directories outside the synchronized block because it may take a long time
+        // because it needs indexes and waits for smart mode.
+        var enabledRoots = findAppMapDataRootDirectories();
+
+        try {
+            synchronized (this) {
+                // Remove processes of roots, which no longer have a matching content root in a project or which don't match the
+                // settings anymore.
+                // We need to launch the scanner when "enableFindings" changes. We're iterating on a copy, because stop() is
+                // called inside the loop and modifies "processes"
+                for (var entry : List.copyOf(processes.entrySet())) {
+                    var activeRoot = entry.getKey();
+                    if (!enabledRoots.contains(activeRoot)) {
+                        try {
+                            stop(activeRoot, false);
+                        } catch (Exception e) {
+                            LOG.warn("Error stopping processes for root: " + activeRoot.getPath());
+                        }
+                    }
+                }
+
+                // launch missing cli processes
+                for (var root : enabledRoots) {
+                    try {
+                        start(root, false);
+                    } catch (ExecutionException e) {
+                        LOG.warn("Error launching cli process for root: " + root);
+                    }
+                }
+            }
+        } finally {
+            if (!ApplicationManager.getApplication().isDisposed()) {
+                var messageBus = ApplicationManager.getApplication().getMessageBus();
+                messageBus.syncPublisher(AppLandCommandLineListener.TOPIC).afterRefreshForProjects();
+            }
+        }
+    }
+
+    private static @NotNull VirtualFileSet findAppMapDataRootDirectories() {
         var enabledRoots = VfsUtilCore.createCompactVirtualFileSet();
         for (var project : ProjectManager.getInstance().getOpenProjects()) {
             var projectRoots = DumbService.getInstance(project).runReadActionInSmartMode(() -> {
@@ -422,30 +450,7 @@ public class DefaultCommandLineService implements AppLandCommandLineService {
             });
             enabledRoots.addAll(projectRoots);
         }
-
-        // Remove processes of roots, which no longer have a matching content root in a project or which don't match the
-        // settings anymore.
-        // We need to launch the scanner when "enableFindings" changes. We're iterating on a copy, because stop() is
-        // called inside the loop and modifies "processes"
-        for (var entry : List.copyOf(processes.entrySet())) {
-            var activeRoot = entry.getKey();
-            if (!enabledRoots.contains(activeRoot)) {
-                try {
-                    stop(activeRoot, false);
-                } catch (Exception e) {
-                    LOG.warn("Error stopping processes for root: " + activeRoot.getPath());
-                }
-            }
-        }
-
-        // launch missing cli processes
-        for (var root : enabledRoots) {
-            try {
-                start(root, false);
-            } catch (ExecutionException e) {
-                LOG.warn("Error launching cli process for root: " + root);
-            }
-        }
+        return enabledRoots;
     }
 
     /**
