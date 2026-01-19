@@ -369,7 +369,7 @@ project(":") {
 
         runIde {
             systemProperty("appmap.sandbox", "true")
-            jvmArgs("-Xmx2048m")
+            jvmArgs("-Xmx2048m", "-XX:+UnlockDiagnosticVMOptions")
         }
 
         @Suppress("unused")
@@ -394,7 +394,7 @@ project(":") {
 
             task {
                 systemProperty("appmap.sandbox", "true")
-                jvmArgs("-Xmx2048m")
+                jvmArgs("-Xmx2048m", "-XX:+UnlockDiagnosticVMOptions")
             }
         }
 
