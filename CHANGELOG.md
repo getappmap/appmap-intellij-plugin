@@ -1,5 +1,22 @@
 AppMap Plugin Changelog
 
+## [0.83.0](https://github.com/getappmap/appmap-intellij-plugin/compare/v0.82.1...v0.83.0) (2026-02-02)
+
+
+### Features
+
+-  Implement quick review command ([c061260](https://github.com/getappmap/appmap-intellij-plugin/commit/c061260fa955c11f1927dcbe6c8ececd658fc3fa))
+
+
+### Bug Fixes
+
+-  don't block access to processes while waiting for smart mode ([206068a](https://github.com/getappmap/appmap-intellij-plugin/commit/206068a2e352110c5bf4044c039026d3d004fa98))
+-  don't use a background thread to terminate JSON-RPC process if the application is shutting down or if already on a background thread ([c225cd6](https://github.com/getappmap/appmap-intellij-plugin/commit/c225cd6a059615bed45d0ca0e2aac13176674763))
+-  Exception "IncorrectOperationException" after closing an AppMap editor ([a4ae3f1](https://github.com/getappmap/appmap-intellij-plugin/commit/a4ae3f1722e16a90b435aaa374db86044bfd0361))
+-  support Java 25 when executing with the AppMap agent ([c50464c](https://github.com/getappmap/appmap-intellij-plugin/commit/c50464c1c70f54ffc42ec5a30a23ae96673f7cac))
+-  synchronous stop of JSON-RPC process ([3b6d629](https://github.com/getappmap/appmap-intellij-plugin/commit/3b6d629c9f833c536dbeabd95fdbefa660bd3348))
+-  terminate AppMap processes when the plugin is unloaded ([ca3970d](https://github.com/getappmap/appmap-intellij-plugin/commit/ca3970d40e667133a12fa1b25668454b6407984f))
+
 ## [0.82.1](https://github.com/getappmap/appmap-intellij-plugin/compare/v0.82.0...v0.82.1) (2025-12-11)
 
 
