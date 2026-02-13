@@ -1,7 +1,8 @@
 package appland.files;
 
+import com.intellij.openapi.Disposable;
+import com.intellij.openapi.util.Disposer;
 import com.intellij.psi.PsiFile;
-import com.intellij.psi.search.GlobalSearchScope;
 import com.intellij.psi.search.GlobalSearchScopes;
 import com.intellij.testFramework.fixtures.LightPlatformCodeInsightFixture4TestCase;
 import org.junit.Test;
@@ -10,6 +11,41 @@ import java.util.Arrays;
 import java.util.Collections;
 
 public class AppMapFileLookupTest extends LightPlatformCodeInsightFixture4TestCase {
+    @Test
+    public void extensionLookup() {
+        var base = myFixture.configureByText("a.txt", "").getVirtualFile();
+        // file not in project
+        var notFound = FileLookup.findRelativeFile(getProject(), base, "external/file.txt");
+        assertNull(notFound);
+
+        // Register extension
+        Disposable disposable = Disposer.newDisposable();
+        try {
+            AppMapFileLookup.EP_NAME.getPoint().registerExtension((project, data) -> {
+                if ("external/file.txt".equals(data.relativePath())) {
+                    return base; // return base file as mock result
+                }
+                return null;
+            }, disposable);
+
+            var found = FileLookup.findRelativeFile(getProject(), base, "external/file.txt");
+            assertEquals(base, found);
+        } finally {
+            Disposer.dispose(disposable);
+        }
+    }
+
+    @Test
+    public void genericLookup() {
+        var target = myFixture.addFileToProject("libs/dep/src/org/example/Lib.java", "").getVirtualFile();
+
+        var lookup = new AppMapGenericFileLookup();
+        var data = new AppMapFileLookup.Data("org/example/Lib.java", null);
+
+        var found = lookup.findFile(getProject(), data);
+        assertEquals(target, found);
+    }
+
     @Test
     public void locateFilenameByRelativePath() {
         PsiFile base = myFixture.configureByText("a.txt", "");

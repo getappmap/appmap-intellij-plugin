@@ -181,9 +181,19 @@ public final class SharedAppMapWebViewMessages {
             return;
         }
 
+        LOG.debug("Resolved file for " + relativePath + ": " + referencedFile.getPath());
+
         ApplicationManager.getApplication().invokeLater(() -> {
+            int line = location.getZeroBasedLine(-1);
+            // Ignore line numbers for .class files - decompiled text layout rarely matches
+            // the original source line numbers, so jumping to a specific line usually lands
+            // in the wrong place. Open at the top instead.
+            if (referencedFile.getName().endsWith(".class")) {
+                line = -1;
+            }
+
             // IntelliJ's lines are 0-based, AppMap lines seem to be 1-based
-            var descriptor = new OpenFileDescriptor(project, referencedFile, location.getZeroBasedLine(-1), -1);
+            var descriptor = new OpenFileDescriptor(project, referencedFile, line, -1);
             OpenInRightSplit.openInRightSplit(project, referencedFile, descriptor);
         }, ModalityState.defaultModalityState());
     }

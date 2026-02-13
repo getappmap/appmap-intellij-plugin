@@ -2,6 +2,7 @@ package appland.files;
 
 import appland.index.AppMapSearchScopes;
 import com.google.common.collect.Lists;
+import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.project.DumbService;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.SystemInfo;
@@ -29,6 +30,8 @@ import java.util.stream.Collectors;
  * This class tries to locate the best matching file in the project.
  */
 public class FileLookup {
+    private static final Logger LOG = Logger.getInstance(FileLookup.class);
+
     /**
      * @param project      Current project
      * @param base         The base file or directory. This usually is the currently opened appmap file. {@code null} indicates that no context is available.
@@ -95,6 +98,18 @@ public class FileLookup {
             if (parent != null) {
                 // the candidate is matching all parent directories in the hierarchy
                 return candidate;
+            }
+        }
+
+        // Fallback: try extension points for finding files in external libraries
+        // Language-specific extensions (e.g., Java) run first, followed by generic lookup
+        LOG.debug("File not found in project content, trying extension lookups: " + relativePath);
+        var data = new AppMapFileLookup.Data(relativePath, null);
+        for (var lookup : AppMapFileLookup.EP_NAME.getExtensionList()) {
+            var file = lookup.findFile(project, data);
+            if (file != null) {
+                LOG.debug("File found by extension " + lookup + ": " + file.getPath());
+                return file;
             }
         }
 
