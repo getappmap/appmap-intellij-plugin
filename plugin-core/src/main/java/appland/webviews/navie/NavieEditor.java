@@ -369,60 +369,6 @@ public class NavieEditor extends WebviewEditor<Void> {
         }
     }
 
-    private void handleOpenLocation(@NotNull String pathWithLineRange, @Nullable String directory) {
-        var colonIndex = pathWithLineRange.lastIndexOf(':');
-        var filePath = colonIndex > 0 ? pathWithLineRange.substring(0, colonIndex) : pathWithLineRange;
-        var lineRangeOrEventId = colonIndex > 0 ? pathWithLineRange.substring(colonIndex + 1) : null;
-
-        var virtualFile = findFileByPathOrNotify(filePath, directory);
-        if (virtualFile == null) {
-            return;
-        }
-
-        if (AppMapFiles.isAppMapFileName(filePath)) {
-            // If the path is an appmap.json, the starting line is actually an event ID.
-            var state = AppMapFileEditorState.createViewSequence(lineRangeOrEventId);
-            ApplicationManager.getApplication().invokeLater(() -> {
-                AppMapFileEditorProvider.openAppMap(project, virtualFile, state);
-            }, ModalityState.defaultModalityState());
-        } else {
-            // Other files should be opened as text files.
-            // Lines:
-            // null: no line,
-            // size 1: just the start line,
-            // size 2: start and end line,
-            // other sizes are not possible.
-            var lineRange = lineRangeOrEventId != null ? mapToLineRange(lineRangeOrEventId) : null;
-            ApplicationManager.getApplication().invokeLater(() -> {
-                var startLine = lineRange != null ? lineRange[0] : 0;
-                // scrolls to the start line, the API does not support scrolling to a range
-                new OpenFileDescriptor(project, virtualFile, startLine, 0).navigate(true);
-            }, ModalityState.defaultModalityState());
-        }
-    }
-
-    /**
-     * Locate a {@link VirtualFile} by path (relative or absolute).
-     * If the file is not found, an error is shown to the user and {@code null} is returned.
-     *
-     * @param filePath  The path to look up. It's either a relative or an absolute path.
-     * @param directory An optional path to a directory to restrict the search for the {@link VirtualFile}.
-     * @return The file if it was found, otherwise {@code null}
-     */
-    private @Nullable VirtualFile findFileByPathOrNotify(@NotNull String filePath, @Nullable String directory) {
-        var searchScope = directory != null ? createDirectorySearchScope(project, directory) : null;
-        var virtualFile = ReadAction.compute(() -> FileLookup.findRelativeFile(project, searchScope, null, filePath));
-        if (virtualFile != null) {
-            return virtualFile;
-        }
-
-        ApplicationManager.getApplication().invokeLater(() -> Messages.showErrorDialog(
-                project,
-                AppMapBundle.get("notification.genericFileNotFound.message"),
-                AppMapBundle.get("notification.genericFileNotFound.title")));
-        return null;
-    }
-
     private void handleSelectLlmOption(@NotNull String choice) {
         switch (choice) {
             // Clear LLM environment settings and remove OpenAPI key
@@ -451,41 +397,6 @@ public class NavieEditor extends WebviewEditor<Void> {
             default:
                 LOG.warn("Unknown type passed to select-llm-option: " + choice);
         }
-    }
-
-    /**
-     * @param directoryPath Native OS directory path as a string.
-     * @return A search scope which is restricted to the given directory. {@code null} is returned if the path could not be found.
-     */
-    private static @Nullable GlobalSearchScope createDirectorySearchScope(@NotNull Project project,
-                                                                          @NotNull String directoryPath) {
-        try {
-            var directory = LocalFileSystem.getInstance().findFileByNioFile(Path.of(directoryPath));
-            if (directory != null) {
-                return GlobalSearchScopes.directoryScope(project, directory, true);
-            }
-        } catch (InvalidPathException e) {
-            // ignore
-        }
-        return null;
-    }
-
-    /**
-     * Maps a string with "n" or "n-m" to an int array containing the available numbers.
-     *
-     * @param lineRange A single number or range of numbers "n-m"
-     * @return Array of start and end line, just the start line or {@code null} if the input is invalid.
-     * The lines are adjusted from 1-based to 0-based to match the JetBrains API.
-     */
-    private static int @Nullable [] mapToLineRange(@NotNull String lineRange) {
-        var parts = lineRange.split("-");
-        if (parts.length == 2) {
-            return new int[]{Integer.parseInt(parts[0]) - 1, Integer.parseInt(parts[1]) - 1};
-        }
-        if (parts.length == 1) {
-            return new int[]{Integer.parseInt(parts[0]) - 1};
-        }
-        return null;
     }
 
     /**

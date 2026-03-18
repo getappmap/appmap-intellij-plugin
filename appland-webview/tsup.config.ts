@@ -4,7 +4,14 @@ import polyfills from "node-libs-browser";
 
 export default defineConfig([
     {
-        entry: ["signin.js", "findings.js", "appmap.js", "install-guide.js", "navie.js"],
+        entry: [
+            'appmap.js',
+            'findings.js',
+            'install-guide.js',
+            'navie.js',
+            'signin.js',
+            'review.ts',
+        ],
         outDir: "dist",
         name: "main",
         noExternal: [/./],
