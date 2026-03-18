@@ -27,7 +27,9 @@ export default class MessagePublisher {
         eventListeners = this.eventListeners[undefined] || [];
       }
 
-      eventListeners.forEach((listener) => {
+      // use async to queue the callbacks on the event loop
+      // (otherwise they can block the rendering thread)
+      eventListeners.forEach(async (listener) => {
         listener.callback(message);
       });
 

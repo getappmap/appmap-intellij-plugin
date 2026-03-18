@@ -1,0 +1,2 @@
+import {a,j,k as k$1,l,h,i}from'./chunk-YYVUCYP3.js';import'./chunk-WA6WR3DA.js';import'./chunk-55GLTCV3.js';import {k}from'./chunk-F2BWCX7B.js';k();var c=void 0;a.use(j);var u=["open-location","show-navie-thread"],g=new k$1(l);g.on("init",({rpcPort:p,baseRef:d})=>{let s=new a({el:"#app",render:e=>e(h,{ref:"review"})}),f=s.$refs.review;for(let e of u)s.$on(e,(...v)=>l.postMessage({command:e,args:v}));let w=new i(f,{rpcPort:p,...c});w.startReview(d);});l.postMessage({command:"ready"});//# sourceMappingURL=review.js.map
+//# sourceMappingURL=review.js.map
