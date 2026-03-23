@@ -10,6 +10,7 @@ import com.intellij.openapi.components.Service;
 import com.intellij.openapi.progress.ProgressIndicator;
 import com.intellij.openapi.progress.ProgressManager;
 import com.intellij.openapi.progress.Task;
+import com.intellij.openapi.util.text.StringUtil;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import org.jetbrains.annotations.NotNull;
@@ -25,6 +26,9 @@ public final class AppMapSecureApplicationSettingsService implements AppMapSecur
     public static @NotNull AppMapSecureApplicationSettings getInstance() {
         return ApplicationManager.getApplication().getService(AppMapSecureApplicationSettingsService.class);
     }
+
+    // Key to store the OpenAI API key in the model config. This must match the value used by the AppMap webview.
+    private static final String MODEL_CONFIG_OPENAI_API_KEY = "OPENAI_API_KEY";
 
     private volatile boolean isCached = false;
     private volatile @NotNull CachedSettings cachedSettings = new CachedSettings();
@@ -73,7 +77,7 @@ public final class AppMapSecureApplicationSettingsService implements AppMapSecur
                 ApplicationManager.getApplication().executeOnPooledThread(() -> ApplicationManager.getApplication()
                         .getMessageBus()
                         .syncPublisher(AppMapSettingsListener.TOPIC)
-                        .secureModelConfigChange());
+                        .secureModelConfigChange(key));
             }
         }
     }
@@ -85,29 +89,22 @@ public final class AppMapSecureApplicationSettingsService implements AppMapSecur
     @Override
     public synchronized @Nullable String getOpenAIKey() {
         updateCachedData();
-        return cachedSettings.getOpenAIKey();
+
+        // The key is stored in the model config settings to sync with the webview.
+        // But because it previously was stored as a separate value, we fall back to this key to migrate old settings.
+        var modelConfigValue = cachedSettings.getModelConfig().get(MODEL_CONFIG_OPENAI_API_KEY);
+        var fallbackValue = cachedSettings.openAIKey;
+        return StringUtil.defaultIfEmpty(modelConfigValue, fallbackValue);
     }
 
     @Override
     public synchronized void setOpenAIKey(@Nullable String key) {
         updateCachedData();
 
-        var oldValue = cachedSettings.openAIKey;
-        try {
-            PasswordSafe.getInstance().setPassword(createOpenAIKeyCredentials(), key);
-            cachedSettings.openAIKey = key;
-        } finally {
-            if (!Objects.equals(oldValue, key)) {
-                // notify listeners on background thread, outside the synchronized block
-                ApplicationManager.getApplication().executeOnPooledThread(() -> ApplicationManager.getApplication()
-                        .getMessageBus()
-                        .syncPublisher(AppMapSettingsListener.TOPIC)
-                        .openAIKeyChange());
-
-            }
-        }
+        // We always store the OpenAI key in the model config settings.
+        // The fallback to the old, deprecated value is done in getOpenAIKey.
+        setModelConfigItem(MODEL_CONFIG_OPENAI_API_KEY, key);
     }
-
 
     private synchronized void updateCachedData() {
         if (isCached) {
@@ -154,7 +151,8 @@ public final class AppMapSecureApplicationSettingsService implements AppMapSecur
     @AllArgsConstructor
     @Data
     private static class CachedSettings {
-        @Nullable String openAIKey;
+        // fixme Drop this in a few months after most users updated to a version storing the value in modelConfig
+        @Deprecated @Nullable String openAIKey;
         @Nullable Map<String, String> modelConfig;
 
         public CachedSettings() {
