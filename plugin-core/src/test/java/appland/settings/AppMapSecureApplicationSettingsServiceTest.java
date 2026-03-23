@@ -12,7 +12,7 @@ import java.util.concurrent.TimeUnit;
 @SuppressWarnings("deprecation")
 public class AppMapSecureApplicationSettingsServiceTest extends AppMapBaseTest {
     @Test
-    public void openAiKey() {
+    public void openAiKey() throws Exception {
         ApplicationManager.getApplication().assertIsDispatchThread();
 
         var settings = AppMapSecureApplicationSettingsService.getInstance();
@@ -20,7 +20,10 @@ public class AppMapSecureApplicationSettingsServiceTest extends AppMapBaseTest {
         // if executed on the EDT, it must not throw an exception about slow operations
         var oldValue = settings.getOpenAIKey();
         try {
+            var condition = subscribeToModelConfig("OPENAI_API_KEY");
             settings.setOpenAIKey("my-new-key");
+
+            condition.await(15, TimeUnit.SECONDS);
         } finally {
             settings.setOpenAIKey(oldValue);
         }
@@ -48,19 +51,7 @@ public class AppMapSecureApplicationSettingsServiceTest extends AppMapBaseTest {
 
     @Test
     public void modelConfigListenerForNewKey() throws Exception {
-        var condition = new CountDownLatch(1);
-        var listener = new AppMapSettingsListener() {
-            @Override
-            public void secureModelConfigChange(@NotNull String key) {
-                ApplicationManager.getApplication().assertIsNonDispatchThread();
-                condition.countDown();
-            }
-        };
-
-        ApplicationManager.getApplication().getMessageBus()
-                .connect(getTestRootDisposable())
-                .subscribe(AppMapSettingsListener.TOPIC, listener);
-
+        var condition = subscribeToModelConfig("first_key");
         AppMapSecureApplicationSettingsService.getInstance().setModelConfigItem("first_key", "first_value");
         assertTrue(condition.await(15, TimeUnit.SECONDS));
     }
@@ -69,20 +60,28 @@ public class AppMapSecureApplicationSettingsServiceTest extends AppMapBaseTest {
     public void modelConfigListenerForUpdatedValue() throws Exception {
         AppMapSecureApplicationSettingsService.getInstance().setModelConfigItem("first_key", "first_value");
 
+        var condition = subscribeToModelConfig("first_key");
+        AppMapSecureApplicationSettingsService.getInstance().setModelConfigItem("first_key", "updated_value");
+        assertTrue(condition.await(15, TimeUnit.SECONDS));
+    }
+
+    private @NotNull CountDownLatch subscribeToModelConfig(@NotNull String expectedKey) {
         var condition = new CountDownLatch(1);
         var listener = new AppMapSettingsListener() {
             @Override
             public void secureModelConfigChange(@NotNull String key) {
                 ApplicationManager.getApplication().assertIsNonDispatchThread();
                 condition.countDown();
+
+                if (!expectedKey.equals(key)) {
+                    LOG.error("Expected key: " + expectedKey + ", found: " + key);
+                }
             }
         };
 
         ApplicationManager.getApplication().getMessageBus()
                 .connect(getTestRootDisposable())
                 .subscribe(AppMapSettingsListener.TOPIC, listener);
-
-        AppMapSecureApplicationSettingsService.getInstance().setModelConfigItem("first_key", "updated_value");
-        assertTrue(condition.await(15, TimeUnit.SECONDS));
+        return condition;
     }
 }
