@@ -27,13 +27,14 @@ public interface AppMapSettingsListener {
     default void appMapWebViewFiltersChanged() {
     }
 
-    default void openAIKeyChange() {
-    }
-
     default void modelConfigChange() {
     }
 
-    default void secureModelConfigChange() {
+    /**
+     * Invoked after the value of the secure setting identified by {@code key} was changed.
+     * @param key The key of the modified settings.
+     */
+    default void secureModelConfigChange(@NotNull String key) {
     }
 
     default void copilotIntegrationDisabledChanged() {

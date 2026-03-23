@@ -52,8 +52,10 @@ public class AppMapSettingsReloadProjectListener implements AppMapSettingsListen
     }
 
     @Override
-    public void openAIKeyChange() {
-        reloadJsonRpcServerAlarm.get().cancelAndRequest();
+    public void secureModelConfigChange(@NotNull String key) {
+        if (AppLandJsonRpcService.LLM_ENV_VARIABLES.contains(key)) {
+            reloadJsonRpcServerAlarm.get().cancelAndRequest();
+        }
     }
 
     @Override

@@ -2,6 +2,7 @@ package appland.settings;
 
 import appland.AppMapBaseTest;
 import com.intellij.openapi.application.ApplicationManager;
+import org.jetbrains.annotations.NotNull;
 import org.junit.Test;
 
 import java.util.Map;
@@ -50,7 +51,7 @@ public class AppMapSecureApplicationSettingsServiceTest extends AppMapBaseTest {
         var condition = new CountDownLatch(1);
         var listener = new AppMapSettingsListener() {
             @Override
-            public void secureModelConfigChange() {
+            public void secureModelConfigChange(@NotNull String key) {
                 ApplicationManager.getApplication().assertIsNonDispatchThread();
                 condition.countDown();
             }
@@ -71,7 +72,7 @@ public class AppMapSecureApplicationSettingsServiceTest extends AppMapBaseTest {
         var condition = new CountDownLatch(1);
         var listener = new AppMapSettingsListener() {
             @Override
-            public void secureModelConfigChange() {
+            public void secureModelConfigChange(@NotNull String key) {
                 ApplicationManager.getApplication().assertIsNonDispatchThread();
                 condition.countDown();
             }
