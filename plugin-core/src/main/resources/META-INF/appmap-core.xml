@@ -116,7 +116,6 @@
                         serviceImplementation="appland.remote.DefaultRemoteRecordingStatusService"/>
         <projectService serviceInterface="appland.installGuide.projectData.ProjectDataService"
                         serviceImplementation="appland.installGuide.projectData.DefaultProjectDataService"/>
-        <postStartupActivity implementation="appland.settings.AppMapSettingsMigrationActivity"/>
 
         <projectService serviceInterface="appland.rpcService.AppLandJsonRpcService"
                         serviceImplementation="appland.rpcService.DefaultAppLandJsonRpcService"
