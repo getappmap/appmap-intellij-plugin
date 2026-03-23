@@ -449,6 +449,7 @@ project(":") {
                 into("appmap-assets/webview")
                 include("*.html")
                 include("dist/**")
+                exclude("dist/*.map")
             }
         }
 
