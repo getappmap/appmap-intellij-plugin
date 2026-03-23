@@ -325,15 +325,15 @@ project(":") {
             ides {
                 // earliest supported major version
                 select {
-                    sinceBuild = "241"
-                    untilBuild = "241.*"
+                    sinceBuild = "251"
+                    untilBuild = "251.*"
                     types.set(listOf(IntelliJPlatformType.IntellijIdeaCommunity))
                 }
 
-                // latest supported major version, 2025.3 is only available as a unified build
+                // latest supported major version, 2025.3+ is only available as a unified build
                 select {
-                    sinceBuild = "253"
-                    untilBuild = "253.*"
+                    sinceBuild = "261"
+                    untilBuild = "261.*"
                     types.set(listOf(IntelliJPlatformType.IntellijIdea))
                 }
             }
