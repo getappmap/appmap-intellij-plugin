@@ -11,21 +11,18 @@ import java.util.Map;
  */
 public interface AppMapSecureApplicationSettings {
     /**
-     * The key used to store the OpenAI key in the password safe.
+     * The OpenAI API key retrieved from the model config stored in the password safe.
      * If possible, this method should be called from a background thread.
      */
-    @Deprecated
     @Nullable String getOpenAIKey();
 
     /**
-     * Updates the value of the OpenAI key in the password safe.
+     * Updates the value of the OpenAI key in the model config stored in the password safe.
      *
      * @param key New value of the OpenAI key.
      */
-    @Deprecated
     void setOpenAIKey(@Nullable String key);
 
-    @Deprecated
     default boolean hasOpenAIKey() {
         return StringUtil.isNotEmpty(getOpenAIKey());
     }

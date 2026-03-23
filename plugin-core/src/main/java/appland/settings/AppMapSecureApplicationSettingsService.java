@@ -28,7 +28,7 @@ public final class AppMapSecureApplicationSettingsService implements AppMapSecur
     }
 
     // Key to store the OpenAI API key in the model config. This must match the value used by the AppMap webview.
-    private static final String MODEL_CONFIG_OPENAI_API_KEY = "OPENAI_API_KEY";
+    static final String MODEL_CONFIG_OPENAI_API_KEY = "OPENAI_API_KEY";
 
     private volatile boolean isCached = false;
     private volatile @NotNull CachedSettings cachedSettings = new CachedSettings();

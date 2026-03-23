@@ -63,26 +63,29 @@ public class AppMapProjectConfigurable implements Configurable {
      * Secure settings which are not persisted to implement {@link #isModified()}.
      */
     @Data
-    private static class InlineSecureApplicationSettings implements AppMapSecureApplicationSettings {
-        String openAIKey;
-        Map<String, String> modelConfig;
+    static class InlineSecureApplicationSettings implements AppMapSecureApplicationSettings {
+        @NotNull private Map<String, String> modelConfig;
 
         public InlineSecureApplicationSettings() {
+            this.modelConfig = new HashMap<>();
         }
 
         // copy constructor
         public InlineSecureApplicationSettings(@NotNull AppMapSecureApplicationSettings settings) {
-            this.openAIKey = settings.getOpenAIKey();
             this.modelConfig = new HashMap<>(settings.getModelConfig());
+        }
+
+        public @Nullable String getOpenAIKey() {
+            return modelConfig.get(AppMapSecureApplicationSettingsService.MODEL_CONFIG_OPENAI_API_KEY);
+        }
+
+        public void setOpenAIKey(@Nullable String value) {
+            setModelConfigItem(AppMapSecureApplicationSettingsService.MODEL_CONFIG_OPENAI_API_KEY, value);
         }
 
         @Override
         public void setModelConfigItem(@NotNull String key, @Nullable String value) {
-            if (modelConfig == null) {
-                if (value != null) {
-                    modelConfig = new HashMap<>(Map.of(key, value));
-                }
-            } else if (value == null) {
+            if (value == null) {
                 modelConfig.remove(key);
             } else {
                 modelConfig.put(key, value);
