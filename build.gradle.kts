@@ -3,7 +3,6 @@ import de.undercouch.gradle.tasks.download.Download
 import groovy.json.JsonSlurper
 import org.commonmark.parser.Parser
 import org.commonmark.renderer.html.HtmlRenderer
-import org.gradle.api.JavaVersion.VERSION_17
 import org.gradle.api.tasks.testing.logging.TestLogEvent
 import org.jetbrains.changelog.Changelog
 import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType
@@ -11,6 +10,7 @@ import org.jetbrains.intellij.platform.gradle.TestFrameworkType
 import org.jetbrains.intellij.platform.gradle.tasks.InstrumentCodeTask
 import org.jetbrains.intellij.platform.gradle.tasks.PrepareSandboxTask
 import org.jetbrains.intellij.platform.gradle.tasks.VerifyPluginTask.FailureLevel
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.konan.properties.loadProperties
 
 loadPlatformProperties()
@@ -140,20 +140,19 @@ allprojects {
         instrumentCode = false
     }
 
-    // Only 2024.2+ is supporting Java 21
     // https://plugins.jetbrains.com/docs/intellij/setting-up-theme-environment.html#add-jdk-and-intellij-platform-plugin-sdk
     configure<JavaPluginExtension> {
-        sourceCompatibility = VERSION_17
-        targetCompatibility = VERSION_17
+        sourceCompatibility = JavaVersion.VERSION_21
+        targetCompatibility = JavaVersion.VERSION_21
     }
 
     tasks {
         compileKotlin {
-            kotlinOptions.jvmTarget = "17"
+            compilerOptions.jvmTarget.set(JvmTarget.JVM_21)
         }
 
         compileTestKotlin {
-            kotlinOptions.jvmTarget = "17"
+            compilerOptions.jvmTarget.set(JvmTarget.JVM_21)
         }
 
         processTestResources {
@@ -382,14 +381,16 @@ project(":") {
                 doLast {
                     val settingsFile = pluginDirectory.file("site-config.json").get().asFile
                     if (!settingsFile.exists()) {
-                        settingsFile.writeText("""
+                        settingsFile.writeText(
+                            """
                             {
                                 "appMap.autoUpdateTools": false,
                                 "appMap.telemetry": {
                                     "backend": "splunk"
                                 }
                             }
-                            """.trimIndent())
+                            """.trimIndent()
+                        )
                     }
                 }
             }

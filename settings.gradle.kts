@@ -7,8 +7,8 @@ pluginManagement {
     val platformVersion = (extra["platformVersion"] as String).toInt()
     plugins {
         val kotlinVersion = when {
-            platformVersion >= 251 -> "2.1.21"
-            else -> "1.9.24"
+            platformVersion >= 261 -> "2.3.20"
+            else -> "2.1.21"
         }
         kotlin("jvm") version kotlinVersion
         kotlin("plugin.lombok") version kotlinVersion

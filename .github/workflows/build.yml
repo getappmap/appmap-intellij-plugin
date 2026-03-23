@@ -15,7 +15,7 @@ jobs:
     test:
         strategy:
             matrix:
-                platform_version: [ "241" ]
+                platform_version: [ "251" ]
                 os: [ ubuntu, windows, macos ]
                 include:
                     # Run tests with latest platform version, but only on Linux
@@ -67,7 +67,7 @@ jobs:
 
             - name: Save AppMaps
               uses: actions/cache/save@v4
-              if: runner.os == 'Linux' && matrix.platform_version == '241'
+              if: runner.os == 'Linux' && matrix.platform_version == '251'
               with:
                   path: ./tmp/appmap
                   key: appmaps-${{ github.sha }}-${{ github.run_attempt }}
