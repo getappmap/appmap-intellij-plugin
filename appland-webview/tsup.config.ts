@@ -1,6 +1,5 @@
 import path from "path";
 import { defineConfig } from "tsup";
-import polyfills from "node-libs-browser";
 
 export default defineConfig([
     {
@@ -29,12 +28,11 @@ export default defineConfig([
             options.platform = "browser";
             options.alias = {
                 ...(options.alias || {}),
-                ...Object.entries(polyfills)
-                    .filter(([, modulePath]) => Boolean(modulePath))
-                    .reduce((memo, [name, modulePath]) => {
-                        memo[name] = modulePath;
-                        return memo;
-                    }, {}),
+                "process": "process/browser",
+                "http": "stream-http",
+                "https": "https-browserify",
+                "stream": "stream-browserify",
+
                 "socket.io-client": "./node_modules/socket.io-client/dist/socket.io.js",
                 messagePublisher: path.resolve("./messagePublisher.js"),
                 vsCodeBridge: path.resolve("./vsCodeBridge.js"),
