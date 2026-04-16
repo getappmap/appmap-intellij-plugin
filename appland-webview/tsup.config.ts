@@ -23,12 +23,10 @@ export default defineConfig([
         inject: ["polyfillShim.js"],
         define: {
             global: "globalThis",
-            process: "process",
-            Buffer: "Buffer",
         },
         esbuildOptions(options) {
             options.resolveExtensions = [".mjs", ".js", ".ts"];
-            options.mainFields = ["browser", "main"];
+            options.platform = "browser";
             options.alias = {
                 ...(options.alias || {}),
                 ...Object.entries(polyfills)
