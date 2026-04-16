@@ -35,7 +35,6 @@ export default defineConfig([
                         memo[name] = modulePath;
                         return memo;
                     }, {}),
-                fs: "./node_modules/browserify-fs",
                 "socket.io-client": "./node_modules/socket.io-client/dist/socket.io.js",
                 messagePublisher: path.resolve("./messagePublisher.js"),
                 vsCodeBridge: path.resolve("./vsCodeBridge.js"),
