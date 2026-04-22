@@ -1,5 +1,13 @@
 AppMap Plugin Changelog
 
+## [0.83.1](https://github.com/getappmap/appmap-intellij-plugin/compare/v0.83.0...v0.83.1) (2026-04-22)
+
+
+### Bug Fixes
+
+-  Don't show that AppMap settings were modified in the settings UI ([45c7eb0](https://github.com/getappmap/appmap-intellij-plugin/commit/45c7eb08f2c6828651015fa6748da9adff79a9d3))
+-  Store the OpenAI key provided in the settings UI in the same place as the AppMap webview ([db90e41](https://github.com/getappmap/appmap-intellij-plugin/commit/db90e41b73c6187271e3f7294eb3305a5ab03cd2))
+
 ## [0.83.0](https://github.com/getappmap/appmap-intellij-plugin/compare/v0.82.1...v0.83.0) (2026-02-02)
 
 
