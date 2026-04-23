@@ -209,16 +209,16 @@ public abstract class WebviewEditor<T> extends UserDataHolderBase implements Fil
     private void loadApplication() {
         contentPanel.loadURL(webview.getIndexHtmlUrl());
 
-        if (Registry.is("appmap.webview.open.dev.tools", false)) {
-            ApplicationManager.getApplication().invokeLater(this::openDevTools);
-        }
-
         if (AppMapNotifications.isWebviewProxyWarningRequired()) {
             AppMapNotifications.showWebviewProxyBrokenWarning(project);
         }
     }
 
     private void initWebviewApplication() {
+        if (Registry.is("appmap.webview.open.dev.tools", false)) {
+            ApplicationManager.getApplication().invokeLater(this::openDevTools);
+        }
+
         postMessageQuery.addHandler(request -> {
             try {
                 var json = gson.fromJson(request, JsonObject.class);
