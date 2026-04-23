@@ -85,12 +85,20 @@ jobs:
         steps:
             - name: Fetch Sources
               uses: actions/checkout@v6
+              with:
+                  fetch-depth: 0
 
             - name: Setup Java
               uses: actions/setup-java@v5
               with:
                   distribution: jetbrains
                   java-version: ${{ env.JAVA_VERSION }}
+
+            - name: Set development version
+              shell: bash
+              run: |
+                  VERSION=$(git describe --tags --always | sed 's/^v//')
+                  sed -i "s/^pluginVersion=.*/pluginVersion=$VERSION/" gradle.properties
 
             - name: Verify Plugin Structure
               shell: bash
@@ -100,19 +108,9 @@ jobs:
               shell: bash
               run: ./gradlew verifyPlugin
 
-            - name: Prepare plugin distribution upload
-              id: artifact
-              run: |
-                  cd "${{ github.workspace }}/build/distributions"
-
-                  FILENAME="$(ls *.zip)"
-                  unzip -d content "$FILENAME"
-
-                  OUTPUT_FILENAME="${FILENAME/.zip/}-build${GITHUB_RUN_NUMBER}.${GITHUB_SHA::6}"
-                  echo "filename=${OUTPUT_FILENAME}" >> $GITHUB_OUTPUT
-
             - name: Upload plugin distribution
               uses: actions/upload-artifact@v7
               with:
-                  name: ${{ steps.artifact.outputs.filename }}
-                  path: ${{ github.workspace }}/build/distributions/content/**/*
+                  name: plugin-distribution
+                  path: build/distributions/intellij-appmap-*.zip
+                  archive: false

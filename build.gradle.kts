@@ -314,8 +314,8 @@ project(":") {
 
             changeNotes.set(provider {
                 val item = when {
-                    pluginVersionString.endsWith("-SNAPSHOT") -> changelog.getUnreleased()
-                    else -> changelog.get(pluginVersionString)
+                    pluginVersionString.matches(Regex("\\d+\\.\\d+\\.\\d+")) -> changelog.get(pluginVersionString)
+                    else -> changelog.getLatest()
                 }
                 changelog.renderItem(item.withHeader(false), Changelog.OutputType.HTML)
             })
