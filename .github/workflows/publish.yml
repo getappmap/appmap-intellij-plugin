@@ -1,0 +1,38 @@
+name: Publish
+on:
+    push:
+        tags:
+            - 'v*'
+    workflow_dispatch:
+        inputs:
+            tag:
+                description: "Tag to publish (e.g. v0.83.1)"
+                required: true
+                type: string
+
+jobs:
+    publish:
+        runs-on: ubuntu-latest
+        environment: Marketplace Deployment
+        steps:
+            - name: Fetch Sources
+              uses: actions/checkout@v6
+              with:
+                  # Force refs/tags/ prefix so that a branch name or non-existent value
+                  # causes checkout to fail rather than silently publishing from wrong code.
+                  ref: ${{ github.event_name == 'workflow_dispatch' && format('refs/tags/{0}', inputs.tag) || github.ref }}
+
+            - name: Setup Java
+              uses: actions/setup-java@v5
+              with:
+                  distribution: jetbrains
+                  java-version: 21
+
+            - name: Setup Gradle
+              uses: gradle/actions/setup-gradle@v5
+
+            - name: Publish Plugin
+              shell: bash
+              env:
+                  JETBRAINS_MARKETPLACE_TOKEN: ${{ secrets.JETBRAINS_MARKETPLACE_TOKEN }}
+              run: ./gradlew clean buildPlugin publishPlugin -x test -x testAgent

@@ -49,13 +49,8 @@ plugins:
         hasChanged: true
         numMatches: 1
         numReplacements: 1
-# exec uses prepareCmd (not publishCmd) and is ordered before @semantic-release/git
-# intentionally: semantic-release pushes commits+tags after all prepare plugins but
-# before any publish plugins, so publishCmd would push the version bump commit even
-# if the marketplace upload fails. With prepareCmd here, a failed upload aborts
-# prepare before git ever commits, leaving main untouched.
 - - '@semantic-release/exec'
-  - prepareCmd: ./gradlew clean buildPlugin publishPlugin -x test -x testAgent
+  - prepareCmd: ./gradlew clean buildPlugin -x test -x testAgent
 - - '@semantic-release/git'
   - assets:
     - CHANGELOG.md
