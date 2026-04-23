@@ -39,6 +39,9 @@
     </projectListeners>
 
     <extensionPoints>
+        <extensionPoint qualifiedName="appland.files.fileLookup" interface="appland.files.AppMapFileLookup"
+                        dynamic="true"/>
+
         <extensionPoint dynamic="true"
                         qualifiedName="appland.cli.envProvider"
                         interface="appland.cli.AppLandCliEnvProvider"/>
@@ -53,6 +56,10 @@
         <envProvider implementation="appland.telemetry.splunk.AppMapSplunkTelemetryCliEnvProvider"/>
         <envProvider order="last"
                      implementation="appland.webviews.navie.NavieLanguageModelEnvProvider"/>
+    </extensions>
+
+    <extensions defaultExtensionNs="appland.files">
+        <fileLookup implementation="appland.files.AppMapGenericFileLookup" order="last"/>
     </extensions>
 
     <extensions defaultExtensionNs="com.intellij">
