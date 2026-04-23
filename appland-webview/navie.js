@@ -107,9 +107,15 @@ export function mountWebview() {
     app.$on("change-model-config", ({ key, value, secret }) =>
       vscode.postMessage({ command: "change-model-config", key, value, secret })
     );
-    app.$on("select-model", ({ provider, id }) =>
-      vscode.postMessage({ command: "select-model", id: `${provider}:${id}` })
-    );
+    app.$on("select-model", (arg) => {
+      // For some reason, this is being called with an undefined argument in some cases
+      // such as when previously selected model is no longer available after Navie restarts.
+      // We should investigate why that is, but in the meantime, we can guard against it here.
+      if (arg) {
+        const { provider, id } = arg;
+        vscode.postMessage({ command: "select-model", id: `${provider}:${id}` })
+      }
+    });
   });
 
   vscode.postMessage({ command: "ready" });
