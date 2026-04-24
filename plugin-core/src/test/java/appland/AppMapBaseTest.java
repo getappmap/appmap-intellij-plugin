@@ -197,7 +197,7 @@ public abstract class AppMapBaseTest extends LightPlatformCodeInsightFixture4Tes
             return;
         }
 
-        var latch = createWaitForJsonRpcServerRestartCondition(true);
+        var latch = createWaitForJsonRpcServerStartCondition();
         ApplicationManager.getApplication().executeOnPooledThread(service::startServer);
         try {
             assertTrue("The AppMap JSON-RPC server must launch", latch.await(30, TimeUnit.SECONDS));
@@ -206,52 +206,14 @@ public abstract class AppMapBaseTest extends LightPlatformCodeInsightFixture4Tes
         }
     }
 
-    protected void waitForJsonRpcServerPort() {
-        var service = AppLandJsonRpcService.getInstance(getProject());
-        if (service.isServerRunning()) {
-            return;
-        }
-
-        var latch = createWaitForJsonRpcServerPortCondition();
-        ApplicationManager.getApplication().executeOnPooledThread(service::startServer);
-        try {
-            assertTrue("The AppMap JSON-RPC server must launch", latch.await(30, TimeUnit.SECONDS));
-        } catch (InterruptedException e) {
-            addSuppressedException(e);
-        }
-    }
-
-    protected @NotNull CountDownLatch createWaitForJsonRpcServerRestartCondition(boolean allowStart) {
+    protected @NotNull CountDownLatch createWaitForJsonRpcServerStartCondition() {
         var latch = new CountDownLatch(1);
         getProject().getMessageBus()
                 .connect(getTestRootDisposable())
                 .subscribe(AppLandJsonRpcListener.TOPIC, new AppLandJsonRpcListener() {
                     @Override
                     public void serverStarted() {
-                        if (allowStart) {
-                            latch.countDown();
-                        }
-                    }
-
-                    @Override
-                    public void serverRestarted() {
                         latch.countDown();
-                    }
-                });
-        return latch;
-    }
-
-    protected @NotNull CountDownLatch createWaitForJsonRpcServerPortCondition() {
-        var latch = new CountDownLatch(1);
-        getProject().getMessageBus()
-                .connect(getTestRootDisposable())
-                .subscribe(AppLandJsonRpcListener.TOPIC, new AppLandJsonRpcListener() {
-                    @Override
-                    public void serverConfigurationUpdated(@NotNull Collection<VirtualFile> contentRoots,
-                                                           @NotNull Collection<VirtualFile> appMapConfigFiles) {
-                        if (AppLandJsonRpcService.getInstance(getProject()).getServerPort() != null) {
-                            latch.countDown();
-                        }
                     }
                 });
         return latch;

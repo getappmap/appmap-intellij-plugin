@@ -51,15 +51,7 @@ public interface AppLandJsonRpcService extends Disposable {
     void restartServer();
 
     /**
-     * Stops the server in a background thread.
-     * The calling thread is not blocked.
-     */
-    void stopServerAsync();
-
-    /**
      * Stops the server synchronously. This method must not be called from the EDT.
-     * <p>
-     * Please use {@link #stopServerAsync()} instead, if possible.
      */
     @RequiresBackgroundThread
     void stopServer();

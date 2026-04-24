@@ -78,7 +78,7 @@ public class AddNavieContextFilesActionTest extends AppMapBaseTest {
 
     private void openNavieEditor(@NotNull VirtualFile tempDir) throws Exception {
         createAppMapConfig(tempDir, Path.of("tmp", "appmap"));
-        waitForJsonRpcServerPort();
+        waitForJsonRpcServer();
 
         edt(() -> NavieEditorProvider.openEditor(getProject(), DataContext.EMPTY_CONTEXT));
 

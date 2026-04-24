@@ -22,12 +22,6 @@ public interface AppLandJsonRpcListener {
     }
 
     /**
-     * Sent after the JSON-RPC server was restarted.
-     */
-    default void serverRestarted() {
-    }
-
-    /**
      * Sent after a new AppMap JSON-RPC server was fully initialized.
      *
      * @param contentRoots      The content roots passed to the server process

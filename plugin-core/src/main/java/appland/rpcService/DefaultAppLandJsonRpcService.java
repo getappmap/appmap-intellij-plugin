@@ -9,19 +9,16 @@ import appland.utils.GsonUtils;
 import appland.utils.UserLog;
 import com.google.gson.JsonObject;
 import com.intellij.execution.ExecutionException;
-import com.intellij.execution.process.KillableProcessHandler;
-import com.intellij.execution.process.ProcessAdapter;
-import com.intellij.execution.process.ProcessEvent;
-import com.intellij.execution.process.ProcessOutputTypes;
+import com.intellij.execution.process.*;
 import com.intellij.openapi.application.ApplicationInfo;
 import com.intellij.openapi.application.ApplicationManager;
+import com.intellij.openapi.application.ReadAction;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.project.DumbService;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.roots.ModuleRootEvent;
 import com.intellij.openapi.roots.ModuleRootListener;
 import com.intellij.openapi.util.Key;
-import com.intellij.openapi.util.Pair;
 import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.util.Alarm;
@@ -31,7 +28,6 @@ import com.intellij.util.concurrency.annotations.RequiresBackgroundThread;
 import com.intellij.util.concurrency.annotations.RequiresReadLock;
 import com.intellij.util.io.BaseOutputReader;
 import com.intellij.util.io.HttpRequests;
-import lombok.Data;
 import net.jcip.annotations.GuardedBy;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -49,8 +45,8 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 /**
- * This implementation restarts the JSON-RPC server up to three times if it terminates unexpectedly.
- * The following configuration changes trigger a restart:
+ * This implementation restarts the JSON-RPC server up to {@link #MAX_CRASH_RESTARTS} times if it
+ * terminates unexpectedly. The following configuration changes trigger an intentional restart:
  * - Change of the AppMap API key
  * - Download or update of an AppMap CLI binary
  * - Add/remove/update of an appmap.yml file
@@ -58,35 +54,56 @@ import java.util.stream.Collectors;
 @SuppressWarnings("UnstableApiUsage")
 public class DefaultAppLandJsonRpcService implements AppLandJsonRpcService, AppLandDownloadListener {
     private static final Logger LOG = Logger.getInstance(DefaultAppLandJsonRpcService.class);
-    // pattern to capture the code in STDOUT of the server process
     private static final Pattern PORT_PATTERN = Pattern.compile("^Running JSON-RPC server on port: (\\d+)$");
-    // initial delay for the first restart attempt
-    private static final long INITIAL_RESTART_DELAY_MILLIS = 5_000;
-    // factor to calculate the next restart delay based on the previous delay
-    private static final double NEXT_RESTART_FACTOR = 1.5;
-    // three restarts at most (5_000 * 1.5^3 > 15_000)
-    private static final long MAX_RESTART_DELAY_MILLIS = INITIAL_RESTART_DELAY_MILLIS * 3;
+    private static final long INITIAL_CRASH_RESTART_DELAY_MILLIS = 1_000;
+    private static final double CRASH_RESTART_DELAY_FACTOR = 1.5;
+    private static final int MAX_CRASH_RESTARTS = 3;
+
+    private enum ServerState {
+        /**
+         * No process running; can be started.
+         */
+        STOPPED,
+        /**
+         * Process launched; waiting for port announcement on stdout.
+         */
+        STARTING,
+        /**
+         * Port announced; server is ready to accept RPC calls.
+         */
+        RUNNING,
+        /**
+         * Process is being killed by an explicit stop/restart call.
+         */
+        STOPPING,
+        /**
+         * Process crashed; a scheduled task will attempt a restart.
+         */
+        CRASH_RESTARTING,
+        /**
+         * Service disposed; no further starts allowed.
+         */
+        DISPOSED
+    }
 
     private final @NotNull Project project;
-    // future to control the lifetime of the appmap.yml polling
     private final @Nullable ScheduledFuture<?> pollingFuture;
-    // debounce requests to send the configuration message to the server by 1s
     private final SingleAlarm updateServerSettingsAlarm = new SingleAlarm(this::updateServerSettings,
-            1_000,
-            this,
-            Alarm.ThreadToUse.POOLED_THREAD);
-    // debounce requests to send model configuration update messages by 1s
-    private final SingleAlarm updateModelConfigAlarm = new SingleAlarm(this::updateModelConfig,
-            1_000,
-            this,
-            Alarm.ThreadToUse.POOLED_THREAD);
+            1_000, this, Alarm.ThreadToUse.POOLED_THREAD);
 
-    // flag to help avoid starting the server if we're already disposed
+    // Fast non-locking guard used in hot paths where acquiring "this" would be heavy.
     private volatile boolean isDisposed;
-    // a value of "0" indicates that process restart is disabled
-    private volatile long nextRestartDelayMillis = INITIAL_RESTART_DELAY_MILLIS;
+
     @GuardedBy("this")
-    protected volatile @Nullable JsonRpcServer jsonRpcServer = null;
+    private ServerState state = ServerState.STOPPED;
+    @GuardedBy("this")
+    protected @Nullable KillableProcessHandler currentProcess = null;
+    // Preserved across restarts so the server binds to the same port every time.
+    @GuardedBy("this")
+    private @Nullable Integer lastKnownPort = null;
+    // Reset to 0 whenever the server reaches RUNNING; incremented on each crash.
+    @GuardedBy("this")
+    private int crashRestartCount = 0;
 
     private static final @NotNull AtomicInteger jsonRpcRequestCounter = new AtomicInteger(0);
     private static final @NotNull UserLog OUTPUT_LOG_STREAM = new UserLog("appmap-json-rpc.log");
@@ -120,12 +137,8 @@ public class DefaultAppLandJsonRpcService implements AppLandJsonRpcService, AppL
         });
 
         if (!application.isUnitTestMode()) {
-            // poll AppMap configuration files every 30s and send "v1.configuration.set",
-            // but we don't want to update the model configuration.
-            this.pollingFuture = AppExecutorUtil.getAppScheduledExecutorService().scheduleWithFixedDelay(this::triggerSendConfigurationSet,
-                    30_000,
-                    30_000,
-                    TimeUnit.MILLISECONDS);
+            this.pollingFuture = AppExecutorUtil.getAppScheduledExecutorService().scheduleWithFixedDelay(
+                    this::triggerSendConfigurationSet, 30_000, 30_000, TimeUnit.MILLISECONDS);
         } else {
             this.pollingFuture = null;
         }
@@ -133,10 +146,7 @@ public class DefaultAppLandJsonRpcService implements AppLandJsonRpcService, AppL
 
     @Override
     public void dispose() {
-        this.isDisposed = true;
-
-        // disable restarts
-        this.nextRestartDelayMillis = 0L;
+        isDisposed = true;
 
         try {
             var future = pollingFuture;
@@ -144,94 +154,36 @@ public class DefaultAppLandJsonRpcService implements AppLandJsonRpcService, AppL
                 future.cancel(true);
             }
         } finally {
+            KillableProcessHandler process;
+            synchronized (this) {
+                state = ServerState.DISPOSED;
+                process = currentProcess;
+                currentProcess = null;
+            }
+
             var application = ApplicationManager.getApplication();
-            if (application.isDisposed()) {
-                // application shutdown in progress
-                stopServer();
-            } else if (!application.isDispatchThread()) {
-                // dispose not called on EDT
-                stopServer();
+            if (application.isDisposed() || !application.isDispatchThread()) {
+                killProcessAndWait(process);
             } else {
-                // Dispose called on EDT, e.g. when the AppMap plugin is unloaded.
-                stopServerAsync();
+                application.executeOnPooledThread(() -> killProcessAndWait(process));
             }
         }
     }
 
     @Override
     public synchronized boolean isServerRunning() {
-        return jsonRpcServer != null;
+        return state == ServerState.RUNNING;
     }
 
     @Override
     public void startServer() {
-        startServer(null);
-    }
-
-    private void startServer(@Nullable Integer port) {
-        if (isServerRunning()) {
-            LOG.debug("AppMap JSON-RPC server is already running.");
-            return;
-        }
-
-        if (isDisposed || project.isDisposed()) {
-            LOG.debug("Unable to start JSON-RPC server, because the service is already disposed.");
-            return;
-        }
-
-        var commandLine = AppLandCommandLineService.getInstance().createAppMapJsonRpcCommand(port);
-        if (commandLine == null) {
-            LOG.debug("Unable to launch JSON-RPC server, because CLI command is unavailable.");
-            return;
-        }
-
-        commandLine = commandLine.withEnvironment("APPMAP_CODE_EDITOR", createCodeEditorInfo());
-
-        synchronized (this) {
-            if (isServerRunning()) {
-                return;
-            }
-
-            try {
-                var process = new KillableProcessHandler(commandLine) {
-                    @NotNull
-                    @Override
-                    protected BaseOutputReader.Options readerOptions() {
-                        return BaseOutputReader.Options.forMostlySilentProcess();
-                    }
-                };
-
-                var jsonRpcServer = new JsonRpcServer(process);
-                process.addProcessListener(new JsonRpcProcessListener(jsonRpcServer), this);
-
-                this.jsonRpcServer = jsonRpcServer;
-
-                // launch process and our process listener
-                process.startNotify();
-            } catch (ExecutionException e) {
-                LOG.debug("Failed to launch AppMap JSON-RPC server, command: " + commandLine.getCommandLineString(), e);
-            } finally {
-                if (!isDisposed && !project.isDisposed()) {
-                    project.getMessageBus().syncPublisher(AppLandJsonRpcListener.TOPIC).serverStarted();
-                }
-            }
-        }
-    }
-
-    @Override
-    public synchronized void stopServerAsync() {
-        ApplicationManager.getApplication().executeOnPooledThread(this::stopServer);
+        startServerInternal();
     }
 
     @Override
     @RequiresBackgroundThread
-    public synchronized void stopServer() {
-        var server = jsonRpcServer;
-        if (server != null) {
-            this.jsonRpcServer = null;
-
-            stopServerSync(server);
-        }
+    public void stopServer() {
+        stopCurrentProcessSync();
     }
 
     @Override
@@ -241,45 +193,141 @@ public class DefaultAppLandJsonRpcService implements AppLandJsonRpcService, AppL
 
     @Override
     public synchronized @Nullable Integer getServerPort() {
-        var server = jsonRpcServer;
-        return server != null ? server.jsonRpcPort : null;
+        return state == ServerState.RUNNING ? lastKnownPort : null;
     }
 
-    private @Nullable String getServerUrl() {
-        var port = getServerPort();
-        return port != null ? "http://127.0.0.1:" + port : null;
-    }
-
-    /**
-     * Queries existing Navie threads via JSON-RPC.
-     *
-     * @param params RPC parameters
-     * @return list of threads, or an empty list if the server is not running or if the query failed
-     */
     @Override
     @NotNull
     public List<NavieThreadQueryV1Response.NavieThread> queryNavieThreads(@NotNull NavieThreadQueryV1Params params) throws IOException {
-        String serverUrl = getServerUrl();
+        var serverUrl = getServerUrl();
         if (serverUrl == null) {
             throw new IOException("Navie JSON-RPC server is not running");
         }
 
-        try {
-            var response = sendJsonRpcMessage(serverUrl, "v1.navie.thread.query", params);
-            if (response == null) {
-                throw new IOException("Received empty response from JSON-RPC server");
-            }
+        var response = sendJsonRpcMessage(serverUrl, "v1.navie.thread.query", params);
+        if (response == null) {
+            throw new IOException("Received empty response from JSON-RPC server");
+        }
+        return GsonUtils.GSON.fromJson(response, NavieThreadQueryV1Response.class).result();
+    }
 
-            var result = GsonUtils.GSON.fromJson(response, NavieThreadQueryV1Response.class);
-            return result.result();
-        } catch (IOException e) {
-            LOG.debug("Failed to send \"v1.navie.thread.query\" message", e);
+    @Override
+    public void downloadFinished(@NotNull CliTool type, @NotNull AppMapDownloadStatus status) {
+        if (!status.isSuccessful() || !CliTool.AppMap.equals(type)) {
+            return;
+        }
+        synchronized (this) {
+            // A running server is fine with the old binary; it will pick up the update on the next session.
+            if (state == ServerState.RUNNING) {
+                return;
+            }
+        }
+        restartServerAsync();
+    }
+
+    private void startServerInternal() {
+        Integer portToUse;
+        synchronized (this) {
+            if (state != ServerState.STOPPED && state != ServerState.CRASH_RESTARTING) {
+                LOG.debug("Not starting JSON-RPC server, state is " + state);
+                return;
+            }
+            if (isDisposed || project.isDisposed()) {
+                LOG.debug("Not starting JSON-RPC server, service is disposed");
+                return;
+            }
+            portToUse = lastKnownPort;
         }
 
-        return List.of();
+        var commandLine = AppLandCommandLineService.getInstance().createAppMapJsonRpcCommand(portToUse);
+        if (commandLine == null) {
+            LOG.debug("Unable to launch JSON-RPC server, because CLI command is unavailable.");
+            return;
+        }
+
+        commandLine = commandLine.withEnvironment("APPMAP_CODE_EDITOR", createCodeEditorInfo());
+
+        KillableProcessHandler process;
+        try {
+            synchronized (this) {
+                // Re-check under lock after the (potentially slow) command-line creation.
+                if (state != ServerState.STOPPED && state != ServerState.CRASH_RESTARTING) {
+                    return;
+                }
+                if (isDisposed || project.isDisposed()) {
+                    return;
+                }
+
+                process = new KillableProcessHandler(commandLine) {
+                    @NotNull
+                    @Override
+                    protected BaseOutputReader.Options readerOptions() {
+                        return BaseOutputReader.Options.forMostlySilentProcess();
+                    }
+                };
+                process.addProcessListener(processListener, this);
+                currentProcess = process;
+                state = ServerState.STARTING;
+            }
+            process.startNotify();
+        } catch (ExecutionException e) {
+            LOG.debug("Failed to launch AppMap JSON-RPC server: " + commandLine.getCommandLineString(), e);
+        }
     }
 
     @RequiresBackgroundThread
+    private void stopCurrentProcessSync() {
+        ApplicationManager.getApplication().assertIsNonDispatchThread();
+
+        KillableProcessHandler process;
+        synchronized (this) {
+            switch (state) {
+                case STOPPED:
+                case STOPPING:
+                case DISPOSED:
+                    return;
+                case CRASH_RESTARTING:
+                    // Cancel the pending restart; the scheduled task checks state and will no-op.
+                    state = ServerState.STOPPED;
+                    return;
+                default:
+                    // STARTING or RUNNING: take ownership of the process and begin stopping.
+                    process = currentProcess;
+                    currentProcess = null;
+                    state = ServerState.STOPPING;
+            }
+        }
+
+        killProcessAndWait(process);
+
+        synchronized (this) {
+            if (state == ServerState.STOPPING) {
+                state = ServerState.STOPPED;
+            }
+        }
+
+        if (!isDisposed && !project.isDisposed()) {
+            project.getMessageBus().syncPublisher(AppLandJsonRpcListener.TOPIC).serverStopped();
+        }
+    }
+
+    @RequiresBackgroundThread
+    private void restartServerSync() {
+        ApplicationManager.getApplication().assertIsNonDispatchThread();
+
+        // No try/finally needed: stopCurrentProcessSync swallows all exceptions internally,
+        // and serverStarted fires automatically from onPortAnnounced when the new process announces its port.
+        project.getMessageBus().syncPublisher(AppLandJsonRpcListener.TOPIC).beforeServerRestart();
+        stopCurrentProcessSync();
+        if (!project.isDisposed()) {
+            synchronized (this) {
+                // Intentional restart: don't count against the crash budget.
+                crashRestartCount = 0;
+            }
+            startServerInternal();
+        }
+    }
+
     private void restartServerAsync() {
         if (isDisposed || project.isDisposed()) {
             return;
@@ -293,109 +341,120 @@ public class DefaultAppLandJsonRpcService implements AppLandJsonRpcService, AppL
         }
     }
 
-    @RequiresBackgroundThread
-    private void restartServerSync() {
-        ApplicationManager.getApplication().assertIsNonDispatchThread();
+    private void onPortAnnounced(@NotNull ProcessHandler process, int port) {
+        synchronized (this) {
+            if (process != currentProcess || state != ServerState.STARTING) {
+                return;
+            }
+            lastKnownPort = port;
+            state = ServerState.RUNNING;
+            crashRestartCount = 0;
+        }
+        // Push config before notifying listeners so the initial state is already set when they react.
+        updateServerSettings();
+        updateModelConfig();
+        if (!isDisposed && !project.isDisposed()) {
+            project.getMessageBus().syncPublisher(AppLandJsonRpcListener.TOPIC).serverStarted();
+        }
+    }
 
-        var publisher = project.getMessageBus().syncPublisher(AppLandJsonRpcListener.TOPIC);
+    private void onProcessTerminated(@NotNull ProcessHandler process) {
+        OUTPUT_LOG_STREAM.log("AppMap JSON-RPC server terminated\n\n");
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("AppMap JSON-RPC server terminated");
+        }
 
-        Integer previousPort = null;
-        try {
-            publisher.beforeServerRestart();
+        boolean scheduleCrashRestart;
+        long restartDelay;
+        synchronized (this) {
+            if (process != currentProcess) {
+                // Stale event from a process we already replaced or explicitly stopped.
+                return;
+            }
+            if (state == ServerState.STOPPING || state == ServerState.DISPOSED) {
+                // Intentional stop; stopCurrentProcessSync/dispose owns the transition.
+                return;
+            }
 
-            previousPort = stopServerSync(this.jsonRpcServer);
-        } finally {
-            if (!project.isDisposed()) {
-                try {
-                    startServer(previousPort);
-                } finally {
-                    publisher.serverRestarted();
+            // Unexpected termination (crash) while STARTING or RUNNING.
+            currentProcess = null;
+
+            boolean canRestart = !isDisposed && !project.isDisposed() && crashRestartCount < MAX_CRASH_RESTARTS;
+            if (canRestart) {
+                crashRestartCount++;
+                restartDelay = (long) (INITIAL_CRASH_RESTART_DELAY_MILLIS
+                        * Math.pow(CRASH_RESTART_DELAY_FACTOR, crashRestartCount - 1));
+                state = ServerState.CRASH_RESTARTING;
+                scheduleCrashRestart = true;
+            } else {
+                state = ServerState.STOPPED;
+                scheduleCrashRestart = false;
+                restartDelay = 0;
+            }
+        }
+
+        if (scheduleCrashRestart) {
+            AppExecutorUtil.getAppScheduledExecutorService().schedule(() -> {
+                if (isDisposed || project.isDisposed()) {
+                    return;
                 }
+                synchronized (DefaultAppLandJsonRpcService.this) {
+                    if (state != ServerState.CRASH_RESTARTING) {
+                        return;
+                    }
+                    state = ServerState.STOPPED;
+                }
+                startServerInternal();
+            }, restartDelay, TimeUnit.MILLISECONDS);
+        }
+    }
+
+    private static void killProcessAndWait(@Nullable KillableProcessHandler process) {
+        if (process == null) {
+            return;
+        }
+        try {
+            process.setShouldKillProcessSoftly(false);
+            process.destroyProcess();
+            process.waitFor(500);
+        } catch (WinpException e) {
+            // https://github.com/getappmap/appmap-intellij-plugin/issues/706
+            // On Windows 10 and later, ctrl+c is sent to the process as first attempt.
+            // If this attempt takes longer than 5s, then a WinpException is thrown.
+            LOG.warn("Failed to destroyProcess, falling back to forced process termination", e);
+        } finally {
+            if (!process.isProcessTerminated()) {
+                process.killProcess();
             }
         }
     }
 
-    /**
-     * Stops the server and waits for a short time before it's forcibly killed.
-     *
-     * @param server The server to stop, a {@code null} value is ignored.
-     * @return Port used by the server, if a server was running.
-     */
-    @RequiresBackgroundThread
-    private Integer stopServerSync(@Nullable JsonRpcServer server) {
-        ApplicationManager.getApplication().assertIsNonDispatchThread();
-
-        if (server == null) {
-            return null;
-        }
-
-        var port = server.getJsonRpcPort();
-        try {
-            var process = server.processHandler;
-            try {
-                process.setShouldKillProcessSoftly(false);
-                process.destroyProcess();
-                process.waitFor(500);
-            } catch (WinpException e) {
-                // https://github.com/getappmap/appmap-intellij-plugin/issues/706
-                // On Windows 10 and later, ctrl+c is sent to the process as first attempt.
-                // If this attempt takes longer than 5s, then a WinpException is thrown.
-                LOG.warn("Failed to destroyProcess, falling back to forced process termination", e);
-            } finally {
-                if (!process.isProcessTerminated()) {
-                    process.killProcess();
-                }
-            }
-        } finally {
-            if (!isDisposed && !project.isDisposed()) {
-                project.getMessageBus().syncPublisher(AppLandJsonRpcListener.TOPIC).serverStopped();
-            }
-        }
-        return port;
-    }
-
-    @Override
-    public void downloadFinished(@NotNull CliTool type, @NotNull AppMapDownloadStatus status) {
-        if (status.isSuccessful() && CliTool.AppMap.equals(type) && !isServerRunning()) {
-            restartServerAsync();
-        }
+    private @Nullable String getServerUrl() {
+        var port = getServerPort();
+        return port != null ? "http://127.0.0.1:" + port : null;
     }
 
     private void triggerSendConfigurationSet() {
         updateServerSettingsAlarm.cancelAndRequest();
     }
 
-    private void triggerModelConfigUpdate() {
-        updateModelConfigAlarm.cancelAndRequest();
-    }
-
-    /**
-     * Updates the JSON-RPC server with the current settings by sending JSON-RPC messages.
-     */
     private void updateServerSettings() {
         ApplicationManager.getApplication().assertIsNonDispatchThread();
-
         var serverUrl = getServerUrl();
         if (serverUrl == null) {
-            LOG.debug("Unable to send \"v1.configuration.set\" because JSON-RPC service is unavailable.");
+            LOG.debug("Unable to send \"v2.configuration.set\" because JSON-RPC service is unavailable.");
             return;
         }
-
         sendConfigurationSetMessage(serverUrl);
     }
 
-    /**
-     * Updates the JSON-RPC server with the current settings by sending JSON-RPC messages.
-     */
     private void updateModelConfig() {
         ApplicationManager.getApplication().assertIsNonDispatchThread();
-
         var serverUrl = getServerUrl();
         if (serverUrl == null) {
-            LOG.debug("Unable to send \"v1.configuration.set\" because JSON-RPC service is unavailable.");
+            LOG.debug("Unable to send model config because JSON-RPC service is unavailable.");
             return;
         }
-
         sendNavieModelsAddMessage(serverUrl);
         sendNavieModelsSelectMessage(serverUrl);
     }
@@ -438,18 +497,17 @@ public class DefaultAppLandJsonRpcService implements AppLandJsonRpcService, AppL
         }
     }
 
-    /**
-     * Sends message "v1.configuration.set" to the currently running JSON-RPC server.
-     */
-    private void sendConfigurationSetMessage(String serverUrl) {
-        var contentRootsWithConfigFiles = DumbService.getInstance(project).runReadActionInSmartMode(() -> {
-            var contentRoots = List.of(AppMapFiles.findTopLevelContentRoots(project));
-            var configFiles = AppMapFiles.findAppMapConfigFiles(project);
-            return new Pair<Collection<VirtualFile>, Collection<VirtualFile>>(contentRoots, configFiles);
-        });
+    private record ProjectConfig(Collection<VirtualFile> contentRoots, Collection<VirtualFile> configFiles) {
+    }
 
-        var contentRoots = contentRootsWithConfigFiles.first;
-        var jsonConfigFiles = contentRootsWithConfigFiles.second;
+    private void sendConfigurationSetMessage(@NotNull String serverUrl) {
+        DumbService.getInstance(project).waitForSmartMode();
+        var config = ReadAction.compute(() -> new ProjectConfig(
+                List.of(AppMapFiles.findTopLevelContentRoots(project)),
+                AppMapFiles.findAppMapConfigFiles(project)));
+
+        var contentRoots = config.contentRoots();
+        var jsonConfigFiles = config.configFiles();
 
         try {
             sendJsonRpcMessage(serverUrl,
@@ -459,8 +517,7 @@ public class DefaultAppLandJsonRpcService implements AppLandJsonRpcService, AppL
             if (LOG.isDebugEnabled()) {
                 LOG.debug("Error sending request v2.configuration.set", e);
             }
-
-            // fallback to v1 API
+            // Fallback to v1 API.
             try {
                 sendJsonRpcMessage(serverUrl,
                         "v1.configuration.set",
@@ -529,23 +586,10 @@ public class DefaultAppLandJsonRpcService implements AppLandJsonRpcService, AppL
         return info.getFullApplicationName() + " by " + info.getCompanyName();
     }
 
-    @Data
-    protected static final class JsonRpcServer {
-        @NotNull KillableProcessHandler processHandler;
-        @Nullable Integer jsonRpcPort = null;
-    }
-
-    private class JsonRpcProcessListener extends ProcessAdapter {
-        private final JsonRpcServer jsonRpcServer;
-
-        private JsonRpcProcessListener(JsonRpcServer jsonRpcServer) {
-            this.jsonRpcServer = jsonRpcServer;
-        }
-
+    private final ProcessAdapter processListener = new ProcessAdapter() {
         @Override
         public void onTextAvailable(@NotNull ProcessEvent event, @NotNull Key outputType) {
             OUTPUT_LOG_STREAM.log(event.getText());
-
             if (LOG.isDebugEnabled() && outputType != ProcessOutputTypes.SYSTEM) {
                 LOG.debug("JSON-RPC: " + event.getText().trim());
             }
@@ -554,44 +598,14 @@ public class DefaultAppLandJsonRpcService implements AppLandJsonRpcService, AppL
             if (match.matches()) {
                 var port = StringUtil.parseInt(match.group(1), -1);
                 if (port > 0) {
-                    jsonRpcServer.jsonRpcPort = port;
-                    triggerSendConfigurationSet();
-                    triggerModelConfigUpdate();
+                    onPortAnnounced(event.getProcessHandler(), port);
                 }
             }
         }
 
         @Override
         public void processTerminated(@NotNull ProcessEvent event) {
-            OUTPUT_LOG_STREAM.log("AppMap JSON-RPC server terminated: " + event + "\n\n");
-            if (LOG.isDebugEnabled()) {
-                LOG.debug("AppMap JSON-RPC server terminated: " + event);
-            }
-
-            synchronized (DefaultAppLandJsonRpcService.this) {
-                DefaultAppLandJsonRpcService.this.jsonRpcServer = null;
-                jsonRpcServer.jsonRpcPort = null;
-            }
-
-            var currentRestartDelay = nextRestartDelayMillis;
-            var restartNeeded = currentRestartDelay > 0L
-                    && currentRestartDelay <= MAX_RESTART_DELAY_MILLIS
-                    && !isDisposed;
-
-            if (restartNeeded) {
-                nextRestartDelayMillis = (long) ((double) currentRestartDelay * NEXT_RESTART_FACTOR);
-                AppExecutorUtil.getAppScheduledExecutorService().schedule(() -> {
-                            if (!isDisposed && !project.isDisposed()) {
-                                try {
-                                    DefaultAppLandJsonRpcService.this.startServer();
-                                } finally {
-                                    project.getMessageBus().syncPublisher(AppLandJsonRpcListener.TOPIC).serverRestarted();
-                                }
-                            }
-                        },
-                        nextRestartDelayMillis,
-                        TimeUnit.MILLISECONDS);
-            }
+            onProcessTerminated(event.getProcessHandler());
         }
-    }
+    };
 }

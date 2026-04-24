@@ -1,5 +1,6 @@
 package appland.rpcService;
 
+import com.intellij.execution.process.KillableProcessHandler;
 import com.intellij.openapi.project.Project;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.TestOnly;
@@ -16,9 +17,12 @@ public class TestAppLandJsonRpcService extends DefaultAppLandJsonRpcService {
      */
     public static void killJsonRpcProcess(@NotNull Project project) {
         var service = (DefaultAppLandJsonRpcService) AppLandJsonRpcService.getInstance(project);
-        var server = service.jsonRpcServer;
-        if (server != null) {
-            server.processHandler.killProcess();
+        KillableProcessHandler process;
+        synchronized (service) {
+            process = service.currentProcess;
+        }
+        if (process != null) {
+            process.killProcess();
         }
     }
 }
