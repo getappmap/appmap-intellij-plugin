@@ -3,9 +3,7 @@ package appland.copilotChat;
 import appland.cli.AppLandModelInfoProvider;
 import appland.copilotChat.copilot.CopilotModelDefinition;
 import appland.copilotChat.copilot.GitHubCopilotService;
-import appland.rpcService.AppLandJsonRpcService;
 import appland.settings.AppMapApplicationSettingsService;
-import appland.settings.AppMapSecureApplicationSettingsService;
 import com.intellij.ide.plugins.PluginManager;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -52,24 +50,12 @@ public class CopilotModelInfoProvider implements AppLandModelInfoProvider {
     }
 
     /**
-     * @return {@code true} if the integration with GitHub Copilot is unavailable,
-     * either because the user chose a different LLM in Navie or because the GitHub Copilot plugin is not installed.
+     * @return {@code true} if the integration with GitHub Copilot is unavailable
+     * because the GitHub Copilot plugin is not installed or the integration was explicitly disabled.
      * This method must not evaluate the state of Copilot authentication.
      */
     public static boolean isDisabled() {
-        return hasCustomAppMapModelSettings() || isGitHubCopilotDisabled();
-    }
-
-    /**
-     * @return {@code true} if the user has set custom model settings for Navie for an OpenAI or Azure OpenAI API key.
-     * Existing settings for a custom key override the Copilot integration.
-     */
-    static boolean hasCustomAppMapModelSettings() {
-        var environment = AppMapApplicationSettingsService.getInstance().getCliEnvironment();
-        return AppMapSecureApplicationSettingsService.getInstance().hasOpenAIKey()
-                || environment.containsKey(AppLandJsonRpcService.OPENAI_API_KEY)
-                || environment.containsKey(AppLandJsonRpcService.OPENAI_BASE_URL)
-                || environment.containsKey(AppLandJsonRpcService.AZURE_OPENAI_API_KEY);
+        return isGitHubCopilotDisabled();
     }
 
     private static boolean isGitHubCopilotDisabled() {
