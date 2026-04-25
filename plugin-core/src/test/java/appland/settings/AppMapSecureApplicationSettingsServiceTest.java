@@ -20,7 +20,7 @@ public class AppMapSecureApplicationSettingsServiceTest extends AppMapBaseTest {
         // if executed on the EDT, it must not throw an exception about slow operations
         var oldValue = settings.getOpenAIKey();
         try {
-            var condition = subscribeToModelConfig("OPENAI_API_KEY");
+            var condition = subscribeToModelConfig();
             settings.setOpenAIKey("my-new-key");
 
             condition.await(15, TimeUnit.SECONDS);
@@ -51,7 +51,7 @@ public class AppMapSecureApplicationSettingsServiceTest extends AppMapBaseTest {
 
     @Test
     public void modelConfigListenerForNewKey() throws Exception {
-        var condition = subscribeToModelConfig("first_key");
+        var condition = subscribeToModelConfig();
         AppMapSecureApplicationSettingsService.getInstance().setModelConfigItem("first_key", "first_value");
         assertTrue(condition.await(15, TimeUnit.SECONDS));
     }
@@ -60,22 +60,18 @@ public class AppMapSecureApplicationSettingsServiceTest extends AppMapBaseTest {
     public void modelConfigListenerForUpdatedValue() throws Exception {
         AppMapSecureApplicationSettingsService.getInstance().setModelConfigItem("first_key", "first_value");
 
-        var condition = subscribeToModelConfig("first_key");
+        var condition = subscribeToModelConfig();
         AppMapSecureApplicationSettingsService.getInstance().setModelConfigItem("first_key", "updated_value");
         assertTrue(condition.await(15, TimeUnit.SECONDS));
     }
 
-    private @NotNull CountDownLatch subscribeToModelConfig(@NotNull String expectedKey) {
+    private @NotNull CountDownLatch subscribeToModelConfig() {
         var condition = new CountDownLatch(1);
         var listener = new AppMapSettingsListener() {
             @Override
-            public void secureModelConfigChange(@NotNull String key) {
+            public void modelConfigChange() {
                 ApplicationManager.getApplication().assertIsNonDispatchThread();
                 condition.countDown();
-
-                if (!expectedKey.equals(key)) {
-                    LOG.error("Expected key: " + expectedKey + ", found: " + key);
-                }
             }
         };
 

@@ -9,7 +9,6 @@ import com.intellij.openapi.project.ProjectManager;
 import com.intellij.util.Alarm;
 import com.intellij.util.LazyInitializer;
 import com.intellij.util.SingleAlarm;
-import org.apache.commons.collections.CollectionUtils;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Set;
@@ -46,16 +45,12 @@ public class AppMapSettingsReloadProjectListener implements AppMapSettingsListen
 
     @Override
     public void cliEnvironmentChanged(@NotNull Set<String> modifiedKeys) {
-        if (CollectionUtils.containsAny(modifiedKeys, AppLandJsonRpcService.LLM_ENV_VARIABLES)) {
-            reloadJsonRpcServerAlarm.get().cancelAndRequest();
-        }
+        reloadJsonRpcServerAlarm.get().cancelAndRequest();
     }
 
     @Override
-    public void secureModelConfigChange(@NotNull String key) {
-        if (AppLandJsonRpcService.LLM_ENV_VARIABLES.contains(key)) {
-            reloadJsonRpcServerAlarm.get().cancelAndRequest();
-        }
+    public void modelConfigChange() {
+        reloadJsonRpcServerAlarm.get().cancelAndRequest();
     }
 
     @Override

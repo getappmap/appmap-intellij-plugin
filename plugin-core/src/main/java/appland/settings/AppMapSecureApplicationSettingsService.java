@@ -77,7 +77,7 @@ public final class AppMapSecureApplicationSettingsService implements AppMapSecur
                 ApplicationManager.getApplication().executeOnPooledThread(() -> ApplicationManager.getApplication()
                         .getMessageBus()
                         .syncPublisher(AppMapSettingsListener.TOPIC)
-                        .secureModelConfigChange(key));
+                        .modelConfigChange());
             }
         }
     }

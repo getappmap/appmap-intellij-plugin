@@ -30,13 +30,6 @@ public interface AppMapSettingsListener {
     default void modelConfigChange() {
     }
 
-    /**
-     * Invoked after the value of the secure setting identified by {@code key} was changed.
-     * @param key The key of the modified settings.
-     */
-    default void secureModelConfigChange(@NotNull String key) {
-    }
-
     default void copilotIntegrationDisabledChanged() {
     }
 

@@ -4,7 +4,6 @@ import appland.cli.*;
 import appland.config.AppMapConfigFileListener;
 import appland.files.AppMapFiles;
 import appland.settings.AppMapApplicationSettingsService;
-import appland.settings.AppMapSettingsListener;
 import appland.utils.GsonUtils;
 import appland.utils.UserLog;
 import com.google.gson.JsonObject;
@@ -116,17 +115,6 @@ public class DefaultAppLandJsonRpcService implements AppLandJsonRpcService, AppL
         var applicationBus = application.getMessageBus().connect(this);
         applicationBus.subscribe(AppLandDownloadListener.TOPIC, this);
         applicationBus.subscribe(AppMapConfigFileListener.TOPIC, (AppMapConfigFileListener) this::triggerSendConfigurationSet);
-        applicationBus.subscribe(AppMapSettingsListener.TOPIC, new AppMapSettingsListener() {
-            @Override
-            public void modelConfigChange() {
-                restartServerAsync();
-            }
-
-            @Override
-            public void secureModelConfigChange(@NotNull String key) {
-                restartServerAsync();
-            }
-        });
 
         var projectBus = project.getMessageBus().connect(this);
         projectBus.subscribe(ModuleRootListener.TOPIC, new ModuleRootListener() {

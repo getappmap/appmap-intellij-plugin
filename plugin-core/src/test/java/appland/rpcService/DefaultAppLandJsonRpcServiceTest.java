@@ -19,6 +19,7 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -209,6 +210,64 @@ public class DefaultAppLandJsonRpcServiceTest extends AppMapBaseTest {
 
         var newPort = AppLandJsonRpcService.getInstance(getProject()).getServerPort();
         assertEquals("Port must remain the same after a restart", firstPort, newPort);
+    }
+
+    @Test
+    public void ensureSingleRestartOnSettingsChange() throws Exception {
+        waitForJsonRpcServer();
+
+        var restartCount = new AtomicInteger(0);
+        getProject().getMessageBus()
+                .connect(getTestRootDisposable())
+                .subscribe(AppLandJsonRpcListener.TOPIC, new AppLandJsonRpcListener() {
+                    @Override
+                    public void beforeServerRestart() {
+                        restartCount.incrementAndGet();
+                    }
+                });
+
+        var serverStarted = createWaitForJsonRpcServerStartCondition();
+        AppMapSecureApplicationSettingsService.getInstance().setOpenAIKey("test-key");
+        try {
+            assertTrue("Server must restart after OpenAI key change", serverStarted.await(30, TimeUnit.SECONDS));
+            // Wait for an extra debounce window to catch any delayed second restart
+            Thread.sleep(2_000);
+            assertEquals("Exactly one restart must occur for a single settings change", 1, restartCount.get());
+        } finally {
+            // Use reset() to avoid firing a notification that would arm the alarm in the next test
+            AppMapSecureApplicationSettingsService.reset();
+        }
+    }
+
+    @Test
+    public void ensureRapidSettingsChangesAreDebounced() throws Exception {
+        waitForJsonRpcServer();
+
+        var restartCount = new AtomicInteger(0);
+        getProject().getMessageBus()
+                .connect(getTestRootDisposable())
+                .subscribe(AppLandJsonRpcListener.TOPIC, new AppLandJsonRpcListener() {
+                    @Override
+                    public void beforeServerRestart() {
+                        restartCount.incrementAndGet();
+                    }
+                });
+
+        var serverStarted = createWaitForJsonRpcServerStartCondition();
+        // Fire several sync changes in rapid succession — debouncing must collapse them into one restart.
+        // cliEnvironmentChanged fires synchronously, avoiding a race between async modelConfigChange
+        // events and the 1000ms alarm.
+        var settingsService = AppMapApplicationSettingsService.getInstance();
+        settingsService.setCliEnvironmentNotifying(Map.of("APPMAP_NAVIE_MODEL", "model-1"));
+        settingsService.setCliEnvironmentNotifying(Map.of("APPMAP_NAVIE_MODEL", "model-1", "OPENAI_BASE_URL", "http://example.com"));
+        settingsService.setCliEnvironmentNotifying(Map.of("APPMAP_NAVIE_MODEL", "model-2", "OPENAI_BASE_URL", "http://example.com"));
+        try {
+            assertTrue("Server must restart after settings changes", serverStarted.await(30, TimeUnit.SECONDS));
+            Thread.sleep(2_000);
+            assertEquals("Rapid settings changes must be debounced into a single restart", 1, restartCount.get());
+        } finally {
+            settingsService.setCliEnvironment(Map.of());
+        }
     }
 
     @Test
