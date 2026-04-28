@@ -83,6 +83,11 @@ jobs:
         needs: [test]
         timeout-minutes: 45
         steps:
+            - name: Free Disk Space
+              uses: insightsengineering/disk-space-reclaimer@dae9fabcb8febe09f6585471948acf9dc9a57489 # v1.1.2
+              with:
+                  swap-storage: false
+
             - name: Fetch Sources
               uses: actions/checkout@v6
               with:
