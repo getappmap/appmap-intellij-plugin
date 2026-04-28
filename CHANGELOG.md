@@ -1,5 +1,14 @@
 AppMap Plugin Changelog
 
+## [0.83.2](https://github.com/getappmap/appmap-intellij-plugin/compare/v0.83.1...v0.83.2) (2026-04-28)
+
+
+### Bug Fixes
+
+-  configuration changes now trigger a single debounced Navie restart ([5f42671](https://github.com/getappmap/appmap-intellij-plugin/commit/5f426714bfc763c59c08c5023d336b4aa3028471))
+-  Copilot models are now available alongside a configured OpenAI key ([9f8376d](https://github.com/getappmap/appmap-intellij-plugin/commit/9f8376da072985e4abb329f8d6bd972c8568ceb7))
+-  Navie could become permanently unavailable after a settings change ([fcc29bb](https://github.com/getappmap/appmap-intellij-plugin/commit/fcc29bb1b723afc957103deaef964398de7d461f))
+
 ## [0.83.1](https://github.com/getappmap/appmap-intellij-plugin/compare/v0.83.0...v0.83.1) (2026-04-22)
 
 
