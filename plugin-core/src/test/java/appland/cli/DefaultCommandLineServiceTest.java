@@ -227,11 +227,27 @@ public class DefaultCommandLineServiceTest extends AppMapBaseTest {
 
     @Test
     public void directoryRefreshAfterAppMapIndexing() throws Throwable {
-        var appMapConfig = myFixture.copyFileToProject("projects/without_existing_index/appmap.yml", "test-project/appmap.yml");
-        ModuleTestUtils.withContentRoot(getModule(), appMapConfig.getParent(), () -> {
+        var tempDir = createVirtualFileDirectory("test-project/file.txt");
+        ModuleTestUtils.withContentRoot(getModule(), tempDir, () -> {
+            // Pre-create tmp/appmap before starting the indexer. startIndexerProcess calls
+            // prepareWatchedDirectory which would otherwise create the directory on the real
+            // filesystem outside the VFS; any later VFS operation targeting that path would
+            // then fail with "Cannot create directory" because mkdir fails on an already-existing
+            // path that the VFS doesn't know about.
+            WriteAction.runAndWait(() -> tempDir
+                    .createChildDirectory(this, "tmp")
+                    .createChildDirectory(this, "appmap"));
+
+            // createAppMapYaml creates appmap.yml inside the content root and waits for
+            // afterRefreshForProjects, so the indexer is guaranteed to be running when it returns.
+            createAppMapYaml(tempDir, "tmp/appmap");
+            waitForProcessStatus(true, tempDir, true);
+
             // copying AppMaps into a watched directory must trigger a file refresh based on the output of the AppMap process
             var refreshCondition = TestVfsRefreshService.newVfsRefreshCondition(getProject(), getTestRootDisposable());
-            myFixture.copyDirectoryToProject("projects/without_existing_index", "test-project");
+            myFixture.copyFileToProject(
+                    "projects/without_existing_index/tmp/appmap/with_modification_date.appmap.json",
+                    "test-project/tmp/appmap/with_modification_date.appmap.json");
             assertTrue(refreshCondition.await(30, TimeUnit.SECONDS));
 
             var refreshedFiles = TestVfsRefreshService.getInstance().getRefreshedFiles();
