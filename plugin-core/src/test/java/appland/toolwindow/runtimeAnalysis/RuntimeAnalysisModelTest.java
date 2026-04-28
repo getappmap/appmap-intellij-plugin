@@ -131,7 +131,12 @@ public class RuntimeAnalysisModelTest extends AppMapLocalTempFilesTest {
     }
 
     private void loadFindingsDirectory(@NotNull String directoryPath) throws Exception {
-        var condition = TestFindingsManager.createFindingsCondition(getProject(), getTestRootDisposable());
+        // Wait for afterFindingsReloaded, not afterFindingsChanged. reloadAsync() fires
+        // afterFindingsChanged once per findings file before firing afterFindingsReloaded at the
+        // end. Proceeding after the first afterFindingsChanged leaves RootNode receiving further
+        // structureChanged() calls during expandAll(), causing the AsyncTreeModel to restart
+        // indefinitely and time out after 120 s.
+        var condition = TestFindingsManager.createFindingsReloadedCondition(getProject(), getTestRootDisposable());
         WriteAction.computeAndWait(() -> myFixture.copyDirectoryToProject(directoryPath, "root"));
         waitUntilIndexesAreReady();
         assertTrue(condition.await(30, TimeUnit.SECONDS));
