@@ -74,8 +74,8 @@ public class CliToolsTest extends AppMapBaseTest {
         TestAppLandDownloadService.ensureDownloaded();
 
         var downloadedAppMapBinary = AppLandDownloadService.getInstance().getDownloadFilePath(CliTool.AppMap,
-                CliTools.currentPlatform(),
-                CliTools.currentArch());
+                CliPlatform.currentPlatform(),
+                CliPlatform.currentArch());
         assertNotNull(downloadedAppMapBinary);
 
         var bundledBinary = createMockBinary(downloadedAppMapBinary.getFileName().toString());
