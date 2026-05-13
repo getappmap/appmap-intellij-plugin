@@ -2,8 +2,6 @@ package appland.cli;
 
 import appland.deployment.AppMapDeploymentSettingsService;
 import com.intellij.openapi.diagnostic.Logger;
-import com.intellij.openapi.util.SystemInfo;
-import com.intellij.util.system.CpuArch;
 import com.intellij.util.text.SemVer;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -38,7 +36,7 @@ public final class CliTools {
      * If both a bundled binary and the downloaded binary have the highest version, the bundled binary is returned.
      */
     public static @Nullable Path getBinaryPath(@NotNull CliTool type) {
-        return getBinaryPath(type, currentPlatform(), currentArch());
+        return getBinaryPath(type, CliPlatform.currentPlatform(), CliPlatform.currentArch());
     }
 
     /**
@@ -82,32 +80,6 @@ public final class CliTools {
             SemVerComparator.INSTANCE);
 
     /**
-     * package-visible for our tests
-     */
-    public static @NotNull String currentPlatform() {
-        if (SystemInfo.isLinux) {
-            return "linux";
-        }
-
-        if (SystemInfo.isMac) {
-            return "macos";
-        }
-
-        if (SystemInfo.isWindows) {
-            return "win";
-        }
-
-        throw new IllegalStateException("Unsupported platform: " + SystemInfo.getOsNameAndVersion());
-    }
-
-    /**
-     * package-visible for our tests
-     */
-    public static @NotNull String currentArch() {
-        return CpuArch.isArm64() ? "arm64" : "x64";
-    }
-
-    /**
      * @return The first SemVer match in the given string, or {@code null} if there is no match.
      */
     public static @Nullable SemVer extractVersion(@NotNull String value) {
@@ -123,8 +95,9 @@ public final class CliTools {
      * On Windows, do nothing.
      */
     public static void fixBinaryPermissions(Path downloadTargetFilePath) throws IOException {
-        if (SystemInfo.isUnix && !Files.isExecutable(downloadTargetFilePath)) {
+        if (com.intellij.openapi.util.SystemInfo.isUnix && !Files.isExecutable(downloadTargetFilePath)) {
             Files.setPosixFilePermissions(downloadTargetFilePath, Set.of(OWNER_READ, OWNER_WRITE, OWNER_EXECUTE, GROUP_READ, OTHERS_READ));
         }
     }
 }
+

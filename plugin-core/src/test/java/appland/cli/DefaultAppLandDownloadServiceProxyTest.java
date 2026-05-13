@@ -14,8 +14,8 @@ import org.mockserver.model.HttpResponse;
 
 import java.util.Arrays;
 
-import static appland.cli.CliTools.currentArch;
-import static appland.cli.CliTools.currentPlatform;
+import static appland.cli.CliPlatform.currentArch;
+import static appland.cli.CliPlatform.currentPlatform;
 
 public class DefaultAppLandDownloadServiceProxyTest extends AppMapBaseTest {
     @Rule

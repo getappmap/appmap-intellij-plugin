@@ -55,20 +55,20 @@ public class DefaultAppLandDownloadServiceTest extends AppMapBaseTest {
     public void findVersionedDownloadDirectories() {
         var downloadRoot = createTempDir("downloadRoot");
         var rootPath = downloadRoot.toNioPath();
-        assertEmpty(DefaultAppLandDownloadService.findVersionDownloadDirectories(rootPath));
+        assertEmpty(LocalAssetRepository.findVersionDownloadDirectories(rootPath));
 
         // files matching the version pattern must be excluded
         VfsTestUtil.createFile(downloadRoot, "0.0.0");
-        assertEmpty(DefaultAppLandDownloadService.findVersionDownloadDirectories(rootPath));
+        assertEmpty(LocalAssetRepository.findVersionDownloadDirectories(rootPath));
 
         VfsTestUtil.createDir(downloadRoot, "1.2.3");
-        assertEquals(List.of(rootPath.resolve("1.2.3")), DefaultAppLandDownloadService.findVersionDownloadDirectories(rootPath));
+        assertEquals(List.of(rootPath.resolve("1.2.3")), LocalAssetRepository.findVersionDownloadDirectories(rootPath));
 
         VfsTestUtil.createDir(downloadRoot, "something-else");
-        assertEquals(List.of(rootPath.resolve("1.2.3")), DefaultAppLandDownloadService.findVersionDownloadDirectories(rootPath));
+        assertEquals(List.of(rootPath.resolve("1.2.3")), LocalAssetRepository.findVersionDownloadDirectories(rootPath));
 
-        assertEmpty(DefaultAppLandDownloadService.removeOtherVersions(rootPath, "1.2.3"));
-        assertEquals(List.of(rootPath.resolve("1.2.3")), DefaultAppLandDownloadService.removeOtherVersions(rootPath, "9.9.9"));
+        assertEmpty(LocalAssetRepository.removeOtherVersions(rootPath, "1.2.3"));
+        assertEquals(List.of(rootPath.resolve("1.2.3")), LocalAssetRepository.removeOtherVersions(rootPath, "9.9.9"));
     }
 
     @Test
@@ -81,8 +81,8 @@ public class DefaultAppLandDownloadServiceTest extends AppMapBaseTest {
     }
 
     private static void assertDownloadPath(@NotNull CliTool type) {
-        assertNotNull(DefaultAppLandDownloadService.getToolDownloadDirectory(type, true));
-        assertNotNull(DefaultAppLandDownloadService.getToolDownloadDirectory(type, false));
+        assertNotNull(LocalAssetRepository.getToolDownloadDirectory(type, true));
+        assertNotNull(LocalAssetRepository.getToolDownloadDirectory(type, false));
     }
 
     private static void assertVersion(@NotNull CliTool type) throws IOException {

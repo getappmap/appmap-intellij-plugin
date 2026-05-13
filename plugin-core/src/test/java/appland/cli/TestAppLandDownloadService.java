@@ -29,7 +29,7 @@ public class TestAppLandDownloadService extends DefaultAppLandDownloadService {
         }
 
         for (var type : CliTool.values()) {
-            var downloadDir = TestAppLandDownloadService.getToolDownloadDirectory(type, true);
+            var downloadDir = LocalAssetRepository.getToolDownloadDirectory(type, true);
             if (Files.exists(downloadDir)) {
                 try {
                     NioFiles.deleteRecursively(downloadDir);
