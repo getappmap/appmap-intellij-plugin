@@ -16,7 +16,7 @@ public class StartServicesAfterDownloadListener implements AppLandDownloadListen
         }
 
         if (CliTools.isBinaryAvailable(CliTool.AppMap) && CliTools.isBinaryAvailable(CliTool.Scanner)) {
-            AppLandCommandLineService.getInstance().refreshForOpenProjectsInBackground();
+            AppLandCommandLineService.getInstance().restartProcessesInBackground();
         }
     }
 }

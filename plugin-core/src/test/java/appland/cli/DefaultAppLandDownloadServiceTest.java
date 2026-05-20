@@ -9,9 +9,7 @@ import com.intellij.testFramework.fixtures.impl.TempDirTestFixtureImpl;
 import org.jetbrains.annotations.NotNull;
 import org.junit.Test;
 
-import java.io.IOException;
 import java.util.List;
-import java.util.regex.Pattern;
 
 public class DefaultAppLandDownloadServiceTest extends AppMapBaseTest {
     @Override
@@ -22,12 +20,6 @@ public class DefaultAppLandDownloadServiceTest extends AppMapBaseTest {
     @Override
     protected TempDirTestFixture createTempDirTestFixture() {
         return new TempDirTestFixtureImpl();
-    }
-
-    @Test
-    public void latestVersion() throws IOException {
-        assertVersion(CliTool.AppMap);
-        assertVersion(CliTool.Scanner);
     }
 
     @Test
@@ -45,7 +37,7 @@ public class DefaultAppLandDownloadServiceTest extends AppMapBaseTest {
 
     @Test
     public void downloadAppMapBinaryWithProhibitingDeploymentSettings() throws Exception {
-        AppMapDeploymentTestUtils.withSiteConfigFile(new AppMapDeploymentSettings(null, false), () -> {
+        AppMapDeploymentTestUtils.withSiteConfigFile(new AppMapDeploymentSettings(null, false, null, null), () -> {
             var status = AppLandDownloadServiceTestUtil.downloadLatestCliVersions(getProject(), CliTool.AppMap, getTestRootDisposable());
             assertEquals(AppMapDownloadStatus.Skipped, status);
         });
@@ -71,23 +63,8 @@ public class DefaultAppLandDownloadServiceTest extends AppMapBaseTest {
         assertEquals(List.of(rootPath.resolve("1.2.3")), LocalAssetRepository.removeOtherVersions(rootPath, "9.9.9"));
     }
 
-    @Test
-    public void parseLatestVersion() {
-        var json = "[{\"tag_name\": \"@appland/appmap-validate-v1.0.0\"}, {\"tag_name\": \"@appland/scanner-v1.2.3\"}, {\"tag_name\": \"@appland/appmap-v4.5.6\"}]";
-        var releases = com.google.gson.JsonParser.parseString(json).getAsJsonArray();
-
-        assertEquals("4.5.6", DefaultAppLandDownloadService.parseLatestVersion(CliTool.AppMap, releases));
-        assertEquals("1.2.3", DefaultAppLandDownloadService.parseLatestVersion(CliTool.Scanner, releases));
-    }
-
     private static void assertDownloadPath(@NotNull CliTool type) {
         assertNotNull(LocalAssetRepository.getToolDownloadDirectory(type, true));
         assertNotNull(LocalAssetRepository.getToolDownloadDirectory(type, false));
-    }
-
-    private static void assertVersion(@NotNull CliTool type) throws IOException {
-        var version = AppLandDownloadService.getInstance().fetchLatestRemoteVersion(type);
-        assertNotNull(version);
-        assertTrue(Pattern.matches("\\d+\\.\\d+\\.\\d+", version));
     }
 }

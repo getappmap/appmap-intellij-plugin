@@ -1,6 +1,7 @@
 package appland.cli;
 
 import appland.deployment.AppMapDeploymentSettingsService;
+import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.util.text.SemVer;
 import org.jetbrains.annotations.NotNull;
@@ -46,25 +47,45 @@ public final class CliTools {
      * If both a bundled binary and the downloaded binary have the highest version, the bundled binary is returned.
      */
     public static @Nullable Path getBinaryPath(@NotNull CliTool type, @NotNull String platform, @NotNull String arch) {
-        var downloadedBinary = AppLandDownloadService.getInstance().getDownloadFilePath(type, platform, arch);
+        var unitTestMode = ApplicationManager.getApplication().isUnitTestMode();
+        var activeVersion = LocalAssetRepository.getActiveVersion(type, unitTestMode);
+        
+        if (activeVersion != null) {
+            var activePath = LocalAssetRepository.getExecutableFilePath(type, activeVersion, platform, arch, unitTestMode);
+            if (Files.exists(activePath)) {
+                try {
+                    fixBinaryPermissions(activePath);
+                    return activePath;
+                } catch (IOException e) {
+                    LOG.warn("Failed to make the active binary executable. Path: " + activePath, e);
+                }
+            }
+        }
+
+        var downloadedBinary = LocalAssetRepository.getInstalledBinaryPath(type, platform, arch);
         var bestBundledBinary = AppMapDeploymentSettingsService.getInstance()
                 .findBundledBinaries(type, platform, arch)
                 .filter(Files::exists)
                 .max(pathComparator)
                 .orElse(null);
 
+        Path selectedBinary = null;
         if (bestBundledBinary == null) {
-            return downloadedBinary;
+            selectedBinary = downloadedBinary;
         } else if (downloadedBinary == null) {
-            return bestBundledBinary;
+            selectedBinary = bestBundledBinary;
+        } else {
+            // == 0: same version, prefer the bundled binary
+            // < 0: the downloaded binary has a lower version, prefer the bundled binary
+            int compareValue = pathComparator.compare(downloadedBinary, bestBundledBinary);
+            selectedBinary = compareValue == 0 || compareValue < 0
+                    ? bestBundledBinary
+                    : downloadedBinary;
         }
 
-        // == 0: same version, prefer the bundled binary
-        // < 0: the downloaded binary has a lower version, prefer the bundled binary
-        int compareValue = pathComparator.compare(downloadedBinary, bestBundledBinary);
-        var selectedBinary = compareValue == 0 || compareValue < 0
-                ? bestBundledBinary
-                : downloadedBinary;
+        if (selectedBinary == null) {
+            return null;
+        }
 
         try {
             fixBinaryPermissions(selectedBinary);

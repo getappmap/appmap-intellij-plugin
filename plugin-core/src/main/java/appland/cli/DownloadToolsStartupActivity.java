@@ -9,7 +9,6 @@ import com.intellij.openapi.project.DumbAware;
 import com.intellij.openapi.project.Project;
 import org.jetbrains.annotations.NotNull;
 
-import java.io.IOException;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -27,17 +26,13 @@ public class DownloadToolsStartupActivity extends ProjectActivityAdapter impleme
         }
 
         if (ACTIVE.compareAndSet(false, true)) {
-            try {
-                if (DownloadSettings.isAssetDownloadDisabled() && CliTools.getBinaryPath(CliTool.AppMap) == null) {
-                    // Show a notification but still continue with queueDownloadTasks avoid assumptions about its
-                    // implementation.
-                    AppMapNotifications.showAppMapBinaryUnavailableNotification(project);
-                }
-
-                AppLandDownloadService.getInstance().queueDownloadTasks(project);
-            } catch (IOException e) {
-                LOG.warn("Download of CLI binaries failed", e);
+            if (DownloadSettings.isAssetDownloadDisabled() && CliTools.getBinaryPath(CliTool.AppMap) == null) {
+                // Show a notification but still continue with queueDownloadTasks avoid assumptions about its
+                // implementation.
+                AppMapNotifications.showAppMapBinaryUnavailableNotification(project);
             }
+
+            AppLandDownloadService.getInstance().queueDownloadTasks(project);
         }
     }
 }

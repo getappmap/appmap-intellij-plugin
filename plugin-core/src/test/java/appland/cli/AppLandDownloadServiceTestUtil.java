@@ -26,10 +26,7 @@ final class AppLandDownloadServiceTestUtil {
     static @NotNull AppMapDownloadStatus downloadLatestCliVersions(@NotNull Project project,
                                                                    @NotNull CliTool toolType,
                                                                    @NotNull Disposable parentDisposable) throws Exception {
-        var service = AppLandDownloadService.getInstance();
-
-        var latestVersion = service.fetchLatestRemoteVersion(toolType);
-        Assert.assertNotNull(latestVersion);
+        var service = (DefaultAppLandDownloadService) AppLandDownloadService.getInstance();
 
         var downloadSuccessful = new AtomicReference<AppMapDownloadStatus>();
         var downloadException = new AtomicReference<Exception>();
@@ -47,7 +44,7 @@ final class AppLandDownloadServiceTestUtil {
             @Override
             public void run(@NotNull ProgressIndicator indicator) {
                 try {
-                    service.download(toolType, latestVersion, indicator);
+                    service.download(toolType, indicator);
                 } catch (Exception e) {
                     downloadException.set(e);
                 }
@@ -70,6 +67,6 @@ final class AppLandDownloadServiceTestUtil {
                                                 @NotNull CliTool toolType,
                                                 @NotNull Disposable parentDisposable) throws Exception {
         var status = downloadLatestCliVersions(project, toolType, parentDisposable);
-        Assert.assertTrue("The download must be successful", status.isSuccessful());
+        Assert.assertNotEquals("The download must not fail", AppMapDownloadStatus.Failed, status);
     }
 }

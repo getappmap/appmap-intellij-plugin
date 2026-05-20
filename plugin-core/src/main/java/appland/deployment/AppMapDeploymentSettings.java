@@ -17,12 +17,20 @@ public final class AppMapDeploymentSettings {
     @SerializedName("appMap.autoUpdateTools")
     private boolean autoUpdateTools = true;
 
+    @SerializedName("appMap.manifest.appmapUrl")
+    @Nullable
+    private String appmapManifestUrl;
+
+    @SerializedName("appMap.manifest.scannerUrl")
+    @Nullable
+    private String scannerManifestUrl;
+
     public AppMapDeploymentSettings(@Nullable AppMapDeploymentTelemetrySettings telemetry) {
-        this(telemetry, true);
+        this(telemetry, true, null, null);
     }
 
     public boolean isEmpty() {
-        return this.telemetry == null && autoUpdateTools;
+        return this.telemetry == null && autoUpdateTools && appmapManifestUrl == null && scannerManifestUrl == null;
     }
 }
 

@@ -1,9 +1,10 @@
 package appland.actions;
 
 import appland.AppMapBundle;
-import appland.cli.AppLandDownloadService;
 import appland.cli.CliTool;
 import appland.cli.CliTools;
+import appland.cli.LocalAssetRepository;
+import appland.cli.ManifestManager;
 import appland.deployment.AppMapDeploymentSettingsService;
 import appland.javaAgent.JavaAgentStatus;
 import appland.telemetry.SplunkTelemetryUtils;
@@ -20,7 +21,6 @@ import com.intellij.testFramework.LightVirtualFile;
 import com.intellij.util.concurrency.annotations.RequiresBackgroundThread;
 import org.jetbrains.annotations.NotNull;
 
-import java.io.IOException;
 import java.util.Objects;
 
 public class PluginStatus extends AnAction implements DumbAware {
@@ -106,19 +106,13 @@ public class PluginStatus extends AnAction implements DumbAware {
 
     @NotNull
     private static String appmapBinaryStatusReport(@NotNull CliTool type) {
-        var service = AppLandDownloadService.getInstance();
-
-        String latestVersion;
-        try {
-            latestVersion = service.fetchLatestRemoteVersion(type);
-        } catch (IOException e) {
-            latestVersion = null;
-        }
+        var manifest = ManifestManager.fetch(type);
+        var latestVersion = manifest != null ? manifest.version : null;
 
         String latestVersionText = String.format("Latest version: %s",
                 latestVersion == null ? "Failed to check for the latest version" : latestVersion);
 
-        var downloadedVersion = service.findLatestDownloadedVersion(type);
+        var downloadedVersion = LocalAssetRepository.getInstalledVersion(type);
         var downloadPath = CliTools.getBinaryPath(type);
 
         String localVersionText = "Your version: ";
