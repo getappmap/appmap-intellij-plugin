@@ -5,7 +5,6 @@ import com.intellij.openapi.application.PathManager;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.util.SystemInfo;
 import com.intellij.openapi.util.Version;
-import com.intellij.openapi.util.io.NioFiles;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -106,28 +105,6 @@ public final class LocalAssetRepository {
             LOG.debug("Error listing download directory entries: " + parentDirectory, e);
             return Collections.emptyList();
         }
-    }
-
-    public static void removeOtherVersions(@NotNull CliTool type, @NotNull String keepVersion, boolean unitTestMode) {
-        removeOtherVersions(getToolDownloadDirectory(type, unitTestMode), keepVersion);
-    }
-
-    public static @NotNull List<Path> removeOtherVersions(@NotNull Path directory, @NotNull String keepVersion) {
-        var toRemove = findVersionDownloadDirectories(directory)
-                .stream()
-                .filter(path -> !keepVersion.equals(path.getFileName().toString()))
-                .collect(Collectors.toList());
-
-        if (!toRemove.isEmpty()) {
-            for (var path : toRemove) {
-                try {
-                    NioFiles.deleteRecursively(path);
-                } catch (IOException e) {
-                    LOG.debug("Error deleting download directory: " + path, e);
-                }
-            }
-        }
-        return toRemove;
     }
 
     public static @NotNull Path getExecutableFilePath(@NotNull CliTool type,

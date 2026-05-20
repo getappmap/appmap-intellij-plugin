@@ -104,7 +104,6 @@ public class DefaultAppLandDownloadService implements AppLandDownloadService {
             CliTools.fixBinaryPermissions(downloadTargetFilePath);
             Files.move(downloadTargetFilePath, targetFilePath, StandardCopyOption.ATOMIC_MOVE);
             LocalAssetRepository.setActiveVersion(type, version, unitTestMode);
-            LocalAssetRepository.removeOtherVersions(type, version, unitTestMode);
 
             notifyDownloadFinished(type, AppMapDownloadStatus.Successful);
             return AppMapDownloadStatus.Successful;
