@@ -31,4 +31,13 @@ public enum CliTool {
         var suffix = "win".equals(platform) ? ".exe" : "";
         return id + "-" + platform + "-" + arch + suffix;
     }
+
+    /**
+     * @return The versioned filename for the cached binary, e.g. "appmap-linux-x64-1.2.3".
+     * Matches the naming convention used by the VSCode AppMap extension.
+     */
+    public @NotNull String getBinaryName(@NotNull String platform, @NotNull String arch, @NotNull String version) {
+        var suffix = "win".equals(platform) ? ".exe" : "";
+        return id + "-" + platform + "-" + arch + "-" + version + suffix;
+    }
 }
