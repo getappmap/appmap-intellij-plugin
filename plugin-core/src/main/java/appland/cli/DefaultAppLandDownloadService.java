@@ -3,93 +3,114 @@ package appland.cli;
 import appland.AppMapBundle;
 import appland.github.GitHubHttpRequests;
 import appland.settings.DownloadSettings;
-import appland.utils.GsonUtils;
-import com.google.gson.JsonArray;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.progress.ProgressIndicator;
-import com.intellij.openapi.progress.ProgressManager;
 import com.intellij.openapi.progress.Task;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.io.NioFiles;
-import com.intellij.util.Urls;
 import com.intellij.util.io.HttpRequests;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
-import java.util.HashMap;
-import java.util.Map;
+import java.security.MessageDigest;
 
 /**
  * Downloads are stored as "appland-downloads/$NAME/$VERSION/$NAME-$OS-$ARCH", e.g. "appland-downloads/appmap/1.2.3/appmap-linux-x64".
  */
 public class DefaultAppLandDownloadService implements AppLandDownloadService {
     private static final Logger LOG = Logger.getInstance(DefaultAppLandDownloadService.class);
-    private static final String LATEST_CLI_VERSIONS_URL = "https://api.github.com/repos/getappmap/appmap-js/releases";
-    private final Object lock = new Object();
-    private volatile Map<CliTool, String> cachedReleaseVersions = null;
 
     @Override
-    public @Nullable Path getDownloadFilePath(@NotNull CliTool type, @NotNull String platform, @NotNull String arch) {
-        var version = LocalAssetRepository.findLatestDownloadedVersion(type);
-        if (version == null) {
-            return null;
+    public void queueDownloadTasks(@NotNull Project project) {
+        if (DownloadSettings.isAssetDownloadEnabled()) {
+            downloadTool(project, CliTool.AppMap);
+            downloadTool(project, CliTool.Scanner);
         }
-
-        var unitTestMode = ApplicationManager.getApplication().isUnitTestMode();
-        return LocalAssetRepository.getExecutableFilePath(type, version, platform, arch, unitTestMode);
     }
 
-    @Override
-    public @NotNull AppMapDownloadStatus download(@NotNull CliTool type,
-                                                  @NotNull String version,
-                                                  @NotNull ProgressIndicator progressIndicator) {
+    @NotNull AppMapDownloadStatus download(@NotNull CliTool type, @NotNull ProgressIndicator progressIndicator) {
         if (DownloadSettings.isAssetDownloadDisabled()) {
             notifyDownloadFinished(type, AppMapDownloadStatus.Skipped);
             return AppMapDownloadStatus.Skipped;
         }
 
+        var manifest = ManifestManager.fetch(type);
+        var platform = CliPlatform.currentPlatform();
+        var arch = CliPlatform.currentArch();
+
+        if (manifest == null) {
+            LOG.warn("Cannot fetch manifest for " + type.getId());
+
+            // A bundled binary (from deployment settings) is still usable even without a download.
+            if (CliTools.getBinaryPath(type, platform, arch) != null) {
+                notifyDownloadFinished(type, AppMapDownloadStatus.Skipped);
+                return AppMapDownloadStatus.Skipped;
+            }
+
+            notifyDownloadFinished(type, AppMapDownloadStatus.Failed);
+            return AppMapDownloadStatus.Failed;
+        }
+
+        var version = manifest.version;
         var unitTestMode = ApplicationManager.getApplication().isUnitTestMode();
 
-        try {
-            var platform = CliPlatform.currentPlatform();
-            var arch = CliPlatform.currentArch();
+        if (LocalAssetRepository.isDownloaded(type, version, platform, arch, unitTestMode)) {
+            var currentActive = LocalAssetRepository.getActiveVersion(type, unitTestMode);
+            if (!version.equals(currentActive)) {
+                LocalAssetRepository.setActiveVersion(type, version, unitTestMode);
+                notifyDownloadFinished(type, AppMapDownloadStatus.Successful);
+                return AppMapDownloadStatus.Successful;
+            }
+            notifyDownloadFinished(type, AppMapDownloadStatus.Skipped);
+            return AppMapDownloadStatus.Skipped;
+        }
 
-            // the path to the downloaded executable
+        var platformId = CliPlatform.getId();
+        var source = manifest.getAsset(platformId);
+        if (source == null) {
+            LOG.warn("No " + type.getId() + " asset for " + platformId + " in manifest");
+            notifyDownloadFinished(type, AppMapDownloadStatus.Failed);
+            return AppMapDownloadStatus.Failed;
+        }
+
+        try {
             var targetFilePath = LocalAssetRepository.getExecutableFilePath(type, version, platform, arch, unitTestMode);
-            // the path where the in-progress download is stored
             var downloadTargetFilePath = targetFilePath.resolveSibling(targetFilePath.getFileName().toString() + ".download");
 
-            // final and temp file paths have the same parent
             Files.createDirectories(targetFilePath.getParent());
             Files.deleteIfExists(targetFilePath);
             Files.deleteIfExists(downloadTargetFilePath);
 
-            // download the file, it throws an IOException if it fails or if the remote file is unavailable
-            var url = type.getDownloadUrl(version, platform, arch);
-            LOG.debug(String.format("Downloading CLI binary %s from %s to %s", type.getId(), url, targetFilePath));
-            HttpRequests.request(url)
+            LOG.info(String.format("Downloading CLI binary %s from %s to %s", type.getId(), source.url, targetFilePath));
+            HttpRequests.request(source.url)
                     .tuner(GitHubHttpRequests.gitHubTokenTuner())
                     .saveToFile(downloadTargetFilePath, progressIndicator);
 
+            if (source.digest != null) {
+                if (!verifyDigest(downloadTargetFilePath, source.digest)) {
+                    LOG.warn("Digest verification failed for " + type.getId() + " version " + version);
+                    Files.deleteIfExists(downloadTargetFilePath);
+                    notifyDownloadFinished(type, AppMapDownloadStatus.Failed);
+                    return AppMapDownloadStatus.Failed;
+                }
+                LOG.info("Verified digest for " + type.getId() + " version " + version);
+            }
+
             CliTools.fixBinaryPermissions(downloadTargetFilePath);
-
-            // now move the downloaded file to the expected path
             Files.move(downloadTargetFilePath, targetFilePath, StandardCopyOption.ATOMIC_MOVE);
-
-            // after a successful download, remove previous downloads, make sure to keep the new download
+            LocalAssetRepository.setActiveVersion(type, version, unitTestMode);
             LocalAssetRepository.removeOtherVersions(type, version, unitTestMode);
 
             notifyDownloadFinished(type, AppMapDownloadStatus.Successful);
             return AppMapDownloadStatus.Successful;
-        } catch (IOException e) {
+        } catch (Exception e) {
             LOG.debug("Error downloading CLI binary", e);
 
-            // cleanup failed download, if available
             var downloadDir = LocalAssetRepository.getVersionDownloadDirectory(type, version, unitTestMode);
             try {
                 if (Files.isDirectory(downloadDir)) {
@@ -104,51 +125,47 @@ public class DefaultAppLandDownloadService implements AppLandDownloadService {
         }
     }
 
-    @Override
-    public @Nullable String fetchLatestRemoteVersion(@NotNull CliTool type) {
-        if (this.cachedReleaseVersions == null) {
-            synchronized (this.lock) {
-                if (this.cachedReleaseVersions == null) {
-                    this.cachedReleaseVersions = fetchLatestReleases(ProgressManager.getGlobalProgressIndicator());
-                }
+    private boolean verifyDigest(Path path, String expectedDigest) throws Exception {
+        var parts = expectedDigest.split(":", 2);
+        if (parts.length != 2 || !parts[0].equals("sha256")) {
+            LOG.warn("Unsupported digest algorithm: " + (parts.length > 0 ? parts[0] : "none"));
+            return false;
+        }
+        var expectedHash = parts[1];
+
+        var digest = MessageDigest.getInstance("SHA-256");
+        try (InputStream is = Files.newInputStream(path)) {
+            var buffer = new byte[8192];
+            int bytesRead;
+            while ((bytesRead = is.read(buffer)) != -1) {
+                digest.update(buffer, 0, bytesRead);
             }
         }
-
-        // a null map indicates that the versions could not be fetched,
-        // a null version value indicates that the fetch was successful but no version was found
-        var releases = this.cachedReleaseVersions;
-        return releases != null ? releases.get(type) : null;
-    }
-
-    @Override
-    public void queueDownloadTasks(@NotNull Project project) {
-        if (DownloadSettings.isAssetDownloadEnabled()) {
-            downloadTool(project, CliTool.AppMap);
-            downloadTool(project, CliTool.Scanner);
+        var hashBytes = digest.digest();
+        var hexString = new StringBuilder(2 * hashBytes.length);
+        for (byte b : hashBytes) {
+            var hex = Integer.toHexString(0xff & b);
+            if (hex.length() == 1) {
+                hexString.append('0');
+            }
+            hexString.append(hex);
         }
-    }
 
-    @Override
-    public @Nullable String findLatestDownloadedVersion(@NotNull CliTool type) {
-        return LocalAssetRepository.findLatestDownloadedVersion(type);
+        return expectedHash.equalsIgnoreCase(hexString.toString());
     }
 
     private void downloadTool(@NotNull Project project, @NotNull CliTool type) {
-        LOG.debug("Downloading AppMap CLI tool: " + type);
-        var latestVersion = fetchLatestRemoteVersion(type);
-        if (latestVersion != null && !LocalAssetRepository.isDownloaded(type, latestVersion, CliPlatform.currentPlatform(), CliPlatform.currentArch(), ApplicationManager.getApplication().isUnitTestMode())) {
-            var title = AppMapBundle.get("cliDownload.progress.title", type.getPresentableName());
-            new Task.Backgroundable(project, title, true) {
-                @Override
-                public void run(@NotNull ProgressIndicator indicator) {
-                    var status = download(type, latestVersion, indicator);
-                    switch (status) {
-                        case Failed -> LOG.debug("Download of CLI tool failed: " + type);
-                        case Skipped -> LOG.debug("Download of CLI tool was skipped: " + type);
-                    }
+        var title = AppMapBundle.get("cliDownload.progress.title", type.getPresentableName());
+        new Task.Backgroundable(project, title, true) {
+            @Override
+            public void run(@NotNull ProgressIndicator indicator) {
+                var status = download(type, indicator);
+                switch (status) {
+                    case Failed -> LOG.warn("Download of CLI tool failed: " + type);
+                    case Skipped -> LOG.debug("Download of CLI tool was skipped: " + type);
                 }
-            }.queue();
-        }
+            }
+        }.queue();
     }
 
     private static void notifyDownloadFinished(@NotNull CliTool type, AppMapDownloadStatus status) {
@@ -162,50 +179,5 @@ public class DefaultAppLandDownloadService implements AppLandDownloadService {
                 }
             });
         }
-    }
-
-    static @Nullable Map<CliTool, String> fetchLatestReleases(@Nullable ProgressIndicator progressIndicator) {
-        try {
-            var jsonString = HttpRequests.request(Urls.newFromEncoded(LATEST_CLI_VERSIONS_URL))
-                    .tuner(GitHubHttpRequests.gitHubTokenTuner())
-                    .readString(progressIndicator);
-
-            var json = GsonUtils.GSON.fromJson(jsonString, JsonArray.class);
-            if (json != null && json.isJsonArray()) {
-                // non-null values because unmodifiable maps don't support them
-                var versions = new HashMap<CliTool, @NotNull String>();
-                for (var tool : CliTool.values()) {
-                    var version = parseLatestVersion(tool, json);
-                    if (version == null) {
-                        LOG.debug("No release version found for " + tool.getId());
-                    } else {
-                        versions.put(tool, version);
-                    }
-                }
-                return Map.copyOf(versions);
-            }
-        } catch (IOException e) {
-            LOG.debug("Error fetching latest CLI versions from " + LATEST_CLI_VERSIONS_URL, e);
-        }
-
-        return null;
-    }
-
-    static @Nullable String parseLatestVersion(@NotNull CliTool type, @NotNull JsonArray releases) {
-        var prefix = "@appland/" + type.getId() + "-v";
-        for (var release : releases) {
-            var releaseObj = release.getAsJsonObject();
-            if (releaseObj.has("tag_name")) {
-                var tagName = releaseObj.getAsJsonPrimitive("tag_name").getAsString();
-                if (tagName.startsWith(prefix)) {
-                    var version = tagName.substring(prefix.length());
-                    // verify it starts with a number, otherwise it's not the version
-                    if (!version.isEmpty() && Character.isDigit(version.charAt(0))) {
-                        return version;
-                    }
-                }
-            }
-        }
-        return null;
     }
 }

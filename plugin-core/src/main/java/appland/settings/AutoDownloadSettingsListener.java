@@ -1,12 +1,11 @@
 package appland.settings;
 
 import appland.cli.AppLandDownloadService;
+import appland.cli.ManifestManager;
 import appland.javaAgent.AppMapJavaAgentDownloadService;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.project.Project;
 import org.jetbrains.annotations.NotNull;
-
-import java.io.IOException;
 
 public class AutoDownloadSettingsListener implements AppMapSettingsListener {
     private static final Logger LOG = Logger.getInstance(AutoDownloadSettingsListener.class);
@@ -20,11 +19,8 @@ public class AutoDownloadSettingsListener implements AppMapSettingsListener {
     @Override
     public void autoUpdateToolsChanged() {
         if (DownloadSettings.isAssetDownloadEnabled()) {
-            try {
-                AppLandDownloadService.getInstance().queueDownloadTasks(project);
-            } catch (IOException e) {
-                LOG.warn("Failed to download AppMap CLI assets", e);
-            }
+            ManifestManager.clearCache();
+            AppLandDownloadService.getInstance().queueDownloadTasks(project);
 
             try {
                 AppMapJavaAgentDownloadService.getInstance().downloadJavaAgent(project);

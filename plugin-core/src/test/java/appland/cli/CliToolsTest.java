@@ -25,6 +25,12 @@ public class CliToolsTest extends AppMapBaseTest {
         return false;
     }
 
+    @Override
+    public void setUp() throws Exception {
+        super.setUp();
+        TestAppLandDownloadService.removeDownloads();
+    }
+
     @Test
     public void bestBinarySearch() throws Exception {
         // Mock binaries to copy into the location where bundled binaries are searched
@@ -45,6 +51,9 @@ public class CliToolsTest extends AppMapBaseTest {
                 createMockBinary("appmap-macos-arm64-v1000.2.0"),
                 createMockBinary("appmap-macos-arm64-v1000.1.123")
         );
+
+        // Delete active-version to test fallback logic
+        Files.deleteIfExists(LocalAssetRepository.getToolDownloadDirectory(CliTool.AppMap, true).resolve("active-version.txt"));
 
         AppMapDeploymentTestUtils.withBundledBinaries(appmapBinaries, () -> {
             assertNotNull("There must be a match for every platform", CliTools.getBinaryPath(CliTool.AppMap));
@@ -73,10 +82,13 @@ public class CliToolsTest extends AppMapBaseTest {
     public void bundledBinaryIsPreferred() throws Exception {
         TestAppLandDownloadService.ensureDownloaded();
 
-        var downloadedAppMapBinary = AppLandDownloadService.getInstance().getDownloadFilePath(CliTool.AppMap,
+        var downloadedAppMapBinary = LocalAssetRepository.getInstalledBinaryPath(CliTool.AppMap,
                 CliPlatform.currentPlatform(),
                 CliPlatform.currentArch());
         assertNotNull(downloadedAppMapBinary);
+
+        // Delete active-version to test fallback logic
+        Files.deleteIfExists(LocalAssetRepository.getToolDownloadDirectory(CliTool.AppMap, true).resolve("active-version.txt"));
 
         var bundledBinary = createMockBinary(downloadedAppMapBinary.getFileName().toString());
 

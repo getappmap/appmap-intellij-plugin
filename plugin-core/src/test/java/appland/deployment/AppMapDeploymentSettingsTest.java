@@ -9,7 +9,7 @@ public class AppMapDeploymentSettingsTest extends AppMapBaseTest {
     public void jsonSerialization() {
         var settings = new AppMapDeploymentSettings(new AppMapDeploymentTelemetrySettings(
                 "splunk", "https://my-splunk.example.com:443", "my-hec-token", "my-ca-cert"
-        ), true);
+        ), true, null, null);
 
         var expectedJson = """
                 {"appMap.telemetry":{"backend":"splunk","url":"https://my-splunk.example.com:443","token":"my-hec-token","ca":"my-ca-cert"},"appMap.autoUpdateTools":true}

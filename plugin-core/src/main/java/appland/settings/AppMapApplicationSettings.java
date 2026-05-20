@@ -70,6 +70,9 @@ public class AppMapApplicationSettings {
 
     private volatile boolean showFailedCliDownloadError = true;
 
+    private volatile @Nullable String appmapManifestUrl = null;
+    private volatile @Nullable String scannerManifestUrl = null;
+
     private volatile @Nullable String selectedAppMapModel = null;
 
     /**
@@ -106,6 +109,8 @@ public class AppMapApplicationSettings {
         this.copilotIntegrationDetected = settings.copilotIntegrationDetected;
         this.copilotModelId = settings.copilotModelId;
         this.showFailedCliDownloadError = settings.showFailedCliDownloadError;
+        this.appmapManifestUrl = settings.appmapManifestUrl;
+        this.scannerManifestUrl = settings.scannerManifestUrl;
         this.selectedAppMapModel = settings.selectedAppMapModel;
         this.modelConfig.putAll(settings.modelConfig);
         this.autoUpdateTools = settings.autoUpdateTools;
@@ -223,6 +228,24 @@ public class AppMapApplicationSettings {
     public void setAutoUpdateToolsNotifying(@Nullable Boolean autoUpdateTools) {
         var changed = !Objects.equals(autoUpdateTools, this.autoUpdateTools);
         this.autoUpdateTools = autoUpdateTools;
+
+        if (changed) {
+            settingsPublisher().autoUpdateToolsChanged();
+        }
+    }
+
+    public void setAppmapManifestUrlNotifying(@Nullable String appmapManifestUrl) {
+        var changed = !Objects.equals(appmapManifestUrl, this.appmapManifestUrl);
+        this.appmapManifestUrl = appmapManifestUrl;
+
+        if (changed) {
+            settingsPublisher().autoUpdateToolsChanged();
+        }
+    }
+
+    public void setScannerManifestUrlNotifying(@Nullable String scannerManifestUrl) {
+        var changed = !Objects.equals(scannerManifestUrl, this.scannerManifestUrl);
+        this.scannerManifestUrl = scannerManifestUrl;
 
         if (changed) {
             settingsPublisher().autoUpdateToolsChanged();

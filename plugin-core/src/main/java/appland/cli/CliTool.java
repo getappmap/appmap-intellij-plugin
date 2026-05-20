@@ -10,35 +10,25 @@ import org.jetbrains.annotations.NotNull;
  */
 @Getter
 public enum CliTool {
-    AppMap("appmap",
-            "https://github.com/getappmap/appmap-js/releases/download/@appland/appmap",
-            AppMapBundle.get("cli.appMap.name")),
-    Scanner("scanner",
-            "https://github.com/getappmap/appmap-js/releases/download/@appland/scanner",
-            AppMapBundle.get("cli.scanner.name"));
+    AppMap("appmap", AppMapBundle.get("cli.appMap.name")),
+    Scanner("scanner", AppMapBundle.get("cli.scanner.name"));
 
     private final String id;
-    private final String baseURL;
     private final String presentableName;
 
-    CliTool(@NotNull String id, @NotNull String baseURL, String presentableName) {
+    CliTool(@NotNull String id, String presentableName) {
         this.id = id;
-        this.baseURL = baseURL;
         this.presentableName = presentableName;
     }
 
     /**
-     * @param platform "macos", "linux", or "win"
+     * @param platform "linux", "macos", or "win"
      * @param arch     "x64" or "arm64"
      * @return The name of the binary for the given platform and architecture.
-     * The name is used locally and to build the download URL.
+     * The name is used locally.
      */
     public @NotNull String getBinaryName(@NotNull String platform, @NotNull String arch) {
         var suffix = "win".equals(platform) ? ".exe" : "";
         return id + "-" + platform + "-" + arch + suffix;
-    }
-
-    public @NotNull String getDownloadUrl(@NotNull String version, @NotNull String platform, @NotNull String arch) {
-        return baseURL + "-v" + version + "/" + getBinaryName(platform, arch);
     }
 }

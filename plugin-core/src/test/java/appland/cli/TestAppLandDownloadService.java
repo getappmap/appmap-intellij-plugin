@@ -14,11 +14,8 @@ public class TestAppLandDownloadService extends DefaultAppLandDownloadService {
     public static void ensureDownloaded() {
         var service = (TestAppLandDownloadService) AppLandDownloadService.getInstance();
         for (var type : CliTool.values()) {
-            if (service.findLatestDownloadedVersion(type) == null) {
-                var version = service.fetchLatestRemoteVersion(type);
-                assert version != null;
-
-                service.download(type, version, new EmptyProgressIndicator());
+            if (LocalAssetRepository.getInstalledVersion(type) == null) {
+                service.download(type, new EmptyProgressIndicator());
             }
         }
     }

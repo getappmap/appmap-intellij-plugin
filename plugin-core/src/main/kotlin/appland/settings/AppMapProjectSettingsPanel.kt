@@ -1,6 +1,7 @@
 package appland.settings
 
 import appland.AppMapBundle
+import appland.cli.CliTool
 import appland.deployment.AppMapDeploymentSettingsService.getCachedDeploymentSettings
 import com.intellij.execution.configuration.EnvironmentVariablesComponent
 import com.intellij.openapi.ui.ComboBox
@@ -25,6 +26,8 @@ class AppMapProjectSettingsPanel {
     private lateinit var maxPinnedFileSizeKB: JBIntSpinner
     private lateinit var openAIKey: JBTextField
     private lateinit var useAnimation: JCheckBox
+    private lateinit var appmapManifestUrl: JBTextField
+    private lateinit var scannerManifestUrl: JBTextField
 
     fun loadSettingsFrom(
         applicationSettings: AppMapApplicationSettings,
@@ -46,6 +49,9 @@ class AppMapProjectSettingsPanel {
             // with deployment settings, both true and false override the default from the deployment setting
             else -> autoUpdateTools
         }
+        
+        appmapManifestUrl.text = DownloadSettings.getManifestUrl(CliTool.AppMap)
+        scannerManifestUrl.text = DownloadSettings.getManifestUrl(CliTool.Scanner)
     }
 
     fun applySettingsTo(
@@ -78,6 +84,20 @@ class AppMapProjectSettingsPanel {
             applicationSettings.setAutoUpdateToolsNotifying(autoUpdateTools)
         } else {
             applicationSettings.autoUpdateTools = autoUpdateTools
+        }
+        
+        val defaultAppMapUrl = getCachedDeploymentSettings().appmapManifestUrl?.takeUnless { it.isBlank() } ?: DownloadSettings.DEFAULT_APPMAP_MANIFEST_URL
+        val defaultScannerUrl = getCachedDeploymentSettings().scannerManifestUrl?.takeUnless { it.isBlank() } ?: DownloadSettings.DEFAULT_SCANNER_MANIFEST_URL
+        
+        val appmapManifest = appmapManifestUrl.text.takeIf { it.isNotBlank() && it != defaultAppMapUrl }
+        val scannerManifest = scannerManifestUrl.text.takeIf { it.isNotBlank() && it != defaultScannerUrl }
+        
+        if (notify) {
+            applicationSettings.setAppmapManifestUrlNotifying(appmapManifest)
+            applicationSettings.setScannerManifestUrlNotifying(scannerManifest)
+        } else {
+            applicationSettings.appmapManifestUrl = appmapManifest
+            applicationSettings.scannerManifestUrl = scannerManifest
         }
     }
 
@@ -133,6 +153,15 @@ class AppMapProjectSettingsPanel {
                 row {
                     cell(cliEnvironment).align(AlignX.FILL)
                 }
+            }
+            group(AppMapBundle.get("projectSettings.advanced")) {
+                row(AppMapBundle.get("projectSettings.appmapManifestUrl.title")) {
+                    appmapManifestUrl = textField().align(AlignX.FILL).component
+                }.layout(RowLayout.INDEPENDENT)
+                
+                row(AppMapBundle.get("projectSettings.scannerManifestUrl.title")) {
+                    scannerManifestUrl = textField().align(AlignX.FILL).component
+                }.layout(RowLayout.INDEPENDENT)
             }
         }
     }

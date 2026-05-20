@@ -350,6 +350,8 @@ public class DefaultCommandLineService implements AppLandCommandLineService {
             return null;
         }
 
+        LOG.info("Starting AppMap indexer using binary: " + indexerPath);
+
         var workingDir = AppMapVfsUtils.asNativePath(directory);
         var watchedDir = findWatchedAppMapDirectory(workingDir);
         prepareWatchedDirectory(watchedDir);
@@ -387,6 +389,8 @@ public class DefaultCommandLineService implements AppLandCommandLineService {
         if (scannerPath == null || Files.notExists(scannerPath)) {
             return null;
         }
+
+        LOG.info("Starting AppMap scanner using binary: " + scannerPath);
 
         var workingDir = AppMapVfsUtils.asNativePath(directory);
         var watchedDir = findWatchedAppMapDirectory(workingDir);
@@ -515,6 +519,7 @@ public class DefaultCommandLineService implements AppLandCommandLineService {
             return;
         }
 
+        LOG.info("Stopping AppMap process: " + process.getCommandLine());
         NEXT_RESTART_DELAY.set(process, 0L);
         try {
             var shutdownRunnable = new Runnable() {
