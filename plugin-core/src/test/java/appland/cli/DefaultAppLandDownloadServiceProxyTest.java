@@ -45,8 +45,8 @@ public class DefaultAppLandDownloadServiceProxyTest extends AppMapBaseTest {
         // Clear manifest cache to ensure it fetches
         ManifestManager.clearCache();
 
-        var manifestUrlString = "http://localhost:" + mockServerRule.getPort() + "/manifest.json";
-        var binaryUrlString = "http://localhost:" + mockServerRule.getPort() + "/binary.bin";
+        var manifestUrlString = "http://test/manifest.json";
+        var binaryUrlString = "http://test/binary.bin";
         
         // Mock manifest endpoint
         var platformId = CliPlatform.getId();
@@ -72,9 +72,9 @@ public class DefaultAppLandDownloadServiceProxyTest extends AppMapBaseTest {
         AppLandDownloadServiceTestUtil.assertDownloadLatestCliVersions(getProject(), toolType, getTestRootDisposable());
 
         var hasManifestRequest = Arrays.stream(mockServerRule.getClient().retrieveRecordedRequests(null))
-                .anyMatch(request -> request.getPath().getValue().equals("/manifest.json"));
+                .anyMatch(request -> request.containsHeader("host", "test") && request.getPath().getValue().equals("/manifest.json"));
         var hasBinaryRequest = Arrays.stream(mockServerRule.getClient().retrieveRecordedRequests(null))
-                .anyMatch(request -> request.getPath().getValue().equals("/binary.bin"));
+                .anyMatch(request -> request.containsHeader("host", "test") && request.getPath().getValue().equals("/binary.bin"));
                 
         Assert.assertTrue("Manifest must be downloaded with the IDE's HTTP proxy", hasManifestRequest);
         Assert.assertTrue("AppMap CLI tools must be downloaded with the IDE's HTTP proxy", hasBinaryRequest);

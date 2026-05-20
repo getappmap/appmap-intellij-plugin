@@ -235,6 +235,8 @@ public class DefaultAppLandJsonRpcService implements AppLandJsonRpcService, AppL
 
         commandLine = commandLine.withEnvironment("APPMAP_CODE_EDITOR", createCodeEditorInfo());
 
+        LOG.info("Starting AppMap JSON-RPC server using binary: " + commandLine.getExePath());
+
         KillableProcessHandler process;
         try {
             synchronized (this) {

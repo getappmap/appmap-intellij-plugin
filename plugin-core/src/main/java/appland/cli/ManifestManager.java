@@ -37,7 +37,7 @@ public final class ManifestManager {
             }
             
             return manifest;
-        } catch (IOException e) {
+        } catch (Exception e) {
             LOG.warn("Failed to fetch manifest from " + urlString + ": " + e.toString());
             // Don't cache failures so a transient outage doesn't disable discovery until restart
             return null;

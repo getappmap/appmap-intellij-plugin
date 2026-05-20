@@ -112,15 +112,18 @@ public class PluginStatus extends AnAction implements DumbAware {
         String latestVersionText = String.format("Latest version: %s",
                 latestVersion == null ? "Failed to check for the latest version" : latestVersion);
 
-        var downloadedVersion = LocalAssetRepository.getInstalledVersion(type);
         var downloadPath = CliTools.getBinaryPath(type);
 
         String localVersionText = "Your version: ";
-        if (downloadedVersion == null || downloadPath == null) {
+        if (downloadPath == null) {
             localVersionText += "*unavailable*";
         } else {
-            localVersionText += downloadedVersion;
-            localVersionText += String.format("\n\nLocation: %s", downloadPath);
+            // Best-effort version: symlink target carries version in its filename; bundled path also has it.
+            var version = LocalAssetRepository.getInstalledVersion(type);
+            var resolved = LocalAssetRepository.resolveForVersionComparison(downloadPath);
+            if (version == null && resolved != null) version = LocalAssetRepository.versionFromPath(resolved);
+            localVersionText += version != null ? version : "*unknown*";
+            localVersionText += String.format("\n\nLocation: %s", resolved != null ? resolved : downloadPath);
         }
 
         return getBinaryReportHeader(type) + latestVersionText + "\n\n" + localVersionText + "\n\n";
