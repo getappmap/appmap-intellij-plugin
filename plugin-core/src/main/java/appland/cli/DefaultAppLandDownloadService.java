@@ -40,12 +40,27 @@ public class DefaultAppLandDownloadService implements AppLandDownloadService {
             return AppMapDownloadStatus.Skipped;
         }
 
+        var unitTestMode = ApplicationManager.getApplication().isUnitTestMode();
         var manifest = ManifestManager.fetch(type);
         var platform = CliPlatform.currentPlatform();
         var arch = CliPlatform.currentArch();
 
         if (manifest == null) {
             LOG.warn("Cannot fetch manifest for " + type.getId());
+            // Symlink already works — nothing to do.
+            if (LocalAssetRepository.getInstalledBinaryPath(type) != null) {
+                notifyDownloadFinished(type, AppMapDownloadStatus.Skipped);
+                return AppMapDownloadStatus.Skipped;
+            }
+
+            // Symlink is missing or broken — restore from the highest cached binary.
+            var cachedPath = LocalAssetRepository.findHighestCachedBinary(type, platform, arch, unitTestMode);
+            if (cachedPath != null) {
+                LOG.info("Restoring " + type.getId() + " symlink to cached " + LocalAssetRepository.versionFromPath(cachedPath));
+                LocalAssetRepository.updateSymlink(cachedPath, LocalAssetRepository.getSymlinkPath(type));
+                notifyDownloadFinished(type, AppMapDownloadStatus.Successful);
+                return AppMapDownloadStatus.Successful;
+            }
 
             // A bundled binary (from deployment settings) is still usable even without a download.
             if (CliTools.getBinaryPath(type, platform, arch) != null) {
@@ -58,12 +73,13 @@ public class DefaultAppLandDownloadService implements AppLandDownloadService {
         }
 
         var version = manifest.version;
-        var unitTestMode = ApplicationManager.getApplication().isUnitTestMode();
 
         if (LocalAssetRepository.isDownloaded(type, version, platform, arch, unitTestMode)) {
-            var currentActive = LocalAssetRepository.getActiveVersion(type, unitTestMode);
-            if (!version.equals(currentActive)) {
-                LocalAssetRepository.setActiveVersion(type, version, unitTestMode);
+            var cachedPath = LocalAssetRepository.getExecutableFilePath(type, version, platform, arch, unitTestMode);
+            var symlinkPath = LocalAssetRepository.getSymlinkPath(type);
+            if (!LocalAssetRepository.symlinkPointsTo(symlinkPath, cachedPath)) {
+                LOG.info("Updating " + type.getId() + " symlink to version " + version);
+                LocalAssetRepository.updateSymlink(cachedPath, symlinkPath);
                 notifyDownloadFinished(type, AppMapDownloadStatus.Successful);
                 return AppMapDownloadStatus.Successful;
             }
@@ -104,7 +120,7 @@ public class DefaultAppLandDownloadService implements AppLandDownloadService {
 
             CliTools.fixBinaryPermissions(downloadTargetFilePath);
             Files.move(downloadTargetFilePath, targetFilePath, StandardCopyOption.ATOMIC_MOVE);
-            LocalAssetRepository.setActiveVersion(type, version, unitTestMode);
+            LocalAssetRepository.updateSymlink(targetFilePath, LocalAssetRepository.getSymlinkPath(type));
 
             notifyDownloadFinished(type, AppMapDownloadStatus.Successful);
             return AppMapDownloadStatus.Successful;

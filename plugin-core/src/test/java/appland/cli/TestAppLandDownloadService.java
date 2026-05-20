@@ -6,7 +6,7 @@ import com.intellij.openapi.util.io.NioFiles;
 
 import java.io.IOException;
 import java.nio.file.Files;
-import java.nio.file.Path;
+import java.util.List;
 
 /**
  * Customized download service for tests.
@@ -26,12 +26,13 @@ public class TestAppLandDownloadService extends DefaultAppLandDownloadService {
             throw new IllegalStateException("This method can only be called in unit test mode");
         }
 
-        Path cacheDir = LocalAssetRepository.getCacheDirectory(true);
-        if (Files.exists(cacheDir)) {
-            try {
-                NioFiles.deleteRecursively(cacheDir);
-            } catch (IOException e) {
-                // ignore
+        for (var dir : List.of(LocalAssetRepository.getCacheDirectory(true), LocalAssetRepository.getBinDirectory())) {
+            if (Files.exists(dir)) {
+                try {
+                    NioFiles.deleteRecursively(dir);
+                } catch (IOException e) {
+                    // ignore
+                }
             }
         }
     }

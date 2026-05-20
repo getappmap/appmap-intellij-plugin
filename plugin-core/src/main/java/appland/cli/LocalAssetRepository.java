@@ -4,14 +4,16 @@ import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.application.PathManager;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.util.SystemInfo;
-import com.intellij.openapi.util.Version;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
+import com.intellij.util.text.SemVer;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.Comparator;
 
 public final class LocalAssetRepository {
@@ -20,14 +22,16 @@ public final class LocalAssetRepository {
     private LocalAssetRepository() {
     }
 
-    private static final String ACTIVE_VERSION_FILE = "active-version.txt";
+    private static boolean isSandboxOrTestMode(boolean unitTestMode) {
+        return unitTestMode || "true".equals(System.getProperty("appmap.sandbox"));
+    }
 
     /**
      * Returns the platform-specific cache directory for downloaded CLI binaries.
      * Matches the location used by the VSCode AppMap extension so both plugins share cached downloads.
      */
     public static @NotNull Path getCacheDirectory(boolean unitTestMode) {
-        if (unitTestMode || "true".equals(System.getProperty("appmap.sandbox"))) {
+        if (isSandboxOrTestMode(unitTestMode)) {
             return Paths.get(PathManager.getTempPath()).resolve("appland-downloads");
         }
         var home = Paths.get(System.getProperty("user.home"));
@@ -46,76 +50,174 @@ public final class LocalAssetRepository {
         }
     }
 
-    public static @Nullable String getActiveVersion(@NotNull CliTool type, boolean unitTestMode) {
-        var directory = getToolDownloadDirectory(type, unitTestMode);
-        var activeVersionFile = directory.resolve(ACTIVE_VERSION_FILE);
-        if (Files.isRegularFile(activeVersionFile)) {
-            try {
-                var version = Files.readString(activeVersionFile).trim();
-                if (!version.isEmpty()) {
-                    return version;
-                }
-            } catch (IOException e) {
-                LOG.debug("Error reading active version file: " + activeVersionFile, e);
-            }
+    /**
+     * Returns the directory that holds current-version symlinks.
+     * In production: ~/.appmap/bin (matching the VSCode AppMap extension).
+     * In test/sandbox mode: a sandboxed temp directory to avoid polluting the real bin dir.
+     */
+    public static @NotNull Path getBinDirectory() {
+        if (isSandboxOrTestMode(ApplicationManager.getApplication().isUnitTestMode())) {
+            return Paths.get(PathManager.getTempPath()).resolve("appland-bin");
         }
-        return null;
+        return Paths.get(System.getProperty("user.home"), ".appmap", "bin");
     }
 
-    public static void setActiveVersion(@NotNull CliTool type, @NotNull String version, boolean unitTestMode) {
-        var directory = getToolDownloadDirectory(type, unitTestMode);
+    /**
+     * Returns the path of the current-version symlink (or Windows copy fallback) for the given tool,
+     * e.g. ~/.appmap/bin/appmap on Unix or ~/.appmap/bin/appmap.exe on Windows.
+     */
+    public static @NotNull Path getSymlinkPath(@NotNull CliTool type) {
+        var name = type.getId() + (SystemInfo.isWindows ? ".exe" : "");
+        return getBinDirectory().resolve(name);
+    }
+
+    /**
+     * Creates or updates the symlink at {@code symlinkPath} pointing to {@code cachedPath}.
+     * Falls back to copying the file on systems where symlinks are not supported (e.g. locked-down Windows).
+     */
+    public static void updateSymlink(@NotNull Path cachedPath, @NotNull Path symlinkPath) {
         try {
-            Files.createDirectories(directory);
-            Files.writeString(directory.resolve(ACTIVE_VERSION_FILE), version);
+            Files.deleteIfExists(symlinkPath);
         } catch (IOException e) {
-            LOG.warn("Failed to write active version file for " + type, e);
+            LOG.debug("Error removing existing symlink: " + symlinkPath, e);
+        }
+        try {
+            Files.createDirectories(symlinkPath.getParent());
+        } catch (IOException e) {
+            LOG.warn("Failed to create bin directory: " + symlinkPath.getParent(), e);
+            return;
+        }
+        try {
+            Files.createSymbolicLink(symlinkPath, cachedPath);
+        } catch (IOException | UnsupportedOperationException | SecurityException e) {
+            // Fallback: copy the file (e.g. Windows without symlink privileges)
+            try {
+                Files.copy(cachedPath, symlinkPath, StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.COPY_ATTRIBUTES);
+                CliTools.fixBinaryPermissions(symlinkPath);
+            } catch (IOException ex) {
+                LOG.warn("Failed to create symlink or copy binary at " + symlinkPath, ex);
+            }
         }
     }
 
     /**
-     * @return The active version if its binary exists on disk, or the highest available fallback version.
+     * @return true if the symlink already points to {@code targetPath}, or if it is a regular file
+     * (Windows copy fallback — treat as correct to avoid redundant re-copies on steady-state runs).
      */
-    public static @Nullable String getInstalledVersion(@NotNull CliTool type) {
-        var unitTestMode = ApplicationManager.getApplication().isUnitTestMode();
-        var platform = CliPlatform.currentPlatform();
-        var arch = CliPlatform.currentArch();
-
-        var activeVersion = getActiveVersion(type, unitTestMode);
-        if (activeVersion != null && isDownloaded(type, activeVersion, platform, arch, unitTestMode)) {
-            return activeVersion;
+    public static boolean symlinkPointsTo(@NotNull Path symlinkPath, @NotNull Path targetPath) {
+        try {
+            if (Files.isSymbolicLink(symlinkPath)) {
+                var link = Files.readSymbolicLink(symlinkPath);
+                return targetPath.equals(symlinkPath.getParent().resolve(link));
+            }
+            return Files.isRegularFile(symlinkPath);
+        } catch (IOException e) {
+            return false;
         }
-
-        return findHighestCachedVersion(type, platform, arch, unitTestMode);
     }
 
-    private static @Nullable String findHighestCachedVersion(@NotNull CliTool type,
-                                                             @NotNull String platform,
-                                                             @NotNull String arch,
-                                                             boolean unitTestMode) {
+    /**
+     * Extracts the version from a bundled binary filename by splitting on the last '-'.
+     * e.g. "appmap-linux-x64-v1.2.3" → "1.2.3"
+     * Does NOT handle prerelease versions (e.g. "1.2.3-rc.1") — use
+     * {@link #versionFromCachedFilename} for downloaded cache files where the prefix is known.
+     */
+    public static @Nullable String versionFromPath(@NotNull Path path) {
+        var filename = path.getFileName().toString();
+        if (filename.endsWith(".exe")) {
+            filename = filename.substring(0, filename.length() - 4);
+        }
+        var lastDash = filename.lastIndexOf('-');
+        if (lastDash < 0) return null;
+        var after = filename.substring(lastDash + 1);
+        // Tolerate an optional leading "v" (e.g. bundled binaries with v1.2.3 suffix)
+        if (after.startsWith("v")) after = after.substring(1);
+        return (!after.isEmpty() && Character.isDigit(after.charAt(0))) ? after : null;
+    }
+
+    /**
+     * Extracts the version from a cached binary filename by stripping the known prefix.
+     * Unlike {@link #versionFromPath}, this correctly handles prerelease versions
+     * (e.g. "appmap-linux-x64-1.2.3-rc.1" → "1.2.3-rc.1").
+     */
+    private static @Nullable String versionFromCachedFilename(@NotNull String filename, @NotNull String prefix) {
+        if (filename.endsWith(".exe")) {
+            filename = filename.substring(0, filename.length() - 4);
+        }
+        if (!filename.startsWith(prefix)) return null;
+        var version = filename.substring(prefix.length());
+        if (version.startsWith("v")) version = version.substring(1);
+        return (!version.isEmpty() && Character.isDigit(version.charAt(0))) ? version : null;
+    }
+
+    /**
+     * Returns the installed version by reading the symlink target.
+     * Returns null if not installed or if the version cannot be determined (e.g. Windows copy fallback).
+     */
+    public static @Nullable String getInstalledVersion(@NotNull CliTool type) {
+        var symlinkPath = getSymlinkPath(type);
+        if (Files.isSymbolicLink(symlinkPath)) {
+            try {
+                var target = Files.readSymbolicLink(symlinkPath);
+                var filename = symlinkPath.getParent().resolve(target).getFileName().toString();
+                var prefix = type.getId() + "-" + CliPlatform.currentPlatform() + "-" + CliPlatform.currentArch() + "-";
+                return versionFromCachedFilename(filename, prefix);
+            } catch (IOException e) {
+                LOG.debug("Error reading symlink for version: " + symlinkPath, e);
+            }
+        }
+        // Not a symlink (Windows copy fallback) or read failed: version unknown
+        return null;
+    }
+
+    /**
+     * Returns the symlink (or copy) path for the tool if it exists and is executable, null otherwise.
+     * isExecutableBinary follows symlinks, so this works for both symlinks and Windows copy fallbacks.
+     */
+    public static @Nullable Path getInstalledBinaryPath(@NotNull CliTool type) {
+        var symlinkPath = getSymlinkPath(type);
+        return isExecutableBinary(symlinkPath) ? symlinkPath : null;
+    }
+
+    /**
+     * Resolves a symlink to its target so the version embedded in the target filename can be
+     * used for comparison. Returns the path as-is if it is not a symlink.
+     */
+    public static @Nullable Path resolveForVersionComparison(@Nullable Path path) {
+        if (path == null) return null;
+        if (Files.isSymbolicLink(path)) {
+            try {
+                return path.toRealPath();
+            } catch (IOException e) {
+                LOG.debug("Error resolving symlink for version comparison: " + path, e);
+            }
+        }
+        return path;
+    }
+
+    /**
+     * Returns the highest-version executable binary in the cache for the given tool/platform/arch,
+     * or null if none is found. Used to restore the symlink when the manifest is unreachable.
+     */
+    public static @Nullable Path findHighestCachedBinary(@NotNull CliTool type,
+                                                          @NotNull String platform,
+                                                          @NotNull String arch,
+                                                          boolean unitTestMode) {
         var cacheDir = getCacheDirectory(unitTestMode);
         var prefix = type.getId() + "-" + platform + "-" + arch + "-";
         try (var stream = Files.list(cacheDir)) {
             return stream
-                    .filter(p -> isExecutableBinary(p))
-                    .map(p -> p.getFileName().toString())
-                    .filter(name -> name.startsWith(prefix))
-                    .map(name -> {
-                        var stripped = name.endsWith(".exe") ? name.substring(0, name.length() - 4) : name;
-                        return stripped.substring(prefix.length());
-                    })
-                    .filter(v -> !v.isEmpty() && Version.parseVersion(v) != null)
-                    .max(Comparator.naturalOrder())
+                    .filter(LocalAssetRepository::isExecutableBinary)
+                    .filter(p -> p.getFileName().toString().startsWith(prefix))
+                    .max(Comparator.comparing(p -> {
+                        var v = versionFromCachedFilename(p.getFileName().toString(), prefix);
+                        return v != null ? SemVer.parseFromText(v) : null;
+                    }, SemVerComparator.INSTANCE))
                     .orElse(null);
         } catch (IOException e) {
-            LOG.debug("Error scanning cache directory: " + cacheDir, e);
+            LOG.debug("Error scanning cache directory for fallback binary: " + cacheDir, e);
             return null;
         }
-    }
-
-    public static @Nullable Path getInstalledBinaryPath(@NotNull CliTool type, @NotNull String platform, @NotNull String arch) {
-        var unitTestMode = ApplicationManager.getApplication().isUnitTestMode();
-        var version = getInstalledVersion(type);
-        return version != null ? getExecutableFilePath(type, version, platform, arch, unitTestMode) : null;
     }
 
     public static boolean isDownloaded(@NotNull CliTool type, @NotNull String version, @NotNull String platform, @NotNull String arch, boolean unitTestMode) {
@@ -140,9 +242,9 @@ public final class LocalAssetRepository {
     }
 
     /**
-     * Returns a per-tool subdirectory of the cache used for plugin-specific metadata (e.g. active-version.txt).
+     * Returns the cache directory for the given tool (both tools share the same flat cache directory).
      */
     public static @NotNull Path getToolDownloadDirectory(@NotNull CliTool type, boolean unitTestMode) {
-        return getCacheDirectory(unitTestMode).resolve(type.getId());
+        return getCacheDirectory(unitTestMode);
     }
 }

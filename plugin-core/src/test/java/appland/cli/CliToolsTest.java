@@ -2,11 +2,12 @@ package appland.cli;
 
 import appland.AppMapBaseTest;
 import appland.AppMapDeploymentTestUtils;
-import appland.deployment.AppMapDeploymentSettingsService;
+import com.intellij.openapi.progress.EmptyProgressIndicator;
 import com.intellij.openapi.util.SystemInfo;
 import com.intellij.testFramework.fixtures.TempDirTestFixture;
 import com.intellij.testFramework.fixtures.impl.TempDirTestFixtureImpl;
 import org.jetbrains.annotations.NotNull;
+import org.junit.Assume;
 import org.junit.Test;
 
 import java.nio.file.Files;
@@ -52,9 +53,6 @@ public class CliToolsTest extends AppMapBaseTest {
                 createMockBinary("appmap-macos-arm64-v1000.1.123")
         );
 
-        // Delete active-version to test fallback logic
-        Files.deleteIfExists(LocalAssetRepository.getToolDownloadDirectory(CliTool.AppMap, true).resolve("active-version.txt"));
-
         AppMapDeploymentTestUtils.withBundledBinaries(appmapBinaries, () -> {
             assertNotNull("There must be a match for every platform", CliTools.getBinaryPath(CliTool.AppMap));
 
@@ -79,31 +77,64 @@ public class CliToolsTest extends AppMapBaseTest {
     }
 
     @Test
-    public void bundledBinaryIsPreferred() throws Exception {
+    public void installedBinaryIsPreferred() throws Exception {
         TestAppLandDownloadService.ensureDownloaded();
 
-        var downloadedAppMapBinary = LocalAssetRepository.getInstalledBinaryPath(CliTool.AppMap,
-                CliPlatform.currentPlatform(),
-                CliPlatform.currentArch());
-        assertNotNull(downloadedAppMapBinary);
+        var installedBinary = LocalAssetRepository.getInstalledBinaryPath(CliTool.AppMap);
+        assertNotNull(installedBinary);
 
-        // Delete active-version to test fallback logic
-        Files.deleteIfExists(LocalAssetRepository.getToolDownloadDirectory(CliTool.AppMap, true).resolve("active-version.txt"));
-
-        var bundledBinary = createMockBinary(downloadedAppMapBinary.getFileName().toString());
-
+        // Even with a bundled binary available, the installed (symlinked) binary wins
+        var bundledBinary = createMockBinary("appmap-" + CliPlatform.currentPlatform() + "-" + CliPlatform.currentArch() + "-v9999.0.0");
         AppMapDeploymentTestUtils.withBundledBinaries(List.of(bundledBinary), () -> {
             var bestMatch = CliTools.getBinaryPath(CliTool.AppMap);
             assertNotNull(bestMatch);
-            assertEquals(bundledBinary.getFileName().toString(), bestMatch.getFileName().toString());
-
-            var binaryParentDir = AppMapDeploymentSettingsService.bundledBinarySearchPath().stream().findFirst().orElse(null);
-            assertNotNull(binaryParentDir);
-            assertEquals(
-                    "Bundled binaries should be preferred over downloaded binaries",
-                    binaryParentDir.resolve(bestMatch.getFileName()),
-                    bestMatch);
+            assertEquals("Installed binary should be preferred over bundled",
+                    installedBinary.getFileName().toString(), bestMatch.getFileName().toString());
         });
+    }
+
+    @Test
+    public void symlinkCreatedAfterDownload() throws Exception {
+        Assume.assumeFalse("symlinks are unreliable on Windows", SystemInfo.isWindows);
+
+        var symlinkPath = LocalAssetRepository.getSymlinkPath(CliTool.AppMap);
+        assertFalse("No symlink before download", Files.exists(symlinkPath));
+
+        TestAppLandDownloadService.ensureDownloaded();
+
+        assertTrue("Symlink exists after download", Files.isSymbolicLink(symlinkPath));
+        assertTrue("Symlink target is an executable binary", Files.isExecutable(symlinkPath.toRealPath()));
+
+        var version = LocalAssetRepository.getInstalledVersion(CliTool.AppMap);
+        assertNotNull("Version is readable from symlink", version);
+    }
+
+    @Test
+    public void secondDownloadIsSkipped() {
+        var service = (TestAppLandDownloadService) AppLandDownloadService.getInstance();
+        var firstStatus = service.download(CliTool.AppMap, new EmptyProgressIndicator());
+        assertEquals(AppMapDownloadStatus.Successful, firstStatus);
+
+        var secondStatus = service.download(CliTool.AppMap, new EmptyProgressIndicator());
+        assertEquals("Second download should be skipped when symlink already points to the correct binary",
+                AppMapDownloadStatus.Skipped, secondStatus);
+    }
+
+    @Test
+    public void prereleaseVersionExtractedFromSymlink() throws Exception {
+        var platform = CliPlatform.currentPlatform();
+        var arch = CliPlatform.currentArch();
+        var cacheDir = LocalAssetRepository.getCacheDirectory(true);
+        Files.createDirectories(cacheDir);
+
+        var binaryName = CliTool.AppMap.getBinaryName(platform, arch, "1.2.3-rc.1");
+        var cachedBinary = cacheDir.resolve(binaryName);
+        Files.write(cachedBinary, new byte[0]);
+        CliTools.fixBinaryPermissions(cachedBinary);
+
+        LocalAssetRepository.updateSymlink(cachedBinary, LocalAssetRepository.getSymlinkPath(CliTool.AppMap));
+
+        assertEquals("1.2.3-rc.1", LocalAssetRepository.getInstalledVersion(CliTool.AppMap));
     }
 
     private @NotNull Path createMockBinary(String filename) {
