@@ -8,7 +8,6 @@ import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.progress.ProgressIndicator;
 import com.intellij.openapi.progress.Task;
 import com.intellij.openapi.project.Project;
-import com.intellij.openapi.util.io.NioFiles;
 import com.intellij.util.io.HttpRequests;
 import org.jetbrains.annotations.NotNull;
 
@@ -20,7 +19,9 @@ import java.nio.file.StandardCopyOption;
 import java.security.MessageDigest;
 
 /**
- * Downloads are stored as "appland-downloads/$NAME/$VERSION/$NAME-$OS-$ARCH", e.g. "appland-downloads/appmap/1.2.3/appmap-linux-x64".
+ * Downloads are cached as "$NAME-$OS-$ARCH-$VERSION" in the platform-specific cache directory,
+ * e.g. "appmap-linux-x64-1.2.3" in ~/.cache/appmap/ on Linux.
+ * This matches the layout used by the VSCode AppMap extension so both share the same cache.
  */
 public class DefaultAppLandDownloadService implements AppLandDownloadService {
     private static final Logger LOG = Logger.getInstance(DefaultAppLandDownloadService.class);
@@ -78,10 +79,10 @@ public class DefaultAppLandDownloadService implements AppLandDownloadService {
             return AppMapDownloadStatus.Failed;
         }
 
-        try {
-            var targetFilePath = LocalAssetRepository.getExecutableFilePath(type, version, platform, arch, unitTestMode);
-            var downloadTargetFilePath = targetFilePath.resolveSibling(targetFilePath.getFileName().toString() + ".download");
+        var targetFilePath = LocalAssetRepository.getExecutableFilePath(type, version, platform, arch, unitTestMode);
+        var downloadTargetFilePath = targetFilePath.resolveSibling(targetFilePath.getFileName().toString() + ".download");
 
+        try {
             Files.createDirectories(targetFilePath.getParent());
             Files.deleteIfExists(targetFilePath);
             Files.deleteIfExists(downloadTargetFilePath);
@@ -110,13 +111,11 @@ public class DefaultAppLandDownloadService implements AppLandDownloadService {
         } catch (Exception e) {
             LOG.debug("Error downloading CLI binary", e);
 
-            var downloadDir = LocalAssetRepository.getVersionDownloadDirectory(type, version, unitTestMode);
             try {
-                if (Files.isDirectory(downloadDir)) {
-                    NioFiles.deleteRecursively(downloadDir);
-                }
+                Files.deleteIfExists(targetFilePath);
+                Files.deleteIfExists(downloadTargetFilePath);
             } catch (IOException ex) {
-                LOG.debug("Error cleaning up download directory: " + downloadDir, e);
+                LOG.debug("Error cleaning up failed download: " + targetFilePath, ex);
             }
 
             notifyDownloadFinished(type, AppMapDownloadStatus.Failed);

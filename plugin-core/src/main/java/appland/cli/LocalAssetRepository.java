@@ -12,10 +12,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Collections;
 import java.util.Comparator;
-import java.util.List;
-import java.util.stream.Collectors;
 
 public final class LocalAssetRepository {
     private static final Logger LOG = Logger.getInstance(LocalAssetRepository.class);
@@ -24,6 +21,30 @@ public final class LocalAssetRepository {
     }
 
     private static final String ACTIVE_VERSION_FILE = "active-version.txt";
+
+    /**
+     * Returns the platform-specific cache directory for downloaded CLI binaries.
+     * Matches the location used by the VSCode AppMap extension so both plugins share cached downloads.
+     */
+    public static @NotNull Path getCacheDirectory(boolean unitTestMode) {
+        if (unitTestMode || "true".equals(System.getProperty("appmap.sandbox"))) {
+            return Paths.get(PathManager.getTempPath()).resolve("appland-downloads");
+        }
+        var home = Paths.get(System.getProperty("user.home"));
+        if (SystemInfo.isWindows) {
+            var localAppData = System.getenv("LOCALAPPDATA");
+            return localAppData != null
+                    ? Paths.get(localAppData, "AppMap", "cache")
+                    : home.resolve("AppData").resolve("Local").resolve("AppMap").resolve("cache");
+        } else if (SystemInfo.isMac) {
+            return home.resolve("Library").resolve("Caches").resolve("AppMap");
+        } else {
+            var xdgCacheHome = System.getenv("XDG_CACHE_HOME");
+            return xdgCacheHome != null
+                    ? Paths.get(xdgCacheHome).resolve("appmap")
+                    : home.resolve(".cache").resolve("appmap");
+        }
+    }
 
     public static @Nullable String getActiveVersion(@NotNull CliTool type, boolean unitTestMode) {
         var directory = getToolDownloadDirectory(type, unitTestMode);
@@ -56,30 +77,39 @@ public final class LocalAssetRepository {
      */
     public static @Nullable String getInstalledVersion(@NotNull CliTool type) {
         var unitTestMode = ApplicationManager.getApplication().isUnitTestMode();
-        var directory = getToolDownloadDirectory(type, unitTestMode);
-        if (!Files.isDirectory(directory)) {
-            return null;
-        }
-
-        var activeVersion = getActiveVersion(type, unitTestMode);
-        if (activeVersion != null && isDownloaded(type, activeVersion, CliPlatform.currentPlatform(), CliPlatform.currentArch(), unitTestMode)) {
-            return activeVersion;
-        }
-
-        var candidates = findVersionDownloadDirectories(directory);
-        if (candidates.isEmpty()) {
-            return null;
-        }
-
         var platform = CliPlatform.currentPlatform();
         var arch = CliPlatform.currentArch();
 
-        return candidates
-                .stream()
-                .map(file -> file.getFileName().toString())
-                .filter(v -> isDownloaded(type, v, platform, arch, unitTestMode))
-                .max(Comparator.naturalOrder())
-                .orElse(null);
+        var activeVersion = getActiveVersion(type, unitTestMode);
+        if (activeVersion != null && isDownloaded(type, activeVersion, platform, arch, unitTestMode)) {
+            return activeVersion;
+        }
+
+        return findHighestCachedVersion(type, platform, arch, unitTestMode);
+    }
+
+    private static @Nullable String findHighestCachedVersion(@NotNull CliTool type,
+                                                             @NotNull String platform,
+                                                             @NotNull String arch,
+                                                             boolean unitTestMode) {
+        var cacheDir = getCacheDirectory(unitTestMode);
+        var prefix = type.getId() + "-" + platform + "-" + arch + "-";
+        try (var stream = Files.list(cacheDir)) {
+            return stream
+                    .filter(p -> isExecutableBinary(p))
+                    .map(p -> p.getFileName().toString())
+                    .filter(name -> name.startsWith(prefix))
+                    .map(name -> {
+                        var stripped = name.endsWith(".exe") ? name.substring(0, name.length() - 4) : name;
+                        return stripped.substring(prefix.length());
+                    })
+                    .filter(v -> !v.isEmpty() && Version.parseVersion(v) != null)
+                    .max(Comparator.naturalOrder())
+                    .orElse(null);
+        } catch (IOException e) {
+            LOG.debug("Error scanning cache directory: " + cacheDir, e);
+            return null;
+        }
     }
 
     public static @Nullable Path getInstalledBinaryPath(@NotNull CliTool type, @NotNull String platform, @NotNull String arch) {
@@ -96,33 +126,23 @@ public final class LocalAssetRepository {
         return Files.isRegularFile(file) && (!SystemInfo.isUnix || Files.isExecutable(file));
     }
 
-    public static @NotNull List<Path> findVersionDownloadDirectories(@NotNull Path parentDirectory) {
-        try (var stream = Files.list(parentDirectory)) {
-            return stream
-                    .filter(file -> Files.isDirectory(file) && Version.parseVersion(file.getFileName().toString()) != null)
-                    .collect(Collectors.toList());
-        } catch (Exception e) {
-            LOG.debug("Error listing download directory entries: " + parentDirectory, e);
-            return Collections.emptyList();
-        }
-    }
-
+    /**
+     * Returns the path where a specific version of the binary is cached.
+     * Binaries are stored flat in the shared cache directory with the version embedded in the filename,
+     * matching the layout used by the VSCode AppMap extension.
+     */
     public static @NotNull Path getExecutableFilePath(@NotNull CliTool type,
-                                               @NotNull String version,
-                                               @NotNull String platform,
-                                               @NotNull String arch,
-                                               boolean unitTestMode) {
-        return getVersionDownloadDirectory(type, version, unitTestMode).resolve(type.getBinaryName(platform, arch));
+                                                      @NotNull String version,
+                                                      @NotNull String platform,
+                                                      @NotNull String arch,
+                                                      boolean unitTestMode) {
+        return getCacheDirectory(unitTestMode).resolve(type.getBinaryName(platform, arch, version));
     }
 
-    public static @NotNull Path getVersionDownloadDirectory(@NotNull CliTool type, @NotNull String version, boolean unitTestMode) {
-        return getToolDownloadDirectory(type, unitTestMode).resolve(version);
-    }
-
+    /**
+     * Returns a per-tool subdirectory of the cache used for plugin-specific metadata (e.g. active-version.txt).
+     */
     public static @NotNull Path getToolDownloadDirectory(@NotNull CliTool type, boolean unitTestMode) {
-        var basePath = unitTestMode || "true".equals(System.getProperty("appmap.sandbox"))
-                ? Paths.get(PathManager.getTempPath()).resolve("appland-downloads")
-                : Paths.get(PathManager.getDefaultSystemPathFor("appland-plugin"));
-        return basePath.resolve(type.getId());
+        return getCacheDirectory(unitTestMode).resolve(type.getId());
     }
 }
