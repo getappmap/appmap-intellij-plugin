@@ -11,6 +11,7 @@ import org.junit.Test;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.attribute.PosixFilePermission;
 import java.util.List;
 
 public class CliToolsTest extends AppMapBaseTest {
@@ -91,6 +92,39 @@ public class CliToolsTest extends AppMapBaseTest {
                     "Bundled binaries should be preferred over downloaded binaries",
                     binaryParentDir.resolve(bestMatch.getFileName()),
                     bestMatch);
+        });
+    }
+
+    @Test
+    public void testBundledBinaryPermissionsFixed() throws Exception {
+        if (!SystemInfo.isUnix) {
+            return;
+        }
+
+        // Mock binary name that matches the current platform/arch
+        var binaryName = String.format("appmap-%s-%s-v1000.0.0", CliTools.currentPlatform(), CliTools.currentArch());
+        var mockBinary = createMockBinary(binaryName);
+
+        AppMapDeploymentTestUtils.withBundledBinaries(List.of(mockBinary), () -> {
+            // Find the file that was just copied
+            var bundledPath = AppMapDeploymentSettingsService.bundledBinarySearchPath().get(0).resolve(binaryName);
+
+            // Force it to be non-executable first
+            if (Files.isExecutable(bundledPath)) {
+                var perms = Files.getPosixFilePermissions(bundledPath);
+                perms.remove(PosixFilePermission.OWNER_EXECUTE);
+                perms.remove(PosixFilePermission.GROUP_EXECUTE);
+                perms.remove(PosixFilePermission.OTHERS_EXECUTE);
+                Files.setPosixFilePermissions(bundledPath, perms);
+            }
+            assertFalse(Files.isExecutable(bundledPath));
+
+            // Now call the method under test
+            var binaryPath = CliTools.getBinaryPath(CliTool.AppMap);
+
+            assertNotNull(binaryPath);
+            assertEquals(binaryName, binaryPath.getFileName().toString());
+            assertTrue("Bundled binary must be made executable", Files.isExecutable(binaryPath));
         });
     }
 
