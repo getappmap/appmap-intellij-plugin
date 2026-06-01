@@ -1,5 +1,12 @@
 AppMap Plugin Changelog
 
+## [0.83.3](https://github.com/getappmap/appmap-intellij-plugin/compare/v0.83.2...v0.83.3) (2026-06-01)
+
+
+### Bug Fixes
+
+-  **webview:** add missing stylesheet references to HTML files ([76a32aa](https://github.com/getappmap/appmap-intellij-plugin/commit/76a32aa2aeb1f4c5e42e945414fd2e690a965ab9))
+
 ## [0.83.2](https://github.com/getappmap/appmap-intellij-plugin/compare/v0.83.1...v0.83.2) (2026-04-28)
 
 
