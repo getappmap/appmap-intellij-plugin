@@ -30,10 +30,13 @@ import static org.junit.Assert.assertArrayEquals;
 public class DefaultAppLandJsonRpcServiceTest extends AppMapBaseTest {
     @Before
     public void setupListener() {
-        // by default, the listener is inactive in test mode to avoid side-effects
+        // by default, the listener is inactive in test mode to avoid side-effects;
+        // pass getTestRootDisposable() so alarms are cancelled when the test ends and
+        // don't trigger unexpected restarts in subsequent tests
+        var listener = new AppMapSettingsReloadProjectListener(getTestRootDisposable());
         ApplicationManager.getApplication().getMessageBus()
                 .connect(getTestRootDisposable())
-                .subscribe(AppMapSettingsListener.TOPIC, new AppMapSettingsReloadProjectListener());
+                .subscribe(AppMapSettingsListener.TOPIC, listener);
     }
 
     @Override
