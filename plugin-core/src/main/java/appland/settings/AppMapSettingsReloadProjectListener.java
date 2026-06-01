@@ -3,6 +3,7 @@ package appland.settings;
 import appland.AppLandLifecycleService;
 import appland.notifications.AppMapNotifications;
 import appland.rpcService.AppLandJsonRpcService;
+import com.intellij.openapi.Disposable;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.application.ModalityState;
 import com.intellij.openapi.project.ProjectManager;
@@ -17,30 +18,38 @@ import java.util.Set;
  * Displays a notification in each of the opened projects to reload the project after settings changed,
  * which require a project reload to activate.
  */
+// applicationListeners subscribers must not implement Disposable (JetBrains guidelines). We still
+// need alarms scoped tighter than the application: using AppLandLifecycleService directly causes
+// cross-test state leaks when alarms fire after a test finishes and trigger unexpected restarts in
+// the next one. The package-private constructor lets tests inject getTestRootDisposable() instead.
 public class AppMapSettingsReloadProjectListener implements AppMapSettingsListener {
     // Debounce the notification, because several separate settings may be changed at once.
     // Initialized lazily, because init references a service and other services
     // must not be accessed during initialization in 2025.1+.
-    private final LazyInitializer.LazyValue<SingleAlarm> showReloadNotificationAlarm = LazyInitializer.create(() -> {
-        return new SingleAlarm(
+    private final LazyInitializer.LazyValue<SingleAlarm> showReloadNotificationAlarm;
+    private final LazyInitializer.LazyValue<SingleAlarm> reloadJsonRpcServerAlarm;
+
+    @SuppressWarnings("unused") // instantiated by the platform via XML applicationListeners registration
+    public AppMapSettingsReloadProjectListener() {
+        this(AppLandLifecycleService.getInstance());
+    }
+
+    @org.jetbrains.annotations.TestOnly
+    @SuppressWarnings("deprecation") // SingleAlarm is deprecated in favour of Flow.debounce, which is Kotlin-only
+    public AppMapSettingsReloadProjectListener(@NotNull Disposable alarmParent) {
+        showReloadNotificationAlarm = LazyInitializer.create(() -> new SingleAlarm(
                 this::showReloadNotificationInAllProjects,
                 1_000,
-                AppLandLifecycleService.getInstance(),
+                alarmParent,
                 Alarm.ThreadToUse.SWING_THREAD,
-                ModalityState.defaultModalityState());
-    });
-
-    // Debounce the notification, because several separate settings may be changed at once.
-    // Initialized lazily, because init references a service and other services
-    // must not be accessed during initialization in 2025.1+.
-    private final LazyInitializer.LazyValue<SingleAlarm> reloadJsonRpcServerAlarm = LazyInitializer.create(() -> {
-        return new SingleAlarm(
+                ModalityState.defaultModalityState()));
+        reloadJsonRpcServerAlarm = LazyInitializer.create(() -> new SingleAlarm(
                 this::restartJsonRpcServerInAllProjects,
                 1_000,
-                AppLandLifecycleService.getInstance(),
+                alarmParent,
                 Alarm.ThreadToUse.POOLED_THREAD,
-                ModalityState.defaultModalityState());
-    });
+                ModalityState.defaultModalityState()));
+    }
 
 
     @Override
