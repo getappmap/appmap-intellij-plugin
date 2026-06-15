@@ -10,10 +10,10 @@ public final class SemVerComparator implements Comparator<@Nullable SemVer> {
 
     @Override
     public int compare(@Nullable SemVer o1, @Nullable SemVer o2) {
-        // sort null to the end
+        // sort null to the beginning (smaller than any valid SemVer)
         if (o1 == null && o2 == null) return 0;
-        if (o1 == null) return 1;
-        if (o2 == null) return -1;
+        if (o1 == null) return -1;
+        if (o2 == null) return 1;
 
         return o1.compareTo(o2);
     }

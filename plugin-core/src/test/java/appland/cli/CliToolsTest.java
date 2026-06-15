@@ -137,6 +137,37 @@ public class CliToolsTest extends AppMapBaseTest {
         assertEquals("1.2.3-rc.1", LocalAssetRepository.getInstalledVersion(CliTool.AppMap));
     }
 
+    @Test
+    public void findHighestCachedBinaryWithInvalidVersions() throws Exception {
+        var platform = CliPlatform.currentPlatform();
+        var arch = CliPlatform.currentArch();
+        var cacheDir = LocalAssetRepository.getCacheDirectory(true);
+        Files.createDirectories(cacheDir);
+
+        try (var stream = Files.list(cacheDir)) {
+            var files = stream.collect(java.util.stream.Collectors.toList());
+            for (var path : files) {
+                try {
+                    Files.delete(path);
+                } catch (java.io.IOException ignored) {
+                }
+            }
+        }
+
+        var binary123 = cacheDir.resolve(CliTool.AppMap.getBinaryName(platform, arch, "1.2.3"));
+        Files.write(binary123, new byte[0]);
+        CliTools.fixBinaryPermissions(binary123);
+
+        var binaryInvalid = cacheDir.resolve(CliTool.AppMap.getBinaryName(platform, arch, "crashing-tmp"));
+        Files.write(binaryInvalid, new byte[0]);
+        CliTools.fixBinaryPermissions(binaryInvalid);
+
+        var highest = LocalAssetRepository.findHighestCachedBinary(CliTool.AppMap, platform, arch, true);
+        assertNotNull("Should find a fallback binary", highest);
+        assertEquals("The binary with a valid SemVer should be preferred over the unparseable one",
+                binary123.toAbsolutePath(), highest.toAbsolutePath());
+    }
+
     private @NotNull Path createMockBinary(String filename) {
         return myFixture.getTempDirFixture().createFile(filename).toNioPath();
     }

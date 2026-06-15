@@ -9,8 +9,8 @@ public class SemVerComparatorTest extends AppMapBaseTest {
     public void comparator() {
         var comparator = SemVerComparator.INSTANCE;
         assertEquals(0, comparator.compare(SemVer.parseFromText("1.2.3"), SemVer.parseFromText("1.2.3")));
-        assertEquals(1, comparator.compare(null, SemVer.parseFromText("1.2.3")));
-        assertEquals(-1, comparator.compare(SemVer.parseFromText("1.2.3"), null));
+        assertEquals(-1, comparator.compare(null, SemVer.parseFromText("1.2.3")));
+        assertEquals(1, comparator.compare(SemVer.parseFromText("1.2.3"), null));
 
         assertEquals(1, comparator.compare(SemVer.parseFromText("2.0.0"), SemVer.parseFromText("1.2.3")));
         assertEquals(-1, comparator.compare(SemVer.parseFromText("1.2.3"), SemVer.parseFromText("2.0.0")));
