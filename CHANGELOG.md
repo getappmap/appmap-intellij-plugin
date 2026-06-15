@@ -1,5 +1,18 @@
 AppMap Plugin Changelog
 
+## [0.84.0](https://github.com/getappmap/appmap-intellij-plugin/compare/v0.83.3...v0.84.0) (2026-06-15)
+
+
+### Features
+
+-  **assets:** manifest-driven CLI discovery and verification ([f3ee3fd](https://github.com/getappmap/appmap-intellij-plugin/commit/f3ee3fd81d89b8211fb6c02f364b0dd24821dbea))
+-  **assets:** track current CLI version via ~/.appmap/bin/* symlinks ([46f19c6](https://github.com/getappmap/appmap-intellij-plugin/commit/46f19c6c7b756d4989e30a020096ae75fddb6f94))
+
+
+### Bug Fixes
+
+-  **cli:** sort null SemVer to beginning to prevent invalid fallback binary selection ([fcea3e1](https://github.com/getappmap/appmap-intellij-plugin/commit/fcea3e188c6cc00569d3ad129314a9e15ac46629))
+
 ## [0.83.3](https://github.com/getappmap/appmap-intellij-plugin/compare/v0.83.2...v0.83.3) (2026-06-01)
 
 
