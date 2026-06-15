@@ -29,9 +29,18 @@ public final class LocalAssetRepository {
     /**
      * Returns the platform-specific cache directory for downloaded CLI binaries.
      * Matches the location used by the VSCode AppMap extension so both plugins share cached downloads.
+     * In unit-test mode a stable per-user directory is used so downloaded binaries survive across
+     * test invocations and only need to be fetched once per version per machine.
      */
     public static @NotNull Path getCacheDirectory(boolean unitTestMode) {
-        if (isSandboxOrTestMode(unitTestMode)) {
+        if (unitTestMode) {
+            var xdgCacheHome = System.getenv("XDG_CACHE_HOME");
+            var cacheBase = xdgCacheHome != null
+                    ? Paths.get(xdgCacheHome)
+                    : Paths.get(System.getProperty("user.home"), ".cache");
+            return cacheBase.resolve("appmap-test");
+        }
+        if ("true".equals(System.getProperty("appmap.sandbox"))) {
             return Paths.get(PathManager.getTempPath()).resolve("appland-downloads");
         }
         var home = Paths.get(System.getProperty("user.home"));
@@ -54,6 +63,9 @@ public final class LocalAssetRepository {
      * Returns the directory that holds current-version symlinks.
      * In production: ~/.appmap/bin (matching the VSCode AppMap extension).
      * In test/sandbox mode: a sandboxed temp directory to avoid polluting the real bin dir.
+     * Note: unlike getCacheDirectory, this intentionally uses the combined sandbox+unitTest check
+     * because the bin dir must always be ephemeral in both modes — tests call removeDownloads() to
+     * reset symlink state between runs, and runIde sandbox must not touch the real ~/.appmap/bin.
      */
     public static @NotNull Path getBinDirectory() {
         if (isSandboxOrTestMode(ApplicationManager.getApplication().isUnitTestMode())) {
@@ -203,7 +215,17 @@ public final class LocalAssetRepository {
                                                           @NotNull String platform,
                                                           @NotNull String arch,
                                                           boolean unitTestMode) {
-        var cacheDir = getCacheDirectory(unitTestMode);
+        return findHighestCachedBinaryIn(type, platform, arch, getCacheDirectory(unitTestMode));
+    }
+
+    /**
+     * Like {@link #findHighestCachedBinary} but searches an explicit directory.
+     * Used by tests that need an isolated cache dir so they don't pollute the shared test cache.
+     */
+    static @Nullable Path findHighestCachedBinaryIn(@NotNull CliTool type,
+                                                     @NotNull String platform,
+                                                     @NotNull String arch,
+                                                     @NotNull Path cacheDir) {
         var prefix = type.getId() + "-" + platform + "-" + arch + "-";
         try (var stream = Files.list(cacheDir)) {
             return stream

@@ -228,6 +228,12 @@ allprojects {
             // all our tests need the jar, even if the agent is disabled
             dependsOn(":downloadAppMapAgent")
 
+            if (!project.hasProperty("includeNetworkTests")) {
+                useJUnit {
+                    excludeCategories("appland.RequiresNetwork")
+                }
+            }
+
             systemProperty("idea.test.execution.policy", "appland.AppLandTestExecutionPolicy")
             systemProperty("appland.testDataPath", rootProject.rootDir.resolve("src/test/data").path)
             if (isCI && githubToken != null) {

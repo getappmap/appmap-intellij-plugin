@@ -1,6 +1,7 @@
 package appland.actions;
 
 import appland.AppMapBaseTest;
+import appland.RequiresNetwork;
 import appland.cli.TestAppLandDownloadService;
 import appland.utils.DataContexts;
 import appland.webviews.navie.NavieEditor;
@@ -20,10 +21,12 @@ import org.junit.Assert;
 import org.junit.Assume;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
 
 import java.nio.file.Path;
 import java.util.concurrent.TimeUnit;
 
+@Category(RequiresNetwork.class)
 public class AddNavieContextFilesActionTest extends AppMapBaseTest {
     @Override
     protected TempDirTestFixture createTempDirTestFixture() {

@@ -9,6 +9,8 @@ import org.mockserver.junit.MockServerRule;
 import org.mockserver.model.HttpRequest;
 import org.mockserver.model.HttpResponse;
 
+import java.io.IOException;
+import java.nio.file.Files;
 import java.util.Arrays;
 
 public class DefaultAppLandDownloadServiceProxyTest extends AppMapBaseTest {
@@ -26,10 +28,28 @@ public class DefaultAppLandDownloadServiceProxyTest extends AppMapBaseTest {
         return false;
     }
 
+    @Before
+    public void removeMockBinary() {
+        // The mock manifest uses version "1.2.3" and the download writes a fake binary to the
+        // persistent cache. Delete it before each run so isDownloaded() never short-circuits
+        // the download and the proxy assertion always holds.
+        deleteMockBinary();
+    }
+
     @AfterClass
     public static void cleanup() {
-        // we have to remote all zero-byte downloads created by this test
         TestAppLandDownloadService.removeDownloads();
+        deleteMockBinary();
+    }
+
+    private static void deleteMockBinary() {
+        var path = LocalAssetRepository.getExecutableFilePath(
+                CliTool.AppMap, "1.2.3",
+                CliPlatform.currentPlatform(), CliPlatform.currentArch(), true);
+        try {
+            Files.deleteIfExists(path);
+        } catch (IOException ignored) {
+        }
     }
 
     @After
