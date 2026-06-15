@@ -26,7 +26,8 @@
     "vue-template-compiler": "^2.7"
   },
   "resolutions": {
-    "@appland/rpc": "1.19.0"
+    "@appland/rpc": "1.19.0",
+    "esbuild": "0.28.1"
   },
   "packageManager": "yarn@4.13.0"
 }
