@@ -1,6 +1,7 @@
 package appland.javaAgent;
 
 import appland.AppMapBaseTest;
+import appland.RequiresNetwork;
 import appland.utils.SystemProperties;
 import com.intellij.openapi.progress.EmptyProgressIndicator;
 import com.intellij.openapi.util.SystemInfo;
@@ -8,6 +9,7 @@ import com.intellij.testFramework.fixtures.TempDirTestFixture;
 import com.intellij.testFramework.fixtures.impl.TempDirTestFixtureImpl;
 import org.junit.Rule;
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
 import org.junit.rules.TestRule;
 
 import java.io.IOException;
@@ -37,6 +39,7 @@ public class AppMapJavaAgentDownloadServiceTest extends AppMapBaseTest {
         assertTrue("Agent dir must be under ~/.agent", agentDir.startsWith(expectedParent));
     }
 
+    @Category(RequiresNetwork.class)
     @Test
     public void multipleDownloadRequests() throws IOException {
         var service = AppMapJavaAgentDownloadService.getInstance();
@@ -52,6 +55,7 @@ public class AppMapJavaAgentDownloadServiceTest extends AppMapBaseTest {
         assertNotNull("JAR file must still exist after a skipped download", service.getJavaAgentPathIfExists());
     }
 
+    @Category(RequiresNetwork.class)
     @Test
     public void lockFileGuard() throws IOException {
         var service = AppMapJavaAgentDownloadService.getInstance();

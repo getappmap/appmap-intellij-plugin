@@ -1,6 +1,7 @@
 package appland.rpcService;
 
 import appland.AppMapBaseTest;
+import appland.RequiresNetwork;
 import appland.cli.AppLandCommandLineService;
 import appland.cli.TestAppLandDownloadService;
 import appland.settings.AppMapApplicationSettingsService;
@@ -14,6 +15,7 @@ import org.jetbrains.annotations.NotNull;
 import org.junit.Assume;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
 
 import java.util.Collection;
 import java.util.Map;
@@ -27,6 +29,7 @@ import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.Matchers.hasEntry;
 import static org.junit.Assert.assertArrayEquals;
 
+@Category(RequiresNetwork.class)
 public class DefaultAppLandJsonRpcServiceTest extends AppMapBaseTest {
     @Before
     public void setupListener() {

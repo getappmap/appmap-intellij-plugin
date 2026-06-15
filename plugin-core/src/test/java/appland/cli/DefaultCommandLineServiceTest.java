@@ -1,6 +1,7 @@
 package appland.cli;
 
 import appland.AppMapBaseTest;
+import appland.RequiresNetwork;
 import appland.files.AppMapFiles;
 import appland.settings.AppMapApplicationSettingsService;
 import appland.settings.AppMapSettingsListener;
@@ -27,6 +28,7 @@ import com.intellij.util.net.HttpConfigurable;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.junit.*;
+import org.junit.experimental.categories.Category;
 import org.junit.rules.TestRule;
 
 import java.nio.file.Files;
@@ -41,6 +43,7 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 
 @SuppressWarnings("removal")
+@Category(RequiresNetwork.class)
 public class DefaultCommandLineServiceTest extends AppMapBaseTest {
     @Rule
     public final TestRule resetProxyRule = new ResetIdeHttpProxyRule();

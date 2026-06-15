@@ -2,6 +2,7 @@ package appland.cli;
 
 import appland.AppMapBaseTest;
 import appland.AppMapDeploymentTestUtils;
+import appland.RequiresNetwork;
 import com.intellij.openapi.progress.EmptyProgressIndicator;
 import com.intellij.openapi.util.SystemInfo;
 import com.intellij.testFramework.fixtures.TempDirTestFixture;
@@ -9,6 +10,7 @@ import com.intellij.testFramework.fixtures.impl.TempDirTestFixtureImpl;
 import org.jetbrains.annotations.NotNull;
 import org.junit.Assume;
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -78,7 +80,7 @@ public class CliToolsTest extends AppMapBaseTest {
 
     @Test
     public void installedBinaryIsPreferred() throws Exception {
-        TestAppLandDownloadService.ensureDownloaded();
+        TestAppLandDownloadService.ensureStubInstalled();
 
         var installedBinary = LocalAssetRepository.getInstalledBinaryPath(CliTool.AppMap);
         assertNotNull(installedBinary);
@@ -93,6 +95,7 @@ public class CliToolsTest extends AppMapBaseTest {
         });
     }
 
+    @Category(RequiresNetwork.class)
     @Test
     public void symlinkCreatedAfterDownload() throws Exception {
         Assume.assumeFalse("symlinks are unreliable on Windows", SystemInfo.isWindows);
@@ -109,6 +112,7 @@ public class CliToolsTest extends AppMapBaseTest {
         assertNotNull("Version is readable from symlink", version);
     }
 
+    @Category(RequiresNetwork.class)
     @Test
     public void secondDownloadIsSkipped() {
         var service = (TestAppLandDownloadService) AppLandDownloadService.getInstance();
@@ -124,8 +128,8 @@ public class CliToolsTest extends AppMapBaseTest {
     public void prereleaseVersionExtractedFromSymlink() throws Exception {
         var platform = CliPlatform.currentPlatform();
         var arch = CliPlatform.currentArch();
-        var cacheDir = LocalAssetRepository.getCacheDirectory(true);
-        Files.createDirectories(cacheDir);
+        // Use the fixture temp dir so we don't pollute the shared persistent cache.
+        var cacheDir = myFixture.getTempDirFixture().createFile("prerelease-cache-placeholder").toNioPath().getParent();
 
         var binaryName = CliTool.AppMap.getBinaryName(platform, arch, "1.2.3-rc.1");
         var cachedBinary = cacheDir.resolve(binaryName);
@@ -141,18 +145,8 @@ public class CliToolsTest extends AppMapBaseTest {
     public void findHighestCachedBinaryWithInvalidVersions() throws Exception {
         var platform = CliPlatform.currentPlatform();
         var arch = CliPlatform.currentArch();
-        var cacheDir = LocalAssetRepository.getCacheDirectory(true);
-        Files.createDirectories(cacheDir);
-
-        try (var stream = Files.list(cacheDir)) {
-            var files = stream.collect(java.util.stream.Collectors.toList());
-            for (var path : files) {
-                try {
-                    Files.delete(path);
-                } catch (java.io.IOException ignored) {
-                }
-            }
-        }
+        // Use an isolated temp dir so this test never touches the shared persistent cache.
+        var cacheDir = myFixture.getTempDirFixture().createFile("cache-placeholder").toNioPath().getParent();
 
         var binary123 = cacheDir.resolve(CliTool.AppMap.getBinaryName(platform, arch, "1.2.3"));
         Files.write(binary123, new byte[0]);
@@ -162,7 +156,7 @@ public class CliToolsTest extends AppMapBaseTest {
         Files.write(binaryInvalid, new byte[0]);
         CliTools.fixBinaryPermissions(binaryInvalid);
 
-        var highest = LocalAssetRepository.findHighestCachedBinary(CliTool.AppMap, platform, arch, true);
+        var highest = LocalAssetRepository.findHighestCachedBinaryIn(CliTool.AppMap, platform, arch, cacheDir);
         assertNotNull("Should find a fallback binary", highest);
         assertEquals("The binary with a valid SemVer should be preferred over the unparseable one",
                 binary123.toAbsolutePath(), highest.toAbsolutePath());

@@ -2,11 +2,13 @@ package appland.cli;
 
 import appland.AppMapBaseTest;
 import appland.AppMapDeploymentTestUtils;
+import appland.RequiresNetwork;
 import appland.deployment.AppMapDeploymentSettings;
 import com.intellij.testFramework.fixtures.TempDirTestFixture;
 import com.intellij.testFramework.fixtures.impl.TempDirTestFixtureImpl;
 import org.jetbrains.annotations.NotNull;
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
 
 public class DefaultAppLandDownloadServiceTest extends AppMapBaseTest {
     @Override
@@ -25,6 +27,7 @@ public class DefaultAppLandDownloadServiceTest extends AppMapBaseTest {
         assertDownloadPath(CliTool.Scanner);
     }
 
+    @Category(RequiresNetwork.class)
     @Test
     public void downloadAppMapBinary() throws Exception {
         // We're only testing the download of the AppMap tool and not of the scanner
