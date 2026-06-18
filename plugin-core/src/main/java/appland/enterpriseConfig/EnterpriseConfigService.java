@@ -2,6 +2,7 @@ package appland.enterpriseConfig;
 
 import appland.deployment.AppMapDeploymentSettings;
 import appland.deployment.AppMapDeploymentSettingsService;
+import appland.deployment.AppMapDeploymentTelemetrySettings;
 import appland.notifications.AppMapNotifications;
 import appland.settings.AppMapApplicationSettings;
 import appland.settings.AppMapApplicationSettingsService;
@@ -132,6 +133,8 @@ public final class EnterpriseConfigService {
         var applicationSettings = AppMapApplicationSettingsService.getInstance();
         var currentFuture = fetchFutureRef.get();
 
+        var telemetryBefore = effectiveTelemetry();
+
         var url = resolveConfigUrl();
         if (url == null) {
             // URL was cleared at runtime. Preserve local-file one-shot settings if present,
@@ -149,7 +152,7 @@ public final class EnterpriseConfigService {
                 applicationSettings.setEnterpriseConfigCache(null);
             }
             if (currentFuture != null) currentFuture.complete(null);
-            fireSettingsChanged();
+            fireSettingsChanged(telemetryChanged(telemetryBefore));
             return;
         }
 
@@ -177,6 +180,9 @@ public final class EnterpriseConfigService {
                 // a brand-new URL (no matching previous config) supersedes every setting it specifies.
                 clearSupersededUserOverrides(applicationSettings, parsed, previousConfig);
                 LOG.debug("Applied enterprise settings from URL: " + url);
+                if (interactive) {
+                    notifyApplied();
+                }
             } catch (IOException | JsonParseException e) {
                 LOG.warn("Enterprise config fetch failed for URL: " + url, e);
                 if (interactive) {
@@ -195,7 +201,7 @@ public final class EnterpriseConfigService {
             IS_FETCHING.set(false);
         }
 
-        fireSettingsChanged();
+        fireSettingsChanged(telemetryChanged(telemetryBefore));
     }
 
     private void notifyFetchFailed(@NotNull String url) {
@@ -281,18 +287,51 @@ public final class EnterpriseConfigService {
                 + currentUserOverride + ", now using organization value " + newOrgValue + ")");
     }
 
-    private void fireSettingsChanged() {
-        ApplicationManager.getApplication().getMessageBus()
-                .syncPublisher(AppMapSettingsListener.TOPIC)
-                .enterpriseDeploymentSettingsChanged();
+    private void fireSettingsChanged(boolean telemetryChanged) {
+        var publisher = ApplicationManager.getApplication().getMessageBus()
+                .syncPublisher(AppMapSettingsListener.TOPIC);
+        publisher.enterpriseDeploymentSettingsChanged();
 
-        // Reconfigure telemetry routing on the fly so no IDE restart is required.
-        // Only act if the telemetry service has already been initialized; otherwise it will
-        // pick up the current settings when it's first created.
-        var telemetryService = ApplicationManager.getApplication().getServiceIfCreated(TelemetryService.class);
-        if (telemetryService != null) {
-            telemetryService.reloadReporter();
+        // Telemetry routing is comparatively expensive to reconfigure (it rebuilds the reporter and
+        // restarts processes that carry telemetry settings in their environment), so only do it when
+        // the telemetry settings actually changed.
+        if (telemetryChanged) {
+            // Reconfigure telemetry routing on the fly so no IDE restart is required. Only act if the
+            // telemetry service already exists; otherwise it picks up the current settings when created.
+            var telemetryService = ApplicationManager.getApplication().getServiceIfCreated(TelemetryService.class);
+            if (telemetryService != null) {
+                telemetryService.reloadReporter();
+            }
+            publisher.telemetrySettingsChanged();
         }
+    }
+
+    /**
+     * @return The effective telemetry settings (organization config merged over bundled defaults),
+     * used to decide whether telemetry-dependent components need to be reconfigured/restarted.
+     */
+    private @Nullable AppMapDeploymentTelemetrySettings effectiveTelemetry() {
+        return AppMapDeploymentSettingsService.getCachedDeploymentSettings().getTelemetry();
+    }
+
+    private boolean telemetryChanged(@Nullable AppMapDeploymentTelemetrySettings before) {
+        return !Objects.equals(before, effectiveTelemetry());
+    }
+
+    private void notifyApplied() {
+        var projects = ProjectManager.getInstance().getOpenProjects();
+        if (projects.length == 0) return;
+
+        var source = getConfigSourceDescription();
+        AppMapNotifications.showSimpleNotification(
+                projects[0],
+                "AppMap Organization Configuration",
+                source != null
+                        ? "Organization configuration applied (" + source + ")."
+                        : "Organization configuration applied.",
+                NotificationType.INFORMATION,
+                true
+        );
     }
 
     /**
@@ -358,18 +397,17 @@ public final class EnterpriseConfigService {
         var deploymentService = AppMapDeploymentSettingsService.getInstance();
         var applicationSettings = AppMapApplicationSettingsService.getInstance();
 
+        var telemetryBefore = effectiveTelemetry();
+
         fetchFutureRef.set(null);
         deploymentService.setEnterpriseDeploymentSettings(null);
         applicationSettings.setEnterpriseConfigCache(null);
         applicationSettings.setOrgConfigAppliedAt(null);
+        // Clear the URL non-notifying: we clear the state directly here, so a configurationUrlChanged
+        // would only spawn a redundant apply pipeline (and a duplicate telemetry reload).
+        applicationSettings.setConfigurationUrl(null);
 
-        if (StringUtil.isNotEmpty(applicationSettings.getConfigurationUrl())) {
-            // Also clears the URL; the resulting configurationUrlChanged re-runs the apply pipeline
-            // with no URL, which is a harmless no-op now that the state above is already cleared.
-            applicationSettings.setConfigurationUrlNotifying(null);
-        }
-
-        fireSettingsChanged();
+        fireSettingsChanged(telemetryChanged(telemetryBefore));
 
         if (StringUtil.isNotEmpty(System.getenv("APPMAP_CONFIG_URL"))) {
             LOG.warn("Organization config is also set via the APPMAP_CONFIG_URL environment variable; " +
@@ -393,15 +431,17 @@ public final class EnterpriseConfigService {
             return;
         }
 
+        var telemetryBefore = effectiveTelemetry();
+
         // Clear any existing URL-based config
         var existingUrl = resolveConfigUrl();
         if (existingUrl != null) {
+            fetchFutureRef.set(null); // abandon any URL-based fetch state; we're switching to a local file
             deploymentService.setEnterpriseDeploymentSettings(null);
             applicationSettings.setEnterpriseConfigCache(null);
-            var urlFromSettings = applicationSettings.getConfigurationUrl();
-            if (StringUtil.isNotEmpty(urlFromSettings)) {
-                applicationSettings.setConfigurationUrlNotifying(null);
-            }
+            // Clear the URL non-notifying: a configurationUrlChanged here would kick off a second,
+            // redundant apply pipeline (and a duplicate telemetry reload). We apply the file directly.
+            applicationSettings.setConfigurationUrl(null);
         }
 
         deploymentService.setEnterpriseDeploymentSettings(parsed);
@@ -411,7 +451,9 @@ public final class EnterpriseConfigService {
         // A local-file apply is a one-shot, fresh source: supersede every user override it specifies.
         clearSupersededUserOverrides(applicationSettings, parsed, null);
 
-        ApplicationManager.getApplication().executeOnPooledThread(this::fireSettingsChanged);
+        notifyApplied();
+        var telemetryChanged = telemetryChanged(telemetryBefore);
+        ApplicationManager.getApplication().executeOnPooledThread(() -> fireSettingsChanged(telemetryChanged));
     }
 
     private void showLocalFileError(@Nullable com.intellij.openapi.project.Project project, @NotNull String message) {

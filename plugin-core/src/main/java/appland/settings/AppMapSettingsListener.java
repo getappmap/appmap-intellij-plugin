@@ -53,4 +53,13 @@ public interface AppMapSettingsListener {
 
     default void enterpriseDeploymentSettingsChanged() {
     }
+
+    /**
+     * Fired only when the effective telemetry settings actually change (not on every org-config apply).
+     * Consumers that embed telemetry settings in a process environment (the JSON-RPC server and CLI
+     * processes) should restart so the change takes effect; restarting is relatively expensive, so it
+     * must not be triggered when telemetry is unchanged.
+     */
+    default void telemetrySettingsChanged() {
+    }
 }
