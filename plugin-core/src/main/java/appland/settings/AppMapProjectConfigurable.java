@@ -37,6 +37,11 @@ public class AppMapProjectConfigurable implements Configurable {
         // While the settings page is open, reload it when the organization configuration changes
         // (e.g. an applied URL finished fetching, or a background auto-update arrived) so the
         // displayed values reflect the effective settings immediately instead of only after reopen.
+        // Defensively drop any previous connection: the platform usually pairs createComponent with
+        // disposeUIResources, but if createComponent is called again first, don't leak the old listener.
+        if (settingsConnection != null) {
+            settingsConnection.disconnect();
+        }
         var connection = ApplicationManager.getApplication().getMessageBus().connect();
         connection.subscribe(AppMapSettingsListener.TOPIC, new AppMapSettingsListener() {
             @Override
