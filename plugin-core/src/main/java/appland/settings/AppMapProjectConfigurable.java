@@ -16,12 +16,13 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class AppMapProjectConfigurable implements Configurable {
-    private final AppMapProjectSettingsPanel form = new AppMapProjectSettingsPanel();
+    private final AppMapProjectSettingsPanel form;
     private final Project project;
     private @Nullable MessageBusConnection settingsConnection;
 
     public AppMapProjectConfigurable(@NotNull Project project) {
         this.project = project;
+        this.form = new AppMapProjectSettingsPanel(project);
     }
 
     @Override

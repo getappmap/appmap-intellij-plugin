@@ -1,12 +1,15 @@
 package appland.settings
 
 import appland.AppMapBundle
+import appland.actions.SetConfigurationUrlAction
 import appland.cli.CliTool
 import appland.deployment.AppMapDeploymentSettingsService.getCachedDeploymentSettings
 import appland.enterpriseConfig.EnterpriseConfigService
 import com.intellij.execution.configuration.EnvironmentVariablesComponent
+import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.ComboBox
 import com.intellij.openapi.util.text.Strings
+import com.intellij.openapi.util.text.StringUtil
 import com.intellij.ui.CollectionComboBoxModel
 import com.intellij.ui.JBIntSpinner
 import com.intellij.ui.components.JBTextField
@@ -22,7 +25,7 @@ import javax.swing.JCheckBox
 import javax.swing.JLabel
 import javax.swing.JPanel
 
-class AppMapProjectSettingsPanel {
+class AppMapProjectSettingsPanel(private val project: Project?) {
     private lateinit var enableTelemetry: JCheckBox
     private lateinit var enableAutoToolsUpdate: ComboBox<Boolean?>
     private lateinit var enableScanner: JCheckBox
@@ -32,26 +35,43 @@ class AppMapProjectSettingsPanel {
     private lateinit var useAnimation: JCheckBox
     private lateinit var appmapManifestUrl: JBTextField
     private lateinit var scannerManifestUrl: JBTextField
-    private lateinit var configurationUrl: JBTextField
+    private lateinit var orgConfigApplyRow: Row
     private lateinit var orgConfigStatusRow: Row
+    private lateinit var orgConfigSourceRow: Row
     private lateinit var orgConfigStatusLabel: JLabel
+    private lateinit var orgConfigSourceLabel: JLabel
 
     /**
-     * Reflects whether an organization configuration is currently applied: shows its source and
-     * applied time when active, and hides the row (and its Clear button) when not.
+     * Reflects whether an organization configuration is currently applied. When applied, shows the
+     * status row (with Change/Clear) plus a separate source line; when not, shows a single Apply button.
+     * The source is on its own line and middle-truncated (full value in the tooltip) so a long URL
+     * can't widen the dialog or trigger a horizontal scrollbar.
      */
     private fun updateOrgConfigStatus() {
         val service = EnterpriseConfigService.getInstance()
         val applied = service.isApplied
+        // A URL source gets its own (truncated) line so a long URL can't widen the dialog; a local
+        // file has no useful detail to show, so it's folded into the status line instead.
+        var showSourceLine = false
         if (applied) {
-            val source = service.configSourceDescription ?: ""
             val appliedAt = AppMapApplicationSettingsService.getInstance().orgConfigAppliedAt
             val appliedSuffix = appliedAt?.let {
                 AppMapBundle.get("projectSettings.orgConfig.appliedAt", DateFormatUtil.formatDateTime(it))
             } ?: ""
-            orgConfigStatusLabel.text = AppMapBundle.get("projectSettings.orgConfig.active", source) + appliedSuffix
+
+            if (service.resolveConfigUrl() != null) {
+                orgConfigStatusLabel.text = AppMapBundle.get("projectSettings.orgConfig.active") + appliedSuffix
+                val source = service.configSourceDescription ?: ""
+                orgConfigSourceLabel.text = StringUtil.trimMiddle(source, 72)
+                orgConfigSourceLabel.toolTipText = if (source.length > 72) source else null
+                showSourceLine = true
+            } else {
+                orgConfigStatusLabel.text = AppMapBundle.get("projectSettings.orgConfig.activeLocalFile") + appliedSuffix
+            }
         }
         orgConfigStatusRow.visible(applied)
+        orgConfigSourceRow.visible(showSourceLine)
+        orgConfigApplyRow.visible(!applied)
     }
 
     fun loadSettingsFrom(
@@ -77,7 +97,6 @@ class AppMapProjectSettingsPanel {
         
         appmapManifestUrl.text = DownloadSettings.getManifestUrl(CliTool.AppMap)
         scannerManifestUrl.text = DownloadSettings.getManifestUrl(CliTool.Scanner)
-        configurationUrl.text = Strings.notNullize(applicationSettings.configurationUrl)
         updateOrgConfigStatus()
     }
 
@@ -122,11 +141,9 @@ class AppMapProjectSettingsPanel {
         if (notify) {
             applicationSettings.setAppmapManifestUrlNotifying(appmapManifest)
             applicationSettings.setScannerManifestUrlNotifying(scannerManifest)
-            applicationSettings.setConfigurationUrlNotifying(Strings.nullize(configurationUrl.text))
         } else {
             applicationSettings.appmapManifestUrl = appmapManifest
             applicationSettings.scannerManifestUrl = scannerManifest
-            applicationSettings.configurationUrl = Strings.nullize(configurationUrl.text)
         }
     }
 
@@ -184,17 +201,29 @@ class AppMapProjectSettingsPanel {
                 }
             }
             group(AppMapBundle.get("projectSettings.advanced")) {
-                row(AppMapBundle.get("projectSettings.configurationUrl.title")) {
-                    configurationUrl = textField().align(AlignX.FILL).component
-                }.layout(RowLayout.INDEPENDENT)
-
-                orgConfigStatusRow = row {
-                    orgConfigStatusLabel = label("").component
-                    button(AppMapBundle.get("projectSettings.orgConfig.clear")) {
-                        EnterpriseConfigService.getInstance().clearOrgConfig()
-                        configurationUrl.text = ""
+                // Shown when no organization configuration is applied.
+                orgConfigApplyRow = row {
+                    button(AppMapBundle.get("projectSettings.orgConfig.apply")) {
+                        SetConfigurationUrlAction.showPicker(project)
                         updateOrgConfigStatus()
                     }
+                }
+
+                // Shown when an organization configuration is applied: status + change/clear.
+                orgConfigStatusRow = row {
+                    orgConfigStatusLabel = label("").component
+                    button(AppMapBundle.get("projectSettings.orgConfig.change")) {
+                        SetConfigurationUrlAction.showPicker(project)
+                        updateOrgConfigStatus()
+                    }
+                    button(AppMapBundle.get("projectSettings.orgConfig.clear")) {
+                        EnterpriseConfigService.getInstance().clearOrgConfig()
+                        updateOrgConfigStatus()
+                    }
+                }
+                // Source on its own line (middle-truncated) so a long URL doesn't widen the dialog.
+                orgConfigSourceRow = row {
+                    orgConfigSourceLabel = label("").component
                 }
 
                 row(AppMapBundle.get("projectSettings.appmapManifestUrl.title")) {
