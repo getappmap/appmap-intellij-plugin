@@ -18,7 +18,7 @@
     "util": "^0.12.5"
   },
   "dependencies": {
-    "@appland/components": "^4.47.0",
+    "@appland/components": "^4.49.0",
     "@appland/rpc": "^1.19.0",
     "highlight.js": "^11.11.1",
     "url": "^0.11",

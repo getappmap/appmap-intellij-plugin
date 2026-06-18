@@ -42,6 +42,12 @@ function mountWebview() {
     app.$on("activate", (apiKey) => {
       vscode.postMessage({ command: "activate", apiKey });
     });
+    app.$on("apply-org-config", async () => {
+      vscode.postMessage({ command: "apply-org-config" });
+      messages.once("apply-org-config", (response) => {
+        if (response.applied) app.$refs.ui.onOrgConfigApplied();
+      });
+    });
   });
 
   vscode.postMessage({ command: "ready" });
