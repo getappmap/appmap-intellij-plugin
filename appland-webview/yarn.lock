@@ -33,9 +33,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@appland/components@npm:^4.47.0":
-  version: 4.47.0
-  resolution: "@appland/components@npm:4.47.0"
+"@appland/components@npm:^4.49.0":
+  version: 4.49.0
+  resolution: "@appland/components@npm:4.49.0"
   dependencies:
     "@appland/client": "npm:^1.12.0"
     "@appland/diagrams": "npm:^1.7.0"
@@ -62,7 +62,7 @@ __metadata:
     sql-formatter: "npm:^4.0.2"
     vue: "npm:^2.7.16"
     vuex: "npm:^3.6.0"
-  checksum: 10c0/6b7938aa992b535ecf1cd7685701e62c02948447750a63c3dc35dc4aef1fe923b632d5ed6bb1cb8e37c378919d358335c8e1633cebf008bb192ff34e8d4e341c
+  checksum: 10c0/13d199c8e47aa10178674caa22a73a1acdaaf12dbc87842dbb9c3337537a498c8128cec4ba49f1ddd35d5e519b06325577ec96dd708cf65850650acab93747f8
   languageName: node
   linkType: hard
 
@@ -806,7 +806,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "appmap-intellij-webview@workspace:."
   dependencies:
-    "@appland/components": "npm:^4.47.0"
+    "@appland/components": "npm:^4.49.0"
     "@appland/rpc": "npm:^1.19.0"
     assert: "npm:^2.1.0"
     buffer: "npm:^6.0.3"
