@@ -12,6 +12,9 @@ By default, the plugin ZIP file only bundles the JAR file of the AppMap Java age
 It's possible to customize settings and/or to bundle AppMap binaries into the plugin ZIP afterward to simplify the
 deployment.
 
+To apply settings centrally at runtime (from a URL, a local file, or the `APPMAP_CONFIG_URL` environment variable)
+rather than by modifying the ZIP, see [Organization Configuration](./ORGANIZATION_CONFIGURATION.md).
+
 ### Customizing Deployment
 
 By modifying the plugin ZIP archive, the deployment can be customized.
@@ -21,7 +24,7 @@ The current status of the deployment is shown with action `Tools > AppMap > Plug
 Settings can be customized by adding a `site-config.json` file at `./intellij-appmap/site-config.json` inside the ZIP file.
 
 The file must be a valid JSON file.
-It allows configuring telemetry and auto-update of AppMap binaries.
+It allows configuring telemetry, auto-update of AppMap binaries, and the URLs of the CLI release manifests.
 By default, no custom telemetry is configured and auto-update is enabled.
 
 Default settings:
@@ -49,6 +52,24 @@ If Splunk is configured, then the user-setting to turn off telemetry is ignored.
     "appMap.autoUpdateTools": true
 }
 ```
+
+#### Manifest URLs
+
+The AppMap and Scanner CLI binaries are downloaded according to
+[release manifests](https://github.com/getappmap/appmap-js/blob/main/architecture/release-manifests.md). The manifest
+URLs can be overridden — for example, to download from an internal mirror in an air-gapped environment:
+
+```json
+{
+    "appMap.manifest.appmapUrl": "https://artifacts.example.com/appmap-manifest.json",
+    "appMap.manifest.scannerUrl": "https://artifacts.example.com/scanner-manifest.json"
+}
+```
+
+If unset, the defaults are used:
+
+- `appMap.manifest.appmapUrl`: `https://raw.githubusercontent.com/getappmap/appmap-js/release-manifests/appmap-latest.json`
+- `appMap.manifest.scannerUrl`: `https://raw.githubusercontent.com/getappmap/appmap-js/release-manifests/scanner-latest.json`
 
 ### Bundling AppMap binaries
 
