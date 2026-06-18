@@ -85,7 +85,10 @@ public final class AppMapDeploymentSettingsService {
      * If there are no deployment settings, then an empty settings instance with defaults is returned.
      */
     private @NotNull AppMapDeploymentSettings getDeploymentSettings() {
-        appland.enterpriseConfig.EnterpriseConfigService.awaitInitialFetchIfConfigured();
+        // Read path: only restore the persisted cache (cheap, thread-safe, never blocks). The live
+        // organization-config fetch runs eagerly at startup and on URL changes, not lazily on read,
+        // so this is safe to call from the EDT without risking a hang or a "wait on EDT" error.
+        appland.enterpriseConfig.EnterpriseConfigService.getInstance().ensurePersistedCacheApplied();
 
         var enterprise = this.enterpriseDeploymentSettings;
         var bundled = loadBundledSettings();

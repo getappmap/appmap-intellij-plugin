@@ -18,6 +18,18 @@ public class AutoDownloadSettingsListener implements AppMapSettingsListener {
 
     @Override
     public void autoUpdateToolsChanged() {
+        refreshDownloads();
+    }
+
+    @Override
+    public void enterpriseDeploymentSettingsChanged() {
+        // The organization configuration can change the effective auto-update flag and the manifest
+        // URLs. Since the fetch is now applied asynchronously (not blocking the startup read path),
+        // re-evaluate downloads here so a freshly-applied org config takes effect without a restart.
+        refreshDownloads();
+    }
+
+    private void refreshDownloads() {
         if (DownloadSettings.isAssetDownloadEnabled()) {
             ManifestManager.clearCache();
             AppLandDownloadService.getInstance().queueDownloadTasks(project);
