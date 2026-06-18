@@ -78,6 +78,13 @@ public class AppMapSettingsReloadProjectListener implements AppMapSettingsListen
     }
 
     @Override
+    public void telemetrySettingsChanged() {
+        // The JSON-RPC server receives telemetry settings via its environment, so it must be
+        // restarted to route telemetry to the newly configured backend.
+        reloadJsonRpcServerAlarm.get().cancelAndRequest();
+    }
+
+    @Override
     public void scannerEnabledChanged() {
         showReloadNotificationAlarm.get().cancelAndRequest();
     }

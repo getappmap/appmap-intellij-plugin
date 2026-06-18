@@ -4,10 +4,14 @@ import appland.AppMapBaseTest;
 import appland.deployment.AppMapDeploymentSettings;
 import appland.deployment.AppMapDeploymentSettingsService;
 import appland.settings.AppMapApplicationSettingsService;
+import appland.settings.AppMapSettingsListener;
+import appland.telemetry.TelemetryService;
+import appland.utils.GsonUtils;
 import com.google.gson.JsonObject;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.testFramework.fixtures.TempDirTestFixture;
 import com.intellij.testFramework.fixtures.impl.TempDirTestFixtureImpl;
+import org.jetbrains.annotations.NotNull;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -15,6 +19,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class EnterpriseConfigServiceTest extends AppMapBaseTest {
     @Override
@@ -34,6 +39,13 @@ public class EnterpriseConfigServiceTest extends AppMapBaseTest {
         try {
             AppMapDeploymentSettingsService.reset();
             EnterpriseConfigService.getInstance().reset();
+            // Some tests apply Splunk telemetry, which reloads the shared app-level telemetry reporter to
+            // an always-enabled Splunk reporter. Rebuild it from the now-cleared settings so it doesn't
+            // leak an "always enabled" state into other tests (e.g. TelemetryStatusEnvProviderTest).
+            var telemetry = ApplicationManager.getApplication().getServiceIfCreated(TelemetryService.class);
+            if (telemetry != null) {
+                telemetry.reloadReporter();
+            }
         } finally {
             super.tearDown();
         }
@@ -163,6 +175,87 @@ public class EnterpriseConfigServiceTest extends AppMapBaseTest {
 
         assertEquals("Override for a setting the org config doesn't specify must be kept",
                 Boolean.TRUE, settings.getAutoUpdateTools());
+    }
+
+    @Test
+    public void applyLocalFile_clearsExistingUrlSetting() {
+        var settings = AppMapApplicationSettingsService.getInstance();
+        settings.setConfigurationUrl("https://example.com/config");
+
+        EnterpriseConfigService.getInstance().applyLocalFile("{\"appMap.autoUpdateTools\": false}", null);
+
+        assertNull("Switching to a local file must clear the configured URL", settings.getConfigurationUrl());
+        var cache = settings.getEnterpriseConfigCache();
+        assertNotNull(cache);
+        assertTrue("Cache must hold the local-file sentinel, not the old URL", cache.contains("appmap:local-file"));
+    }
+
+    // --- clearOrgConfig ---
+
+    @Test
+    public void clearOrgConfig_resetsAllState() throws Exception {
+        AppMapApplicationSettingsService.getInstance().setConfigurationUrl("https://example.com/config");
+        AppMapDeploymentSettingsService.getInstance().setEnterpriseDeploymentSettings(
+                GsonUtils.GSON.fromJson(SPLUNK_JSON, AppMapDeploymentSettings.class));
+        AppMapApplicationSettingsService.getInstance().setEnterpriseConfigCache("{\"url\":\"x\",\"json\":\"{}\"}");
+        AppMapApplicationSettingsService.getInstance().setOrgConfigAppliedAt(1L);
+
+        runOnPooledThreadAndWait(() -> EnterpriseConfigService.getInstance().clearOrgConfig());
+
+        var settings = AppMapApplicationSettingsService.getInstance();
+        assertNull(settings.getConfigurationUrl());
+        assertNull(settings.getEnterpriseConfigCache());
+        assertNull(settings.getOrgConfigAppliedAt());
+        assertNull(AppMapDeploymentSettingsService.getInstance().getEnterpriseDeploymentSettings());
+    }
+
+    // --- telemetrySettingsChanged is only fired when telemetry actually changes ---
+
+    @Test
+    public void clearOrgConfig_firesTelemetryChangeWhenClearingSplunk() throws Exception {
+        AppMapDeploymentSettingsService.getInstance().setEnterpriseDeploymentSettings(
+                GsonUtils.GSON.fromJson(SPLUNK_JSON, AppMapDeploymentSettings.class));
+        AppMapApplicationSettingsService.getInstance().setOrgConfigAppliedAt(1L);
+
+        var telemetryChanges = subscribeTelemetryChanges();
+        runOnPooledThreadAndWait(() -> EnterpriseConfigService.getInstance().clearOrgConfig());
+
+        assertEquals("Clearing a Splunk org config changes telemetry, so the change must be fired",
+                1, telemetryChanges.get());
+    }
+
+    @Test
+    public void clearOrgConfig_withoutTelemetry_doesNotFireTelemetryChange() throws Exception {
+        AppMapDeploymentSettingsService.getInstance().setEnterpriseDeploymentSettings(
+                GsonUtils.GSON.fromJson("{\"appMap.autoUpdateTools\": false}", AppMapDeploymentSettings.class));
+        AppMapApplicationSettingsService.getInstance().setOrgConfigAppliedAt(1L);
+
+        var telemetryChanges = subscribeTelemetryChanges();
+        runOnPooledThreadAndWait(() -> EnterpriseConfigService.getInstance().clearOrgConfig());
+
+        assertEquals("Clearing a config with no telemetry must not fire a telemetry change (avoids a costly restart)",
+                0, telemetryChanges.get());
+    }
+
+    @Test
+    public void reapplyingIdenticalTelemetry_firesTelemetryChangeOnce() throws Exception {
+        var telemetryChanges = subscribeTelemetryChanges();
+        var deploymentChanges = subscribeDeploymentChanges();
+
+        // Wait on the telemetry-change signal itself, not the deployment-change one: fireSettingsChanged
+        // publishes enterpriseDeploymentSettingsChanged BEFORE telemetrySettingsChanged (with the reporter
+        // reload in between), so waiting on the deployment counter can observe it a moment before the
+        // telemetry counter is incremented.
+        EnterpriseConfigService.getInstance().applyLocalFile(SPLUNK_JSON, null);
+        waitUntil(() -> telemetryChanges.get() >= 1);
+        assertEquals("Telemetry appearing for the first time must fire a change", 1, telemetryChanges.get());
+
+        // Re-apply the exact same telemetry: the deployment-change event still fires, but telemetry didn't
+        // change — so no further telemetry-change event. The second apply has no telemetry event to race,
+        // so the deployment counter is a reliable "second apply finished" signal here.
+        EnterpriseConfigService.getInstance().applyLocalFile(SPLUNK_JSON, null);
+        waitUntil(() -> deploymentChanges.get() >= 2);
+        assertEquals("Re-applying identical telemetry must not fire another telemetry change", 1, telemetryChanges.get());
     }
 
     // --- fetch via file:// URL ---
@@ -311,6 +404,69 @@ public class EnterpriseConfigServiceTest extends AppMapBaseTest {
     }
 
     // --- helpers ---
+
+    private static final String SPLUNK_JSON = """
+            {
+              "appMap.telemetry": {
+                "backend": "splunk",
+                "url": "https://splunk.example.com:443",
+                "token": "tok",
+                "ca": "system"
+              }
+            }
+            """;
+
+    private AtomicInteger subscribeTelemetryChanges() {
+        var counter = new AtomicInteger();
+        ApplicationManager.getApplication().getMessageBus().connect(getTestRootDisposable())
+                .subscribe(AppMapSettingsListener.TOPIC, new AppMapSettingsListener() {
+                    @Override
+                    public void telemetrySettingsChanged() {
+                        counter.incrementAndGet();
+                    }
+                });
+        return counter;
+    }
+
+    private AtomicInteger subscribeDeploymentChanges() {
+        var counter = new AtomicInteger();
+        ApplicationManager.getApplication().getMessageBus().connect(getTestRootDisposable())
+                .subscribe(AppMapSettingsListener.TOPIC, new AppMapSettingsListener() {
+                    @Override
+                    public void enterpriseDeploymentSettingsChanged() {
+                        counter.incrementAndGet();
+                    }
+                });
+        return counter;
+    }
+
+    /**
+     * Runs {@code task} on a pooled thread and waits for it to finish. Used for operations that
+     * publish settings-change events synchronously, so message-bus listeners run off the EDT and the
+     * counters they update are fully visible once the task completes.
+     */
+    private void runOnPooledThreadAndWait(@NotNull Runnable task) throws InterruptedException {
+        var latch = new CountDownLatch(1);
+        ApplicationManager.getApplication().executeOnPooledThread(() -> {
+            try {
+                task.run();
+            } finally {
+                latch.countDown();
+            }
+        });
+        assertTrue("Task did not complete within timeout", latch.await(5, TimeUnit.SECONDS));
+    }
+
+    private void waitUntil(@NotNull java.util.function.BooleanSupplier condition) throws InterruptedException {
+        var deadline = System.currentTimeMillis() + 5_000;
+        while (!condition.getAsBoolean()) {
+            if (System.currentTimeMillis() > deadline) {
+                fail("Condition not met within timeout");
+            }
+            //noinspection BusyWait
+            Thread.sleep(25);
+        }
+    }
 
     private Path writeTempConfig(String content) throws IOException {
         var path = Path.of(myFixture.getTempDirPath()).resolve("enterprise-config.json");
