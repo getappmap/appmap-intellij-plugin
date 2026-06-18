@@ -9,6 +9,7 @@ import appland.settings.AppMapApplicationSettingsService;
 import appland.settings.AppMapSettingsListener;
 import appland.telemetry.TelemetryService;
 import appland.utils.GsonUtils;
+import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 import com.intellij.notification.NotificationType;
 import com.intellij.openapi.application.ApplicationManager;
@@ -25,18 +26,21 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Objects;
-import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicReference;
+import java.util.concurrent.atomic.AtomicLong;
 
 @Service(Service.Level.APP)
 public final class EnterpriseConfigService {
     private static final Logger LOG = Logger.getInstance(EnterpriseConfigService.class);
     private static final String LOCAL_FILE_SENTINEL = "appmap:local-file";
-    private static final ThreadLocal<Boolean> IS_FETCHING = ThreadLocal.withInitial(() -> false);
 
-    private final AtomicReference<CompletableFuture<Void>> fetchFutureRef = new AtomicReference<>(null);
     private final AtomicBoolean cacheApplied = new AtomicBoolean(false);
+
+    // Incremented by every apply/clear request. A fetch captures the value at the start and only
+    // mutates state if it's still current, so a slow in-flight fetch can't clobber a newer Clear or
+    // local-file apply. All state mutations happen under applyLock so check-and-apply is atomic.
+    private final AtomicLong applyGeneration = new AtomicLong(0);
+    private final Object applyLock = new Object();
 
     public static @NotNull EnterpriseConfigService getInstance() {
         return ApplicationManager.getApplication().getService(EnterpriseConfigService.class);
@@ -58,6 +62,11 @@ public final class EnterpriseConfigService {
         applyPersistedCache(resolveConfigUrl());
     }
 
+    /**
+     * Eagerly loads the configured organization config. Called once at startup from a background
+     * thread. It applies the persisted cache (safe on any thread) and then, when a URL is configured,
+     * performs the live fetch synchronously on the calling (background) thread.
+     */
     public static void awaitInitialFetchIfConfigured() {
         var service = getInstance();
         var url = service.resolveConfigUrl();
@@ -68,45 +77,20 @@ public final class EnterpriseConfigService {
 
         if (url == null) return;
 
-        // Only block waiting for the live fetch if we're on a background thread and not re-entrant.
+        // This is meant to run on a background thread. If it's ever called on the EDT, don't block the
+        // UI or run a network fetch on it — the cached/bundled settings are already in effect.
         if (ApplicationManager.getApplication().isDispatchThread()) {
-            LOG.error("Enterprise config wait requested on EDT with an active config URL. This is a logic error; the UI will use cached/bundled settings instead of waiting for organization config to prevent hangs.");
-            return;
-        }
-        if (IS_FETCHING.get()) {
-            LOG.error("Re-entrant call to getDeploymentSettings detected on fetch thread. This is a logic error: settings should not be read while they are being updated mid-fetch. Returning current/stale settings to avoid deadlock.");
+            LOG.warn("Enterprise config fetch requested on the EDT; using cached/bundled settings instead of fetching to avoid blocking the UI.");
             return;
         }
 
-        var future = service.getOrStartFetchFuture();
-        try {
-            future.get(3_500, TimeUnit.MILLISECONDS);
-        } catch (TimeoutException e) {
-            LOG.warn("Enterprise config fetch timed out after 3.5s, using cached settings if available");
-        } catch (ExecutionException | InterruptedException e) {
-            LOG.warn("Enterprise config fetch failed", e);
-        }
-    }
-
-    private @NotNull CompletableFuture<Void> getOrStartFetchFuture() {
-        var existing = fetchFutureRef.get();
-        if (existing != null) return existing;
-
-        var newFuture = new CompletableFuture<Void>();
-        if (fetchFutureRef.compareAndSet(null, newFuture)) {
-            // Lazy/startup fetch: not interactive, so a failure keeps the cached offline fallback.
-            ApplicationManager.getApplication().executeOnPooledThread(() -> fetchAndApply(false));
-            return newFuture;
-        }
-        // Another thread beat us, return the winner
-        return fetchFutureRef.get();
+        service.fetchAndApply(false, service.applyGeneration.incrementAndGet());
     }
 
     private void applyPersistedCache(@Nullable String currentUrl) {
         if (!cacheApplied.compareAndSet(false, true)) return;
 
-        var applicationSettings = AppMapApplicationSettingsService.getInstance();
-        var cachedJson = applicationSettings.getEnterpriseConfigCache();
+        var cachedJson = EnterpriseConfigCacheService.getInstance().getCacheJson();
         if (cachedJson == null) return;
 
         try {
@@ -128,80 +112,108 @@ public final class EnterpriseConfigService {
         }
     }
 
-    private void fetchAndApply(boolean interactive) {
+    /**
+     * Fetches the organization config from the configured URL and applies it.
+     *
+     * @param interactive whether this was triggered by an explicit user action (vs. a startup fetch);
+     *                    interactive failures clear stale config and notify the user.
+     * @param gen         the apply-generation captured when this operation was requested; if a newer
+     *                    apply/clear happens while we fetch, we abandon our result instead of clobbering it.
+     */
+    private void fetchAndApply(boolean interactive, long gen) {
         var deploymentService = AppMapDeploymentSettingsService.getInstance();
-        var applicationSettings = AppMapApplicationSettingsService.getInstance();
-        var currentFuture = fetchFutureRef.get();
-
-        var telemetryBefore = effectiveTelemetry();
+        var cacheService = EnterpriseConfigCacheService.getInstance();
 
         var url = resolveConfigUrl();
         if (url == null) {
             // URL was cleared at runtime. Preserve local-file one-shot settings if present,
             // since applyLocalFile() clears the URL as part of switching to local-file mode.
-            var cachedJson = applicationSettings.getEnterpriseConfigCache();
-            boolean hasLocalFileSentinel = false;
-            if (cachedJson != null) {
-                try {
-                    var cached = GsonUtils.GSON.fromJson(cachedJson, EnterpriseConfigCache.class);
-                    hasLocalFileSentinel = cached != null && LOCAL_FILE_SENTINEL.equals(cached.url);
-                } catch (JsonParseException ignored) {}
+            // telemetryChanged stays null when nothing was mutated (so we don't fire listeners).
+            Boolean telemetryChanged = null;
+            synchronized (applyLock) {
+                if (gen == applyGeneration.get() && !hasLocalFileCache(cacheService)) {
+                    var telemetryBefore = effectiveTelemetry();
+                    deploymentService.setEnterpriseDeploymentSettings(null);
+                    cacheService.setCacheJson(null);
+                    telemetryChanged = telemetryChanged(telemetryBefore);
+                }
             }
-            if (!hasLocalFileSentinel) {
-                deploymentService.setEnterpriseDeploymentSettings(null);
-                applicationSettings.setEnterpriseConfigCache(null);
-            }
-            if (currentFuture != null) currentFuture.complete(null);
-            fireSettingsChanged(telemetryChanged(telemetryBefore));
+            // Fire outside the lock: listeners dispatch synchronously and must not run while we hold it.
+            if (telemetryChanged != null) fireSettingsChanged(telemetryChanged);
             return;
         }
 
-        IS_FETCHING.set(true);
+        // Perform the (potentially slow) fetch outside the lock.
+        AppMapDeploymentSettings parsed;
+        String content;
         try {
-            try {
-                String content;
-                if (url.startsWith("file://")) {
-                    content = Files.readString(Path.of(url.substring("file://".length())));
-                } else {
-                    content = HttpRequests.request(url).readString(null);
+            if (url.startsWith("file://")) {
+                content = Files.readString(Path.of(url.substring("file://".length())));
+            } else {
+                content = HttpRequests.request(url).readString(null);
+            }
+            parsed = GsonUtils.GSON.fromJson(content, AppMapDeploymentSettings.class);
+            if (parsed == null) {
+                throw new JsonParseException("Organization configuration is not a valid JSON object");
+            }
+        } catch (IOException | JsonParseException e) {
+            LOG.warn("Enterprise config fetch failed for URL: " + url, e);
+            // On startup (non-interactive), keep whatever the persisted cache restored as an offline
+            // fallback rather than wiping a known-good configuration on a transient failure.
+            if (!interactive) return;
+
+            // The user explicitly (re)applied this URL and it is unreachable or invalid: clear any
+            // previously-applied org config so stale settings don't silently linger, and notify them.
+            Boolean telemetryChanged = null;
+            synchronized (applyLock) {
+                if (gen == applyGeneration.get()) {
+                    var telemetryBefore = effectiveTelemetry();
+                    deploymentService.setEnterpriseDeploymentSettings(null);
+                    cacheService.setCacheJson(null);
+                    telemetryChanged = telemetryChanged(telemetryBefore);
                 }
-                var parsed = GsonUtils.GSON.fromJson(content, AppMapDeploymentSettings.class);
-                if (parsed == null) {
-                    throw new JsonParseException("Organization configuration is not a valid JSON object");
-                }
+            }
+            if (telemetryChanged != null) {
+                fireSettingsChanged(telemetryChanged); // outside the lock — see above
+                notifyFetchFailed(url);
+            }
+            return;
+        }
+
+        // Apply (fast) atomically; skip if a newer apply/clear superseded this fetch.
+        boolean applied = false;
+        Boolean telemetryChanged = null;
+        synchronized (applyLock) {
+            if (gen == applyGeneration.get()) {
+                applied = true;
+                var telemetryBefore = effectiveTelemetry();
                 // Capture the previous org config (same URL only) before overwriting the cache,
                 // so we can tell which settings actually changed since the last fetch.
-                var previousConfig = readCachedConfigForUrl(applicationSettings, url);
+                var previousConfig = readCachedConfigForUrl(url);
                 deploymentService.setEnterpriseDeploymentSettings(parsed);
-                var cache = new EnterpriseConfigCache(url, content);
-                applicationSettings.setEnterpriseConfigCache(GsonUtils.GSON.toJson(cache));
+                cacheService.setCacheJson(GsonUtils.GSON.toJson(new EnterpriseConfigCache(url, content)));
                 markApplied();
                 // Same URL → only supersede user overrides for settings that changed since last fetch;
                 // a brand-new URL (no matching previous config) supersedes every setting it specifies.
-                clearSupersededUserOverrides(applicationSettings, parsed, previousConfig);
+                clearSupersededUserOverrides(AppMapApplicationSettingsService.getInstance(), parsed, previousConfig);
                 LOG.debug("Applied enterprise settings from URL: " + url);
-                if (interactive) {
-                    notifyApplied();
-                }
-            } catch (IOException | JsonParseException e) {
-                LOG.warn("Enterprise config fetch failed for URL: " + url, e);
-                if (interactive) {
-                    // The user explicitly (re)applied this URL and it is unreachable or invalid.
-                    // Clear any previously-applied org config so stale settings don't silently linger,
-                    // and let the user know their organization configuration is not being applied.
-                    deploymentService.setEnterpriseDeploymentSettings(null);
-                    applicationSettings.setEnterpriseConfigCache(null);
-                    notifyFetchFailed(url);
-                }
-                // On startup (non-interactive), keep whatever the persisted cache restored as an
-                // offline fallback rather than wiping a known-good configuration on a transient failure.
+                telemetryChanged = telemetryChanged(telemetryBefore);
             }
-        } finally {
-            if (currentFuture != null) currentFuture.complete(null);
-            IS_FETCHING.set(false);
         }
+        // Fire outside the lock — listeners dispatch synchronously and must not run while we hold it.
+        if (telemetryChanged != null) fireSettingsChanged(telemetryChanged);
+        if (applied && interactive) notifyApplied();
+    }
 
-        fireSettingsChanged(telemetryChanged(telemetryBefore));
+    private boolean hasLocalFileCache(@NotNull EnterpriseConfigCacheService cacheService) {
+        var cachedJson = cacheService.getCacheJson();
+        if (cachedJson == null) return false;
+        try {
+            var cached = GsonUtils.GSON.fromJson(cachedJson, EnterpriseConfigCache.class);
+            return cached != null && LOCAL_FILE_SENTINEL.equals(cached.url);
+        } catch (JsonParseException e) {
+            return false;
+        }
     }
 
     private void notifyFetchFailed(@NotNull String url) {
@@ -223,9 +235,8 @@ public final class EnterpriseConfigService {
      * unparseable, or was stored for a different URL/source. A non-null result means "same source as
      * last time", which lets {@link #clearSupersededUserOverrides} restrict itself to changed settings.
      */
-    private @Nullable AppMapDeploymentSettings readCachedConfigForUrl(
-            @NotNull AppMapApplicationSettings applicationSettings, @NotNull String url) {
-        var cachedJson = applicationSettings.getEnterpriseConfigCache();
+    private @Nullable AppMapDeploymentSettings readCachedConfigForUrl(@NotNull String url) {
+        var cachedJson = EnterpriseConfigCacheService.getInstance().getCacheJson();
         if (cachedJson == null) return null;
         try {
             var cached = GsonUtils.GSON.fromJson(cachedJson, EnterpriseConfigCache.class);
@@ -249,26 +260,29 @@ public final class EnterpriseConfigService {
     private void clearSupersededUserOverrides(@NotNull AppMapApplicationSettings settings,
                                               @NotNull AppMapDeploymentSettings newConfig,
                                               @Nullable AppMapDeploymentSettings previousConfig) {
+        // Non-notifying setters: the caller fires a single enterpriseDeploymentSettingsChanged afterwards
+        // (outside the apply lock), which the download/settings-panel listeners already react to. This
+        // keeps message-bus dispatch out from under applyLock.
         maybeClearOverride("appMap.autoUpdateTools",
                 newConfig.getAutoUpdateTools(),
                 previousConfig != null ? previousConfig.getAutoUpdateTools() : null,
                 previousConfig != null,
                 settings.getAutoUpdateTools(),
-                () -> settings.setAutoUpdateToolsNotifying(null));
+                () -> settings.setAutoUpdateTools(null));
 
         maybeClearOverride("appMap.manifest.appmapUrl",
                 newConfig.getAppmapManifestUrl(),
                 previousConfig != null ? previousConfig.getAppmapManifestUrl() : null,
                 previousConfig != null,
                 settings.getAppmapManifestUrl(),
-                () -> settings.setAppmapManifestUrlNotifying(null));
+                () -> settings.setAppmapManifestUrl(null));
 
         maybeClearOverride("appMap.manifest.scannerUrl",
                 newConfig.getScannerManifestUrl(),
                 previousConfig != null ? previousConfig.getScannerManifestUrl() : null,
                 previousConfig != null,
                 settings.getScannerManifestUrl(),
-                () -> settings.setScannerManifestUrlNotifying(null));
+                () -> settings.setScannerManifestUrl(null));
     }
 
     private void maybeClearOverride(@NotNull String key,
@@ -340,8 +354,8 @@ public final class EnterpriseConfigService {
      * and notifies the user instead of silently keeping stale settings.
      */
     public void applyAsync() {
-        fetchFutureRef.set(null); // allow re-fetch
-        ApplicationManager.getApplication().executeOnPooledThread(() -> fetchAndApply(true));
+        var gen = applyGeneration.incrementAndGet();
+        ApplicationManager.getApplication().executeOnPooledThread(() -> fetchAndApply(true, gen));
     }
 
     public void markApplied() {
@@ -374,17 +388,36 @@ public final class EnterpriseConfigService {
     }
 
     /**
-     * @return The raw JSON contents of the currently-applied organization configuration (as fetched or
-     * read from file), or {@code null} if none is cached. Intended for the plugin status / debugging view.
+     * @return The JSON contents of the currently-applied organization configuration (as fetched or read
+     * from file) with the Splunk telemetry {@code token} redacted, or {@code null} if none is cached.
+     * Intended for the plugin status / debugging view, which users routinely paste into bug reports — so
+     * the secret token must never appear here. (The {@code ca} certificate is public and is left intact.)
      */
     public @Nullable String getAppliedConfigJson() {
-        var cachedJson = AppMapApplicationSettingsService.getInstance().getEnterpriseConfigCache();
+        var cachedJson = EnterpriseConfigCacheService.getInstance().getCacheJson();
         if (cachedJson == null) return null;
         try {
             var cached = GsonUtils.GSON.fromJson(cachedJson, EnterpriseConfigCache.class);
-            return cached != null ? cached.json : null;
+            if (cached == null || cached.json == null) return null;
+            return redactSecrets(cached.json);
         } catch (JsonParseException e) {
             return null;
+        }
+    }
+
+    private static @NotNull String redactSecrets(@NotNull String configJson) {
+        try {
+            var root = GsonUtils.GSON.fromJson(configJson, JsonObject.class);
+            if (root != null && root.has("appMap.telemetry") && root.get("appMap.telemetry").isJsonObject()) {
+                var telemetry = root.getAsJsonObject("appMap.telemetry");
+                if (telemetry.has("token")) {
+                    telemetry.addProperty("token", "***");
+                }
+            }
+            return GsonUtils.GSON.toJson(root);
+        } catch (Exception e) {
+            // Never fall back to the raw JSON — that could leak the token. Return a safe placeholder.
+            return "{ \"error\": \"organization configuration present but could not be safely rendered\" }";
         }
     }
 
@@ -397,17 +430,21 @@ public final class EnterpriseConfigService {
         var deploymentService = AppMapDeploymentSettingsService.getInstance();
         var applicationSettings = AppMapApplicationSettingsService.getInstance();
 
-        var telemetryBefore = effectiveTelemetry();
-
-        fetchFutureRef.set(null);
-        deploymentService.setEnterpriseDeploymentSettings(null);
-        applicationSettings.setEnterpriseConfigCache(null);
-        applicationSettings.setOrgConfigAppliedAt(null);
-        // Clear the URL non-notifying: we clear the state directly here, so a configurationUrlChanged
-        // would only spawn a redundant apply pipeline (and a duplicate telemetry reload).
-        applicationSettings.setConfigurationUrl(null);
-
-        fireSettingsChanged(telemetryChanged(telemetryBefore));
+        // Bump the generation so any in-flight fetch is superseded and won't re-apply after we clear.
+        applyGeneration.incrementAndGet();
+        boolean telemetryChanged;
+        synchronized (applyLock) {
+            var telemetryBefore = effectiveTelemetry();
+            deploymentService.setEnterpriseDeploymentSettings(null);
+            EnterpriseConfigCacheService.getInstance().setCacheJson(null);
+            applicationSettings.setOrgConfigAppliedAt(null);
+            // Clear the URL non-notifying: we clear the state directly here, so a configurationUrlChanged
+            // would only spawn a redundant apply pipeline (and a duplicate telemetry reload).
+            applicationSettings.setConfigurationUrl(null);
+            telemetryChanged = telemetryChanged(telemetryBefore);
+        }
+        // Fire outside the lock — listeners dispatch synchronously and must not run while we hold it.
+        fireSettingsChanged(telemetryChanged);
 
         if (StringUtil.isNotEmpty(System.getenv("APPMAP_CONFIG_URL"))) {
             LOG.warn("Organization config is also set via the APPMAP_CONFIG_URL environment variable; " +
@@ -431,29 +468,31 @@ public final class EnterpriseConfigService {
             return;
         }
 
-        var telemetryBefore = effectiveTelemetry();
+        // Bump the generation so any in-flight URL fetch is superseded and won't clobber this apply.
+        applyGeneration.incrementAndGet();
+        boolean telemetryChanged;
+        synchronized (applyLock) {
+            var telemetryBefore = effectiveTelemetry();
 
-        // Clear any existing URL-based config
-        var existingUrl = resolveConfigUrl();
-        if (existingUrl != null) {
-            fetchFutureRef.set(null); // abandon any URL-based fetch state; we're switching to a local file
-            deploymentService.setEnterpriseDeploymentSettings(null);
-            applicationSettings.setEnterpriseConfigCache(null);
-            // Clear the URL non-notifying: a configurationUrlChanged here would kick off a second,
-            // redundant apply pipeline (and a duplicate telemetry reload). We apply the file directly.
-            applicationSettings.setConfigurationUrl(null);
+            // Clear any existing URL-based config. Clear the URL non-notifying: a configurationUrlChanged
+            // here would kick off a second, redundant apply pipeline. We apply the file directly.
+            if (resolveConfigUrl() != null) {
+                deploymentService.setEnterpriseDeploymentSettings(null);
+                applicationSettings.setConfigurationUrl(null);
+            }
+
+            deploymentService.setEnterpriseDeploymentSettings(parsed);
+            EnterpriseConfigCacheService.getInstance().setCacheJson(
+                    GsonUtils.GSON.toJson(new EnterpriseConfigCache(LOCAL_FILE_SENTINEL, fileContent)));
+            markApplied();
+            // A local-file apply is a one-shot, fresh source: supersede every user override it specifies.
+            clearSupersededUserOverrides(applicationSettings, parsed, null);
+            telemetryChanged = telemetryChanged(telemetryBefore);
         }
 
-        deploymentService.setEnterpriseDeploymentSettings(parsed);
-        var cache = new EnterpriseConfigCache(LOCAL_FILE_SENTINEL, fileContent);
-        applicationSettings.setEnterpriseConfigCache(GsonUtils.GSON.toJson(cache));
-        markApplied();
-        // A local-file apply is a one-shot, fresh source: supersede every user override it specifies.
-        clearSupersededUserOverrides(applicationSettings, parsed, null);
-
         notifyApplied();
-        var telemetryChanged = telemetryChanged(telemetryBefore);
-        ApplicationManager.getApplication().executeOnPooledThread(() -> fireSettingsChanged(telemetryChanged));
+        var changed = telemetryChanged;
+        ApplicationManager.getApplication().executeOnPooledThread(() -> fireSettingsChanged(changed));
     }
 
     private void showLocalFileError(@Nullable com.intellij.openapi.project.Project project, @NotNull String message) {
@@ -466,9 +505,9 @@ public final class EnterpriseConfigService {
 
     @TestOnly
     public void reset() {
-        fetchFutureRef.set(null);
         cacheApplied.set(false);
-        IS_FETCHING.set(false);
+        applyGeneration.set(0);
+        EnterpriseConfigCacheService.getInstance().setCacheJson(null);
     }
 
     private static class EnterpriseConfigCache {
