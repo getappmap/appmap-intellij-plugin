@@ -3,6 +3,7 @@ package appland.enterpriseConfig;
 import appland.deployment.AppMapDeploymentSettings;
 import appland.deployment.AppMapDeploymentSettingsService;
 import appland.notifications.AppMapNotifications;
+import appland.settings.AppMapApplicationSettings;
 import appland.settings.AppMapApplicationSettingsService;
 import appland.settings.AppMapSettingsListener;
 import appland.telemetry.TelemetryService;
@@ -22,6 +23,7 @@ import org.jetbrains.annotations.TestOnly;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Objects;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
@@ -154,10 +156,16 @@ public final class EnterpriseConfigService {
                 if (parsed == null) {
                     throw new JsonParseException("Organization configuration is not a valid JSON object");
                 }
+                // Capture the previous org config (same URL only) before overwriting the cache,
+                // so we can tell which settings actually changed since the last fetch.
+                var previousConfig = readCachedConfigForUrl(applicationSettings, url);
                 deploymentService.setEnterpriseDeploymentSettings(parsed);
                 var cache = new EnterpriseConfigCache(url, content);
                 applicationSettings.setEnterpriseConfigCache(GsonUtils.GSON.toJson(cache));
                 markApplied();
+                // Same URL → only supersede user overrides for settings that changed since last fetch;
+                // a brand-new URL (no matching previous config) supersedes every setting it specifies.
+                clearSupersededUserOverrides(applicationSettings, parsed, previousConfig);
                 LOG.debug("Applied enterprise settings from URL: " + url);
             } catch (IOException | JsonParseException e) {
                 LOG.warn("Enterprise config fetch failed for URL: " + url, e);
@@ -192,6 +200,75 @@ public final class EnterpriseConfigService {
                 NotificationType.WARNING,
                 true
         );
+    }
+
+    /**
+     * Parses the cached organization config for {@code url}, or {@code null} if the cache is empty,
+     * unparseable, or was stored for a different URL/source. A non-null result means "same source as
+     * last time", which lets {@link #clearSupersededUserOverrides} restrict itself to changed settings.
+     */
+    private @Nullable AppMapDeploymentSettings readCachedConfigForUrl(
+            @NotNull AppMapApplicationSettings applicationSettings, @NotNull String url) {
+        var cachedJson = applicationSettings.getEnterpriseConfigCache();
+        if (cachedJson == null) return null;
+        try {
+            var cached = GsonUtils.GSON.fromJson(cachedJson, EnterpriseConfigCache.class);
+            if (cached == null || cached.json == null || !url.equals(cached.url)) return null;
+            return GsonUtils.GSON.fromJson(cached.json, AppMapDeploymentSettings.class);
+        } catch (JsonParseException e) {
+            return null;
+        }
+    }
+
+    /**
+     * Removes user overrides that the freshly-applied organization config should win over, so applying
+     * an org config actually takes effect instead of being silently masked by an existing user setting.
+     *
+     * <p>If {@code previousConfig} is {@code null} (a new URL, a local file, or a first-time fetch) every
+     * setting the new config specifies supersedes the matching user override. If it is non-null (a repeat
+     * fetch from the same URL) only settings whose org value changed since last time are superseded, so a
+     * user can re-override a setting the org config isn't actively changing. The user can always override
+     * again afterwards.
+     */
+    private void clearSupersededUserOverrides(@NotNull AppMapApplicationSettings settings,
+                                              @NotNull AppMapDeploymentSettings newConfig,
+                                              @Nullable AppMapDeploymentSettings previousConfig) {
+        maybeClearOverride("appMap.autoUpdateTools",
+                newConfig.getAutoUpdateTools(),
+                previousConfig != null ? previousConfig.getAutoUpdateTools() : null,
+                previousConfig != null,
+                settings.getAutoUpdateTools(),
+                () -> settings.setAutoUpdateToolsNotifying(null));
+
+        maybeClearOverride("appMap.manifest.appmapUrl",
+                newConfig.getAppmapManifestUrl(),
+                previousConfig != null ? previousConfig.getAppmapManifestUrl() : null,
+                previousConfig != null,
+                settings.getAppmapManifestUrl(),
+                () -> settings.setAppmapManifestUrlNotifying(null));
+
+        maybeClearOverride("appMap.manifest.scannerUrl",
+                newConfig.getScannerManifestUrl(),
+                previousConfig != null ? previousConfig.getScannerManifestUrl() : null,
+                previousConfig != null,
+                settings.getScannerManifestUrl(),
+                () -> settings.setScannerManifestUrlNotifying(null));
+    }
+
+    private void maybeClearOverride(@NotNull String key,
+                                    @Nullable Object newOrgValue,
+                                    @Nullable Object previousOrgValue,
+                                    boolean sameSource,
+                                    @Nullable Object currentUserOverride,
+                                    @NotNull Runnable clearOverride) {
+        if (newOrgValue == null) return;            // org config has no opinion on this setting
+        if (currentUserOverride == null) return;    // no user override to supersede
+        // Same source: only supersede when the org value actually changed since the last fetch.
+        if (sameSource && Objects.equals(newOrgValue, previousOrgValue)) return;
+
+        clearOverride.run();
+        LOG.info("Organization configuration superseded user setting '" + key + "' (was "
+                + currentUserOverride + ", now using organization value " + newOrgValue + ")");
     }
 
     private void fireSettingsChanged() {
@@ -258,6 +335,8 @@ public final class EnterpriseConfigService {
         var cache = new EnterpriseConfigCache(LOCAL_FILE_SENTINEL, fileContent);
         applicationSettings.setEnterpriseConfigCache(GsonUtils.GSON.toJson(cache));
         markApplied();
+        // A local-file apply is a one-shot, fresh source: supersede every user override it specifies.
+        clearSupersededUserOverrides(applicationSettings, parsed, null);
 
         ApplicationManager.getApplication().executeOnPooledThread(this::fireSettingsChanged);
     }
