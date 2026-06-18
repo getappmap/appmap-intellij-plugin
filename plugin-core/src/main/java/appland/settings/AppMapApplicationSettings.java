@@ -93,14 +93,9 @@ public class AppMapApplicationSettings {
     private volatile @Nullable String configurationUrl = null;
 
     /**
-     * JSON cache of the last successful enterprise config fetch: {"url":"…","json":"…"}
-     * Used as fallback when the URL is unreachable on startup.
-     */
-    private volatile @Nullable String enterpriseConfigCache = null;
-
-    /**
-     * Epoch-millis timestamp of when an organization configuration was first successfully applied
-     * (either via URL fetch or local file one-shot). Never cleared once set; used by
+     * Epoch-millis timestamp of when an organization configuration was last successfully applied
+     * (either via URL fetch or local file one-shot), or {@code null} if none is applied. Cleared by
+     * {@link appland.enterpriseConfig.EnterpriseConfigService#clearOrgConfig()}; used by
      * {@link appland.enterpriseConfig.EnterpriseConfigService#isApplied()} to drive UI affordances.
      */
     private volatile @Nullable Long orgConfigAppliedAt = null;
@@ -130,7 +125,6 @@ public class AppMapApplicationSettings {
         this.modelConfig.putAll(settings.modelConfig);
         this.autoUpdateTools = settings.autoUpdateTools;
         this.configurationUrl = settings.configurationUrl;
-        this.enterpriseConfigCache = settings.enterpriseConfigCache;
         this.orgConfigAppliedAt = settings.orgConfigAppliedAt;
     }
 

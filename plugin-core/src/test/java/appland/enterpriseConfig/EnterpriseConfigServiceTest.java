@@ -110,7 +110,7 @@ public class EnterpriseConfigServiceTest extends AppMapBaseTest {
     @Test
     public void applyLocalFile_writesLocalFileSentinelCache() {
         EnterpriseConfigService.getInstance().applyLocalFile("{}", null);
-        var cache = AppMapApplicationSettingsService.getInstance().getEnterpriseConfigCache();
+        var cache = EnterpriseConfigCacheService.getInstance().getCacheJson();
         assertNotNull(cache);
         assertTrue("Cache must contain local-file sentinel", cache.contains("appmap:local-file"));
     }
@@ -119,7 +119,7 @@ public class EnterpriseConfigServiceTest extends AppMapBaseTest {
     public void applyLocalFile_invalidJson_leavesSettingsUntouched() {
         EnterpriseConfigService.getInstance().applyLocalFile("!!! not JSON !!!", null);
         assertFalse("Must not mark applied for invalid JSON", EnterpriseConfigService.getInstance().isApplied());
-        assertNull("Enterprise config cache must stay null", AppMapApplicationSettingsService.getInstance().getEnterpriseConfigCache());
+        assertNull("Enterprise config cache must stay null", EnterpriseConfigCacheService.getInstance().getCacheJson());
         assertNull("Enterprise deployment settings must stay null",
                 AppMapDeploymentSettingsService.getInstance().getEnterpriseDeploymentSettings());
     }
@@ -185,7 +185,7 @@ public class EnterpriseConfigServiceTest extends AppMapBaseTest {
         EnterpriseConfigService.getInstance().applyLocalFile("{\"appMap.autoUpdateTools\": false}", null);
 
         assertNull("Switching to a local file must clear the configured URL", settings.getConfigurationUrl());
-        var cache = settings.getEnterpriseConfigCache();
+        var cache = EnterpriseConfigCacheService.getInstance().getCacheJson();
         assertNotNull(cache);
         assertTrue("Cache must hold the local-file sentinel, not the old URL", cache.contains("appmap:local-file"));
     }
@@ -197,14 +197,14 @@ public class EnterpriseConfigServiceTest extends AppMapBaseTest {
         AppMapApplicationSettingsService.getInstance().setConfigurationUrl("https://example.com/config");
         AppMapDeploymentSettingsService.getInstance().setEnterpriseDeploymentSettings(
                 GsonUtils.GSON.fromJson(SPLUNK_JSON, AppMapDeploymentSettings.class));
-        AppMapApplicationSettingsService.getInstance().setEnterpriseConfigCache("{\"url\":\"x\",\"json\":\"{}\"}");
+        EnterpriseConfigCacheService.getInstance().setCacheJson("{\"url\":\"x\",\"json\":\"{}\"}");
         AppMapApplicationSettingsService.getInstance().setOrgConfigAppliedAt(1L);
 
         runOnPooledThreadAndWait(() -> EnterpriseConfigService.getInstance().clearOrgConfig());
 
         var settings = AppMapApplicationSettingsService.getInstance();
         assertNull(settings.getConfigurationUrl());
-        assertNull(settings.getEnterpriseConfigCache());
+        assertNull(EnterpriseConfigCacheService.getInstance().getCacheJson());
         assertNull(settings.getOrgConfigAppliedAt());
         assertNull(AppMapDeploymentSettingsService.getInstance().getEnterpriseDeploymentSettings());
     }
@@ -258,6 +258,32 @@ public class EnterpriseConfigServiceTest extends AppMapBaseTest {
         assertEquals("Re-applying identical telemetry must not fire another telemetry change", 1, telemetryChanges.get());
     }
 
+    // --- getAppliedConfigJson redaction (the Splunk token must not leak into the status report) ---
+
+    @Test
+    public void getAppliedConfigJson_redactsSplunkToken() {
+        var json = """
+                {
+                  "appMap.telemetry": {
+                    "backend": "splunk",
+                    "url": "https://splunk.example.com:443",
+                    "token": "super-secret-hec-token",
+                    "ca": "system"
+                  }
+                }
+                """;
+        EnterpriseConfigService.getInstance().applyLocalFile(json, null);
+
+        var applied = EnterpriseConfigService.getInstance().getAppliedConfigJson();
+        assertNotNull(applied);
+        assertFalse("Splunk HEC token must not appear in the status-report JSON",
+                applied.contains("super-secret-hec-token"));
+        // Non-secret fields are still shown so the report stays useful for debugging.
+        assertTrue("Backend should still be shown", applied.contains("splunk"));
+        assertTrue("URL should still be shown", applied.contains("splunk.example.com"));
+        assertTrue("CA (public, not a secret) should still be shown", applied.contains("system"));
+    }
+
     // --- fetch via file:// URL ---
 
     @Test
@@ -309,9 +335,50 @@ public class EnterpriseConfigServiceTest extends AppMapBaseTest {
         });
         assertTrue(latch.await(5, TimeUnit.SECONDS));
 
-        var cache = AppMapApplicationSettingsService.getInstance().getEnterpriseConfigCache();
+        var cache = EnterpriseConfigCacheService.getInstance().getCacheJson();
         assertNotNull(cache);
         assertTrue("Cache must contain the configured URL", cache.contains(url));
+    }
+
+    @Test
+    public void sameUrlRefetch_supersedesOnlyChangedSettings() throws Exception {
+        var settings = AppMapApplicationSettingsService.getInstance();
+        var configFile = writeTempConfig(
+                "{\"appMap.autoUpdateTools\": false, \"appMap.manifest.appmapUrl\": \"https://a.example.com/m.json\"}");
+        settings.setConfigurationUrl("file://" + configFile);
+
+        // First fetch establishes the cached config for this URL (no user overrides yet).
+        runOnPooledThreadAndWait(EnterpriseConfigService::awaitInitialFetchIfConfigured);
+
+        // User overrides both settings.
+        settings.setAutoUpdateTools(true);
+        settings.setAppmapManifestUrl("https://user.example.com/m.json");
+
+        // Re-fetch the SAME URL with only the manifest URL changed (autoUpdateTools unchanged).
+        Files.writeString(configFile,
+                "{\"appMap.autoUpdateTools\": false, \"appMap.manifest.appmapUrl\": \"https://b.example.com/m.json\"}");
+        runOnPooledThreadAndWait(EnterpriseConfigService::awaitInitialFetchIfConfigured);
+
+        assertEquals("An unchanged org setting must NOT supersede the user override",
+                Boolean.TRUE, settings.getAutoUpdateTools());
+        assertNull("A changed org setting MUST supersede the user override", settings.getAppmapManifestUrl());
+    }
+
+    @Test
+    public void interactiveFetchFailure_clearsPreviouslyAppliedConfig() throws Exception {
+        // Start with a valid applied config.
+        EnterpriseConfigService.getInstance().applyLocalFile("{\"appMap.autoUpdateTools\": false}", null);
+        assertNotNull(AppMapDeploymentSettingsService.getInstance().getEnterpriseDeploymentSettings());
+
+        // Interactively point at an unreachable URL.
+        AppMapApplicationSettingsService.getInstance().setConfigurationUrl(
+                "file://" + Path.of(myFixture.getTempDirPath()).resolve("does-not-exist.json"));
+        EnterpriseConfigService.getInstance().applyAsync();
+
+        // The interactive failure must clear the previously-applied config (rather than keep it stale).
+        waitUntil(() -> AppMapDeploymentSettingsService.getInstance().getEnterpriseDeploymentSettings() == null);
+        assertNull("Cache must be cleared on interactive failure",
+                EnterpriseConfigCacheService.getInstance().getCacheJson());
     }
 
     // --- persisted cache ---
@@ -320,7 +387,7 @@ public class EnterpriseConfigServiceTest extends AppMapBaseTest {
     public void persistedCache_localFileSentinelAppliedWithoutUrl() {
         // Simulate restart after a local-file apply: cache has sentinel, no URL configured
         var json = "{\"appMap.autoUpdateTools\": false}";
-        AppMapApplicationSettingsService.getInstance().setEnterpriseConfigCache(buildCacheJson("appmap:local-file", json));
+        EnterpriseConfigCacheService.getInstance().setCacheJson(buildCacheJson("appmap:local-file", json));
 
         // Safe from EDT because url is null — returns early after applyPersistedCache
         EnterpriseConfigService.awaitInitialFetchIfConfigured();
@@ -333,7 +400,7 @@ public class EnterpriseConfigServiceTest extends AppMapBaseTest {
     @Test
     public void persistedCache_appliedOnceOnly() {
         var json = "{\"appMap.autoUpdateTools\": false}";
-        AppMapApplicationSettingsService.getInstance().setEnterpriseConfigCache(buildCacheJson("appmap:local-file", json));
+        EnterpriseConfigCacheService.getInstance().setCacheJson(buildCacheJson("appmap:local-file", json));
 
         // First call — applies cache
         EnterpriseConfigService.awaitInitialFetchIfConfigured();
@@ -353,7 +420,7 @@ public class EnterpriseConfigServiceTest extends AppMapBaseTest {
     public void persistedCache_notAppliedWhenUrlMismatch() {
         var json = "{\"appMap.autoUpdateTools\": false}";
         // Cache was for a different URL than what's currently configured
-        AppMapApplicationSettingsService.getInstance().setEnterpriseConfigCache(
+        EnterpriseConfigCacheService.getInstance().setCacheJson(
                 buildCacheJson("https://old.example.com/config", json));
 
         // Safe from EDT since url is null → early return after cache (mismatch → no-op)

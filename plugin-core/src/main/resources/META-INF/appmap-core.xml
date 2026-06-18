@@ -117,6 +117,7 @@
         <applicationService id="appmap.settings"
                             serviceImplementation="appland.settings.AppMapApplicationSettingsService"/>
         <applicationService serviceImplementation="appland.enterpriseConfig.EnterpriseConfigService"/>
+        <applicationService serviceImplementation="appland.enterpriseConfig.EnterpriseConfigCacheService"/>
         <projectService serviceInterface="appland.remote.RemoteRecordingStatusService"
                         serviceImplementation="appland.remote.DefaultRemoteRecordingStatusService"/>
         <projectService serviceInterface="appland.installGuide.projectData.ProjectDataService"
