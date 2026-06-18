@@ -335,6 +335,21 @@ public final class EnterpriseConfigService {
     }
 
     /**
+     * @return The raw JSON contents of the currently-applied organization configuration (as fetched or
+     * read from file), or {@code null} if none is cached. Intended for the plugin status / debugging view.
+     */
+    public @Nullable String getAppliedConfigJson() {
+        var cachedJson = AppMapApplicationSettingsService.getInstance().getEnterpriseConfigCache();
+        if (cachedJson == null) return null;
+        try {
+            var cached = GsonUtils.GSON.fromJson(cachedJson, EnterpriseConfigCache.class);
+            return cached != null ? cached.json : null;
+        } catch (JsonParseException e) {
+            return null;
+        }
+    }
+
+    /**
      * Removes any applied organization configuration: clears the configured URL, the cached config,
      * the in-memory enterprise settings and the applied-timestamp, then notifies listeners. User
      * settings are left untouched (they keep whatever values are currently effective).
