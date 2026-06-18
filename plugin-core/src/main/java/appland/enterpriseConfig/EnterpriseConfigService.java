@@ -2,14 +2,17 @@ package appland.enterpriseConfig;
 
 import appland.deployment.AppMapDeploymentSettings;
 import appland.deployment.AppMapDeploymentSettingsService;
+import appland.notifications.AppMapNotifications;
 import appland.settings.AppMapApplicationSettingsService;
 import appland.settings.AppMapSettingsListener;
 import appland.telemetry.TelemetryService;
 import appland.utils.GsonUtils;
 import com.google.gson.JsonParseException;
+import com.intellij.notification.NotificationType;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.components.Service;
 import com.intellij.openapi.diagnostic.Logger;
+import com.intellij.openapi.project.ProjectManager;
 import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.util.io.HttpRequests;
 import org.jetbrains.annotations.NotNull;
@@ -78,7 +81,8 @@ public final class EnterpriseConfigService {
 
         var newFuture = new CompletableFuture<Void>();
         if (fetchFutureRef.compareAndSet(null, newFuture)) {
-            ApplicationManager.getApplication().executeOnPooledThread(this::fetchAndApply);
+            // Lazy/startup fetch: not interactive, so a failure keeps the cached offline fallback.
+            ApplicationManager.getApplication().executeOnPooledThread(() -> fetchAndApply(false));
             return newFuture;
         }
         // Another thread beat us, return the winner
@@ -111,7 +115,7 @@ public final class EnterpriseConfigService {
         }
     }
 
-    private void fetchAndApply() {
+    private void fetchAndApply(boolean interactive) {
         var deploymentService = AppMapDeploymentSettingsService.getInstance();
         var applicationSettings = AppMapApplicationSettingsService.getInstance();
         var currentFuture = fetchFutureRef.get();
@@ -147,15 +151,26 @@ public final class EnterpriseConfigService {
                     content = HttpRequests.request(url).readString(null);
                 }
                 var parsed = GsonUtils.GSON.fromJson(content, AppMapDeploymentSettings.class);
-                if (parsed != null) {
-                    deploymentService.setEnterpriseDeploymentSettings(parsed);
-                    var cache = new EnterpriseConfigCache(url, content);
-                    applicationSettings.setEnterpriseConfigCache(GsonUtils.GSON.toJson(cache));
-                    markApplied();
-                    LOG.debug("Applied enterprise settings from URL: " + url);
+                if (parsed == null) {
+                    throw new JsonParseException("Organization configuration is not a valid JSON object");
                 }
+                deploymentService.setEnterpriseDeploymentSettings(parsed);
+                var cache = new EnterpriseConfigCache(url, content);
+                applicationSettings.setEnterpriseConfigCache(GsonUtils.GSON.toJson(cache));
+                markApplied();
+                LOG.debug("Applied enterprise settings from URL: " + url);
             } catch (IOException | JsonParseException e) {
                 LOG.warn("Enterprise config fetch failed for URL: " + url, e);
+                if (interactive) {
+                    // The user explicitly (re)applied this URL and it is unreachable or invalid.
+                    // Clear any previously-applied org config so stale settings don't silently linger,
+                    // and let the user know their organization configuration is not being applied.
+                    deploymentService.setEnterpriseDeploymentSettings(null);
+                    applicationSettings.setEnterpriseConfigCache(null);
+                    notifyFetchFailed(url);
+                }
+                // On startup (non-interactive), keep whatever the persisted cache restored as an
+                // offline fallback rather than wiping a known-good configuration on a transient failure.
             }
         } finally {
             if (currentFuture != null) currentFuture.complete(null);
@@ -163,6 +178,20 @@ public final class EnterpriseConfigService {
         }
 
         fireSettingsChanged();
+    }
+
+    private void notifyFetchFailed(@NotNull String url) {
+        var projects = ProjectManager.getInstance().getOpenProjects();
+        if (projects.length == 0) return;
+
+        AppMapNotifications.showSimpleNotification(
+                projects[0],
+                "AppMap Organization Configuration",
+                "Couldn't load the organization configuration from " + url +
+                        ". Any previously applied organization settings have been cleared.",
+                NotificationType.WARNING,
+                true
+        );
     }
 
     private void fireSettingsChanged() {
@@ -179,9 +208,14 @@ public final class EnterpriseConfigService {
         }
     }
 
+    /**
+     * Re-applies the configured organization config from its URL. Used when the user changes the
+     * configuration URL interactively, so a fetch failure clears any previously-applied org config
+     * and notifies the user instead of silently keeping stale settings.
+     */
     public void applyAsync() {
         fetchFutureRef.set(null); // allow re-fetch
-        ApplicationManager.getApplication().executeOnPooledThread(this::fetchAndApply);
+        ApplicationManager.getApplication().executeOnPooledThread(() -> fetchAndApply(true));
     }
 
     public void markApplied() {
