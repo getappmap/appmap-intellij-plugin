@@ -3,6 +3,7 @@ package appland.settings
 import appland.AppMapBundle
 import appland.cli.CliTool
 import appland.deployment.AppMapDeploymentSettingsService.getCachedDeploymentSettings
+import appland.enterpriseConfig.EnterpriseConfigService
 import com.intellij.execution.configuration.EnvironmentVariablesComponent
 import com.intellij.openapi.ui.ComboBox
 import com.intellij.openapi.util.text.Strings
@@ -11,11 +12,14 @@ import com.intellij.ui.JBIntSpinner
 import com.intellij.ui.components.JBTextField
 import com.intellij.ui.dsl.builder.AlignX
 import com.intellij.ui.dsl.builder.RightGap
+import com.intellij.ui.dsl.builder.Row
 import com.intellij.ui.dsl.builder.RowLayout
 import com.intellij.ui.dsl.builder.panel
 import com.intellij.ui.dsl.listCellRenderer.textListCellRenderer
+import com.intellij.util.text.DateFormatUtil
 import java.awt.BorderLayout
 import javax.swing.JCheckBox
+import javax.swing.JLabel
 import javax.swing.JPanel
 
 class AppMapProjectSettingsPanel {
@@ -29,6 +33,26 @@ class AppMapProjectSettingsPanel {
     private lateinit var appmapManifestUrl: JBTextField
     private lateinit var scannerManifestUrl: JBTextField
     private lateinit var configurationUrl: JBTextField
+    private lateinit var orgConfigStatusRow: Row
+    private lateinit var orgConfigStatusLabel: JLabel
+
+    /**
+     * Reflects whether an organization configuration is currently applied: shows its source and
+     * applied time when active, and hides the row (and its Clear button) when not.
+     */
+    private fun updateOrgConfigStatus() {
+        val service = EnterpriseConfigService.getInstance()
+        val applied = service.isApplied
+        if (applied) {
+            val source = service.configSourceDescription ?: ""
+            val appliedAt = AppMapApplicationSettingsService.getInstance().orgConfigAppliedAt
+            val appliedSuffix = appliedAt?.let {
+                AppMapBundle.get("projectSettings.orgConfig.appliedAt", DateFormatUtil.formatDateTime(it))
+            } ?: ""
+            orgConfigStatusLabel.text = AppMapBundle.get("projectSettings.orgConfig.active", source) + appliedSuffix
+        }
+        orgConfigStatusRow.visible(applied)
+    }
 
     fun loadSettingsFrom(
         applicationSettings: AppMapApplicationSettings,
@@ -54,6 +78,7 @@ class AppMapProjectSettingsPanel {
         appmapManifestUrl.text = DownloadSettings.getManifestUrl(CliTool.AppMap)
         scannerManifestUrl.text = DownloadSettings.getManifestUrl(CliTool.Scanner)
         configurationUrl.text = Strings.notNullize(applicationSettings.configurationUrl)
+        updateOrgConfigStatus()
     }
 
     fun applySettingsTo(
@@ -162,6 +187,15 @@ class AppMapProjectSettingsPanel {
                 row(AppMapBundle.get("projectSettings.configurationUrl.title")) {
                     configurationUrl = textField().align(AlignX.FILL).component
                 }.layout(RowLayout.INDEPENDENT)
+
+                orgConfigStatusRow = row {
+                    orgConfigStatusLabel = label("").component
+                    button(AppMapBundle.get("projectSettings.orgConfig.clear")) {
+                        EnterpriseConfigService.getInstance().clearOrgConfig()
+                        configurationUrl.text = ""
+                        updateOrgConfigStatus()
+                    }
+                }
 
                 row(AppMapBundle.get("projectSettings.appmapManifestUrl.title")) {
                     appmapManifestUrl = textField().align(AlignX.FILL).component

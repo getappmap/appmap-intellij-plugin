@@ -314,6 +314,54 @@ public final class EnterpriseConfigService {
                 AppMapApplicationSettingsService.getInstance().getOrgConfigAppliedAt() != null;
     }
 
+    /**
+     * @return A human-readable description of where the currently-applied organization configuration
+     * comes from, or {@code null} if none is applied.
+     */
+    public @Nullable String getConfigSourceDescription() {
+        var settings = AppMapApplicationSettingsService.getInstance();
+        var url = settings.getConfigurationUrl();
+        if (StringUtil.isNotEmpty(url)) {
+            return "URL: " + url;
+        }
+        var envUrl = System.getenv("APPMAP_CONFIG_URL");
+        if (StringUtil.isNotEmpty(envUrl)) {
+            return "URL: " + envUrl + " (from APPMAP_CONFIG_URL)";
+        }
+        if (settings.getOrgConfigAppliedAt() != null) {
+            return "local file";
+        }
+        return null;
+    }
+
+    /**
+     * Removes any applied organization configuration: clears the configured URL, the cached config,
+     * the in-memory enterprise settings and the applied-timestamp, then notifies listeners. User
+     * settings are left untouched (they keep whatever values are currently effective).
+     */
+    public void clearOrgConfig() {
+        var deploymentService = AppMapDeploymentSettingsService.getInstance();
+        var applicationSettings = AppMapApplicationSettingsService.getInstance();
+
+        fetchFutureRef.set(null);
+        deploymentService.setEnterpriseDeploymentSettings(null);
+        applicationSettings.setEnterpriseConfigCache(null);
+        applicationSettings.setOrgConfigAppliedAt(null);
+
+        if (StringUtil.isNotEmpty(applicationSettings.getConfigurationUrl())) {
+            // Also clears the URL; the resulting configurationUrlChanged re-runs the apply pipeline
+            // with no URL, which is a harmless no-op now that the state above is already cleared.
+            applicationSettings.setConfigurationUrlNotifying(null);
+        }
+
+        fireSettingsChanged();
+
+        if (StringUtil.isNotEmpty(System.getenv("APPMAP_CONFIG_URL"))) {
+            LOG.warn("Organization config is also set via the APPMAP_CONFIG_URL environment variable; " +
+                    "it will be re-applied on the next startup unless the variable is unset.");
+        }
+    }
+
     public void applyLocalFile(@NotNull String fileContent, @Nullable com.intellij.openapi.project.Project project) {
         var deploymentService = AppMapDeploymentSettingsService.getInstance();
         var applicationSettings = AppMapApplicationSettingsService.getInstance();
