@@ -1,9 +1,12 @@
 package appland.settings;
 
 import appland.AppMapBundle;
+import com.intellij.openapi.application.ApplicationManager;
+import com.intellij.openapi.application.ModalityState;
 import com.intellij.openapi.options.Configurable;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.NlsContexts;
+import com.intellij.util.messages.MessageBusConnection;
 import lombok.Data;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -15,6 +18,7 @@ import java.util.Map;
 public class AppMapProjectConfigurable implements Configurable {
     private final AppMapProjectSettingsPanel form = new AppMapProjectSettingsPanel();
     private final Project project;
+    private @Nullable MessageBusConnection settingsConnection;
 
     public AppMapProjectConfigurable(@NotNull Project project) {
         this.project = project;
@@ -27,7 +31,39 @@ public class AppMapProjectConfigurable implements Configurable {
 
     @Override
     public @Nullable JComponent createComponent() {
-        return form.getMainPanel();
+        var component = form.getMainPanel();
+
+        // While the settings page is open, reload it when the organization configuration changes
+        // (e.g. an applied URL finished fetching, or a background auto-update arrived) so the
+        // displayed values reflect the effective settings immediately instead of only after reopen.
+        var connection = ApplicationManager.getApplication().getMessageBus().connect();
+        connection.subscribe(AppMapSettingsListener.TOPIC, new AppMapSettingsListener() {
+            @Override
+            public void enterpriseDeploymentSettingsChanged() {
+                reloadOnEdt();
+            }
+
+            @Override
+            public void autoUpdateToolsChanged() {
+                reloadOnEdt();
+            }
+        });
+        this.settingsConnection = connection;
+
+        return component;
+    }
+
+    private void reloadOnEdt() {
+        ApplicationManager.getApplication().invokeLater(this::reset, ModalityState.any());
+    }
+
+    @Override
+    public void disposeUIResources() {
+        if (settingsConnection != null) {
+            settingsConnection.disconnect();
+            settingsConnection = null;
+        }
+        Configurable.super.disposeUIResources();
     }
 
     @Override
