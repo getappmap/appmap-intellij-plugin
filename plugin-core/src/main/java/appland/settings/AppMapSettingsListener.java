@@ -47,4 +47,10 @@ public interface AppMapSettingsListener {
 
     default void autoUpdateToolsChanged() {
     }
+
+    default void configurationUrlChanged() {
+    }
+
+    default void enterpriseDeploymentSettingsChanged() {
+    }
 }

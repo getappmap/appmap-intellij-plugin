@@ -21,7 +21,7 @@ public final class DownloadSettings {
         var userOverride = AppMapApplicationSettingsService.getInstance().getAutoUpdateTools();
         return userOverride != null
                 ? userOverride
-                : AppMapDeploymentSettingsService.getCachedDeploymentSettings().isAutoUpdateTools();
+                : !Boolean.FALSE.equals(AppMapDeploymentSettingsService.getCachedDeploymentSettings().getAutoUpdateTools());
     }
 
     public static boolean isAssetDownloadDisabled() {

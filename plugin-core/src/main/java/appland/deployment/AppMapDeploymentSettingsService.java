@@ -31,6 +31,7 @@ public final class AppMapDeploymentSettingsService {
     private static final Logger LOG = Logger.getInstance(AppMapDeploymentSettingsService.class);
 
     private volatile @Nullable AppMapDeploymentSettings cachedDeploymentSettings = null;
+    private volatile @Nullable AppMapDeploymentSettings enterpriseDeploymentSettings = null;
 
     public static @NotNull AppMapDeploymentSettingsService getInstance() {
         return ApplicationManager.getApplication().getService(AppMapDeploymentSettingsService.class);
@@ -46,7 +47,14 @@ public final class AppMapDeploymentSettingsService {
 
     @TestOnly
     public static void reset() {
-        getInstance().cachedDeploymentSettings = null;
+        var instance = getInstance();
+        instance.cachedDeploymentSettings = null;
+        instance.enterpriseDeploymentSettings = null;
+    }
+
+    @TestOnly
+    public @Nullable AppMapDeploymentSettings getEnterpriseDeploymentSettings() {
+        return enterpriseDeploymentSettings;
     }
 
     /**
@@ -77,6 +85,14 @@ public final class AppMapDeploymentSettingsService {
      * If there are no deployment settings, then an empty settings instance with defaults is returned.
      */
     private @NotNull AppMapDeploymentSettings getDeploymentSettings() {
+        appland.enterpriseConfig.EnterpriseConfigService.awaitInitialFetchIfConfigured();
+
+        var enterprise = this.enterpriseDeploymentSettings;
+        var bundled = loadBundledSettings();
+        return merge(enterprise, bundled);
+    }
+
+    private @NotNull AppMapDeploymentSettings loadBundledSettings() {
         var settings = this.cachedDeploymentSettings;
         if (settings == null) {
             var newSettings = readDeploymentSettings();
@@ -84,6 +100,22 @@ public final class AppMapDeploymentSettingsService {
             this.cachedDeploymentSettings = settings;
         }
         return settings;
+    }
+
+    private static @NotNull AppMapDeploymentSettings merge(
+            @Nullable AppMapDeploymentSettings enterprise,
+            @NotNull AppMapDeploymentSettings bundled) {
+        if (enterprise == null) return bundled;
+        return new AppMapDeploymentSettings(
+            enterprise.getTelemetry() != null ? enterprise.getTelemetry() : bundled.getTelemetry(),
+            enterprise.getAutoUpdateTools() != null ? enterprise.getAutoUpdateTools() : bundled.getAutoUpdateTools(),
+            enterprise.getAppmapManifestUrl() != null ? enterprise.getAppmapManifestUrl() : bundled.getAppmapManifestUrl(),
+            enterprise.getScannerManifestUrl() != null ? enterprise.getScannerManifestUrl() : bundled.getScannerManifestUrl()
+        );
+    }
+
+    public void setEnterpriseDeploymentSettings(@Nullable AppMapDeploymentSettings settings) {
+        this.enterpriseDeploymentSettings = settings;
     }
 
     /**

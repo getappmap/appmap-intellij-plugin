@@ -28,6 +28,7 @@ class AppMapProjectSettingsPanel {
     private lateinit var useAnimation: JCheckBox
     private lateinit var appmapManifestUrl: JBTextField
     private lateinit var scannerManifestUrl: JBTextField
+    private lateinit var configurationUrl: JBTextField
 
     fun loadSettingsFrom(
         applicationSettings: AppMapApplicationSettings,
@@ -52,6 +53,7 @@ class AppMapProjectSettingsPanel {
         
         appmapManifestUrl.text = DownloadSettings.getManifestUrl(CliTool.AppMap)
         scannerManifestUrl.text = DownloadSettings.getManifestUrl(CliTool.Scanner)
+        configurationUrl.text = Strings.notNullize(applicationSettings.configurationUrl)
     }
 
     fun applySettingsTo(
@@ -95,9 +97,11 @@ class AppMapProjectSettingsPanel {
         if (notify) {
             applicationSettings.setAppmapManifestUrlNotifying(appmapManifest)
             applicationSettings.setScannerManifestUrlNotifying(scannerManifest)
+            applicationSettings.setConfigurationUrlNotifying(Strings.nullize(configurationUrl.text))
         } else {
             applicationSettings.appmapManifestUrl = appmapManifest
             applicationSettings.scannerManifestUrl = scannerManifest
+            applicationSettings.configurationUrl = Strings.nullize(configurationUrl.text)
         }
     }
 
@@ -134,9 +138,9 @@ class AppMapProjectSettingsPanel {
                         }
                     }).apply {
                         if (!deploymentSettings.isEmpty) {
-                            val value = when (deploymentSettings.isAutoUpdateTools) {
+                            val value = when (deploymentSettings.autoUpdateTools ?: true) {
                                 true -> AppMapBundle.get("projectSettings.automaticToolsUpdate.enabled")
-                                false -> AppMapBundle.get("projectSettings.automaticToolsUpdate.disabled")
+                                else -> AppMapBundle.get("projectSettings.automaticToolsUpdate.disabled")
                             }
                             comment(AppMapBundle.get("projectSettings.automaticToolsUpdate.deploymentDefaultComment", value))
                         }
@@ -155,10 +159,14 @@ class AppMapProjectSettingsPanel {
                 }
             }
             group(AppMapBundle.get("projectSettings.advanced")) {
+                row(AppMapBundle.get("projectSettings.configurationUrl.title")) {
+                    configurationUrl = textField().align(AlignX.FILL).component
+                }.layout(RowLayout.INDEPENDENT)
+
                 row(AppMapBundle.get("projectSettings.appmapManifestUrl.title")) {
                     appmapManifestUrl = textField().align(AlignX.FILL).component
                 }.layout(RowLayout.INDEPENDENT)
-                
+
                 row(AppMapBundle.get("projectSettings.scannerManifestUrl.title")) {
                     scannerManifestUrl = textField().align(AlignX.FILL).component
                 }.layout(RowLayout.INDEPENDENT)

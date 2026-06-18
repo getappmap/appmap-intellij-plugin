@@ -14,6 +14,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 
 import static appland.AppMapDeploymentTestUtils.withSiteConfigFile;
+import static org.junit.Assert.assertNotEquals;
 
 public class AppMapDeploymentSettingsServiceTest extends AppMapBaseTest {
     @Override
@@ -24,10 +25,7 @@ public class AppMapDeploymentSettingsServiceTest extends AppMapBaseTest {
 
     @Test
     public void defaultStatus() {
-        assertTrue(
-                "By default, downloads must be permitted",
-                AppMapDeploymentSettingsService.getCachedDeploymentSettings().isAutoUpdateTools()
-        );
+        assertNotEquals("By default, downloads must be permitted", Boolean.FALSE, AppMapDeploymentSettingsService.getCachedDeploymentSettings().getAutoUpdateTools());
     }
 
     @Test

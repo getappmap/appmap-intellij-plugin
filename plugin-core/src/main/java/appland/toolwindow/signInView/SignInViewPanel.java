@@ -108,7 +108,11 @@ public class SignInViewPanel extends SimpleToolWindowPanel implements Disposable
         htmlPanel.getCefBrowser().executeJavaScript(createCallbackJS(postMessageQuery, "postMessage"), "", 0);
 
         // trigger init of JS application
-        htmlPanel.getCefBrowser().executeJavaScript("window.postMessage({\"type\": \"init\" })", "", 0);
+        var initData = java.util.Map.of(
+                "enableOrgConfig", true,
+                "orgConfigApplied", appland.enterpriseConfig.EnterpriseConfigService.getInstance().isApplied()
+        );
+        this.postMessage(java.util.Map.of("type", "init", "data", initData));
     }
 
     private boolean handleWebviewMessage(@NotNull String id, @NotNull JsonObject message) {
@@ -137,9 +141,22 @@ public class SignInViewPanel extends SimpleToolWindowPanel implements Disposable
                 }
                 return true;
 
+            case "apply-org-config": {
+                ApplicationManager.getApplication().invokeLater(() -> {
+                    appland.actions.SetConfigurationUrlAction.showPicker(project);
+                    boolean applied = appland.enterpriseConfig.EnterpriseConfigService.getInstance().isApplied();
+                    this.postMessage(java.util.Map.of("type", "apply-org-config", "applied", applied));
+                });
+                return true;
+            }
+
             default:
                 return false;
         }
+    }
+
+    protected void postMessage(@NotNull Object message) {
+        htmlPanel.getCefBrowser().executeJavaScript("window.postMessage(" + GsonUtils.GSON.toJson(message) + ")", "", 0);
     }
 
     @NotNull
