@@ -47,6 +47,16 @@ public final class EnterpriseConfigService {
         return System.getenv("APPMAP_CONFIG_URL");
     }
 
+    /**
+     * Applies the persisted organization-config cache if it hasn't been applied yet. Safe to call from
+     * any thread (including the EDT): it only deserializes local JSON and never triggers or waits on a
+     * network fetch. This is the read path used by {@code getDeploymentSettings()}; the live fetch is
+     * kicked off eagerly at startup (and on URL changes) instead of lazily on first read.
+     */
+    public void ensurePersistedCacheApplied() {
+        applyPersistedCache(resolveConfigUrl());
+    }
+
     public static void awaitInitialFetchIfConfigured() {
         var service = getInstance();
         var url = service.resolveConfigUrl();
