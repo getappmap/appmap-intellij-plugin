@@ -140,6 +140,31 @@ public class EnterpriseConfigServiceTest extends AppMapBaseTest {
         assertEquals("splunk", enterprise.getTelemetry().getBackend());
     }
 
+    @Test
+    public void applyLocalFile_supersedesUserOverrideForSpecifiedSetting() {
+        var settings = AppMapApplicationSettingsService.getInstance();
+        settings.setAutoUpdateTools(true); // user had explicitly enabled auto-update
+
+        EnterpriseConfigService.getInstance().applyLocalFile("{\"appMap.autoUpdateTools\": false}", null);
+
+        assertNull("User override must be cleared so the org config takes effect", settings.getAutoUpdateTools());
+        assertEquals("Org config value must now be effective", Boolean.FALSE,
+                AppMapDeploymentSettingsService.getCachedDeploymentSettings().getAutoUpdateTools());
+    }
+
+    @Test
+    public void applyLocalFile_keepsUserOverrideForUnspecifiedSetting() {
+        var settings = AppMapApplicationSettingsService.getInstance();
+        settings.setAutoUpdateTools(true);
+
+        // Config specifies a manifest URL but says nothing about autoUpdateTools
+        EnterpriseConfigService.getInstance().applyLocalFile(
+                "{\"appMap.manifest.appmapUrl\": \"https://example.com/manifest.json\"}", null);
+
+        assertEquals("Override for a setting the org config doesn't specify must be kept",
+                Boolean.TRUE, settings.getAutoUpdateTools());
+    }
+
     // --- fetch via file:// URL ---
 
     @Test
