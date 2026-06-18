@@ -2,17 +2,14 @@ package appland.enterpriseConfig;
 
 import appland.deployment.AppMapDeploymentSettings;
 import appland.deployment.AppMapDeploymentSettingsService;
-import appland.notifications.AppMapNotifications;
 import appland.settings.AppMapApplicationSettingsService;
 import appland.settings.AppMapSettingsListener;
 import appland.telemetry.TelemetryService;
 import appland.utils.GsonUtils;
 import com.google.gson.JsonParseException;
-import com.intellij.notification.NotificationType;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.components.Service;
 import com.intellij.openapi.diagnostic.Logger;
-import com.intellij.openapi.project.ProjectManager;
 import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.util.io.HttpRequests;
 import org.jetbrains.annotations.NotNull;
@@ -173,19 +170,12 @@ public final class EnterpriseConfigService {
                 .syncPublisher(AppMapSettingsListener.TOPIC)
                 .enterpriseDeploymentSettingsChanged();
 
-        // Show restart notification if TelemetryService is already initialized
+        // Reconfigure telemetry routing on the fly so no IDE restart is required.
+        // Only act if the telemetry service has already been initialized; otherwise it will
+        // pick up the current settings when it's first created.
         var telemetryService = ApplicationManager.getApplication().getServiceIfCreated(TelemetryService.class);
         if (telemetryService != null) {
-            var projects = ProjectManager.getInstance().getOpenProjects();
-            if (projects.length > 0) {
-                AppMapNotifications.showSimpleNotification(
-                        projects[0],
-                        null,
-                        "Restart the IDE to apply the updated organization configuration to telemetry routing.",
-                        NotificationType.INFORMATION,
-                        true
-                );
-            }
+            telemetryService.reloadReporter();
         }
     }
 
