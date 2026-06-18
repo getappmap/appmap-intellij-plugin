@@ -71,6 +71,18 @@ public class PluginStatus extends AnAction implements DumbAware {
         var output = new StringBuilder();
         output.append("### Deployment Settings\n");
 
+        var enterpriseConfig = appland.enterpriseConfig.EnterpriseConfigService.getInstance();
+        if (enterpriseConfig.isApplied()) {
+            output.append("Organization configuration: active");
+            var source = enterpriseConfig.getConfigSourceDescription();
+            if (source != null) {
+                output.append(" (").append(source).append(")");
+            }
+            output.append("\n\n");
+        } else {
+            output.append("Organization configuration: not applied\n\n");
+        }
+
         output.append("Deployment settings search path:\n");
         for (var filePath : AppMapDeploymentSettingsService.deploymentSettingsFileSearchPath()) {
             output.append("- ").append(filePath.toString()).append("\n");
