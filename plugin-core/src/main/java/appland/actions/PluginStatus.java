@@ -79,6 +79,12 @@ public class PluginStatus extends AnAction implements DumbAware {
                 output.append(" (").append(source).append(")");
             }
             output.append("\n\n");
+
+            var configJson = enterpriseConfig.getAppliedConfigJson();
+            if (configJson != null) {
+                output.append("Organization configuration contents:\n");
+                output.append("```json\n").append(configJson).append("\n```\n\n");
+            }
         } else {
             output.append("Organization configuration: not applied\n\n");
         }
