@@ -82,7 +82,7 @@ public class PluginStatus extends AnAction implements DumbAware {
             output.append("No deployment settings were found.\n");
         } else {
             output.append("Automatic update of AppMap binaries: ");
-            output.append(settings.isAutoUpdateTools() ? "enabled" : "disabled");
+            output.append(!Boolean.FALSE.equals(settings.getAutoUpdateTools()) ? "enabled" : "disabled");
             output.append("\n\n");
 
             if (SplunkTelemetryUtils.isSplunkTelemetryEnabled(settings)) {

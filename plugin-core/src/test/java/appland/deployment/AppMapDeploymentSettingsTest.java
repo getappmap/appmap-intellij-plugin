@@ -24,7 +24,7 @@ public class AppMapDeploymentSettingsTest extends AppMapBaseTest {
                 {"appmap.telemetry":{"backend":"splunk","url":"https://my-splunk.example.com:443","token":"my-hec-token","ca":"my-ca-cert"}}
                 """;
         var settings = GsonUtils.GSON.fromJson(json, AppMapDeploymentSettings.class);
-        assertTrue("The default setting must be kept if the JSON did not define it", settings.isAutoUpdateTools());
+        assertNull("The default setting must be null (absent) if the JSON did not define it", settings.getAutoUpdateTools());
     }
 
     @Test
@@ -33,6 +33,6 @@ public class AppMapDeploymentSettingsTest extends AppMapBaseTest {
                 {"appMap.autoUpdateTools": null}
                 """;
         var settings = GsonUtils.GSON.fromJson(json, AppMapDeploymentSettings.class);
-        assertTrue("The default setting must be kept if the JSON did not define it", settings.isAutoUpdateTools());
+        assertNull("The default setting must be null (absent) if the JSON explicitly set null", settings.getAutoUpdateTools());
     }
 }
