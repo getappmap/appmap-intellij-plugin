@@ -19,23 +19,37 @@ import java.util.Objects;
 public class TelemetryService {
     private static final @NotNull Logger LOG = Logger.getInstance(TelemetryService.class);
 
-    private final @NotNull TelemetryReporter reporter;
+    private volatile @NotNull TelemetryReporter reporter;
 
     public static @NotNull TelemetryService getInstance() {
         return ApplicationManager.getApplication().getService(TelemetryService.class);
     }
 
     public TelemetryService() {
-        TelemetryReporter reporter;
+        this.reporter = buildReporter();
+    }
+
+    /**
+     * Rebuilds the telemetry reporter from the current deployment settings.
+     * Called when the organization configuration changes so telemetry routing
+     * (e.g. Splunk vs. App Insights) is updated on the fly, without an IDE restart.
+     */
+    public void reloadReporter() {
+        var previous = this.reporter;
+        var updated = buildReporter();
+        this.reporter = updated;
+        LOG.debug("Reloaded telemetry reporter: "
+                + previous.getClass().getSimpleName() + " -> " + updated.getClass().getSimpleName());
+    }
+
+    private static @NotNull TelemetryReporter buildReporter() {
         try {
-            reporter = createTelemetryReporter(AppMapDeploymentSettingsService.getCachedDeploymentSettings());
+            return createTelemetryReporter(AppMapDeploymentSettingsService.getCachedDeploymentSettings());
         } catch (Exception e) {
             // safeguard to prevent unexpected exceptions breaking this service and the plugin
             LOG.debug("Failed to create telemetry reporter. Using no-op reporter.", e);
-            reporter = new NoOpTelemetryReporter();
+            return new NoOpTelemetryReporter();
         }
-
-        this.reporter = reporter;
     }
 
     /**
