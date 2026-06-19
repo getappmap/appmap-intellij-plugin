@@ -42,11 +42,15 @@ function mountWebview() {
     app.$on("activate", (apiKey) => {
       vscode.postMessage({ command: "activate", apiKey });
     });
-    app.$on("apply-org-config", async () => {
+    app.$on("apply-org-config", () => {
       vscode.postMessage({ command: "apply-org-config" });
-      messages.once("apply-org-config", (response) => {
-        if (response.applied) app.$refs.ui.onOrgConfigApplied();
-      });
+    });
+
+    // React to the applied state the IDE pushes whenever the org config changes, regardless of where
+    // it was applied from (this view, the settings page, startup). Registered once with `on` (not
+    // `once`) so it keeps reacting to later changes.
+    messages.on("apply-org-config", (response) => {
+      if (response.applied && app.$refs.ui) app.$refs.ui.onOrgConfigApplied();
     });
   });
 
