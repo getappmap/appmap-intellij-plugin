@@ -3,10 +3,11 @@ package appland.actions;
 import appland.AppMapBundle;
 import appland.enterpriseConfig.EnterpriseConfigService;
 import appland.settings.AppMapApplicationSettingsService;
+import appland.utils.AppMapFileChoosers;
 import com.intellij.openapi.actionSystem.ActionUpdateThread;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
-import com.intellij.openapi.fileChooser.FileChooser;
+import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.fileChooser.FileChooserDescriptorFactory;
 import com.intellij.openapi.project.DumbAware;
 import com.intellij.openapi.project.Project;
@@ -82,22 +83,25 @@ public class SetConfigurationUrlAction extends AnAction implements DumbAware {
         var descriptor = FileChooserDescriptorFactory.createSingleFileDescriptor("json");
         descriptor.setTitle(AppMapBundle.get("action.appmap.setConfigurationUrl.fileChooser.title"));
 
-        var file = FileChooser.chooseFile(descriptor, project, null);
-        if (file != null) {
-            applyLocalFile(file, project);
-        }
+        AppMapFileChoosers.chooseFile(descriptor, project, file -> applyLocalFile(file, project));
     }
 
     private static void applyLocalFile(@NotNull VirtualFile file, @Nullable Project project) {
-        String content;
-        try {
-            content = new String(file.contentsToByteArray(), file.getCharset());
-        } catch (IOException e) {
-            Messages.showErrorDialog(project,
-                    "Failed to read the configuration file: " + e.getMessage(),
-                    AppMapBundle.get("action.appmap.setConfigurationUrl.dialog.title"));
-            return;
-        }
-        EnterpriseConfigService.getInstance().applyLocalFile(content, project);
+        // Read the file off the EDT: contentsToByteArray() is a VFS read (a slow operation on the EDT).
+        // applyLocalFile() is thread-safe (it guards its mutations and shows dialogs/notifications via
+        // invokeLater), so it's safe to call from the pooled thread.
+        ApplicationManager.getApplication().executeOnPooledThread(() -> {
+            String content;
+            try {
+                content = new String(file.contentsToByteArray(), file.getCharset());
+            } catch (IOException e) {
+                ApplicationManager.getApplication().invokeLater(() -> Messages.showErrorDialog(
+                        project,
+                        "Failed to read the configuration file: " + e.getMessage(),
+                        AppMapBundle.get("action.appmap.setConfigurationUrl.dialog.title")));
+                return;
+            }
+            EnterpriseConfigService.getInstance().applyLocalFile(content, project);
+        });
     }
 }
