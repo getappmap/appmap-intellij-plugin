@@ -3,6 +3,7 @@ package appland.toolwindow.signInView;
 import appland.notifications.AppMapNotifications;
 import appland.oauth.AppMapLoginAction;
 import appland.settings.AppMapApplicationSettingsService;
+import appland.settings.AppMapSettingsListener;
 import appland.toolwindow.AppMapToolWindowContent;
 import appland.utils.GsonUtils;
 import appland.webviews.ConsoleInitMessageHandler;
@@ -113,6 +114,24 @@ public class SignInViewPanel extends SimpleToolWindowPanel implements Disposable
                 "orgConfigApplied", appland.enterpriseConfig.EnterpriseConfigService.getInstance().isApplied()
         );
         this.postMessage(java.util.Map.of("type", "init", "data", initData));
+
+        // Push the applied state to the webview whenever the organization configuration actually
+        // changes. Applying happens asynchronously (URL fetch, or the local-file chooser), so we can't
+        // read isApplied() right after showing the picker — we'd report a stale value. This also keeps
+        // the webview in sync when the config is changed or cleared elsewhere (settings page, startup).
+        ApplicationManager.getApplication().getMessageBus().connect(this)
+                .subscribe(AppMapSettingsListener.TOPIC, new AppMapSettingsListener() {
+                    @Override
+                    public void enterpriseDeploymentSettingsChanged() {
+                        postOrgConfigApplied();
+                    }
+                });
+    }
+
+    private void postOrgConfigApplied() {
+        ApplicationManager.getApplication().invokeLater(() -> this.postMessage(java.util.Map.of(
+                "type", "apply-org-config",
+                "applied", appland.enterpriseConfig.EnterpriseConfigService.getInstance().isApplied())));
     }
 
     private boolean handleWebviewMessage(@NotNull String id, @NotNull JsonObject message) {
@@ -142,11 +161,10 @@ public class SignInViewPanel extends SimpleToolWindowPanel implements Disposable
                 return true;
 
             case "apply-org-config": {
-                ApplicationManager.getApplication().invokeLater(() -> {
-                    appland.actions.SetConfigurationUrlAction.showPicker(project);
-                    boolean applied = appland.enterpriseConfig.EnterpriseConfigService.getInstance().isApplied();
-                    this.postMessage(java.util.Map.of("type", "apply-org-config", "applied", applied));
-                });
+                // Just show the picker; the applied state is pushed reactively by the settings listener
+                // once the (asynchronous) apply actually lands. See postOrgConfigApplied().
+                ApplicationManager.getApplication().invokeLater(() ->
+                        appland.actions.SetConfigurationUrlAction.showPicker(project));
                 return true;
             }
 
