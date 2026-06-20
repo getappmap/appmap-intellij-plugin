@@ -284,6 +284,25 @@ public class EnterpriseConfigServiceTest extends AppMapBaseTest {
         assertTrue("CA (public, not a secret) should still be shown", applied.contains("system"));
     }
 
+    // --- getConfigSourceDescription ---
+
+    @Test
+    public void getConfigSourceDescription_masksUrlCredentials() {
+        AppMapApplicationSettingsService.getInstance()
+                .setConfigurationUrl("https://user:s3cr3t@config.example.com/site-config.json");
+
+        var description = EnterpriseConfigService.getInstance().getConfigSourceDescription();
+        assertNotNull(description);
+        assertFalse("URL credentials must not be shown", description.contains("s3cr3t"));
+        assertTrue("credentials should be masked", description.contains("***@config.example.com"));
+    }
+
+    @Test
+    public void getConfigSourceDescription_reportsLocalFileWhenApplied() {
+        EnterpriseConfigService.getInstance().applyLocalFile("{\"appMap.autoUpdateTools\": false}", null);
+        assertEquals("local file", EnterpriseConfigService.getInstance().getConfigSourceDescription());
+    }
+
     // --- fetch via file:// URL ---
 
     @Test
@@ -337,7 +356,32 @@ public class EnterpriseConfigServiceTest extends AppMapBaseTest {
 
         var cache = EnterpriseConfigCacheService.getInstance().getCacheJson();
         assertNotNull(cache);
-        assertTrue("Cache must contain the configured URL", cache.contains(url));
+        // Compare the parsed "url" field, not a substring: on Windows the URL has backslashes, which
+        // Gson escapes in the stored JSON, so a raw contains() check would fail even though it round-trips.
+        var cachedUrl = GsonUtils.GSON.fromJson(cache, JsonObject.class).get("url").getAsString();
+        assertEquals("Cache must record the configured URL", url, cachedUrl);
+    }
+
+    @Test
+    public void fetchViaFileUrl_handlesRawPathWithSpaces() throws Exception {
+        // A space makes "file://" + path an invalid URI, exercising the raw-path fallback in
+        // fileUrlToPath (the same code path that "file://C:\..." hits on Windows).
+        var configFile = Path.of(myFixture.getTempDirPath()).resolve("org config.json");
+        Files.writeString(configFile, "{\"appMap.autoUpdateTools\": false}");
+        AppMapApplicationSettingsService.getInstance().setConfigurationUrl("file://" + configFile);
+
+        var latch = new CountDownLatch(1);
+        ApplicationManager.getApplication().executeOnPooledThread(() -> {
+            EnterpriseConfigService.awaitInitialFetchIfConfigured();
+            latch.countDown();
+        });
+        assertTrue(latch.await(5, TimeUnit.SECONDS));
+
+        AppMapApplicationSettingsService.getInstance().setConfigurationUrl(null);
+        var enterprise = AppMapDeploymentSettingsService.getInstance().getEnterpriseDeploymentSettings();
+        assertNotNull("a file:// URL whose path isn't URI-valid must still be read via the raw-path fallback",
+                enterprise);
+        assertEquals(Boolean.FALSE, enterprise.getAutoUpdateTools());
     }
 
     @Test

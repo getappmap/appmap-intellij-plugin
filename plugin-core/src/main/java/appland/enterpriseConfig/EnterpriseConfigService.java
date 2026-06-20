@@ -23,6 +23,7 @@ import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.TestOnly;
 
 import java.io.IOException;
+import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Objects;
@@ -147,8 +148,8 @@ public final class EnterpriseConfigService {
         AppMapDeploymentSettings parsed;
         String content;
         try {
-            if (url.startsWith("file://")) {
-                content = Files.readString(Path.of(url.substring("file://".length())));
+            if (url.startsWith("file:")) {
+                content = Files.readString(fileUrlToPath(url));
             } else {
                 content = HttpRequests.request(url).readString(null);
             }
@@ -156,8 +157,9 @@ public final class EnterpriseConfigService {
             if (parsed == null) {
                 throw new JsonParseException("Organization configuration is not a valid JSON object");
             }
-        } catch (IOException | JsonParseException e) {
-            LOG.warn("Enterprise config fetch failed for URL: " + url, e);
+        } catch (IOException | JsonParseException | IllegalArgumentException e) {
+            // IllegalArgumentException (incl. InvalidPathException) covers an unparseable file URL/path.
+            LOG.warn("Enterprise config fetch failed for URL: " + maskCredentials(url), e);
             // On startup (non-interactive), keep whatever the persisted cache restored as an offline
             // fallback rather than wiping a known-good configuration on a transient failure.
             if (!interactive) return;
@@ -196,7 +198,7 @@ public final class EnterpriseConfigService {
                 // Same URL → only supersede user overrides for settings that changed since last fetch;
                 // a brand-new URL (no matching previous config) supersedes every setting it specifies.
                 clearSupersededUserOverrides(AppMapApplicationSettingsService.getInstance(), parsed, previousConfig);
-                LOG.debug("Applied enterprise settings from URL: " + url);
+                LOG.debug("Applied enterprise settings from URL: " + maskCredentials(url));
                 telemetryChanged = telemetryChanged(telemetryBefore);
             }
         }
@@ -223,7 +225,7 @@ public final class EnterpriseConfigService {
         AppMapNotifications.showSimpleNotification(
                 projects[0],
                 "AppMap Organization Configuration",
-                "Couldn't load the organization configuration from " + url +
+                "Couldn't load the organization configuration from " + maskCredentials(url) +
                         ". Any previously applied organization settings have been cleared.",
                 NotificationType.WARNING,
                 true
@@ -372,19 +374,47 @@ public final class EnterpriseConfigService {
      * comes from, or {@code null} if none is applied.
      */
     public @Nullable String getConfigSourceDescription() {
+        // A local-file snapshot is the active source for this session even if APPMAP_CONFIG_URL is set
+        // (the env URL would only be (re)applied on the next startup), so check it first.
+        if (hasLocalFileCache(EnterpriseConfigCacheService.getInstance())) {
+            return "local file";
+        }
         var settings = AppMapApplicationSettingsService.getInstance();
         var url = settings.getConfigurationUrl();
         if (StringUtil.isNotEmpty(url)) {
-            return "URL: " + url;
+            return "URL: " + maskCredentials(url);
         }
         var envUrl = System.getenv("APPMAP_CONFIG_URL");
         if (StringUtil.isNotEmpty(envUrl)) {
-            return "URL: " + envUrl + " (from APPMAP_CONFIG_URL)";
+            return "URL: " + maskCredentials(envUrl) + " (from APPMAP_CONFIG_URL)";
         }
         if (settings.getOrgConfigAppliedAt() != null) {
             return "local file";
         }
         return null;
+    }
+
+    /**
+     * Strips userinfo (user:password@) from a URL so credentials don't leak into logs, the status
+     * report, or notifications. URLs without credentials are returned unchanged.
+     */
+    private static @NotNull String maskCredentials(@NotNull String url) {
+        return url.replaceFirst("://[^@/]*@", "://***@");
+    }
+
+    /**
+     * Converts a {@code file:} URL to a path. Prefers proper file-URI parsing (handles {@code file:///},
+     * escaped characters, UNC hosts), but falls back to treating the part after {@code file://} as a raw
+     * OS path — which is how the URL is often built (e.g. {@code "file://" + path}, yielding
+     * {@code file://C:\...} on Windows, which is not a valid URI).
+     */
+    private static @NotNull Path fileUrlToPath(@NotNull String url) {
+        try {
+            return Path.of(URI.create(url));
+        } catch (IllegalArgumentException e) {
+            var prefix = url.startsWith("file://") ? "file://" : "file:";
+            return Path.of(url.substring(prefix.length()));
+        }
     }
 
     /**
