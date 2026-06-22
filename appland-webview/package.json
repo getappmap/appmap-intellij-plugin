@@ -27,7 +27,9 @@
   },
   "resolutions": {
     "@appland/rpc": "1.19.0",
-    "esbuild": "0.28.1"
+    "esbuild": "0.28.1",
+    "engine.io-client/ws": "8.21.0",
+    "uuid": "11.1.1"
   },
   "packageManager": "yarn@4.13.0"
 }
