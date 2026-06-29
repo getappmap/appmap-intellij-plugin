@@ -1,5 +1,12 @@
 AppMap Plugin Changelog
 
+## [0.85.0](https://github.com/getappmap/appmap-intellij-plugin/compare/v0.84.0...v0.85.0) (2026-06-29)
+
+
+### Features
+
+-  **enterprise-config:** organization configuration via URL or local file ([32f6216](https://github.com/getappmap/appmap-intellij-plugin/commit/32f6216a032d790bdf0b39ff001cca4f56258ac7))
+
 ## [0.84.0](https://github.com/getappmap/appmap-intellij-plugin/compare/v0.83.3...v0.84.0) (2026-06-15)
 
 
