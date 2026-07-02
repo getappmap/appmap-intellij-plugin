@@ -1,5 +1,12 @@
 <idea-plugin>
     <resource-bundle>messages.appland</resource-bundle>
+    <!--
+      We declare com.intellij.modules.jcef as optional to allow compatibility with both Platform 251 and Platform 262:
+      - On Platform 251 (and older), JCEF is bundled in the core platform but com.intellij.modules.jcef is not visible as a separate module.
+      - On Platform 262 (and newer), JCEF is isolated behind its own modular classloader and must be explicitly requested.
+      Making it optional ensures it works on both without failing to load on older platforms.
+    -->
+    <depends optional="true" config-file="appmap-jcef.xml">com.intellij.modules.jcef</depends>
 
     <applicationListeners>
         <listener topic="com.intellij.openapi.project.ProjectManagerListener"
