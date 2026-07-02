@@ -4,7 +4,7 @@ import appland.cli.AppLandModelInfoProvider;
 import appland.copilotChat.copilot.CopilotModelDefinition;
 import appland.copilotChat.copilot.GitHubCopilotService;
 import appland.settings.AppMapApplicationSettingsService;
-import com.intellij.ide.plugins.PluginManager;
+import com.intellij.ide.plugins.PluginManagerCore;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -63,9 +63,7 @@ public class CopilotModelInfoProvider implements AppLandModelInfoProvider {
             return true;
         }
 
-        return PluginManager.getLoadedPlugins()
-                .stream()
-                .noneMatch(plugin -> plugin.isEnabled() && plugin.getPluginId().equals(GitHubCopilotService.CopilotPluginId));
+        return !PluginManagerCore.isPluginInstalled(GitHubCopilotService.CopilotPluginId) || PluginManagerCore.isDisabled(GitHubCopilotService.CopilotPluginId);
     }
 
     /**
