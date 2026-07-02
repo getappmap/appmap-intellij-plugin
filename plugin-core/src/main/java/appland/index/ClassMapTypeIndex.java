@@ -1,7 +1,6 @@
 package appland.index;
 
 import appland.files.AppMapFiles;
-import com.intellij.json.JsonFileType;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.project.DumbService;
 import com.intellij.openapi.project.Project;
@@ -27,7 +26,8 @@ import java.util.*;
  */
 public class ClassMapTypeIndex extends FileBasedIndexExtension<ClassMapItemType, List<ClassMapItem>> {
     private static final ID<ClassMapItemType, List<ClassMapItem>> INDEX_ID = ID.create("appmap.classMap");
-    private static final FileBasedIndex.FileTypeSpecificInputFilter INPUT_FILTER = new NamedFileTypeFilter(JsonFileType.INSTANCE, ClassMapUtil.CLASS_MAP_FILE::equalsIgnoreCase);
+    // Match by file name only, not by JSON file type (see AbstractAppMapMetadataFileIndex).
+    private static final FileBasedIndex.InputFilter INPUT_FILTER = file -> ClassMapUtil.CLASS_MAP_FILE.equalsIgnoreCase(file.getName());
     private static final DataExternalizer<List<ClassMapItem>> DATA_EXTERNALIZER = new DataExternalizer<>() {
         @Override
         public void save(@NotNull DataOutput out, @NotNull List<ClassMapItem> values) throws IOException {

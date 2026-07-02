@@ -26,7 +26,8 @@ import java.util.stream.Collectors;
 
 final class IndexUtil {
     // base version for our indexes, increase when the data structures or the parsing logic change
-    static final int BASE_VERSION = 66;
+    // 67: input filters match by file name only, no longer gated on the JSON file type
+    static final int BASE_VERSION = 67;
 
     // filenames covered by our own indexes
     static final Set<String> indexedFilenames = Collections.unmodifiableSet(findIndexedFilenames());

@@ -1,6 +1,5 @@
 package appland.index;
 
-import com.intellij.json.JsonFileType;
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.roots.FileIndexFacade;
@@ -23,10 +22,14 @@ public final class AppMapSearchScopes {
 
     /**
      * @param project Project
-     * @return Search scope, which contains all .appmap.json files of the project, included files inside excluded directories. The scope is also restricted by the JSON file type.
+     * @return Search scope, which contains all project files, including files inside excluded directories.
+     * The scope is intentionally not restricted by the JSON file type: it is used to query AppMap
+     * metadata indexes whose input filters already match the specific file names, and JSON language
+     * support is an optional platform module that may not classify {@code .json} files as JSON in every
+     * runtime.
      */
     public static @NotNull GlobalSearchScope appMapsWithExcluded(@NotNull Project project) {
-        return GlobalSearchScope.getScopeRestrictedByFileTypes(projectFilesWithExcluded(project), JsonFileType.INSTANCE);
+        return projectFilesWithExcluded(project);
     }
 
     public static @NotNull GlobalSearchScope appMapConfigSearchScope(@NotNull Project project) {
