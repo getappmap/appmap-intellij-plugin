@@ -1,0 +1,6 @@
+<idea-plugin>
+    <!--
+      This placeholder XML is structurally required by the IntelliJ Platform when declaring 'com.intellij.modules.jcef' as an optional dependency.
+      We keep this empty as the core plugin code handles classpath access and loading on both Platform 251 and Platform 262.
+    -->
+</idea-plugin>
