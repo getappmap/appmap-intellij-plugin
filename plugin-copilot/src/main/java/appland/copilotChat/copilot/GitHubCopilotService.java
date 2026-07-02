@@ -1,10 +1,12 @@
 package appland.copilotChat.copilot;
 
 import appland.notifications.AppMapNotifications;
+import appland.settings.AppMapApplicationSettingsService;
 import appland.utils.GsonUtils;
 import appland.utils.SystemProperties;
 import appland.utils.UserLog;
 import com.google.gson.JsonObject;
+import com.intellij.ide.plugins.PluginManager;
 import com.intellij.openapi.Disposable;
 import com.intellij.openapi.application.ApplicationInfo;
 import com.intellij.openapi.application.ApplicationManager;
@@ -60,6 +62,29 @@ public final class GitHubCopilotService implements Disposable {
 
     public boolean isCopilotAuthenticated() {
         return loadGitHubOAuthToken() != null;
+    }
+
+    /**
+     * @return {@code true} if the integration with GitHub Copilot is unavailable,
+     * either because the GitHub Copilot plugin is not installed/enabled or because
+     * the integration was explicitly disabled in the AppMap settings.
+     * This method must not evaluate the state of Copilot authentication.
+     */
+    public boolean isIntegrationDisabled() {
+        if (AppMapApplicationSettingsService.getInstance().isCopilotIntegrationDisabled()) {
+            return true;
+        }
+
+        return PluginManager.getLoadedPlugins()
+                .stream()
+                .noneMatch(plugin -> plugin.isEnabled() && plugin.getPluginId().equals(CopilotPluginId));
+    }
+
+    /**
+     * @return {@code true} if the GitHub Copilot integration is enabled and the user is authenticated with GitHub Copilot.
+     */
+    public boolean isAvailable() {
+        return !isIntegrationDisabled() && isCopilotAuthenticated();
     }
 
     public @NotNull Encoding loadTokenizer(@NotNull String tokenizerName) {

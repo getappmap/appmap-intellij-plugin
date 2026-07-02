@@ -3,8 +3,6 @@ package appland.copilotChat;
 import appland.cli.AppLandModelInfoProvider;
 import appland.copilotChat.copilot.CopilotModelDefinition;
 import appland.copilotChat.copilot.GitHubCopilotService;
-import appland.settings.AppMapApplicationSettingsService;
-import com.intellij.ide.plugins.PluginManager;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -18,11 +16,7 @@ import java.util.stream.Collectors;
 public class CopilotModelInfoProvider implements AppLandModelInfoProvider {
     @Override
     public @Nullable List<ModelInfo> getModelInfo() throws IOException {
-        if (isDisabled()) {
-            return null;
-        }
-
-        if (!GitHubCopilotService.getInstance().isCopilotAuthenticated()) {
+        if (!GitHubCopilotService.getInstance().isAvailable()) {
             return null;
         }
 
@@ -47,25 +41,6 @@ public class CopilotModelInfoProvider implements AppLandModelInfoProvider {
                 apiKey,
                 model.capabilities().limits().maxPromptTokens()
         )).toList();
-    }
-
-    /**
-     * @return {@code true} if the integration with GitHub Copilot is unavailable
-     * because the GitHub Copilot plugin is not installed or the integration was explicitly disabled.
-     * This method must not evaluate the state of Copilot authentication.
-     */
-    public static boolean isDisabled() {
-        return isGitHubCopilotDisabled();
-    }
-
-    private static boolean isGitHubCopilotDisabled() {
-        if (AppMapApplicationSettingsService.getInstance().isCopilotIntegrationDisabled()) {
-            return true;
-        }
-
-        return PluginManager.getLoadedPlugins()
-                .stream()
-                .noneMatch(plugin -> plugin.isEnabled() && plugin.getPluginId().equals(GitHubCopilotService.CopilotPluginId));
     }
 
     /**

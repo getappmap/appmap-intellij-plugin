@@ -5,7 +5,6 @@ import appland.copilotChat.copilot.GitHubCopilotService;
 import appland.rpcService.AppLandJsonRpcService;
 import appland.settings.AppMapApplicationSettingsService;
 import appland.settings.AppMapSecureApplicationSettingsService;
-import com.intellij.ide.plugins.PluginManager;
 import com.intellij.openapi.util.text.StringUtil;
 
 import java.util.HashMap;
@@ -19,11 +18,11 @@ import java.util.Map;
 public class CopilotAppMapEnvProvider implements AppLandCliEnvProvider {
     @Override
     public Map<String, String> getEnvironment() {
-        if (isDisabled()) {
+        if (hasCustomAppMapModelSettings()) {
             return Map.of();
         }
 
-        if (!GitHubCopilotService.getInstance().isCopilotAuthenticated()) {
+        if (!GitHubCopilotService.getInstance().isAvailable()) {
             return Map.of();
         }
 
@@ -45,7 +44,7 @@ public class CopilotAppMapEnvProvider implements AppLandCliEnvProvider {
      * This method must not evaluate the state of Copilot authentication.
      */
     public static boolean isDisabled() {
-        return hasCustomAppMapModelSettings() || isGitHubCopilotDisabled();
+        return hasCustomAppMapModelSettings() || GitHubCopilotService.getInstance().isIntegrationDisabled();
     }
 
     /**
@@ -58,15 +57,5 @@ public class CopilotAppMapEnvProvider implements AppLandCliEnvProvider {
                 || environment.containsKey(AppLandJsonRpcService.OPENAI_API_KEY)
                 || environment.containsKey(AppLandJsonRpcService.OPENAI_BASE_URL)
                 || environment.containsKey(AppLandJsonRpcService.AZURE_OPENAI_API_KEY);
-    }
-
-    private static boolean isGitHubCopilotDisabled() {
-        if (AppMapApplicationSettingsService.getInstance().isCopilotIntegrationDisabled()) {
-            return true;
-        }
-
-        return PluginManager.getLoadedPlugins()
-                .stream()
-                .noneMatch(plugin -> plugin.isEnabled() && plugin.getPluginId().equals(GitHubCopilotService.CopilotPluginId));
     }
 }
