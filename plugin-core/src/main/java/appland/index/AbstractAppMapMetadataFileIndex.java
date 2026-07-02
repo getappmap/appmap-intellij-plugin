@@ -1,7 +1,6 @@
 package appland.index;
 
 import com.google.gson.JsonParseException;
-import com.intellij.json.JsonFileType;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.util.indexing.FileBasedIndex;
 import com.intellij.util.indexing.FileContent;
@@ -20,9 +19,10 @@ import org.jetbrains.annotations.Nullable;
 abstract class AbstractAppMapMetadataFileIndex<T> extends SingleEntryFileBasedIndexExtension<T> {
     private static final Logger LOG = Logger.getInstance(AbstractAppMapMetadataFileIndex.class);
 
-    private final FileBasedIndex.InputFilter inputFilter = new NamedFileTypeFilter(JsonFileType.INSTANCE, fileName -> {
-        return getIndexedFileName().equalsIgnoreCase(fileName);
-    });
+    // Match by file name only. We intentionally do not use a FileTypeSpecificInputFilter keyed on the
+    // JSON file type: JSON language support is a separate platform module whose file-type registration
+    // is not active in every runtime (e.g. the 262 test sandbox), which would silently exclude our files.
+    private final FileBasedIndex.InputFilter inputFilter = file -> getIndexedFileName().equalsIgnoreCase(file.getName());
 
     private final SingleEntryIndexer<T> indexer = new SingleEntryIndexer<>(false) {
         @Override

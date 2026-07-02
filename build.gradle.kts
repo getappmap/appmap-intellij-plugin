@@ -28,7 +28,7 @@ buildscript {
 plugins {
     idea
     id("org.jetbrains.kotlin.jvm")
-    id("org.jetbrains.intellij.platform") version "2.13.1"
+    id("org.jetbrains.intellij.platform") version "2.17.0"
     id("org.jetbrains.changelog") version "2.2.1"
     id("com.adarshr.test-logger") version "4.0.0"
     id("de.undercouch.download") version "5.6.0"
@@ -44,6 +44,24 @@ group = "appland.appmap"
 version = pluginVersionString
 
 val platformVersion = prop("platformVersion").toInt()
+
+// Bundled plugins that com.intellij.java requires but that the Gradle plugin no longer pulls in
+// transitively (JetBrains/intellij-platform-gradle-plugin#1930), so the Java plugin is excluded from
+// the 262+ test sandbox and its services (JavaDirectoryService, JavaAwareProjectJdkTable, run-config
+// types) never register. There is no catch-all/"full IDE" test mode, so we list them explicitly.
+// To refresh after a platform bump: run tests, look for "'Java' ... excluded" / "X is not resolved"
+// in the sandbox log, and add the plugin owning module X (`printBundledPlugins` lists the IDs).
+val javaTestCompanionPlugins = listOf(
+    "intellij.structureView.plugin",
+    "intellij.bookmarks.plugin",
+    "intellij.testRunner.plugin",
+    "intellij.todo.plugin",
+    "intellij.structuralSearch.plugin",
+    "intellij.libraries.misc.plugin",
+    "com.intellij.copyright",
+    "org.jetbrains.plugins.terminal",
+    "XPathView",
+)
 
 val isCI = System.getenv("CI") == "true"
 val agentOutputPath = rootProject.layout.buildDirectory.asFile.get()
@@ -84,25 +102,20 @@ allprojects {
                 testFramework(TestFrameworkType.Plugin.Java)
             }
 
-            // org.jetbrains.intellij.platform requires to bundledModules for 2024.2+
-            if (platformVersion >= 242) {
-                bundledModule("intellij.platform.collaborationTools")
-                bundledModule("intellij.platform.vcs.impl")
-            }
-            // 2024.3 extracted JSON support into a plugin
-            if (platformVersion >= 243) {
-                bundledPlugins("com.intellij.modules.json")
-            }
+            bundledModule("intellij.platform.collaborationTools")
+            bundledModule("intellij.platform.vcs.impl")
+            bundledPlugins("com.intellij.modules.json")
+
             // 2025.3 extracted OAuth support into modules
             if (platformVersion >= 253) {
                 bundledModule("intellij.platform.collaborationTools.auth.base")
                 bundledModule("intellij.platform.collaborationTools.auth")
+                bundledModule("intellij.platform.vcs.dvcs")
+                bundledModule("intellij.platform.vcs.dvcs.impl")
+                bundledModule("com.intellij.modules.jcef")
             }
             bundledPlugin("Git4Idea")
         }
-
-        // added because org.jetbrains.intellij.platform resolves to an older version bundled with the SDK
-        compileOnly("org.jetbrains:annotations:24.1.0")
 
         compileOnly("com.google.code.findbugs:jsr305:3.0.2")
 
@@ -124,9 +137,6 @@ allprojects {
             testImplementation(project(":plugin-core", "testOutput"))
         }
 
-        // workaround for https://github.com/JetBrains/intellij-platform-gradle-plugin/issues/1663
-        testImplementation("org.opentest4j:opentest4j:1.3.0")
-
         // Subproject test-integration must not get our additional test dependencies
         // because mockserver is conflicting with the SDK's bundled library versions.
         // See https://github.com/getappmap/appmap-intellij-plugin/pull/794.
@@ -140,19 +150,24 @@ allprojects {
         instrumentCode = false
     }
 
+    val jvmVersion = when {
+        platformVersion >= 262 -> "25"
+        else -> "21"
+    }
+
     // https://plugins.jetbrains.com/docs/intellij/setting-up-theme-environment.html#add-jdk-and-intellij-platform-plugin-sdk
     configure<JavaPluginExtension> {
-        sourceCompatibility = JavaVersion.VERSION_21
-        targetCompatibility = JavaVersion.VERSION_21
+        sourceCompatibility = JavaVersion.toVersion(jvmVersion)
+        targetCompatibility = JavaVersion.toVersion(jvmVersion)
     }
 
     tasks {
         compileKotlin {
-            compilerOptions.jvmTarget.set(JvmTarget.JVM_21)
+            compilerOptions.jvmTarget.set(JvmTarget.fromTarget(jvmVersion))
         }
 
         compileTestKotlin {
-            compilerOptions.jvmTarget.set(JvmTarget.JVM_21)
+            compilerOptions.jvmTarget.set(JvmTarget.fromTarget(jvmVersion))
         }
 
         processTestResources {
@@ -196,15 +211,10 @@ allprojects {
             }
 
             plugins {
-                // org.jetbrains.intellij.platform requires to bundledModules for 2024.2+
-                if (platformVersion >= 242) {
-                    bundledModule("intellij.platform.collaborationTools")
-                    bundledModule("intellij.platform.vcs.impl")
-                }
-                // 2024.3 extracted JSON support into a plugin
-                if (platformVersion >= 243) {
-                    bundledPlugins("com.intellij.modules.json")
-                }
+                bundledModule("intellij.platform.collaborationTools")
+                bundledModule("intellij.platform.vcs.impl")
+                bundledPlugins("com.intellij.modules.json")
+
                 // 2025.3 extracted OAuth support into modules
                 if (platformVersion >= 253) {
                     bundledModule("intellij.platform.collaborationTools.auth.base")
@@ -287,17 +297,11 @@ project(":") {
 
     dependencies {
         intellijPlatform {
-            // use pluginComposedModule when https://github.com/JetBrains/intellij-platform-gradle-plugin/issues/1971 is fixed
-            implementation(project(":plugin-core"))
-            implementation(project(":plugin-gradle"))
-            implementation(project(":plugin-java"))
-            implementation(project(":plugin-maven"))
-            implementation(project(":plugin-copilot"))
-            /*pluginComposedModule(implementation(project(":plugin-core")))
+            pluginComposedModule(implementation(project(":plugin-core")))
             pluginComposedModule(implementation(project(":plugin-gradle")))
             pluginComposedModule(implementation(project(":plugin-java")))
             pluginComposedModule(implementation(project(":plugin-maven")))
-            pluginComposedModule(implementation(project(":plugin-copilot")))*/
+            pluginComposedModule(implementation(project(":plugin-copilot")))
 
             // adding this for runIde support
             compatiblePlugin("com.github.copilot")
@@ -336,10 +340,9 @@ project(":") {
                     types.set(listOf(IntelliJPlatformType.IntellijIdeaCommunity))
                 }
 
-                // latest supported major version, 2025.3+ is only available as a unified build
                 select {
-                    sinceBuild = "261"
-                    untilBuild = "261.*"
+                    sinceBuild = "262"
+                    untilBuild = "262.*"
                     types.set(listOf(IntelliJPlatformType.IntellijIdea))
                 }
             }
@@ -494,6 +497,10 @@ project(":plugin-java") {
         intellijPlatform {
             bundledPlugin("com.intellij.java")
             bundledPlugin("com.intellij.properties")
+            // see javaTestCompanionPlugins
+            if (platformVersion >= 262) {
+                bundledPlugins(javaTestCompanionPlugins)
+            }
         }
     }
 }

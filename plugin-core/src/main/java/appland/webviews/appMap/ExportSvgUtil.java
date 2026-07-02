@@ -2,7 +2,6 @@ package appland.webviews.appMap;
 
 import appland.AppMapBundle;
 import com.intellij.CommonBundle;
-import com.intellij.ide.IdeBundle;
 import com.intellij.openapi.fileChooser.FileChooserDescriptorFactory;
 import com.intellij.openapi.progress.ProgressIndicator;
 import com.intellij.openapi.progress.ProgressManager;
@@ -69,7 +68,7 @@ public class ExportSvgUtil {
                         project,
                         AppMapBundle.get("appmap.editor.exportSVG.errorFileExists.message", filePath),
                         AppMapBundle.get("appmap.editor.exportSVG.dialogTitle"),
-                        IdeBundle.message("action.overwrite"),
+                        CommonBundle.message("button.overwrite"),
                         CommonBundle.getCancelButtonText(),
                         Messages.getWarningIcon()
                 );

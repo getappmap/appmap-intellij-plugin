@@ -19,8 +19,9 @@ jobs:
                 platform_version: [ "251" ]
                 os: [ ubuntu, windows, macos ]
                 include:
-                    # Run tests with latest platform version, but only on Linux
-                    - platform_version: "261"
+                    - platform_version: "261"  # latest released version
+                      os: ubuntu
+                    - platform_version: "262"  # latest EAP version
                       os: ubuntu
 
         name: Test ${{ matrix.platform_version }} on ${{ matrix.os }}

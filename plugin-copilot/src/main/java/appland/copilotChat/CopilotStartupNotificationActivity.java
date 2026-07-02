@@ -24,7 +24,7 @@ public class CopilotStartupNotificationActivity extends ProjectActivityAdapter i
         }
 
         // don't show if the GitHub Copilot plugin is unavailable
-        if (CopilotAppMapEnvProvider.isDisabled()) {
+        if (CopilotModelInfoProvider.isDisabled()) {
             return;
         }
 
