@@ -45,6 +45,24 @@ version = pluginVersionString
 
 val platformVersion = prop("platformVersion").toInt()
 
+// Bundled plugins that com.intellij.java requires but that the Gradle plugin no longer pulls in
+// transitively (JetBrains/intellij-platform-gradle-plugin#1930), so the Java plugin is excluded from
+// the 262+ test sandbox and its services (JavaDirectoryService, JavaAwareProjectJdkTable, run-config
+// types) never register. There is no catch-all/"full IDE" test mode, so we list them explicitly.
+// To refresh after a platform bump: run tests, look for "'Java' ... excluded" / "X is not resolved"
+// in the sandbox log, and add the plugin owning module X (`printBundledPlugins` lists the IDs).
+val javaTestCompanionPlugins = listOf(
+    "intellij.structureView.plugin",
+    "intellij.bookmarks.plugin",
+    "intellij.testRunner.plugin",
+    "intellij.todo.plugin",
+    "intellij.structuralSearch.plugin",
+    "intellij.libraries.misc.plugin",
+    "com.intellij.copyright",
+    "org.jetbrains.plugins.terminal",
+    "XPathView",
+)
+
 val isCI = System.getenv("CI") == "true"
 val agentOutputPath = rootProject.layout.buildDirectory.asFile.get()
     .resolve("appmap-java-agent")
@@ -479,6 +497,10 @@ project(":plugin-java") {
         intellijPlatform {
             bundledPlugin("com.intellij.java")
             bundledPlugin("com.intellij.properties")
+            // see javaTestCompanionPlugins
+            if (platformVersion >= 262) {
+                bundledPlugins(javaTestCompanionPlugins)
+            }
         }
     }
 }
