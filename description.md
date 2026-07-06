@@ -4,9 +4,15 @@
 
 **Live code behavior, for your eyes and your AI tools, in your JetBrains IDE.**
 
-AppMap records how your application actually runs, with zero code changes. It turns every run into interactive sequence diagrams, dependency maps, flame graphs, and trace views you can read, and makes the same runtime data available to any AI coding agent through the Model Context Protocol (MCP). Your agent can query real execution traces instead of guessing from static code.
+AppMap records how your application actually runs, with zero code changes. Every run becomes interactive sequence diagrams, dependency maps, flame graphs, and trace views. The same runtime data is available to any AI coding agent through the Model Context Protocol (MCP). Your agent can query real execution traces instead of guessing from static code.
 
 People see the map. Agents query the trace. One run, same ground truth.
+
+## Why developers use it
+
+-   **Review behavior, not just diffs.** See what an AI-generated change actually did at runtime before you open the PR.
+-   **Debug in one query, not fifteen greps.** The request path, the SQL, and the exception are one trace away, for you and your agent.
+-   **Give your agent ground truth.** Answers from real execution over MCP, not guesses from static code.
 
 ## Works with any AI coding agent via MCP
 
@@ -47,4 +53,4 @@ Get started:
 
 Open source | [Terms and conditions](https://appmap.io/community/terms-and-conditions.html) | [Security disclosure](https://appmap.io/security)
 
-AppMap is free for every developer and for organizations under 250 employees. Larger organizations standardizing on AppMap are supported with a [support contract](https://appmap.io/pricing).
+This extension is for individual developers working in the code editor. Check out the [pricing page](https://appmap.io/pricing).
