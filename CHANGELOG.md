@@ -1,5 +1,13 @@
 AppMap Plugin Changelog
 
+## [0.85.1](https://github.com/getappmap/appmap-intellij-plugin/compare/v0.85.0...v0.85.1) (2026-07-14)
+
+
+### Bug Fixes
+
+-  add compatibility with platform 262 and java 25 ([555dca5](https://github.com/getappmap/appmap-intellij-plugin/commit/555dca5fc1db286674d5136f8da81dc902c50f16))
+-  **index:** match AppMap metadata files by name, not JSON file type ([ea64cf1](https://github.com/getappmap/appmap-intellij-plugin/commit/ea64cf1be0de9f20acb65b10ee22d273d871dfab))
+
 ## [0.85.0](https://github.com/getappmap/appmap-intellij-plugin/compare/v0.84.0...v0.85.0) (2026-06-29)
 
 
