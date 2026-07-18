@@ -45,11 +45,15 @@ jobs:
               with:
                   cache-disabled: true
 
-            - name: Cache AppMap test binaries
-              uses: actions/cache@v5
+            # Restore cached AppMap/Scanner test binaries from previous runs using restore-keys.
+            # We explicitly use actions/cache/restore (instead of actions/cache) to decouple
+            # restoring and saving, allowing us to only save a new cache when new versions are downloaded.
+            - name: Restore AppMap test binaries cache
+              id: restore-cache
+              uses: actions/cache/restore@v5
               with:
                   path: ~/.cache/appmap-test
-                  key: appmap-test-binaries-${{ runner.os }}-${{ github.run_id }}
+                  key: appmap-test-binaries-${{ runner.os }}-initial
                   restore-keys: appmap-test-binaries-${{ runner.os }}-
 
             # https://docs.github.com/en/rest/overview/resources-in-the-rest-api?apiVersion=2022-11-28#rate-limits-for-requests-from-github-actions
@@ -72,6 +76,26 @@ jobs:
                   path: |
                       build/reports/
                       **/build/reports/
+
+            # Clean up the cache directory before saving to keep it lean.
+            # The script sorts downloaded binaries by SemVer, deletes old versions,
+            # prunes test stubs, and outputs a SHA-256 hash of the surviving stable files.
+            - name: Clean AppMap test binaries cache
+              id: clean-cache
+              if: always()
+              continue-on-error: true
+              run: node .github/workflows/clean-cache.js
+
+            # Save the cache with the unique hash of the preserved binaries.
+            # To avoid CPU and network upload churn on identical states (since GitHub caches are immutable),
+            # we explicitly skip saving if the newly generated key matches the key we restored from.
+            - name: Save AppMap test binaries cache
+              if: always() && steps.clean-cache.outputs.cache_hash != '' && steps.clean-cache.outputs.cache_hash != 'empty' && steps.restore-cache.outputs.cache-matched-key != format('appmap-test-binaries-{0}-{1}', runner.os, steps.clean-cache.outputs.cache_hash)
+              continue-on-error: true
+              uses: actions/cache/save@v5
+              with:
+                  path: ~/.cache/appmap-test
+                  key: appmap-test-binaries-${{ runner.os }}-${{ steps.clean-cache.outputs.cache_hash }}
 
             - name: Save AppMaps
               uses: actions/cache/save@v5
