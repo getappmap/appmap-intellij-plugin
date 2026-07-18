@@ -1,6 +1,7 @@
 package appland.settings;
 
 import appland.AppLandLifecycleService;
+import appland.cli.AppLandCommandLineService;
 import appland.notifications.AppMapNotifications;
 import appland.rpcService.AppLandJsonRpcService;
 import com.intellij.openapi.Disposable;
@@ -28,6 +29,7 @@ public class AppMapSettingsReloadProjectListener implements AppMapSettingsListen
     // must not be accessed during initialization in 2025.1+.
     private final LazyInitializer.LazyValue<SingleAlarm> showReloadNotificationAlarm;
     private final LazyInitializer.LazyValue<SingleAlarm> reloadJsonRpcServerAlarm;
+    private final LazyInitializer.LazyValue<SingleAlarm> reloadCliProcessesAlarm;
 
     @SuppressWarnings("unused") // instantiated by the platform via XML applicationListeners registration
     public AppMapSettingsReloadProjectListener() {
@@ -49,12 +51,21 @@ public class AppMapSettingsReloadProjectListener implements AppMapSettingsListen
                 alarmParent,
                 Alarm.ThreadToUse.POOLED_THREAD,
                 ModalityState.defaultModalityState()));
+        reloadCliProcessesAlarm = LazyInitializer.create(() -> new SingleAlarm(
+                () -> AppLandCommandLineService.getInstance().restartProcessesInBackground(),
+                1_000,
+                alarmParent,
+                Alarm.ThreadToUse.POOLED_THREAD,
+                ModalityState.defaultModalityState()));
     }
 
 
     @Override
     public void cliEnvironmentChanged(@NotNull Set<String> modifiedKeys) {
+        // The indexer and scanner CLI processes also receive this environment, so they must be
+        // restarted alongside the JSON-RPC server for the change to take effect.
         reloadJsonRpcServerAlarm.get().cancelAndRequest();
+        reloadCliProcessesAlarm.get().cancelAndRequest();
     }
 
     @Override
@@ -79,9 +90,11 @@ public class AppMapSettingsReloadProjectListener implements AppMapSettingsListen
 
     @Override
     public void telemetrySettingsChanged() {
-        // The JSON-RPC server receives telemetry settings via its environment, so it must be
-        // restarted to route telemetry to the newly configured backend.
+        // The JSON-RPC server, indexer, and scanner processes all receive telemetry settings via
+        // their environment, so they must be restarted to route telemetry to the newly
+        // configured backend.
         reloadJsonRpcServerAlarm.get().cancelAndRequest();
+        reloadCliProcessesAlarm.get().cancelAndRequest();
     }
 
     @Override
