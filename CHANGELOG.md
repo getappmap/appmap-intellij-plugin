@@ -1,5 +1,12 @@
 AppMap Plugin Changelog
 
+## [0.85.2](https://github.com/getappmap/appmap-intellij-plugin/compare/v0.85.1...v0.85.2) (2026-07-20)
+
+
+### Bug Fixes
+
+-  restart indexer/scanner processes on telemetry and CLI env changes ([5d17879](https://github.com/getappmap/appmap-intellij-plugin/commit/5d17879f30b8147dc1abc3d78d8afa5419cf3fbf))
+
 ## [0.85.1](https://github.com/getappmap/appmap-intellij-plugin/compare/v0.85.0...v0.85.1) (2026-07-14)
 
 
