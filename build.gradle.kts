@@ -152,6 +152,17 @@ allprojects {
 
     intellijPlatform {
         instrumentCode = false
+
+        // Cache extracted IDE distributions in a stable, OS-agnostic directory
+        // (.intellijPlatform/ides/<type>-<version>) instead of relying solely on
+        // Gradle's transform cache. This lets CI restore the IDE across runs and
+        // share a single cache entry across OS runners for a given version (the ZIP
+        // is OS-agnostic). See the IDE cache steps in .github/workflows/build.yml.
+        caching {
+            ides {
+                enabled = true
+            }
+        }
     }
 
     val jvmVersion = when {
