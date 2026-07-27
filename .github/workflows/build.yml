@@ -42,7 +42,13 @@ jobs:
             - name: Setup Gradle
               uses: gradle/actions/setup-gradle@v5
               with:
-                  cache-disabled: true
+                  # Exclude the IntelliJ Platform IDE distributions from the Gradle cache. They are
+                  # cached separately (intellijPlatform.caching.ides -> .intellijPlatform/ides, via the
+                  # actions/cache steps below). On a warm IDE cache the ZIP is never downloaded; this
+                  # also keeps a cold run's ~1 GB ZIP out of the Gradle cache, deterministically,
+                  # rather than relying on cache-cleanup to prune it on a subsequent run. Covers both
+                  # ideaIC (Community/251) and ideaIU (Ultimate/262).
+                  gradle-home-cache-excludes: caches/modules-2/files-2.1/com.jetbrains.intellij.idea
 
             # Restore cached AppMap/Scanner test binaries from previous runs using restore-keys.
             # We explicitly use actions/cache/restore (instead of actions/cache) to decouple
