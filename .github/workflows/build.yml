@@ -146,10 +146,9 @@ jobs:
         needs: [test]
         timeout-minutes: 45
         steps:
-            - name: Free Disk Space
-              uses: insightsengineering/disk-space-reclaimer@dae9fabcb8febe09f6585471948acf9dc9a57489 # v1.1.2
-              with:
-                  swap-storage: false
+            - name: Show Available Disk Space
+              shell: bash
+              run: df -h
 
             - name: Fetch Sources
               uses: actions/checkout@v6
@@ -198,3 +197,8 @@ jobs:
                   name: plugin-distribution
                   path: build/distributions/intellij-appmap-*.zip
                   archive: false
+
+            - name: Show Available Disk Space
+              if: always()
+              shell: bash
+              run: df -h
