@@ -55,6 +55,17 @@ jobs:
                   key: appmap-test-binaries-${{ runner.os }}-initial
                   restore-keys: appmap-test-binaries-${{ runner.os }}-
 
+            # Restore the IntelliJ Platform IDE. It is resolved as an OS-agnostic cross-platform
+            # ZIP (useInstaller = false) and cached in .intellijPlatform/ides, so a single entry
+            # per version is shared across all OS runners -- the key intentionally omits runner.os.
+            # Decoupled restore/save (like the AppMap binaries cache) lets us save only on a miss.
+            - name: Restore IntelliJ IDE cache
+              id: restore-ide-cache
+              uses: actions/cache/restore@v5
+              with:
+                  path: .intellijPlatform/ides
+                  key: intellij-ide-${{ matrix.platform_version }}-${{ hashFiles(format('gradle-{0}.properties', matrix.platform_version)) }}
+
             # https://docs.github.com/en/rest/overview/resources-in-the-rest-api?apiVersion=2022-11-28#rate-limits-for-requests-from-github-actions
             - name: Show GitHub Actions rate limit
               shell: bash
@@ -96,6 +107,21 @@ jobs:
                   path: ~/.cache/appmap-test
                   key: appmap-test-binaries-${{ runner.os }}-${{ steps.clean-cache.outputs.cache_hash }}
 
+            # Save the IDE cache only when this run downloaded a new IDE (restore missed).
+            # GitHub caches are immutable and the ZIP is large, so re-saving on a hit is pure churn.
+            # The product-info.json guard ensures we only cache a fully-extracted IDE: it is absent
+            # if the build failed before IDE resolution or the download/extract failed, which would
+            # otherwise poison the immutable key with an empty/partial entry. always() (rather than
+            # success()) still caches a valid IDE when tests fail *after* it was resolved.
+            # Parallel matrix jobs sharing a key may race to save first; the loser's 409 is benign.
+            - name: Save IntelliJ IDE cache
+              if: always() && steps.restore-ide-cache.outputs.cache-hit != 'true' && hashFiles('.intellijPlatform/ides/*/product-info.json') != ''
+              continue-on-error: true
+              uses: actions/cache/save@v5
+              with:
+                  path: .intellijPlatform/ides
+                  key: intellij-ide-${{ matrix.platform_version }}-${{ hashFiles(format('gradle-{0}.properties', matrix.platform_version)) }}
+
             - name: Save AppMaps
               uses: actions/cache/save@v5
               if: runner.os == 'Linux' && matrix.platform_version == '251'
@@ -135,6 +161,22 @@ jobs:
               run: |
                   VERSION=$(git describe --tags --always | sed 's/^v//')
                   sed -i "s/^pluginVersion=.*/pluginVersion=$VERSION/" gradle.properties
+
+            # Restore the OS-agnostic IDE caches populated by the test jobs. This job needs both
+            # the 251 and 262 IDEs (to build the distribution and run the verifier against each).
+            # Restore-only: the test jobs own the save. Both restore into the same managed cache
+            # directory; each IDE lives in its own <type>-<version> subdir, so they coexist.
+            - name: Restore IntelliJ IDE cache (251)
+              uses: actions/cache/restore@v5
+              with:
+                  path: .intellijPlatform/ides
+                  key: intellij-ide-251-${{ hashFiles('gradle-251.properties') }}
+
+            - name: Restore IntelliJ IDE cache (262)
+              uses: actions/cache/restore@v5
+              with:
+                  path: .intellijPlatform/ides
+                  key: intellij-ide-262-${{ hashFiles('gradle-262.properties') }}
 
             - name: Verify Plugin Structure
               shell: bash
