@@ -333,18 +333,12 @@ project(":") {
 
         pluginVerification {
             ides {
-                // earliest supported major version
-                select {
-                    sinceBuild = "251"
-                    untilBuild = "251.*"
-                    types.set(listOf(IntelliJPlatformType.IntellijIdeaCommunity))
-                }
-
-                select {
-                    sinceBuild = "262"
-                    untilBuild = "262.*"
-                    types.set(listOf(IntelliJPlatformType.IntellijIdea))
-                }
+                // Verify against the exact IDE builds used for compilation and tests, so the
+                // verifier reuses the same cached IDEs instead of resolving "latest in range".
+                // Versions come from gradle-<platform>.properties (single source of truth,
+                // shared with the build platform) via ideVersionFor().
+                create(IntelliJPlatformType.IntellijIdeaCommunity, ideVersionFor(251)) // earliest supported
+                create(IntelliJPlatformType.IntellijIdea, ideVersionFor(262))          // latest released
             }
 
             failureLevel.set(
@@ -546,6 +540,14 @@ fun String.renderMarkdown(): String {
 fun prop(name: String): String {
     return extra.properties[name] as? String ?: error("Property `$name` is not defined in gradle.properties")
 }
+
+// Reads the `ideVersion` for a specific platform from its gradle-<platform>.properties file.
+// This is the single source of truth shared between the build platform (loadPlatformProperties)
+// and the plugin verifier, so the verifier reuses the exact same cached IDE builds.
+fun ideVersionFor(platform: Int): String =
+    loadProperties(rootDir.resolve("gradle-$platform.properties").toString())
+        .getProperty("ideVersion")
+        ?: error("`ideVersion` is not defined in gradle-$platform.properties")
 
 fun loadPlatformProperties() {
     val platformVersion = prop("platformVersion").toInt()
