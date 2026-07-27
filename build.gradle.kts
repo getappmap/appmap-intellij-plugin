@@ -89,10 +89,14 @@ allprojects {
     val testOutput = configurations.create("testOutput")
     dependencies {
         intellijPlatform {
-            // 2025.3 is only available as a unified build
+            // Use the cross-platform (multi-OS) ZIP distribution instead of the OS-specific
+            // installer, so the downloaded IDE can be cached once and shared across all OS
+            // runners. The ZIP bundles no JBR; tests run on the environment JDK (setup-java
+            // on CI, system JDK locally).
             when {
-                platformVersion >= 253 -> intellijIdea(ideVersion)
-                else -> intellijIdeaCommunity(ideVersion)
+                // 2025.3+ is only available as a unified build
+                platformVersion >= 253 -> intellijIdea(ideVersion) { useInstaller = false }
+                else -> intellijIdeaCommunity(ideVersion) { useInstaller = false }
             }
 
             // using "Bundled" to gain access to the Java plugin's test classes
@@ -337,8 +341,12 @@ project(":") {
                 // verifier reuses the same cached IDEs instead of resolving "latest in range".
                 // Versions come from gradle-<platform>.properties (single source of truth,
                 // shared with the build platform) via ideVersionFor().
-                create(IntelliJPlatformType.IntellijIdeaCommunity, ideVersionFor(251)) // earliest supported
-                create(IntelliJPlatformType.IntellijIdea, ideVersionFor(262))          // latest released
+                create(IntelliJPlatformType.IntellijIdeaCommunity, ideVersionFor(251)) {
+                    useInstaller = false // earliest supported; ZIP to reuse the build's cached IDE
+                }
+                create(IntelliJPlatformType.IntellijIdea, ideVersionFor(262)) {
+                    useInstaller = false // latest released; ZIP to reuse the build's cached IDE
+                }
             }
 
             failureLevel.set(
