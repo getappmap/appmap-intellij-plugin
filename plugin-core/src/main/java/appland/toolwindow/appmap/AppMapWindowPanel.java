@@ -438,7 +438,7 @@ public class AppMapWindowPanel extends SimpleToolWindowPanel implements DataProv
 
     private static @NotNull JComponent createSouthPanel(@NotNull Project project, @NotNull Disposable parent) {
         var contentPanel = new VerticalBox();
-        if (AppMapApplicationSettingsService.getInstance().isEnableScanner()) {
+        if (AppMapApplicationSettingsService.getInstance().isScannerEnabled()) {
             contentPanel.add(createRuntimeAnalysisPanel(project, parent));
         }
         contentPanel.add(createCodeObjectsPanel(project, parent));

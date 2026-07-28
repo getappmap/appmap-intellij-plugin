@@ -28,7 +28,7 @@ import javax.swing.JPanel
 class AppMapProjectSettingsPanel(private val project: Project?) {
     private lateinit var enableTelemetry: JCheckBox
     private lateinit var enableAutoToolsUpdate: ComboBox<Boolean?>
-    private lateinit var enableScanner: JCheckBox
+    private lateinit var enableScanner: ComboBox<Boolean?>
     private lateinit var cliEnvironment: EnvironmentVariablesComponent
     private lateinit var maxPinnedFileSizeKB: JBIntSpinner
     private lateinit var openAIKey: JBTextField
@@ -79,7 +79,15 @@ class AppMapProjectSettingsPanel(private val project: Project?) {
         secureApplicationSettings: AppMapSecureApplicationSettings
     ) {
         enableTelemetry.isSelected = applicationSettings.isEnableTelemetry
-        enableScanner.isSelected = applicationSettings.isEnableScanner
+
+        val scannerEnabled = applicationSettings.enableScanner
+        enableScanner.selectedItem = when {
+            // without deployment settings, null collapses to the default of "disabled"
+            scannerEnabled == null && getCachedDeploymentSettings().isEmpty -> false
+            // with deployment settings, null means "use the deployment default"
+            else -> scannerEnabled
+        }
+
         cliEnvironment.envs = applicationSettings.cliEnvironment
         cliEnvironment.isPassParentEnvs = applicationSettings.isCliPassParentEnv
         maxPinnedFileSizeKB.number = applicationSettings.maxPinnedFileSizeKB
@@ -106,10 +114,16 @@ class AppMapProjectSettingsPanel(private val project: Project?) {
         notify: Boolean,
     ) {
         applicationSettings.isEnableTelemetry = enableTelemetry.isSelected
+
+        val enableScannerValue = when {
+            // without deployment settings, "disabled" is the default and is stored as null (no override)
+            enableScanner.selectedItem == false && getCachedDeploymentSettings().isEmpty -> null
+            else -> enableScanner.selectedItem as? Boolean
+        }
         if (notify) {
-            applicationSettings.setEnableScannerNotifying(enableScanner.isSelected)
+            applicationSettings.setEnableScannerNotifying(enableScannerValue)
         } else {
-            applicationSettings.isEnableScanner = enableScanner.isSelected
+            applicationSettings.enableScanner = enableScannerValue
         }
         applicationSettings.isCliPassParentEnv = cliEnvironment.isPassParentEnvs
         if (notify) {
@@ -190,8 +204,31 @@ class AppMapProjectSettingsPanel(private val project: Project?) {
                         enableAutoToolsUpdate = this
                     }
                 }
-                row {
-                    enableScanner = checkBox(AppMapBundle.get("projectSettings.enableScanner.title")).component
+                row(AppMapBundle.get("projectSettings.enableScanner.title")) {
+                    val deploymentSettings = getCachedDeploymentSettings()
+                    val values = when {
+                        deploymentSettings.isEmpty -> listOf(true, false)
+                        // null to show "Use deployment settings"
+                        else -> listOf(null, true, false)
+                    }
+
+                    comboBox(CollectionComboBoxModel(values), textListCellRenderer {
+                        when (it) {
+                            true -> AppMapBundle.get("projectSettings.enableScanner.enabled")
+                            false -> AppMapBundle.get("projectSettings.enableScanner.disabled")
+                            null -> AppMapBundle.get("projectSettings.enableScanner.deploymentDefault")
+                        }
+                    }).apply {
+                        if (!deploymentSettings.isEmpty) {
+                            val value = when (deploymentSettings.scannerEnabled ?: false) {
+                                true -> AppMapBundle.get("projectSettings.enableScanner.enabled")
+                                else -> AppMapBundle.get("projectSettings.enableScanner.disabled")
+                            }
+                            comment(AppMapBundle.get("projectSettings.enableScanner.deploymentDefaultComment", value))
+                        }
+                    }.applyToComponent {
+                        enableScanner = this
+                    }
                 }
                 row(AppMapBundle.get("projectSettings.openAIKey.title")) {
                     openAIKey = textField().align(AlignX.FILL).component

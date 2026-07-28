@@ -23,7 +23,8 @@ plugin's default (or the user's own setting) in effect.
     },
     "appMap.autoUpdateTools": true,
     "appMap.manifest.appmapUrl": "https://artifacts.example.com/appmap-manifest.json",
-    "appMap.manifest.scannerUrl": "https://artifacts.example.com/scanner-manifest.json"
+    "appMap.manifest.scannerUrl": "https://artifacts.example.com/scanner-manifest.json",
+    "appMap.scannerEnabled": true
 }
 ```
 
@@ -33,6 +34,7 @@ plugin's default (or the user's own setting) in effect.
 | `appMap.autoUpdateTools` | boolean | `true` (the default) lets the plugin download/update the AppMap & Scanner CLI binaries; `false` disables it. See the caveat below. |
 | `appMap.manifest.appmapUrl` | string | Overrides the URL of the AppMap CLI [release manifest](https://github.com/getappmap/appmap-js/blob/main/architecture/release-manifests.md) (e.g. point it at an internal mirror). |
 | `appMap.manifest.scannerUrl` | string | Overrides the URL of the Scanner CLI [release manifest](https://github.com/getappmap/appmap-js/blob/main/architecture/release-manifests.md). |
+| `appMap.scannerEnabled` | boolean | `true` enables the AppMap scanner (runtime analysis / findings); `false` disables it. Omit (the default) to leave it off unless the user enabled it. Same key as the VS Code plugin. |
 
 ### Recommended setup: keep auto-update on, mirror the manifests
 

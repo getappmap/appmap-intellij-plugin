@@ -20,7 +20,13 @@ import java.util.*;
 public class AppMapApplicationSettings {
     private volatile boolean firstStart = true;
     private volatile boolean enableTelemetry = true;
-    private volatile boolean enableScanner = false;
+    /**
+     * User override for enabling the AppMap scanner. {@code null} means "no user choice", in which case
+     * the effective state is taken from the bundled/organization deployment configuration
+     * ({@link appland.deployment.AppMapDeploymentSettings#scannerEnabled}), defaulting to disabled.
+     * Use {@link #isScannerEnabled()} to read the effective value.
+     */
+    private volatile @Nullable Boolean enableScanner = null;
     private volatile @Nullable String apiKey = null;
     private volatile boolean useAnimation = true;
     /**
@@ -173,13 +179,28 @@ public class AppMapApplicationSettings {
         }
     }
 
-    public void setEnableScannerNotifying(boolean enableScanner) {
-        var changed = this.enableScanner != enableScanner;
+    public void setEnableScannerNotifying(@Nullable Boolean enableScanner) {
+        var changed = !Objects.equals(this.enableScanner, enableScanner);
         this.enableScanner = enableScanner;
 
         if (changed) {
             settingsPublisher().scannerEnabledChanged();
         }
+    }
+
+    /**
+     * Resolves whether the AppMap scanner is enabled, honoring (in order): an explicit user override
+     * ({@link #enableScanner}), the bundled/organization deployment configuration
+     * ({@code appMap.scannerEnabled}), and finally the default of disabled. Mirrors
+     * {@link DownloadSettings#isAssetDownloadEnabled()}.
+     */
+    public boolean isScannerEnabled() {
+        var userOverride = this.enableScanner;
+        if (userOverride != null) {
+            return userOverride;
+        }
+        return Boolean.TRUE.equals(
+                appland.deployment.AppMapDeploymentSettingsService.getCachedDeploymentSettings().getScannerEnabled());
     }
 
     public boolean isAuthenticated() {
