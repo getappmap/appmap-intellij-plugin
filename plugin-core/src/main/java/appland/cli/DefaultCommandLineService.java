@@ -376,7 +376,7 @@ public class DefaultCommandLineService implements AppLandCommandLineService {
             return null;
         }
 
-        if (!AppMapApplicationSettingsService.getInstance().isEnableScanner()) {
+        if (!AppMapApplicationSettingsService.getInstance().isScannerEnabled()) {
             return null;
         }
 

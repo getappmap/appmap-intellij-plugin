@@ -165,6 +165,62 @@ public class EnterpriseConfigServiceTest extends AppMapBaseTest {
     }
 
     @Test
+    public void scannerEnabledViaOrgConfig_takesEffect() {
+        var settings = AppMapApplicationSettingsService.getInstance();
+        assertFalse("Scanner is disabled by default", settings.isScannerEnabled());
+
+        EnterpriseConfigService.getInstance().applyLocalFile("{\"appMap.scannerEnabled\": true}", null);
+
+        assertTrue("Organization config must be able to enable the scanner", settings.isScannerEnabled());
+    }
+
+    @Test
+    public void isScannerEnabled_userOverrideWinsOverDeployment() {
+        var settings = AppMapApplicationSettingsService.getInstance();
+        AppMapDeploymentSettingsService.getInstance().setEnterpriseDeploymentSettings(
+                new AppMapDeploymentSettings(null, null, null, null, true));
+        assertTrue("Deployment config enables the scanner when there is no user override", settings.isScannerEnabled());
+
+        settings.setEnableScanner(false);
+        assertFalse("An explicit user override must win over the deployment value", settings.isScannerEnabled());
+    }
+
+    @Test
+    public void applyLocalFile_firesScannerEnabledChangeWhenEffectiveStateChanges() throws Exception {
+        var scannerChanges = subscribeScannerChanges();
+
+        EnterpriseConfigService.getInstance().applyLocalFile("{\"appMap.scannerEnabled\": true}", null);
+
+        waitUntil(() -> scannerChanges.get() >= 1);
+        assertEquals("Enabling the scanner via org config must fire a scanner change so services restart live",
+                1, scannerChanges.get());
+    }
+
+    @Test
+    public void applyLocalFile_doesNotFireScannerChangeWhenScannerUnaffected() throws Exception {
+        var scannerChanges = subscribeScannerChanges();
+        var deploymentChanges = subscribeDeploymentChanges();
+
+        // Config changes an unrelated setting; the effective scanner state stays disabled.
+        EnterpriseConfigService.getInstance().applyLocalFile("{\"appMap.autoUpdateTools\": false}", null);
+
+        waitUntil(() -> deploymentChanges.get() >= 1);
+        assertEquals("An org config that doesn't change the effective scanner state must not fire a scanner change",
+                0, scannerChanges.get());
+    }
+
+    @Test
+    public void applyLocalFile_supersedesUserOverrideForScannerEnabled() {
+        var settings = AppMapApplicationSettingsService.getInstance();
+        settings.setEnableScanner(false); // user had explicitly disabled the scanner
+
+        EnterpriseConfigService.getInstance().applyLocalFile("{\"appMap.scannerEnabled\": true}", null);
+
+        assertNull("User override must be cleared so the org config takes effect", settings.getEnableScanner());
+        assertTrue("Org config value must now be effective", settings.isScannerEnabled());
+    }
+
+    @Test
     public void applyLocalFile_keepsUserOverrideForUnspecifiedSetting() {
         var settings = AppMapApplicationSettingsService.getInstance();
         settings.setAutoUpdateTools(true);
@@ -479,10 +535,19 @@ public class EnterpriseConfigServiceTest extends AppMapBaseTest {
     @Test
     public void merge_enterpriseOverridesBundledAutoUpdateTools() {
         AppMapDeploymentSettingsService.getInstance().setEnterpriseDeploymentSettings(
-                new AppMapDeploymentSettings(null, false, null, null));
+                new AppMapDeploymentSettings(null, false, null, null, null));
 
         var merged = AppMapDeploymentSettingsService.getCachedDeploymentSettings();
         assertEquals("Enterprise autoUpdateTools=false must override bundled null", Boolean.FALSE, merged.getAutoUpdateTools());
+    }
+
+    @Test
+    public void merge_enterpriseOverridesBundledScannerEnabled() {
+        AppMapDeploymentSettingsService.getInstance().setEnterpriseDeploymentSettings(
+                new AppMapDeploymentSettings(null, null, null, null, true));
+
+        var merged = AppMapDeploymentSettingsService.getCachedDeploymentSettings();
+        assertEquals("Enterprise scannerEnabled=true must override bundled null", Boolean.TRUE, merged.getScannerEnabled());
     }
 
     @Test
@@ -508,7 +573,7 @@ public class EnterpriseConfigServiceTest extends AppMapBaseTest {
     public void merge_enterpriseManifestUrlOverridesBundled() {
         var manifestUrl = "https://enterprise.example.com/manifest.json";
         AppMapDeploymentSettingsService.getInstance().setEnterpriseDeploymentSettings(
-                new AppMapDeploymentSettings(null, null, manifestUrl, null));
+                new AppMapDeploymentSettings(null, null, manifestUrl, null, null));
 
         var merged = AppMapDeploymentSettingsService.getCachedDeploymentSettings();
         assertEquals("Enterprise appmapManifestUrl must override bundled null", manifestUrl, merged.getAppmapManifestUrl());
@@ -533,6 +598,18 @@ public class EnterpriseConfigServiceTest extends AppMapBaseTest {
                 .subscribe(AppMapSettingsListener.TOPIC, new AppMapSettingsListener() {
                     @Override
                     public void telemetrySettingsChanged() {
+                        counter.incrementAndGet();
+                    }
+                });
+        return counter;
+    }
+
+    private AtomicInteger subscribeScannerChanges() {
+        var counter = new AtomicInteger();
+        ApplicationManager.getApplication().getMessageBus().connect(getTestRootDisposable())
+                .subscribe(AppMapSettingsListener.TOPIC, new AppMapSettingsListener() {
+                    @Override
+                    public void scannerEnabledChanged() {
                         counter.incrementAndGet();
                     }
                 });

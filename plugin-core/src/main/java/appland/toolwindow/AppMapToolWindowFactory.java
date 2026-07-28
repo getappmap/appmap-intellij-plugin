@@ -58,6 +58,17 @@ public class AppMapToolWindowFactory implements ToolWindowFactory, DumbAware {
                 .subscribe(AppMapSettingsListener.TOPIC, new AppMapSettingsListener() {
                     @Override
                     public void apiKeyChanged() {
+                        rebuildContent();
+                    }
+
+                    @Override
+                    public void scannerEnabledChanged() {
+                        // The AppMapWindowPanel builds its "Runtime Analysis" section conditionally on
+                        // isScannerEnabled(), so rebuild the content to add/remove it live.
+                        rebuildContent();
+                    }
+
+                    private void rebuildContent() {
                         ApplicationManager.getApplication().invokeLater(() -> {
                             toolWindow.getContentManager().removeAllContents(true);
                             updateToolWindowContent(project, toolWindow);

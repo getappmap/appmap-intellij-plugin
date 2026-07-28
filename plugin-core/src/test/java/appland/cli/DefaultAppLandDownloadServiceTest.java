@@ -37,7 +37,7 @@ public class DefaultAppLandDownloadServiceTest extends AppMapBaseTest {
 
     @Test
     public void downloadAppMapBinaryWithProhibitingDeploymentSettings() throws Exception {
-        AppMapDeploymentTestUtils.withSiteConfigFile(new AppMapDeploymentSettings(null, false, null, null), () -> {
+        AppMapDeploymentTestUtils.withSiteConfigFile(new AppMapDeploymentSettings(null, false, null, null, null), () -> {
             var status = AppLandDownloadServiceTestUtil.downloadLatestCliVersions(getProject(), CliTool.AppMap, getTestRootDisposable());
             assertEquals(AppMapDownloadStatus.Skipped, status);
         });

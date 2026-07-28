@@ -131,16 +131,19 @@ public final class EnterpriseConfigService {
             // since applyLocalFile() clears the URL as part of switching to local-file mode.
             // telemetryChanged stays null when nothing was mutated (so we don't fire listeners).
             Boolean telemetryChanged = null;
+            boolean scannerChanged = false;
             synchronized (applyLock) {
                 if (gen == applyGeneration.get() && !hasLocalFileCache(cacheService)) {
                     var telemetryBefore = effectiveTelemetry();
+                    var scannerBefore = effectiveScannerEnabled();
                     deploymentService.setEnterpriseDeploymentSettings(null);
                     cacheService.setCacheJson(null);
                     telemetryChanged = telemetryChanged(telemetryBefore);
+                    scannerChanged = scannerBefore != effectiveScannerEnabled();
                 }
             }
             // Fire outside the lock: listeners dispatch synchronously and must not run while we hold it.
-            if (telemetryChanged != null) fireSettingsChanged(telemetryChanged);
+            if (telemetryChanged != null) fireSettingsChanged(telemetryChanged, scannerChanged);
             return;
         }
 
@@ -167,16 +170,19 @@ public final class EnterpriseConfigService {
             // The user explicitly (re)applied this URL and it is unreachable or invalid: clear any
             // previously-applied org config so stale settings don't silently linger, and notify them.
             Boolean telemetryChanged = null;
+            boolean scannerChanged = false;
             synchronized (applyLock) {
                 if (gen == applyGeneration.get()) {
                     var telemetryBefore = effectiveTelemetry();
+                    var scannerBefore = effectiveScannerEnabled();
                     deploymentService.setEnterpriseDeploymentSettings(null);
                     cacheService.setCacheJson(null);
                     telemetryChanged = telemetryChanged(telemetryBefore);
+                    scannerChanged = scannerBefore != effectiveScannerEnabled();
                 }
             }
             if (telemetryChanged != null) {
-                fireSettingsChanged(telemetryChanged); // outside the lock — see above
+                fireSettingsChanged(telemetryChanged, scannerChanged); // outside the lock — see above
                 notifyFetchFailed(url);
             }
             return;
@@ -185,10 +191,12 @@ public final class EnterpriseConfigService {
         // Apply (fast) atomically; skip if a newer apply/clear superseded this fetch.
         boolean applied = false;
         Boolean telemetryChanged = null;
+        boolean scannerChanged = false;
         synchronized (applyLock) {
             if (gen == applyGeneration.get()) {
                 applied = true;
                 var telemetryBefore = effectiveTelemetry();
+                var scannerBefore = effectiveScannerEnabled();
                 // Capture the previous org config (same URL only) before overwriting the cache,
                 // so we can tell which settings actually changed since the last fetch.
                 var previousConfig = readCachedConfigForUrl(url);
@@ -200,10 +208,12 @@ public final class EnterpriseConfigService {
                 clearSupersededUserOverrides(AppMapApplicationSettingsService.getInstance(), parsed, previousConfig);
                 LOG.debug("Applied enterprise settings from URL: " + maskCredentials(url));
                 telemetryChanged = telemetryChanged(telemetryBefore);
+                // Computed after clearSupersededUserOverrides so a superseded user override is reflected.
+                scannerChanged = scannerBefore != effectiveScannerEnabled();
             }
         }
         // Fire outside the lock — listeners dispatch synchronously and must not run while we hold it.
-        if (telemetryChanged != null) fireSettingsChanged(telemetryChanged);
+        if (telemetryChanged != null) fireSettingsChanged(telemetryChanged, scannerChanged);
         if (applied && interactive) notifyApplied();
     }
 
@@ -285,6 +295,13 @@ public final class EnterpriseConfigService {
                 previousConfig != null,
                 settings.getScannerManifestUrl(),
                 () -> settings.setScannerManifestUrl(null));
+
+        maybeClearOverride("appMap.scannerEnabled",
+                newConfig.getScannerEnabled(),
+                previousConfig != null ? previousConfig.getScannerEnabled() : null,
+                previousConfig != null,
+                settings.getEnableScanner(),
+                () -> settings.setEnableScanner(null));
     }
 
     private void maybeClearOverride(@NotNull String key,
@@ -304,9 +321,20 @@ public final class EnterpriseConfigService {
     }
 
     private void fireSettingsChanged(boolean telemetryChanged) {
+        fireSettingsChanged(telemetryChanged, false);
+    }
+
+    private void fireSettingsChanged(boolean telemetryChanged, boolean scannerEnabledChanged) {
         var publisher = ApplicationManager.getApplication().getMessageBus()
                 .syncPublisher(AppMapSettingsListener.TOPIC);
         publisher.enterpriseDeploymentSettingsChanged();
+
+        // Only fire when the effective scanner state actually changed: the listener restarts the
+        // indexer/scanner CLI processes and rebuilds the tool window, so it must not run on every
+        // org-config apply (e.g. a manifest-only change).
+        if (scannerEnabledChanged) {
+            publisher.scannerEnabledChanged();
+        }
 
         // Telemetry routing is comparatively expensive to reconfigure (it rebuilds the reporter and
         // restarts processes that carry telemetry settings in their environment), so only do it when
@@ -332,6 +360,15 @@ public final class EnterpriseConfigService {
 
     private boolean telemetryChanged(@Nullable AppMapDeploymentTelemetrySettings before) {
         return !Objects.equals(before, effectiveTelemetry());
+    }
+
+    /**
+     * @return The effective scanner-enabled state (user override, else bundled/organization config,
+     * else disabled), used to decide whether the scanner CLI process and scanner-dependent UI need to
+     * be started/stopped after an organization-config change.
+     */
+    private boolean effectiveScannerEnabled() {
+        return AppMapApplicationSettingsService.getInstance().isScannerEnabled();
     }
 
     private void notifyApplied() {
@@ -463,8 +500,10 @@ public final class EnterpriseConfigService {
         // Bump the generation so any in-flight fetch is superseded and won't re-apply after we clear.
         applyGeneration.incrementAndGet();
         boolean telemetryChanged;
+        boolean scannerChanged;
         synchronized (applyLock) {
             var telemetryBefore = effectiveTelemetry();
+            var scannerBefore = effectiveScannerEnabled();
             deploymentService.setEnterpriseDeploymentSettings(null);
             EnterpriseConfigCacheService.getInstance().setCacheJson(null);
             applicationSettings.setOrgConfigAppliedAt(null);
@@ -472,9 +511,10 @@ public final class EnterpriseConfigService {
             // would only spawn a redundant apply pipeline (and a duplicate telemetry reload).
             applicationSettings.setConfigurationUrl(null);
             telemetryChanged = telemetryChanged(telemetryBefore);
+            scannerChanged = scannerBefore != effectiveScannerEnabled();
         }
         // Fire outside the lock — listeners dispatch synchronously and must not run while we hold it.
-        fireSettingsChanged(telemetryChanged);
+        fireSettingsChanged(telemetryChanged, scannerChanged);
 
         if (StringUtil.isNotEmpty(System.getenv("APPMAP_CONFIG_URL"))) {
             LOG.warn("Organization config is also set via the APPMAP_CONFIG_URL environment variable; " +
@@ -501,8 +541,10 @@ public final class EnterpriseConfigService {
         // Bump the generation so any in-flight URL fetch is superseded and won't clobber this apply.
         applyGeneration.incrementAndGet();
         boolean telemetryChanged;
+        boolean scannerChanged;
         synchronized (applyLock) {
             var telemetryBefore = effectiveTelemetry();
+            var scannerBefore = effectiveScannerEnabled();
 
             // Clear any existing URL-based config. Clear the URL non-notifying: a configurationUrlChanged
             // here would kick off a second, redundant apply pipeline. We apply the file directly.
@@ -518,11 +560,15 @@ public final class EnterpriseConfigService {
             // A local-file apply is a one-shot, fresh source: supersede every user override it specifies.
             clearSupersededUserOverrides(applicationSettings, parsed, null);
             telemetryChanged = telemetryChanged(telemetryBefore);
+            // Computed after clearSupersededUserOverrides so a superseded user override is reflected.
+            scannerChanged = scannerBefore != effectiveScannerEnabled();
         }
 
         notifyApplied();
-        var changed = telemetryChanged;
-        ApplicationManager.getApplication().executeOnPooledThread(() -> fireSettingsChanged(changed));
+        var telemetryDidChange = telemetryChanged;
+        var scannerDidChange = scannerChanged;
+        ApplicationManager.getApplication().executeOnPooledThread(
+                () -> fireSettingsChanged(telemetryDidChange, scannerDidChange));
     }
 
     private void showLocalFileError(@Nullable com.intellij.openapi.project.Project project, @NotNull String message) {

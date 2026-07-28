@@ -307,7 +307,7 @@ public class DefaultCommandLineServiceTest extends AppMapBaseTest {
     @Test
     public void scannerSettingDefault() throws Exception {
         var settings = AppMapApplicationSettingsService.getInstance();
-        assertFalse("Scanner must be turned off by default", settings.isEnableScanner());
+        assertFalse("Scanner must be turned off by default", settings.isScannerEnabled());
 
         var tempDir = myFixture.createFile("test.txt", "").getParent();
         withContentRoot(tempDir, () -> {

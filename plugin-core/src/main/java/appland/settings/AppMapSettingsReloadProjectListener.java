@@ -99,6 +99,11 @@ public class AppMapSettingsReloadProjectListener implements AppMapSettingsListen
 
     @Override
     public void scannerEnabledChanged() {
+        // Start or stop the scanner CLI process live: restartProcessesInBackground() re-evaluates the
+        // isScannerEnabled() gate per watched root, so the scanner is launched or torn down without a
+        // restart. The reload notification remains as a fallback for UI that can't be rebuilt in place
+        // (the Problems View "Runtime Analysis" findings tab).
+        reloadCliProcessesAlarm.get().cancelAndRequest();
         showReloadNotificationAlarm.get().cancelAndRequest();
     }
 

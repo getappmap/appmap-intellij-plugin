@@ -71,6 +71,22 @@ If unset, the defaults are used:
 - `appMap.manifest.appmapUrl`: `https://raw.githubusercontent.com/getappmap/appmap-js/release-manifests/appmap-latest.json`
 - `appMap.manifest.scannerUrl`: `https://raw.githubusercontent.com/getappmap/appmap-js/release-manifests/scanner-latest.json`
 
+#### Enabling the scanner
+
+The AppMap scanner (runtime analysis / findings) can be enabled centrally with the same key the
+VS Code plugin uses, `appMap.scannerEnabled`:
+
+```json
+{
+    "appMap.scannerEnabled": true
+}
+```
+
+When omitted (the default), the scanner stays off unless the user enables it in
+`Settings > Tools > AppMap`. A user setting always wins over the deployment value; applying an
+organization configuration that specifies this key supersedes the user's choice (see
+[Organization Configuration](./ORGANIZATION_CONFIGURATION.md)).
+
 ### Bundling AppMap binaries
 
 The following directory inside the plugin ZIP file is searched for AppMap binaries:

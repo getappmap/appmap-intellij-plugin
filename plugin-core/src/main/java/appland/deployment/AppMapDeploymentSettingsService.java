@@ -113,7 +113,8 @@ public final class AppMapDeploymentSettingsService {
             enterprise.getTelemetry() != null ? enterprise.getTelemetry() : bundled.getTelemetry(),
             enterprise.getAutoUpdateTools() != null ? enterprise.getAutoUpdateTools() : bundled.getAutoUpdateTools(),
             enterprise.getAppmapManifestUrl() != null ? enterprise.getAppmapManifestUrl() : bundled.getAppmapManifestUrl(),
-            enterprise.getScannerManifestUrl() != null ? enterprise.getScannerManifestUrl() : bundled.getScannerManifestUrl()
+            enterprise.getScannerManifestUrl() != null ? enterprise.getScannerManifestUrl() : bundled.getScannerManifestUrl(),
+            enterprise.getScannerEnabled() != null ? enterprise.getScannerEnabled() : bundled.getScannerEnabled()
         );
     }
 
