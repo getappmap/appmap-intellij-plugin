@@ -1,5 +1,12 @@
 AppMap Plugin Changelog
 
+## [0.86.0](https://github.com/getappmap/appmap-intellij-plugin/compare/v0.85.2...v0.86.0) (2026-08-04)
+
+
+### Features
+
+-  **scanner:** enable scanner via bundled/organization config ([bfcd0b2](https://github.com/getappmap/appmap-intellij-plugin/commit/bfcd0b2d21ee4ff9542408aac7b40edc0695f124))
+
 ## [0.85.2](https://github.com/getappmap/appmap-intellij-plugin/compare/v0.85.1...v0.85.2) (2026-07-20)
 
 
