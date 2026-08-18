@@ -3,6 +3,7 @@ package appland.actions;
 import appland.AppMapBaseTest;
 import appland.RequiresNetwork;
 import appland.cli.TestAppLandDownloadService;
+import appland.settings.AppMapApplicationSettingsService;
 import appland.utils.DataContexts;
 import appland.webviews.navie.NavieEditor;
 import appland.webviews.navie.NavieEditorProvider;
@@ -36,6 +37,9 @@ public class AddNavieContextFilesActionTest extends AppMapBaseTest {
     @Before
     public void ensureToolsDownloaded() {
         TestAppLandDownloadService.ensureDownloaded();
+
+        // the JSON-RPC server, which backs the Navie editor, only starts for a signed-in user
+        AppMapApplicationSettingsService.getInstance().setApiKey("api-key");
 
         // Unfortunately, JCEF is unsupported on headless systems, which includes CI.
         Assume.assumeTrue("JCEF must be supported to run tests of this class", JBCefApp.isSupported());

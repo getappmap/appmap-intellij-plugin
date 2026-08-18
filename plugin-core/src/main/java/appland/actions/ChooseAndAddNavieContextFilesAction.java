@@ -4,8 +4,6 @@ import appland.utils.AppMapFileChoosers;
 import appland.webviews.navie.NavieEditor;
 import com.intellij.openapi.project.Project;
 
-import com.intellij.openapi.actionSystem.ActionUpdateThread;
-import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.fileChooser.FileChooserDescriptor;
 import com.intellij.openapi.fileEditor.FileEditorManager;
@@ -15,15 +13,10 @@ import org.jetbrains.annotations.Nullable;
 /**
  * Action to let the user choose the files to add as pinned files to the active Navie editor.
  */
-public class ChooseAndAddNavieContextFilesAction extends AnAction {
+public class ChooseAndAddNavieContextFilesAction extends AppMapFeatureAction {
     @Override
-    public @NotNull ActionUpdateThread getActionUpdateThread() {
-        return ActionUpdateThread.BGT;
-    }
-
-    @Override
-    public void update(@NotNull AnActionEvent e) {
-        e.getPresentation().setEnabled(findActiveNavieEditor(e) != null);
+    protected boolean isAvailable(@NotNull AnActionEvent e) {
+        return findActiveNavieEditor(e) != null;
     }
 
     public static void chooseAndAddPinnedFiles(Project project, NavieEditor editor) {
