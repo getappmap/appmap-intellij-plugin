@@ -52,6 +52,58 @@ public class DefaultAppLandJsonRpcServiceTest extends AppMapBaseTest {
         TestAppLandDownloadService.ensureDownloaded();
     }
 
+    @Before
+    public void signIn() {
+        // the JSON-RPC server only starts for a signed-in user
+        AppMapApplicationSettingsService.getInstance().setApiKey("api-key");
+    }
+
+    @Test
+    public void serverGatedOnAuthentication() throws Exception {
+        var settings = AppMapApplicationSettingsService.getInstance();
+        settings.setApiKey(null);
+
+        var service = AppLandJsonRpcService.getInstance(getProject());
+
+        // startServer() launches the process synchronously, so no process afterwards means the gate applied
+        service.startServer();
+        assertNoJsonRpcProcess();
+
+        // signing in must start the server
+        var started = createWaitForJsonRpcServerStartCondition();
+        settings.setApiKeyNotifying("api-key");
+        assertTrue("The JSON-RPC server must start after signing in", started.await(60, TimeUnit.SECONDS));
+
+        // signing out must stop it
+        var stopped = createWaitForJsonRpcServerStopCondition();
+        settings.setApiKeyNotifying(null);
+        assertTrue("The JSON-RPC server must stop after signing out", stopped.await(60, TimeUnit.SECONDS));
+
+        // ... and it must stay stopped, even if something requests a start
+        service.startServer();
+        assertNoJsonRpcProcess();
+    }
+
+    private void assertNoJsonRpcProcess() {
+        assertFalse("No JSON-RPC process must be launched while signed out",
+                TestAppLandJsonRpcService.hasJsonRpcProcess(getProject()));
+        assertFalse("The JSON-RPC server must not be running while signed out",
+                AppLandJsonRpcService.getInstance(getProject()).isServerRunning());
+    }
+
+    private @NotNull CountDownLatch createWaitForJsonRpcServerStopCondition() {
+        var latch = new CountDownLatch(1);
+        getProject().getMessageBus()
+                .connect(getTestRootDisposable())
+                .subscribe(AppLandJsonRpcListener.TOPIC, new AppLandJsonRpcListener() {
+                    @Override
+                    public void serverStopped() {
+                        latch.countDown();
+                    }
+                });
+        return latch;
+    }
+
     @Test
     public void launchedWithProject() {
         waitForJsonRpcServer();

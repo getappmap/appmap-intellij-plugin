@@ -37,6 +37,11 @@ import com.intellij.util.concurrency.annotations.RequiresReadLock;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+/**
+ * Part of the AppMap feature surface, but deliberately not an {@link AppMapFeatureAction}: it also controls its
+ * own visibility in the AppMap tool window's toolbar, and it stays available with an inactive plugin while a
+ * recording is in flight, which {@link AppMapFeatureAction} cannot express.
+ */
 public class StopAppMapRecordingAction extends AnAction implements DumbAware {
     private static final Logger LOG = Logger.getInstance(StopAppMapRecordingAction.class);
 
@@ -56,10 +61,22 @@ public class StopAppMapRecordingAction extends AnAction implements DumbAware {
             return;
         }
 
+        var recording = RemoteRecordingStatusService.getInstance(project).getActiveRecordingURL() != null;
+
+        // Apply the feature-surface gate HERE, and not inside the isFromActionToolbar() branch below: the
+        // branch is skipped for the Tools > AppMap menu, so a gate placed inside it would leave the menu entry
+        // enabled while the plugin is inactive. AppMapActionAuthenticationGateTest covers this.
+        //
+        // Only gate when there's nothing to stop: signing out mid-recording must not leave a recording running
+        // in the user's application with no way to stop it.
+        if (!recording && !AppMapFeatureAction.isAppMapAvailable()) {
+            e.getPresentation().setEnabled(false);
+            return;
+        }
+
         // don't hide the "Stop recording" action in the global list, only in the toolbar
         // we still want to allow a user to stop recording at any URL
         if (e.isFromActionToolbar()) {
-            var recording = RemoteRecordingStatusService.getInstance(project).getActiveRecordingURL() != null;
             e.getPresentation().setEnabledAndVisible(recording);
         }
     }

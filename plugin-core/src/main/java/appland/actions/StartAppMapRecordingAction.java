@@ -16,6 +16,10 @@ import org.jetbrains.annotations.NotNull;
 
 import static appland.AppMapBundle.get;
 
+/**
+ * Part of the AppMap feature surface, but deliberately not an {@link AppMapFeatureAction}: it also controls
+ * its own visibility in the AppMap tool window's toolbar, which isn't expressible as a predicate.
+ */
 public class StartAppMapRecordingAction extends AnAction implements DumbAware {
     public StartAppMapRecordingAction() {
         super(Icons.START_RECORDING_ACTION);
@@ -30,6 +34,14 @@ public class StartAppMapRecordingAction extends AnAction implements DumbAware {
     public void update(@NotNull AnActionEvent e) {
         var project = e.getProject();
         if (project == null) {
+            return;
+        }
+
+        // Apply the feature-surface gate HERE, and not inside the isFromActionToolbar() branch below:
+        // the branch is skipped for the Tools > AppMap menu, so a gate placed inside it would leave the
+        // menu entry enabled while the plugin is inactive. AppMapActionAuthenticationGateTest covers this.
+        if (!AppMapFeatureAction.isAppMapAvailable()) {
+            e.getPresentation().setEnabled(false);
             return;
         }
 
