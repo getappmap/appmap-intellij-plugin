@@ -7,9 +7,11 @@ import org.junit.Test;
 public class AppMapDeploymentSettingsTest extends AppMapBaseTest {
     @Test
     public void jsonSerialization() {
-        var settings = new AppMapDeploymentSettings(new AppMapDeploymentTelemetrySettings(
-                "splunk", "https://my-splunk.example.com:443", "my-hec-token", "my-ca-cert"
-        ), true, null, null, null);
+        var settings = AppMapDeploymentSettings.builder()
+                .telemetry(new AppMapDeploymentTelemetrySettings(
+                        "splunk", "https://my-splunk.example.com:443", "my-hec-token", "my-ca-cert"))
+                .autoUpdateTools(true)
+                .build();
 
         var expectedJson = """
                 {"appMap.telemetry":{"backend":"splunk","url":"https://my-splunk.example.com:443","token":"my-hec-token","ca":"my-ca-cert"},"appMap.autoUpdateTools":true}

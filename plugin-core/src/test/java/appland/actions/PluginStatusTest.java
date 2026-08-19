@@ -14,7 +14,7 @@ public class PluginStatusTest extends AppMapBaseTest {
                 "https://my-splunk.example.com:443",
                 "my-hec-token",
                 "my-ca-cert");
-        AppMapDeploymentTestUtils.withSiteConfigFile(new AppMapDeploymentSettings(telemetrySettings), () -> {
+        AppMapDeploymentTestUtils.withSiteConfigFile(AppMapDeploymentSettings.builder().telemetry(telemetrySettings).build(), () -> {
             var report = PluginStatus.statusReportText(new EmptyProgressIndicator());
             assertNotNull(report);
         });

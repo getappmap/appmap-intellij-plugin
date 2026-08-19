@@ -1,13 +1,21 @@
 package appland.deployment;
 
 import com.google.gson.annotations.SerializedName;
+import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.jetbrains.annotations.Nullable;
 
+/**
+ * Construct with {@link #builder()}. The all-args constructor is private on purpose: these fields are all
+ * nullable and mostly of the same few types, so a positional call silently accepts a wrong ordering, and
+ * every added field breaks every call site.
+ */
 @Data
-@AllArgsConstructor
+@Builder
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
 @NoArgsConstructor
 public final class AppMapDeploymentSettings {
     @SerializedName("appMap.telemetry")
@@ -16,7 +24,7 @@ public final class AppMapDeploymentSettings {
 
     @SerializedName("appMap.autoUpdateTools")
     @Nullable
-    private Boolean autoUpdateTools = null;
+    private Boolean autoUpdateTools;
 
     @SerializedName("appMap.manifest.appmapUrl")
     @Nullable
@@ -33,15 +41,10 @@ public final class AppMapDeploymentSettings {
      */
     @SerializedName("appMap.scannerEnabled")
     @Nullable
-    private Boolean scannerEnabled = null;
-
-    public AppMapDeploymentSettings(@Nullable AppMapDeploymentTelemetrySettings telemetry) {
-        this(telemetry, null, null, null, null);
-    }
+    private Boolean scannerEnabled;
 
     public boolean isEmpty() {
         return this.telemetry == null && autoUpdateTools == null && appmapManifestUrl == null
                 && scannerManifestUrl == null && scannerEnabled == null;
     }
 }
-

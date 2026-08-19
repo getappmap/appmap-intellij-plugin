@@ -24,7 +24,7 @@ public class TelemetryServiceTest extends AppMapBaseTest {
     @Test
     public void notificationSkippedForSplunk() throws Exception {
         var splunk = new AppMapDeploymentTelemetrySettings("splunk", "https://splunk.example.com", "token", null);
-        var settings = new AppMapDeploymentSettings(splunk);
+        var settings = AppMapDeploymentSettings.builder().telemetry(splunk).build();
 
         AppMapDeploymentTestUtils.withSiteConfigFile(settings, () -> {
             var service = new TelemetryService();
