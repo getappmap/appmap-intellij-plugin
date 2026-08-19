@@ -210,6 +210,25 @@ public class EnterpriseConfigServiceTest extends AppMapBaseTest {
     }
 
     @Test
+    public void applyLocalFile_manifestUrlOnly_firesNeitherScannerNorTelemetryChange() throws Exception {
+        var scannerChanges = subscribeScannerChanges();
+        var telemetryChanges = subscribeTelemetryChanges();
+        var deploymentChanges = subscribeDeploymentChanges();
+
+        EnterpriseConfigService.getInstance().applyLocalFile(
+                "{\"appMap.manifest.appmapUrl\": \"https://example.com/manifest.json\"}", null);
+
+        waitUntil(() -> deploymentChanges.get() >= 1);
+        assertEquals("A manifest-only org config must still announce that deployment settings changed",
+                1, deploymentChanges.get());
+        assertEquals("A manifest-only org config must not restart the CLI processes via a scanner change",
+                0, scannerChanges.get());
+        // The reporter reload happens in the same branch as this event, so asserting the event covers it.
+        assertEquals("A manifest-only org config must not rebuild the telemetry reporter",
+                0, telemetryChanges.get());
+    }
+
+    @Test
     public void applyLocalFile_supersedesUserOverrideForScannerEnabled() {
         var settings = AppMapApplicationSettingsService.getInstance();
         settings.setEnableScanner(false); // user had explicitly disabled the scanner
