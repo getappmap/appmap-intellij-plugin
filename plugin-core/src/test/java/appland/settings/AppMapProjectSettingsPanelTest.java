@@ -43,8 +43,10 @@ public class AppMapProjectSettingsPanelTest extends AppMapBaseTest {
 
     @Test
     public void telemetryOnlyConfigurationOffersNoDeploymentDefaults() throws Exception {
-        var telemetryOnly = new AppMapDeploymentSettings(
-                new AppMapDeploymentTelemetrySettings("splunk", "https://splunk.example.com:443", "token", "system"));
+        var telemetryOnly = AppMapDeploymentSettings.builder()
+                .telemetry(new AppMapDeploymentTelemetrySettings(
+                        "splunk", "https://splunk.example.com:443", "token", "system"))
+                .build();
 
         withSiteConfigFile(telemetryOnly, () -> {
             var panel = createPanel();
@@ -182,7 +184,7 @@ public class AppMapProjectSettingsPanelTest extends AppMapBaseTest {
      * A deployment configuration which only sets {@code appMap.scannerEnabled}.
      */
     private static @NotNull AppMapDeploymentSettings scannerOnlyDeploymentSettings() {
-        return new AppMapDeploymentSettings(null, null, null, null, true);
+        return AppMapDeploymentSettings.builder().scannerEnabled(true).build();
     }
 
     private @NotNull AppMapProjectSettingsPanel createPanel() {
