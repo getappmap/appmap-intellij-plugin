@@ -10,25 +10,36 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.ComboBox
 import com.intellij.openapi.util.text.Strings
 import com.intellij.openapi.util.text.StringUtil
-import com.intellij.ui.CollectionComboBoxModel
+import com.intellij.ui.MutableCollectionComboBoxModel
 import com.intellij.ui.JBIntSpinner
 import com.intellij.ui.components.JBTextField
 import com.intellij.ui.dsl.builder.AlignX
+import com.intellij.ui.dsl.builder.Panel
 import com.intellij.ui.dsl.builder.RightGap
 import com.intellij.ui.dsl.builder.Row
 import com.intellij.ui.dsl.builder.RowLayout
 import com.intellij.ui.dsl.builder.panel
 import com.intellij.ui.dsl.listCellRenderer.textListCellRenderer
 import com.intellij.util.text.DateFormatUtil
+import org.jetbrains.annotations.TestOnly
 import java.awt.BorderLayout
 import javax.swing.JCheckBox
+import javax.swing.JEditorPane
 import javax.swing.JLabel
 import javax.swing.JPanel
 
 class AppMapProjectSettingsPanel(private val project: Project?) {
+    private val autoUpdateTools = DeploymentBackedSetting(
+        messagePrefix = "projectSettings.automaticToolsUpdate",
+        builtInDefault = true,
+    ) { getCachedDeploymentSettings().autoUpdateTools }
+
+    private val scanner = DeploymentBackedSetting(
+        messagePrefix = "projectSettings.enableScanner",
+        builtInDefault = false,
+    ) { getCachedDeploymentSettings().scannerEnabled }
+
     private lateinit var enableTelemetry: JCheckBox
-    private lateinit var enableAutoToolsUpdate: ComboBox<Boolean?>
-    private lateinit var enableScanner: ComboBox<Boolean?>
     private lateinit var cliEnvironment: EnvironmentVariablesComponent
     private lateinit var maxPinnedFileSizeKB: JBIntSpinner
     private lateinit var openAIKey: JBTextField
@@ -40,6 +51,18 @@ class AppMapProjectSettingsPanel(private val project: Project?) {
     private lateinit var orgConfigSourceRow: Row
     private lateinit var orgConfigStatusLabel: JLabel
     private lateinit var orgConfigSourceLabel: JLabel
+
+    @TestOnly
+    fun getAutoUpdateToolsComboBox(): ComboBox<Boolean?> = autoUpdateTools.comboBox
+
+    @TestOnly
+    fun getScannerComboBox(): ComboBox<Boolean?> = scanner.comboBox
+
+    @TestOnly
+    fun getAutoUpdateToolsDeploymentComment(): String? = autoUpdateTools.visibleCommentText()
+
+    @TestOnly
+    fun getScannerDeploymentComment(): String? = scanner.visibleCommentText()
 
     /**
      * Reflects whether an organization configuration is currently applied. When applied, shows the
@@ -80,13 +103,7 @@ class AppMapProjectSettingsPanel(private val project: Project?) {
     ) {
         enableTelemetry.isSelected = applicationSettings.isEnableTelemetry
 
-        val scannerEnabled = applicationSettings.enableScanner
-        enableScanner.selectedItem = when {
-            // without deployment settings, null collapses to the default of "disabled"
-            scannerEnabled == null && getCachedDeploymentSettings().isEmpty -> false
-            // with deployment settings, null means "use the deployment default"
-            else -> scannerEnabled
-        }
+        scanner.loadFrom(applicationSettings.enableScanner)
 
         cliEnvironment.envs = applicationSettings.cliEnvironment
         cliEnvironment.isPassParentEnvs = applicationSettings.isCliPassParentEnv
@@ -95,14 +112,8 @@ class AppMapProjectSettingsPanel(private val project: Project?) {
         openAIKey.text = Strings.notNullize(secureApplicationSettings.openAIKey)
         useAnimation.isSelected = applicationSettings.isUseAnimation
 
-        val autoUpdateTools = applicationSettings.autoUpdateTools
-        enableAutoToolsUpdate.selectedItem = when {
-            // without deployment settings, null means to enable automatic downloads
-            autoUpdateTools == null && getCachedDeploymentSettings().isEmpty -> true
-            // with deployment settings, both true and false override the default from the deployment setting
-            else -> autoUpdateTools
-        }
-        
+        autoUpdateTools.loadFrom(applicationSettings.autoUpdateTools)
+
         appmapManifestUrl.text = DownloadSettings.getManifestUrl(CliTool.AppMap)
         scannerManifestUrl.text = DownloadSettings.getManifestUrl(CliTool.Scanner)
         updateOrgConfigStatus()
@@ -115,11 +126,7 @@ class AppMapProjectSettingsPanel(private val project: Project?) {
     ) {
         applicationSettings.isEnableTelemetry = enableTelemetry.isSelected
 
-        val enableScannerValue = when {
-            // without deployment settings, "disabled" is the default and is stored as null (no override)
-            enableScanner.selectedItem == false && getCachedDeploymentSettings().isEmpty -> null
-            else -> enableScanner.selectedItem as? Boolean
-        }
+        val enableScannerValue = scanner.valueToStore()
         if (notify) {
             applicationSettings.setEnableScannerNotifying(enableScannerValue)
         } else {
@@ -136,14 +143,11 @@ class AppMapProjectSettingsPanel(private val project: Project?) {
         secureApplicationSettings.openAIKey = Strings.nullize(openAIKey.text)
         applicationSettings.isUseAnimation = useAnimation.isSelected
 
-        val autoUpdateTools = when {
-            enableAutoToolsUpdate.selectedItem == true && getCachedDeploymentSettings().isEmpty -> null
-            else -> enableAutoToolsUpdate.selectedItem as? Boolean
-        }
+        val autoUpdateToolsValue = autoUpdateTools.valueToStore()
         if (notify) {
-            applicationSettings.setAutoUpdateToolsNotifying(autoUpdateTools)
+            applicationSettings.setAutoUpdateToolsNotifying(autoUpdateToolsValue)
         } else {
-            applicationSettings.autoUpdateTools = autoUpdateTools
+            applicationSettings.autoUpdateTools = autoUpdateToolsValue
         }
         
         val defaultAppMapUrl = getCachedDeploymentSettings().appmapManifestUrl?.takeUnless { it.isBlank() } ?: DownloadSettings.DEFAULT_APPMAP_MANIFEST_URL
@@ -178,58 +182,8 @@ class AppMapProjectSettingsPanel(private val project: Project?) {
                 useAnimation = checkBox(AppMapBundle.get("projectSettings.useAnimation.title")).component
             }
             group(AppMapBundle.get("projectSettings.appMapServices")) {
-                row(AppMapBundle.get("projectSettings.automaticToolsUpdate.title")) {
-                    val deploymentSettings = getCachedDeploymentSettings()
-                    val values = when {
-                        deploymentSettings.isEmpty -> listOf(true, false)
-                        // null to show "Use deployment settings"
-                        else -> listOf(null, true, false)
-                    }
-
-                    comboBox(CollectionComboBoxModel(values), textListCellRenderer {
-                        when (it) {
-                            true -> AppMapBundle.get("projectSettings.automaticToolsUpdate.enabled")
-                            false -> AppMapBundle.get("projectSettings.automaticToolsUpdate.disabled")
-                            null -> AppMapBundle.get("projectSettings.automaticToolsUpdate.deploymentDefault")
-                        }
-                    }).apply {
-                        if (!deploymentSettings.isEmpty) {
-                            val value = when (deploymentSettings.autoUpdateTools ?: true) {
-                                true -> AppMapBundle.get("projectSettings.automaticToolsUpdate.enabled")
-                                else -> AppMapBundle.get("projectSettings.automaticToolsUpdate.disabled")
-                            }
-                            comment(AppMapBundle.get("projectSettings.automaticToolsUpdate.deploymentDefaultComment", value))
-                        }
-                    }.applyToComponent {
-                        enableAutoToolsUpdate = this
-                    }
-                }
-                row(AppMapBundle.get("projectSettings.enableScanner.title")) {
-                    val deploymentSettings = getCachedDeploymentSettings()
-                    val values = when {
-                        deploymentSettings.isEmpty -> listOf(true, false)
-                        // null to show "Use deployment settings"
-                        else -> listOf(null, true, false)
-                    }
-
-                    comboBox(CollectionComboBoxModel(values), textListCellRenderer {
-                        when (it) {
-                            true -> AppMapBundle.get("projectSettings.enableScanner.enabled")
-                            false -> AppMapBundle.get("projectSettings.enableScanner.disabled")
-                            null -> AppMapBundle.get("projectSettings.enableScanner.deploymentDefault")
-                        }
-                    }).apply {
-                        if (!deploymentSettings.isEmpty) {
-                            val value = when (deploymentSettings.scannerEnabled ?: false) {
-                                true -> AppMapBundle.get("projectSettings.enableScanner.enabled")
-                                else -> AppMapBundle.get("projectSettings.enableScanner.disabled")
-                            }
-                            comment(AppMapBundle.get("projectSettings.enableScanner.deploymentDefaultComment", value))
-                        }
-                    }.applyToComponent {
-                        enableScanner = this
-                    }
-                }
+                autoUpdateTools.buildRow(this)
+                scanner.buildRow(this)
                 row(AppMapBundle.get("projectSettings.openAIKey.title")) {
                     openAIKey = textField().align(AlignX.FILL).component
                 }.layout(RowLayout.INDEPENDENT)
@@ -273,4 +227,98 @@ class AppMapProjectSettingsPanel(private val project: Project?) {
             }
         }
     }
+}
+/**
+ * A tri-state setting which can fall back to the bundled/organization deployment configuration:
+ * Yes / No / "Default from deployment settings".
+ *
+ * The `null` ("Default from deployment settings") entry, and the comment naming the deployment value, are only
+ * present while the deployment configuration actually sets this field. That can change while the settings page
+ * is open — an organization configuration is applied and cleared from the buttons in the panel's own "Advanced"
+ * group — so both are recomputed by [loadFrom], which is what [AppMapProjectConfigurable.reset] calls when it's
+ * notified of the change. There is deliberately no separate code path for building the row: [buildRow]
+ * populates it through the same [refresh] the reload uses, so the two can't drift apart.
+ *
+ * @param messagePrefix Resource bundle prefix owning the `.title`, `.enabled`, `.disabled`,
+ *                      `.deploymentDefault` and `.deploymentDefaultComment` keys.
+ * @param builtInDefault The effective value when there is neither a user override nor a deployment default.
+ * @param deploymentDefault The value the deployment configuration sets for this field, or `null` if it sets none.
+ */
+private class DeploymentBackedSetting(
+    private val messagePrefix: String,
+    private val builtInDefault: Boolean,
+    private val deploymentDefault: () -> Boolean?,
+) {
+    private val model = MutableCollectionComboBoxModel<Boolean?>()
+
+    lateinit var comboBox: ComboBox<Boolean?>
+        private set
+
+    private var comment: JEditorPane? = null
+
+    fun buildRow(panel: Panel) {
+        panel.row(AppMapBundle.get("$messagePrefix.title")) {
+            // The comment is always created, even when there's nothing to say yet: it can't be added later,
+            // and the deployment configuration may gain a default for this field while the page is open.
+            val cell = comboBox(model, textListCellRenderer {
+                when (it) {
+                    null -> AppMapBundle.get("$messagePrefix.deploymentDefault")
+                    else -> valueLabel(it)
+                }
+            }).comment("")
+
+            comboBox = cell.component
+            comment = cell.comment
+        }
+
+        refresh()
+    }
+
+    /**
+     * Shows [userOverride], or the effective default when the user hasn't chosen anything.
+     */
+    fun loadFrom(userOverride: Boolean?) {
+        refresh()
+
+        comboBox.selectedItem = when {
+            // without a deployment default, "no override" collapses to the built-in default
+            userOverride == null && deploymentDefault() == null -> builtInDefault
+            // with one, null is a selectable value meaning "use the deployment default"
+            else -> userOverride
+        }
+    }
+
+    /**
+     * @return The value to persist as the user override, or `null` for "no override".
+     */
+    fun valueToStore(): Boolean? = when {
+        // Storing the built-in default as an explicit override would be indistinguishable from a deliberate
+        // choice, and would then win over a deployment default applied later.
+        comboBox.selectedItem == builtInDefault && deploymentDefault() == null -> null
+        else -> comboBox.selectedItem as? Boolean
+    }
+
+    /**
+     * @return The deployment-default comment, or `null` while it isn't shown. Test-only.
+     */
+    fun visibleCommentText(): String? = comment?.takeIf { it.isVisible }?.text
+
+    /**
+     * Recomputes what the deployment configuration currently offers for this field.
+     */
+    private fun refresh() {
+        val default = deploymentDefault()
+
+        model.replaceAll(if (default == null) listOf(true, false) else listOf(null, true, false))
+
+        comment?.let {
+            it.isVisible = default != null
+            if (default != null) {
+                it.text = AppMapBundle.get("$messagePrefix.deploymentDefaultComment", valueLabel(default))
+            }
+        }
+    }
+
+    private fun valueLabel(value: Boolean): String =
+        AppMapBundle.get(if (value) "$messagePrefix.enabled" else "$messagePrefix.disabled")
 }
