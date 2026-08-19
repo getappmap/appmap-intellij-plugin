@@ -29,7 +29,7 @@ public class AppMapSplunkTelemetryCliEnvProviderTest extends AppMapBaseTest {
         var provider = new AppMapSplunkTelemetryCliEnvProvider();
 
         var splunk = new AppMapDeploymentTelemetrySettings("splunk", null, "my-token", null);
-        AppMapDeploymentTestUtils.withSiteConfigFile(new AppMapDeploymentSettings(splunk), () -> {
+        AppMapDeploymentTestUtils.withSiteConfigFile(AppMapDeploymentSettings.builder().telemetry(splunk).build(), () -> {
             assertEquals("With incomplete Splunk deployment settings, the env must be empty.", 0, provider.getEnvironment().size());
         });
     }
@@ -39,7 +39,7 @@ public class AppMapSplunkTelemetryCliEnvProviderTest extends AppMapBaseTest {
         var provider = new AppMapSplunkTelemetryCliEnvProvider();
 
         var splunk = new AppMapDeploymentTelemetrySettings("splunk", "https://my-splunk.example.com", null, null);
-        AppMapDeploymentTestUtils.withSiteConfigFile(new AppMapDeploymentSettings(splunk), () -> {
+        AppMapDeploymentTestUtils.withSiteConfigFile(AppMapDeploymentSettings.builder().telemetry(splunk).build(), () -> {
             assertEquals("With incomplete Splunk deployment settings, the env must be empty.", 0, provider.getEnvironment().size());
         });
     }
@@ -49,7 +49,7 @@ public class AppMapSplunkTelemetryCliEnvProviderTest extends AppMapBaseTest {
         var provider = new AppMapSplunkTelemetryCliEnvProvider();
 
         var splunk = new AppMapDeploymentTelemetrySettings("splunk", "https://my-splunk.example.com", "my-token", "my-ca-cert");
-        AppMapDeploymentTestUtils.withSiteConfigFile(new AppMapDeploymentSettings(splunk), () -> {
+        AppMapDeploymentTestUtils.withSiteConfigFile(AppMapDeploymentSettings.builder().telemetry(splunk).build(), () -> {
             var expectedEnv = Map.of(
                     "APPMAP_TELEMETRY_BACKEND", "splunk",
                     "SPLUNK_URL", "https://my-splunk.example.com",

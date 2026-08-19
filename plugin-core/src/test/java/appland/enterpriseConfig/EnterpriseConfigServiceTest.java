@@ -178,7 +178,7 @@ public class EnterpriseConfigServiceTest extends AppMapBaseTest {
     public void isScannerEnabled_userOverrideWinsOverDeployment() {
         var settings = AppMapApplicationSettingsService.getInstance();
         AppMapDeploymentSettingsService.getInstance().setEnterpriseDeploymentSettings(
-                new AppMapDeploymentSettings(null, null, null, null, true));
+                AppMapDeploymentSettings.builder().scannerEnabled(true).build());
         assertTrue("Deployment config enables the scanner when there is no user override", settings.isScannerEnabled());
 
         settings.setEnableScanner(false);
@@ -554,7 +554,7 @@ public class EnterpriseConfigServiceTest extends AppMapBaseTest {
     @Test
     public void merge_enterpriseOverridesBundledAutoUpdateTools() {
         AppMapDeploymentSettingsService.getInstance().setEnterpriseDeploymentSettings(
-                new AppMapDeploymentSettings(null, false, null, null, null));
+                AppMapDeploymentSettings.builder().autoUpdateTools(false).build());
 
         var merged = AppMapDeploymentSettingsService.getCachedDeploymentSettings();
         assertEquals("Enterprise autoUpdateTools=false must override bundled null", Boolean.FALSE, merged.getAutoUpdateTools());
@@ -563,7 +563,7 @@ public class EnterpriseConfigServiceTest extends AppMapBaseTest {
     @Test
     public void merge_enterpriseOverridesBundledScannerEnabled() {
         AppMapDeploymentSettingsService.getInstance().setEnterpriseDeploymentSettings(
-                new AppMapDeploymentSettings(null, null, null, null, true));
+                AppMapDeploymentSettings.builder().scannerEnabled(true).build());
 
         var merged = AppMapDeploymentSettingsService.getCachedDeploymentSettings();
         assertEquals("Enterprise scannerEnabled=true must override bundled null", Boolean.TRUE, merged.getScannerEnabled());
@@ -592,7 +592,7 @@ public class EnterpriseConfigServiceTest extends AppMapBaseTest {
     public void merge_enterpriseManifestUrlOverridesBundled() {
         var manifestUrl = "https://enterprise.example.com/manifest.json";
         AppMapDeploymentSettingsService.getInstance().setEnterpriseDeploymentSettings(
-                new AppMapDeploymentSettings(null, null, manifestUrl, null, null));
+                AppMapDeploymentSettings.builder().appmapManifestUrl(manifestUrl).build());
 
         var merged = AppMapDeploymentSettingsService.getCachedDeploymentSettings();
         assertEquals("Enterprise appmapManifestUrl must override bundled null", manifestUrl, merged.getAppmapManifestUrl());
