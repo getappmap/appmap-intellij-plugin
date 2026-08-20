@@ -200,36 +200,35 @@ public class EnterpriseConfigServiceTest extends AppMapBaseTest {
     }
 
     @Test
-    public void applyLocalFile_doesNotFireScannerChangeWhenScannerUnaffected() throws Exception {
+    public void orgConfigChangeLeavingTheScannerAlone_doesNotFireAScannerChange() throws Exception {
+        // an org config which sets an unrelated setting; the effective scanner state stays disabled
+        applyAndAwait("{\"appMap.autoUpdateTools\": false}");
+
         var scannerChanges = subscribeScannerChanges();
-        var deploymentChanges = subscribeDeploymentChanges();
+        clearAndAwait();
 
-        // Config changes an unrelated setting; the effective scanner state stays disabled.
-        EnterpriseConfigService.getInstance().applyLocalFile("{\"appMap.autoUpdateTools\": false}", null);
-
-        waitUntil(() -> deploymentChanges.get() >= 1);
-        assertEquals("An org config that doesn't change the effective scanner state must not fire a scanner change",
+        assertEquals("An org config change that doesn't move the effective scanner state must not fire a scanner change",
                 0, scannerChanges.get());
     }
 
     @Test
-    public void applyLocalFile_manifestUrlOnly_firesNeitherScannerNorTelemetryChange() throws Exception {
+    public void manifestOnlyOrgConfigChange_firesNeitherScannerNorTelemetryChange() throws Exception {
+        applyAndAwait("{\"appMap.manifest.appmapUrl\": \"https://example.com/manifest.json\"}");
+
         var scannerChanges = subscribeScannerChanges();
         var telemetryChanges = subscribeTelemetryChanges();
         var deploymentChanges = subscribeDeploymentChanges();
         var reporterBefore = TelemetryService.getInstance().getReporter();
 
-        EnterpriseConfigService.getInstance().applyLocalFile(
-                "{\"appMap.manifest.appmapUrl\": \"https://example.com/manifest.json\"}", null);
+        clearAndAwait();
 
-        waitUntil(() -> deploymentChanges.get() >= 1);
-        assertEquals("A manifest-only org config must still announce that deployment settings changed",
+        assertEquals("A manifest-only change must still announce that deployment settings changed",
                 1, deploymentChanges.get());
-        assertEquals("A manifest-only org config must not restart the CLI processes via a scanner change",
+        assertEquals("A manifest-only change must not restart the CLI processes via a scanner change",
                 0, scannerChanges.get());
-        assertEquals("A manifest-only org config must not reconfigure telemetry routing",
+        assertEquals("A manifest-only change must not reconfigure telemetry routing",
                 0, telemetryChanges.get());
-        assertSame("A manifest-only org config must not rebuild the telemetry reporter either",
+        assertSame("A manifest-only change must not rebuild the telemetry reporter either",
                 reporterBefore, TelemetryService.getInstance().getReporter());
     }
 
@@ -260,15 +259,10 @@ public class EnterpriseConfigServiceTest extends AppMapBaseTest {
     @Test
     public void customerIdChanged_notFiredForAnUnrelatedChange() throws Exception {
         // an organization config which says nothing about the customer ID
-        EnterpriseConfigService.getInstance().applyLocalFile(
-                "{\"appMap.manifest.appmapUrl\": \"https://example.com/manifest.json\"}", null);
-        waitUntil(() -> EnterpriseConfigService.getInstance().isApplied());
+        applyAndAwait("{\"appMap.manifest.appmapUrl\": \"https://example.com/manifest.json\"}");
 
         var customerIdChanges = subscribeCustomerIdChanges();
-        // Unlike applyLocalFile, clearOrgConfig fires its listeners synchronously, so once it returns every
-        // listener has run. Waiting on another event instead would be unsound: customerIdChanged is published
-        // last, so an assertion could run before the event it is checking for.
-        runOnPooledThreadAndWait(() -> EnterpriseConfigService.getInstance().clearOrgConfig());
+        clearAndAwait();
 
         assertEquals("A change that doesn't touch the customer ID must not restart the services",
                 0, customerIdChanges.get());
@@ -281,18 +275,39 @@ public class EnterpriseConfigServiceTest extends AppMapBaseTest {
     @Test
     public void customerIdChanged_notFiredWhenClearingReconvergesOnTheBundledId() throws Exception {
         withSiteConfigFile(AppMapDeploymentSettings.builder().customerId("acme-corp").build(), () -> {
-            EnterpriseConfigService.getInstance().applyLocalFile("{\"appMap.customerId\": \"acme-corp\"}", null);
-            waitUntil(() -> EnterpriseConfigService.getInstance().isApplied());
+            applyAndAwait("{\"appMap.customerId\": \"acme-corp\"}");
 
             var customerIdChanges = subscribeCustomerIdChanges();
-            // clearOrgConfig fires synchronously, so no wait is needed after it returns
-            runOnPooledThreadAndWait(() -> EnterpriseConfigService.getInstance().clearOrgConfig());
+            clearAndAwait();
 
             assertTrue("The bundled value must still entitle after the clear",
                     Entitlement.isEntitled());
             assertEquals("Reconverging on the same effective ID is not a change",
                     0, customerIdChanges.get());
         });
+    }
+
+    /**
+     * Applies an organization configuration and waits until its (asynchronously dispatched) listeners have
+     * run, so a following subscription can't be polluted by events from the setup.
+     */
+    private void applyAndAwait(@NotNull String json) throws InterruptedException {
+        var applied = subscribeDeploymentChanges();
+        EnterpriseConfigService.getInstance().applyLocalFile(json, null);
+        waitUntil(() -> applied.get() >= 1);
+    }
+
+    /**
+     * Clears the organization configuration as the observable mutation under test.
+     * <p>
+     * Unlike {@code applyLocalFile}, {@code clearOrgConfig} fires its listeners synchronously, so returning
+     * from it is a real barrier: every listener has run. That matters for asserting an event was <em>not</em>
+     * fired — {@code fireSettingsChanged} publishes {@code enterpriseDeploymentSettingsChanged} first and the
+     * conditional events after it, so waiting on the former and then asserting about the latter would let the
+     * assertion run before the event it is checking for, and the test could never fail.
+     */
+    private void clearAndAwait() throws InterruptedException {
+        runOnPooledThreadAndWait(() -> EnterpriseConfigService.getInstance().clearOrgConfig());
     }
 
     private AtomicInteger subscribeCustomerIdChanges() {
