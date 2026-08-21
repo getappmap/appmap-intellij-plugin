@@ -64,6 +64,9 @@ val javaTestCompanionPlugins = listOf(
 )
 
 val isCI = System.getenv("CI") == "true"
+// Make the IDE artifact choice explicit in build logs: CI uses the multi-OS ZIP (see the
+// intellijPlatform dependency block), local dev uses the complete OS-specific installer.
+logger.lifecycle("IntelliJ Platform IDE artifact: ${if (isCI) "multi-OS ZIP (CI)" else "installer (local)"}")
 val agentOutputPath = rootProject.layout.buildDirectory.asFile.get()
     .resolve("appmap-java-agent")
     .resolve("appmap-agent.jar")
@@ -89,14 +92,19 @@ allprojects {
     val testOutput = configurations.create("testOutput")
     dependencies {
         intellijPlatform {
-            // Use the cross-platform (multi-OS) ZIP distribution instead of the OS-specific
-            // installer, so the downloaded IDE can be cached once and shared across all OS
-            // runners. The ZIP bundles no JBR; tests run on the environment JDK (setup-java
-            // on CI, system JDK locally).
+            // On CI, resolve the cross-platform (multi-OS) ZIP distribution so the downloaded
+            // IDE can be cached once and shared across all OS runners (see the IDE cache steps
+            // in .github/workflows/build.yml). The ZIP is an incomplete runtime distribution:
+            // it omits the JBR and some native components (JCEF, platform-daemon). That's fine
+            // for headless tests -- the JBR is resolved separately by Gradle (the OS-specific
+            // com.jetbrains:jbr artifact, kept in the Gradle cache, not the IDE cache), and the
+            // missing natives aren't exercised. Locally, use the OS-specific installer, which is
+            // a complete, runnable IDE (bundled JBR + JCEF + platform-daemon natives), so runIde
+            // works on recent (2026+) builds where the ZIP fails to launch.
             when {
                 // 2025.3+ is only available as a unified build
-                platformVersion >= 253 -> intellijIdea(ideVersion) { useInstaller = false }
-                else -> intellijIdeaCommunity(ideVersion) { useInstaller = false }
+                platformVersion >= 253 -> intellijIdea(ideVersion) { useInstaller = !isCI }
+                else -> intellijIdeaCommunity(ideVersion) { useInstaller = !isCI }
             }
 
             // using "Bundled" to gain access to the Java plugin's test classes
@@ -353,10 +361,10 @@ project(":") {
                 // Versions come from gradle-<platform>.properties (single source of truth,
                 // shared with the build platform) via ideVersionFor().
                 create(IntelliJPlatformType.IntellijIdeaCommunity, ideVersionFor(251)) {
-                    useInstaller = false // earliest supported; ZIP to reuse the build's cached IDE
+                    useInstaller = !isCI // earliest supported; match the build's IDE artifact (ZIP on CI)
                 }
                 create(IntelliJPlatformType.IntellijIdea, ideVersionFor(262)) {
-                    useInstaller = false // latest released; ZIP to reuse the build's cached IDE
+                    useInstaller = !isCI // latest released; match the build's IDE artifact (ZIP on CI)
                 }
             }
 
