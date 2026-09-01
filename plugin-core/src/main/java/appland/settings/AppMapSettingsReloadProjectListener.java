@@ -79,6 +79,15 @@ public class AppMapSettingsReloadProjectListener implements AppMapSettingsListen
     }
 
     @Override
+    public void customerIdChanged() {
+        // Gaining or losing entitlement starts or stops the services, exactly as signing in or out does.
+        // Both alarms are needed: unlike apiKeyChanged, the CLI processes also receive APPMAP_CUSTOMER_ID,
+        // and after the quiescence gate they have to start and stop with the entitlement too.
+        reloadJsonRpcServerAlarm.get().cancelAndRequest();
+        reloadCliProcessesAlarm.get().cancelAndRequest();
+    }
+
+    @Override
     public void copilotIntegrationDisabledChanged() {
         reloadJsonRpcServerAlarm.get().cancelAndRequest();
     }

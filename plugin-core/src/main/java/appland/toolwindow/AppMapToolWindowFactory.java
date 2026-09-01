@@ -62,6 +62,12 @@ public class AppMapToolWindowFactory implements ToolWindowFactory, DumbAware {
                     }
 
                     @Override
+                    public void customerIdChanged() {
+                        // Entitlement swaps the sign-in panel for the AppMap panel, just as signing in does.
+                        rebuildContent();
+                    }
+
+                    @Override
                     public void scannerEnabledChanged() {
                         // The AppMapWindowPanel builds its "Runtime Analysis" section conditionally on
                         // isScannerEnabled(), so rebuild the content to add/remove it live.
@@ -109,7 +115,7 @@ public class AppMapToolWindowFactory implements ToolWindowFactory, DumbAware {
             return (T) new JcefUnsupportedPanel();
         }
 
-        return AppMapApplicationSettingsService.getInstance().isAuthenticated()
+        return AppMapApplicationSettingsService.getInstance().isSignedInOrEntitled()
                 ? (T) new AppMapWindowPanel(project, toolWindow.getDisposable())
                 : (T) new SignInViewPanel(project, toolWindow.getDisposable());
     }

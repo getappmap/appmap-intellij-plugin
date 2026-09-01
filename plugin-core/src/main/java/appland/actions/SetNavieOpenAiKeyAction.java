@@ -4,8 +4,6 @@ import appland.AppMapBundle;
 import appland.settings.AppMapApplicationSettingsService;
 import appland.settings.AppMapSecureApplicationSettingsService;
 import appland.utils.WrappingTextInputDialog;
-import com.intellij.openapi.actionSystem.ActionUpdateThread;
-import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.project.DumbAware;
 import com.intellij.openapi.project.Project;
@@ -19,12 +17,11 @@ import java.util.Objects;
 import static com.intellij.openapi.ui.Messages.getCancelButton;
 import static com.intellij.openapi.ui.Messages.getOkButton;
 
-public class SetNavieOpenAiKeyAction extends AnAction implements DumbAware {
-    @Override
-    public @NotNull ActionUpdateThread getActionUpdateThread() {
-        return ActionUpdateThread.BGT;
-    }
-
+/**
+ * Part of the feature surface rather than exempt: it configures Navie BYOK, so it achieves nothing while
+ * Navie is unavailable, and it isn't a route back into an active state.
+ */
+public class SetNavieOpenAiKeyAction extends AppMapFeatureAction implements DumbAware {
     @Override
     public void actionPerformed(@NotNull AnActionEvent e) {
         showInputDialog(Objects.requireNonNull(e.getProject()));

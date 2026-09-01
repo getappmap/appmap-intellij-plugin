@@ -2,6 +2,8 @@ package appland.cli;
 
 import appland.AppMapBaseTest;
 import appland.RequiresNetwork;
+import appland.deployment.AppMapDeploymentSettings;
+import appland.deployment.AppMapDeploymentSettingsService;
 import appland.files.AppMapFiles;
 import appland.settings.AppMapApplicationSettingsService;
 import appland.settings.AppMapSettingsListener;
@@ -295,13 +297,65 @@ public class DefaultCommandLineServiceTest extends AppMapBaseTest {
                 AppMapApplicationSettingsService.getInstance().setApiKeyNotifying("new-api-key");
             });
             assertActiveRoots(tempDir);
-
-            // restart after sign out
-            waitForProcessRestart(tempDir, getIndexerFunction, processHandler -> {
-                AppMapApplicationSettingsService.getInstance().setApiKeyNotifying(null);
-            });
-            assertActiveRoots(tempDir);
         });
+    }
+
+    @Test
+    public void processesGatedOnAuthentication() throws Exception {
+        // we're installing the listener for api key changes just for this test to avoid side effects inside the test
+        // setup and in our other tests
+        ApplicationManager.getApplication().getMessageBus()
+                .connect(getTestRootDisposable())
+                .subscribe(AppMapSettingsListener.TOPIC, new RestartServicesAfterApiChangeListener());
+
+        var settings = AppMapApplicationSettingsService.getInstance();
+        settings.setApiKey(null);
+
+        var tempDir = createVirtualFileDirectory("test.txt");
+        ModuleTestUtils.withContentRoot(getModule(), tempDir, () -> {
+            // a root, which would qualify if the user was signed in
+            createAppMapYaml(tempDir, "tmp/appmap");
+            assertEmptyRoots();
+
+            // signing in must launch indexer and scanner
+            settings.setApiKeyNotifying("api-key");
+            waitForProcessStatus(true, tempDir, true);
+            assertActiveRoots(tempDir);
+
+            // signing out must stop them
+            settings.setApiKeyNotifying(null);
+            waitForProcessStatus(false, tempDir, true);
+            assertEmptyRoots();
+
+            // ... and they must stay stopped: another pass of the reconciler must not bring them back
+            var refreshed = ProjectRefreshUtil.newProjectRefreshCondition(getTestRootDisposable());
+            AppLandCommandLineService.getInstance().refreshForOpenProjectsInBackground();
+            assertTrue(refreshed.await(30, TimeUnit.SECONDS));
+            assertEmptyRoots();
+        });
+    }
+
+    /**
+     * An entitled deployment behaves exactly like an authenticated one, so the CLI processes run without a
+     * session.
+     */
+    @Test
+    public void processesStartForAnEntitledDeploymentWithoutASession() throws Exception {
+        var settings = AppMapApplicationSettingsService.getInstance();
+        settings.setApiKey(null);
+        AppMapDeploymentSettingsService.getInstance().setEnterpriseDeploymentSettings(
+                AppMapDeploymentSettings.builder().customerId("acme-corp").build());
+
+        try {
+            var tempDir = createVirtualFileDirectory("test.txt");
+            ModuleTestUtils.withContentRoot(getModule(), tempDir, () -> {
+                createAppMapYaml(tempDir, "tmp/appmap");
+                waitForProcessStatus(true, tempDir, true);
+                assertActiveRoots(tempDir);
+            });
+        } finally {
+            AppMapDeploymentSettingsService.reset();
+        }
     }
 
     @Test

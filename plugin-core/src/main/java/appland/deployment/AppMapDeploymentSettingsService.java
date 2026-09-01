@@ -109,13 +109,22 @@ public final class AppMapDeploymentSettingsService {
             @Nullable AppMapDeploymentSettings enterprise,
             @NotNull AppMapDeploymentSettings bundled) {
         if (enterprise == null) return bundled;
-        return new AppMapDeploymentSettings(
-            enterprise.getTelemetry() != null ? enterprise.getTelemetry() : bundled.getTelemetry(),
-            enterprise.getAutoUpdateTools() != null ? enterprise.getAutoUpdateTools() : bundled.getAutoUpdateTools(),
-            enterprise.getAppmapManifestUrl() != null ? enterprise.getAppmapManifestUrl() : bundled.getAppmapManifestUrl(),
-            enterprise.getScannerManifestUrl() != null ? enterprise.getScannerManifestUrl() : bundled.getScannerManifestUrl(),
-            enterprise.getScannerEnabled() != null ? enterprise.getScannerEnabled() : bundled.getScannerEnabled()
-        );
+        return AppMapDeploymentSettings.builder()
+                .telemetry(mergeField(enterprise.getTelemetry(), bundled.getTelemetry()))
+                .autoUpdateTools(mergeField(enterprise.getAutoUpdateTools(), bundled.getAutoUpdateTools()))
+                .appmapManifestUrl(mergeField(enterprise.getAppmapManifestUrl(), bundled.getAppmapManifestUrl()))
+                .scannerManifestUrl(mergeField(enterprise.getScannerManifestUrl(), bundled.getScannerManifestUrl()))
+                .scannerEnabled(mergeField(enterprise.getScannerEnabled(), bundled.getScannerEnabled()))
+                .customerId(mergeField(enterprise.getCustomerId(), bundled.getCustomerId()))
+                .build();
+    }
+
+    /**
+     * Merges a single field of the two configuration layers: the organization config wins where it has an
+     * opinion, otherwise the value bundled with the plugin distribution applies.
+     */
+    private static <T> @Nullable T mergeField(@Nullable T enterprise, @Nullable T bundled) {
+        return enterprise != null ? enterprise : bundled;
     }
 
     public void setEnterpriseDeploymentSettings(@Nullable AppMapDeploymentSettings settings) {

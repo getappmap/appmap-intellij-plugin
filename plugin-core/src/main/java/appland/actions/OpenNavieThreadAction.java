@@ -6,8 +6,6 @@ import appland.rpcService.AppLandJsonRpcService;
 import appland.rpcService.NavieThreadQueryV1Params;
 import appland.rpcService.NavieThreadQueryV1Response;
 import appland.webviews.navie.NavieEditorProvider;
-import com.intellij.openapi.actionSystem.ActionUpdateThread;
-import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.progress.ProgressIndicator;
 import com.intellij.openapi.progress.ProgressManager;
@@ -26,18 +24,13 @@ import java.util.List;
 /**
  * Action to list existing Navie threads and open one.
  */
-public class OpenNavieThreadAction extends AnAction implements DumbAware {
+public class OpenNavieThreadAction extends AppMapFeatureAction implements DumbAware {
     // maximum number of historical threads to retrieve
     private static final int THREAD_QUERY_LIMIT = 64;
 
     @Override
-    public @NotNull ActionUpdateThread getActionUpdateThread() {
-        return ActionUpdateThread.BGT;
-    }
-
-    @Override
-    public void update(@NotNull AnActionEvent e) {
-        e.getPresentation().setEnabled(e.getProject() != null);
+    protected boolean isAvailable(@NotNull AnActionEvent e) {
+        return e.getProject() != null;
     }
 
     @Override

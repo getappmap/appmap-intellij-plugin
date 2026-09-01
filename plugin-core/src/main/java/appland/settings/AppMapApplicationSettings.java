@@ -1,5 +1,6 @@
 package appland.settings;
 
+import appland.deployment.Entitlement;
 import com.google.common.collect.Maps;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.util.text.StringUtil;
@@ -203,8 +204,17 @@ public class AppMapApplicationSettings {
                 appland.deployment.AppMapDeploymentSettingsService.getCachedDeploymentSettings().getScannerEnabled());
     }
 
-    public boolean isAuthenticated() {
-        return apiKey != null;
+    /**
+     * Resolves whether the plugin should behave as signed in: either there is a real getappmap.com session, or
+     * the deployment is entitled by an administrator-set customer ID. Sits next to {@link #isScannerEnabled()},
+     * which likewise resolves across the deployment configuration layer.
+     * <p>
+     * This is the predicate for UI and service state. It is deliberately <em>not</em> a credential check —
+     * anything needing an actual token must use {@link #hasAppMapKey()}, because an entitled deployment has
+     * none. Entitled deployments otherwise behave exactly like authenticated ones.
+     */
+    public boolean isSignedInOrEntitled() {
+        return hasAppMapKey() || Entitlement.isEntitled();
     }
 
     public void setCopilotIntegrationDisabledNotifying(boolean copilotIntegrationDisabled) {

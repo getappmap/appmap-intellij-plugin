@@ -214,6 +214,12 @@ public class DefaultAppLandJsonRpcService implements AppLandJsonRpcService, AppL
     }
 
     private void startServerInternal() {
+        // The inactive state must be quiescent, the server must not run behind the sign-in wall.
+        if (!AppMapApplicationSettingsService.getInstance().isSignedInOrEntitled()) {
+            LOG.debug("Not starting JSON-RPC server, the plugin is neither signed in nor entitled");
+            return;
+        }
+
         Integer portToUse;
         synchronized (this) {
             if (state != ServerState.STOPPED && state != ServerState.CRASH_RESTARTING) {

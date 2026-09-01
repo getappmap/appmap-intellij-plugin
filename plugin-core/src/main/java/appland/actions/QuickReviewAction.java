@@ -6,8 +6,6 @@ import appland.webviews.navie.NaviePromptSuggestion;
 import appland.webviews.review.ReviewEditorProvider;
 import com.intellij.icons.AllIcons;
 import com.intellij.ide.util.PropertiesComponent;
-import com.intellij.openapi.actionSystem.ActionUpdateThread;
-import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.progress.ProgressIndicator;
 import com.intellij.openapi.progress.Task;
@@ -34,7 +32,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.regex.Pattern;
 
 @SuppressWarnings("ComponentNotRegistered") // registered in appmap-core.xml
-public class QuickReviewAction extends AnAction implements DumbAware {
+public class QuickReviewAction extends AppMapFeatureAction implements DumbAware {
     public static final String ACTION_ID = "appmap.quickReview";
     private static final String LAST_PICKED_REF_KEY = "appmap.quickReview.lastPickedRef";
     private static final Collection<String> COMMON_MAIN_BRANCHES = Set.of(
@@ -42,14 +40,8 @@ public class QuickReviewAction extends AnAction implements DumbAware {
     );
 
     @Override
-    public @NotNull ActionUpdateThread getActionUpdateThread() {
-        return ActionUpdateThread.BGT;
-    }
-
-    @Override
-    public void update(@NotNull AnActionEvent e) {
-        super.update(e);
-        e.getPresentation().setEnabled(e.getProject() != null);
+    protected boolean isAvailable(@NotNull AnActionEvent e) {
+        return e.getProject() != null;
     }
 
     @Override
