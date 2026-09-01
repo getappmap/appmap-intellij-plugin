@@ -1,164 +1,91 @@
-# Runtime-aware AI starts here
+# Runtime evidence for AI-assisted development
 
-### Live code behavior, surfaced to your AI tools in your JetBrains IDE
+> ### Enterprise users
+>
+> If your company installs AppMap for you, some settings are already set by an administrator. Before you install AppMap or change a setting, ask your AppMap administrator, or read your company's own setup documentation, for example in Confluence.
 
-AppMap Navie for JetBrains brings the power of real-time execution data and AI-driven insights right to your code editor. No more guessing what your code does under the hood. Navie watches your application run and uses that live context to provide **smarter suggestions**, **faster debugging**, and **runtime-aware code reviews**.
+### See how every change behaves before it merges, in your JetBrains IDE
+
+AI tools generate code changes faster than anyone can read them. Reviewing an AI-generated change today means reading a diff and guessing how it will behave. The diff shows what the code says. It cannot show what the code does when it runs.
+
+AppMap closes that gap. It records your application while it runs and turns the recording into two things: pictures of behavior for you, and behavior data for your AI, over MCP. You understand the code you are shipping, and your agent works from what the code did, instead of a guess.
+
+![How AppMap works with your coding agent](https://raw.githubusercontent.com/getappmap/appmap-intellij-plugin/develop/assets/appmap-mcp-flow.png)
 
 ## Key Benefits
 
-### Smarter AI assistance
+### Understand AI-generated code before you ship it
 
-Navie combines static analysis with live AppMap traces, so you can ask things like _"What just happened?"_ and get answers based on the actual runtime flow, HTTP calls, SQL queries, exceptions, I/O, and more.
+An AI assistant can change hundreds of lines in one pull request. Reading all of it, and holding it in your head, is the hardest part of working with AI. AppMap shows you the behavior of the change as diagrams: which functions ran, which SQL queries were made, which HTTP requests were handled, and where exceptions came from. You check what the change does, and you make sure it does what you expect.
 
-### Faster debugging & fewer defects
+### Pictures of behavior for you
 
-Pinpoint performance bottlenecks and logic errors through automatically generated sequence diagrams, flame graphs, dependency maps, and trace views.
+A new SQL query, a changed call path, or a slow spot is hard to find in a diff and easy to see in a picture. Sequence diagrams, dependency maps, flame graphs, and trace views show you what your code did when it ran.
 
-### Context-aware code reviews
+![Dependency map of a running application: services, code, and SQL, and how they connect](https://raw.githubusercontent.com/getappmap/appmap-intellij-plugin/develop/assets/dependency-map.webp)
 
-From security checks to maintainability recommendations, Navie’s `@review` mode analyzes your current branch changes against your base branch with runtime insights.
+### Behavior data for your AI
 
-### Zero fine-tuning required
+Your coding agent reads the same recordings over MCP. When it debugs, reviews, or explains your code, it works from recorded behavior. AppMap works with Claude Code, Cursor, GitHub Copilot, Windsurf, and any MCP-capable coding agent. Navie chat is still available inside the IDE.
 
-Works out-of-the-box with enterprise-ready LLMs—simply plug in your API key or let Navie default to GitHub Copilot or AppMap’s built-in endpoint.
+### The plugin keeps your runtime data fresh
+
+Runtime data is only useful when it is current, and nobody wants to maintain it by hand. That is the plugin's job. It installs the AppMap command-line tools and keeps them updated. It watches your project and indexes every new recording, so the MCP server always has fresh data to serve. The data stays on your machine, as files in your project.
+
+You can work this way and never open an AppMap panel. Record by running your tests, then ask questions from your chat. Many people use AppMap entirely through their coding agent, and the plugin keeps the data fresh underneath.
+
+### Review code changes in a new way
+
+Ask your coding agent to review a change using AppMap recordings, not just the diff. The agent reads what the code says and what the code did, and it can answer questions the diff alone cannot:
+
+-   Is the changed code covered by runtime traces?
+-   Does the change cover every scenario of the bug or feature, in the right place?
+-   Does it touch things outside the area it was meant to change?
+-   Does it change the application's security controls?
+-   Does it add a known performance problem, such as an N+1 query?
+
+Here is a real example, anonymized. A code change added a timeout to each of two AI backend calls. Every test passed, because each call was correct on its own. The recorded trace showed that the fallback call got a second, fresh clock, so the worst-case user wait doubled. No unit test could fail on this. The defect lived in the relationship between two calls, and the trace was the only artifact that looked there.
+
+![A real finding, re-created and anonymized: a nightly trace comparison flagged one changed baseline after a change that passed every test](https://raw.githubusercontent.com/getappmap/appmap-intellij-plugin/develop/assets/drift-watch-finding.png)
+
+*A real finding, re-created and anonymized. Every test passed. The trace comparison caught the doubled timeout.*
+
+If a change has no runtime coverage, the review says so, and the fix is direct: add a test that runs the changed code. The more of your app you record, the more the review can check. The review runs wherever your agent runs, on your machine, and teams can centralize the same review later.
+
+### Nothing leaves your machine
+
+Recording and the MCP server both run in your development environment. AppMap data is saved as files in your project.
 
 ## What AppMap Does
 
--   Captures real-time snapshots of code execution, data flow, and behavior with zero effort and no code changes.
+-   Records code execution, data flow, and behavior while your app runs. You do not change any code.
+-   Serves that data to coding agents over MCP.
+-   Draws diagrams you can read: sequence diagram, dependency map, flame graph, and trace view.
+-   Checks recordings against heuristic rules for known problems, such as N+1 queries.
 
--   Feeds runtime context to AI assistants like Navie, GitHub Copilot, Anthropic Claude, Google Gemini, OpenAI, and your own local LLMs.
+## Using AppMap with your coding agent
 
--   Delivers deep code explanations, diagrams, implementation plans, tests, and patch-ready code snippets, all grounded in what your application just did.
+The AppMap MCP server gives your agent 13 read-only query tools. They include `get_call_tree`, `find_calls`, `find_queries`, and `find_requests`.
 
-## Requirements and Use
+To set it up in Claude Code, run `claude mcp add appmap -- appmap query mcp`. For another agent, add `"appmap": { "command": "appmap", "args": ["query", "mcp"] }` to its MCP servers configuration.
 
-**2023.1** and newer JetBrains IDEs are required to use this plugin.
+You do not have to open the AppMap panels to get this. Installing the plugin installs the AppMap command-line tools, keeps them updated, and keeps your recordings indexed while you work. Your agent can query the data even if you never leave the chat.
 
-AppMap works best\* with the following:
+AppMap also publishes [skills for coding agents](https://github.com/getappmap/skills), including a skill that sets up AppMap on a repository from scratch.
 
--   **Languages:** Java, Kotlin, Python, Ruby, and Node.js (TypeScript and JavaScript).
--   **Frameworks:** Spring, Django, Flask, Ruby on Rails, Nest.js, Next.js, and Express.
+For more detail, see the [AppMap MCP server reference](https://appmap.io/docs/reference/appmap-mcp.html).
 
-Refer to AppMap documentation for the latest information on supported languages, frameworks, and versions.
+## Navie Chat
 
-[*] AppMap Navie is designed to work with a wide range of languages and frameworks, but AppMap trace recording requires a language-specific library.
-
-## Get Started
-
-1. **Install [the AppMap Plugin](https://plugins.jetbrains.com/plugin/16701-appmap)** from within the code editor or
-   from the marketplace.
-
-2. **Sign in** using an email address to obtain a license key and activate AppMap. It's best to use your work email, so
-   that your license can be easily associated with your organization subscription.
-
-3. **Ask Navie** for assistance with the project you're working on. Use the `@help` command to get help with AppMap and
-   Navie itself.
-
-## Examples
-
-[Here are some examples](https://appmap.io/product/examples/navie) of Navie providing code explanations, diagrams,
-specifications, documentation,
-and reasoning about a broad context of mature application code.
-
-## Command Modes
-
-Navie provides different command modes to assist you with your code and project. Here's a quick overview:
-
--   **`@explain` (default)**: Provides context-aware suggestions, specific solutions, and reasons about the
-    larger context of the specific code being worked on.
-
--   **`@diagram`**: Creates and renders Mermaid compatible diagrams within the Navie UI. You can open
-    a diagram in the [Mermaid Live Editor](https://mermaid.live), copy the Mermaid Definitions to your clipboard, save
-    to disk, or expand a full window view.
-
--   **`@plan`**: Builds a detailed implementation plan for an issue or task. This will focus Navie on only understanding
-    the problem and the application to generate a step-by-step plan.
-
--   **`@generate`**: In this mode, responses are optimized to include code snippets and patches that you can apply
-    directly to the files you're working on.
-
--   **`@test`**: Provides output optimized for creating and updating test cases. Supports both unit tests and integration
-    tests. Test updates will confirm to the existing structure and patterns of your test cases, and will provide updated
-    tests based on features or code that is provided.
-
--   **`@search`**: Leverages smart search capabilities to locate specific functions, files, modules, and examples.
-
--   **`@review`**: Performs a review of the code changes on your current branch against the base branch. Provides
-    actionable insights on important aspects of the code, ensuring alignment with best practices in areas such as code
-    quality, security, and maintainability.
-
--   **`@help`**: Offers assistance with using AppMap and Navie, including guidance for generating and leveraging AppMap
-    data effectively.
-
-## Activating Navie
-
-**Activate Navie from the Tools menu**  
-Select 'Explain with AppMap Navie AI' from the Tools/AppMap dropdown
-
-![Open Navie from Tools](https://appmap.io/assets/img/product/tools-appmap-vscode.png)
-
-**Activate Navie from the AppMap sidebar**  
-Click the 'New Navie Chat' button
-
-![New Navie Chat](https://appmap.io/assets/img/product/new-navie-chat.png)
-
-## Add Files to a Navie chat
-
-You can add specific files to your conversation with Navie. This feature is referred to
-as "pinning". Some types of files you may want to pin include:
-
--   Issue description
--   Custom prompts
--   Code files
--   Navie chat responses from previous conversations
-
-**Pin files from the file list**  
-Right-click on a file to select 'AppMap: Add Files to Navie Context'
-
-![Add context from file](https://appmap.io/assets/img/product/add-context-from-file.png)
-
-**Pin files from a Navie response**  
-Click the pin icon in the header of a Navie response
-
-![Pin from Response](https://appmap.io/assets/img/pin-from-response.png)
-
-**Pin files from the Navie's Context Sources Pane**  
-Click the 'Add Context' button
-
-![Add context from the context window](https://appmap.io/assets/img/product/add-context-in-context-window.png)
-
-## Choosing your LLM for Navie
-
-By default, if you have the GitHub Copilot plugin installed, and you have an active Copilot subscription, Navie will use
-the GitHub Copilot LLM. Otherwise, Navie will default to an OpenAI LLM endpoint provided by AppMap.
-
-You can also configure Navie to use your own LLM API key, or to use a local model. Refer to
-the [AppMap Navie documentation](https://appmap.io/docs/navie/bring-your-own-model.html) for details on how to do that.
+Navie still works inside the IDE. It answers questions using the same AppMap data, without leaving your editor. The `@explain`, `@plan`, `@generate`, `@test`, `@diagram`, `@search`, `@review`, and `@help` commands work as before. See the [Navie command reference](https://appmap.io/docs/using-navie-ai/navie-commands.html).
 
 ## Recording AppMap Data
 
-AppMap data brings two benefits to your development workflow:
+You record AppMap data by running your app. You can do this by [running your test cases](https://appmap.io/docs/get-started-with-appmap/making-appmap-data.html#with-test-case-recording), or by [recording a short interaction with your app](https://appmap.io/docs/get-started-with-appmap/making-appmap-data.html#with-remote-application-recording).
 
-1. **Runtime diagrams:** You can directly use the AppMap diagrams to understand the runtime behavior of your
-   application.
-2. **Improved context for Navie AI:** Navie will leverage available AppMap data to provide more accurate and relevant
-   answers.
-
-You record AppMap data by running your app — either
-by [running test cases](https://appmap.io/docs/recording-methods.html#recording-test-cases), or
-by [recording a short interaction with your app](https://appmap.io/docs/recording-methods.html#remote-recording).
-
-Navie can assistance with making AppMap data. Use the `@help` command for this.
-
-In IntelliJ, you can record AppMap data using the "Start with AppMap" menu item. [Visit the documentation](https://appmap.io/docs/get-started-with-appmap/making-appmap-data.html) for other languages or more details.
+In IntelliJ, use the "Start with AppMap" menu item. [Visit the documentation](https://appmap.io/docs/get-started-with-appmap/making-appmap-data.html) for other languages or more detail.
 
 ![Start with AppMap](https://appmap.io/assets/img/product/start-with-appmap.png)
-
-#### Requirements for Making AppMap Data
-
-Supported programming languages: Node.js, Java (+ Kotlin), Ruby, and Python.
-AppMap works particularly well with web application frameworks such as: Nest.js, Next.js, Spring, Ruby on Rails, Django,
-and Flask.
 
 ## Using AppMap Data
 
@@ -169,20 +96,41 @@ AppMap diagrams include:
 -   **Flame Graph** to spot performance issues and bottlenecks.
 -   **Trace View** to perform detailed function call and data flow tracing.
 
-Using AppMap data, Navie gains deeper knowledge of runtime aspects of code behavior, such as:
+![Sequence diagram of a recorded HTTP request, including its SQL queries](https://raw.githubusercontent.com/getappmap/appmap-intellij-plugin/develop/assets/sequence.jpg)
 
--   HTTP requests and responses
--   SQL queries
--   Timing data
--   Exceptions
--   I/O operations
+![Function calls with parameters and return values](https://raw.githubusercontent.com/getappmap/appmap-intellij-plugin/develop/assets/call-tree.webp)
+
+![SQL queries with bindings and source](https://raw.githubusercontent.com/getappmap/appmap-intellij-plugin/develop/assets/queries.jpg)
+
+## Requirements and Use
+
+**2025.1** and newer JetBrains IDEs are required to use this plugin.
+
+AppMap works best\* with the following:
+
+-   **Languages:** Java, Kotlin, Python, Ruby, and Node.js (TypeScript and JavaScript). In alpha: .NET, React, Swift, and Go.
+-   **Frameworks:** Spring, Django, Flask, Ruby on Rails, Nest.js, Next.js, and Express.
+
+Looking for support for your language or stack? New languages appear first on [our GitHub](https://github.com/getappmap).
+
+Refer to the [AppMap documentation](https://appmap.io/docs/appmap-docs.html) for the latest information on supported languages, frameworks, and versions.
+
+[*] AppMap trace recording requires a language-specific library.
+
+## Get Started
+
+1. **Install [the AppMap Plugin](https://plugins.jetbrains.com/plugin/16701-appmap)** from within the code editor or from the marketplace.
+
+2. **Sign in** using an email address to obtain a license key and activate AppMap. It's best to use your work email, so that your license can be easily associated with your organization subscription.
+
+3. **Record your app** by running your tests, or by recording an interaction with your app.
+
+4. **Connect your coding agent.** In Claude Code, run `claude mcp add appmap -- appmap query mcp`. For another agent, add `"appmap": { "command": "appmap", "args": ["query", "mcp"] }` to its MCP servers configuration. See the [setup reference](https://appmap.io/docs/reference/appmap-mcp.html).
 
 ## Licensing and Security
 
 [Open source MIT license](https://github.com/getappmap/appmap-intellij-plugin/blob/develop/LICENSE) | [Terms and conditions](https://appmap.io/community/terms-and-conditions.html)
 
-To learn more about security of AppMap, or the use of data with AI when using Navie, see the
-AppMap [security disclosure](https://appmap.io/security) for more detailed information and discussion.
+To learn more about the security of AppMap, and how your data is used, see the AppMap [security disclosure](https://appmap.io/security).
 
-There is [no fee](https://appmap.io/pricing) for personal use of AppMap for graphing and limited Navie use. Pricing for
-premium features and integrations are listed on [AppMap’s Pricing Page](https://appmap.io/pricing).
+There is [no fee](https://appmap.io/pricing) for personal use of AppMap. Pricing for premium features and integrations is listed on [AppMap's Pricing Page](https://appmap.io/pricing).
