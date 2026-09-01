@@ -6,6 +6,7 @@ import appland.cli.CliTools;
 import appland.cli.LocalAssetRepository;
 import appland.cli.ManifestManager;
 import appland.deployment.AppMapDeploymentSettingsService;
+import appland.deployment.Entitlement;
 import appland.javaAgent.JavaAgentStatus;
 import appland.telemetry.SplunkTelemetryUtils;
 import com.intellij.openapi.actionSystem.AnAction;
@@ -87,6 +88,16 @@ public class PluginStatus extends AnAction implements DumbAware {
             }
         } else {
             output.append("Organization configuration: not applied\n\n");
+        }
+
+        // The customer ID is printed in full and deliberately not redacted like the Splunk token: it is not a
+        // secret, and this report is how an administrator verifies that a rollout actually took effect.
+        var customerId = Entitlement.getCustomerId();
+        if (customerId != null) {
+            output.append("Managed entitlement: active\n\n");
+            output.append("Customer ID: ").append(customerId).append("\n\n");
+        } else {
+            output.append("Managed entitlement: not configured\n\n");
         }
 
         output.append("Deployment settings search path:\n");

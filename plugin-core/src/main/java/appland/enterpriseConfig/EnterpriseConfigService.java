@@ -3,6 +3,7 @@ package appland.enterpriseConfig;
 import appland.deployment.AppMapDeploymentSettings;
 import appland.deployment.AppMapDeploymentSettingsService;
 import appland.deployment.AppMapDeploymentTelemetrySettings;
+import appland.deployment.Entitlement;
 import appland.notifications.AppMapNotifications;
 import appland.settings.AppMapApplicationSettings;
 import appland.settings.AppMapApplicationSettingsService;
@@ -331,17 +332,30 @@ public final class EnterpriseConfigService {
             publisher.scannerEnabledChanged();
         }
 
-        // Telemetry routing is comparatively expensive to reconfigure (it rebuilds the reporter and
-        // restarts processes that carry telemetry settings in their environment), so only do it when
-        // the telemetry settings actually changed.
-        if (!Objects.equals(before.telemetry(), after.telemetry())) {
-            // Reconfigure telemetry routing on the fly so no IDE restart is required. Only act if the
-            // telemetry service already exists; otherwise it picks up the current settings when created.
+        var telemetryChanged = !Objects.equals(before.telemetry(), after.telemetry());
+        var customerIdChanged = !Objects.equals(before.customerId(), after.customerId());
+
+        // The reporter is built with a fixed set of common properties, which includes the customer ID, so
+        // either change means rebuilding it — otherwise events keep the stale attribution or the stale
+        // backend until the IDE restarts. Only act if the telemetry service already exists; otherwise it
+        // picks up the current settings when it is created.
+        if (telemetryChanged || customerIdChanged) {
             var telemetryService = ApplicationManager.getApplication().getServiceIfCreated(TelemetryService.class);
             if (telemetryService != null) {
                 telemetryService.reloadReporter();
             }
+        }
+
+        // Routing is a separate, more expensive concern: this event also restarts the processes which carry
+        // telemetry settings in their environment, so it is not fired for a customer-ID-only change.
+        if (telemetryChanged) {
             publisher.telemetrySettingsChanged();
+        }
+
+        // Entitlement makes the plugin behave as signed in, so a change here starts or stops the services and
+        // swaps the tool window, exactly as signing in or out does.
+        if (customerIdChanged) {
+            publisher.customerIdChanged();
         }
     }
 
@@ -355,11 +369,14 @@ public final class EnterpriseConfigService {
      * organization config for the scanner, which is why capturing {@code after} has to happen once every
      * mutation — including {@link #clearSupersededUserOverrides} — is done.
      */
-    private record EffectiveState(@Nullable AppMapDeploymentTelemetrySettings telemetry, boolean scannerEnabled) {
+    private record EffectiveState(@Nullable AppMapDeploymentTelemetrySettings telemetry,
+                                  boolean scannerEnabled,
+                                  @Nullable String customerId) {
         static @NotNull EffectiveState capture() {
             return new EffectiveState(
                     AppMapDeploymentSettingsService.getCachedDeploymentSettings().getTelemetry(),
-                    AppMapApplicationSettingsService.getInstance().isScannerEnabled());
+                    AppMapApplicationSettingsService.getInstance().isScannerEnabled(),
+                    Entitlement.getCustomerId());
         }
     }
 

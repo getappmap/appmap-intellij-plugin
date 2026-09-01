@@ -57,4 +57,31 @@ public class AppMapDeploymentSettingsTest extends AppMapBaseTest {
         assertNull("scannerEnabled must be null (absent) when the JSON does not define it",
                 settings.getScannerEnabled());
     }
+
+    @Test
+    public void customerIdParsed() {
+        var json = """
+                {"appMap.customerId": "acme-corp"}
+                """;
+        var settings = GsonUtils.GSON.fromJson(json, AppMapDeploymentSettings.class);
+        assertEquals("appMap.customerId must be parsed (same key as the VS Code plugin)",
+                "acme-corp", settings.getCustomerId());
+    }
+
+    @Test
+    public void customerIdDefaultsToNullWhenAbsent() {
+        var json = """
+                {"appMap.autoUpdateTools": true}
+                """;
+        var settings = GsonUtils.GSON.fromJson(json, AppMapDeploymentSettings.class);
+        assertNull("customerId must be null (absent) when the JSON does not define it",
+                settings.getCustomerId());
+    }
+
+    @Test
+    public void customerIdMakesSettingsNonEmpty() {
+        assertFalse("A configuration which only sets a customer ID is not empty",
+                AppMapDeploymentSettings.builder().customerId("acme-corp").build().isEmpty());
+        assertTrue(new AppMapDeploymentSettings().isEmpty());
+    }
 }

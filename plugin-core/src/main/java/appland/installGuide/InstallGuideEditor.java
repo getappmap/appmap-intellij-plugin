@@ -212,7 +212,7 @@ public class InstallGuideEditor extends WebviewEditor<List<ProjectMetadata>> {
     private void addBaseProperties(@NotNull JsonObject json) {
         var settings = AppMapApplicationSettingsService.getInstance();
 
-        json.addProperty("userAuthenticated", settings.getApiKey() != null);
+        json.addProperty("userAuthenticated", settings.isSignedInOrEntitled());
         json.addProperty("analysisEnabled", true);
     }
 
