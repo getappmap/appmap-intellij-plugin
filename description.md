@@ -10,7 +10,7 @@ AI tools generate code changes faster than anyone can read them. Reviewing an AI
 
 AppMap closes that gap. It records your application while it runs and turns the recording into two things: pictures of behavior for you, and behavior data for your AI, over MCP. You understand the code you are shipping, and your agent works from what the code did, instead of a guess.
 
-![How AppMap works with your coding agent](https://raw.githubusercontent.com/getappmap/appmap-intellij-plugin/develop/assets/appmap-mcp-flow.png)
+![How AppMap works with your coding agent](https://raw.githubusercontent.com/getappmap/appmap-intellij-plugin/main/assets/appmap-mcp-flow.png)
 
 ## Key Benefits
 
@@ -22,7 +22,7 @@ An AI assistant can change hundreds of lines in one pull request. Reading all of
 
 A new SQL query, a changed call path, or a slow spot is hard to find in a diff and easy to see in a picture. Sequence diagrams, dependency maps, flame graphs, and trace views show you what your code did when it ran.
 
-![Dependency map of a running application: services, code, and SQL, and how they connect](https://raw.githubusercontent.com/getappmap/appmap-intellij-plugin/develop/assets/dependency-map.webp)
+![Dependency map of a running application: services, code, and SQL, and how they connect](https://raw.githubusercontent.com/getappmap/appmap-intellij-plugin/main/assets/dependency-map.webp)
 
 ### Behavior data for your AI
 
@@ -46,7 +46,7 @@ Ask your coding agent to review a change using AppMap recordings, not just the d
 
 Here is a real example, anonymized. A code change added a timeout to each of two AI backend calls. Every test passed, because each call was correct on its own. The recorded trace showed that the fallback call got a second, fresh clock, so the worst-case user wait doubled. No unit test could fail on this. The defect lived in the relationship between two calls, and the trace was the only artifact that looked there.
 
-![A real finding, re-created and anonymized: a nightly trace comparison flagged one changed baseline after a change that passed every test](https://raw.githubusercontent.com/getappmap/appmap-intellij-plugin/develop/assets/drift-watch-finding.png)
+![A real finding, re-created and anonymized: a nightly trace comparison flagged one changed baseline after a change that passed every test](https://raw.githubusercontent.com/getappmap/appmap-intellij-plugin/main/assets/drift-watch-finding.png)
 
 *A real finding, re-created and anonymized. Every test passed. The trace comparison caught the doubled timeout.*
 
@@ -96,11 +96,11 @@ AppMap diagrams include:
 -   **Flame Graph** to spot performance issues and bottlenecks.
 -   **Trace View** to perform detailed function call and data flow tracing.
 
-![Sequence diagram of a recorded HTTP request, including its SQL queries](https://raw.githubusercontent.com/getappmap/appmap-intellij-plugin/develop/assets/sequence.jpg)
+![Sequence diagram of a recorded HTTP request, including its SQL queries](https://raw.githubusercontent.com/getappmap/appmap-intellij-plugin/main/assets/sequence.jpg)
 
-![Function calls with parameters and return values](https://raw.githubusercontent.com/getappmap/appmap-intellij-plugin/develop/assets/call-tree.webp)
+![Function calls with parameters and return values](https://raw.githubusercontent.com/getappmap/appmap-intellij-plugin/main/assets/call-tree.webp)
 
-![SQL queries with bindings and source](https://raw.githubusercontent.com/getappmap/appmap-intellij-plugin/develop/assets/queries.jpg)
+![SQL queries with bindings and source](https://raw.githubusercontent.com/getappmap/appmap-intellij-plugin/main/assets/queries.jpg)
 
 ## Requirements and Use
 
