@@ -501,11 +501,11 @@ public class DefaultCommandLineService implements AppLandCommandLineService {
     }
 
     /**
-     * The unauthenticated state must be quiescent: no indexer and no scanner may run behind the sign-in wall,
+     * The inactive state must be quiescent: no indexer and no scanner may run behind the sign-in wall,
      * which presents the plugin as inactive.
      */
     private static boolean isServiceStartAllowed() {
-        return AppMapApplicationSettingsService.getInstance().hasAppMapKey();
+        return AppMapApplicationSettingsService.getInstance().isSignedInOrEntitled();
     }
 
     private static boolean isSupported() {

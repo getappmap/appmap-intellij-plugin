@@ -62,4 +62,17 @@ public interface AppMapSettingsListener {
      */
     default void telemetrySettingsChanged() {
     }
+
+    /**
+     * Fired only when the <em>effective</em> managed customer ID changes, in either direction. Entitlement
+     * makes the plugin behave as signed in, so consumers must react as they do to
+     * {@link #apiKeyChanged()}: restart the services, and rebuild UI that is gated on the plugin being
+     * active.
+     * <p>
+     * Not fired when a mutation leaves the effective value alone — clearing the organization configuration on
+     * a bundled build reconverges on the bundled ID, and announcing that would bounce the CLI processes for
+     * nothing.
+     */
+    default void customerIdChanged() {
+    }
 }

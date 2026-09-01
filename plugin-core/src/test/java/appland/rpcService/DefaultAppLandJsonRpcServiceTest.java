@@ -4,6 +4,9 @@ import appland.AppMapBaseTest;
 import appland.RequiresNetwork;
 import appland.cli.AppLandCommandLineService;
 import appland.cli.TestAppLandDownloadService;
+import appland.deployment.AppMapDeploymentSettings;
+import appland.deployment.AppMapDeploymentSettingsService;
+import appland.enterpriseConfig.EnterpriseConfigService;
 import appland.settings.AppMapApplicationSettingsService;
 import appland.settings.AppMapSecureApplicationSettingsService;
 import appland.settings.AppMapSettingsListener;
@@ -91,6 +94,44 @@ public class DefaultAppLandJsonRpcServiceTest extends AppMapBaseTest {
                 AppLandJsonRpcService.getInstance(getProject()).isServerRunning());
     }
 
+    /**
+     * An entitled deployment behaves exactly like an authenticated one, so the server runs without a session.
+     */
+    @Test
+    public void serverStartsForAnEntitledDeploymentWithoutASession() throws Exception {
+        AppMapApplicationSettingsService.getInstance().setApiKey(null);
+        AppMapDeploymentSettingsService.getInstance().setEnterpriseDeploymentSettings(
+                AppMapDeploymentSettings.builder().customerId("acme-corp").build());
+        try {
+            var started = createWaitForJsonRpcServerStartCondition();
+            AppLandJsonRpcService.getInstance(getProject()).startServer();
+
+            assertTrue("The JSON-RPC server must start for an entitled deployment",
+                    started.await(60, TimeUnit.SECONDS));
+        } finally {
+            AppMapDeploymentSettingsService.reset();
+        }
+    }
+
+    /**
+     * Covers the whole chain an administrator sees when applying an organization configuration:
+     * {@code customerIdChanged} → the debounced reload listener → a server restart, with no IDE restart.
+     */
+    @Test
+    public void serverRestartsWhenAnEntitlementIsGained() throws Exception {
+        waitForJsonRpcServer();
+        try {
+            var restarted = createWaitForJsonRpcServerStartCondition();
+            EnterpriseConfigService.getInstance().applyLocalFile("{\"appMap.customerId\": \"acme-corp\"}", null);
+
+            assertTrue("Gaining an entitlement must restart the server so it picks up APPMAP_CUSTOMER_ID",
+                    restarted.await(60, TimeUnit.SECONDS));
+        } finally {
+            AppMapDeploymentSettingsService.reset();
+            EnterpriseConfigService.getInstance().reset();
+        }
+    }
+
     private @NotNull CountDownLatch createWaitForJsonRpcServerStopCondition() {
         var latch = new CountDownLatch(1);
         getProject().getMessageBus()
@@ -164,6 +205,29 @@ public class DefaultAppLandJsonRpcServiceTest extends AppMapBaseTest {
         } finally {
             settings.setApiKey(null);
             settings.setCliEnvironment(Map.of());
+        }
+    }
+
+    /**
+     * Goes through the real {@code appland.cli.envProvider} extension point into the command line the
+     * subprocess is launched with, so it covers the registration that a unit test of the provider can't.
+     */
+    @Test
+    public void serverEnvironmentCarriesTheCustomerIdWithoutASession() {
+        final var settings = AppMapApplicationSettingsService.getInstance();
+        settings.setApiKey(null);
+        AppMapDeploymentSettingsService.getInstance().setEnterpriseDeploymentSettings(
+                AppMapDeploymentSettings.builder().customerId("acme-corp").build());
+        try {
+            var commandLine = AppLandCommandLineService.getInstance().createAppMapJsonRpcCommand(null);
+            assert commandLine != null;
+
+            var environment = commandLine.getEffectiveEnvironment();
+            assertEquals("acme-corp", environment.get("APPMAP_CUSTOMER_ID"));
+            assertFalse("An entitled deployment has no session token to pass",
+                    environment.containsKey("APPMAP_API_KEY"));
+        } finally {
+            AppMapDeploymentSettingsService.reset();
         }
     }
 

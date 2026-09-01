@@ -7,6 +7,8 @@ import appland.cli.CliTools;
 import com.intellij.testFramework.fixtures.TempDirTestFixture;
 import com.intellij.testFramework.fixtures.impl.TempDirTestFixtureImpl;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+import org.junit.After;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -21,6 +23,11 @@ public class AppMapDeploymentSettingsServiceTest extends AppMapBaseTest {
     protected TempDirTestFixture createTempDirTestFixture() {
         // create temp files on disk
         return new TempDirTestFixtureImpl();
+    }
+
+    @After
+    public void resetDeploymentSettings() {
+        AppMapDeploymentSettingsService.reset();
     }
 
     @Test
@@ -106,6 +113,68 @@ public class AppMapDeploymentSettingsServiceTest extends AppMapBaseTest {
             assertNotNull("Deployment settings must be read from the top-level of the plugin directory", parsedSettings);
             assertNotNull(parsedSettings.getTelemetry());
         });
+    }
+
+    // --- customer ID: merged across the two layers, blank collapsing to absent ---
+
+    @Test
+    public void customerId_bundledOnly() throws Exception {
+        withSiteConfigFile(customerIdConfig("bundled-id"), () -> {
+            assertEquals("bundled-id", mergedCustomerId());
+        });
+    }
+
+    @Test
+    public void customerId_organizationWinsOverBundled() throws Exception {
+        withSiteConfigFile(customerIdConfig("bundled-id"), () -> {
+            applyOrganizationConfig(customerIdConfig("organization-id"));
+
+            assertEquals("organization-id", mergedCustomerId());
+        });
+    }
+
+    @Test
+    public void customerId_blankOrganizationValueDoesNotMaskBundled() throws Exception {
+        withSiteConfigFile(customerIdConfig("bundled-id"), () -> {
+            applyOrganizationConfig(customerIdConfig("   "));
+
+            assertEquals("A blank organization value must not de-entitle a bundled build",
+                    "bundled-id", mergedCustomerId());
+        });
+    }
+
+    @Test
+    public void customerId_organizationOnly() {
+        applyOrganizationConfig(customerIdConfig("organization-id"));
+
+        assertEquals("An organization config resolves without any bundled site-config.json",
+                "organization-id", mergedCustomerId());
+    }
+
+    @Test
+    public void customerId_absentFromBothLayers() {
+        assertNull(mergedCustomerId());
+    }
+
+    @Test
+    public void customerId_blankInBothLayers() throws Exception {
+        withSiteConfigFile(customerIdConfig(" "), () -> {
+            applyOrganizationConfig(customerIdConfig(""));
+
+            assertNull("Blank collapses to absent in both layers", mergedCustomerId());
+        });
+    }
+
+    private static @Nullable String mergedCustomerId() {
+        return AppMapDeploymentSettingsService.getCachedDeploymentSettings().getCustomerId();
+    }
+
+    private static @NotNull AppMapDeploymentSettings customerIdConfig(@Nullable String customerId) {
+        return AppMapDeploymentSettings.builder().customerId(customerId).build();
+    }
+
+    private void applyOrganizationConfig(@NotNull AppMapDeploymentSettings settings) {
+        AppMapDeploymentSettingsService.getInstance().setEnterpriseDeploymentSettings(settings);
     }
 
     private void createMockBinaries(@NotNull Path baseDir,

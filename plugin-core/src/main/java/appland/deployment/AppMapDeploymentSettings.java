@@ -43,8 +43,36 @@ public final class AppMapDeploymentSettings {
     @Nullable
     private Boolean scannerEnabled;
 
+    /**
+     * Managed entitlement: an administrator-set customer ID which switches the plugin into its authenticated
+     * state without a getappmap.com sign-in. Uses the same configuration key as the VS Code plugin
+     * ({@code appMap.customerId}). Deliberately unverified — the plugin is open source, so this is a
+     * business-process boundary, not a security one. Read it through {@link Entitlement}, never directly.
+     */
+    @SerializedName("appMap.customerId")
+    @Nullable
+    private String customerId;
+
+    /**
+     * Blank collapses to absent: the value is trimmed, and empty or whitespace-only reads as unset. That rule
+     * lives here, in the single accessor, so nothing downstream has to remember to apply it — in particular
+     * the merge of the two configuration layers, where a blank organization value has to fall through to the
+     * bundled one rather than mask it.
+     * <p>
+     * Hand-written rather than generated: Gson populates the field directly, so normalizing in a setter or a
+     * builder customization wouldn't cover the parsed configuration, which is the only way this is ever set
+     * in production.
+     */
+    public @Nullable String getCustomerId() {
+        if (customerId == null) {
+            return null;
+        }
+        var trimmed = customerId.trim();
+        return trimmed.isEmpty() ? null : trimmed;
+    }
+
     public boolean isEmpty() {
         return this.telemetry == null && autoUpdateTools == null && appmapManifestUrl == null
-                && scannerManifestUrl == null && scannerEnabled == null;
+                && scannerManifestUrl == null && scannerEnabled == null && getCustomerId() == null;
     }
 }

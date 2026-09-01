@@ -1,6 +1,8 @@
 package appland.actions;
 
 import appland.AppMapBaseTest;
+import appland.deployment.AppMapDeploymentSettings;
+import appland.deployment.AppMapDeploymentSettingsService;
 import appland.settings.AppMapApplicationSettingsService;
 import appland.settings.AppMapProjectSettingsService;
 import appland.utils.DataContexts;
@@ -13,6 +15,7 @@ import com.intellij.openapi.actionSystem.Presentation;
 import com.intellij.openapi.actionSystem.ex.ActionUtil;
 import com.intellij.testFramework.TestActionEvent;
 import org.jetbrains.annotations.NotNull;
+import org.junit.After;
 import org.junit.Test;
 
 import java.util.List;
@@ -57,6 +60,26 @@ public class AppMapActionAuthenticationGateTest extends AppMapBaseTest {
             "appMapLoginByKey",
             "appmap.setConfigurationUrl",
             "appmap.pluginStatus");
+
+    @After
+    public void resetDeploymentSettings() {
+        AppMapDeploymentSettingsService.reset();
+    }
+
+    /**
+     * An entitled deployment behaves exactly like an authenticated one, so the feature surface is available
+     * without a getappmap.com session.
+     */
+    @Test
+    public void featureActionsEnabledWhenEntitledWithoutASession() {
+        signOut();
+        entitle();
+
+        for (var actionId : GATED_ACTION_IDS_ENABLED_WHEN_SIGNED_IN) {
+            assertTrue("Action must be enabled for an entitled deployment: " + actionId,
+                    updateInToolsMenu(actionId).isEnabled());
+        }
+    }
 
     @Test
     public void featureActionsDisabledWhileSignedOut() {
@@ -105,6 +128,11 @@ public class AppMapActionAuthenticationGateTest extends AppMapBaseTest {
 
     private void signOut() {
         AppMapApplicationSettingsService.getInstance().setApiKey(null);
+    }
+
+    private void entitle() {
+        AppMapDeploymentSettingsService.getInstance().setEnterpriseDeploymentSettings(
+                AppMapDeploymentSettings.builder().customerId("acme-corp").build());
     }
 
     /**

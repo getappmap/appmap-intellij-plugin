@@ -4,6 +4,7 @@ import appland.AppMapBundle
 import appland.actions.SetConfigurationUrlAction
 import appland.cli.CliTool
 import appland.deployment.AppMapDeploymentSettingsService.getCachedDeploymentSettings
+import appland.deployment.Entitlement
 import appland.enterpriseConfig.EnterpriseConfigService
 import com.intellij.execution.configuration.EnvironmentVariablesComponent
 import com.intellij.openapi.project.Project
@@ -51,6 +52,8 @@ class AppMapProjectSettingsPanel(private val project: Project?) {
     private lateinit var orgConfigSourceRow: Row
     private lateinit var orgConfigStatusLabel: JLabel
     private lateinit var orgConfigSourceLabel: JLabel
+    private lateinit var customerIdRow: Row
+    private lateinit var customerIdLabel: JLabel
 
     @TestOnly
     fun getAutoUpdateToolsComboBox(): ComboBox<Boolean?> = autoUpdateTools.comboBox
@@ -63,6 +66,9 @@ class AppMapProjectSettingsPanel(private val project: Project?) {
 
     @TestOnly
     fun getScannerDeploymentComment(): String? = scanner.visibleCommentText()
+
+    @TestOnly
+    fun getCustomerIdText(): String? = customerIdLabel.takeIf { it.isVisible }?.text
 
     /**
      * Reflects whether an organization configuration is currently applied. When applied, shows the
@@ -97,6 +103,16 @@ class AppMapProjectSettingsPanel(private val project: Project?) {
         orgConfigApplyRow.visible(!applied)
     }
 
+    /**
+     * The customer ID is only shown while the deployment is entitled. Entitlement can be gained or lost from
+     * the buttons above, so this is recomputed on every reload rather than fixed at build time.
+     */
+    private fun updateCustomerId() {
+        val customerId = Entitlement.getCustomerId()
+        customerIdLabel.text = customerId ?: ""
+        customerIdRow.visible(customerId != null)
+    }
+
     fun loadSettingsFrom(
         applicationSettings: AppMapApplicationSettings,
         secureApplicationSettings: AppMapSecureApplicationSettings
@@ -117,6 +133,7 @@ class AppMapProjectSettingsPanel(private val project: Project?) {
         appmapManifestUrl.text = DownloadSettings.getManifestUrl(CliTool.AppMap)
         scannerManifestUrl.text = DownloadSettings.getManifestUrl(CliTool.Scanner)
         updateOrgConfigStatus()
+        updateCustomerId()
     }
 
     fun applySettingsTo(
@@ -169,7 +186,7 @@ class AppMapProjectSettingsPanel(private val project: Project?) {
         cliEnvironment = EnvironmentVariablesComponent()
         cliEnvironment.labelLocation = BorderLayout.WEST
 
-        return panel {
+        val mainPanel = panel {
             row {
                 enableTelemetry = checkBox(AppMapBundle.get("projectSettings.enableTelemetry.title")).component
             }
@@ -217,6 +234,12 @@ class AppMapProjectSettingsPanel(private val project: Project?) {
                     orgConfigSourceLabel = label("").component
                 }
 
+                // Read-only on purpose: the customer ID is set by an administrator through the bundled or
+                // organization configuration, and there is deliberately no user-settable equivalent.
+                customerIdRow = row(AppMapBundle.get("projectSettings.customerId.title")) {
+                    customerIdLabel = label("").component
+                }.rowComment(AppMapBundle.get("projectSettings.customerId.comment"))
+
                 row(AppMapBundle.get("projectSettings.appmapManifestUrl.title")) {
                     appmapManifestUrl = textField().align(AlignX.FILL).component
                 }.layout(RowLayout.INDEPENDENT)
@@ -226,6 +249,12 @@ class AppMapProjectSettingsPanel(private val project: Project?) {
                 }.layout(RowLayout.INDEPENDENT)
             }
         }
+
+        // The row must not be left visible-but-empty until the first reload, so it is initialised here — the
+        // same way DeploymentBackedSetting populates itself from buildRow().
+        updateCustomerId()
+
+        return mainPanel
     }
 }
 /**

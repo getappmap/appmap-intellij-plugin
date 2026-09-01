@@ -115,6 +115,7 @@ public final class AppMapDeploymentSettingsService {
                 .appmapManifestUrl(mergeField(enterprise.getAppmapManifestUrl(), bundled.getAppmapManifestUrl()))
                 .scannerManifestUrl(mergeField(enterprise.getScannerManifestUrl(), bundled.getScannerManifestUrl()))
                 .scannerEnabled(mergeField(enterprise.getScannerEnabled(), bundled.getScannerEnabled()))
+                .customerId(mergeField(enterprise.getCustomerId(), bundled.getCustomerId()))
                 .build();
     }
 
