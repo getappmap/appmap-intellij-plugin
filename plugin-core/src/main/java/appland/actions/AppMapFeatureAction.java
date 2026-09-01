@@ -40,7 +40,7 @@ public abstract class AppMapFeatureAction extends AnAction {
      * remote-recording actions, which apply the same gate from a hand-written {@code update()}.
      */
     public static boolean isAppMapAvailable() {
-        return AppMapApplicationSettingsService.getInstance().hasAppMapKey();
+        return AppMapApplicationSettingsService.getInstance().isSignedInOrEntitled();
     }
 
     @Override

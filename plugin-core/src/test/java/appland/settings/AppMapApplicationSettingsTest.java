@@ -1,10 +1,13 @@
 package appland.settings;
 
 import appland.AppMapBaseTest;
+import appland.deployment.AppMapDeploymentSettings;
+import appland.deployment.AppMapDeploymentSettingsService;
 import com.intellij.configurationStore.XmlSerializer;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.util.JDOMUtil;
 import org.jetbrains.annotations.NotNull;
+import org.junit.After;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -13,6 +16,51 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
 public class AppMapApplicationSettingsTest extends AppMapBaseTest {
+    @After
+    public void resetDeploymentSettings() {
+        AppMapDeploymentSettingsService.reset();
+    }
+
+    // --- isSignedInOrEntitled: a real session and a managed entitlement are separate axes ---
+
+    @Test
+    public void signedInOrEntitled_withASessionOnly() {
+        var settings = new AppMapApplicationSettings();
+        settings.setApiKey("api-key");
+
+        assertTrue(settings.isSignedInOrEntitled());
+    }
+
+    @Test
+    public void signedInOrEntitled_withAnEntitlementOnly() {
+        entitle("acme-corp");
+
+        var settings = new AppMapApplicationSettings();
+        assertNull("no session", settings.getApiKey());
+        assertTrue("An entitled deployment must count as signed in for UI and service purposes",
+                settings.isSignedInOrEntitled());
+    }
+
+    @Test
+    public void signedInOrEntitled_withNeither() {
+        assertFalse(new AppMapApplicationSettings().isSignedInOrEntitled());
+    }
+
+    @Test
+    public void signedInOrEntitled_withBoth() {
+        entitle("acme-corp");
+
+        var settings = new AppMapApplicationSettings();
+        settings.setApiKey("api-key");
+        assertTrue(settings.isSignedInOrEntitled());
+        assertTrue("Entitlement must not disturb the real credential", settings.hasAppMapKey());
+    }
+
+    private static void entitle(@NotNull String customerId) {
+        AppMapDeploymentSettingsService.getInstance().setEnterpriseDeploymentSettings(
+                AppMapDeploymentSettings.builder().customerId(customerId).build());
+    }
+
     @Test
     public void xmlSerialization() {
         var settings = createSettings();

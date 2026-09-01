@@ -25,7 +25,7 @@ public class FindingsPanelProvider implements ProblemsViewPanelProvider {
 
         // A quiescent scanner produces no new findings, but a stale appmap-findings.json would still populate
         // this tab. It's the one findings surface which isn't behind the tool window's sign-in panel.
-        return settings.hasAppMapKey() && settings.isScannerEnabled()
+        return settings.isSignedInOrEntitled() && settings.isScannerEnabled()
                 ? new FindingsViewTab(project, ProblemsViewState.getInstance(project))
                 : null;
     }
