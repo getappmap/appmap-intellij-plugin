@@ -1,9 +1,12 @@
 package appland.problemsView;
 
 import appland.AppMapBaseTest;
+import appland.deployment.AppMapDeploymentSettings;
+import appland.deployment.AppMapDeploymentSettingsService;
 import appland.settings.AppMapApplicationSettingsService;
 import com.intellij.openapi.Disposable;
 import com.intellij.openapi.util.Disposer;
+import org.junit.After;
 import org.junit.Test;
 
 /**
@@ -30,6 +33,29 @@ public class FindingsPanelProviderTest extends AppMapBaseTest {
 
         assertNull("The Runtime Analysis tab must be unavailable if the scanner is disabled",
                 new FindingsPanelProvider(getProject()).create());
+    }
+
+    @After
+    public void resetDeploymentSettings() {
+        AppMapDeploymentSettingsService.reset();
+    }
+
+    @Test
+    public void tabAvailableWithEnabledScannerAndAnEntitlement() {
+        var settings = AppMapApplicationSettingsService.getInstance();
+        settings.setApiKey(null);
+        settings.setEnableScanner(true);
+        AppMapDeploymentSettingsService.getInstance().setEnterpriseDeploymentSettings(
+                AppMapDeploymentSettings.builder().customerId("acme-corp").build());
+
+        var tab = new FindingsPanelProvider(getProject()).create();
+        try {
+            assertNotNull("An entitled deployment must get the Runtime Analysis tab without a session", tab);
+        } finally {
+            if (tab instanceof Disposable) {
+                Disposer.dispose((Disposable) tab);
+            }
+        }
     }
 
     @Test

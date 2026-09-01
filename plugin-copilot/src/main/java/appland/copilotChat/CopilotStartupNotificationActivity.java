@@ -18,8 +18,9 @@ public class CopilotStartupNotificationActivity extends ProjectActivityAdapter i
 
     @Override
     public void runActivity(@NotNull Project project) {
-        // don't show if the user is not yet logged in to an AppMap account
-        if (!AppMapApplicationSettingsService.getInstance().hasAppMapKey()) {
+        // don't show while the plugin is inactive. Entitled deployments are eligible: most are expected to use
+        // Copilot, and gated on a real session they would never learn the integration exists.
+        if (!AppMapApplicationSettingsService.getInstance().isSignedInOrEntitled()) {
             return;
         }
 

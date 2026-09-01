@@ -5,12 +5,10 @@ import appland.AppMapBundle;
 import appland.deployment.AppMapDeploymentSettings;
 import appland.deployment.AppMapDeploymentSettingsService;
 import appland.deployment.AppMapDeploymentTelemetrySettings;
-import appland.enterpriseConfig.EnterpriseConfigService;
 import com.intellij.openapi.ui.ComboBox;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
 
 import java.util.ArrayList;
@@ -29,12 +27,6 @@ public class AppMapProjectSettingsPanelTest extends AppMapBaseTest {
     private static final List<Boolean> WITH_DEPLOYMENT_DEFAULT = Arrays.asList(null, true, false);
     /** The label a deployment default of {@code true} is rendered with. */
     private static final String ENABLED_LABEL = AppMapBundle.get("projectSettings.enableScanner.enabled");
-
-    @Before
-    public void dropPersistedOrganizationConfig() {
-        // a cache left behind by another test would be applied on the first read and mask what we set up here
-        EnterpriseConfigService.getInstance().reset();
-    }
 
     @After
     public void resetDeploymentSettings() {
@@ -148,6 +140,52 @@ public class AppMapProjectSettingsPanelTest extends AppMapBaseTest {
         assertSelectionIsOffered(panel.getScannerComboBox());
         assertNull("The comment must not keep naming a default which was cleared",
                 panel.getScannerDeploymentComment());
+    }
+
+    // --- the customer ID is shown read-only, and only when the deployment is entitled ---
+
+    @Test
+    public void customerIdNotShownWithoutAnEntitlement() {
+        var panel = createPanel();
+
+        assertNull("There is no customer ID to show, so the row must be hidden",
+                panel.getCustomerIdText());
+    }
+
+    @Test
+    public void customerIdShownWhenEntitled() throws Exception {
+        withSiteConfigFile(AppMapDeploymentSettings.builder().customerId("acme-corp").build(), () -> {
+            var panel = createPanel();
+
+            assertEquals("acme-corp", panel.getCustomerIdText());
+        });
+    }
+
+    /**
+     * Entitlement can be gained from the "Apply Organization Configuration…" button in this very panel, so the
+     * row has to follow a reload rather than only reflecting the state at build time.
+     */
+    @Test
+    public void customerIdFollowsAnAppliedOrganizationConfiguration() {
+        var panel = createPanel();
+        assertNull(panel.getCustomerIdText());
+
+        applyOrganizationConfig(AppMapDeploymentSettings.builder().customerId("acme-corp").build());
+        reload(panel);
+
+        assertEquals("acme-corp", panel.getCustomerIdText());
+    }
+
+    @Test
+    public void customerIdHiddenAgainWhenTheEntitlementIsCleared() {
+        applyOrganizationConfig(AppMapDeploymentSettings.builder().customerId("acme-corp").build());
+        var panel = createPanel();
+        assertEquals("acme-corp", panel.getCustomerIdText());
+
+        applyOrganizationConfig(null);
+        reload(panel);
+
+        assertNull("The row must not keep showing an entitlement which was cleared", panel.getCustomerIdText());
     }
 
     private static void assertDeploymentComment(@NotNull String expectedValueLabel, @Nullable String comment) {

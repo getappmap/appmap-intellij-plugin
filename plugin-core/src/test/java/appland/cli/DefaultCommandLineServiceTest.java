@@ -2,6 +2,8 @@ package appland.cli;
 
 import appland.AppMapBaseTest;
 import appland.RequiresNetwork;
+import appland.deployment.AppMapDeploymentSettings;
+import appland.deployment.AppMapDeploymentSettingsService;
 import appland.files.AppMapFiles;
 import appland.settings.AppMapApplicationSettingsService;
 import appland.settings.AppMapSettingsListener;
@@ -331,6 +333,29 @@ public class DefaultCommandLineServiceTest extends AppMapBaseTest {
             assertTrue(refreshed.await(30, TimeUnit.SECONDS));
             assertEmptyRoots();
         });
+    }
+
+    /**
+     * An entitled deployment behaves exactly like an authenticated one, so the CLI processes run without a
+     * session.
+     */
+    @Test
+    public void processesStartForAnEntitledDeploymentWithoutASession() throws Exception {
+        var settings = AppMapApplicationSettingsService.getInstance();
+        settings.setApiKey(null);
+        AppMapDeploymentSettingsService.getInstance().setEnterpriseDeploymentSettings(
+                AppMapDeploymentSettings.builder().customerId("acme-corp").build());
+
+        try {
+            var tempDir = createVirtualFileDirectory("test.txt");
+            ModuleTestUtils.withContentRoot(getModule(), tempDir, () -> {
+                createAppMapYaml(tempDir, "tmp/appmap");
+                waitForProcessStatus(true, tempDir, true);
+                assertActiveRoots(tempDir);
+            });
+        } finally {
+            AppMapDeploymentSettingsService.reset();
+        }
     }
 
     @Test

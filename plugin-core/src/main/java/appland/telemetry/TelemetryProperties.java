@@ -1,6 +1,7 @@
 package appland.telemetry;
 
 import appland.AppMapPlugin;
+import appland.deployment.Entitlement;
 import appland.utils.GsonUtils;
 import com.google.gson.annotations.SerializedName;
 import com.intellij.openapi.application.ApplicationInfo;
@@ -28,6 +29,12 @@ public final class TelemetryProperties {
     public static final @NonNls String PRODUCT = "product";
     public static final @NonNls String SOURCE = "source";
     public static final @NonNls String USERNAME = "username";
+    /**
+     * Managed entitlement, so seat usage can be attributed to the customer. All lower-case with no separator,
+     * matching {@link #EXT_NAME} and {@link #IDE_VERSION} — and matching the VS Code plugin, which sends the
+     * same property name. Do not "fix" it to {@code customerId}.
+     */
+    public static final @NonNls String CUSTOMER_ID = "customerid";
 
     private TelemetryProperties() {
     }
@@ -49,6 +56,14 @@ public final class TelemetryProperties {
         properties.put(JVM_VERSION, System.getProperty("java.version"));
         properties.put(PRODUCT, ApplicationInfo.getInstance().getBuild().getProductCode());
         properties.put(SOURCE, "JetBrains");
+
+        // Omitted entirely when there is no entitlement, rather than sent empty. Note CliProperties
+        // deliberately does not pick this up: the CLI is told via APPMAP_CUSTOMER_ID and stamps its own
+        // events, so it must not also arrive in APPMAP_TELEMETRY_PROPERTIES.
+        var customerId = Entitlement.getCustomerId();
+        if (customerId != null) {
+            properties.put(CUSTOMER_ID, customerId);
+        }
 
         if (includeUsername) {
             try {
