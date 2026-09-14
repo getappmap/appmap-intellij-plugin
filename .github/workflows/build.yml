@@ -2,6 +2,9 @@ name: Build
 env:
     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     JAVA_VERSION: 21
+    # Keep Yarn's zip cache inside the checkout (appland-webview/.yarn/cache) rather than in the
+    # per-OS global cache location, so the actions/cache path below is the same on every runner.
+    YARN_ENABLE_GLOBAL_CACHE: "false"
 on:
     pull_request:
     push:
@@ -38,6 +41,24 @@ jobs:
               with:
                   distribution: jetbrains
                   java-version: ${{ env.JAVA_VERSION }}
+
+            # Needed by the bundleWebview Gradle task, which builds appland-webview/dist (generated
+            # output, not checked in). Yarn itself is vendored in the repository, so only Node is
+            # set up here. The runner images ship a Node too; pin it so every job bundles alike.
+            # .nvmrc is the single source of truth, shared with the publish and release workflows
+            # so the artifact that ships is built on the same Node this job tested.
+            - name: Setup Node
+              uses: actions/setup-node@v7
+              with:
+                  node-version-file: .nvmrc
+
+            # The key includes runner.os because the dependency tree pulls in platform-specific
+            # native binaries (@esbuild/*, @rollup/rollup-*), so one entry cannot serve the matrix.
+            - name: Cache webview dependencies
+              uses: actions/cache@v5
+              with:
+                  path: appland-webview/.yarn/cache
+                  key: yarn-${{ runner.os }}-${{ hashFiles('appland-webview/yarn.lock') }}
 
             - name: Setup Gradle
               uses: gradle/actions/setup-gradle@v5
@@ -160,6 +181,18 @@ jobs:
               with:
                   distribution: jetbrains
                   java-version: ${{ env.JAVA_VERSION }}
+
+            # This job builds the plugin distribution, so it needs the webview bundle too.
+            - name: Setup Node
+              uses: actions/setup-node@v7
+              with:
+                  node-version-file: .nvmrc
+
+            - name: Cache webview dependencies
+              uses: actions/cache@v5
+              with:
+                  path: appland-webview/.yarn/cache
+                  key: yarn-${{ runner.os }}-${{ hashFiles('appland-webview/yarn.lock') }}
 
             - name: Setup Gradle
               uses: gradle/actions/setup-gradle@v5

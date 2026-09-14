@@ -1,4 +1,7 @@
 name: Release
+env:
+    # See the note in build.yml: keeps Yarn's zip cache at a path that is stable across runners.
+    YARN_ENABLE_GLOBAL_CACHE: "false"
 on:
     workflow_dispatch:
         inputs:
@@ -37,10 +40,20 @@ jobs:
             - name: Setup Gradle
               uses: gradle/actions/setup-gradle@v5
 
+            # Used by semantic-release and, through its prepareCmd, by the webview bundle.
+            # Version comes from .nvmrc, shared with the Build and Publish workflows.
             - name: Setup Node.js
-              uses: actions/setup-node@v6
+              uses: actions/setup-node@v7
               with:
-                  node-version: 20
+                  node-version-file: .nvmrc
+
+            # semantic-release's prepareCmd runs buildPlugin (see .releaserc.yml), which bundles
+            # the webviews from source.
+            - name: Cache webview dependencies
+              uses: actions/cache@v5
+              with:
+                  path: appland-webview/.yarn/cache
+                  key: yarn-${{ runner.os }}-${{ hashFiles('appland-webview/yarn.lock') }}
 
             - name: Install Dependencies
               shell: bash
