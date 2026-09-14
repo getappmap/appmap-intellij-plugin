@@ -12,6 +12,9 @@ export default defineConfig([
             'review.ts',
         ],
         outDir: "dist",
+        // Chunk filenames are content-hashed, so without this a rebuild leaves the previous
+        // build's orphaned chunks behind in dist/ and they end up shipped in the plugin.
+        clean: true,
         name: "main",
         noExternal: [/./],
         outExtension: () => ({ js: ".js" }),

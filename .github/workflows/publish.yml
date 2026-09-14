@@ -1,4 +1,7 @@
 name: Publish
+env:
+    # See the note in build.yml: keeps Yarn's zip cache at a path that is stable across runners.
+    YARN_ENABLE_GLOBAL_CACHE: "false"
 on:
     release:
         types: [published]
@@ -26,6 +29,20 @@ jobs:
               with:
                   distribution: jetbrains
                   java-version: 21
+
+            # buildPlugin bundles the webviews from source, which needs Node (Yarn is vendored).
+            # Version comes from .nvmrc, shared with build.yml, so the published artifact is built
+            # on the same Node the Build workflow tested.
+            - name: Setup Node
+              uses: actions/setup-node@v7
+              with:
+                  node-version-file: .nvmrc
+
+            - name: Cache webview dependencies
+              uses: actions/cache@v5
+              with:
+                  path: appland-webview/.yarn/cache
+                  key: yarn-${{ runner.os }}-${{ hashFiles('appland-webview/yarn.lock') }}
 
             - name: Setup Gradle
               uses: gradle/actions/setup-gradle@v5
