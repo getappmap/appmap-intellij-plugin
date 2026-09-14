@@ -415,7 +415,27 @@ project(":") {
                 into("")
                 include("**/*")
             }
+            // buildPlugin archives prepareSandbox's plugin directory, and that task stages the
+            // webview source maps for local debugging (see below). They are ~25 MB and useless to
+            // users, so drop them here: this is the only place the sandbox and the released
+            // artifact can be told apart, because runIde and buildPlugin share prepareSandbox.
+            exclude("**/webview/dist/*.map")
         }
+
+        // Source maps make the minified webview bundle debuggable in JCEF devtools, which serves
+        // <plugin>/webview/** over the IDE's built-in web server, so a map only has to exist next
+        // to its bundle to be picked up. copyPluginAssets keeps them out of the staged assets, so
+        // take them straight from the bundle output. Test sandboxes are skipped: nothing reads the
+        // maps there, and it saves copying ~25 MB per sandbox on every test run.
+        withType<PrepareSandboxTask>()
+            .matching { !it.name.contains("Test", ignoreCase = true) }
+            .configureEach {
+                dependsOn(":bundleWebview")
+                from(webviewDir.resolve("dist")) {
+                    into("${rootProject.name}/webview/dist")
+                    include("*.map")
+                }
+            }
 
         runIde {
             systemProperty("appmap.sandbox", "true")
