@@ -83,6 +83,11 @@ public class DefaultCommandLineService implements AppLandCommandLineService {
 
     @Override
     public synchronized void start(@NotNull VirtualFile directory, boolean waitForProcessTermination) throws ExecutionException {
+        if (!isServiceStartAllowed()) {
+            LOG.debug("Not starting AppMap CLI processes, the user is not signed in");
+            return;
+        }
+
         if (!AppMapFiles.isDirectoryEnabled(directory)) {
             return;
         }
@@ -407,7 +412,12 @@ public class DefaultCommandLineService implements AppLandCommandLineService {
 
         // Fetch the AppMap root directories outside the synchronized block because it may take a long time
         // because it needs indexes and waits for smart mode.
-        var enabledRoots = findAppMapDataRootDirectories();
+        //
+        // An empty root set while the plugin is inactive is all that's needed to keep the services quiescent in
+        // both directions: this method is a reconciler, so it also stops the processes of roots which dropped out.
+        var enabledRoots = isServiceStartAllowed()
+                ? findAppMapDataRootDirectories()
+                : VfsUtilCore.createCompactVirtualFileSet();
 
         try {
             synchronized (this) {
@@ -488,6 +498,14 @@ public class DefaultCommandLineService implements AppLandCommandLineService {
                 LOG.debug("Failed to create AppMap directory: " + watchedDir, e);
             }
         }
+    }
+
+    /**
+     * The inactive state must be quiescent: no indexer and no scanner may run behind the sign-in wall,
+     * which presents the plugin as inactive.
+     */
+    private static boolean isServiceStartAllowed() {
+        return AppMapApplicationSettingsService.getInstance().isSignedInOrEntitled();
     }
 
     private static boolean isSupported() {

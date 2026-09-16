@@ -3,6 +3,7 @@ package appland.enterpriseConfig;
 import appland.AppMapBaseTest;
 import appland.deployment.AppMapDeploymentSettings;
 import appland.deployment.AppMapDeploymentSettingsService;
+import appland.deployment.Entitlement;
 import appland.settings.AppMapApplicationSettingsService;
 import appland.settings.AppMapSettingsListener;
 import appland.telemetry.TelemetryService;
@@ -20,6 +21,8 @@ import java.nio.file.Path;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
+
+import static appland.AppMapDeploymentTestUtils.withSiteConfigFile;
 
 public class EnterpriseConfigServiceTest extends AppMapBaseTest {
     @Override
@@ -178,7 +181,7 @@ public class EnterpriseConfigServiceTest extends AppMapBaseTest {
     public void isScannerEnabled_userOverrideWinsOverDeployment() {
         var settings = AppMapApplicationSettingsService.getInstance();
         AppMapDeploymentSettingsService.getInstance().setEnterpriseDeploymentSettings(
-                new AppMapDeploymentSettings(null, null, null, null, true));
+                AppMapDeploymentSettings.builder().scannerEnabled(true).build());
         assertTrue("Deployment config enables the scanner when there is no user override", settings.isScannerEnabled());
 
         settings.setEnableScanner(false);
@@ -197,16 +200,159 @@ public class EnterpriseConfigServiceTest extends AppMapBaseTest {
     }
 
     @Test
-    public void applyLocalFile_doesNotFireScannerChangeWhenScannerUnaffected() throws Exception {
-        var scannerChanges = subscribeScannerChanges();
-        var deploymentChanges = subscribeDeploymentChanges();
+    public void orgConfigChangeLeavingTheScannerAlone_doesNotFireAScannerChange() throws Exception {
+        // an org config which sets an unrelated setting; the effective scanner state stays disabled
+        applyAndAwait("{\"appMap.autoUpdateTools\": false}");
 
-        // Config changes an unrelated setting; the effective scanner state stays disabled.
-        EnterpriseConfigService.getInstance().applyLocalFile("{\"appMap.autoUpdateTools\": false}", null);
+        var scannerChanges = subscribeScannerChanges();
+        clearAndAwait();
+
+        assertEquals("An org config change that doesn't move the effective scanner state must not fire a scanner change",
+                0, scannerChanges.get());
+    }
+
+    @Test
+    public void manifestOnlyOrgConfigChange_firesNeitherScannerNorTelemetryChange() throws Exception {
+        applyAndAwait("{\"appMap.manifest.appmapUrl\": \"https://example.com/manifest.json\"}");
+
+        var scannerChanges = subscribeScannerChanges();
+        var telemetryChanges = subscribeTelemetryChanges();
+        var deploymentChanges = subscribeDeploymentChanges();
+        var reporterBefore = TelemetryService.getInstance().getReporter();
+
+        clearAndAwait();
+
+        assertEquals("A manifest-only change must still announce that deployment settings changed",
+                1, deploymentChanges.get());
+        assertEquals("A manifest-only change must not restart the CLI processes via a scanner change",
+                0, scannerChanges.get());
+        assertEquals("A manifest-only change must not reconfigure telemetry routing",
+                0, telemetryChanges.get());
+        assertSame("A manifest-only change must not rebuild the telemetry reporter either",
+                reporterBefore, TelemetryService.getInstance().getReporter());
+    }
+
+    // --- customerIdChanged is fired only when the effective customer ID actually changes ---
+
+    @Test
+    public void customerIdChanged_firesWhenAnEntitlementIsGained() throws Exception {
+        var customerIdChanges = subscribeCustomerIdChanges();
+
+        EnterpriseConfigService.getInstance().applyLocalFile("{\"appMap.customerId\": \"acme-corp\"}", null);
+
+        waitUntil(() -> customerIdChanges.get() >= 1);
+        assertEquals(1, customerIdChanges.get());
+    }
+
+    @Test
+    public void customerIdChanged_firesWhenAnEntitlementIsLost() throws Exception {
+        EnterpriseConfigService.getInstance().applyLocalFile("{\"appMap.customerId\": \"acme-corp\"}", null);
+        waitUntil(Entitlement::isEntitled);
+
+        var customerIdChanges = subscribeCustomerIdChanges();
+        runOnPooledThreadAndWait(() -> EnterpriseConfigService.getInstance().clearOrgConfig());
+
+        assertEquals("Losing entitlement must be announced too, so services stop and the UI locks again",
+                1, customerIdChanges.get());
+    }
+
+    @Test
+    public void customerIdChanged_notFiredForAnUnrelatedChange() throws Exception {
+        // an organization config which says nothing about the customer ID
+        applyAndAwait("{\"appMap.manifest.appmapUrl\": \"https://example.com/manifest.json\"}");
+
+        var customerIdChanges = subscribeCustomerIdChanges();
+        clearAndAwait();
+
+        assertEquals("A change that doesn't touch the customer ID must not restart the services",
+                0, customerIdChanges.get());
+    }
+
+    /**
+     * Clearing the organization configuration on a bundled build reconverges on the bundled customer ID, so
+     * nothing effectively changed. Announcing it would bounce the CLI processes for no reason.
+     */
+    @Test
+    public void customerIdChanged_notFiredWhenClearingReconvergesOnTheBundledId() throws Exception {
+        withSiteConfigFile(AppMapDeploymentSettings.builder().customerId("acme-corp").build(), () -> {
+            applyAndAwait("{\"appMap.customerId\": \"acme-corp\"}");
+
+            var customerIdChanges = subscribeCustomerIdChanges();
+            clearAndAwait();
+
+            assertTrue("The bundled value must still entitle after the clear",
+                    Entitlement.isEntitled());
+            assertEquals("Reconverging on the same effective ID is not a change",
+                    0, customerIdChanges.get());
+        });
+    }
+
+    /**
+     * Applies an organization configuration and waits until its (asynchronously dispatched) listeners have
+     * run, so a following subscription can't be polluted by events from the setup.
+     */
+    private void applyAndAwait(@NotNull String json) throws InterruptedException {
+        var applied = subscribeDeploymentChanges();
+        EnterpriseConfigService.getInstance().applyLocalFile(json, null);
+        waitUntil(() -> applied.get() >= 1);
+    }
+
+    /**
+     * Clears the organization configuration as the observable mutation under test.
+     * <p>
+     * Unlike {@code applyLocalFile}, {@code clearOrgConfig} fires its listeners synchronously, so returning
+     * from it is a real barrier: every listener has run. That matters for asserting an event was <em>not</em>
+     * fired — {@code fireSettingsChanged} publishes {@code enterpriseDeploymentSettingsChanged} first and the
+     * conditional events after it, so waiting on the former and then asserting about the latter would let the
+     * assertion run before the event it is checking for, and the test could never fail.
+     */
+    private void clearAndAwait() throws InterruptedException {
+        runOnPooledThreadAndWait(() -> EnterpriseConfigService.getInstance().clearOrgConfig());
+    }
+
+    private AtomicInteger subscribeCustomerIdChanges() {
+        var counter = new AtomicInteger();
+        ApplicationManager.getApplication().getMessageBus().connect(getTestRootDisposable())
+                .subscribe(AppMapSettingsListener.TOPIC, new AppMapSettingsListener() {
+                    @Override
+                    public void customerIdChanged() {
+                        counter.incrementAndGet();
+                    }
+                });
+        return counter;
+    }
+
+    /**
+     * The reporter carries {@code common.customerid} in the property set it is built with, so a change to the
+     * customer ID has to rebuild it — otherwise events keep the stale attribution until the IDE restarts.
+     */
+    @Test
+    public void applyLocalFile_customerIdChange_rebuildsTheTelemetryReporter() throws Exception {
+        var telemetryService = TelemetryService.getInstance();
+        var reporterBefore = telemetryService.getReporter();
+
+        EnterpriseConfigService.getInstance().applyLocalFile("{\"appMap.customerId\": \"acme-corp\"}", null);
+
+        waitUntil(() -> telemetryService.getReporter() != reporterBefore);
+    }
+
+    @Test
+    public void applyLocalFile_unchangedCustomerId_doesNotRebuildTheTelemetryReporter() throws Exception {
+        var telemetryService = TelemetryService.getInstance();
+
+        // applyLocalFile fires its listeners on a pooled thread, so wait for the first apply's rebuild to
+        // land before capturing the reporter the second apply must leave alone.
+        var initialReporter = telemetryService.getReporter();
+        EnterpriseConfigService.getInstance().applyLocalFile("{\"appMap.customerId\": \"acme-corp\"}", null);
+        waitUntil(() -> telemetryService.getReporter() != initialReporter);
+        var reporterBefore = telemetryService.getReporter();
+
+        var deploymentChanges = subscribeDeploymentChanges();
+        EnterpriseConfigService.getInstance().applyLocalFile("{\"appMap.customerId\": \"acme-corp\"}", null);
 
         waitUntil(() -> deploymentChanges.get() >= 1);
-        assertEquals("An org config that doesn't change the effective scanner state must not fire a scanner change",
-                0, scannerChanges.get());
+        assertSame("Re-applying the same customer ID must not rebuild the reporter",
+                reporterBefore, telemetryService.getReporter());
     }
 
     @Test
@@ -535,7 +681,7 @@ public class EnterpriseConfigServiceTest extends AppMapBaseTest {
     @Test
     public void merge_enterpriseOverridesBundledAutoUpdateTools() {
         AppMapDeploymentSettingsService.getInstance().setEnterpriseDeploymentSettings(
-                new AppMapDeploymentSettings(null, false, null, null, null));
+                AppMapDeploymentSettings.builder().autoUpdateTools(false).build());
 
         var merged = AppMapDeploymentSettingsService.getCachedDeploymentSettings();
         assertEquals("Enterprise autoUpdateTools=false must override bundled null", Boolean.FALSE, merged.getAutoUpdateTools());
@@ -544,7 +690,7 @@ public class EnterpriseConfigServiceTest extends AppMapBaseTest {
     @Test
     public void merge_enterpriseOverridesBundledScannerEnabled() {
         AppMapDeploymentSettingsService.getInstance().setEnterpriseDeploymentSettings(
-                new AppMapDeploymentSettings(null, null, null, null, true));
+                AppMapDeploymentSettings.builder().scannerEnabled(true).build());
 
         var merged = AppMapDeploymentSettingsService.getCachedDeploymentSettings();
         assertEquals("Enterprise scannerEnabled=true must override bundled null", Boolean.TRUE, merged.getScannerEnabled());
@@ -573,7 +719,7 @@ public class EnterpriseConfigServiceTest extends AppMapBaseTest {
     public void merge_enterpriseManifestUrlOverridesBundled() {
         var manifestUrl = "https://enterprise.example.com/manifest.json";
         AppMapDeploymentSettingsService.getInstance().setEnterpriseDeploymentSettings(
-                new AppMapDeploymentSettings(null, null, manifestUrl, null, null));
+                AppMapDeploymentSettings.builder().appmapManifestUrl(manifestUrl).build());
 
         var merged = AppMapDeploymentSettingsService.getCachedDeploymentSettings();
         assertEquals("Enterprise appmapManifestUrl must override bundled null", manifestUrl, merged.getAppmapManifestUrl());

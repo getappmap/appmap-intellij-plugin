@@ -24,7 +24,8 @@ plugin's default (or the user's own setting) in effect.
     "appMap.autoUpdateTools": true,
     "appMap.manifest.appmapUrl": "https://artifacts.example.com/appmap-manifest.json",
     "appMap.manifest.scannerUrl": "https://artifacts.example.com/scanner-manifest.json",
-    "appMap.scannerEnabled": true
+    "appMap.scannerEnabled": true,
+    "appMap.customerId": "acme-corp"
 }
 ```
 
@@ -35,6 +36,7 @@ plugin's default (or the user's own setting) in effect.
 | `appMap.manifest.appmapUrl` | string | Overrides the URL of the AppMap CLI [release manifest](https://github.com/getappmap/appmap-js/blob/main/architecture/release-manifests.md) (e.g. point it at an internal mirror). |
 | `appMap.manifest.scannerUrl` | string | Overrides the URL of the Scanner CLI [release manifest](https://github.com/getappmap/appmap-js/blob/main/architecture/release-manifests.md). |
 | `appMap.scannerEnabled` | boolean | `true` enables the AppMap scanner (runtime analysis / findings); `false` disables it. Omit (the default) to leave it off unless the user enabled it. Same key as the VS Code plugin. |
+| `appMap.customerId` | string | Lets your developers use the plugin without signing in to getappmap.com. See below. Same key as the VS Code plugin. |
 
 ### Recommended setup: keep auto-update on, mirror the manifests
 
@@ -64,6 +66,34 @@ for the manifest format and how mirroring works.
 When a Splunk backend is configured, telemetry is **mandatory**: the user's "disable telemetry"
 setting is ignored and events are routed to your Splunk endpoint. With no `appMap.telemetry`,
 the user's telemetry preference applies as usual.
+
+### Customer ID (`appMap.customerId`)
+
+Setting a customer ID lets your developers use the plugin **without signing in to getappmap.com**.
+Where licensing is settled by an agreement with AppMap, sending every developer through an
+interactive sign-in adds nothing: it fails outright on restricted networks, and it creates an audit
+trail for a flow that grants nothing the agreement has not already granted.
+
+With a customer ID in effect the plugin behaves exactly as if the user were signed in — the AppMap
+tool window, Navie and the `Tools > AppMap` actions are all available, and the indexer, scanner and
+Navie backend all run. The ID is passed to the AppMap CLI as `APPMAP_CUSTOMER_ID`, and attached to
+telemetry as `common.customerid` so usage can be attributed to your organization. If telemetry is
+disabled, nothing is sent.
+
+Two things to be clear about:
+
+- **It is not a licence key and not an enforcement mechanism.** The value is not verified, and the
+  plugin is open source, so anyone can read how it works. It exists to remove friction for
+  organizations that are already covered by an agreement — not to grant or restrict access.
+- **It is not a secret.** It is shown in the settings UI and printed in full in the status report.
+  Don't treat it as a credential. (Your Splunk `token`, by contrast, *is* redacted from the status
+  report.)
+
+A user can still sign in normally while a customer ID is set; the two are independent, and both are
+passed to the CLI.
+
+Blank or whitespace-only reads as unset, so an empty value cannot accidentally remove an entitlement
+that a bundled configuration provides.
 
 ## How to apply it
 
@@ -123,11 +153,20 @@ removes it (URL, cached configuration, applied settings). User settings are left
 > If the configuration came from the `APPMAP_CONFIG_URL` environment variable, Clear cannot remove
 > it permanently — it will be re-applied on the next startup until the variable is unset.
 
+Clearing a configuration that set `appMap.customerId` removes the entitlement, and the plugin
+returns to its signed-out state immediately: the tool window shows the sign-in panel again and the
+background services stop. The one exception is a plugin build that ships a customer ID in its own
+`site-config.json` — clearing then falls back to that bundled ID, so the deployment stays entitled
+and nothing restarts.
+
 ## Verifying what's applied
 
 Run **Tools > AppMap > Plugin Status Report**. Under *Deployment Settings* it shows whether an
 organization configuration is active, where it came from (URL / local file / environment), and the
 full raw JSON that was applied — useful for confirming a rollout or debugging a user's machine.
+
+If a customer ID is in effect, the same section reports `Managed entitlement: active` and the ID
+itself. The ID is also shown read-only in **Settings > Tools > AppMap > Advanced**.
 
 ## Guiding your users
 
