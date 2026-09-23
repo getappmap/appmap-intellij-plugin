@@ -1,5 +1,19 @@
 AppMap Plugin Changelog
 
+## [0.87.0](https://github.com/getappmap/appmap-intellij-plugin/compare/v0.86.0...v0.87.0) (2026-09-23)
+
+
+### Features
+
+-  **entitlement:** let a customer ID entitle a deployment without signing in ([3f43e40](https://github.com/getappmap/appmap-intellij-plugin/commit/3f43e40609606e81e1666e932967042a916d0b5e))
+-  Show server-sent error messages in the OTP sign in form ([7e454ff](https://github.com/getappmap/appmap-intellij-plugin/commit/7e454ffa9234f0086fd33890458b73122870fce1))
+
+
+### Bug Fixes
+
+-  **services:** keep the plugin quiescent while it is inactive ([5cb625f](https://github.com/getappmap/appmap-intellij-plugin/commit/5cb625f1bfaf03c87aa1ef4ae63993a66cc14d19))
+-  **settings:** resolve deployment defaults per field, and keep them fresh ([24b15aa](https://github.com/getappmap/appmap-intellij-plugin/commit/24b15aa514f5dea08b4db0cf1e0829d9aeb3b0e6))
+
 ## [0.86.0](https://github.com/getappmap/appmap-intellij-plugin/compare/v0.85.2...v0.86.0) (2026-08-04)
 
 
