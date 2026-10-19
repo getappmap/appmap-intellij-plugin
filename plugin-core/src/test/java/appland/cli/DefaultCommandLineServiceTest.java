@@ -10,6 +10,7 @@ import appland.settings.AppMapSettingsListener;
 import appland.testRules.ResetIdeHttpProxyRule;
 import appland.utils.AppMapProcessUtil;
 import appland.utils.ModuleTestUtils;
+import com.intellij.credentialStore.Credentials;
 import com.intellij.execution.ExecutionException;
 import com.intellij.execution.configurations.PtyCommandLine;
 import com.intellij.execution.process.CapturingProcessAdapter;
@@ -27,6 +28,7 @@ import com.intellij.testFramework.fixtures.TempDirTestFixture;
 import com.intellij.testFramework.fixtures.impl.TempDirTestFixtureImpl;
 import com.intellij.util.ThrowableConsumer;
 import com.intellij.util.net.HttpConfigurable;
+import com.intellij.util.net.ProxyCredentialStore;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.junit.*;
@@ -440,8 +442,9 @@ public class DefaultCommandLineServiceTest extends AppMapBaseTest {
         HttpConfigurable.getInstance().PROXY_HOST = "my.proxy.host";
         HttpConfigurable.getInstance().PROXY_PORT = 8080;
         HttpConfigurable.getInstance().KEEP_PROXY_PASSWORD = true;
-        HttpConfigurable.getInstance().setProxyLogin("username");
-        HttpConfigurable.getInstance().setPlainProxyPassword("secure_password");
+        // 2026.3 removed the HttpConfigurable setters, the credential store is where they wrote to
+        ProxyCredentialStore.getInstance()
+                .setCredentials("my.proxy.host", 8080, new Credentials("username", "secure_password"), true);
         HttpConfigurable.getInstance().PROXY_EXCEPTIONS = "localhost*,127.*,*.example.com";
 
         assertEquals(Map.of(
@@ -457,8 +460,8 @@ public class DefaultCommandLineServiceTest extends AppMapBaseTest {
         HttpConfigurable.getInstance().PROXY_HOST = "my.proxy.host";
         HttpConfigurable.getInstance().PROXY_PORT = 8080;
         HttpConfigurable.getInstance().KEEP_PROXY_PASSWORD = true;
-        HttpConfigurable.getInstance().setProxyLogin("username");
-        HttpConfigurable.getInstance().setPlainProxyPassword(null);
+        ProxyCredentialStore.getInstance()
+                .setCredentials("my.proxy.host", 8080, new Credentials("username", (String) null), true);
         HttpConfigurable.getInstance().PROXY_EXCEPTIONS = "localhost*,127.*,*.example.com";
 
         assertEquals(Map.of(
