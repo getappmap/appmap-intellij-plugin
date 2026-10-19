@@ -8,6 +8,14 @@
     -->
     <depends optional="true" config-file="appmap-jcef.xml">com.intellij.modules.jcef</depends>
 
+    <!--
+      Same reasoning for the Problems View, which our scanner findings panel extends:
+      - On Platform 262 (and older), it is part of the core platform and its classes are visible to every plugin.
+      - On Platform 263 (and newer), it is a bundled plugin of its own and its classes are visible only to plugins which depend on it.
+      Making it optional keeps a single artifact working on both: older platforms have no plugin with this ID and ignore the dependency.
+    -->
+    <depends optional="true" config-file="appmap-problems-view.xml">com.intellij.problemsView</depends>
+
     <applicationListeners>
         <listener topic="com.intellij.openapi.project.ProjectManagerListener"
                   class="appland.cli.AppLandProjectManagerListener"/>

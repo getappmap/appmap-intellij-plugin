@@ -1,0 +1,6 @@
+<idea-plugin>
+    <!--
+      This placeholder XML is structurally required by the IntelliJ Platform when declaring 'com.intellij.problemsView' as an optional dependency.
+      We keep this empty as the dependency itself is what matters: it wires the Problems View plugin into our classloader on Platform 263 and newer.
+    -->
+</idea-plugin>
