@@ -509,6 +509,27 @@ project(":") {
             }
         }
 
+        // Runs the plugin as it ships -- compiled against the default platform -- on another IDE
+        // build, an EAP say: `./gradlew runIdeOn`, or `-PrunIdeVersion=263.1234.5` for a build other
+        // than the one in gradle-263.properties. The plugin is not recompiled against the target
+        // IDE, so this is the local check which matches what users install: what moves between
+        // platform versions shows in how the platform wires the plugin's class loader, and neither
+        // the tests (they force the core class loader) nor the Plugin Verifier model that.
+        // The property is deliberately not named `ideVersion`: that one selects the IDE the whole
+        // build compiles against, see loadPlatformProperties.
+        @Suppress("unused")
+        val runIdeOn by intellijPlatformTesting.runIde.registering {
+            type = IntelliJPlatformType.IntellijIdea
+            version = providers.gradleProperty("runIdeVersion").orElse(provider { ideVersionFor(263) })
+            useInstaller = true // the multi-OS ZIP cannot launch on 2026+, see the dependency block
+            sandboxDirectory = project.layout.buildDirectory.dir("idea-sandbox-run-ide-on")
+
+            task {
+                systemProperty("appmap.sandbox", "true")
+                jvmArgs("-Xmx2048m", "-XX:+UnlockDiagnosticVMOptions")
+            }
+        }
+
         @Suppress("UNCHECKED_CAST")
         val downloadAppMapAgent by registering(Download::class) {
             src("https://api.github.com/repos/getappmap/appmap-java/releases/latest")
