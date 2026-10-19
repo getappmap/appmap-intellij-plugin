@@ -51,16 +51,36 @@ val platformVersion = prop("platformVersion").toInt()
 // types) never register. There is no catch-all/"full IDE" test mode, so we list them explicitly.
 // To refresh after a platform bump: run tests, look for "'Java' ... excluded" / "X is not resolved"
 // in the sandbox log, and add the plugin owning module X (`printBundledPlugins` lists the IDs).
-val javaTestCompanionPlugins = listOf(
+val javaTestCompanionPlugins = listOfNotNull(
     "intellij.structureView.plugin",
     "intellij.bookmarks.plugin",
     "intellij.testRunner.plugin",
     "intellij.todo.plugin",
     "intellij.structuralSearch.plugin",
-    "intellij.libraries.misc.plugin",
+    // 2026.3 dissolved this one again: its library modules are no longer owned by a plugin.
+    "intellij.libraries.misc.plugin".takeIf { platformVersion < 263 },
     "com.intellij.copyright",
     "org.jetbrains.plugins.terminal",
     "XPathView",
+)
+
+// The Problems View plugin, extracted from the core platform in 2026.3. The same ID is what the
+// platform resolves the optional `<depends>` in appmap-core.xml against.
+val problemsViewPlugin = "com.intellij.problemsView"
+
+// 2026.3 also split these out of the core plugin into modules with their own classloaders, so they
+// are no longer on the default compile and test classpath. We have always taken them from the
+// platform, Jackson included, so they are requested here rather than replaced by our own
+// dependencies, which would risk a version conflict with the platform's own copy.
+val platform263Modules = listOf(
+    "intellij.platform.builtInServer.impl", // org.jetbrains.ide.RestService
+    "intellij.platform.externalSystem", // ExternalSystemTaskExecutionSettings
+    "intellij.platform.externalSystem.impl", // ExternalSystemRunConfiguration
+    "intellij.platform.vcs.core", // VcsException
+    "intellij.libraries.jackson",
+    "intellij.libraries.jackson.annotations",
+    "intellij.libraries.jackson.databind",
+    "intellij.libraries.jackson.dataformat.yaml",
 )
 
 val isCI = System.getenv("CI") == "true"
@@ -144,6 +164,19 @@ allprojects {
                 bundledModule("intellij.platform.vcs.dvcs")
                 bundledModule("intellij.platform.vcs.dvcs.impl")
                 bundledModule("com.intellij.modules.jcef")
+            }
+
+            // 2026.3 moved the Problems View out of the core platform into a bundled plugin of its
+            // own, so com.intellij.analysis.problemsView.* is no longer on the default compile and
+            // test classpath; see platform263Modules for the same move applied to platform modules.
+            // Conditional because older platforms have neither the plugin ID nor the split modules.
+            // The runtime side of the move is handled by the optional dependency in appmap-core.xml.
+            if (platformVersion >= 263) {
+                bundledPlugin(problemsViewPlugin)
+                bundledModules(platform263Modules)
+                // 2026.3 ships idea_rt.jar (com.intellij.rt.execution.junit.*) with the Java plugin
+                // instead of the core platform, and the platform test framework needs it to start.
+                testBundledPlugin("com.intellij.java")
             }
             bundledPlugin("Git4Idea")
         }
@@ -261,6 +294,12 @@ allprojects {
                 if (platformVersion >= 253) {
                     bundledModule("intellij.platform.collaborationTools.auth.base")
                     bundledModule("intellij.platform.collaborationTools.auth")
+                }
+
+                // see the same dependencies in the main `intellijPlatform` block
+                if (platformVersion >= 263) {
+                    bundledPlugin(problemsViewPlugin)
+                    bundledModules(platform263Modules)
                 }
                 bundledPlugin("Git4Idea")
             }
@@ -463,6 +502,27 @@ project(":") {
                     }
                 }
             }
+
+            task {
+                systemProperty("appmap.sandbox", "true")
+                jvmArgs("-Xmx2048m", "-XX:+UnlockDiagnosticVMOptions")
+            }
+        }
+
+        // Runs the plugin as it ships -- compiled against the default platform -- on another IDE
+        // build, an EAP say: `./gradlew runIdeOn`, or `-PrunIdeVersion=263.1234.5` for a build other
+        // than the one in gradle-263.properties. The plugin is not recompiled against the target
+        // IDE, so this is the local check which matches what users install: what moves between
+        // platform versions shows in how the platform wires the plugin's class loader, and neither
+        // the tests (they force the core class loader) nor the Plugin Verifier model that.
+        // The property is deliberately not named `ideVersion`: that one selects the IDE the whole
+        // build compiles against, see loadPlatformProperties.
+        @Suppress("unused")
+        val runIdeOn by intellijPlatformTesting.runIde.registering {
+            type = IntelliJPlatformType.IntellijIdea
+            version = providers.gradleProperty("runIdeVersion").orElse(provider { ideVersionFor(263) })
+            useInstaller = true // the multi-OS ZIP cannot launch on 2026+, see the dependency block
+            sandboxDirectory = project.layout.buildDirectory.dir("idea-sandbox-run-ide-on")
 
             task {
                 systemProperty("appmap.sandbox", "true")

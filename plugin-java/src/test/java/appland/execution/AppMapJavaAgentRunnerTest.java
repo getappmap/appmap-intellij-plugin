@@ -12,7 +12,7 @@ import com.intellij.execution.ui.RunContentDescriptor;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.application.ReadAction;
 import com.intellij.openapi.application.WriteAction;
-import com.intellij.openapi.module.StdModuleTypes;
+import com.intellij.openapi.module.JavaModuleType;
 import com.intellij.openapi.roots.ModuleRootModificationUtil;
 import org.junit.Test;
 
@@ -45,7 +45,7 @@ public class AppMapJavaAgentRunnerTest extends BaseAppMapJavaTest {
         var javaPath = Paths.get(AppLandTestExecutionPolicy.findAppMapHomePath()).resolve("appmap-java/simpleProject").toString();
 
         WriteAction.runAndWait(() -> {
-            var module = createModuleFromTestData(javaPath, "simpleProject", StdModuleTypes.JAVA, true);
+            var module = createModuleFromTestData(javaPath, "simpleProject", JavaModuleType.getModuleType(), true);
             ModuleRootModificationUtil.setModuleSdk(module, getTestProjectJdk());
         });
 
