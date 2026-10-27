@@ -1,5 +1,12 @@
 AppMap Plugin Changelog
 
+## [0.87.1](https://github.com/getappmap/appmap-intellij-plugin/compare/v0.87.0...v0.87.1) (2026-10-27)
+
+
+### Bug Fixes
+
+-  keep the Problems View panel working on IntelliJ 2026.3 ([ba72f12](https://github.com/getappmap/appmap-intellij-plugin/commit/ba72f12820b6c378ed2854bad835a76d9b738112))
+
 ## [0.87.0](https://github.com/getappmap/appmap-intellij-plugin/compare/v0.86.0...v0.87.0) (2026-09-23)
 
 
