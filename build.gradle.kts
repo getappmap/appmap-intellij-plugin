@@ -69,18 +69,12 @@ val javaTestCompanionPlugins = listOfNotNull(
 val problemsViewPlugin = "com.intellij.problemsView"
 
 // 2026.3 also split these out of the core plugin into modules with their own classloaders, so they
-// are no longer on the default compile and test classpath. We have always taken them from the
-// platform, Jackson included, so they are requested here rather than replaced by our own
-// dependencies, which would risk a version conflict with the platform's own copy.
+// are no longer on the default compile and test classpath, and are requested here.
 val platform263Modules = listOf(
     "intellij.platform.builtInServer.impl", // org.jetbrains.ide.RestService
     "intellij.platform.externalSystem", // ExternalSystemTaskExecutionSettings
     "intellij.platform.externalSystem.impl", // ExternalSystemRunConfiguration
     "intellij.platform.vcs.core", // VcsException
-    "intellij.libraries.jackson",
-    "intellij.libraries.jackson.annotations",
-    "intellij.libraries.jackson.databind",
-    "intellij.libraries.jackson.dataformat.yaml",
 )
 
 val isCI = System.getenv("CI") == "true"
@@ -183,7 +177,7 @@ allprojects {
 
         compileOnly("com.google.code.findbugs:jsr305:3.0.2")
 
-        implementation("org.yaml:snakeyaml:1.33")
+        implementation("org.yaml:snakeyaml:2.7")
 
         // https://mvnrepository.com/artifact/junit/junit
         testImplementation("junit:junit:4.13.2")

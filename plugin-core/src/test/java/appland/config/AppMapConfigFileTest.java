@@ -151,6 +151,49 @@ public class AppMapConfigFileTest extends AppMapBaseTest {
     }
 
     @Test
+    public void writeUpdatedConfigKeepsUnmodifiedValuesAsWritten() throws IOException {
+        var configPath = Path.of(myFixture.getTempDirPath(), "appmap.yml");
+        Files.writeString(configPath, """
+                name: "quoted name"
+                shallow: yes
+                since: 2024-01-01
+                """);
+        var config = AppMapConfigFile.parseConfigFile(configPath);
+        assertNotNull(config);
+
+        config.setAppMapDir("true");
+        config.writeTo(configPath);
+        assertEquals("""
+                name: "quoted name"
+                shallow: yes
+                since: 2024-01-01
+                appmap_dir: 'true'
+                """, Files.readString(configPath));
+    }
+
+    @Test
+    public void updateDuplicateProperty() throws IOException {
+        var configPath = Path.of(myFixture.getTempDirPath(), "appmap.yml");
+        Files.writeString(configPath, """
+                appmap_dir: old
+                name: my-app
+                appmap_dir: ''
+                """);
+        var config = AppMapConfigFile.parseConfigFile(configPath);
+        assertNotNull(config);
+        assertEquals("", config.getAppMapDir());
+
+        config.setAppMapDir("tmp/appmap");
+        assertEquals("tmp/appmap", config.getAppMapDir());
+
+        config.writeTo(configPath);
+        assertEquals("""
+                appmap_dir: tmp/appmap
+                name: my-app
+                """, Files.readString(configPath));
+    }
+
+    @Test
     public void nameProperty() {
         var config = new AppMapConfigFile();
         assertNull(config.getName());
