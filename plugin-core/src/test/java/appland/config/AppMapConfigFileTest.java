@@ -3,9 +3,13 @@ package appland.config;
 import appland.AppMapBaseTest;
 import com.intellij.testFramework.fixtures.TempDirTestFixture;
 import com.intellij.testFramework.fixtures.impl.TempDirTestFixtureImpl;
+import org.jetbrains.annotations.NotNull;
 import org.junit.Test;
+import org.yaml.snakeyaml.Yaml;
 
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Collections;
 import java.util.List;
 
@@ -104,6 +108,49 @@ public class AppMapConfigFileTest extends AppMapBaseTest {
     }
 
     @Test
+    public void writeNewConfig() throws IOException {
+        var config = new AppMapConfigFile();
+        config.setName("my-app");
+        config.setAppMapDir("tmp/appmap");
+        config.setPackages(List.of("com.example.one", "com.example.two"));
+
+        var configPath = Path.of(myFixture.getTempDirPath(), "appmap.yml");
+        config.writeTo(configPath);
+        assertEquals(yamlData("""
+                language: java
+                name: my-app
+                appmap_dir: tmp/appmap
+                packages:
+                  - path: com.example.one
+                  - path: com.example.two
+                """), yamlData(Files.readString(configPath)));
+    }
+
+    @Test
+    public void writeUpdatedConfigKeepsOtherProperties() throws IOException {
+        var appMapFile = myFixture.copyFileToProject("appmap-config/appmap-no-dir.yml");
+        var config = AppMapConfigFile.parseConfigFile(appMapFile);
+        assertNotNull(config);
+
+        config.setAppMapDir("tmp/appmap");
+        config.writeTo(appMapFile.toNioPath());
+        assertEquals(yamlData("""
+                name: sample_app_6th_ed
+                packages:
+                  - path: app
+                  - path: lib
+                language: ruby
+                appmap_dir: tmp/appmap
+                test_recording:
+                  test_commands:
+                    - env:
+                        APPMAP: 'true'
+                        DISABLE_SPRING: 'true'
+                      command: bundle exec rails test
+                """), yamlData(Files.readString(appMapFile.toNioPath())));
+    }
+
+    @Test
     public void nameProperty() {
         var config = new AppMapConfigFile();
         assertNull(config.getName());
@@ -116,5 +163,12 @@ public class AppMapConfigFileTest extends AppMapBaseTest {
     public void languageProperty() {
         var config = new AppMapConfigFile();
         assertEquals(config.getLanguage(), "java");
+    }
+
+    /**
+     * Loads YAML as plain data, i.e. maps, lists and scalars, to compare it regardless of formatting and property order.
+     */
+    private static Object yamlData(@NotNull String yaml) {
+        return new Yaml().load(yaml);
     }
 }
