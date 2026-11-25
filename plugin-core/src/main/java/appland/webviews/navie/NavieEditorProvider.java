@@ -12,6 +12,7 @@ import appland.webviews.WebviewEditorProvider;
 import com.intellij.openapi.actionSystem.CommonDataKeys;
 import com.intellij.openapi.actionSystem.DataContext;
 import com.intellij.openapi.actionSystem.DataKey;
+import com.intellij.openapi.application.ReadAction;
 import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.fileEditor.FileDocumentManager;
 import com.intellij.openapi.fileEditor.FileEditor;
@@ -23,6 +24,7 @@ import com.intellij.openapi.vfs.VfsUtil;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiManager;
 import com.intellij.util.concurrency.annotations.RequiresEdt;
+import com.intellij.util.concurrency.annotations.RequiresReadLock;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -161,7 +163,14 @@ public final class NavieEditorProvider extends WebviewEditorProvider {
         });
     }
 
-    private static @Nullable NavieCodeSelection buildCodeSelection(@NotNull Project project, @Nullable Editor editor) {
+    static @Nullable NavieCodeSelection buildCodeSelection(@NotNull Project project, @Nullable Editor editor) {
+        // Navie is also opened from EDT events which hold no lock.
+        return ReadAction.compute(() -> buildCodeSelectionInReadAction(project, editor));
+    }
+
+    @RequiresReadLock
+    private static @Nullable NavieCodeSelection buildCodeSelectionInReadAction(@NotNull Project project,
+                                                                              @Nullable Editor editor) {
         var selection = editor != null ? editor.getSelectionModel() : null;
         if (selection == null || !selection.hasSelection()) {
             return null;
