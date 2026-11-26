@@ -69,18 +69,12 @@ val javaTestCompanionPlugins = listOfNotNull(
 val problemsViewPlugin = "com.intellij.problemsView"
 
 // 2026.3 also split these out of the core plugin into modules with their own classloaders, so they
-// are no longer on the default compile and test classpath. We have always taken them from the
-// platform, Jackson included, so they are requested here rather than replaced by our own
-// dependencies, which would risk a version conflict with the platform's own copy.
+// are no longer on the default compile and test classpath, and are requested here.
 val platform263Modules = listOf(
     "intellij.platform.builtInServer.impl", // org.jetbrains.ide.RestService
     "intellij.platform.externalSystem", // ExternalSystemTaskExecutionSettings
     "intellij.platform.externalSystem.impl", // ExternalSystemRunConfiguration
     "intellij.platform.vcs.core", // VcsException
-    "intellij.libraries.jackson",
-    "intellij.libraries.jackson.annotations",
-    "intellij.libraries.jackson.databind",
-    "intellij.libraries.jackson.dataformat.yaml",
 )
 
 val isCI = System.getenv("CI") == "true"
@@ -183,7 +177,7 @@ allprojects {
 
         compileOnly("com.google.code.findbugs:jsr305:3.0.2")
 
-        implementation("org.yaml:snakeyaml:1.33")
+        implementation("org.yaml:snakeyaml:2.7")
 
         // https://mvnrepository.com/artifact/junit/junit
         testImplementation("junit:junit:4.13.2")
@@ -511,15 +505,17 @@ project(":") {
 
         // Runs the plugin as it ships -- compiled against the default platform -- on another IDE
         // build, an EAP say: `./gradlew runIdeOn`, or `-PrunIdeVersion=263.1234.5` for a build other
-        // than the one in gradle-263.properties. The plugin is not recompiled against the target
-        // IDE, so this is the local check which matches what users install: what moves between
+        // than the one in gradle-263.properties, and `-PrunIdeType=PY` for another product, PyCharm
+        // here (the product codes are those of IntelliJPlatformType). The plugin is not recompiled
+        // against the target IDE, so this is the local check which matches what users install: what moves between
         // platform versions shows in how the platform wires the plugin's class loader, and neither
         // the tests (they force the core class loader) nor the Plugin Verifier model that.
         // The property is deliberately not named `ideVersion`: that one selects the IDE the whole
         // build compiles against, see loadPlatformProperties.
         @Suppress("unused")
         val runIdeOn by intellijPlatformTesting.runIde.registering {
-            type = IntelliJPlatformType.IntellijIdea
+            type = providers.gradleProperty("runIdeType").map { IntelliJPlatformType.fromCode(it) }
+                .orElse(IntelliJPlatformType.IntellijIdea)
             version = providers.gradleProperty("runIdeVersion").orElse(provider { ideVersionFor(263) })
             useInstaller = true // the multi-OS ZIP cannot launch on 2026+, see the dependency block
             sandboxDirectory = project.layout.buildDirectory.dir("idea-sandbox-run-ide-on")

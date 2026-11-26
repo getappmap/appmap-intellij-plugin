@@ -98,8 +98,10 @@ OS-specific file extensions like `.exe` must be appended.
 
 If more than one compatible, bundled binary is found, then the binary with the latest version is preferred.
 
-If a downloaded binary has a higher version than the bundled binary, then the downloaded binary is used.
-If a downloaded binary and the best-matching bundled binary have the same version, then the bundled binary is used.
+A bundled binary is only used when no binary is installed in `~/.appmap/bin` (`%USERPROFILE%\.appmap\bin` on Windows).
+A binary installed there, whether downloaded by the plugin or placed by hand, always takes precedence,
+regardless of version. While automatic downloads are enabled, the plugin downloads the version listed in
+the release manifest and installs it there, so to keep using the bundled binary, disable automatic downloads.
 
 Possible values:
 

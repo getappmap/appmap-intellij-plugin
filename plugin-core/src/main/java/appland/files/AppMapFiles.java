@@ -2,12 +2,11 @@ package appland.files;
 
 import appland.AppMapBundle;
 import appland.cli.AppLandCommandLineService;
+import appland.config.AppMapConfigFile;
 import appland.index.AppMapConfigFileIndex;
 import appland.index.AppMapSearchScopes;
 import appland.utils.GsonUtils;
 import appland.webviews.WebviewEditorException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.intellij.execution.ExecutionException;
@@ -135,17 +134,8 @@ public final class AppMapFiles {
         assert appMapConfigFile.isInLocalFileSystem();
         assert !appMapConfigFile.isDirectory();
 
-        try {
-            var content = VfsUtil.loadText(appMapConfigFile);
-            var tree = new ObjectMapper(new YAMLFactory()).readTree(content);
-            var appMapDir = tree.get("appmap_dir");
-            if (appMapDir != null && appMapDir.isTextual()) {
-                return StringUtil.nullize(appMapDir.textValue());
-            }
-        } catch (Exception e) {
-            LOG.debug("error parsing appmap.yml configuration file", e);
-        }
-        return null;
+        var config = AppMapConfigFile.parseConfigFile(appMapConfigFile);
+        return config != null ? StringUtil.nullize(config.getAppMapDir()) : null;
     }
 
     /**
